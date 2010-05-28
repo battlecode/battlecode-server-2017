@@ -1,0 +1,152 @@
+package battlecode.engine.instrumenter;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+import java.util.zip.ZipFile;
+
+import battlecode.engine.ErrorReporter;
+
+import org.objectweb.asm.*;
+import static org.objectweb.asm.ClassWriter.*;
+
+public class IndividualClassLoader extends InstrumentingClassLoader {
+
+	private final static String[] disallowedPlayerPackages = {"java/", "battlecode/", "sun/"};
+		
+	// caches the binary format of classes that have been instrumented
+	// the values are byte arrays, not Classes, because each instance of InstrumentingClassLoader should define its own class,
+	// even if another InstrumentingClassLoader has already loaded a class from the same class file
+	private final static Map<String, byte[]> instrumentedClasses = new HashMap<String,byte[]>();
+	
+	// caches the names of teams with errors, so that if a class is loaded for that team, it immediately throws an exception
+	private final static Set<String> teamsWithErrors = new HashSet<String>();
+	
+	// the name of the team this InstrumentingClassLoader is loading
+	private final String teamPackageName;
+
+	public static void reset() {
+		instrumentedClasses.clear();
+		teamsWithErrors.clear();
+		singletonLoader = new SingletonClassLoader();
+	}
+
+	static SingletonClassLoader singletonLoader = new SingletonClassLoader();
+
+	public IndividualClassLoader(String teamPackageName, boolean debugMethodsEnabled, boolean silenced) throws InstrumentationException {
+		super(silenced,debugMethodsEnabled,singletonLoader);
+		
+		// check that the package we're trying to load isn't contained in a disallowed package
+		String teamNameSlash = teamPackageName + "/";
+		for(String sysName : disallowedPlayerPackages) {
+			if(teamNameSlash.startsWith(sysName)) {
+				ErrorReporter.report("Invalid package name: \"" + teamPackageName + "\"\nPlayer packages cannot be contained in system packages (e.g., java., battlecode.)", false);
+				throw new InstrumentationException();
+			}
+		}
+		
+		this.teamPackageName = teamPackageName;
+		
+	}
+
+	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+
+		synchronized(teamPackageName) {
+
+			// check if the team we're loading already has errors
+			if(teamsWithErrors.contains(teamPackageName))
+				throw new InstrumentationException();
+
+			name = name.replace('.','/');
+
+			// this is the class we'll return
+			Class finishedClass = null;
+
+			//System.out.println("loadClass "+name);
+
+			if(instrumentedClasses.containsKey(name)) {
+				byte[] classBytes = instrumentedClasses.get(name);
+				finishedClass = defineClass(null, classBytes, 0, classBytes.length);
+			}
+			else if(name.equals("battlecode/engine/instrumenter/lang/ObjectHashCode")) {
+				// We want each robot to have its own copy of this class
+				// so that it isn't possible to send messages by calling
+				// hashCode repeatedly.  But we don't want to instrument it.
+				ClassReader cr = null;
+				try {
+					cr = new ClassReader(name);
+				}catch(IOException ioe) {
+					ErrorReporter.report("Can't find the class \"" + name + "\"", "Make sure the team name is spelled correctly.\nMake sure the .class files are in the right directory (teams/teamname/*.class)");
+					throw new InstrumentationException();
+				}
+				ClassWriter cw = new ClassWriter(cr,COMPUTE_MAXS);
+				cr.accept(cw,0);
+				finishedClass = saveAndDefineClass(name,cw.toByteArray());
+			}
+			else if(name.startsWith(teamPackageName)) {
+				byte [] classBytes;
+				try {
+					classBytes = instrument(name,true,teamPackageName);
+				} catch(InstrumentationException ie) {
+					teamsWithErrors.add(teamPackageName);
+					throw ie;
+				}
+			
+				/*
+				  if(name.startsWith("hardplayer/"))
+				  try {
+				  java.io.File file = new java.io.File("classes/"+name+".class");
+				  java.io.FileOutputStream stream = new java.io.FileOutputStream(file);
+				  stream.write(classBytes);
+				  stream.close();
+				  } catch(Exception e) { }
+				*/
+
+				finishedClass = saveAndDefineClass(name,classBytes);
+			}
+			/*
+			else if(name.startsWith("instrumented")) {
+				byte [] classBytes;
+				try {
+					classBytes = instrument(name,false,teamPackageName);
+				} catch(InstrumentationException ie) {
+					teamsWithErrors.add(teamPackageName);
+					throw ie;
+				}
+				finishedClass = saveAndDefineClass(name,classBytes);
+			}
+			*/
+			else {
+				try {
+					return singletonLoader.loadClass(name,resolve);
+				} catch(InstrumentationException ie) {
+					teamsWithErrors.add(teamPackageName);
+					throw ie;
+				}
+			}
+		
+			if(resolve)
+				resolveClass(finishedClass);
+		
+			return finishedClass;
+
+		}
+	}
+
+	public Class<?> saveAndDefineClass(String name, byte [] classBytes) {
+		if(classBytes == null) {
+			ErrorReporter.report("Can't find instrumented class " + name + ", but no errors reported", true);
+			throw new InstrumentationException();
+		}
+		Class <?> theClass = defineClass(null, classBytes, 0, classBytes.length);
+		instrumentedClasses.put(name, classBytes);
+		return theClass;
+
+	}
+
+}

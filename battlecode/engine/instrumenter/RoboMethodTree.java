@@ -1,0 +1,469 @@
+package battlecode.engine.instrumenter;
+
+// Should produce the exact same results as RoboMethodAdapter.  I wrote
+// this in an attempt to fix a strange bug.  RoboMethodTree is more
+// extensible than RoboMethodAdapter, but also less well tested. -dgulotta
+
+import static battlecode.common.GameConstants.EXCEPTION_BYTECODE_PENALTY;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+
+import org.objectweb.asm.tree.*;
+import static org.objectweb.asm.tree.AbstractInsnNode.*;
+
+import battlecode.engine.ErrorReporter;
+
+public class RoboMethodTree extends MethodNode implements Opcodes {
+
+	private final String methodName;
+	private final String teamPackageName;
+	private final String className;	// the class to which this method belongs
+	private final boolean debugMethodsEnabled;
+	private final boolean silenced;
+	private final boolean checkDisallowed;
+	private final String methodDesc;	// the description of this method, e.g., "()V"
+	private boolean codeVisited = false;	// tells whether visitCode() has been called
+
+	// all the exception handlers we've seen in the code
+	private final Set<LabelNode> exceptionHandlers = new HashSet<LabelNode>();
+
+	private static final Set<String> instrumentedStringFuncs = new HashSet<String>();
+
+	static {
+		instrumentedStringFuncs.add("matches");
+		instrumentedStringFuncs.add("replaceAll");
+		instrumentedStringFuncs.add("replaceFirst");
+		instrumentedStringFuncs.add("split");
+	}
+
+	private LabelNode startLabel;
+
+	private int bytecodeCtr = 0;
+
+	private MethodVisitor methodWriter;
+
+	public RoboMethodTree(final MethodVisitor mv, final String className, final int access, final String methodName, final String methodDesc, final String signature, final String [] exceptions, final String teamPackageName, final boolean debugMethodsEnabled, boolean silenced, boolean checkDisallowed) {
+        super(access,methodName,methodDesc,signature,exceptions);
+        this.methodName = methodName;
+		this.teamPackageName = teamPackageName;
+		this.className = className;
+		this.debugMethodsEnabled = debugMethodsEnabled;
+		this.silenced = silenced;
+		this.checkDisallowed = checkDisallowed;
+		this.methodDesc = methodDesc;
+		methodWriter = mv;
+    }
+
+	protected String classReference(String name) {
+		return ClassReferenceUtil.classReference(name,teamPackageName,silenced,checkDisallowed);
+	}
+
+	protected String classDescReference(String name) {
+		return ClassReferenceUtil.classDescReference(name,teamPackageName,silenced,checkDisallowed);
+	}
+
+	protected String methodDescReference(String name) {
+		return ClassReferenceUtil.methodDescReference(name,teamPackageName,silenced,checkDisallowed);
+	}
+
+	protected String fieldSignatureReference(String name) {
+		return ClassReferenceUtil.fieldSignatureReference(name,teamPackageName,silenced,checkDisallowed);
+	}
+
+	public void visitMaxs(int maxStack, int maxLocals) {
+		for(Object o : tryCatchBlocks) {
+			visitTryCatchBlockNode((TryCatchBlockNode)o);
+		}
+		AbstractInsnNode node, nextNode;
+		for(node = instructions.getFirst(); node != null; node = nextNode) {
+			// node could be taken out of the list
+			// or have stuff inserted after it,
+			// so node.getNext() might not be valid
+			// after we visit node
+			nextNode = node.getNext();
+			switch(node.getType()) {
+			case FIELD_INSN:
+				visitFieldInsnNode((FieldInsnNode)node);
+				break;
+			case INSN:
+				visitInsnNode((InsnNode)node);
+				break;
+			case LDC_INSN:
+				visitLdcInsnNode((LdcInsnNode)node);
+				break;
+			case METHOD_INSN:
+				visitMethodInsnNode((MethodInsnNode)node);
+				break;
+			case MULTIANEWARRAY_INSN:
+				visitMultiANewArrayInsnNode((MultiANewArrayInsnNode)node);
+				break;
+			case TYPE_INSN:
+				visitTypeInsnNode((TypeInsnNode)node);
+				break;
+			case VAR_INSN:
+				visitVarInsnNode((VarInsnNode)node);
+				break;
+			case LABEL:
+				visitLabelNode((LabelNode)node);
+				break;
+			case JUMP_INSN:
+			case LOOKUPSWITCH_INSN:
+			case TABLESWITCH_INSN:
+				bytecodeCtr++;
+				endOfBasicBlock(node);
+				break;
+			case IINC_INSN:
+			case INT_INSN:
+				bytecodeCtr++;
+				break;
+			}
+		}
+		startLabel = new LabelNode(new Label());
+		instructions.insert(startLabel);
+		boolean anyTryCatch=tryCatchBlocks.size()>0;
+		if(methodName.startsWith("debug_") && methodDesc.endsWith("V")) {
+			addDebugHandler();
+		}
+		if(anyTryCatch) {
+			addRobotDeathHandler();
+		}
+		instructions.insert(new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/RobotMonitor","monitorStackSize","()V"));
+		for(Object o : localVariables) {
+			visitLocalVariableNode((LocalVariableNode)o);
+		}
+		super.visitMaxs(0,0);
+	}
+
+	public void visitEnd() {
+		accept(methodWriter);
+	}
+
+	private void visitTryCatchBlockNode(TryCatchBlockNode n) {
+		exceptionHandlers.add(n.handler);
+		if(n.type!=null) {
+			n.type = classReference(n.type);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void addRobotDeathHandler() {
+		LabelNode robotDeathLabel = new LabelNode(new Label());
+		tryCatchBlocks.add(0,new TryCatchBlockNode(startLabel,robotDeathLabel,robotDeathLabel,"battlecode/engine/instrumenter/RobotDeathException"));
+		instructions.add(robotDeathLabel);
+		instructions.add(new InsnNode(ATHROW));
+	}
+
+	@SuppressWarnings("unchecked")
+	private void addDebugHandler() {
+		LabelNode debugEndLabel = new LabelNode(new Label());
+		tryCatchBlocks.add(new TryCatchBlockNode(startLabel,debugEndLabel,debugEndLabel,null));
+		instructions.insert(new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "incrementDebugLevel", "()V"));
+		instructions.add(debugEndLabel);
+		instructions.add(new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "decrementDebugLevel", "()V"));
+		instructions.add(new InsnNode(ATHROW));
+	}
+
+	private void visitFieldInsnNode(FieldInsnNode n) {
+		bytecodeCtr++;
+		n.owner=classReference(n.owner);
+		n.desc=classDescReference(n.desc);
+	}
+
+	private void visitInsnNode(InsnNode n) {
+		bytecodeCtr++;
+		switch(n.getOpcode()) {
+		case IRETURN:
+		case LRETURN:
+		case FRETURN:
+		case DRETURN:
+		case ARETURN:
+		case RETURN:
+			endOfBasicBlock(n);
+			if(methodName.startsWith("debug_") && methodDesc.endsWith("V")) {
+				instructions.insertBefore(n,new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "decrementDebugLevel", "()V"));
+			}
+			break;
+		case MONITORENTER:
+		case MONITOREXIT:
+			if(checkDisallowed) {
+				ErrorReporter.report("synchronized() may not be used by a player.",false);
+				throw new InstrumentationException();
+			}
+			// We need to strip these so we don't leave monitors locked when a robot dies
+			instructions.set(n,new InsnNode(POP));
+			break;
+		}
+	}
+
+	private void visitLdcInsnNode(LdcInsnNode n) {
+		bytecodeCtr++;
+		if(n.cst instanceof Type) {
+			n.cst = Type.getType(classDescReference(n.cst.toString()));
+		}
+	}
+
+	private void visitMethodInsnNode(MethodInsnNode n) {
+
+		if(n.name.equals("hashCode")&&n.desc.equals("()I")&&n.getOpcode()!=INVOKESTATIC) {
+			bytecodeCtr++;
+			endOfBasicBlock(n);
+			// replace hashCode with deterministic version
+			InsnList newInsns = new InsnList();
+			newInsns.add(new InsnNode(DUP));
+			newInsns.add(new InsnNode(DUP));
+			newInsns.add(new MethodInsnNode(INVOKEVIRTUAL,"java/lang/Object","getClass","()Ljava/lang/Class;"));
+			if(n.getOpcode()==INVOKESPECIAL&&!n.owner.equals(className))
+				newInsns.add(new MethodInsnNode(INVOKEVIRTUAL,"java/lang/Class","getSuperclass","()Ljava/lang/Class;"));
+			newInsns.add(new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/lang/ObjectHashCode","hashCode","(Ljava/lang/Object;Ljava/lang/Class;)Ljava/lang/Integer;"));
+			LabelNode normal = new LabelNode(new Label());
+			LabelNode done = new LabelNode(new Label());
+			newInsns.add(new InsnNode(DUP));
+			newInsns.add(new JumpInsnNode(IFNULL,normal));
+			newInsns.add(new MethodInsnNode(INVOKEVIRTUAL,"java/lang/Integer","intValue","()I"));
+			newInsns.add(new InsnNode(SWAP));
+			newInsns.add(new InsnNode(POP));
+			newInsns.add(new JumpInsnNode(GOTO,done));
+			newInsns.add(normal);
+			newInsns.add(new InsnNode(POP));
+			instructions.insertBefore(n,newInsns);
+			n.owner = classReference(n.owner);
+			instructions.insert(n,done);
+			return;
+		}
+
+		// I hate BigInteger so much for this.
+		if(className.equals("instrumented/java/math/BigInteger")&&n.name.equals("getUnsafe")) {
+			endOfBasicBlock(n);
+			instructions.insert(n,new InsnNode(RETURN));
+			return;
+		}
+
+		// check for banned functions
+		if(checkDisallowed) {
+			// do wait/notify monitoring
+			if((n.desc.equals("()V") && (n.name.equals("wait") || n.name.equals("notify") || n.name.equals("notifyAll")))
+			   || (n.name.equals("wait") && (n.desc.equals("(J)V") || n.desc.equals("(JI)V")))) {
+				ErrorReporter.report("Illegal method: Object." + n.name + "() cannot be called by a player", false);
+				throw new InstrumentationException();
+			}
+
+			if(n.owner.equals("java/lang/Class")&&n.name.equals("forName")) {
+				ErrorReporter.report("Illegal method in" + className + ": Class.forName() may not be called by a player.", false);
+				throw new InstrumentationException();
+			}
+
+			if(n.owner.equals("java/io/PrintStream")&&n.name.equals("<init>")&&n.desc.startsWith("(Ljava/lang/String;")) {
+				ErrorReporter.report("Illegal method in" + className + ": You may not use PrintStream to open files.", false);
+				throw new InstrumentationException();
+			}
+
+			if(n.owner.equals("java/lang/Math") && n.name.equals("random")) {
+				ErrorReporter.report("Illegal method in " + className + ": Math.random() cannot be called by a player.  Use java.util.Random instead.", false);
+				throw new InstrumentationException();
+			}
+
+			if(n.owner.equals("java/lang/StrictMath") && n.name.equals("random")) {
+				ErrorReporter.report("Illegal method in " + className + ": StrictMath.random() cannot be called by a player.  Use java.util.Random instead.", false);
+				throw new InstrumentationException();
+			}
+			
+			if(n.owner.equals("java/util/Collections") && n.name.equals("shuffle") && n.desc.equals("(Ljava/util/List;)V")) {
+				ErrorReporter.report("Illegal method in " + className + ": You must supply Collections.shuffle() with a Random.", false);
+				throw new InstrumentationException();
+			}
+		}
+
+		boolean isDebugMethod = n.name.startsWith("debug_") && n.desc.endsWith("V") && n.owner.startsWith(teamPackageName);
+		boolean endBasicBlock = true;
+
+		if(!isDebugMethod)
+			bytecodeCtr++;
+
+		MethodCostUtil.MethodData data = MethodCostUtil.getMethodData(n.owner, n.name);
+		if(data!=null) {
+			bytecodeCtr+=data.cost;
+			endBasicBlock = data.shouldEndRound;
+		}
+
+		// do various function replacements
+
+		// instrument string regex functions
+		if(n.owner.equals("java/lang/String")&&instrumentedStringFuncs.contains(n.name)) {
+			n.setOpcode(INVOKESTATIC);
+			n.desc="(Ljava/lang/String;"+n.desc.substring(1);
+			n.owner="instrumented/battlecode/engine/instrumenter/lang/InstrumentableString";
+		}
+		//hax the e.printStackTrace() method calls
+		// This isn't quite the correct behavior.  If
+		// we wanted to do the correct thing always
+		// we would use reflection at runtime to
+		// figure out whether the method we're
+		// calling is Throwable.printStackTrace.
+		// But in practice this should be good enough.
+		else if (n.name.equals("printStackTrace") && n.desc.equals("()V") &&
+			(n.owner == null || n.owner.equals("java/lang/Throwable")|| isSuperClass(n.owner, "java/lang/Throwable"))) {
+			n.setOpcode(INVOKESTATIC);
+			n.owner="battlecode/engine/instrumenter/RobotMonitor";
+			n.name="printRoboStackTrace";
+			n.desc="(Ljava/lang/Throwable;)V";
+		}
+		else {
+			// replace class names
+			n.owner = classReference(n.owner);
+			n.desc = methodDescReference(n.desc);
+			
+			// debug methods
+			/*
+			if(name.startsWith("debug_")) {
+				System.out.println("debug "+className+" "+methodName+" "+owner+" "+name+" "+checkDisallowed);
+			}
+			*/
+			if(isDebugMethod) {
+				if(debugMethodsEnabled) {
+					// we need to end the basic block BEFORE the debug level is incremented
+					//endOfBasicBlock(n);
+					//instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "incrementDebugLevel", "()V"));
+					// don't call endOfBasicBlock twice
+					//endBasicBlock=false;
+				}
+				else {
+					// if debug methods aren't enabled, we remove the call to the debug method
+					// first, pop the arguments from the stack
+					// arguments are popped in reverse order, so add instructions to newInsns
+					// using insert, not add
+					InsnList newInsns = new InsnList();
+					for(Type t : Type.getArgumentTypes(n.desc)) {
+						switch(t.getSize()) {
+						case 1:
+							//System.out.println("pop "+className+" "+methodName);
+							newInsns.insert(new InsnNode(POP));
+							break;
+						case 2:
+							newInsns.insert(new InsnNode(POP2));
+							break;
+						default:
+							ErrorReporter.report("Illegal type size: not 1 or 2", true);
+							throw new InstrumentationException();
+						}
+					}
+					// next, pop the class on which the method would be called
+					if(n.getOpcode() != INVOKESTATIC)
+						newInsns.add(new InsnNode(POP));
+					// if we remove the method call and don't add any instructions then we could end up with a FrameNode that does not have an instruction following it.  asm seems not to like this.
+					if(newInsns.getFirst()==null)
+						newInsns.add(new InsnNode(NOP));
+					instructions.insertBefore(n,newInsns);
+					instructions.remove(n);
+					// no function was called so don't end the basic block
+					endBasicBlock=false;
+				}
+			}
+		}
+
+		if(endBasicBlock)
+			endOfBasicBlock(n);
+
+	}
+
+	private void visitMultiANewArrayInsnNode(MultiANewArrayInsnNode n) {
+		bytecodeCtr++;
+		n.desc = classDescReference(n.desc);
+	}
+
+	private void visitLabelNode(LabelNode n) {
+		endOfBasicBlock(n);
+		if(exceptionHandlers.contains(n)) {
+			// I don't know if this is ever necessary (it would only be
+			// needed if some non-instrumented code calls back to
+			// instrumented code from inside a try-catch loop that catches
+			// Errors), but just in case...
+			// a label node will never be the last node so there
+			// must be a next node
+			AbstractInsnNode next = n.getNext();
+			instructions.insertBefore(next,new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/RobotMonitor","checkForRobotDeath","()V"));
+			bytecodeCtr+=EXCEPTION_BYTECODE_PENALTY;
+			endOfBasicBlock(next);
+		}
+	}
+
+	private void visitTypeInsnNode(TypeInsnNode n) {
+		bytecodeCtr++;
+		n.desc = classReference(n.desc);
+	}
+
+	private void visitVarInsnNode(VarInsnNode n) {
+		bytecodeCtr++;
+		if(n.getOpcode()==RET)
+			endOfBasicBlock(n);
+	}
+
+	private void visitLocalVariableNode(LocalVariableNode n) {
+		n.desc = classDescReference(n.desc);
+		n.signature = fieldSignatureReference(n.signature);
+	}
+
+	private void endOfBasicBlock(AbstractInsnNode n) {
+		if(name.equals("<clinit>")&&!checkDisallowed) {
+			// Don't charge for static initializers of
+			// builtin classes
+			return;
+		}
+		switch(bytecodeCtr) {
+		case 0:
+			return;
+		case 1:
+			instructions.insertBefore(n,new InsnNode(ICONST_1));
+			break;
+		case 2:
+			instructions.insertBefore(n,new InsnNode(ICONST_2));
+			break;
+		case 3:
+			instructions.insertBefore(n,new InsnNode(ICONST_3));
+			break;
+		case 4:
+			instructions.insertBefore(n,new InsnNode(ICONST_4));
+			break;
+		case 5:
+			instructions.insertBefore(n,new InsnNode(ICONST_5));
+			break;
+		default:
+			instructions.insertBefore(n,new LdcInsnNode(new Integer(bytecodeCtr)));
+		}
+		instructions.insertBefore(n,new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/RobotMonitor", "incrementBytecodes", "(I)V"));
+		bytecodeCtr = 0;
+	}
+
+		/**
+	 * Tests whether the class referenced by <code>owner</code> extends or implements <code>superclass</code>.
+	 * e.g. isSuperClass("battlecode/common/GameActionException", "java/lang/Throwable") => true
+	 * @param owner - class to test
+	 * @param superclass - interface or superclass to test as an ancestor
+	 * @throws InstrumentationException if class <code>owner</code> cannot be found
+	 */
+	private static boolean isSuperClass(String owner, String superclass) {
+		ClassReader cr = null;
+		
+		try{
+			cr = new ClassReader(owner);
+		}catch(IOException ioe) {
+			ErrorReporter.report("Can't find the class \"" + owner + "\", and this wasn't caught until the RobotMethodAdapter.isSuperClass stage.", true);
+			throw new InstrumentationException();
+		}
+		
+		InterfaceReader ir = new InterfaceReader();
+		cr.accept(ir, ClassReader.SKIP_DEBUG);
+		return Arrays.asList(ir.getInterfaces()).contains(superclass);
+	}
+
+}
