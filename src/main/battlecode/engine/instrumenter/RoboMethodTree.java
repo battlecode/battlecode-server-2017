@@ -53,6 +53,8 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 
 	private MethodVisitor methodWriter;
 
+	private static boolean checkedFastHash=false, usingFastHash;
+
 	public RoboMethodTree(final MethodVisitor mv, final String className, final int access, final String methodName, final String methodDesc, final String signature, final String [] exceptions, final String teamPackageName, final boolean debugMethodsEnabled, boolean silenced, boolean checkDisallowed) {
         super(access,methodName,methodDesc,signature,exceptions);
         this.methodName = methodName;
@@ -63,6 +65,9 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 		this.checkDisallowed = checkDisallowed;
 		this.methodDesc = methodDesc;
 		methodWriter = mv;
+		if(!checkedFastHash) {
+			usingFastHash = Boolean.getBoolean(battlecode.server.Config.getGlobalConfig().get("bc.server.fast-hash"));
+		}
     }
 
 	protected String classReference(String name) {
@@ -219,33 +224,58 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 			bytecodeCtr++;
 			endOfBasicBlock(n);
 			// replace hashCode with deterministic version
+			// First, we check if the hash code is the same as
+			// the identity hash code.  If they are different, we know
+			// hashCode was reimplemented.  If they are the same and
+			// bc.server.fast-hash is set, then we assume that hashCode
+			// was not reimplemented.  (Chance of accidental collision
+			// is 1/2^32.)  If bc.server.fast-hash is not set, then
+			// we check if hashCode was reimplemented using reflection.
+			// (Around 30x slower, but guaranteed correct.)
+			n.owner = ClassReferenceUtil.classReference(n.owner, teamPackageName, silenced, checkDisallowed);
+			instructions.insertBefore(n,new InsnNode(DUP));
 			InsnList newInsns = new InsnList();
-			newInsns.add(new InsnNode(DUP));
-			newInsns.add(new InsnNode(DUP));
-			newInsns.add(new MethodInsnNode(INVOKEVIRTUAL,"java/lang/Object","getClass","()Ljava/lang/Class;"));
-			if(n.getOpcode()==INVOKESPECIAL&&!n.owner.equals(className))
-				newInsns.add(new MethodInsnNode(INVOKEVIRTUAL,"java/lang/Class","getSuperclass","()Ljava/lang/Class;"));
-			newInsns.add(new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/lang/ObjectHashCode","hashCode","(Ljava/lang/Object;Ljava/lang/Class;)Ljava/lang/Integer;"));
-			LabelNode normal = new LabelNode(new Label());
-			LabelNode done = new LabelNode(new Label());
-			newInsns.add(new InsnNode(DUP));
-			newInsns.add(new JumpInsnNode(IFNULL,normal));
-			newInsns.add(new MethodInsnNode(INVOKEVIRTUAL,"java/lang/Integer","intValue","()I"));
 			newInsns.add(new InsnNode(SWAP));
+			newInsns.add(new InsnNode(DUP2));
+			newInsns.add(new MethodInsnNode(INVOKESTATIC,"java/lang/System","identityHashCode","(Ljava/lang/Object;)I"));
+			LabelNode doneLabel = new LabelNode(new Label());
+			LabelNode sameLabel = new LabelNode(new Label());
+			newInsns.add(new JumpInsnNode(IF_ICMPEQ,sameLabel));
 			newInsns.add(new InsnNode(POP));
-			newInsns.add(new JumpInsnNode(GOTO,done));
-			newInsns.add(normal);
-			newInsns.add(new InsnNode(POP));
-			instructions.insertBefore(n,newInsns);
-			n.owner = classReference(n.owner);
-			instructions.insert(n,done);
+			newInsns.add(new JumpInsnNode(GOTO,doneLabel));
+			newInsns.add(sameLabel);
+			if(usingFastHash) {
+				newInsns.add(new InsnNode(SWAP));
+				newInsns.add(new InsnNode(POP));
+				newInsns.add(new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/lang/ObjectHashCode","identityHashCode","(Ljava/lang/Object;)I"));
+			}
+			else {
+				if(n.getOpcode()==INVOKESPECIAL) {
+					newInsns.add(new LdcInsnNode(Type.getObjectType(n.owner)));
+				}
+				else {
+					newInsns.add(new InsnNode(DUP));
+					newInsns.add(new MethodInsnNode(n.getOpcode(),n.owner,"getClass","()Ljava/lang/Class;"));
+				}
+				newInsns.add(new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/lang/ObjectHashCode","hashCode","(ILjava/lang/Object;Ljava/lang/Class;)I"));
+			}
+			newInsns.add(doneLabel);
+			instructions.insert(n,newInsns);
 			return;
 		}
 
 		// I hate BigInteger so much for this.
-		if(className.equals("instrumented/java/math/BigInteger")&&n.name.equals("getUnsafe")) {
+		if(n.owner.equals("sun/misc/Unsafe")&&n.name.equals("getUnsafe")) {
 			endOfBasicBlock(n);
-			instructions.insert(n,new InsnNode(RETURN));
+			instructions.insertBefore(n,new InsnNode(RETURN));
+			return;
+		}
+
+		if(n.owner.equals("java/util/Random")&&n.name.equals("<init>")&&
+			n.desc.equals("()V")) {
+			instructions.insertBefore(n,new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/lang/RoboRandom","getMapSeed","()J"));
+			n.owner = "instrumented/java/util/Random";
+			n.desc = "(J)V";
 			return;
 		}
 

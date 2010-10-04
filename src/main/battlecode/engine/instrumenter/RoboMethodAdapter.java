@@ -45,6 +45,9 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 
 	private static HashSet<String> instrumentedStringFuncs;
 
+	private static boolean usingFastHash;
+	private static boolean checkedFastHash = false;
+
 	static {
 		instrumentedStringFuncs = new HashSet<String>();
 		instrumentedStringFuncs.add("matches");
@@ -94,6 +97,9 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 		this.checkDisallowed = checkDisallowed;
 		this.methodDesc = methodDesc;
 		exceptionHandlers = new HashSet<Label>();
+		if(!checkedFastHash) {
+			usingFastHash = Boolean.getBoolean(battlecode.server.Config.getGlobalConfig().get("bc.server.fast-hash"));
+		}
     }
     
 	public void visitCode() {
@@ -201,37 +207,57 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 		if(name.equals("hashCode")&&desc.equals("()I")&&opcode!=INVOKESTATIC) {
 			incrementBytecodeCtr();
 			endOfBasicBlock();
+			owner = ClassReferenceUtil.classReference(owner, teamPackageName, silenced, checkDisallowed);
+			// replace hash code with deterministic version
+			// First, we check if the hash code is the same as
+			// the identity hash code.  If they are different, we know
+			// hashCode was reimplemented.  If they are the same and
+			// bc.server.fast-hash is set, then we assume that hashCode
+			// was not reimplemented.  (Chance of accidental collision
+			// is 1/2^32.)  If bc.server.fast-hash is not set, then
+			// we check if hashCode was reimplemented using reflection.
+			// (Around 30x slower, but guaranteed correct.)
 			super.visitInsn(DUP);
-			super.visitInsn(DUP);
-			super.visitMethodInsn(INVOKEVIRTUAL,"java/lang/Object","getClass","()Ljava/lang/Class;");
-			if(opcode==INVOKESPECIAL&&!owner.equals(className))
-				super.visitMethodInsn(INVOKEVIRTUAL,"java/lang/Class","getSuperclass","()Ljava/lang/Class;");
-			super.visitMethodInsn(INVOKESTATIC,"battlecode/engine/instrumenter/lang/ObjectHashCode","hashCode","(Ljava/lang/Object;Ljava/lang/Class;)Ljava/lang/Integer;");
-			Label normal = new Label();
-			Label done = new Label();
-			super.visitInsn(DUP);
-			super.visitJumpInsn(IFNULL,normal);
-			super.visitMethodInsn(INVOKEVIRTUAL,"java/lang/Integer","intValue","()I");
+			super.visitMethodInsn(opcode,owner,name,desc);
 			super.visitInsn(SWAP);
+			super.visitInsn(DUP2);
+			super.visitMethodInsn(INVOKESTATIC,"java/lang/System","identityHashCode","(Ljava/lang/Object;)I");
+			Label doneLabel = new Label();
+			Label sameLabel = new Label();
+			super.visitJumpInsn(IF_ICMPEQ,sameLabel);
 			super.visitInsn(POP);
-			super.visitJumpInsn(GOTO,done);
-			super.visitLabel(normal);
-			super.visitInsn(POP);
-			super.visitMethodInsn(opcode,ClassReferenceUtil.classReference(owner,teamPackageName,silenced,checkDisallowed),"hashCode","()I");
-			super.visitLabel(done);
+			super.visitJumpInsn(GOTO,doneLabel);
+			super.visitLabel(sameLabel);
+			if(usingFastHash) {
+				super.visitInsn(SWAP);
+				super.visitInsn(POP);
+				super.visitMethodInsn(INVOKESTATIC,"battlecode/engine/instrumenter/lang/ObjectHashCode","identityHashCode","(Ljava/lang/Object;)I");
+			}
+			else {
+				if(opcode==INVOKESPECIAL) {
+					super.visitLdcInsn(Type.getObjectType(owner));
+				}
+				else {
+					super.visitInsn(DUP);
+					super.visitMethodInsn(opcode,owner,"getClass","()Ljava/lang/Class;");
+				}
+				super.visitMethodInsn(INVOKESTATIC,"battlecode/engine/instrumenter/lang/ObjectHashCode","hashCode","(ILjava/lang/Object;Ljava/lang/Class;)I");
+			}
+			super.visitLabel(doneLabel);
 			return;
-			/*
-			opcode = INVOKESTATIC;
-			desc = "(Ljava/lang/Object;)I";
-			owner = "battlecode/engine/instrumenter/lang/ObjectHashCode";
-			*/
-			
 		}
 
 		// I hate BigInteger so much for this.
-		if(className.equals("instrumented/java/math/BigInteger")&&name.equals("getUnsafe")) {
+		if(owner.equals("sun/misc/Unsafe")&&name.equals("getUnsafe")) {
 			endOfBasicBlock();
 			visitInsn(RETURN);
+		}
+
+		if(owner.equals("java/util/Random")&&name.equals("<init>")&&
+			desc.equals("()V")) {
+			super.visitMethodInsn(INVOKESTATIC,"battlecode/engine/instrumenter/lang/RoboRandom","getMapSeed","()J");
+			super.visitMethodInsn(INVOKESPECIAL,"instrumented/java/util/Random","<init>","(J)V");
+			return;
 		}
 
 		if(checkDisallowed) {

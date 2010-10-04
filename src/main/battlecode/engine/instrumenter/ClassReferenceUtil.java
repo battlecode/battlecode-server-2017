@@ -162,9 +162,11 @@ class ClassReferenceUtil {
 			return className;
 		else if(className.equals("java/lang/System"))
 			return (silenced ? "battlecode/engine/instrumenter/lang/SilencedSystem" : "battlecode/engine/instrumenter/lang/System");
-		else if(className.equals("java/util/Random"))
+		else if(className.equals("java/util/concurrent/atomic/AtomicLong"))
+			return "battlecode/engine/instrumenter/lang/AtomicLong";
+		//else if(className.equals("java/util/Random"))
 			//if(checkDisallowed)
-			return "battlecode/engine/instrumenter/lang/RoboRandom";
+		//	return "battlecode/engine/instrumenter/lang/RoboRandom";
 		//else
 		//		return "instrumented/java/util/Random";
 		if(checkDisallowed) {
@@ -173,7 +175,7 @@ class ClassReferenceUtil {
 			}
 		}
 		if(className.equals("java/security/SecureRandom"))
-			return "battlecode/engine/instrumenter/lang/RoboRandom";
+			return "instrumented/java/util/Random";
 		if(shouldAddInstrumentedPrefix(className))
 			return "instrumented/"+className;
 		else

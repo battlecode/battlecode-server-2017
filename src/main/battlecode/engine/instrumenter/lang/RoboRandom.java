@@ -27,4 +27,8 @@ public class RoboRandom extends Random {
 	public static void setMapSeed(long seed) {
 		mapSeed = seed;
 	}
+
+	public static long getMapSeed() {
+		return mapSeed;
+	}
 }

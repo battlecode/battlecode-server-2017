@@ -97,19 +97,22 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 					throw ie;
 				}
 			
-				/*
-				  if(name.startsWith("hardplayer/"))
-				  try {
-				  java.io.File file = new java.io.File("classes/"+name+".class");
-				  java.io.FileOutputStream stream = new java.io.FileOutputStream(file);
-				  stream.write(classBytes);
-				  stream.close();
-				  } catch(Exception e) { }
-				*/
+				
+				if(name.startsWith("testplayer/")) {
+					try {
+						java.io.File file = new java.io.File("classes/"+name+".class");
+						java.io.FileOutputStream stream = new java.io.FileOutputStream(file);
+						stream.write(classBytes);
+						stream.close();
+				  	} catch(Exception e) { }
+				}
 
 				finishedClass = saveAndDefineClass(name,classBytes);
 			}
-			/*
+			// Each robot has its own version of java.util classes.
+			// We do this so that robots can't comminucate by calling
+			// object.hashCode().  If permgen space becomes a problem,
+			// we could make hash codes pseudorandom.
 			else if(name.startsWith("instrumented")) {
 				byte [] classBytes;
 				try {
@@ -120,7 +123,6 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 				}
 				finishedClass = saveAndDefineClass(name,classBytes);
 			}
-			*/
 			else {
 				try {
 					return singletonLoader.loadClass(name,resolve);
