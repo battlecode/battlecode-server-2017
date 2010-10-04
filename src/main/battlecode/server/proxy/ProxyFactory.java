@@ -49,10 +49,6 @@ public class ProxyFactory {
 	 *             if the Proxy could not be created
 	 * @return a new Proxy for writing match data to binary file
 	 */
-	public static Proxy createXMSProxyFromFile(String fileName) throws IOException {
-		return new MatchProxy(fileName);
-	}
-
 	public static Proxy createXStreamProxyFromFile(String fileName)
 		throws IOException {
 		return new FileProxy(fileName) {

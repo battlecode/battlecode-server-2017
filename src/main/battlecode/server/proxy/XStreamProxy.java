@@ -1,11 +1,13 @@
 package battlecode.server.proxy;
 
 import battlecode.common.MapLocation;
+import battlecode.common.TerrainTile;
 import battlecode.serial.ExtensibleMetadata;
 import battlecode.serial.MatchHeader;
 import battlecode.serial.MatchFooter;
 import battlecode.serial.RoundDelta;
 import battlecode.serial.RoundStats;
+import battlecode.world.InternalTerrainTile;
 import battlecode.world.GameMap;
 import battlecode.world.signal.Signal;
 import battlecode.world.signal.SignalHandler;
@@ -210,6 +212,81 @@ public class XStreamProxy extends Proxy {
         }
 	}
 
+	public static class MapTileConverter implements Converter {
+
+		public static enum DataType { terrain, height }
+
+		public boolean canConvert(Class cls) {
+			return cls.equals(InternalTerrainTile [][].class);
+		}
+
+		public void writeTerrainData(InternalTerrainTile [][] tiles, HierarchicalStreamWriter writer, DataType type) {
+			StringBuilder builder = new StringBuilder();
+			boolean first = true;
+			for(InternalTerrainTile [] row: tiles) {
+				if(first)
+					first=false;
+				else
+					builder.append("/");
+				for(InternalTerrainTile t: row) {
+					switch(type) {
+					case terrain:
+						builder.append(t.getType()==TerrainTile.TerrainType.LAND?".":"#");
+						break;
+					case height:
+						builder.append(Integer.toString(t.getHeight(),Character.MAX_RADIX));
+					}
+				}
+			}
+			writer.addAttribute(type.toString(),builder.toString());
+		}
+
+		public void marshal(Object value, HierarchicalStreamWriter writer,
+			MarshallingContext context) {
+			InternalTerrainTile [][] tiles = (InternalTerrainTile [][])value;
+			// I tried to do this in the easiest way possible, rather than
+			// using the map file format.  Feel free to change.  -dgulotta
+			writeTerrainData(tiles,writer,DataType.terrain);
+			writeTerrainData(tiles,writer,DataType.height);
+		}
+
+		public Object unmarshal(HierarchicalStreamReader reader,
+			UnmarshallingContext context) throws ConversionException {
+			String [] terrain = reader.getAttribute("terrain").split("/");
+			String [] height = reader.getAttribute("height").split("/");
+			if(terrain.length!=height.length) throw new ConversionException("incorrect terrain/heightmap size");
+			InternalTerrainTile [][] tiles = new InternalTerrainTile [terrain.length][];
+			for(int i=0;i<terrain.length;i++) {
+				if(terrain[i].length()!=height[i].length()) throw new ConversionException("incorrect terrain/heightmap size");
+				tiles[i] = new InternalTerrainTile [terrain[i].length()];
+				for(int j=0;j<terrain[i].length();j++) {
+					
+					int h;
+					TerrainTile.TerrainType t;
+					try {
+						h=Integer.parseInt(height[i].substring(j,j+1),Character.MAX_RADIX);
+					} catch(NumberFormatException e) {
+						throw new ConversionException("Illegal value in heightmap");
+					}
+					switch(terrain[i].charAt(j)) {
+						case '#':
+							t = TerrainTile.TerrainType.LAND;
+							break;
+						case '.':
+						case ' ':
+							t = TerrainTile.TerrainType.VOID;
+							break;
+						default:
+							throw new ConversionException("Illegal value in terrain map");
+					}
+					tiles[i][j] = new InternalTerrainTile(h,t);
+				}
+			}
+			return tiles;
+		}
+
+	}
+
 	/*
 	public static class MatchHeaderConverter implements Converter {
 
@@ -239,11 +316,12 @@ public class XStreamProxy extends Proxy {
 		xstream.registerConverter(new DoubleArrayConverter());
 		xstream.registerConverter(new MapLocationConverter());
 		xstream.registerConverter(new ExtensibleMetadataConverter());
+		xstream.registerConverter(new MapTileConverter());
 		//xstream.registerConverter(new MatchHeaderConverter());
 		EmptyConverter empty = new EmptyConverter();
 		xstream.registerLocalConverter(GameMap.class,"blockMap",empty);
 		xstream.registerLocalConverter(GameMap.class,"initialBlockMap",empty);
-		xstream.registerLocalConverter(GameMap.class,"mapTiles",empty);
+		//xstream.registerLocalConverter(GameMap.class,"mapTiles",empty);
 		xstream.registerConverter(new RoundDeltaConverter());
 		xstream.useAttributeFor(int.class);
 		xstream.useAttributeFor(int [].class);
