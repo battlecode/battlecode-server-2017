@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+
+<ivy-module version="2.0">
+  <info organisation="org.battlecode" module="${ant.project.name}">
+    <ivyauthor name="Battlecode" url="http://battlecode.mit.edu"/>
+    <description>Battlecode</description>
+  </info>
+
+  <dependencies>
+    <dependency org="commons-lang" name="commons-lang" rev="2.5" />
+    <dependency org="commons-cli" name="commons-cli" rev="1.2" />
+    <dependency org="asm" name="asm" rev="3.2" />
+    <dependency org="asm" name="asm-tree" rev="3.2" />
+    <dependency org="com.thoughtworks.xstream" name="xstream" rev="1.3" />
+    <dependency org="junit" name="junit" rev="4.4" />
+  </dependencies>
+</ivy-module>

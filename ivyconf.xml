@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<ivysettings>
+  <settings defaultResolver="default"/>
+  <property name="ivy.checksums" value=""/>
+
+  <resolvers>
+    <chain name='default'>
+      <ibiblio name='maven2'
+               root='http://www.ibiblio.org/maven2/'
+	       pattern='[organisation]/[module]/[revision]/[module]-[revision].[ext]'
+               m2compatible='true' />
+    </chain>
+  </resolvers>
+
+</ivysettings>
+

@@ -1,0 +1,167 @@
+<?xml version="1.0"?>
+
+<project name="Battlecode"
+        xmlns:ivy="antlib:org.apache.ivy.ant"
+        default="compile">
+
+    <property name="rootname" value="battlecode-client"/>
+    <property name="src.dir" value="${basedir}/src/main"/>
+    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="build.encoding" value="UTF-8"/>
+    <property name="build.jar" value="${basedir}/${rootname}.jar"/>
+
+    <property name="pkg.build.jar" value="${basedir}/${rootname}.jar"/>
+    <property name="pkg.build.dir" value="${build.dir}/classes"/>
+
+    <property name="javac.debug" value="on"/>
+    <property name="javac.optimize" value="on"/>
+    <property name="javac.deprecation" value="off"/>
+    <property name="javac.version" value="1.6"/>
+    <property name="javac.args" value=""/>
+    <property name="javac.args.warnings" value="-Xlint:unchecked"/>
+
+    <property name="javadoc.destdir" value="docs/api"/>
+
+    <!-- Unit tests -->
+    <property name="test.src.dir" value="${basedir}/src/test"/>
+    <property name="test.timeout" value="900000"/>
+    <property name="test.build.dir" value="${build.dir}/tests"/>
+    <property name="test.build.jar" value="${basedir}/${rootname}-test.jar"/>
+    <property name="test.report.file" value="TEST-AllTestSuite"/>
+    <property name="instr.build.dir" value="${build.dir}/instrumented-classes"/>
+    <property name="instr.datafile" value="${build.dir}/cobertura.ser"/>
+
+    <!-- IVY configuration items -->
+    <property name="ivy.install.version" value="2.1.0"/>
+    <condition property="ivy.home" value="${env.IVY_HOME}">
+        <isset property="env.IVY_HOME"/>
+    </condition>
+    <property name="ivy.home" value="${user.home}/.ant"/>
+    <property name="ivy.jar.dir" value="${ivy.home}/lib"/>
+    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar"/>
+    <property name="ivy.remote.jar" value="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"/>
+
+    <!-- the normal classpath -->
+    <path id="classpath-libs">
+        <fileset dir="${lib.dir}"><include name="**/*.jar"/></fileset>
+    </path>
+  
+    <path id="classpath-test">
+        <pathelement location="${basedir}/${rootname}.jar"/>
+    </path>
+  
+    <path id="classpath-compiled">
+        <pathelement location="${pkg.build.dir}"/>
+    </path>
+  
+    <path id="classpath-coverage">
+        <pathelement location="${instr.build.dir}"/>
+    </path>
+
+    <target name="disable-remotes"
+            description="Disable remote fetches (useful if you are offline or aren't on VPN)">
+        <property name="disable.remotes" value="true"/>
+    </target>
+
+    <target name="download-ivy" unless="disable.remotes">
+        <mkdir dir="${ivy.jar.dir}"/>
+        <get dest="${ivy.jar.file}"
+                usetimestamp="true"
+                src="${ivy.remote.jar}"/>
+    </target>
+
+    <target name="init-ivy" depends="download-ivy" unless="disable.remotes">
+        <!-- try to load ivy here from ivy home, in case the user has not
+        already dropped it into ant's lib dir (note that the latter copy will
+        always take precedence).  We will not fail as long as local lib dir
+        exists (it may be empty) and ivy is in at least one of ant's lib dir or
+        the local lib dir. -->
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml"
+                uri="antlib:org.apache.ivy.ant"
+                classpathref="ivy.lib.path"/>
+    </target>
+
+    <target name="init" depends="init-ivy" unless="disable.remotes">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${pkg.build.dir}"/>
+        <mkdir dir="${test.build.dir}"/>
+        <ivy:settings file="ivyconf.xml"/>
+        <ivy:retrieve/>
+    </target>
+
+    <target name="clean"
+            description="Clean up build directory and Ivy libraries.">
+        <delete dir="${build.dir}"/>
+        <delete dir="${javadoc.destdir}"/>
+        <delete file="${build.jar}"/>
+        <delete file="${test.build.jar}"/>
+        <delete file="${test.report.file}.xml"/>
+        <delete>
+            <fileset dir="${lib.dir}">
+                <include name="**/*.jar"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="compile"
+            description="Compile Battlecode classes."
+            depends="init">
+        <javac encoding="${build.encoding}"
+                srcdir="${src.dir}"
+                includes="**/*.java"
+                destdir="${pkg.build.dir}"
+                debug="${javac.debug}"
+                optimize="${javac.optimize}"
+                target="${javac.version}"
+                source="${javac.version}"
+                deprecation="${javac.deprecation}">
+            <compilerarg line="${javac.args} ${javac.args.warnings}"/>
+            <classpath refid="classpath-libs"/>
+        </javac>
+    </target>
+
+    <target name="jar"
+            description="Build the jar (with dependencies included)."
+            depends="compile">
+        <jar jarfile="${pkg.build.jar}" basedir="${pkg.build.dir}">
+            <!-- Pack some external dependencies into the overdrive jar. -->
+            <zipgroupfileset
+                dir="${lib.dir}"
+                includes="*.jar"
+                excludes="easymock-*, *-javadoc.jar, *-sources.jar, hadoop-*, ant-*, cobertura-*"/>
+        </jar>
+    </target>
+
+
+    <!-- ========== TESTING ========= -->
+
+
+    <target name="doc">
+        <javadoc destdir="${javadoc.destdir}"
+                author="true"
+                version="true"
+                use="true"
+                windowtitle="Battlecode Client API">
+        <packageset dir="${src.dir}" defaultexcludes="yes"/>
+        <doctitle><![CDATA[<h1>Battlecode Client</h1>]]></doctitle>
+        <bottom>
+            <![CDATA[
+            <i>Copyright &#169; 2006-2010 Battlecode. All Rights Reserved.</i>
+            ]]>
+        </bottom>
+        <tag name="todo" scope="all" description="To do:"/>
+        <link href="http://java.sun.com/j2se/1.6.0/docs/api/"/>
+        </javadoc>
+    </target>
+
+    <target name="auto-build"
+            description="Target for bulding od through cruisecontrol"
+            depends="clean, jar">
+    </target>
+
+</project>
+<!-- vim: set et ts=4 sw=4 ai smartindent: -->
