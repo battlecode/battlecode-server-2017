@@ -4,7 +4,6 @@ import battlecode.engine.instrumenter.*;
 import battlecode.engine.instrumenter.lang.RoboRandom;
 import battlecode.engine.scheduler.Scheduler;
 import battlecode.engine.signal.Signal;
-import battlecode.common.*;
 import battlecode.world.GameWorldFactory;
 import battlecode.server.Config;
 
@@ -70,8 +69,8 @@ public class Engine {
 			if(gameWorld.getCurrentRound() != -1)
 				gameWorld.clearAllSignals();
 			gameWorld.processBeginningOfRound();
-			if (Clock.getRoundNum() % 500 == 0)
-			    System.out.println("Round: " + Clock.getRoundNum());
+			if (getRoundNum() % 500 == 0)
+			    System.out.println("Round: " + getRoundNum());
 			Scheduler.passToNextThread();
 			gameWorld.processEndOfRound();
 			if(!gameWorld.isRunning()) {
@@ -85,7 +84,7 @@ public class Engine {
 			ErrorReporter.report(e);
 			return GameState.DONE;
 		}
-		if(garbageCollectEnabled && Clock.getRoundNum() % garbageCollectRounds == 0)
+		if(garbageCollectEnabled && getRoundNum() % garbageCollectRounds == 0)
 			java.lang.System.gc();
 		return ((breakpointsEnabled && gameWorld.wasBreakpointHit()) ? GameState.BREAKPOINT : GameState.RUNNING);
 	}

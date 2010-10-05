@@ -3,8 +3,6 @@ package battlecode.engine;
 import java.lang.Runnable;
 import java.lang.reflect.*;
 
-import battlecode.world.InternalRobot;
-import battlecode.common.RobotController;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
 

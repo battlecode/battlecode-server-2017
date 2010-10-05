@@ -6,7 +6,6 @@ import battlecode.engine.Engine;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.scheduler.Scheduler;
-import battlecode.world.InternalRobot;
 import battlecode.common.Team;
 
 

@@ -1,11 +1,8 @@
 package battlecode.engine;
 
-import battlecode.common.*;
 import battlecode.engine.instrumenter.*;
 import battlecode.engine.scheduler.ScheduledRunnable;
 import battlecode.server.Config;
-
-import battlecode.world.signal.SpawnSignal;
 
 /*
 TODO:

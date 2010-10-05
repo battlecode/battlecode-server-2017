@@ -6,7 +6,6 @@ import static battlecode.common.GameConstants.STACK_SIZE_LIMIT;
 import java.util.HashSet;
 import java.util.Set;
 
-import battlecode.common.Clock;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.scheduler.Scheduler;
 import battlecode.engine.GenericRobot;

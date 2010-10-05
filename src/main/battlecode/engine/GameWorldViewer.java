@@ -1,6 +1,6 @@
 package battlecode.engine;
 
-import battlecode.common.*;
+import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
 import battlecode.serial.*;
 

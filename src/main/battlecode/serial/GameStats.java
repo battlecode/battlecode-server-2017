@@ -1,8 +1,7 @@
 package battlecode.serial;
 
 import java.io.Serializable;
-
-import battlecode.common.*;
+import battlecode.common.Team;
 
 /**
  * Used to keep track of various statistics in a given
