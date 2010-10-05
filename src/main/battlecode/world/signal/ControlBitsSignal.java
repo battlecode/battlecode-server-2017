@@ -1,6 +1,6 @@
 package battlecode.world.signal;
 
-import battlecode.world.InternalRobot;
+import battlecode.engine.signal.Signal;
 
 public class ControlBitsSignal extends Signal {
 	

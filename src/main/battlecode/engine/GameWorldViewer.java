@@ -1,7 +1,7 @@
-package battlecode.world;
+package battlecode.engine;
 
 import battlecode.common.*;
-import battlecode.world.signal.Signal;
+import battlecode.engine.signal.Signal;
 import battlecode.serial.*;
 
 import java.io.Serializable;
@@ -13,7 +13,7 @@ public interface GameWorldViewer {
 
 	public int getMapSeed();
 
-	public GameMap getGameMap();
+	public Serializable getGameMap();
 
 	public String getTeamName(Team t);
 

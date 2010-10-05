@@ -4,11 +4,10 @@ import java.io.PrintStream;
 
 import battlecode.engine.Engine;
 import battlecode.engine.ErrorReporter;
+import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.scheduler.Scheduler;
-import battlecode.world.GenericWorld;
 import battlecode.world.InternalRobot;
 import battlecode.common.Team;
-
 
 
 /**
@@ -17,50 +16,19 @@ import battlecode.common.Team;
  *
  * @author adamd
  */
-class RoboPrintStream extends PrintStream {
+public class RoboPrintStream extends PrintStream {
 	
-	/*
-	Implementation notes:
-	
-	Because the instrumenter sticks in SilencedSystem and SilencedPrintStream for teams that are silenced, one might think that 
-	RoboPrintStream never needs to silence anything.  However, if the two teams are the same team (i.e., same classes), and one is silenced,
-	but the other isn't, then the instrumenter can't stick in SilencedSystem, since that would silence both of them, so instead RoboPrintStream
-	has to silence one of them.
-	*/
-	
-	private GenericWorld gw = null;
 	private boolean alreadyInLine = false;
-	private int lastID = 0;
-	private boolean silenceA, silenceB;
-		
+	
+	private String header;
+
 	private static RoboPrintStream theInstance = new RoboPrintStream();
 		
 	private RoboPrintStream() {
 		super(java.lang.System.out);
 	}
 	
-	/**
-	 * Sets some properties about the current gameworld.  Should be called before each game.
-	 * @param gw the GameWorld of the current game
-	 * @param silenceA whether team A should be silenced
-	 * @param silenceB whether team B should be silenced
-	 * @param sameTeams whether the two teams are the same
-	 */
-	public static void setProperties(GenericWorld gw, boolean silenceA, boolean silenceB, boolean sameTeams) {
-		theInstance.gw = gw;
-		theInstance.alreadyInLine = false;
-		theInstance.lastID = 0;
-		if(sameTeams) {
-			theInstance.silenceA = silenceA;
-			theInstance.silenceB = silenceB;
-		} else {
-			// if they're not the same teams, SilencedPrintStream will be stuck in at compile time for teams that should be silenced,
-			// so RoboPrintStream should not silence anyone
-			theInstance.silenceA = theInstance.silenceB = false;
-		}
-	}
-	
-	static RoboPrintStream theInstance() {
+	static public RoboPrintStream theInstance() {
 		return theInstance;
 	}
 	
@@ -196,68 +164,31 @@ class RoboPrintStream extends PrintStream {
 	//*** HELPER METHODS ***
 	//**************************
 
-	private boolean isSilenced(int ID) {
-		if(silenceA == silenceB)
-			return silenceA;
-		try{
-			switch(((InternalRobot)gw.getObjectByID(ID)).getTeam()) {
-				case A:
-					return silenceA;
-				case B:
-					return silenceB;
-				default:
-					return true;
-			}
-		} catch(Exception e) {
-			ErrorReporter.report(e);
-			return false;
-		}
+	public void changeRobot() {
+		header = null;
 	}
 	
-	private boolean isSilenced() {
-		return isSilenced(Scheduler.getCurrentThreadID());
+	private void checkHeader() {
+		if(header==null) {
+			header = String.format("%s@%d",RobotMonitor.getCurrentRobot().toString(),Engine.getRoundNum());
+		}				
 	}
-	
+
 	private void printHelper(String s) {
-		int newID = Scheduler.getCurrentThreadID();
-		if(isSilenced(newID))
-			return;
-		String header = getHeader(newID);
-		if(newID != lastID || !alreadyInLine) {
-			if(alreadyInLine)
-				java.lang.System.out.print('\n');
+		checkHeader();
+		if(!alreadyInLine)
 			java.lang.System.out.print(header);
-			lastID = newID;
-		}
 		java.lang.System.out.print(s);
 		alreadyInLine = true;
 	}
 	
 	private void printlnHelper(String s) {
-		int newID = Scheduler.getCurrentThreadID();
-		if(isSilenced(newID))
-			return;
-		String header = getHeader(newID);
-		if(newID != lastID || !alreadyInLine) {
+		checkHeader();
+		if(!alreadyInLine) {
 			java.lang.System.out.print(header);
-			lastID = newID;
 		}
-		java.lang.System.out.println(s);
+		java.lang.System.out.print(s);
 		alreadyInLine = false;
 	}
 	
-	private String getHeader(int newID) {
-		if(gw == null)
-			ErrorReporter.report("RoboPrintStream.printHeader() has a null gameWorld", true);
-		else {
-			try{
-				return "[" + gw.getObjectByID(newID).toString() + "@" + Engine.getRoundNum() + "]";
-			} catch(Exception e) {
-				ErrorReporter.report(e);
-			}
-		}
-		return null;
-	}
-	
 }
-	

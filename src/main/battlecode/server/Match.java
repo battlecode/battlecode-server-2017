@@ -8,8 +8,8 @@ import battlecode.serial.*;
 //import battlecode.tournament.TournamentType;
 //import battlecode.tournament.Match.Type;
 
-import battlecode.world.GameWorldViewer;
-import battlecode.world.signal.Signal;
+import battlecode.engine.GameWorldViewer;
+import battlecode.engine.signal.Signal;
 
 /**
  * Abstracts the game engine for the server. This class is responsible for
@@ -74,16 +74,6 @@ public class Match extends Observable {
      */
     public void initialize() {
     	
-    	boolean debugMethodsEnabled = options
-				.getBoolean("bc.engine.debug-methods");
-
-		boolean silenceA = options.getBoolean("bc.engine.silence-a");
-		boolean silenceB = options.getBoolean("bc.engine.silence-b");
-
-		boolean gcEnabled = options.getBoolean("bc.engine.gc");
-		int gcRounds = options.getInt("bc.engine.gc-rounds");
-		boolean upkeepEnabled = options.getBoolean("bc.engine.upkeep");
-		boolean spawnRadiusEnforced = options.getBoolean("bc.engine.spawnradius");
 		boolean breakpointsEnabled = options.getBoolean("bc.engine.breakpoints");
         this.bytecodesUsedEnabled = 
             options.getBoolean("bc.engine.bytecodes-used"); 
@@ -92,9 +82,7 @@ public class Match extends Observable {
 
 		// Create a new engine.
 		this.engine = new Engine(info.getTeamA(), info.getTeamB(), map,
-				mapPath, debugMethodsEnabled, silenceA, silenceB, gcEnabled,
-				gcRounds, upkeepEnabled, spawnRadiusEnforced, breakpointsEnabled, 
-                bytecodesUsedEnabled, this.state);
+				mapPath, this.state);
 
 		// Get the viewer from the engine.
 		this.gameWorldViewer = engine.getGameWorldViewer();

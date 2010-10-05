@@ -343,10 +343,8 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 		// But in practice this should be good enough.
 		else if (n.name.equals("printStackTrace") && n.desc.equals("()V") &&
 			(n.owner == null || n.owner.equals("java/lang/Throwable")|| isSuperClass(n.owner, "java/lang/Throwable"))) {
-			n.setOpcode(INVOKESTATIC);
-			n.owner="battlecode/engine/instrumenter/RobotMonitor";
-			n.name="printRoboStackTrace";
-			n.desc="(Ljava/lang/Throwable;)V";
+			instructions.insertBefore(n,new FieldInsnNode(GETSTATIC,"battlecode/engine/instrumenter/lang/System","out","Ljava/io/PrintStream"));
+			n.desc="(Ljava/io/PrintStream;)V";
 		}
 		else {
 			// replace class names

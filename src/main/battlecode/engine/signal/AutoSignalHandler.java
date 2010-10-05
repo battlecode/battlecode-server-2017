@@ -1,4 +1,4 @@
-package battlecode.world.signal;
+package battlecode.engine.signal;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -12,6 +12,7 @@ import java.util.HashMap;
  * - If the method has a {@link battlecode.world.signal.DiscoverSignal} annotation, that is respected.
  * - Otherwise, a method is discovered if it is public, its name starts with "visit", and it takes a single
  * parameter that is a subclass of {@link battlecode.world.Signal} (but not Signal itself).
+ * Currently it uses reflection, which is kind of inelegant and slow (but probably not slow enough to matter).  I guess we could avoid reflection and instead create classes on the fly.
  */
 public class AutoSignalHandler<T> implements SignalHandler<T> {
 

@@ -3,9 +3,10 @@ package battlecode.engine;
 import battlecode.engine.instrumenter.*;
 import battlecode.engine.instrumenter.lang.RoboRandom;
 import battlecode.engine.scheduler.Scheduler;
-import battlecode.world.*;
-import battlecode.world.signal.*;
+import battlecode.engine.signal.Signal;
 import battlecode.common.*;
+import battlecode.world.GameWorldFactory;
+import battlecode.server.Config;
 
 //~ import java.lang.Thread;
 /*
@@ -24,28 +25,22 @@ public class Engine {
 		
 	private static Engine theInstance = null;
 
-	public Engine(String teamA, String teamB, String mapName, String mapPath,
-            boolean debugMethodsEnabled, boolean silenceA, boolean silenceB,
-            boolean garbageCollectEnabled, int garbageCollectRounds,
-            boolean upkeepEnabled, boolean spawnRadiusEnforced, boolean breakpointsEnabled,
-            boolean bytecodesUsedEnabled, long[][] archonMemory) {
+	public Engine(String teamA, String teamB, String mapName, String mapPath, long[][] archonMemory) {
 		theInstance = this;
-		this.garbageCollectEnabled = garbageCollectEnabled;
-		this.garbageCollectRounds = garbageCollectRounds;
-		this.breakpointsEnabled = breakpointsEnabled;
-		GameWorld tempGameWorld = null;
+		Config options = Config.getGlobalConfig();
+		this.garbageCollectEnabled = options.getBoolean("bc.engine.gc");
+		this.garbageCollectRounds = options.getInt("bc.engine.gc-rounds");
+		this.breakpointsEnabled = options.getBoolean("bc.engine.breakpoints");
+		GenericWorld tempGameWorld = null;
 		//InternalObject.resetIDs();
-		InternalRobot.setProperties(upkeepEnabled);
-		InternalRobot.setSpawnRadiusEnforcement(spawnRadiusEnforced);
-		InternalArchon.reset();
 		IndividualClassLoader.reset();
 		Scheduler.reset();
 		RobotMonitor.reset();
-		PlayerFactory.setProperties(debugMethodsEnabled, silenceA, silenceB, teamA.equals(teamB));
+		PlayerFactory.checkOptions();
 		try{
 			try{
 				tempGameWorld = GameWorldFactory.createGameWorld(teamA, teamB, mapName, mapPath, archonMemory);
-			} catch(MapFileError mfe) {
+			} catch(IllegalArgumentException e) {
 				java.lang.System.out.println("[Engine] Error while loading map '" + mapName + "'");
 				return;
 			} catch(Exception e) {
@@ -55,9 +50,8 @@ public class Engine {
 		} finally {
 			gameWorld = tempGameWorld;
 		}
+		gameWorld.resetStatic();
 		RobotMonitor.setGameWorld(gameWorld);
-		RobotMonitor.setSilenceProperties(silenceA, silenceB);
-		battlecode.engine.instrumenter.lang.System.setProperties(gameWorld, silenceA, silenceB, teamA.equals(teamB));
 		RoboRandom.setMapSeed(gameWorld.getMapSeed());
 		Scheduler.start();
 	}
@@ -118,47 +112,4 @@ public class Engine {
 		return gameWorld.getArchonMemory();
 	}
 		
-	// for testing only -- just simulates some rounds
-	public static void main(String[] args) throws Exception{
-		final int NUM_ROUNDS = 200;
-		long[][] archonMemory = new long[2][6];
-		Engine myEngine = new Engine("team000", "team000", "glass", java.lang.System.getProperty("user.dir") + "/../maps", true, false, false, false, 0, true, true, true, true, archonMemory);
-		if(!myEngine.isRunning()) {
-			java.lang.System.out.println("error initializing engine; dummy main is now bailing");
-			return;
-		}
-		int i;
-		//~ Signal[] signals = myEngine.gameWorld.getAllSignals();
-		//~ for(Signal s : signals) {
-			//~ System.out.println(s.class.getName());
-			//~ System.out.println(s);
-		//~ }
-		for(i = 0; i < NUM_ROUNDS; i++) {
-			if(!myEngine.isRunning())
-				break;
-			myEngine.runRound();
-			//~ System.out.println(roundNum);
-			//~ Signal[] signals = myEngine.gameWorld.getAllSignals();
-			//~ SignalHandler<String> handler = new SignalDisplayHandler();
-			//~ for(Signal s : signals) {
-				//~ System.out.println(s.accept(handler));
-			//~ }
-			//~ java.lang.System.out.println("Round " + i);
-			//~ java.lang.System.out.println("World Round " + gameWorld.);
-			//~ java.lang.System.gc();
-			//~ for(InternalObject o : myEngine.getAllGameObjects()) {
-				//~ java.lang.System.out.println(((InternalRobot)o).getCurrentAction());
-			//~ }
-			//~ java.lang.System.out.println("A: " +myEngine.getGameStats().getPoints(Team.A) + "    B: " + myEngine.getGameStats().getPoints(Team.B));
-			//~ java.lang.System.out.println("A: " + myEngine.getGameStats().getEnergon(Team.A) + "    B: " + myEngine.getGameStats().getEnergon(Team.B));
-			//~ InternalObject[] objects = myEngine.getGameWorld().getAllGameObjects();
-			//~ for(InternalObject o : objects) {
-				//~ java.lang.System.out.println(o.toString() + " @ " + o.getLocation().toString());
-			//~ }
-		}
-		//~ Thread.sleep(1000);
-		java.lang.System.out.println("done");
-		java.lang.System.out.println(i);
-	}
-
 }

@@ -1,4 +1,4 @@
-package battlecode.world.signal;
+package battlecode.engine.signal;
 
 /**
  * Overrides the default behavior for automatic signal discovery.

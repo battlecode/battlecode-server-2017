@@ -1,5 +1,6 @@
-package battlecode.world.signal;
+package battlecode.analysis;
 
+import battlecode.engine.signal.Signal;
 import java.io.Serializable;
 
 public class AwesomenessSignal extends Signal {

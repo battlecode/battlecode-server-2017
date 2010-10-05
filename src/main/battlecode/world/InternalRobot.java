@@ -23,12 +23,13 @@ import battlecode.common.Robot;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.engine.ErrorReporter;
+import battlecode.engine.GenericRobot;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.DoTeleportSignal;
-import battlecode.world.signal.Signal;
+import battlecode.engine.signal.Signal;
 
-public class InternalRobot extends InternalObject implements Robot {
+public class InternalRobot extends InternalObject implements Robot, GenericRobot {
 
     private volatile double myEnergonLevel;
     private volatile double myEnergonReserve;
@@ -106,7 +107,7 @@ public class InternalRobot extends InternalObject implements Robot {
         }
     }
 
-    public static void setProperties(boolean upkeepEnabled) {
+    public static void setUpkeepEnabled(boolean upkeepEnabled) {
         InternalRobot.upkeepEnabled = upkeepEnabled;
     }
 

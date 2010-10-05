@@ -18,6 +18,7 @@ import org.apache.commons.cli.ParseException;
 
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
+import battlecode.engine.signal.Signal;
 import battlecode.serial.*;
 import battlecode.server.proxy.Proxy;
 import battlecode.server.proxy.ProxyFactory;
@@ -416,7 +417,7 @@ public class AwesomenessAnalyzer {
 		}
 
 		private void visitHeader(MatchHeader header) {
-			final GameMap map = header.getMap();
+			final GameMap map = (GameMap)header.getMap();
 			final float halfWidth = ((float)map.getWidth()) / 2.0f;
 			final float halfHeight = ((float)map.getHeight()) / 2.0f;
 			final MapLocation origin = map.getMapOrigin();

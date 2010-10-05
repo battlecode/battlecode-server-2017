@@ -3,7 +3,7 @@ package battlecode.engine.instrumenter.lang;
 import java.io.PrintStream;
 
 import battlecode.engine.instrumenter.RobotMonitor;
-import battlecode.world.GenericWorld;
+import battlecode.engine.GenericWorld;
 
 /**
  * A Wrapper for java.lang.System that supports only arraycopy and System.out.  battlecode.engine.instrumenter.lang.System.out is
@@ -27,17 +27,7 @@ public final class System {
 		if(length>0)
 			RobotMonitor.incrementBytecodes(length * 8);
 	}
-	
-	public static final PrintStream out = RoboPrintStream.theInstance();
-		
-	/**
-	 * Sets certain properties about the gameworld.  Should be called at the beginning of each game.
-	 * @param gw the GameWorld of the current game
-	 * @param silenceA whether team A should be silenced
-	 * @param silenceB whether team B should be silenced
-	 * @param sameTeams whether the two teams are the same
-	 */
-	public static void setProperties(GenericWorld gw, boolean silenceA, boolean silenceB, boolean sameTeams) {
-		RoboPrintStream.setProperties(gw, silenceA, silenceB, sameTeams);
-	}
+
+	// set by RobotMonitor
+	public static PrintStream out;
 }

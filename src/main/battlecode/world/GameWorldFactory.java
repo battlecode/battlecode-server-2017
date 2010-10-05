@@ -27,7 +27,7 @@ import battlecode.engine.ErrorReporter;
 import battlecode.engine.PlayerFactory;
 import battlecode.world.GameMap.MapProperties;
 import battlecode.world.signal.MapOriginSignal;
-import battlecode.world.signal.Signal;
+import battlecode.engine.signal.Signal;
 
 /*
 TODO:
@@ -610,7 +610,7 @@ public class GameWorldFactory {
      */
     private static void fail(String reason, String thingsToTry) {
         ErrorReporter.report("Malformed map file: " + reason, thingsToTry);
-        throw new MapFileError();
+        throw new IllegalArgumentException();
     }
 
     public static GameWorld createGameWorld(String teamA, String teamB, String mapName, String mapPath, long[][] archonMemory) throws Exception {

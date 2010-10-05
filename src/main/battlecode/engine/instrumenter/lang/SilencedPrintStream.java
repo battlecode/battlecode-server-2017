@@ -7,7 +7,7 @@ import java.io.PrintStream;
  *
  * @author adamd
  */
-class SilencedPrintStream extends PrintStream {
+public class SilencedPrintStream extends PrintStream {
 	
 	// singleton
 	private static SilencedPrintStream theInstance = new SilencedPrintStream();
@@ -16,7 +16,7 @@ class SilencedPrintStream extends PrintStream {
 		super(java.lang.System.out);
 	}
 	
-	static SilencedPrintStream theInstance() {
+	public static SilencedPrintStream theInstance() {
 		return theInstance;
 	}
 	

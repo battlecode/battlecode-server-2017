@@ -9,7 +9,11 @@ import java.util.Set;
 import battlecode.common.Clock;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.scheduler.Scheduler;
-import battlecode.world.GenericWorld;
+import battlecode.engine.GenericRobot;
+import battlecode.engine.GenericWorld;
+import battlecode.engine.instrumenter.lang.RoboPrintStream;
+import battlecode.engine.instrumenter.lang.SilencedPrintStream;
+import battlecode.server.Config;
 
 /**
  * RobotMonitor is a singleton class for monitoring robots' bytecode execution and stack size, and killing robots' threads.  Player's classes should
@@ -35,7 +39,9 @@ public class RobotMonitor {
 	private static int currDebugLevel = 0;
 	
 	private static GenericWorld myGameWorld = null;
-	
+
+	private static boolean [] silenced = new boolean [2];
+
 	/** A "struct" that holds data about a robot's execution, e.g., bytecodes, stack size, etc. */
 	public static class RobotData {
 		public int currentBytecodeLimit = BYTECODES_PER_ROUND;
@@ -57,6 +63,9 @@ public class RobotMonitor {
 	private static void init() {
 		bytecodeCtr = 0;
 		robotsToKill.clear();
+		Config options = Config.getGlobalConfig();
+		silenced[0] = options.getBoolean("bc.engine.silence-a");
+		silenced[1] = options.getBoolean("bc.engine.silence-b");
 	}
 	
 	/** Resets the internal state of the RobotMonitor.  Should be called between games. */
@@ -101,9 +110,21 @@ public class RobotMonitor {
 		else
 			bytecodeCtr = 0;
 
+		GenericRobot robot = myGameWorld.getRobotByID(newData.ID);
+		if(silenced[robot.getTeam().ordinal()])
+			battlecode.engine.instrumenter.lang.System.out = SilencedPrintStream.theInstance();
+		else {
+			RoboPrintStream stream = RoboPrintStream.theInstance();
+			stream.changeRobot();
+			battlecode.engine.instrumenter.lang.System.out = stream;
+		}
 		myGameWorld.beginningOfExecution(newData.ID);
 	}		
 	
+	public static GenericRobot getCurrentRobot() {
+		return myGameWorld.getRobotByID(currentRobotData.ID);
+	}
+
 	/**
 	 * Increments the active robot's debug level.  Should be called at the beginning of any debug method.
 	 */
@@ -182,40 +203,6 @@ public class RobotMonitor {
 		myGameWorld = gw;
 	}
 	
-	private static boolean silenceA, silenceB;
-	
-	public static void setSilenceProperties(boolean silenceA, boolean silenceB) {
-		RobotMonitor.silenceA = silenceA;
-		RobotMonitor.silenceB = silenceB;
-	}
-	
-	public static void printRoboStackTrace(Throwable t) {
-		if (!isCurrentRobotSilenced())
-			t.printStackTrace();
-	}
-	
-	private static boolean isSilenced(int ID) {
-		if(silenceA == silenceB)
-			return silenceA;
-		try{
-			switch(myGameWorld.getObjectByID(ID).getTeam()) {
-				case A:
-					return silenceA;
-				case B:
-					return silenceB;
-				default:
-					return true;
-			}
-		} catch(Exception e) {
-			ErrorReporter.report(e);
-			return false;
-		}
-	}
-	
-	private static boolean isCurrentRobotSilenced() {
-		return isSilenced(Scheduler.getCurrentThreadID());
-	}
-
 	public static boolean thrownRobotDeathException() {
 		return currentRobotData.thrownRobotDeathException;
 	}

@@ -22,11 +22,14 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
+import battlecode.engine.GenericWorld;
 import battlecode.engine.PlayerFactory;
 import battlecode.engine.instrumenter.RobotMonitor;
+import battlecode.engine.signal.*;
 import battlecode.serial.DominationFactor;
 import battlecode.serial.GameStats;
 import battlecode.serial.RoundStats;
+import battlecode.server.Config;
 import battlecode.world.signal.*;
 
 /**
@@ -698,6 +701,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return ret;
     }
 
+	public void resetStatic() {
+		InternalArchon.reset();
+		Config options = Config.getGlobalConfig();
+		InternalRobot.setUpkeepEnabled(options.getBoolean("bc.engine.upkeep"));
+	}
+
     public void addConvexHullSignal(Team t) {
         signals.add(new ConvexHullSignal(t, scoreCalcs[t.ordinal()].hullArray()));
     }
@@ -1034,16 +1043,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return null;
     }
 
-    public Exception visitBytecodesUsedSignal(BytecodesUsedSignal s) {
-        // TODO: implement
-        return null;
-    }
-
-    public Exception visitAwesomenessSignal(AwesomenessSignal s) {
-        // Gobble up Signal
-        return null;
-    }
-
     public Exception visitDeploySignal(DeploySignal s) {
         try {
             InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
@@ -1073,10 +1072,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         } catch (Exception ex) {
             return ex;
         }
-        return null;
-    }
-
-    public Exception visitConvexHullSignal(ConvexHullSignal s) {
         return null;
     }
 

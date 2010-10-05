@@ -1,7 +1,8 @@
 package battlecode.world;
 
 import battlecode.common.Team;
-import battlecode.world.signal.Signal;
+import battlecode.engine.GenericRobot;
+import battlecode.engine.signal.Signal;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -65,6 +66,10 @@ public class BaseWorld<WorldObject extends BaseObject> {
 
 	public WorldObject getObjectByID(int id) {
 		return gameObjectsByID.get(id);
+	}
+
+	public GenericRobot getRobotByID(int id) {
+		return (GenericRobot)getObjectByID(id);
 	}
 
 	public void addSignal(Signal s) {

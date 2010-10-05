@@ -1,4 +1,4 @@
-package battlecode.engine;
+package battlecode.world;
 
 import static battlecode.common.GameConstants.BYTECODES_PER_ROUND;
 import static battlecode.common.GameConstants.NUMBER_OF_INDICATOR_STRINGS;
@@ -20,11 +20,6 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.engine.scheduler.Scheduler;
-import battlecode.world.GameWorld;
-import battlecode.world.InternalArchon;
-import battlecode.world.InternalAura;
-import battlecode.world.InternalObject;
-import battlecode.world.InternalRobot;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.DeploySignal;
 import battlecode.world.signal.EnergonTransferSignal;
@@ -35,7 +30,7 @@ import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.SetAuraSignal;
 import battlecode.world.signal.SetDirectionSignal;
-import battlecode.world.signal.Signal;
+import battlecode.engine.signal.Signal;
 import battlecode.world.signal.SpawnSignal;
 import battlecode.world.signal.StartTeleportSignal;
 import battlecode.world.signal.UndeploySignal;

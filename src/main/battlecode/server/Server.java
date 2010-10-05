@@ -10,7 +10,7 @@ import battlecode.serial.notification.*;
 import battlecode.server.controller.Controller;
 import battlecode.server.proxy.Proxy;
 
-import battlecode.world.signal.Signal;
+import battlecode.engine.signal.Signal;
 
 /**
  * Runs matches. Specifically, this class forms a pipeline connecting match and

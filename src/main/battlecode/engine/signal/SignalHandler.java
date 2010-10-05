@@ -1,4 +1,4 @@
-package battlecode.world.signal;
+package battlecode.engine.signal;
 
 public interface SignalHandler<T> {
 

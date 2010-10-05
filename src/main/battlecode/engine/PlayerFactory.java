@@ -4,6 +4,7 @@ import static battlecode.common.GameConstants.ARCHON_PRODUCTION;
 import battlecode.common.*;
 import battlecode.engine.instrumenter.*;
 import battlecode.engine.scheduler.ScheduledRunnable;
+import battlecode.server.Config;
 import battlecode.world.*;
 
 import battlecode.world.signal.SpawnSignal;
@@ -20,14 +21,11 @@ public class PlayerFactory {
 
 	private PlayerFactory() {}
 
-	public static void setProperties(boolean debugMethodsEnabled, boolean silenceA, boolean silenceB, boolean sameTeams) {
-		_debugMethodsEnabled = debugMethodsEnabled;
-		if(sameTeams && silenceA != silenceB) {
-			_silenceA = _silenceB = false;
-		} else {
-			_silenceA = silenceA;
-			_silenceB = silenceB;
-		}
+	public static void checkOptions() {
+		Config options = Config.getGlobalConfig();
+		_debugMethodsEnabled = options.getBoolean("bc.engine.debug-methods");
+		_silenceA = options.getBoolean("bc.engine.silence-a");
+		_silenceB = options.getBoolean("bc.engine.silence-b");
 	}
 
 	public static void createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {

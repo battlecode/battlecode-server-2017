@@ -370,10 +370,11 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 		//hax the e.printStackTrace() method calls
 		if (name.equals("printStackTrace") && desc.equals("()V") &&
 				(owner == null || owner.equals("java/lang/Throwable")|| isSuperClass(owner, "java/lang/Throwable"))){
-			 super.visitMethodInsn(INVOKESTATIC,
-					   "battlecode/engine/instrumenter/RobotMonitor",
-					   "printRoboStackTrace",
-					   "(Ljava/lang/Throwable;)V");
+			super.visitFieldInsn(GETSTATIC,"battlecode/engine/instrumenter/lang/System","out","Ljava/io/PrintStream;");
+			 super.visitMethodInsn(INVOKEVIRTUAL,
+					   "java/lang/Throwable",
+					   "printStackTrace",
+					   "(Ljava/io/PrintStream;)V");
 		} else
 			super.visitMethodInsn(opcode, ClassReferenceUtil.classReference(owner, teamPackageName, silenced, checkDisallowed), name, ClassReferenceUtil.methodDescReference(desc, teamPackageName, silenced, checkDisallowed));
 	}

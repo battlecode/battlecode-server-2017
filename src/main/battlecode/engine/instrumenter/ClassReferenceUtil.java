@@ -161,7 +161,7 @@ class ClassReferenceUtil {
 		else if(className.startsWith(teamPackageName+"/"))
 			return className;
 		else if(className.equals("java/lang/System"))
-			return (silenced ? "battlecode/engine/instrumenter/lang/SilencedSystem" : "battlecode/engine/instrumenter/lang/System");
+			return "battlecode/engine/instrumenter/lang/System";
 		else if(className.equals("java/util/concurrent/atomic/AtomicLong"))
 			return "battlecode/engine/instrumenter/lang/AtomicLong";
 		//else if(className.equals("java/util/Random"))

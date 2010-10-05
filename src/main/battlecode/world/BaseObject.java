@@ -1,5 +1,6 @@
 package battlecode.world;
 
+import battlecode.engine.GenericWorld;
 import battlecode.common.*;
 
 public abstract class BaseObject implements GameObject {
