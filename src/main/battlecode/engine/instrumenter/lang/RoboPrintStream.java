@@ -187,7 +187,7 @@ public class RoboPrintStream extends PrintStream {
 		if(!alreadyInLine) {
 			java.lang.System.out.print(header);
 		}
-		java.lang.System.out.print(s);
+		java.lang.System.out.println(s);
 		alreadyInLine = false;
 	}
 	
