@@ -19,6 +19,7 @@ import battlecode.common.RobotLevel;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
+import battlecode.engine.GenericController;
 import battlecode.engine.scheduler.Scheduler;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.DeploySignal;
@@ -78,7 +79,7 @@ TODO:
 - TEST responding to signals
 - TEST clock
  */
-public class RobotControllerImpl implements RobotController {
+public class RobotControllerImpl implements RobotController, GenericController {
 
     private final GameWorld myGameWorld;
     private final InternalRobot myRobot;
@@ -264,8 +265,8 @@ public class RobotControllerImpl implements RobotController {
     /**
      * {@inheritDoc}
      */
-    public Robot getRobot() {
-        return (Robot) myRobot;
+    public InternalRobot getRobot() {
+        return myRobot;
     }
 
     /**

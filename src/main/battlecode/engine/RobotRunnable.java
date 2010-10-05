@@ -19,9 +19,9 @@ TODO:
 class RobotRunnable implements Runnable {
 
     private final Class<?> myPlayerClass;
-    private final RobotController myRobotController;
+    private final GenericController myRobotController;
 
-    public RobotRunnable(Class playerClass, RobotController rc) {
+    public RobotRunnable(Class playerClass, GenericController rc) {
         myPlayerClass = playerClass;
         myRobotController = rc;
     }
@@ -75,7 +75,7 @@ class RobotRunnable implements Runnable {
 				System.out.println("[Engine] Robot " + myRobotController.getRobot() + " died because its run method returned");
 
         } finally {
-            ((InternalRobot) myRobotController.getRobot()).suicide();
+            myRobotController.getRobot().suicide();
         }
 
     }

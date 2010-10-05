@@ -1,11 +1,9 @@
 package battlecode.engine;
 
-import static battlecode.common.GameConstants.ARCHON_PRODUCTION;
 import battlecode.common.*;
 import battlecode.engine.instrumenter.*;
 import battlecode.engine.scheduler.ScheduledRunnable;
 import battlecode.server.Config;
-import battlecode.world.*;
 
 import battlecode.world.signal.SpawnSignal;
 
@@ -16,96 +14,36 @@ TODO:
 public class PlayerFactory {
 
 	private static boolean _debugMethodsEnabled = false;
-	private static boolean _silenceA = false;
-	private static boolean _silenceB = false;
 
 	private PlayerFactory() {}
 
 	public static void checkOptions() {
 		Config options = Config.getGlobalConfig();
 		_debugMethodsEnabled = options.getBoolean("bc.engine.debug-methods");
-		_silenceA = options.getBoolean("bc.engine.silence-a");
-		_silenceB = options.getBoolean("bc.engine.silence-b");
 	}
 
-	public static void createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
-		// note that the order in which all these calls are made is very important
-
-		if(type == RobotType.ARCHON) {
-			createArchonPlayer(gw, loc, t, parent, wakeDelay, ARCHON_PRODUCTION);
-		}
-		else if(type == RobotType.AURA) {
-			InternalRobot robot = new InternalAura(gw, type, loc, t, wakeDelay);
-
-			loadPlayer(gw, robot, t, parent);
-		}
-		else {
-			// first, make the robot
-			InternalRobot robot = new InternalWorker(gw, type, loc, t, wakeDelay);
-
-			loadPlayer(gw, robot, t, parent);
-		}
-	}
-
-	// defaults to wakeDelay = true
-	public static void createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent) {
-		createPlayer(gw, type, loc, t, parent, true);
-	}
-
-	public static void createArchonPlayer(GameWorld gw, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay, double production) {
-		InternalRobot robot = new InternalArchon(gw, loc, t, wakeDelay, production);
-
-		loadPlayer(gw, robot, t, parent);
-	}
-	
-	public static void createWorkerPlayer(GameWorld gw, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
-		InternalRobot robot = new InternalWorker(gw, RobotType.WOUT, loc, t, wakeDelay);
-
-		loadPlayer(gw, robot, t, parent);
-	}
-
-
-	private static void loadPlayer(GameWorld gw, InternalRobot robot, Team t, InternalRobot parent) {
-		gw.addSignal(new SpawnSignal(robot, parent));
-
-		// then, make a controller for the robot
-		RobotController rc = new RobotControllerImpl(gw, robot);
+	public static void loadPlayer(GenericController rc, String teamName) {
 
 		// now, we instantiate and instrument the player's class
 		Class playerClass;
-		String teamName = gw.getTeamName(t);
-		boolean silenced;
-		switch(t) {
-			case A:
-				silenced = _silenceA;
-				break;
-			case B:
-				silenced = _silenceB;
-				break;
-			case NEUTRAL:
-				silenced = _silenceA;
-				break;
-			default:
-				ErrorReporter.report("Error in PlayerFactory.loadPlayer: unexpected team when determining silence", true);
-				return;
-		}
 		try{
-			ClassLoader icl = new IndividualClassLoader(teamName, _debugMethodsEnabled, silenced);
+			// The classloaders ignore silenced now - RobotMonitor takes care of it
+			ClassLoader icl = new IndividualClassLoader(teamName, _debugMethodsEnabled, false);
 			playerClass = icl.loadClass(teamName + ".RobotPlayer");
 			//~ System.out.println("PF done loading");
 		} catch(InstrumentationException ie) {
 			// if we get an InstrumentationException, then the error should have been reported, so we just kill the robot
-			System.out.println("[Engine] Error during instrumentation of " + robot.toString() + ".\n[Engine] Robot will self-destruct in 3...2...1...");
-			robot.suicide();
+			System.out.println("[Engine] Error during instrumentation of " + rc.getRobot().toString() + ".\n[Engine] Robot will self-destruct in 3...2...1...");
+			rc.getRobot().suicide();
 			return;
 		} catch(Exception e) {
 			ErrorReporter.report(e);
-			robot.suicide();
+			rc.getRobot().suicide();
 			return;
 		}
 
 		// finally, create the player's thread, and let it loose
-		new ScheduledRunnable(new RobotRunnable(playerClass, rc), robot.getID());
+		new ScheduledRunnable(new RobotRunnable(playerClass, rc), rc.getRobot().getID());
 
 	}
 }

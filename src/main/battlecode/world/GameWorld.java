@@ -997,7 +997,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             RobotType type = s.getType();
 
             //note: this also adds the signal
-            PlayerFactory.createPlayer(this, type, loc, s.getTeam(), parent);
+            GameWorldFactory.createPlayer(this, type, loc, s.getTeam(), parent);
 
             if (type.isBuilding()) {
                 ScoreCalculator sc = scoreCalcs[s.getTeam().ordinal()];

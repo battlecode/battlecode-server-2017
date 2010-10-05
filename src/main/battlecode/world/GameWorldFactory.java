@@ -4,6 +4,7 @@ import static battlecode.common.GameConstants.MAP_MAX_HEIGHT;
 import static battlecode.common.GameConstants.MAP_MAX_WIDTH;
 import static battlecode.common.GameConstants.MAP_MIN_HEIGHT;
 import static battlecode.common.GameConstants.MAP_MIN_WIDTH;
+import static battlecode.common.GameConstants.ARCHON_PRODUCTION;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import battlecode.engine.ErrorReporter;
 import battlecode.engine.PlayerFactory;
 import battlecode.world.GameMap.MapProperties;
 import battlecode.world.signal.MapOriginSignal;
+import battlecode.world.signal.SpawnSignal;
 import battlecode.engine.signal.Signal;
 
 /*
@@ -65,20 +67,25 @@ public class GameWorldFactory {
             AURA,
             TELEPORTER,
             COMM;
+
+			private final RobotType myRobotType;
+
+			SymbolType() {
+				RobotType type;
+				try {
+					type = Enum.valueOf(RobotType.class, name());
+				} catch(IllegalArgumentException e) {
+					type = null;
+				}
+				myRobotType = type;
+			}
+
+			public RobotType getRobotType() {
+				return myRobotType;
+			}
+
             public boolean isRobot() {
-                switch (this) {
-                    case SOLDIER:
-                    case ARCHON:
-                    case CHAINER:
-                    case WOUT:
-                    case TURRET:
-                    case AURA:
-                    case TELEPORTER:
-                    case COMM:
-                        return true;
-                    default:
-                        return false;
-                }
+				return myRobotType!=null;
             }
         }
 
@@ -570,34 +577,7 @@ public class GameWorldFactory {
                 } else {
                     MapLocation loc = new MapLocation(origin.getX() + coordinate.x, origin.getY() + coordinate.y);
                     SymbolData data = symbolMap.get(map[coordinate.x][coordinate.y]);
-                    switch (data.type) {
-                        case SOLDIER:
-                            PlayerFactory.createPlayer(gw, RobotType.SOLDIER, loc, data.team, null, false);
-                            break;
-                        case CHAINER:
-                            PlayerFactory.createPlayer(gw, RobotType.CHAINER, loc, data.team, null, false);
-                            break;
-                        case TURRET:
-                            PlayerFactory.createPlayer(gw, RobotType.TURRET, loc, data.team, null, false);
-                            break;
-                        case ARCHON:
-                            PlayerFactory.createPlayer(gw, RobotType.ARCHON, loc, data.team, null, false);
-                            break;
-                        case WOUT:
-                            PlayerFactory.createPlayer(gw, RobotType.WOUT, loc, data.team, null, false);
-                            break;
-                        case COMM:
-                            PlayerFactory.createPlayer(gw, RobotType.COMM, loc, data.team, null, false);
-                            break;
-                        case AURA:
-                            PlayerFactory.createPlayer(gw, RobotType.AURA, loc, data.team, null, false);
-                            break;
-                        case TELEPORTER:
-                            PlayerFactory.createPlayer(gw, RobotType.TELEPORTER, loc, data.team, null, false);
-                            break;
-                        default:
-                            break;
-                    }
+					createPlayer(gw,data.type.getRobotType(),loc,data.team,null,false);
                 }
             }
             return gw;
@@ -636,5 +616,48 @@ public class GameWorldFactory {
 
         return handler.createGameWorld(teamA, teamB, archonMemory);
     }
-    
+
+	public static void createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
+		// note that the order in which all these calls are made is very important
+
+		if(type == RobotType.ARCHON) {
+			createArchonPlayer(gw, loc, t, parent, wakeDelay, ARCHON_PRODUCTION);
+		}
+		else if(type == RobotType.AURA) {
+			InternalRobot robot = new InternalAura(gw, type, loc, t, wakeDelay);
+
+			loadPlayer(gw, robot, t, parent);
+		}
+		else {
+			// first, make the robot
+			InternalRobot robot = new InternalWorker(gw, type, loc, t, wakeDelay);
+
+			loadPlayer(gw, robot, t, parent);
+		}
+	}
+
+	// defaults to wakeDelay = true
+	public static void createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent) {
+		createPlayer(gw, type, loc, t, parent, true);
+	}
+
+	public static void createArchonPlayer(GameWorld gw, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay, double production) {
+		InternalRobot robot = new InternalArchon(gw, loc, t, wakeDelay, production);
+
+		loadPlayer(gw, robot, t, parent);
+	}
+	
+	public static void createWorkerPlayer(GameWorld gw, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
+		InternalRobot robot = new InternalWorker(gw, RobotType.WOUT, loc, t, wakeDelay);
+
+		loadPlayer(gw, robot, t, parent);
+	}
+
+	private static void loadPlayer(GameWorld gw, InternalRobot robot, Team t, InternalRobot parent) {
+		gw.addSignal(new SpawnSignal(robot, parent));
+		RobotControllerImpl rc = new RobotControllerImpl(gw, robot);
+		String teamName = gw.getTeamName(t);
+		PlayerFactory.loadPlayer(rc,teamName);
+	}
+
 }
