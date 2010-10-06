@@ -597,7 +597,7 @@ class XMLMapHandler extends DefaultHandler {
 		SymbolData d, md;
 		// check that the map is symmetric
 		for(y = 0, my = mapHeight-1; y <= my; y++, my--)
-			for (x = 0, mx = mapWidth-1 ; x < mapHeight && (my<y||x<mx); x++, mx--) {
+			for (x = 0, mx = mapWidth-1 ; (y<my)?(x<mapHeight):(x<=mx); x++, mx--) {
 				d = symbolMap.get(map[x][y]);
 				md = symbolMap.get(map[mx][my]);
 				if(!d.isMirrorOf(md)) {
