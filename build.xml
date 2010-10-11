@@ -4,7 +4,7 @@
         xmlns:ivy="antlib:org.apache.ivy.ant"
         default="compile">
 
-    <property name="rootname" value="battlecode-client"/>
+    <property name="rootname" value="battlecode-server"/>
     <property name="src.dir" value="${basedir}/src/main"/>
     <property name="lib.dir" value="${basedir}/lib"/>
     <property name="build.dir" value="${basedir}/build"/>
@@ -145,9 +145,9 @@
                 author="true"
                 version="true"
                 use="true"
-                windowtitle="Battlecode Client API">
+                windowtitle="Battlecode Server API">
         <packageset dir="${src.dir}" defaultexcludes="yes"/>
-        <doctitle><![CDATA[<h1>Battlecode Client</h1>]]></doctitle>
+        <doctitle><![CDATA[<h1>Battlecode Server</h1>]]></doctitle>
         <bottom>
             <![CDATA[
             <i>Copyright &#169; 2006-2010 Battlecode. All Rights Reserved.</i>
