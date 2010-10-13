@@ -12,7 +12,7 @@ public final class MapLocation implements Serializable {
 
     private static final long serialVersionUID = -8945913587066072824L;
     /** The x- and y-coordinates of the MapLocation. */
-    private final int x, y;
+    public final int x, y;
 
     /**
      * Creates a new MapLocation representing the location
@@ -32,7 +32,10 @@ public final class MapLocation implements Serializable {
      * Returns the x-coordinate of the location.
      *
      * @return the x-coordinate of the location
+	 *
+	 * @deprecated Replaced by {@link x}
      */
+	@Deprecated
     public final int getX() {
         return this.x;
     }
@@ -41,7 +44,10 @@ public final class MapLocation implements Serializable {
      * Returns the y-coordinate of the location.
      *
      * @return the y-coordinate of the location
+	 *
+	 * @deprecated Replaced by {@link y}
      */
+	@Deprecated
     public final int getY() {
         return this.y;
     }

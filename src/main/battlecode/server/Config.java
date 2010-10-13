@@ -70,7 +70,8 @@ public class Config {
         options.addOption("s", "server", false, "server mode");
         options.addOption("n", "no-dialog", false, "skip the match dialog");
     }
-    private static Config globalConfig = null;
+
+    private static Config globalConfig = new Config(new String [0]);
 
     public static void setGlobalConfig(Config config) {
         globalConfig = config;
@@ -131,8 +132,24 @@ public class Config {
         }
 
         // Use the specified configuration file, if any.
-        if (cmd.hasOption("c"))
-            addFile(cmd.getOptionValue("c"));
+        if (cmd.hasOption("c")) {
+			String filename = cmd.getOptionValue("c");
+			// The default configuration file is bc.conf, but it is
+			// possible to start Battlecode with no configuration file
+			// using "-c -".
+			if(!"-".equals(filename)) {
+				try {
+            		addFile(cmd.getOptionValue("c"));
+				} catch(IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		else {
+			try {
+				addFile("bc.conf");
+			} catch(IOException e) {}
+		}
 
         if (cmd.hasOption("h"))
             properties.setProperty("bc.server.mode", "headless");
@@ -148,14 +165,10 @@ public class Config {
      * Adds the configuration file with given filename to this set of
      * configuration options.
      */
-    public void addFile(String filename) {
-        try {
-            FileInputStream f = new FileInputStream(filename);
-            properties.load(f);
-            f.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void addFile(String filename) throws IOException {
+        FileInputStream f = new FileInputStream(filename);
+        properties.load(f);
+        f.close();
     }
 
     /**

@@ -32,14 +32,12 @@ public class RobotMonitor {
 	// the RobotData for the currently running robot
 	public volatile static RobotData currentRobotData;
 	
-	// the instance for this singleton
-	private static final RobotMonitor theInstance = new RobotMonitor();
-		
+	private static boolean [] silenced = new boolean [2];
+	
 	private static int currDebugLevel = 0;
 	
 	private static GenericWorld myGameWorld = null;
 
-	private static boolean [] silenced = new boolean [2];
 
 	/** A "struct" that holds data about a robot's execution, e.g., bytecodes, stack size, etc. */
 	public static class RobotData {
