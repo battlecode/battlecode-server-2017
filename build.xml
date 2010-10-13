@@ -4,7 +4,7 @@
         xmlns:ivy="antlib:org.apache.ivy.ant"
         default="compile">
 
-    <property name="rootname" value="battlecode-client"/>
+    <property name="rootname" value="battlecode-server"/>
     <property name="src.dir" value="${basedir}/src/main"/>
     <property name="lib.dir" value="${basedir}/lib"/>
     <property name="build.dir" value="${basedir}/build"/>
@@ -135,7 +135,6 @@
                 excludes="easymock-*, *-javadoc.jar, *-sources.jar, hadoop-*, ant-*, cobertura-*"/>
         </jar>
     </target>
-
 
     <!-- ========== TESTING ========= -->
 

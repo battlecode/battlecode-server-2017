@@ -13,7 +13,7 @@ public interface GameWorldViewer {
 
 	public int getMapSeed();
 
-	public Serializable getGameMap();
+	public GenericGameMap getGameMap();
 
 	public String getTeamName(Team t);
 

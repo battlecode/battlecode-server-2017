@@ -6,11 +6,13 @@ import java.util.*;
 
 import battlecode.common.*;
 
+import battlecode.serial.GenericGameMap;
+
 /**
  * The class represents the map in the game world on which
  * objects interact.
  */
-public class GameMap implements Serializable {
+public class GameMap implements GenericGameMap {
 	
 	private static final long serialVersionUID = -2068896916199851260L;
 
