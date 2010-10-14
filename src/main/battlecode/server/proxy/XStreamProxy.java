@@ -53,7 +53,9 @@ public class XStreamProxy extends Proxy {
 		}
 
 		public Object fromString(String name) {
-			String [] strings = name.split(",");
+			// java.lang.String.split doesn't do what we want when
+			// the string is empty
+			String [] strings = StringUtils.split(name,",");
 			int [] obj = new int [ strings.length ];
 			int i;
 			try {
@@ -77,7 +79,7 @@ public class XStreamProxy extends Proxy {
 		}
 
 		public Object fromString(String name) {
-			String [] strings = name.split(",");
+			String [] strings = StringUtils.split(name,",");
 			long [] obj = new long [ strings.length ];
 			int i;
 			try {
@@ -102,7 +104,7 @@ public class XStreamProxy extends Proxy {
 		}
 
 		public Object fromString(String name) {
-			String [] strings = name.split(",");
+			String [] strings = StringUtils.split(name,",");
 			double [] obj = new double [ strings.length ];
 			int i;
 			try {
@@ -127,7 +129,7 @@ public class XStreamProxy extends Proxy {
 		}
 
 		public Object fromString(String name) {
-			String [] coords = name.split(",");
+			String [] coords = StringUtils.split(name,",");
 			if(coords.length!=2)
 				throw new ConversionException("Invalid MapLocation");
 			try {
@@ -270,11 +272,11 @@ public class XStreamProxy extends Proxy {
 					}
 					switch(terrain[i].charAt(j)) {
 						case '#':
-							t = TerrainTile.TerrainType.LAND;
+							t = TerrainTile.TerrainType.VOID;
 							break;
 						case '.':
 						case ' ':
-							t = TerrainTile.TerrainType.VOID;
+							t = TerrainTile.TerrainType.LAND;
 							break;
 						default:
 							throw new ConversionException("Illegal value in terrain map");

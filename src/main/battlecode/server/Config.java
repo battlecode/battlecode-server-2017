@@ -31,7 +31,7 @@ public class Config {
         defaults.setProperty("bc.server.debug", "false");
         defaults.setProperty("bc.server.throttle", "yield");
         defaults.setProperty("bc.server.throttle-count", "15");
-		defaults.setProperty("bc.server.output-xml", "false");
+		defaults.setProperty("bc.server.output-xml", "true");
 
         defaults.setProperty("bc.engine.debug-methods", "true");
         defaults.setProperty("bc.engine.silence-a", "false");
