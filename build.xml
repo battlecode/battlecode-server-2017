@@ -65,19 +65,14 @@
         <pathelement location="${instr.build.dir}"/>
     </path>
 
-    <target name="disable-remotes"
-            description="Disable remote fetches (useful if you are offline or aren't on VPN)">
-        <property name="disable.remotes" value="true"/>
-    </target>
-
-    <target name="download-ivy" unless="ivy.exists">
+    <target name="download-ivy">
         <mkdir dir="${ivy.jar.dir}"/>
         <get dest="${ivy.jar.file}"
                 usetimestamp="true"
                 src="${ivy.remote.jar}"/>
     </target>
 
-    <target name="init-ivy" depends="download-ivy" unless="disable.remotes">
+    <target name="init-ivy">
         <!-- try to load ivy here from ivy home, in case the user has not
         already dropped it into ant's lib dir (note that the latter copy will
         always take precedence).  We will not fail as long as local lib dir
@@ -91,26 +86,24 @@
                 classpathref="ivy.lib.path"/>
     </target>
 
-    <target name="init" depends="init-ivy" unless="disable.remotes">
+	<target name="retrieve" depends="init,init-ivy">
+        <ivy:settings file="ivyconf.xml"/>
+        <ivy:retrieve/>
+	</target>
+
+    <target name="init">
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${pkg.build.dir}"/>
         <mkdir dir="${test.build.dir}"/>
-        <ivy:settings file="ivyconf.xml"/>
-        <ivy:retrieve/>
     </target>
 
     <target name="clean"
-            description="Clean up build directory and Ivy libraries.">
+            description="Clean up build directory.">
         <delete dir="${build.dir}"/>
         <delete dir="${javadoc.destdir}"/>
         <delete file="${build.jar}"/>
         <delete file="${test.build.jar}"/>
         <delete file="${test.report.file}.xml"/>
-        <delete>
-            <fileset dir="${lib.dir}">
-                <include name="**/*.jar"/>
-            </fileset>
-        </delete>
     </target>
 
     <target name="compile"
