@@ -54,9 +54,8 @@ public class RobotMonitor {
 	
 	// private constructor enforces the singleton pattern
 	private RobotMonitor() {
-		init();
 	}
-	
+
 	private static void init() {
 		bytecodeCtr = 0;
 		robotsToKill.clear();
@@ -97,9 +96,6 @@ public class RobotMonitor {
 			throw new RobotDeathException();
 		}
 		
-		if(currentRobotData == null) {
-			currentRobotData = new battlecode.engine.instrumenter.RobotMonitor.RobotData(-1);
-		}
 		currDebugLevel = currentRobotData.debugLevel;
 		currentBytecodeLimit = currentRobotData.currentBytecodeLimit;
 		if(currDebugLevel > 0)
@@ -107,13 +103,16 @@ public class RobotMonitor {
 		else
 			bytecodeCtr = 0;
 
-		GenericRobot robot = myGameWorld.getRobotByID(newData.ID);
-		if(silenced[robot.getTeam().ordinal()])
-			battlecode.engine.instrumenter.lang.System.out = SilencedPrintStream.theInstance();
-		else {
-			RoboPrintStream stream = RoboPrintStream.theInstance();
-			stream.changeRobot();
-			battlecode.engine.instrumenter.lang.System.out = stream;
+		if(newData.ID>=0) {
+			GenericRobot robot = myGameWorld.getRobotByID(newData.ID);
+			if(silenced[robot.getTeam().ordinal()]) {
+				battlecode.engine.instrumenter.lang.System.out = SilencedPrintStream.theInstance();
+			}
+			else {
+				RoboPrintStream stream = RoboPrintStream.theInstance();
+				stream.changeRobot();
+				battlecode.engine.instrumenter.lang.System.out = stream;
+			}
 		}
 		myGameWorld.beginningOfExecution(newData.ID);
 	}		

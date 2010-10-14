@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="Battlecode"
+<project name="Battlecode Server"
         xmlns:ivy="antlib:org.apache.ivy.ant"
         default="compile">
 
@@ -169,11 +169,7 @@
     <target name="jar"
             description="Build the jar (with dependencies included)."
             depends="compile">
-        <jar jarfile="${pkg.build.jar}" basedir="${pkg.build.dir}">
-            <zipgroupfileset
-                dir="${lib.dir}"
-                includes="*.jar"/>
-        </jar>
+        <jar jarfile="${pkg.build.jar}" basedir="${pkg.build.dir}"/>
     </target>
 
     <!-- ========== TESTING ========= -->
