@@ -22,6 +22,7 @@
     <property name="javac.args.warnings" value="-Xlint:unchecked"/>
 
     <property name="javadoc.destdir" value="docs/api"/>
+	<property name="commondoc.destdir" value="docs/common"/>
 
     <!-- Unit tests -->
     <property name="test.src.dir" value="${basedir}/src/test"/>
@@ -101,6 +102,7 @@
             description="Clean up build directory.">
         <delete dir="${build.dir}"/>
         <delete dir="${javadoc.destdir}"/>
+		<delete dir="${commondoc.destdir}"/>
         <delete file="${build.jar}"/>
         <delete file="${test.build.jar}"/>
         <delete file="${test.report.file}.xml"/>
@@ -162,11 +164,21 @@
     <target name="jar"
             description="Build the jar (with dependencies included)."
             depends="compile">
-        <jar jarfile="${pkg.build.jar}" basedir="${pkg.build.dir}"/>
+        <jar jarfile="${pkg.build.jar}" basedir="${pkg.build.dir}">
+			<zipgroupfileset dir="${lib.dir}" excludes="battlecode-*, junit-*"/>
+		</jar>
     </target>
 
     <!-- ========== TESTING ========= -->
 
+	<target name="common-doc">
+		<javadoc
+			sourcepath="${src.dir}"
+			packagenames="battlecode.common.*"
+			destdir="${commondoc.destdir}"
+			windowtitle="Battlecode ${year}"
+			link="http://download.oracle.com/javase/6/docs/api/"/>
+	</target>
 
     <target name="doc">
         <javadoc destdir="${javadoc.destdir}"

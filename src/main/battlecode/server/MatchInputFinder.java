@@ -2,8 +2,14 @@ package battlecode.server;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 // TODO: read default map paths from config file
 // TODO: remove the dependency on Server
@@ -21,7 +27,7 @@ import java.util.List;
 public class MatchInputFinder {
 	
 	/** The filters used to find teams and maps. */
-	private final FileFilter teamFilter, mapFilter;
+	private final Filter teamFilter, mapFilter;
 	
 	/** The paths for finding teams and maps. */
 	private final String[] classPaths, mapPaths;
@@ -30,11 +36,19 @@ public class MatchInputFinder {
 	 * A file filter that passes directories (to propagate a directory search)
 	 * and class files that seem to be BattleCode players.
 	 */
-	private static class TeamFileFilter implements FileFilter {
+	private static interface Filter extends FileFilter {
+		public boolean accept(ZipEntry pathname); 
+	}
+	
+	private static class TeamFileFilter implements Filter {
 		public boolean accept(File pathname) {
 			if (pathname.isDirectory() || "RobotPlayer.class".equals(pathname.getName()))
 				return true;
 			return false;
+		}
+
+		public boolean accept(ZipEntry pathname) {
+			return pathname.getName().endsWith("/RobotPlayer.class");
 		}
 	}
 	
@@ -42,12 +56,16 @@ public class MatchInputFinder {
 	 * A file filter that passes directories (to propagate a directory search)
 	 * and XML files that seem to be BattleCode map files.
 	 */
-	private static class MapFileFilter implements FileFilter {
+	private static class MapFileFilter implements Filter {
 		public boolean accept(File pathname) {
 			if (pathname.isDirectory() ||
 					("maps".equals(pathname.getParentFile().getName()) &&
 					pathname.getName().endsWith(".xml")))
 				return true;
+			return false;
+		}
+
+		public boolean accept(ZipEntry pathname) {
 			return false;
 		}
 	}
@@ -104,7 +122,7 @@ public class MatchInputFinder {
 	 * searching
 	 * @return a String array containing the matched file's names
 	 */
-	private String[] findResourcesLocally(String[] paths, FileFilter filter, boolean parent) {
+	private String[] findResourcesLocally(String[] paths, Filter filter, boolean parent) {
 		
 		List<String> foundList = new LinkedList<String>();
 		
@@ -112,6 +130,8 @@ public class MatchInputFinder {
 			File f = new File(path);
 			if (f.isDirectory())
 				searchPath(f, foundList, filter, parent);
+			else if(f.getName().endsWith(".jar"))
+				searchJar(f, foundList, filter);
 		}
 		
 		// Convert to an array and return.
@@ -144,5 +164,21 @@ public class MatchInputFinder {
 				found.add(f.getName());
 		}
 	}
-	
+
+	private void searchJar(File j, List<String> found, Filter filter) {
+		try {
+			JarFile jar = new JarFile(j);
+			Enumeration<JarEntry> en = jar.entries();
+			while(en.hasMoreElements()) {
+				ZipEntry e = en.nextElement();
+				if(filter.accept(e)) {
+					String name = e.getName();
+					int end = name.lastIndexOf('/');
+					int start = name.lastIndexOf('/',end-1)+1;
+					found.add(name.substring(start,end-start));
+				}
+			}
+		} catch(IOException e) {}
+	}
+
 }

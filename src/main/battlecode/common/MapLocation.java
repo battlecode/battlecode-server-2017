@@ -11,8 +11,11 @@ import static java.lang.Math.pow;
 public final class MapLocation implements Serializable {
 
     private static final long serialVersionUID = -8945913587066072824L;
-    /** The x- and y-coordinates of the MapLocation. */
-    public final int x, y;
+    /** The x-coordinate. */
+    public final int x;
+
+	/** The y-coordinate. */
+	public final int y;
 
     /**
      * Creates a new MapLocation representing the location
@@ -33,7 +36,7 @@ public final class MapLocation implements Serializable {
      *
      * @return the x-coordinate of the location
 	 *
-	 * @deprecated Replaced by {@link x}
+	 * @deprecated Replaced by {@link #x}
      */
 	@Deprecated
     public final int getX() {
@@ -45,7 +48,7 @@ public final class MapLocation implements Serializable {
      *
      * @return the y-coordinate of the location
 	 *
-	 * @deprecated Replaced by {@link y}
+	 * @deprecated Replaced by {@link #y}
      */
 	@Deprecated
     public final int getY() {
@@ -167,6 +170,29 @@ public final class MapLocation implements Serializable {
 
         return new MapLocation(x + direction.dx, y + direction.dy);
     }
+
+ 	/**
+     * Returns a new MapLocation object representing a location
+     * {@code multiple} squares from this one in the given direction.
+     *
+     * @param direction the direction to add to this location
+	 * @param multiple the number of squares to add
+     * @return a MapLocation for the location one square in the given
+     * direction, or this location if the direction is NONE or OMNI
+     */
+	public final MapLocation add(Direction direction, int multiple) {
+		return new MapLocation(x + multiple * direction.dx, y + multiple * direction.dy);
+	}
+
+	/**
+	 * Returns a new MapLocation object translated from this location
+	 * by a fixed amount
+	 * @param dx the amount to translate in the x direction
+	 * @param dy the amount to translate in the y direction
+	 */
+	public final MapLocation add(int dx, int dy) {
+		return new MapLocation(x+dx,y+dy);
+	}
 
     /** 
      * Returns a new MapLocation object representing a location
