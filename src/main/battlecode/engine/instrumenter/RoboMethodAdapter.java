@@ -103,8 +103,6 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
     }
     
 	public void visitCode() {
-		// insert stack size monitoring
-		super.visitMethodInsn(INVOKESTATIC,"battlecode/engine/instrumenter/RobotMonitor","monitorStackSize","()V");
 		// if we're in a debug method, create a start label
 		if(methodName.startsWith("debug_") && methodDesc.endsWith("V")) {
 			debugStartLabel = new Label();
@@ -449,7 +447,8 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 
 		LabelPair p = new LabelPair(start,end);
 		if(!tryCatchEncountered.contains(p)) {
-			super.visitTryCatchBlock(start,end,robotDeathLabel,"battlecode/engine/instrumenter/RobotDeathException");
+			// don't let player recover from robot death / out of memory / stack overflow 
+			super.visitTryCatchBlock(start,end,robotDeathLabel,"java/lang/VirtualMachineError");
 			tryCatchEncountered.add(p);
 		}
 	

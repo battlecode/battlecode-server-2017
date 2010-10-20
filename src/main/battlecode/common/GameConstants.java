@@ -34,8 +34,6 @@ public final class GameConstants {
     public static final int NUMBER_OF_INDICATOR_STRINGS = 3;
     /** The number of bytecodes a robot can execute each round */
     public static final int BYTECODES_PER_ROUND = 6000;
-    /** The maximum stack size a robot can use without incurring penalties */
-    public static final int STACK_SIZE_LIMIT = 64;
     /** The amount of energon a robot can receive per round from transfers */
     public static final double ENERGON_TRANSFER_RATE = 1.0;
     /** The amount of energon a robot can hold in reserve */

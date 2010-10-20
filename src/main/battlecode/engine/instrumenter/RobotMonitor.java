@@ -1,7 +1,6 @@
 package battlecode.engine.instrumenter;
 
 import static battlecode.common.GameConstants.BYTECODES_PER_ROUND;
-import static battlecode.common.GameConstants.STACK_SIZE_LIMIT;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -155,21 +154,6 @@ public class RobotMonitor {
 		while(bytecodeCtr >= currentBytecodeLimit) {
 			myGameWorld.endOfExecution(currentRobotData.ID);
 			Scheduler.passToNextThread();
-		}
-	}
-	
-	/**
-	 * Monitors the stack size of the currently active robot.  If the robot is exceeding the stack size limit, it dies.  Should
-	 * be called at the beginning of every method.
-	 */
-	public static void monitorStackSize() {
-		if(++currentRobotData.stackCheckCtr == 50) {
-			currentRobotData.stackCheckCtr = 0;
-			if(Thread.currentThread().getStackTrace().length > STACK_SIZE_LIMIT) {
-				ErrorReporter.report("[Engine] Robot " + Scheduler.getCurrentThreadID() + " exceeding stack size limit.  See stack trace below.", false);
-				Thread.currentThread().dumpStack();
-				throw new RobotDeathException();
-			}
 		}
 	}
 			

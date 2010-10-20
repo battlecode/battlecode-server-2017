@@ -24,6 +24,9 @@
     <property name="javadoc.destdir" value="docs/api"/>
 	<property name="commondoc.destdir" value="docs/common"/>
 
+	<property name="bc.working-directory" location="."/>
+	<property name="args.extra" value=""/>
+
     <!-- Unit tests -->
     <property name="test.src.dir" value="${basedir}/src/test"/>
     <property name="test.timeout" value="900000"/>
@@ -32,7 +35,6 @@
     <property name="test.report.file" value="TEST-AllTestSuite"/>
     <property name="instr.build.dir" value="${build.dir}/instrumented-classes"/>
     <property name="instr.datafile" value="${build.dir}/cobertura.ser"/>
-	<property name="bc.working-directory" location="."/>
 
     <!-- IVY configuration items -->
     <property name="ivy.install.version" value="2.1.0"/>
@@ -148,6 +150,7 @@
 			<jvmarg value="-Dbc.game.maps=${bc.game.maps}"/>
 			<jvmarg value="-Dbc.game.team-a=${bc.game.team-a}"/>
 			<jvmarg value="-Dbc.game.team-b=${bc.game.team-b}"/>
+			<jvmarg line="${args.extra}"/>
 		</java>
 	</target>
 	

@@ -7,7 +7,7 @@ package battlecode.engine.instrumenter;
  *
  * @author adamd
  */
-public class RobotDeathException extends Error {
+public class RobotDeathException extends VirtualMachineError {
 
     static final long serialVersionUID = -7919557494710405575L;
 	

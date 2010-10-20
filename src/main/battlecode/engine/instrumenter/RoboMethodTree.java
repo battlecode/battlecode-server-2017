@@ -143,7 +143,6 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 		if(anyTryCatch) {
 			addRobotDeathHandler();
 		}
-		instructions.insert(new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/RobotMonitor","monitorStackSize","()V"));
 		for(Object o : localVariables) {
 			visitLocalVariableNode((LocalVariableNode)o);
 		}
@@ -164,7 +163,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 	@SuppressWarnings("unchecked")
 	private void addRobotDeathHandler() {
 		LabelNode robotDeathLabel = new LabelNode(new Label());
-		tryCatchBlocks.add(0,new TryCatchBlockNode(startLabel,robotDeathLabel,robotDeathLabel,"battlecode/engine/instrumenter/RobotDeathException"));
+		tryCatchBlocks.add(0,new TryCatchBlockNode(startLabel,robotDeathLabel,robotDeathLabel,"java/lang/VirtualMachineError"));
 		instructions.add(robotDeathLabel);
 		instructions.add(new InsnNode(ATHROW));
 	}
