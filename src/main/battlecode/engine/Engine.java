@@ -24,6 +24,8 @@ public class Engine {
 		
 	private static Engine theInstance = null;
 
+	private Runnable ioCallback;
+
 	public Engine(String teamA, String teamB, String mapName, String mapPath, long[][] archonMemory) {
 		theInstance = this;
 		Config options = Config.getGlobalConfig();
@@ -71,7 +73,9 @@ public class Engine {
 			gameWorld.processBeginningOfRound();
 			if (getRoundNum() % 500 == 0)
 			    System.out.println("Round: " + getRoundNum());
-			Scheduler.passToNextThread();
+			Scheduler.startNextThread();
+			ioCallback.run();
+			Scheduler.endTurn();
 			gameWorld.processEndOfRound();
 			if(!gameWorld.isRunning()) {
 				// Let all of the threads return so we don't leak
@@ -110,6 +114,10 @@ public class Engine {
 	
 	public long[][] getArchonMemory() {
 		return gameWorld.getArchonMemory();
+	}
+
+	public void setIOCallback(Runnable callback) {
+		ioCallback = callback;
 	}
 		
 }

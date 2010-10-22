@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 
 import battlecode.common.Team;
+import battlecode.engine.ErrorReporter;
 import battlecode.engine.GameState;
 import battlecode.serial.*;
 import battlecode.serial.notification.*;
@@ -270,6 +271,26 @@ public class Server implements Observer, Runnable {
 		}
 	}
 
+	private class IOCallback implements Runnable {
+		public RoundDelta round;
+		public RoundStats stats;
+
+		public void run() {
+			if(round!=null) {
+				try {
+					for (Proxy p : proxies) {
+						p.writeRound(round);
+						p.writeStats(stats);
+					}
+				} catch(IOException e) {
+					ErrorReporter.report(e,false); 
+				}
+				round = null;
+				stats = null;
+			}
+		}
+	}
+
 	/**
 	 * Runs a match; configures the controller and list of proxies, and starts
 	 * running the game in a separate thread.
@@ -303,6 +324,9 @@ public class Server implements Observer, Runnable {
 			p.writeHeader(header);
             p.writeObject(exHeader);
         }
+		
+		IOCallback callback = new IOCallback();
+		match.setIOCallback(callback);
 
 		this.state = State.RUNNING;
 
@@ -328,8 +352,8 @@ public class Server implements Observer, Runnable {
 					break;
 				}
 
-				RoundDelta round = match.getRound();
-				if (round == null)
+				callback.round = match.getRound();
+				if (callback.round == null)
 					break;
 
 				if (count++ == throttleCount) {
@@ -341,13 +365,7 @@ public class Server implements Observer, Runnable {
 				}
 
 				// Compute stats bytes.
-				RoundStats stats = match.getStats();
-
-				// For every listener...
-				for (Proxy p : proxies) {
-					p.writeRound(round);
-					p.writeStats(stats);
-				}
+				callback.stats = match.getStats();
 
 				break;
 
@@ -356,6 +374,9 @@ public class Server implements Observer, Runnable {
 				break;
 			}
 		}
+
+		// we need to write the last round ourselves
+		callback.run();
 
 		// Compute footer data.
 		GameStats gameStats = match.getGameStats();

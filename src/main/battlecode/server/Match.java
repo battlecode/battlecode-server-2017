@@ -310,4 +310,8 @@ public class Match extends Observable {
 
         return sb.toString();
     }
+
+	// Match file IO is pretty performance intensive so we want to do it while robots are
+	// running if possible.
+	public void setIOCallback(Runnable callback) { engine.setIOCallback(callback); }
 }

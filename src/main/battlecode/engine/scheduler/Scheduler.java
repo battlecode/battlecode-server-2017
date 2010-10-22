@@ -95,11 +95,19 @@ public class Scheduler {
 	 */
 	public static void passToNextThread() {
 		//enterTime = System.nanoTime();
-		ScheduledThread old = current;
-		current = old.next;
-		wakeupNext();
+		startNextThread();
 		endTurn();
 		//timeInScheduler+=System.nanoTime()-enterTime;
+	}
+
+	/**
+	 * Starts the next thread without parking this one.  Used
+	 * by the engine so it can write the match to disk while
+	 * robots are running.
+	 */
+	public static void startNextThread() {
+		current = current.next;
+		wakeupNext();
 	}
 
 }
