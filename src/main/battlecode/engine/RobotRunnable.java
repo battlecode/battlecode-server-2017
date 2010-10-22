@@ -29,6 +29,7 @@ class RobotRunnable implements Runnable {
         Constructor ctor;
         Object o;
         Runnable r;
+		
         try {
             try {
                 ctor = myPlayerClass.getConstructor(Class.forName("battlecode.common.RobotController"));

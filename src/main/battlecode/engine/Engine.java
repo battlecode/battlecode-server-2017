@@ -79,6 +79,7 @@ public class Engine {
 				// to kill all the robots;
 				//System.out.println("Trying to clean up robots");
 				Scheduler.passToNextThread();
+				//System.out.println("Time spent in scheduler: "+(Scheduler.timeInScheduler*1.E-9));
 			}
 		} catch(Exception e) {
 			ErrorReporter.report(e);

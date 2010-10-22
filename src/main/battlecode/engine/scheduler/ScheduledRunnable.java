@@ -24,7 +24,7 @@ public class ScheduledRunnable implements Runnable {
 		myRunnable = r;
 		Thread t = new Thread(this, "robot " + ID);
 		t.setDaemon(true);
-		Scheduler.notifyAddingNewThread();
+		Scheduler.add(t,ID);
 		t.start();
 	}
 	
@@ -32,8 +32,7 @@ public class ScheduledRunnable implements Runnable {
 	 * This method is automatically called by the ScheduledRunnable constructor, and should NOT be called by the client.
 	 */
 	public void run() {
-		// lock this thread into the Scheduler's schedule
-		Scheduler.addCurrentThread(myID);
+		Scheduler.endTurn();
 		
 		try{
 			
@@ -42,7 +41,7 @@ public class ScheduledRunnable implements Runnable {
 		} catch(Exception e) {
 			ErrorReporter.report("Unexpected exception in ScheduledRunnable: " + e.getMessage());
 		} finally {
-			Scheduler.removeCurrentThread();
+			Scheduler.die();
 		}
 	}
 }

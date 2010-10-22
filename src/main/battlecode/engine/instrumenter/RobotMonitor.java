@@ -148,7 +148,7 @@ public class RobotMonitor {
 	 *
 	 * @param numBytecodes the number of bytecodes the robot just executed
 	 */
-	public static final void incrementBytecodes(int numBytecodes) {
+	public static void incrementBytecodes(int numBytecodes) {
 		bytecodeCtr += numBytecodes;
 
 		while(bytecodeCtr >= currentBytecodeLimit) {
@@ -156,7 +156,7 @@ public class RobotMonitor {
 			Scheduler.passToNextThread();
 		}
 	}
-			
+
 	/**
 	 * Kills the robot thread of the robot with the given ID.  More specifically, the next time the thread is activated,
 	 * it will throw a RobotDeathException.
@@ -191,20 +191,4 @@ public class RobotMonitor {
 		if(currentRobotData.thrownRobotDeathException)
 			throw new RobotDeathException();
 	}
-	
-	public static void roboFinallyClause() {
-		if (currentRobotData.thrownRobotDeathException) {
-			// if (Clock.getRoundNum() != 1616)
-			//	System.out.println("Detected a thrownRobotDeathException state in a finally clause, throwing a new one");
-			//if (Clock.getRoundNum() == 1616)
-			//	Thread.dumpStack(); 
-		    //    System.out.println("hitting roboFinallyClause with RDE thrown");
-			//System.exit(-1);
-			Scheduler.removeCurrentThreadWithHack();
-			Scheduler.passToNextThread();
-			// RobotMonitor.switchRunner(Scheduler.getCurrent().data);
-			// throw new RobotDeathException();
-		}
-	}
-	
 }
