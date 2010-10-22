@@ -1,7 +1,5 @@
 package battlecode.engine.instrumenter;
 
-import static battlecode.common.GameConstants.BYTECODES_PER_ROUND;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,6 +9,7 @@ import battlecode.engine.GenericRobot;
 import battlecode.engine.GenericWorld;
 import battlecode.engine.instrumenter.lang.RoboPrintStream;
 import battlecode.engine.instrumenter.lang.SilencedPrintStream;
+import battlecode.engine.scheduler.Scheduler;
 import battlecode.server.Config;
 
 /**
@@ -20,11 +19,8 @@ import battlecode.server.Config;
  * @author adamd
  */
 public class RobotMonitor {
-	public static int bytecodeCtr = 0;
-	
-	public static int currentBytecodeLimit = 0;
-	
-	private static final int LARGE_NEG_NUMBER = -100000;
+
+	private static final int DEBUG_BYTECODES = 0x8000;
 		
 	private static final Set<Integer> robotsToKill = new HashSet<Integer>();
 		
@@ -33,15 +29,16 @@ public class RobotMonitor {
 	
 	private static boolean [] silenced = new boolean [2];
 	
-	private static int currDebugLevel = 0;
-	
+	private static int debugLevel;
+	private static int bytecodeLimit;
+	private static int bytecodesLeft;
+
 	private static GenericWorld myGameWorld = null;
 
 
 	/** A "struct" that holds data about a robot's execution, e.g., bytecodes, stack size, etc. */
 	public static class RobotData {
-		public int currentBytecodeLimit = BYTECODES_PER_ROUND;
-		public int stackCheckCtr = 0;
+		public int bytecodesLeft;
 		public int debugLevel = 0;
 		public final int ID;
 		public boolean thrownRobotDeathException = false;
@@ -56,7 +53,6 @@ public class RobotMonitor {
 	}
 
 	private static void init() {
-		bytecodeCtr = 0;
 		robotsToKill.clear();
 		Config options = Config.getGlobalConfig();
 		silenced[0] = options.getBoolean("bc.engine.silence-a");
@@ -69,20 +65,6 @@ public class RobotMonitor {
 	}
 	
 	/**
-	 * Ends the run of the currently active robot.
-	 */
-	public static void endRunner() {
-		// first, update the bytecode limit for the current robot's next round
-		if(currentRobotData != null) {
-			currentRobotData.debugLevel = currDebugLevel;
-			if(bytecodeCtr <= currentRobotData.currentBytecodeLimit)
-				currentRobotData.currentBytecodeLimit = BYTECODES_PER_ROUND;
-			else
-				currentRobotData.currentBytecodeLimit += BYTECODES_PER_ROUND - bytecodeCtr;
-		}
-	}		
-			
-	/**
 	 * Switches the currently active robot to the one referred to by the given RobotData.
 	 */
 	public static void switchRunner(RobotData newData) {
@@ -94,16 +76,17 @@ public class RobotMonitor {
 			//System.out.println("Killing "+newData.ID);
 			throw new RobotDeathException();
 		}
-		
-		currDebugLevel = currentRobotData.debugLevel;
-		currentBytecodeLimit = currentRobotData.currentBytecodeLimit;
-		if(currDebugLevel > 0)
-			bytecodeCtr = LARGE_NEG_NUMBER;
-		else
-			bytecodeCtr = 0;
 
 		if(newData.ID>=0) {
 			GenericRobot robot = myGameWorld.getRobotByID(newData.ID);
+			bytecodeLimit = robot.getBytecodeLimit();
+			debugLevel = currentRobotData.debugLevel;
+			currentRobotData.bytecodesLeft += bytecodeLimit;
+			if(debugLevel == 0)
+				bytecodesLeft = currentRobotData.bytecodesLeft;
+			else
+				bytecodesLeft = DEBUG_BYTECODES;
+			
 			if(silenced[robot.getTeam().ordinal()]) {
 				battlecode.engine.instrumenter.lang.System.out = SilencedPrintStream.theInstance();
 			}
@@ -112,8 +95,8 @@ public class RobotMonitor {
 				stream.changeRobot();
 				battlecode.engine.instrumenter.lang.System.out = stream;
 			}
+			myGameWorld.beginningOfExecution(newData.ID);
 		}
-		myGameWorld.beginningOfExecution(newData.ID);
 	}		
 	
 	public static GenericRobot getCurrentRobot() {
@@ -124,21 +107,20 @@ public class RobotMonitor {
 	 * Increments the active robot's debug level.  Should be called at the beginning of any debug method.
 	 */
 	public static void incrementDebugLevel() {
-		if(currDebugLevel == 0) {
-			currentRobotData.currentBytecodeLimit -= bytecodeCtr;
-			currentBytecodeLimit = currentRobotData.currentBytecodeLimit;
-			bytecodeCtr = LARGE_NEG_NUMBER;
+		if(debugLevel == 0) {
+			currentRobotData.bytecodesLeft = bytecodesLeft;
+			bytecodesLeft = DEBUG_BYTECODES;
 		}
-		currDebugLevel++;
+		debugLevel++;
 	}
 	
 	/**
 	 * Decrements the active robot's debug level.  Should be called at the end of any debug method.
 	 */
 	public static void decrementDebugLevel() {
-		currDebugLevel--;
-		if(currDebugLevel == 0) {
-			bytecodeCtr = 0;
+		debugLevel--;
+		if(debugLevel == 0) {
+			bytecodesLeft = currentRobotData.bytecodesLeft;
 		}
 	}
 	
@@ -149,12 +131,24 @@ public class RobotMonitor {
 	 * @param numBytecodes the number of bytecodes the robot just executed
 	 */
 	public static void incrementBytecodes(int numBytecodes) {
-		bytecodeCtr += numBytecodes;
+		bytecodesLeft -= numBytecodes;
 
-		while(bytecodeCtr >= currentBytecodeLimit) {
-			myGameWorld.endOfExecution(currentRobotData.ID);
-			Scheduler.passToNextThread();
+		while(bytecodesLeft <= 0) {
+			endRunner();
 		}
+	}
+
+	/**
+	 * Ends the run of the currently active robot.
+	 */
+	public static void endRunner() {
+		myGameWorld.endOfExecution(currentRobotData.ID);
+		currentRobotData.debugLevel = debugLevel;
+		if(debugLevel==0)
+			currentRobotData.bytecodesLeft = bytecodesLeft;
+		if(currentRobotData.bytecodesLeft>0)
+			currentRobotData.bytecodesLeft=0;
+		Scheduler.passToNextThread();
 	}
 
 	/**
@@ -167,13 +161,29 @@ public class RobotMonitor {
 	}
 	
 	/**
-	 * Returns the bytecode number that the active robot is currently on.  Note that this can be above BYTECODES_PER_ROUND in some cases.
+	 * Returns the bytecode number that the active robot is currently on.  Note that this can be above bytecodeLimit in some cases.
 	 */
 	public static int getBytecodeNum() {
-		if(currDebugLevel == 0)
-			return BYTECODES_PER_ROUND - currentBytecodeLimit + bytecodeCtr;
+		if(debugLevel == 0)
+			return bytecodeLimit - bytecodesLeft;
 		else
-			return BYTECODES_PER_ROUND - currentBytecodeLimit;
+			return bytecodeLimit - currentRobotData.bytecodesLeft;
+	}
+
+	/**
+	 * Returns the number of bytecodes that this robot has used this round.  Equal to
+	 * min(getBytecodeNum(),bytecodeLimit).
+	 */
+	public static int getBytecodesUsed() {
+		int num = getBytecodeNum();
+		return (num<=bytecodeLimit) ? num : bytecodeLimit;
+	}
+
+	/**
+	 * Returns the percentage of this robot's maximum bytecodes that were used this round.
+	 */
+	public static double getBytecodesUsedPercent() {
+		return (double)getBytecodesUsed()/bytecodeLimit;
 	}
 	
 	/**

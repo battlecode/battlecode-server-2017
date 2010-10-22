@@ -32,8 +32,8 @@ public final class GameConstants {
     public static final double ARCHON_PRODUCTION = 1.0;
     /** The number of indicator strings that a player can associate with a robot */
     public static final int NUMBER_OF_INDICATOR_STRINGS = 3;
-    /** The number of bytecodes a robot can execute each round */
-    public static final int BYTECODES_PER_ROUND = 6000;
+    /** The base number of bytecodes a robot can execute each round */
+    public static final int BYTECODE_LIMIT_BASE = 6000;
     /** The amount of energon a robot can receive per round from transfers */
     public static final double ENERGON_TRANSFER_RATE = 1.0;
     /** The amount of energon a robot can hold in reserve */

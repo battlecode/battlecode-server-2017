@@ -1,12 +1,6 @@
 package battlecode.world;
 
-import static battlecode.common.GameConstants.BROADCAST_COST_PER_BYTE;
-import static battlecode.common.GameConstants.BROADCAST_FIXED_COST;
-import static battlecode.common.GameConstants.ENERGON_TRANSFER_RATE;
-import static battlecode.common.GameConstants.ENERGON_RESERVE_SIZE;
-import static battlecode.common.GameConstants.NUMBER_OF_INDICATOR_STRINGS;
-import static battlecode.common.GameConstants.TELEPORT_DELAY;
-import static battlecode.common.GameConstants.ENERGON_TO_FLUX_CONVERSION;
+import static battlecode.common.GameConstants.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -439,6 +433,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public int getBytecodesUsed() {
         return bytecodesUsed;
     }
+	
+	public int getBytecodeLimit() {
+		return BYTECODE_LIMIT_BASE;
+	}
+
 
     public boolean hasBeenAttacked() {
         return hasBeenAttacked;

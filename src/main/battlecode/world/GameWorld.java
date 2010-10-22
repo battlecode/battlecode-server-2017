@@ -664,10 +664,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void endOfExecution(int robotID) {
         InternalRobot r = (InternalRobot) getObjectByID(robotID);
-        int numBytecodes = RobotMonitor.getBytecodeNum();
-        if (numBytecodes > GameConstants.BYTECODES_PER_ROUND)
-            numBytecodes = GameConstants.BYTECODES_PER_ROUND;
-        r.setBytecodesUsed(numBytecodes);
+        r.setBytecodesUsed(RobotMonitor.getBytecodesUsed());
         r.processEndOfTurn();
     }
 

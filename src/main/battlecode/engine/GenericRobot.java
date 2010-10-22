@@ -10,5 +10,6 @@ public interface GenericRobot {
 	public int getID();
 	public Team getTeam();
 	public int getBytecodesUsed();
+	public int getBytecodeLimit();
 	public void suicide();
 }

@@ -1,6 +1,5 @@
 package battlecode.world;
 
-import static battlecode.common.GameConstants.BYTECODES_PER_ROUND;
 import static battlecode.common.GameConstants.NUMBER_OF_INDICATOR_STRINGS;
 import static battlecode.common.GameConstants.TELEPORT_FLUX_COST;
 import static battlecode.common.GameConstants.YIELD_BONUS;
@@ -20,7 +19,8 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.engine.GenericController;
-import battlecode.engine.scheduler.Scheduler;
+import battlecode.engine.instrumenter.RobotMonitor;
+import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.DeploySignal;
 import battlecode.world.signal.EnergonTransferSignal;
@@ -543,17 +543,15 @@ public class RobotControllerImpl implements RobotController, GenericController {
      * {@inheritDoc}
      */
     public void yield() {
-        myGameWorld.endOfExecution(myRobot.getID());
-        myRobot.changeEnergonLevel(YIELD_BONUS * ((double) (BYTECODES_PER_ROUND - myRobot.getBytecodesUsed()) / BYTECODES_PER_ROUND) * myRobot.getRobotType().energonUpkeep());
-        Scheduler.passToNextThread();
+        myRobot.changeEnergonLevel(YIELD_BONUS * RobotMonitor.getBytecodesUsedPercent() * myRobot.getRobotType().energonUpkeep());
+        RobotMonitor.endRunner();
     }
 
     /**
      * {@inheritDoc}
      */
     public void suicide() {
-        myRobot.suicide();
-        Scheduler.passToNextThread();
+        throw new RobotDeathException();
     }
 
     /**
