@@ -4,6 +4,8 @@
         xmlns:ivy="antlib:org.apache.ivy.ant"
         default="compile">
 
+	<property file="build.conf.local"/>
+
     <property name="rootname" value="battlecode-server"/>
     <property name="src.dir" value="${basedir}/src/main"/>
     <property name="lib.dir" value="${basedir}/lib"/>
@@ -24,8 +26,8 @@
     <property name="javadoc.destdir" value="docs/api"/>
 	<property name="commondoc.destdir" value="docs/common"/>
 
-	<property name="bc.working-directory" location="."/>
-	<property name="args.extra" value=""/>
+	<property name="extern.dir" value=".."/>
+	<property name="extern.target" value="run"/>
 
     <!-- Unit tests -->
     <property name="test.src.dir" value="${basedir}/src/test"/>
@@ -127,42 +129,6 @@
         </javac>
     </target>
 
-	<target name="run"
-		description="Run the Battlecode client."
-		depends="compile">
-		<java fork="yes" classname="battlecode.client.Main">
-			<classpath refid="classpath-libs"/>
-			<classpath refid="classpath-compiled"/>
-		</java>
-	</target>
-
-	<target name="headless"
-		description="Run the server in headless mode."
-		depends="compile">
-		<fail unless="bc.game.maps"/>
-		<fail unless="bc.game.team-a"/>
-		<fail unless="bc.game.team-b"/>
-		<java fork="yes" classname="battlecode.server.Main" dir="${bc.working-directory}">
-			<classpath refid="classpath-libs"/>
-			<classpath refid="classpath-compiled"/>
-			<jvmarg value="-Dbc.server.mode=headless"/>
-			<jvmarg value="-Dbc.game.map-path=${path.maps}"/>
-			<jvmarg value="-Dbc.game.maps=${bc.game.maps}"/>
-			<jvmarg value="-Dbc.game.team-a=${bc.game.team-a}"/>
-			<jvmarg value="-Dbc.game.team-b=${bc.game.team-b}"/>
-			<jvmarg line="${args.extra}"/>
-		</java>
-	</target>
-	
-	<target name="serve"
-		description="Run the server in tcp mode."
-		depends="compile">
-		<java fork="yes" classname="battlecode.server.Main">
-			<classpath refid="classpath-libs"/>
-			<classpath refid="classpath-compiled"/>
-			<jvmarg value="-Dbc.server.mode=tcp"/>
-		</java>
-	</target>
 
     <target name="jar"
             description="Build the jar (with dependencies included)."
@@ -171,6 +137,10 @@
 			<zipgroupfileset dir="${lib.dir}" excludes="battlecode-*, junit-*"/>
 		</jar>
     </target>
+
+	<target name="extern" depends="jar" description="Build the jar, then run an external build file.">
+		<ant dir="${extern.dir}" target="${extern.target}"/>
+	</target>
 
     <!-- ========== TESTING ========= -->
 
@@ -190,13 +160,6 @@
                 use="true"
                 windowtitle="Battlecode Server API">
         <packageset dir="${src.dir}" defaultexcludes="yes"/>
-        <doctitle><![CDATA[<h1>Battlecode Server</h1>]]></doctitle>
-        <bottom>
-            <![CDATA[
-            <i>Copyright &#169; 2006-2010 Battlecode. All Rights Reserved.</i>
-            ]]>
-        </bottom>
-        <tag name="todo" scope="all" description="To do:"/>
         <link href="http://java.sun.com/j2se/1.6.0/docs/api/"/>
         </javadoc>
     </target>
