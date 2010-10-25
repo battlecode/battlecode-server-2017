@@ -4,6 +4,9 @@ import java.io.Serializable;
 
 import static java.lang.Math.pow;
 
+
+// We don't want contestants to be able to subclass MapLocation because
+// that would allow them to pass arbitrary data structures in messages
 /**
  * This class is an immutable representation of two-dimensional coordinates
  * in the battlecode world.

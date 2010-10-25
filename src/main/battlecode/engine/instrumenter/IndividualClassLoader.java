@@ -3,7 +3,9 @@ package battlecode.engine.instrumenter;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +27,7 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 	private final static Map<String, byte[]> instrumentedClasses = new HashMap<String,byte[]>();
 	
 	// caches the names of teams with errors, so that if a class is loaded for that team, it immediately throws an exception
-	private final static Set<String> teamsWithErrors = new HashSet<String>();
+	private final static Set<String> teamsWithErrors = Collections.newSetFromMap(new IdentityHashMap<String,Boolean>());
 	
 	// the name of the team this InstrumentingClassLoader is loading
 	private final String teamPackageName;
@@ -50,7 +52,7 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 			}
 		}
 		
-		this.teamPackageName = teamPackageName;
+		this.teamPackageName = teamPackageName.intern();
 		
 	}
 
