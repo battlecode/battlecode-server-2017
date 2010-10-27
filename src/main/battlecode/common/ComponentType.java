@@ -5,17 +5,17 @@ import static battlecode.common.ComponentClass.*;
 public enum ComponentType
 {
 	//           WT CO DL RNG ANG POW
-	SHIELD      ( 1, 0, 0,  0,  0,  0,ARMOR),
-	HARDENED    ( 5, 0, 0,  0,  0,  0,ARMOR),
-	REGEN       ( 4, 0, 0,  0,  0,  0,ARMOR),
-	PLASMA      ( 3, 0, 2,  0,  0,  0,ARMOR),
-	IRON        ( 3, 0,10,  0,  0,  0,ARMOR),
-	PLATING     ( 1, 0, 0,  0,  0,  0,ARMOR),
-	SATELLITE   ( 7, 0, 0,144,360,  0,SENSOR),
-	SMALL_MOTOR ( 0, 0, 3,  2,360,  0,MOTOR),
-	MEDIUM_MOTOR( 0, 0, 7,  2,360,  0,MOTOR),
-	LARGE_MOTOR ( 0, 0,15,  2,360,  0,MOTOR),
-	FLYING_MOTOR( 0, 0, 4,  2,360,  0,MOTOR),
+	SHIELD      ( 1, 0, 0,  0,  0,  0, ARMOR,ComponentController.class),
+	HARDENED    ( 5, 0, 0,  0,  0,  0, ARMOR,ComponentController.class),
+	REGEN       ( 4, 0, 0,  0,  0,  0, ARMOR,ComponentController.class),
+	PLASMA      ( 3, 0, 2,  0,  0,  0, ARMOR,ComponentController.class),
+	IRON        ( 3, 0,10,  0,  0,  0, ARMOR,SpecialController.class),
+	PLATING     ( 1, 0, 0,  0,  0,  0, ARMOR,ComponentController.class),
+	SATELLITE   ( 7, 0, 0,100,360,  0,SENSOR,SensorController.class),
+	SMALL_MOTOR ( 0, 0, 3,  2,360,  0, MOTOR,MovementController.class),
+	MEDIUM_MOTOR( 0, 0, 7,  2,360,  0, MOTOR,MovementController.class),
+	LARGE_MOTOR ( 0, 0,15,  2,360,  0, MOTOR,MovementController.class),
+	FLYING_MOTOR( 0, 0, 4,  2,360,  0, MOTOR,MovementController.class),
 	;
 
 	/**
@@ -57,9 +57,12 @@ public enum ComponentType
 	 * The kind of component (armor, weapon, etc.)
 	 */
 	public final ComponentClass componentClass;
-	
+
+	public final Class<? extends ComponentController> controller;
+
 	ComponentType(int weight, int cost, int delay, int range, double angle,
-		          double attackPower, ComponentClass componentClass) {
+		          double attackPower, ComponentClass componentClass,
+				  Class<? extends ComponentController> controller) {
 		this.weight = weight;
 		this.cost = cost;
 		this.delay = delay;
@@ -68,5 +71,6 @@ public enum ComponentType
 		this.cosHalfAngle = Math.cos(Math.toRadians(angle)/2.);
 		this.attackPower = attackPower;
 		this.componentClass = componentClass;
+		this.controller = controller;
 	}
 }
