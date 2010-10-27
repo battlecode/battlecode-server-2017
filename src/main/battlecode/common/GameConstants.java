@@ -42,6 +42,10 @@ public final class GameConstants {
     public static final double POINTS_DECREASE_PER_ROUND_FACTOR = 0.0005;
 	/** The number of rounds after a component is equipped before it may be used */
 	public static final int EQUIP_WAKE_DELAY = 10;
+	public static final double HARDENED_MAX_DAMAGE = 2.5;
+	public static final double SHIELD_MIN_DAMAGE = .05;
+	public static final double SHIELD_DAMAGE_REDUCTION = .2;
+	public static final int IRON_EFFECT_ROUNDS = 2;
 
     // This class cannot be instantiated.
     private GameConstants() {

@@ -222,8 +222,29 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 	
 	public void takeDamage(double baseAmount) {
-		// TODO: armor
-		changeEnergonLevelFromAttack(-baseAmount);		
+		// TODO: iron (use buffs)
+		boolean haveHardened = false;
+		double minDamage = Math.min(SHIELD_MIN_DAMAGE, baseAmount);
+		for(BaseComponent c : components.get(ComponentClass.ARMOR)) {
+			switch(c.type()) {
+				case SHIELD:
+					baseAmount-=SHIELD_DAMAGE_REDUCTION;
+					break;
+				case HARDENED:
+					haveHardened=true;
+					break;
+				case PLASMA:
+					if(!c.getComponent().isActive()) {
+						c.getComponent().activate();
+						return;
+					}
+					break;
+			}
+		}
+		if(haveHardened&&baseAmount>HARDENED_MAX_DAMAGE)
+			changeEnergonLevelFromAttack(HARDENED_MAX_DAMAGE);
+		else
+			changeEnergonLevelFromAttack(Math.max(minDamage,baseAmount));		
 	}
 
     public void changeEnergonLevelFromAttack(double amount) {

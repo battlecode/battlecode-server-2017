@@ -1,12 +1,21 @@
 package battlecode.common;
 
+import static battlecode.common.ComponentClass.*;
+
 public enum ComponentType
 {
-	SATELLITE(7,0,0,12,360.,0,ComponentClass.SENSOR),
-	SMALL_MOTOR(0,0,3,1,360.,0,ComponentClass.MOTOR),
-	MEDIUM_MOTOR(0,0,7,1,360.,0,ComponentClass.MOTOR),
-	LARGE_MOTOR(0,0,15,1,360.,0,ComponentClass.MOTOR),
-	FLYING_MOTOR(0,0,4,1,360.,0,ComponentClass.MOTOR),
+	//           WT CO DL RNG ANG POW
+	SHIELD      ( 1, 0, 0,  0,  0,  0,ARMOR),
+	HARDENED    ( 5, 0, 0,  0,  0,  0,ARMOR),
+	REGEN       ( 4, 0, 0,  0,  0,  0,ARMOR),
+	PLASMA      ( 3, 0, 2,  0,  0,  0,ARMOR),
+	IRON        ( 3, 0,10,  0,  0,  0,ARMOR),
+	PLATING     ( 1, 0, 0,  0,  0,  0,ARMOR),
+	SATELLITE   ( 7, 0, 0,144,360,  0,SENSOR),
+	SMALL_MOTOR ( 0, 0, 3,  2,360,  0,MOTOR),
+	MEDIUM_MOTOR( 0, 0, 7,  2,360,  0,MOTOR),
+	LARGE_MOTOR ( 0, 0,15,  2,360,  0,MOTOR),
+	FLYING_MOTOR( 0, 0, 4,  2,360,  0,MOTOR),
 	;
 
 	/**
