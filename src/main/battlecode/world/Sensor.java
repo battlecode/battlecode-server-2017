@@ -71,8 +71,7 @@ public class Sensor extends BaseComponent implements SensorController {
 
 	public boolean canSenseObject(GameObject o) {
 		assertEquipped();
-		InternalObject io = castInternalObject(o);
-		return checkWithinRange(io);
+		return checkWithinRange(castInternalObject(o));
 	}
 
 }

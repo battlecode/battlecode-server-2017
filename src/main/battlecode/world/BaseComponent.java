@@ -12,7 +12,7 @@ import static battlecode.common.GameActionExceptionType.*;
 
 import com.google.common.base.Predicate;
 
-public abstract class BaseComponent implements ComponentController
+public abstract class BaseComponent extends ControllerShared implements ComponentController
 {
 	protected InternalComponent component;
 	protected InternalRobot robot;
@@ -56,7 +56,6 @@ public abstract class BaseComponent implements ComponentController
 		};
 	}
 
-
 	protected void assertEquipped() {
 		if(component.getController()!=this)
 			throw new IllegalStateException("You no longer control this component.");
@@ -75,13 +74,10 @@ public abstract class BaseComponent implements ComponentController
 	}
 
 	protected boolean checkWithinRange(InternalObject obj) {
+		if(!obj.exists()) return false;
 		return checkWithinRange(obj.getLocation());
 	}
 
-	protected static void assertNotNull(Object o) {
-		RobotControllerImpl.assertNotNull(o);
-	}
-	
 	protected void assertInactive() throws GameActionException {
 		if(component.roundsUntilIdle()>0)
 			throw new GameActionException(ALREADY_ACTIVE,"This component is already active.");	
@@ -89,31 +85,16 @@ public abstract class BaseComponent implements ComponentController
 
 	protected void assertWithinRange(MapLocation loc) throws GameActionException {
 		if(!checkWithinRange(loc))
-			throw new GameActionException(CANT_SENSE_THAT,"That is not within this component's range.");
+			outOfRange();
 	}
 
 	protected void assertWithinRange(InternalObject obj) throws GameActionException {
 		assertWithinRange(obj.getLocation());
 	}
 
-	protected static InternalRobot castInternalRobot(Robot r) {
-		assertNotNull(r);
-		if (!(r instanceof InternalRobot))
-            throw new IllegalArgumentException("Invalid Robot object (don't extend Robot!)");
-		return (InternalRobot) r;
-	}
-
-	protected static InternalObject castInternalObject(GameObject o) {
-        assertNotNull(o);
-		if (!(o instanceof InternalObject))
-            throw new IllegalArgumentException("Invalid GameObject (don't extend GameObject!)");
-		return (InternalObject) o;
-	}
-
 	protected BaseComponent(InternalComponent component, InternalRobot robot) {
+		super(robot.getGameWorld(),robot);
 		this.component = component;
-		this.robot = robot;
-		this.gameWorld = robot.getGameWorld();
 	}
 
 }

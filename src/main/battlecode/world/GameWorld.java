@@ -329,7 +329,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
     }
 
-    public boolean isExistant(InternalObject o) {
+    public boolean exists(InternalObject o) {
         return gameObjectsByID.containsKey(o.getID());
     }
 

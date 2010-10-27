@@ -18,8 +18,6 @@ public enum GameActionExceptionType {
 	BAD_DIRECTION,
 	/** Indicates when a robot tries to execute an action, but is not currentl IDLE */
 	ALREADY_ACTIVE,
-	/** Indicates a <code>GameObject</code> was used that does not correspond to an object in the gameworld */
-	INVALID_OBJECT,
 	/** Indicates when a robot tries to sense a <code>GameObject</code> that is no longer existant or no longer
 	 * in this robot's sensor range */
 	CANT_SENSE_THAT,

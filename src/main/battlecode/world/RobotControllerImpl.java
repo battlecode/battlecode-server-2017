@@ -53,14 +53,10 @@ TODO:
 - TEST responding to signals
 - TEST clock
  */
-public class RobotControllerImpl implements RobotController, GenericController {
-
-    private final GameWorld myGameWorld;
-    private final InternalRobot myRobot;
+public class RobotControllerImpl extends ControllerShared implements RobotController, GenericController {
 
     public RobotControllerImpl(GameWorld gw, InternalRobot r) {
-        myGameWorld = gw;
-        myRobot = r;
+        super(gw,r);
     }
 
     //*********************************
@@ -71,76 +67,76 @@ public class RobotControllerImpl implements RobotController, GenericController {
      * {@inheritDoc}
      */
     public Direction getDirection() {
-        return myRobot.getDirection();
+        return robot.getDirection();
     }
 
     /**
      * {@inheritDoc}
      */
     public double getHitpoints() {
-        return myRobot.getEnergonLevel();
+        return robot.getEnergonLevel();
     }
 
     /**
      * {@inheritDoc}
      */
     public double getMaxEnergonLevel() {
-        return myRobot.getMaxEnergon();
+        return robot.getMaxEnergon();
     }
 
     /**
      * {@inheritDoc}
      */
     public MapLocation getLocation() {
-        return myRobot.getLocation();
+        return robot.getLocation();
     }
 
     /**
      * {@inheritDoc}
      */
     public Message getNextMessage() {
-        return myRobot.dequeueIncomingMessage();
+        return robot.dequeueIncomingMessage();
     }
 
     /**
      * {@inheritDoc}
      */
     public Message[] getAllMessages() {
-        return myRobot.dequeueIncomingMessages();
+        return robot.dequeueIncomingMessages();
     }
 
     /**
      * {@inheritDoc}
      */
     public Team getTeam() {
-        return myRobot.getTeam();
+        return robot.getTeam();
     }
 
     /**
      * {@inheritDoc}
      */
     public InternalRobot getRobot() {
-        return myRobot;
+        return robot;
     }
 
     public int getMapMinPoints() {
-        return myGameWorld.getGameMap().getMinPoints();
+        return gameWorld.getGameMap().getMinPoints();
     }
 
 	public Chassis getChassis() {
-		return myRobot.getChassis(); 
+		return robot.getChassis(); 
 	}
 
 	public ComponentController [] components() {
-		return myRobot.getComponentControllers();
+		return robot.getComponentControllers();
 	}
 
 	public ComponentController [] components(ComponentType type) {
-		return myRobot.getComponentControllers(type);
+		return robot.getComponentControllers(type);
 	}
 
 	public ComponentController [] components(ComponentClass cls) {
-		return myRobot.getComponentControllers(cls);
+		return robot.getComponentControllers(cls);
 	}
     
 	//***********************************
@@ -148,18 +144,18 @@ public class RobotControllerImpl implements RobotController, GenericController {
     //***********************************
     
 	public void turnOff() {
-		myRobot.setPower(false);
+		robot.setPower(false);
 	}
 
 	public boolean wasTurnedOff() {
-		return myRobot.queryHasBeenOff();
+		return robot.queryHasBeenOff();
 	}
 
     /**
      * {@inheritDoc}
      */
     public void yield() {
-        myRobot.changeEnergonLevel(YIELD_BONUS * RobotMonitor.getBytecodesUsedPercent() * myRobot.chassis.upkeep);
+        robot.changeEnergonLevel(YIELD_BONUS * RobotMonitor.getBytecodesUsedPercent() * robot.chassis.upkeep);
         RobotMonitor.endRunner();
     }
 
@@ -174,7 +170,7 @@ public class RobotControllerImpl implements RobotController, GenericController {
      * {@inheritDoc}
      */
     public void breakpoint() {
-        myGameWorld.notifyBreakpoint();
+        gameWorld.notifyBreakpoint();
     }
 
 	public void equip(Component c) throws GameActionException {
@@ -193,7 +189,7 @@ public class RobotControllerImpl implements RobotController, GenericController {
      */
     public TerrainTile senseTerrainTile(MapLocation loc) {
         assertNotNull(loc);
-        return myRobot.getMapMemory().recallTerrain(loc);
+        return robot.getMapMemory().recallTerrain(loc);
     }
 
     //************************************
@@ -204,7 +200,7 @@ public class RobotControllerImpl implements RobotController, GenericController {
      */
     public void setIndicatorString(int stringIndex, String newString) {
         if (stringIndex >= 0 && stringIndex < NUMBER_OF_INDICATOR_STRINGS)
-            (new IndicatorStringSignal(myRobot, stringIndex, newString)).accept(myGameWorld);
+            (new IndicatorStringSignal(robot, stringIndex, newString)).accept(gameWorld);
     }
 
 	public void setIndicatorStringFormat(int stringIndex, String format, Object ... args) {
@@ -215,14 +211,14 @@ public class RobotControllerImpl implements RobotController, GenericController {
      * {@inheritDoc}
      */
     public long getControlBits() {
-        return myRobot.getControlBits();
+        return robot.getControlBits();
     }
 
     /**
      * {@inheritDoc}
      */
     public void addMatchObservation(String observation) {
-        (new MatchObservationSignal(myRobot, observation)).accept(myGameWorld);
+        (new MatchObservationSignal(robot, observation)).accept(gameWorld);
     }
 
     /**
@@ -233,32 +229,11 @@ public class RobotControllerImpl implements RobotController, GenericController {
 	}
 
     public long[] getOldArchonMemory() {
-        return myGameWorld.getOldArchonMemory()[myRobot.getTeam().ordinal()];
+        return gameWorld.getOldArchonMemory()[robot.getTeam().ordinal()];
     }
 
-
-    //************************************
-    //********* ASSERTIONS ************
-    //************************************
-    public static void assertNotNull(Object o) {
-        if (o == null)
-            throw new NullPointerException("Argument has an invalid null value");
-    }
-
-	public static InternalComponent castInternalComponent(Component c) throws GameActionException {
-		assertNotNull(c);
-		if(!(c instanceof InternalComponent))
-            throw new GameActionException(INVALID_OBJECT, "Invalid Component (don't extend Component!)");
-		return (InternalComponent)c;
-	}
-
-	public void assertWithinRange(MapLocation loc, int distance) throws GameActionException {
-		if(myRobot.getLocation().distanceSquaredTo(loc)>distance)
-			throw new GameActionException(CANT_SENSE_THAT,"That is too far away.");
-	}
-	
 	public int hashCode() {
-		return myRobot.getID();
+		return robot.getID();
 	}
 
 }

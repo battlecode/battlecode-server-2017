@@ -32,4 +32,8 @@ public abstract class InternalObject extends BaseObject {
 	public GameWorld getGameWorld() {
 		return myGameWorld;
 	}
+
+	public boolean exists() {
+		return myGameWorld.exists(this);
+	}
 }
