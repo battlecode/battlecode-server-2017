@@ -223,6 +223,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 	
 	public void takeDamage(double baseAmount) {
 		// TODO: iron (use buffs)
+		if(baseAmount<0) changeEnergonLevel(-baseAmount);
 		boolean haveHardened = false;
 		double minDamage = Math.min(SHIELD_MIN_DAMAGE, baseAmount);
 		for(BaseComponent c : components.get(ComponentClass.ARMOR)) {
@@ -242,9 +243,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 			}
 		}
 		if(haveHardened&&baseAmount>HARDENED_MAX_DAMAGE)
-			changeEnergonLevelFromAttack(HARDENED_MAX_DAMAGE);
+			changeEnergonLevelFromAttack(-HARDENED_MAX_DAMAGE);
 		else
-			changeEnergonLevelFromAttack(Math.max(minDamage,baseAmount));		
+			changeEnergonLevelFromAttack(-Math.max(minDamage,baseAmount));		
 	}
 
     public void changeEnergonLevelFromAttack(double amount) {
