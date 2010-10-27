@@ -1,5 +1,6 @@
 package battlecode.server.proxy;
 
+import battlecode.common.Chassis;
 import battlecode.common.MapLocation;
 import battlecode.common.TerrainTile;
 import battlecode.serial.ExtensibleMetadata;
@@ -336,7 +337,8 @@ public class XStreamProxy extends Proxy {
 		xstream.useAttributeFor(battlecode.common.Direction.class);
 		xstream.useAttributeFor(battlecode.common.MapLocation.class);
 		xstream.useAttributeFor(battlecode.common.RobotLevel.class);
-		xstream.useAttributeFor(battlecode.common.RobotType.class);
+		xstream.useAttributeFor(battlecode.common.Chassis.class);
+		xstream.useAttributeFor(battlecode.common.ComponentType.class);
 		xstream.useAttributeFor(battlecode.common.Team.class);
 		xstream.useAttributeFor(battlecode.serial.DominationFactor.class);
 		//xstream.aliasPackage("","battlecode.world.signal");

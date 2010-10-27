@@ -16,7 +16,6 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.Message;
 import battlecode.common.RobotLevel;
-import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
@@ -49,9 +48,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc;
     private final Set<MapLocation>[] teleportersByTeam;
     
-    private static final int[][] fluxMineOffsets = GameMap.computeOffsets360(GameConstants.FLUX_RADIUS_SQUARED);
-    private static final int[] fluxMineOffsetsX = fluxMineOffsets[0];
-    private static final int[] fluxMineOffsetsY = fluxMineOffsets[1];
     private boolean[][] minedLocs;
 
     @SuppressWarnings("unchecked")

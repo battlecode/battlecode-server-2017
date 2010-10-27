@@ -26,7 +26,6 @@ import battlecode.common.RobotLevel;
 import battlecode.common.MapLocation;
 import battlecode.common.Message;
 import battlecode.common.Robot;
-import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.GenericRobot;
@@ -46,7 +45,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 	protected volatile boolean hasBeenAttacked = false;
     private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean("bc.engine.upkeep-enabled");
     /** first index is robot type, second is direction, third is x or y */
-    private static final int[][][][] offsets = GameMap.computeVisibleOffsets();
+    private static final Map<ComponentType,int[][][]> offsets = GameMap.computeVisibleOffsets();
     /** number of bytecodes used in the most recent round */
     private volatile int bytecodesUsed = 0;
     private List<Message> incomingMessageQueue;
@@ -273,8 +272,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public void saveMapMemory(MapLocation oldLoc, MapLocation newLoc,
             boolean fringeOnly) {
-        int[][] myOffsets = offsets[chassis.ordinal()][myDirection.ordinal()];
-        mapMemory.rememberLocations(newLoc, myOffsets[0], myOffsets[1]);
+		for(BaseComponent c : components.get(ComponentClass.SENSOR)) {
+        	int[][] myOffsets = offsets.get(c.type())[myDirection.ordinal()];
+        	mapMemory.rememberLocations(newLoc, myOffsets[0], myOffsets[1]);
+		}
     }
 
     @Override
