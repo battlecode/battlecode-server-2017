@@ -9,6 +9,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import com.google.common.base.Functions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
+
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameActionExceptionType;
@@ -46,6 +52,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final GameStats gameStats = new GameStats();		// end-of-game stats
     private double[] teamPoints;
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc;
+	private final Multimap<MapLocation, InternalComponent> looseComponents;
     private final Set<MapLocation>[] teleportersByTeam;
     
     private boolean[][] minedLocs;
@@ -55,6 +62,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		super(gm.getSeed(),teamA,teamB,oldArchonMemory);
         gameMap = gm;
         gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
+		looseComponents = HashMultimap.create();
         teleportersByTeam = new Set[]{
                     new HashSet<MapLocation>(),
                     new HashSet<MapLocation>()};
@@ -249,6 +257,20 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         else
             return null;
     }
+
+	/**
+	 * Returns a set of all loose components at {@code loc}.  May return null
+	 * if there are none.
+	 */
+	public Collection<InternalComponent> getComponentsAt(MapLocation loc) {
+		return looseComponents.get(loc);
+	}
+
+	public Iterable<InternalComponent> getLooseComponents(Predicate<MapLocation> p) {
+		Set<MapLocation> keys = looseComponents.keySet();
+		Iterable<Collection<InternalComponent>> c = Iterables.transform(keys,Functions.forMap(looseComponents.asMap()));
+		return Iterables.concat(c);
+	}
 
     // should only be called by the InternalObject constructor
     public void notifyAddingNewObject(InternalObject o) {

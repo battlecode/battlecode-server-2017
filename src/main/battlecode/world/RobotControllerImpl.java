@@ -148,6 +148,7 @@ public class RobotControllerImpl implements RobotController, GenericController {
     //***********************************
     
 	public void turnOff() {
+		myRobot.setPower(false);
 	}
 
 	public boolean wasTurnedOff() {

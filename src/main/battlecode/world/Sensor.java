@@ -14,18 +14,12 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotLevel;
 import battlecode.common.SensorController;
 
+import java.util.Set;
+
 public class Sensor extends BaseComponent implements SensorController {
 
 	public Sensor(InternalComponent component, InternalRobot robot) {
 		super(component,robot);
-	}
-
-	protected Predicate<InternalObject> canSensePredicate() {
-		return new Predicate<InternalObject>() {
-			public boolean apply(InternalObject o) {
-				return checkWithinRange(o);
-			}
-		};
 	}
 
 	public Robot senseRobotAtLocation(MapLocation loc, RobotLevel height) throws GameActionException {
@@ -38,7 +32,7 @@ public class Sensor extends BaseComponent implements SensorController {
 
 	public Robot [] senseNearbyRobots() {
 		assertEquipped();
-		Predicate<GameObject> p = Predicates.and(canSensePredicate(),Util.isRobot);
+		Predicate<GameObject> p = Predicates.and(objectWithinRangePredicate(),Util.isRobot);
 		return (Robot [])Iterables.toArray(Iterables.filter(gameWorld.allObjects(),p),GameObject.class);
 	}
 
@@ -65,14 +59,14 @@ public class Sensor extends BaseComponent implements SensorController {
 
 	public InternalComponent [] senseNearbyComponents() {
 		assertEquipped();
-		return null;
+		return Iterables.toArray(gameWorld.getLooseComponents(locWithinRangePredicate()),InternalComponent.class);
 	}
 
 	public InternalComponent [] senseComponentsAtLocation(MapLocation loc) throws GameActionException {
 		assertEquipped();
 		assertNotNull(loc);
 		assertWithinRange(loc);
-		return null;
+		return gameWorld.getComponentsAt(loc).toArray(new InternalComponent [0]);
 	}
 
 	public boolean canSenseObject(GameObject o) {

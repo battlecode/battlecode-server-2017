@@ -10,6 +10,8 @@ import battlecode.common.Robot;
 
 import static battlecode.common.GameActionExceptionType.*;
 
+import com.google.common.base.Predicate;
+
 public abstract class BaseComponent implements ComponentController
 {
 	protected InternalComponent component;
@@ -37,6 +39,23 @@ public abstract class BaseComponent implements ComponentController
 	public void unequip() {
 		// add unequip signal
 	}
+
+	protected Predicate<InternalObject> objectWithinRangePredicate() {
+		return new Predicate<InternalObject>() {
+			public boolean apply(InternalObject o) {
+				return checkWithinRange(o);
+			}
+		};
+	}
+
+	protected Predicate<MapLocation> locWithinRangePredicate() {
+		return new Predicate<MapLocation>() {
+			public boolean apply(MapLocation o) {
+				return checkWithinRange(o);
+			}
+		};
+	}
+
 
 	protected void assertEquipped() {
 		if(component.getController()!=this)
