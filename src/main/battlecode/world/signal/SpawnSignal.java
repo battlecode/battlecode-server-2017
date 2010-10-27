@@ -23,7 +23,7 @@ public class SpawnSignal extends Signal {
 	private final MapLocation loc;
 		
 	/** The type of the new robot */
-	private final RobotType type;
+	private final Chassis type;
 		
 	/** The new robot's team */
 	private final Team team;
@@ -42,7 +42,7 @@ public class SpawnSignal extends Signal {
 		else
 			parentID = parent.getID();
 		loc = child.getLocation();
-		type = child.getRobotType();
+		type = child.chassis;
 		team = child.getTeam();
 		dir = child.getDirection();
 	}
@@ -50,7 +50,7 @@ public class SpawnSignal extends Signal {
 	/**
 	 * Creates a spawn signal for a robot that hasn't been spawned yet
 	 */
-	public SpawnSignal(MapLocation loc, RobotType type, Team team, InternalRobot parent) {
+	public SpawnSignal(MapLocation loc, Chassis type, Team team, InternalRobot parent) {
 		this.loc = loc;
 		this.type = type;
 		this.team = team;
@@ -70,7 +70,7 @@ public class SpawnSignal extends Signal {
 		return loc;
 	}
 	
-	public RobotType getType() {
+	public Chassis getType() {
 		return type;
 	}
 	

@@ -15,7 +15,7 @@ import java.util.Map;
 
 import battlecode.common.MapLocation;
 import battlecode.common.RobotLevel;
-import battlecode.common.RobotType;
+import battlecode.common.Chassis;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
@@ -39,40 +39,16 @@ public class GameWorldFactory {
         return handler.createGameWorld(teamA, teamB, archonMemory);
     }
 
-	public static void createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
-		// note that the order in which all these calls are made is very important
+	public static void createPlayer(GameWorld gw, Chassis type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
 
-		if(type == RobotType.ARCHON) {
-			createArchonPlayer(gw, loc, t, parent, wakeDelay, ARCHON_PRODUCTION);
-		}
-		else if(type == RobotType.AURA) {
-			InternalRobot robot = new InternalAura(gw, type, loc, t, wakeDelay);
-
-			loadPlayer(gw, robot, t, parent);
-		}
-		else {
-			// first, make the robot
-			InternalRobot robot = new InternalWorker(gw, type, loc, t, wakeDelay);
-
-			loadPlayer(gw, robot, t, parent);
-		}
+		// first, make the robot
+		InternalRobot robot = new InternalRobot(gw, type, loc, t, wakeDelay);
+		loadPlayer(gw, robot, t, parent);
 	}
 
 	// defaults to wakeDelay = true
-	public static void createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent) {
+	public static void createPlayer(GameWorld gw, Chassis type, MapLocation loc, Team t, InternalRobot parent) {
 		createPlayer(gw, type, loc, t, parent, true);
-	}
-
-	public static void createArchonPlayer(GameWorld gw, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay, double production) {
-		InternalRobot robot = new InternalArchon(gw, loc, t, wakeDelay, production);
-
-		loadPlayer(gw, robot, t, parent);
-	}
-	
-	public static void createWorkerPlayer(GameWorld gw, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
-		InternalRobot robot = new InternalWorker(gw, RobotType.WOUT, loc, t, wakeDelay);
-
-		loadPlayer(gw, robot, t, parent);
 	}
 
 	private static void loadPlayer(GameWorld gw, InternalRobot robot, Team t, InternalRobot parent) {

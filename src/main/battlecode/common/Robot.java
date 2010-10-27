@@ -15,4 +15,9 @@ public interface Robot extends GameObject {
      * @see battlecode.common.RobotLevel
      */
     public RobotLevel getRobotLevel();
+
+	public Chassis getChassis();
+
+	public Team getTeam();
+
 }

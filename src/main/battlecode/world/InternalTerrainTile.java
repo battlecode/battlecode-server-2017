@@ -3,7 +3,6 @@ package battlecode.world;
 import battlecode.common.TerrainTile;
 
 import java.io.Serializable;
-import static battlecode.common.GameConstants.MAX_FLUX_PER_TILE;
 
 import battlecode.world.GameWorld;
 
@@ -32,9 +31,5 @@ public class InternalTerrainTile extends TerrainTile implements Serializable{
 	}
 
 	public void processBeginningOfRound(int round) {
-		if (getType() == TerrainType.LAND && round % height == 0 && flux < MAX_FLUX_PER_TILE){
-			flux++;
-			
-		}
     }
 }

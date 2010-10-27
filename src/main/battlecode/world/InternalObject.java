@@ -4,8 +4,8 @@ import battlecode.common.*;
 
 public abstract class InternalObject extends BaseObject {
 
-    private volatile MapLocation myLocation;
-    private final RobotLevel myHeight;
+    protected volatile MapLocation myLocation;
+    protected final RobotLevel myHeight;
 	protected final GameWorld myGameWorld;
 
     protected InternalObject(GameWorld gw, MapLocation loc, RobotLevel height, Team t) {
@@ -27,5 +27,9 @@ public abstract class InternalObject extends BaseObject {
 
     public RobotLevel getRobotLevel() {
         return myHeight;
+	}
+
+	public GameWorld getGameWorld() {
+		return myGameWorld;
 	}
 }

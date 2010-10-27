@@ -1,7 +1,9 @@
 package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
+import battlecode.world.InternalComponent;
 import battlecode.world.InternalRobot;
+import battlecode.common.ComponentType;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotLevel;
 
@@ -15,13 +17,16 @@ public class AttackSignal extends Signal {
 	private static final long serialVersionUID = 8064711239305833273L;
 
 	/** TheID of the robot that attacked. */
-	private final int robotID;
+	public final int robotID;
 		
 	/** The location that the robot attacked */
-	private final MapLocation targetLoc;
+	public final MapLocation targetLoc;
 		
 	/** The height of the position that the robot attacked */
-	private final RobotLevel targetHeight;
+	public final RobotLevel targetHeight;
+
+	/** The weapon that was used */
+	public final ComponentType weaponType;
 
 	/** 
 	 * Creates a signal for a robot broadcast.
@@ -29,8 +34,9 @@ public class AttackSignal extends Signal {
 	 * @param robot the robot that attacked
 	 * @param targetLoc the location that the robot attacked
 	 */
-	public AttackSignal(InternalRobot robot, MapLocation targetLoc, RobotLevel targetHeight) {
+	public AttackSignal(InternalRobot robot, InternalComponent weapon, MapLocation targetLoc, RobotLevel targetHeight) {
 		this.robotID = robot.getID();
+		this.weaponType = weapon.type();
 		this.targetLoc = targetLoc;
 		this.targetHeight = targetHeight;
 	}
@@ -42,6 +48,10 @@ public class AttackSignal extends Signal {
 	 */
 	public int getRobotID() {
 		return robotID;
+	}
+
+	public ComponentType getWeaponType() {
+		return weaponType;
 	}
 	
 	/**

@@ -23,7 +23,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import battlecode.common.MapLocation;
 import battlecode.common.RobotLevel;
-import battlecode.common.RobotType;
+import battlecode.common.Chassis;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
@@ -63,24 +63,24 @@ class XMLMapHandler extends DefaultHandler {
             TELEPORTER,
             COMM;
 
-			private final RobotType myRobotType;
+			private final Chassis myChassis;
 
 			SymbolType() {
-				RobotType type;
+				Chassis type;
 				try {
-					type = Enum.valueOf(RobotType.class, name());
+					type = Enum.valueOf(Chassis.class, name());
 				} catch(IllegalArgumentException e) {
 					type = null;
 				}
-				myRobotType = type;
+				myChassis = type;
 			}
 
-			public RobotType getRobotType() {
-				return myRobotType;
+			public Chassis getChassis() {
+				return myChassis;
 			}
 
             public boolean isRobot() {
-				return myRobotType!=null;
+				return myChassis!=null;
             }
         }
 
@@ -576,7 +576,7 @@ class XMLMapHandler extends DefaultHandler {
                 } else {
                     MapLocation loc = new MapLocation(origin.getX() + coordinate.x, origin.getY() + coordinate.y);
                     SymbolData data = symbolMap.get(map[coordinate.x][coordinate.y]);
-					GameWorldFactory.createPlayer(gw,data.type.getRobotType(),loc,data.team,null,false);
+					GameWorldFactory.createPlayer(gw,data.type.getChassis(),loc,data.team,null,false);
                 }
             }
             return gw;
