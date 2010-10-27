@@ -260,6 +260,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
     }
 
+	public static boolean canStealComponent(InternalRobot thief, InternalRobot victim) {
+		return (!victim.isOn())&&thief.getLocation().distanceSquaredTo(victim.getLocation())<=2;
+	}
+
 	public Collection<InternalObject> allObjects() {
 		return gameObjectsByID.values();
 	}

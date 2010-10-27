@@ -4,7 +4,6 @@ import static battlecode.common.GameConstants.MAP_MAX_HEIGHT;
 import static battlecode.common.GameConstants.MAP_MAX_WIDTH;
 import static battlecode.common.GameConstants.MAP_MIN_HEIGHT;
 import static battlecode.common.GameConstants.MAP_MIN_WIDTH;
-import static battlecode.common.GameConstants.ARCHON_PRODUCTION;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;

@@ -28,8 +28,6 @@ public final class GameConstants {
     public static final double YIELD_BONUS = 0.1;
     /** The bytecode penalty that is imposed each time an exception is thrown */
     public static final int EXCEPTION_BYTECODE_PENALTY = 500;
-    /** The amount of energon per round an archon produces */
-    public static final double ARCHON_PRODUCTION = 1.0;
     /** The number of indicator strings that a player can associate with a robot */
     public static final int NUMBER_OF_INDICATOR_STRINGS = 3;
     /** The base number of bytecodes a robot can execute each round */
@@ -37,14 +35,11 @@ public final class GameConstants {
     /** The chainer's splash damage radius */
     public final static int CHAINER_SPLASH_RADIUS_SQUARED = 2;
     /** The radius at which flux is mined */
-    public static final int FLUX_RADIUS_SQUARED = 5;
-    /** How much longer movement takes after being hit by a soldier */
     public static final int SOLDIER_MOVEMENT_DECREASE_ROUNDS = 4;
     /** How many rounds a soldier will slow a Robot for */
     public static final int SOLDIER_SLOW_ROUNDS = 60;
     /** Decreace percentage of point differential needed to win per round after round limit */
     public static final double POINTS_DECREASE_PER_ROUND_FACTOR = 0.0005;
-    public static final double POINTS_PER_AREA_FACTOR = 0.01;
 	/** The number of rounds after a component is equipped before it may be used */
 	public static final int EQUIP_WAKE_DELAY = 10;
 

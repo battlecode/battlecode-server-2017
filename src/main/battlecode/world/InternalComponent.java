@@ -26,7 +26,7 @@ public class InternalComponent extends InternalObject implements Component
 			roundsUntilIdle = rounds;
 	}
 	
-	public void processBeginningOfRound() {
+	public void processEndOfTurn() {
 		if(roundsUntilIdle>0)
 			roundsUntilIdle--;	
 	}

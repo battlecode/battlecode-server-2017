@@ -6,6 +6,7 @@ import battlecode.common.GameActionExceptionType;
 import battlecode.common.MapLocation;
 import battlecode.common.MovementController;
 import battlecode.world.signal.MovementSignal;
+import battlecode.world.signal.SetDirectionSignal;
 
 public class Motor extends BaseComponent implements MovementController
 {
@@ -39,6 +40,8 @@ public class Motor extends BaseComponent implements MovementController
 	public void setDirection(Direction d) throws GameActionException {
 		assertNotNull(d);
 		assertInactive();
+		component.activate(1);
+		robot.addAction(new SetDirectionSignal(robot,d));
 	}
 
 	public boolean canMove(Direction d) {

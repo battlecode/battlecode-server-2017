@@ -19,6 +19,8 @@ public class RobotInfo {
     public final double maxHp;
     /** The direction this Robot is facing. */
     public final Direction direction;
+	/** Whether or not this Robot is currently powered on. */
+	public final boolean on;
 	/**
 	 * The components of the robot that was sensed, if the sensor is capable
 	 * of sensing them.  Components can be sensed if: <ul>
@@ -30,13 +32,14 @@ public class RobotInfo {
 
     public RobotInfo(Robot robot, MapLocation location,
 	                 double hitpoints, double maxHp, Direction direction,
-					 Component [] components) {
+					 boolean on, Component [] components) {
         super();
         this.robot = robot;
 		this.location = location;
         this.hitpoints = hitpoints;
 		this.maxHp = maxHp;
         this.direction = direction;
+		this.on = on;
 		this.components = components;
     }
 

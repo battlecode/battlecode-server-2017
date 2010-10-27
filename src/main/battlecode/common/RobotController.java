@@ -98,6 +98,12 @@ public interface RobotController {
 
 	public void turnOff();
 
+	/**
+	 * Returns true if the robot has been turned off since the last call
+	 * to {@code wasTurnedOff()}.
+	 */
+	public boolean wasTurnedOff();
+
     /**
      * Ends the current round and gives your robot a slight energon bonus, given
      * by

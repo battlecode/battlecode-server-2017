@@ -55,6 +55,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 	/** all actions that have been performed in the current round */
 	private List<Signal> actions;
 	private volatile boolean on;
+	private volatile boolean hasBeenOff;
 
 	public static class ComponentSet extends ForwardingMultimap<ComponentClass,BaseComponent> {
 
@@ -110,6 +111,17 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
 	public boolean isOn() { return on; }
+
+	public void setPower(boolean b) {
+		on = b;
+		if(!b) hasBeenOff=true;
+	}
+
+	public boolean queryHasBeenOff() {
+		boolean tmp = hasBeenOff;
+		hasBeenOff = false;
+		return tmp;
+	}
 
 	public void equip(InternalComponent c) {
 		BaseComponent controller;
@@ -175,6 +187,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @Override
     public void processEndOfTurn() {
         super.processEndOfTurn();
+		for(BaseComponent c : components.values()) {
+			c.getComponent().processEndOfTurn();
+		}
 		for(Signal s : actions) {
 			myGameWorld.visitSignal(s);
 		}

@@ -150,6 +150,10 @@ public class RobotControllerImpl implements RobotController, GenericController {
 	public void turnOff() {
 	}
 
+	public boolean wasTurnedOff() {
+		return myRobot.queryHasBeenOff();
+	}
+
     /**
      * {@inheritDoc}
      */

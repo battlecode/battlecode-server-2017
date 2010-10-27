@@ -77,17 +77,17 @@ public abstract class BaseComponent implements ComponentController
 		assertWithinRange(obj.getLocation());
 	}
 
-	protected static InternalRobot castInternalRobot(Robot r) throws GameActionException {
+	protected static InternalRobot castInternalRobot(Robot r) {
 		assertNotNull(r);
 		if (!(r instanceof InternalRobot))
-            throw new GameActionException(INVALID_OBJECT, "Invalid Robot object (don't extend Robot!)");
+            throw new IllegalArgumentException("Invalid Robot object (don't extend Robot!)");
 		return (InternalRobot) r;
 	}
 
-	protected static InternalObject castInternalObject(GameObject o) throws GameActionException {
+	protected static InternalObject castInternalObject(GameObject o) {
         assertNotNull(o);
 		if (!(o instanceof InternalObject))
-            throw new GameActionException(INVALID_OBJECT, "Invalid GameObject (don't extend GameObject!)");
+            throw new IllegalArgumentException("Invalid GameObject (don't extend GameObject!)");
 		return (InternalObject) o;
 	}
 
