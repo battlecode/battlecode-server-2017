@@ -30,9 +30,10 @@ public class Sensor extends BaseComponent implements SensorController {
 		return gameWorld.getObjectOfType(loc,height,InternalRobot.class);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Robot [] senseNearbyRobots() {
 		assertEquipped();
-		Predicate<GameObject> p = Predicates.and(objectWithinRangePredicate(),Util.isRobot);
+		Predicate<GameObject> p = Predicates.and(objectWithinRangePredicate(),Util.isRobot,Predicates.not(Predicates.equalTo(robot)));
 		return (Robot [])Iterables.toArray(Iterables.filter(gameWorld.allObjects(),p),GameObject.class);
 	}
 
