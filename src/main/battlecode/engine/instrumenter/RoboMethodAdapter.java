@@ -306,6 +306,10 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 				ErrorReporter.report("Illegal method in " + className + ": StrictMath.random() cannot be called by a player.  Use java.util.Random instead.", false);
 				throw new InstrumentationException();
 			}
+			else if(owner.equals("java/lang/String") && name.equals("intern")) {
+				ErrorReporter.report("Illegal method in " + className + ": String.intern() cannot be called by a player.", false);
+				throw new InstrumentationException();
+			}
 		}
 		
 		// do debug method craziness

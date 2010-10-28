@@ -306,7 +306,12 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 				ErrorReporter.report("Illegal method in " + className + ": StrictMath.random() cannot be called by a player.  Use java.util.Random instead.", false);
 				throw new InstrumentationException();
 			}
-			
+
+			if(n.owner.equals("java/lang/String") && n.name.equals("intern")) {
+				ErrorReporter.report("Illegal method in " + className + ": String.intern() cannot be called by a player.", false);
+				throw new InstrumentationException();
+			}
+
 			if(n.owner.equals("java/util/Collections") && n.name.equals("shuffle") && n.desc.equals("(Ljava/util/List;)V")) {
 				ErrorReporter.report("Illegal method in " + className + ": You must supply Collections.shuffle() with a Random.", false);
 				throw new InstrumentationException();
