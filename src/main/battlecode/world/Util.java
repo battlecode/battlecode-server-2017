@@ -11,26 +11,54 @@ public class Util {
 
 	private Util() {}
 
-	public static class WithinWedge implements Predicate<MapLocation> {
+	private static class WithinDistance implements Predicate<MapLocation> {
+
+		private MapLocation loc;
+		private int distance;
+
+		public WithinDistance(MapLocation loc, int distance) {
+			this.loc = loc;
+			this.distance = distance;
+		}
+
+		public boolean apply(MapLocation l) {
+			return l.distanceSquaredTo(loc)<=distance;
+		}
+
+	}
+
+	private static class WithinAngle implements Predicate<MapLocation> {
 
 		private double cosHalfTheta;
 		private MapLocation loc;
-		private int distance;
 		private Direction dir;
 
-		public WithinWedge(MapLocation loc, Direction dir, int distance, double cosHalfTheta) {
+		public WithinAngle(MapLocation loc, Direction dir, double cosHalfTheta) {
 			this.loc = loc;
 			this.dir = dir;
-			this.distance = distance;
 			this.cosHalfTheta = cosHalfTheta;
 		}
 
 		public boolean apply(MapLocation l) {
-			if(loc.distanceSquaredTo(l)>distance)
-				return false;
 			return GameWorld.inAngleRange(loc,dir,l,cosHalfTheta);
 		}
 
+	}
+
+	public static Predicate<InternalObject> objectWithinDistance(MapLocation loc, int distance) {
+		return Predicates.compose(withinDistance(loc,distance),objectLocation);
+	}
+
+	public static Predicate<InternalObject> robotWithinDistance(MapLocation loc, int distance) {
+		return Predicates.and(isRobot,objectWithinDistance(loc,distance));
+	}
+
+	public static Predicate<MapLocation> withinDistance(MapLocation loc, int distance) { return new WithinDistance(loc,distance); }
+
+	public static Predicate<MapLocation> withinAngle(MapLocation loc, Direction dir, double cosHalfTheta) { return new WithinAngle(loc,dir,cosHalfTheta); }
+
+	public static Predicate<MapLocation> withinWedge(MapLocation loc, int range, Direction dir, double cosHalfTheta) {
+		return Predicates.and(withinDistance(loc,range),withinAngle(loc,dir,cosHalfTheta));
 	}
 
 	static final Function<InternalObject,MapLocation> objectLocation = new Function<InternalObject,MapLocation>() {

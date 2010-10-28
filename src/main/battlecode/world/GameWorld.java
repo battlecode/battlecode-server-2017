@@ -259,8 +259,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
 	/**
-	 * Returns a set of all loose components at {@code loc}.  May return null
-	 * if there are none.
+	 * Returns a set of all loose components at {@code loc}.
 	 */
 	public Collection<InternalComponent> getComponentsAt(MapLocation loc) {
 		return looseComponents.get(loc);
@@ -483,6 +482,19 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
         return null;
     }
+
+	public Exception visitBroadcastSignal(BroadcastSignal s) {
+		InternalObject sender = gameObjectsByID.get(s.robotID);
+		Collection<InternalObject> objs = gameObjectsByLoc.values();
+		Predicate<InternalObject> pred = Util.robotWithinDistance(sender.getLocation(),s.range);
+		for(InternalObject o : Iterables.filter(objs,pred)) {
+			InternalRobot r = (InternalRobot)o;
+			r.enqueueIncomingMessage((Message)s.message.clone());
+		}
+		s.message = null;
+		addSignal(s);
+		return null;
+	}
 
     public Exception visitDeathSignal(DeathSignal s) {
         if (!running) {
