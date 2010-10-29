@@ -231,11 +231,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     /**
      * {@inheritDoc}
      */
-    public void setArchonMemory(long memory) throws GameActionException {
-    	// what to do about this?
+    public void setTeamMemory(int index, long value) {
+    	gameWorld.setArchonMemory(robot.getTeam(),index,value);
 	}
 
-    public long[] getOldArchonMemory() {
+    public long[] getTeamMemory() {
         return gameWorld.getOldArchonMemory()[robot.getTeam().ordinal()];
     }
 

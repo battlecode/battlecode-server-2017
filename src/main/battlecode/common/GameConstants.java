@@ -49,6 +49,8 @@ public final class GameConstants {
 	public static final int IRON_EFFECT_ROUNDS = 2;
 	public static final double PLATING_HP_BONUS = .1;
 	public static final double REGEN_AMOUNT = .1;
+	/** The number of longs that your team can remember between games. */
+	public static final int TEAM_MEMORY_LENGTH = 32;
 
     // This class cannot be instantiated.
     private GameConstants() {

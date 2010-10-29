@@ -169,15 +169,8 @@ public interface RobotController {
      *
      * @param memory
      *            the data that this archon should remember for the next game
-     * @throws GameActionException
-     *             under any of the following circumstances. If more than one of
-     *             the following applies, the
-     *             <code>GameActionExceptionType</code> will be the first
-     *             applicable one in the list.
-     *             <li>The calling robot is not an archon
-     *             (GameActionExceptionType.ARCHONS_ONLY)</li>
      */
-    public void setArchonMemory(long memory) throws GameActionException;
+    public void setTeamMemory(int index, long value);
 
     /**
      * Returns the archon memory from the archons in the last game of the match.
@@ -187,7 +180,7 @@ public interface RobotController {
      *
      * @return the archon memory from the archons in the last game of the match
      */
-    public long[] getOldArchonMemory();
+    public long[] getTeamMemory();
 
     /**
      * If breakpoints are enabled, calling this method causes the game engine to

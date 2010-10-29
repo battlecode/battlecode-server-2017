@@ -2,6 +2,7 @@ package battlecode.server;
 
 import java.util.Observable;
 
+import battlecode.common.GameConstants;
 import battlecode.common.Team;
 import battlecode.engine.*;
 import battlecode.serial.*;
@@ -18,8 +19,6 @@ import battlecode.engine.signal.Signal;
  */
 public class Match extends Observable {
 
-	private static int NUM_ARCHON_PER_TEAM = 6;
-	
     /** The Engine instance to use to run the game. */
     private Engine engine;
 
@@ -35,7 +34,7 @@ public class Match extends Observable {
     /** The command-line/config file options to use. */
     private final Config options;
 
-    private long[][] state = new long[2][NUM_ARCHON_PER_TEAM];
+    private long[][] state = new long[2][GameConstants.TEAM_MEMORY_LENGTH];
 
     private int number;
 
