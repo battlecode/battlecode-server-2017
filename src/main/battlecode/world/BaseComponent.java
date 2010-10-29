@@ -12,7 +12,7 @@ import static battlecode.common.GameActionExceptionType.*;
 
 import com.google.common.base.Predicate;
 
-public abstract class BaseComponent extends ControllerShared implements ComponentController
+public class BaseComponent extends ControllerShared implements ComponentController
 {
 	protected InternalComponent component;
 	protected InternalRobot robot;

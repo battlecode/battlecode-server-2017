@@ -80,7 +80,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     /**
      * {@inheritDoc}
      */
-    public double getMaxEnergonLevel() {
+    public double getMaxHp() {
         return robot.getMaxEnergon();
     }
 
@@ -111,6 +111,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public Team getTeam() {
         return robot.getTeam();
     }
+
+	public int getBytecodeLimit() {
+		return robot.getBytecodeLimit();
+	}
 
     /**
      * {@inheritDoc}
@@ -178,6 +182,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		assertWithinRange(ic.getLocation(),2);
 		if(!ic.canBeEquipped())
 			throw new GameActionException(CANT_EQUIP_THAT,"You can't equip that component.");
+		if(!robot.hasRoomFor(ic))
+			throw new GameActionException(CANT_EQUIP_THAT,"There is not enough room in the chassis for that component.");
+		robot.equip(ic);
 	}
 
     //***********************************

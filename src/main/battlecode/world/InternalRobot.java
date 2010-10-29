@@ -39,7 +39,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private volatile double myEnergonLevel;
     protected volatile Direction myDirection;
     private volatile boolean energonChanged = true;
-    protected volatile double myMaxEnergon;
     protected volatile long controlBits;
     // is this used ever?
 	protected volatile boolean hasBeenAttacked = false;
@@ -56,6 +55,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 	private List<Signal> actions;
 	private volatile boolean on;
 	private volatile boolean hasBeenOff;
+	private volatile int cores;
+	private volatile int platings;
+	private volatile int weight;
 
 	public static class ComponentSet extends ForwardingMultimap<ComponentClass,BaseComponent> {
 
@@ -92,8 +94,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         myDirection = Direction.values()[gw.getRandGen().nextInt(8)];
 		this.chassis = chassis;
 
-    	myMaxEnergon = chassis.maxHp;
-		myEnergonLevel = myMaxEnergon;
+		myEnergonLevel = getMaxEnergon();
         
 		incomingMessageQueue = new LinkedList<Message>();
 
@@ -123,22 +124,69 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		return tmp;
 	}
 
+	public boolean hasRoomFor(InternalComponent c) {
+		return c.type().weight + weight <= chassis.weight;	
+	}
+
 	public void equip(InternalComponent c) {
 		BaseComponent controller;
-		switch(c.type().componentClass) {
-		case MOTOR:
+		ComponentType type = c.type();
+		switch(type) {
+		case SHIELD:
+		case HARDENED:
+		case REGEN:
+		case PLASMA:
+		case PLATING:
+		case PROCESSOR:
+			controller = new BaseComponent(c,this);
+			break;
+		case SMG:
+		case BLASTER:
+		case CANNON:
+		case RAILGUN:
+		case HAMMER:
+		case GLUEGUN:
+		case MEDIC:
+			controller = new Weapon(c,this);
+			break;
+		case SATELLITE:
+		case TELESCOPE:
+		case SIGHT:
+		case RADAR:
+			controller = new Sensor(c,this);
+			break;
+		case ANTENNA:
+		case DISH:
+		case NETWORK:
+			controller = new Radio(c,this);
+			break;
+		case SMALL_MOTOR:
+		case MEDIUM_MOTOR:
+		case LARGE_MOTOR:
+		case FLYING_MOTOR:
 			controller = new Motor(c,this);
-		// remove this once all components are written
+			break;
 		default:
 			controller = null;
 		}
 		c.setController(controller);
 		components.add(controller);
+		weight+=type.weight;
+		if(type==ComponentType.PLATING)
+			platings++;
+		else if(type==ComponentType.PROCESSOR)
+			cores++;
 	}
 
 	public void unequip(BaseComponent c) {
 		c.getComponent().setController(null);
 		components.remove(c);
+		ComponentType type = c.type();
+		weight-=type.weight;
+		if(type==ComponentType.PLATING)
+			platings--;
+		else if(type==ComponentType.PROCESSOR)
+			cores--;
 	}
 
 	public void addAction(Signal s) {
@@ -255,8 +303,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public void changeEnergonLevel(double amount) {
         myEnergonLevel += amount;
-        if (myEnergonLevel > myMaxEnergon) {
-            myEnergonLevel = myMaxEnergon;
+        if (myEnergonLevel > getMaxEnergon()) {
+            myEnergonLevel = getMaxEnergon();
         }
         energonChanged = true;
     }
@@ -272,7 +320,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 
     public double getMaxEnergon() {
-        return myMaxEnergon;
+        return chassis.maxHp + platings * PLATING_HP_BONUS; 
     }
 
     public void setDirection(Direction dir) {
@@ -339,7 +387,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 	
 	public int getBytecodeLimit() {
-		return BYTECODE_LIMIT_BASE;
+		if(!on) return 0;
+		return BYTECODE_LIMIT_BASE + BYTECODE_LIMIT_ADDON * cores;
 	}
 
 

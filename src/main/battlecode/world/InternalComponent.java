@@ -1,7 +1,9 @@
 package battlecode.world;
 
 import battlecode.common.Component;
+import battlecode.common.ComponentClass;
 import battlecode.common.ComponentType;
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.Team;
 
@@ -28,7 +30,9 @@ public class InternalComponent extends InternalObject implements Component
 	
 	public void processEndOfTurn() {
 		if(roundsUntilIdle>0)
-			roundsUntilIdle--;	
+			roundsUntilIdle--;
+		if(type==ComponentType.REGEN)
+			controller.getRobot().changeEnergonLevel(GameConstants.REGEN_AMOUNT);
 	}
 
 	public InternalComponent(GameWorld gw, MapLocation loc, ComponentType type) {
@@ -45,6 +49,8 @@ public class InternalComponent extends InternalObject implements Component
 	}
 
 	public boolean canBeEquipped() {
+		if(type.componentClass == ComponentClass.MOTOR)
+			return false;
 		return controller==null||!controller.getRobot().isOn();
 	}
 }

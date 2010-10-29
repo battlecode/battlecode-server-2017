@@ -32,6 +32,7 @@ public final class GameConstants {
     public static final int NUMBER_OF_INDICATOR_STRINGS = 3;
     /** The base number of bytecodes a robot can execute each round */
     public static final int BYTECODE_LIMIT_BASE = 2000;
+	public static final int BYTECODE_LIMIT_ADDON = 2000;
     /** The chainer's splash damage radius */
     public final static int CHAINER_SPLASH_RADIUS_SQUARED = 2;
     /** The radius at which flux is mined */
@@ -46,6 +47,8 @@ public final class GameConstants {
 	public static final double SHIELD_MIN_DAMAGE = .05;
 	public static final double SHIELD_DAMAGE_REDUCTION = .2;
 	public static final int IRON_EFFECT_ROUNDS = 2;
+	public static final double PLATING_HP_BONUS = .1;
+	public static final double REGEN_AMOUNT = .1;
 
     // This class cannot be instantiated.
     private GameConstants() {

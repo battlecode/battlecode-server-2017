@@ -29,7 +29,7 @@ public interface RobotController {
      *
      * @return this robot's maximum energon level
      */
-    public double getMaxEnergonLevel();
+    public double getMaxHp();
 
     /**
      * Gets the current location of this robot.
