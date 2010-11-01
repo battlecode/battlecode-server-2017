@@ -51,6 +51,11 @@ public final class GameConstants {
 	public static final double REGEN_AMOUNT = .1;
 	/** The number of longs that your team can remember between games. */
 	public static final int TEAM_MEMORY_LENGTH = 32;
+	/** The maximum capacity that dropships can transport.  Note that
+	 * a chassis of capacity, say, six will take up six space in the
+	 * dropship, regardless of its components.
+	 */
+	public static final int TRANSPORT_CAPACITY = 24;
 
     // This class cannot be instantiated.
     private GameConstants() {

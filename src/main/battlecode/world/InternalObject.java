@@ -36,4 +36,8 @@ public abstract class InternalObject extends BaseObject {
 	public boolean exists() {
 		return myGameWorld.exists(this);
 	}
+
+	public InternalObject container() {
+		return null;
+	}
 }

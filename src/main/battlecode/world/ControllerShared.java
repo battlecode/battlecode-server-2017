@@ -9,6 +9,8 @@ public abstract class ControllerShared
 	protected GameWorld gameWorld;
 	protected InternalRobot robot;
 
+	public InternalRobot getRobot() { return robot; }
+
 	protected ControllerShared(GameWorld gw, InternalRobot r) {
 		gameWorld = gw;
 		robot = r;

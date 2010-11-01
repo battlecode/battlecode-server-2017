@@ -39,20 +39,26 @@ public class Motor extends BaseComponent implements MovementController
 	}
 
 	public void setDirection(Direction d) throws GameActionException {
-		assertNotNull(d);
+		assertValidDirection(d);
 		assertInactive();
 		activate(1);
 		robot.addAction(new SetDirectionSignal(robot,d));
 	}
 
 	public boolean canMove(Direction d) {
-		assertNotNull(d);
+		assertValidDirection(d);
 		return gameWorld.canMove(robot,d);
 	}
 
 	public void assertCanMove(Direction d) throws GameActionException {
 		if(!gameWorld.canMove(robot,d))
 			throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move in the given direction: " + d);
+	}
+
+	public void assertValidDirection(Direction d) {
+		assertNotNull(d);
+		if(d==Direction.NONE||d==Direction.OMNI)
+			throw new IllegalArgumentException("You cannot move in the direction NONE or OMNI.");
 	}
 
 }

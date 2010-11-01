@@ -33,7 +33,4 @@ public class GameActionException extends Exception {
 		return type;
 	}
 
-	public int hashCode() {
-		return type.ordinal();
-	}
 }

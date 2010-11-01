@@ -116,13 +116,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		return robot.getBytecodeLimit();
 	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public InternalRobot getRobot() {
-        return robot;
-    }
-
     public int getMapMinPoints() {
         return gameWorld.getGameMap().getMinPoints();
     }

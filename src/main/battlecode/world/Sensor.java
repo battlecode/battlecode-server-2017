@@ -45,6 +45,11 @@ public class Sensor extends BaseComponent implements SensorController {
 			components = ir.getComponentTypes();
 		else
 			components = null;
+		MapLocation loc;
+		if(ir.container()==robot)
+			loc = robot.getLocation();
+		else
+			loc = ir.getLocation();
 		return new RobotInfo(ir,ir.getLocation(),ir.getEnergonLevel(),ir.getMaxEnergon(),
 			ir.getDirection(),ir.isOn(),components);
 		

@@ -5,10 +5,12 @@ import static battlecode.common.GameConstants.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ForwardingMultimap;
@@ -36,6 +38,12 @@ import battlecode.world.signal.DeathSignal;
 
 public class InternalRobot extends InternalObject implements Robot, GenericRobot {
 
+	/**
+	 * Robots that are inside a transport are considered to be at this
+	 * location, so that no one but the dropship will be able to sense them.
+	 */
+	public static final MapLocation VERY_FAR_AWAY = new MapLocation(-1000,-1000);
+
     private volatile double myEnergonLevel;
     protected volatile Direction myDirection;
     private volatile boolean energonChanged = true;
@@ -60,6 +68,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 	private volatile int cores;
 	private volatile int platings;
 	private volatile int weight;
+	private volatile InternalRobot transporter;
+	private Set<InternalRobot> passengers;
 
 	public static class ComponentSet extends ForwardingMultimap<ComponentClass,BaseComponent> {
 
@@ -113,6 +123,14 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 		on = true;
     }
+
+	public boolean inTransport() {
+		return transporter != null;
+	}
+
+	public InternalRobot container() {
+		return transporter;
+	}
 
 	public boolean isOn() { return on; }
 
@@ -179,10 +197,17 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		newComponents.add(controller);
 		controller.activate(EQUIP_WAKE_DELAY);
 		weight+=type.weight;
-		if(type==ComponentType.PLATING)
+		switch(type) {
+		case PLATING:
 			platings++;
-		else if(type==ComponentType.PROCESSOR)
+			break;
+		case PROCESSOR:
 			cores++;
+			break;
+		case DROPSHIP:
+			passengers = new HashSet<InternalRobot>();
+			break;
+		}
 	}
 
 	/*
@@ -338,6 +363,17 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
     }
 
+	public InternalRobot [] robotsOnBoard() {
+		return passengers.toArray(new InternalRobot [0]);
+	}
+
+	public int spaceAvailable() {
+		int space = TRANSPORT_CAPACITY;
+		for(InternalRobot r : passengers) {
+			space-=r.getChassis().weight;	
+		}
+		return space;
+	}
 
     public double getMaxEnergon() {
         return chassis.maxHp + platings * PLATING_HP_BONUS; 
@@ -383,6 +419,28 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		}
     }
 
+	public void addPassenger(InternalRobot passenger) {
+		passengers.add(passenger);
+	}
+
+	public boolean hasPassenger(InternalRobot passenger) {
+		return passengers.contains(passenger);
+	}
+
+	public void removePassenger(InternalRobot passenger) {
+		passengers.remove(passenger);
+	}
+
+	public void load(InternalRobot transporter) {
+		this.transporter = transporter;
+		myLocation = VERY_FAR_AWAY;
+	}
+
+	public void unload(MapLocation loc) {
+		myLocation = loc;
+		transporter = null;
+	}
+
     @Override
     public void setLocation(MapLocation newLoc) {
         MapLocation oldLoc = getLocation();
@@ -407,10 +465,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 	
 	public int getBytecodeLimit() {
-		if(!on) return 0;
+		if((!on)||inTransport()) return 0;
 		return BYTECODE_LIMIT_BASE + BYTECODE_LIMIT_ADDON * cores;
 	}
-
 
     public boolean hasBeenAttacked() {
         return hasBeenAttacked;

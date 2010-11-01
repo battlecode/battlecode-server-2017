@@ -7,6 +7,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.GameObject;
 import battlecode.common.MapLocation;
 import battlecode.common.Robot;
+import battlecode.common.RobotLevel;
 
 import static battlecode.common.GameActionExceptionType.*;
 
@@ -44,8 +45,6 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 	public ComponentType type() { return type; }
 
 	public ComponentClass componentClass() { return type.componentClass; }
-
-	public InternalRobot getRobot() { return robot; }
 
 	/*
 	public void unequip() {
@@ -92,6 +91,7 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 
 	protected boolean checkWithinRange(InternalObject obj) {
 		if(!obj.exists()) return false;
+		if(obj.container()==robot) return true;
 		return checkWithinRange(obj.getLocation());
 	}
 
@@ -107,6 +107,13 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 
 	protected void assertWithinRange(InternalObject obj) throws GameActionException {
 		assertWithinRange(obj.getLocation());
+	}
+
+	protected InternalRobot alliedRobotAt(MapLocation loc, RobotLevel height) throws GameActionException {
+		InternalRobot ir = gameWorld.getRobot(loc,height);
+		if(ir==null||ir.getTeam()!=robot.getTeam())
+			throw new GameActionException(NO_ROBOT_THERE,"There is no allied robot there.");
+		return ir;
 	}
 
 	protected BaseComponent(ComponentType type, InternalRobot robot) {
