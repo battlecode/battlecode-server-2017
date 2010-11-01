@@ -1,5 +1,6 @@
 package battlecode.world;
 
+import battlecode.common.Chassis;
 import battlecode.common.ComponentType;
 import battlecode.common.DropshipController;
 import battlecode.common.GameActionException;
@@ -22,8 +23,8 @@ public class Dropship extends BaseComponent implements DropshipController {
 		assertNotNull(loc);
 		assertWithinRange(loc);
 		InternalRobot ir = alliedRobotAt(loc,RobotLevel.ON_GROUND);
-		activate();
-		robot.addAction(new LoadSignal(robot,ir));
+		assertSpaceAvailable(ir.getChassis());
+		activate(new LoadSignal(robot,ir));
 	}
 
 	public void unload(Robot r, MapLocation loc) throws GameActionException {
@@ -31,8 +32,7 @@ public class Dropship extends BaseComponent implements DropshipController {
 		InternalRobot ir = castInternalRobot(r);
 		assertCarrying(ir);
 		assertCanUnload(loc);
-		activate();
-		robot.addAction(new UnloadSignal(robot,ir,loc));
+		activate(new UnloadSignal(robot,ir,loc));
 	}
 
 	public boolean canUnload(MapLocation loc) {
@@ -47,6 +47,13 @@ public class Dropship extends BaseComponent implements DropshipController {
 
 	public int spaceAvailable() {
 		return robot.spaceAvailable();
+	}
+
+	public void assertSpaceAvailable(Chassis newChassis) throws GameActionException {
+		if(newChassis==Chassis.BUILDING)
+			throw new GameActionException(GameActionExceptionType.NO_ROBOT_THERE,"You can't transport a building.");
+		if(spaceAvailable()<newChassis.weight)
+			throw new GameActionException(GameActionExceptionType.INSUFFICIENT_ROOM_IN_CARGO,"You don't have space for that robot.");
 	}
 
 	public void assertCanUnload(MapLocation loc) throws GameActionException {

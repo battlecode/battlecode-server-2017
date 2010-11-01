@@ -23,8 +23,7 @@ public class Builder extends BaseComponent implements BuilderController {
 		assertNotNull(level);
 		assertWithinRange(loc);
 		InternalRobot ir = alliedRobotAt(loc,level);
-		activate();
-		robot.addAction(new EquipSignal(robot,ir,type));
+		activate(new EquipSignal(robot,ir,type));
 	}
 
 	public void build(Chassis type, MapLocation loc) throws GameActionException {
@@ -33,8 +32,7 @@ public class Builder extends BaseComponent implements BuilderController {
 		assertWithinRange(loc);
 		if(!gameWorld.canMove(type.level,loc))
 			throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE,"That square is occupied.");
-		activate();
-		robot.addAction(new SpawnSignal(loc,type,robot.getTeam(),robot));
+		activate(new SpawnSignal(loc,type,robot.getTeam(),robot));
 	}
 
 	public void assertCanBuild(ComponentType type) {

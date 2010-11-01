@@ -33,16 +33,14 @@ public class Motor extends BaseComponent implements MovementController
 		assertInactive();
 		assertCanMove(robot.getDirection());
 		int delay = d.isDiagonal()?delayDiagonal:type.delay;
-		activate(delay);
-		robot.addAction(new MovementSignal(robot,robot.getLocation().add(d),
-			d==robot.getDirection(),delay));
+		activate(new MovementSignal(robot,robot.getLocation().add(d),
+			d==robot.getDirection(),delay),delay);
 	}
 
 	public void setDirection(Direction d) throws GameActionException {
 		assertValidDirection(d);
 		assertInactive();
-		activate(1);
-		robot.addAction(new SetDirectionSignal(robot,d));
+		activate(new SetDirectionSignal(robot,d),1);
 	}
 
 	public boolean canMove(Direction d) {

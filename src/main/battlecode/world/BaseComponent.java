@@ -8,6 +8,7 @@ import battlecode.common.GameObject;
 import battlecode.common.MapLocation;
 import battlecode.common.Robot;
 import battlecode.common.RobotLevel;
+import battlecode.engine.signal.Signal;
 
 import static battlecode.common.GameActionExceptionType.*;
 
@@ -40,6 +41,16 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 	public void activate(int rounds) {
 		if(roundsUntilIdle<rounds)
 			roundsUntilIdle=rounds;
+	}
+
+	public void activate(Signal action) {
+		activate();
+		robot.addAction(action);
+	}
+
+	public void activate(Signal action, int rounds) {
+		activate(rounds);
+		robot.addAction(action);
 	}
 
 	public ComponentType type() { return type; }

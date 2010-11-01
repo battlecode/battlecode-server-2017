@@ -15,8 +15,7 @@ public class Radio extends BaseComponent implements BroadcastController {
 	public void broadcast(Message m) throws GameActionException {
 		assertInactive();
 		assertNotNull(m);
-		activate();
-		robot.addAction(new BroadcastSignal(robot,type().range,m));
+		activate(new BroadcastSignal(robot,type().range,m));
 	}
 
 }
