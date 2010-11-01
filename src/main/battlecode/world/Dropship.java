@@ -31,6 +31,7 @@ public class Dropship extends BaseComponent implements DropshipController {
 		InternalRobot ir = castInternalRobot(r);
 		assertCarrying(ir);
 		assertCanUnload(loc);
+		activate();
 		robot.addAction(new UnloadSignal(robot,ir,loc));
 	}
 

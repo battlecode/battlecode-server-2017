@@ -431,12 +431,12 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		passengers.remove(passenger);
 	}
 
-	public void load(InternalRobot transporter) {
+	public void loadOnto(InternalRobot transporter) {
 		this.transporter = transporter;
 		myLocation = VERY_FAR_AWAY;
 	}
 
-	public void unload(MapLocation loc) {
+	public void unloadTo(MapLocation loc) {
 		myLocation = loc;
 		transporter = null;
 	}

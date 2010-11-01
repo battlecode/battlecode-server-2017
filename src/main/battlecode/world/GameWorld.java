@@ -391,6 +391,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return gameObjectsByID.values().toArray(new InternalObject[gameObjectsByID.size()]);
     }
 
+	public InternalRobot getRobotByID(int id) {
+		return (InternalRobot)getObjectByID(id);
+	}
+
     public Signal[] getAllSignals(boolean includeBytecodesUsedSignal) {
         ArrayList<InternalRobot> energonChangedRobots = new ArrayList<InternalRobot>();
         ArrayList<InternalRobot> fluxChangedRobots = new ArrayList<InternalRobot>();
@@ -551,6 +555,24 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
         return null;
     }
+
+	public Exception visitLoadSignal(LoadSignal s) {
+		InternalRobot transport = getRobotByID(s.transportID);
+		InternalRobot passenger = getRobotByID(s.passengerID);
+		transport.addPassenger(passenger);
+		passenger.loadOnto(transport);
+		addSignal(s);
+		return null;
+	}
+
+	public Exception visitUnloadSignal(UnloadSignal s) {
+		InternalRobot transport = getRobotByID(s.transportID);
+		InternalRobot passenger = getRobotByID(s.passengerID);
+		transport.removePassenger(passenger);
+		passenger.unloadTo(s.unloadLoc);
+		addSignal(s);
+		return null;
+	}
 
     public Exception visitMatchObservationSignal(MatchObservationSignal s) {
         addSignal(s);
