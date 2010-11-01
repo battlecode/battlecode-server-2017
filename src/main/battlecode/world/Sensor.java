@@ -4,7 +4,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 
-import battlecode.common.Component;
 import battlecode.common.ComponentType;
 import battlecode.common.GameActionException;
 import battlecode.common.GameObject;
@@ -18,8 +17,8 @@ import java.util.Set;
 
 public class Sensor extends BaseComponent implements SensorController {
 
-	public Sensor(InternalComponent component, InternalRobot robot) {
-		super(component,robot);
+	public Sensor(ComponentType type, InternalRobot robot) {
+		super(type,robot);
 	}
 
 	public Robot senseRobotAtLocation(MapLocation loc, RobotLevel height) throws GameActionException {
@@ -41,9 +40,9 @@ public class Sensor extends BaseComponent implements SensorController {
 		assertEquipped();
 		InternalRobot ir = castInternalRobot(r);
 		assertWithinRange(ir);
-		Component [] components;
-		if(type()==ComponentType.SATELLITE||GameWorld.canStealComponent(robot,ir))
-			components = ir.getComponents();
+		ComponentType [] components;
+		if(type()==ComponentType.SATELLITE)
+			components = ir.getComponentTypes();
 		else
 			components = null;
 		return new RobotInfo(ir,ir.getLocation(),ir.getEnergonLevel(),ir.getMaxEnergon(),
@@ -58,6 +57,7 @@ public class Sensor extends BaseComponent implements SensorController {
 		return io.getLocation();
 	}
 
+	/*
 	public InternalComponent [] senseNearbyComponents() {
 		assertEquipped();
 		return Iterables.toArray(gameWorld.getLooseComponents(locWithinRangePredicate()),InternalComponent.class);
@@ -69,6 +69,7 @@ public class Sensor extends BaseComponent implements SensorController {
 		assertWithinRange(loc);
 		return gameWorld.getComponentsAt(loc).toArray(new InternalComponent [0]);
 	}
+	*/
 
 	public boolean canSenseObject(GameObject o) {
 		assertEquipped();

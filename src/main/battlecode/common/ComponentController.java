@@ -27,6 +27,4 @@ public interface ComponentController
 	 */
 	public boolean withinRange(MapLocation loc);
 
-	public void unequip();
-
 }

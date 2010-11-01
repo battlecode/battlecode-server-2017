@@ -1,7 +1,6 @@
 package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
-import battlecode.world.InternalComponent;
 import battlecode.world.InternalRobot;
 import battlecode.common.ComponentType;
 import battlecode.common.MapLocation;
@@ -34,9 +33,9 @@ public class AttackSignal extends Signal {
 	 * @param robot the robot that attacked
 	 * @param targetLoc the location that the robot attacked
 	 */
-	public AttackSignal(InternalRobot robot, InternalComponent weapon, MapLocation targetLoc, RobotLevel targetHeight) {
+	public AttackSignal(InternalRobot robot, ComponentType weapon, MapLocation targetLoc, RobotLevel targetHeight) {
 		this.robotID = robot.getID();
-		this.weaponType = weapon.type();
+		this.weaponType = weapon;
 		this.targetLoc = targetLoc;
 		this.targetHeight = targetHeight;
 	}

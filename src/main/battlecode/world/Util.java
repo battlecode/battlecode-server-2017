@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
+import battlecode.common.ComponentType;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 
@@ -67,13 +68,20 @@ public class Util {
 		}
 	};
 
+	/*
 	static final Function<BaseComponent,InternalComponent> controllerToComponent = new Function<BaseComponent,InternalComponent>() {
 		public InternalComponent apply(BaseComponent c) {
 			return c.getComponent();
 		}
 	};
+	*/
 
 	static final Predicate<Object> isRobot = Predicates.instanceOf(InternalRobot.class);
-	static final Predicate<Object> isComponent = Predicates.instanceOf(InternalComponent.class);
+
+	static final Function<BaseComponent,ComponentType> typeOfComponent = new Function<BaseComponent,ComponentType>() {
+		public ComponentType apply(BaseComponent c) {
+			return c.type();
+		}
+	};
 
 }

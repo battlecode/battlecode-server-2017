@@ -79,11 +79,28 @@ public interface RobotController {
      */
     public Chassis getChassis();
 
+	/**
+	 * Returns all this robot's components.
+	 */
 	public ComponentController [] components();
 
-	public ComponentController [] components(ComponentType type);
+	/**
+	 * Returns the components that have been added to this robot
+	 * since the last call to newComponents().
+	 */
+	public ComponentController [] newComponents();
 
-	public ComponentController [] components(ComponentClass cls);
+	/**
+	 * Returns all components of the given type that this robot
+	 * possesses.
+	 */
+	//public ComponentController [] components(ComponentType type);
+
+	/**
+	 * Returns all components of the given component class that
+	 * this robot possesses.
+	 */
+	//public ComponentController [] components(ComponentClass cls);
 
     /**
      * Gets the minimum number of points needed to win a game on this map
@@ -93,8 +110,6 @@ public interface RobotController {
     // ***********************************
     // ****** ACTION METHODS ********
     // ***********************************
-
-	public void equip(Component component) throws GameActionException;
 
 	public void turnOff();
 

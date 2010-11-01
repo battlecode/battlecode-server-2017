@@ -52,7 +52,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final GameStats gameStats = new GameStats();		// end-of-game stats
     private double[] teamPoints;
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc;
-	private final Multimap<MapLocation, InternalComponent> looseComponents;
+	//private final Multimap<MapLocation, InternalComponent> looseComponents;
     private final Set<MapLocation>[] teleportersByTeam;
     
     private boolean[][] minedLocs;
@@ -62,7 +62,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		super(gm.getSeed(),teamA,teamB,oldArchonMemory);
         gameMap = gm;
         gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
-		looseComponents = HashMultimap.create();
+		//looseComponents = HashMultimap.create();
         teleportersByTeam = new Set[]{
                     new HashSet<MapLocation>(),
                     new HashSet<MapLocation>()};
@@ -261,6 +261,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 	/**
 	 * Returns a set of all loose components at {@code loc}.
 	 */
+	/*
 	public Collection<InternalComponent> getComponentsAt(MapLocation loc) {
 		return looseComponents.get(loc);
 	}
@@ -270,6 +271,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		Iterable<Collection<InternalComponent>> c = Iterables.transform(keys,Functions.forMap(looseComponents.asMap()));
 		return Iterables.concat(c);
 	}
+	*/
 
     // should only be called by the InternalObject constructor
     public void notifyAddingNewObject(InternalObject o) {
@@ -281,9 +283,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
     }
 
+	/*
 	public static boolean canStealComponent(InternalRobot thief, InternalRobot victim) {
 		return (!victim.isOn())&&thief.getLocation().distanceSquaredTo(victim.getLocation())<=2;
 	}
+	*/
 
 	public Collection<InternalObject> allObjects() {
 		return gameObjectsByID.values();

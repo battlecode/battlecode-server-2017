@@ -53,6 +53,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 	public final Chassis chassis;
 	/** all actions that have been performed in the current round */
 	private List<Signal> actions;
+	private List<BaseComponent> newComponents;
+	private volatile Signal equipSignal;
 	private volatile boolean on;
 	private volatile boolean hasBeenOff;
 	private volatile int cores;
@@ -81,7 +83,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 	}
 
-	public final ComponentSet components;
+	private final ComponentSet components;
 
     public InternalRobotBuffs getBuffs() {
         return buffs;
@@ -103,8 +105,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         controlBits = 0;
 
 		components = new ComponentSet();
+		newComponents = new ArrayList<BaseComponent>();
 		if(chassis.motor!=null)
-			equip(new InternalComponent(myGameWorld,myLocation,chassis.motor));
+			equip(chassis.motor);
 
 		actions = new LinkedList<Signal>();
 
@@ -118,19 +121,22 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		if(!b) hasBeenOff=true;
 	}
 
+	public void setEquipSignal(Signal s) {
+		equipSignal = s;
+	}
+
 	public boolean queryHasBeenOff() {
 		boolean tmp = hasBeenOff;
 		hasBeenOff = false;
 		return tmp;
 	}
 
-	public boolean hasRoomFor(InternalComponent c) {
-		return c.type().weight + weight <= chassis.weight;	
+	public boolean hasRoomFor(ComponentType c) {
+		return c.weight + weight <= chassis.weight;	
 	}
 
-	public void equip(InternalComponent c) {
+	public void equip(ComponentType type) {
 		BaseComponent controller;
-		ComponentType type = c.type();
 		switch(type) {
 		case SHIELD:
 		case HARDENED:
@@ -138,7 +144,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		case PLASMA:
 		case PLATING:
 		case PROCESSOR:
-			controller = new BaseComponent(c,this);
+			controller = new BaseComponent(type,this);
 			break;
 		case SMG:
 		case BLASTER:
@@ -147,30 +153,31 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		case HAMMER:
 		case GLUEGUN:
 		case MEDIC:
-			controller = new Weapon(c,this);
+			controller = new Weapon(type,this);
 			break;
 		case SATELLITE:
 		case TELESCOPE:
 		case SIGHT:
 		case RADAR:
-			controller = new Sensor(c,this);
+			controller = new Sensor(type,this);
 			break;
 		case ANTENNA:
 		case DISH:
 		case NETWORK:
-			controller = new Radio(c,this);
+			controller = new Radio(type,this);
 			break;
 		case SMALL_MOTOR:
 		case MEDIUM_MOTOR:
 		case LARGE_MOTOR:
 		case FLYING_MOTOR:
-			controller = new Motor(c,this);
+			controller = new Motor(type,this);
 			break;
 		default:
 			controller = null;
 		}
-		c.setController(controller);
 		components.add(controller);
+		newComponents.add(controller);
+		controller.activate(EQUIP_WAKE_DELAY);
 		weight+=type.weight;
 		if(type==ComponentType.PLATING)
 			platings++;
@@ -178,6 +185,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 			cores++;
 	}
 
+	/*
 	public void unequip(BaseComponent c) {
 		c.getComponent().setController(null);
 		components.remove(c);
@@ -188,6 +196,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		else if(type==ComponentType.PROCESSOR)
 			cores--;
 	}
+	*/
 
 	public void addAction(Signal s) {
 		actions.add(s);
@@ -197,12 +206,24 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		return chassis;
 	}
 
+	/*
 	public InternalComponent [] getComponents() {
 		return Iterables.toArray(Iterables.transform(components.values(),Util.controllerToComponent),InternalComponent.class);
+	}
+	*/
+
+	public ComponentType [] getComponentTypes() {
+		return Iterables.toArray(Iterables.transform(components.values(),Util.typeOfComponent),ComponentType.class);
 	}
 
 	public BaseComponent [] getComponentControllers() {
 		return components.values().toArray(new BaseComponent [0]);
+	}
+
+	public BaseComponent [] getNewComponentControllers() {
+		BaseComponent [] controllers = newComponents.toArray(new BaseComponent [0]);
+		newComponents.clear();
+		return controllers;
 	}
 
 	public BaseComponent [] getComponentControllers(ComponentClass cl) {
@@ -223,10 +244,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void processBeginningOfRound() {
         super.processBeginningOfRound();
         buffs.processBeginningOfRound();
-
-		for(BaseComponent c : components.values()) {
-			c.component.processBeginningOfRound();
-		}
     }
 
     public void processBeginningOfTurn() {
@@ -236,7 +253,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void processEndOfTurn() {
         super.processEndOfTurn();
 		for(BaseComponent c : components.values()) {
-			c.getComponent().processEndOfTurn();
+			c.processEndOfTurn();
 		}
 		for(Signal s : actions) {
 			myGameWorld.visitSignal(s);
@@ -271,7 +288,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 	
 	public void takeDamage(double baseAmount) {
 		// TODO: iron (use buffs)
-		if(baseAmount<0) changeEnergonLevel(-baseAmount);
+		if(baseAmount<0) {
+			changeEnergonLevel(-baseAmount);
+			return;
+		}
 		boolean haveHardened = false;
 		double minDamage = Math.min(SHIELD_MIN_DAMAGE, baseAmount);
 		for(BaseComponent c : components.get(ComponentClass.ARMOR)) {
@@ -283,8 +303,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 					haveHardened=true;
 					break;
 				case PLASMA:
-					if(!c.getComponent().isActive()) {
-						c.getComponent().activate();
+					if(!c.isActive()) {
+						c.activate();
 						return;
 					}
 					break;

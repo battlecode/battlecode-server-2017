@@ -45,10 +45,6 @@ public abstract class ControllerShared
 		throw new GameActionException(CANT_SENSE_THAT,"That is not within range.");
 	}
 
-	protected static InternalComponent castInternalComponent(Component o) {
-		return castInternalObject(o,InternalComponent.class);
-	}
-
 	protected static InternalRobot castInternalRobot(Robot r) {
 		return castInternalObject(r,InternalRobot.class);
 	}

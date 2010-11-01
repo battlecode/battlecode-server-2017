@@ -1,5 +1,6 @@
 package battlecode.world;
 
+import battlecode.common.ComponentType;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameActionExceptionType;
@@ -15,8 +16,8 @@ public class Motor extends BaseComponent implements MovementController
 
 	int delayDiagonal;
 
-	public Motor(InternalComponent component, InternalRobot robot) {
-		super(component,robot);
+	public Motor(ComponentType type, InternalRobot robot) {
+		super(type,robot);
 		delayDiagonal = (int)Math.round(type().delay*sq2);
 	}
 
@@ -31,8 +32,8 @@ public class Motor extends BaseComponent implements MovementController
 	private void move(Direction d) throws GameActionException {
 		assertInactive();
 		assertCanMove(robot.getDirection());
-		int delay = d.isDiagonal()?delayDiagonal:type().delay;
-		component.activate(delay);
+		int delay = d.isDiagonal()?delayDiagonal:type.delay;
+		activate(delay);
 		robot.addAction(new MovementSignal(robot,robot.getLocation().add(d),
 			d==robot.getDirection(),delay));
 	}
@@ -40,7 +41,7 @@ public class Motor extends BaseComponent implements MovementController
 	public void setDirection(Direction d) throws GameActionException {
 		assertNotNull(d);
 		assertInactive();
-		component.activate(1);
+		activate(1);
 		robot.addAction(new SetDirectionSignal(robot,d));
 	}
 

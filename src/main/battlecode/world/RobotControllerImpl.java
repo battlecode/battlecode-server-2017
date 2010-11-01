@@ -135,6 +135,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		return robot.getComponentControllers();
 	}
 
+	public ComponentController [] newComponents() {
+		return robot.getNewComponentControllers();
+	}
+
 	public ComponentController [] components(ComponentType type) {
 		return robot.getComponentControllers(type);
 	}
@@ -176,7 +180,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public void breakpoint() {
         gameWorld.notifyBreakpoint();
     }
-
+	
+	/*
 	public void equip(Component c) throws GameActionException {
 		InternalComponent ic = castInternalComponent(c);
 		assertWithinRange(ic.getLocation(),2);
@@ -186,6 +191,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 			throw new GameActionException(CANT_EQUIP_THAT,"There is not enough room in the chassis for that component.");
 		robot.equip(ic);
 	}
+	*/
 
     //***********************************
     //****** SENSING METHODS *******

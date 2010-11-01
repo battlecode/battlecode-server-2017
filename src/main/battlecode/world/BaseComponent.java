@@ -14,31 +14,44 @@ import com.google.common.base.Predicate;
 
 public class BaseComponent extends ControllerShared implements ComponentController
 {
-	protected InternalComponent component;
+	protected ComponentType type;
+	protected int roundsUntilIdle;
 	protected InternalRobot robot;
 	protected GameWorld gameWorld;
 
 	public boolean isActive() {
-		assertEquipped();
-		return component.isActive();
+		return roundsUntilIdle>0;
 	}
 
 	public int roundsUntilIdle() {
-		assertEquipped();
-		return component.roundsUntilIdle();
+		return roundsUntilIdle;
 	}
 
-	public ComponentType type() { return component.type(); }
+	public void processEndOfTurn() {
+		if(roundsUntilIdle>0)
+			roundsUntilIdle--;
+	}
 
-	public ComponentClass componentClass() { return component.type().componentClass; }
+	public void activate() {
+		activate(type.delay);
+	}
 
-	public InternalComponent getComponent() { return component; }
+	public void activate(int rounds) {
+		if(roundsUntilIdle<rounds)
+			roundsUntilIdle=rounds;
+	}
+
+	public ComponentType type() { return type; }
+
+	public ComponentClass componentClass() { return type.componentClass; }
 
 	public InternalRobot getRobot() { return robot; }
 
+	/*
 	public void unequip() {
 		// add unequip signal
 	}
+	*/
 
 	protected Predicate<InternalObject> objectWithinRangePredicate() {
 		return new Predicate<InternalObject>() {
@@ -56,9 +69,13 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 		};
 	}
 
+	// This was written under the assumption that components could be
+	// unequipped.  It can be removed once all calls to it have been
+	// removed.
+	@Deprecated
 	protected void assertEquipped() {
-		if(component.getController()!=this)
-			throw new IllegalStateException("You no longer control this component.");
+		//if(component.getController()!=this)
+		//	throw new IllegalStateException("You no longer control this component.");
 	}
 
 	public boolean withinRange(MapLocation loc) {
@@ -67,10 +84,10 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 	}
 
 	protected boolean checkWithinRange(MapLocation loc) {
-		if(robot.getLocation().distanceSquaredTo(loc)>component.type().range)
+		if(robot.getLocation().distanceSquaredTo(loc)>type.range)
 			return false;
 		return GameWorld.inAngleRange(robot.getLocation(),robot.getDirection(),
-			loc,component.type().cosHalfAngle);
+			loc,type.cosHalfAngle);
 	}
 
 	protected boolean checkWithinRange(InternalObject obj) {
@@ -79,7 +96,7 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 	}
 
 	protected void assertInactive() throws GameActionException {
-		if(component.roundsUntilIdle()>0)
+		if(roundsUntilIdle()>0)
 			throw new GameActionException(ALREADY_ACTIVE,"This component is already active.");	
 	}
 
@@ -92,9 +109,9 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 		assertWithinRange(obj.getLocation());
 	}
 
-	protected BaseComponent(InternalComponent component, InternalRobot robot) {
+	protected BaseComponent(ComponentType type, InternalRobot robot) {
 		super(robot.getGameWorld(),robot);
-		this.component = component;
+		this.type = type;
 	}
 
 }

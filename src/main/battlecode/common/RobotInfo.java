@@ -28,11 +28,11 @@ public class RobotInfo {
 	 * <li>the two robots are adjacent, and the robot being sensed is off.</li></ul>
 	 * Otherwise, {@code components} will be {@code null}.
 	 */
-	public final Component [] components;
+	public final ComponentType [] components;
 
     public RobotInfo(Robot robot, MapLocation location,
 	                 double hitpoints, double maxHp, Direction direction,
-					 boolean on, Component [] components) {
+					 boolean on, ComponentType [] components) {
         super();
         this.robot = robot;
 		this.location = location;

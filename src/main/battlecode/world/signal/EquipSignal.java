@@ -1,16 +1,18 @@
 package battlecode.world.signal;
 
+import battlecode.common.ComponentType;
 import battlecode.world.InternalRobot;
-import battlecode.world.InternalComponent;
 import battlecode.engine.signal.Signal;
 
 public class EquipSignal extends Signal {
 
 	public final int robotID;
-	public final int componentID;
-	
-	public EquipSignal(InternalRobot robot, InternalComponent component) {
+	public final int builderID;
+	public final ComponentType component;
+
+	public EquipSignal(InternalRobot robot, InternalRobot builder, ComponentType component) {
 		robotID = robot.getID();
-		componentID = component.getID();
+		builderID = builder.getID();
+		this.component = component;
 	}
 }
