@@ -67,7 +67,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 	private volatile boolean hasBeenOff;
 	private volatile int cores;
 	private volatile int platings;
+	private volatile int regens;
 	private volatile int weight;
+	private volatile int invulnerableRounds;
 	private volatile InternalRobot transporter;
 	private Set<InternalRobot> passengers;
 
@@ -209,6 +211,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		case PROCESSOR:
 			cores++;
 			break;
+		case REGEN:
+			regens++;
+			break;
 		case DROPSHIP:
 			passengers = new HashSet<InternalRobot>();
 			break;
@@ -277,11 +282,14 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void processBeginningOfTurn() {
+		changeEnergonLevel(regens * REGEN_AMOUNT);
 	}
 
     @Override
     public void processEndOfTurn() {
         super.processEndOfTurn();
+		if(invulnerableRounds>0)
+			invulnerableRounds--;
 		for(BaseComponent c : components.values()) {
 			c.processEndOfTurn();
 		}
@@ -299,8 +307,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         	// TODO: upkeep
 		}
 
-		// TODO: regeneration
-
         buffs.processEndOfRound();
         
 		if (myEnergonLevel <= 0) {
@@ -315,6 +321,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public Direction getDirection() {
         return myDirection;
     }
+
+	public void activateShield() {
+		invulnerableRounds=IRON_EFFECT_ROUNDS;
+	}
 	
 	public void takeDamage(double baseAmount) {
 		// TODO: iron (use buffs)
@@ -322,6 +332,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 			changeEnergonLevel(-baseAmount);
 			return;
 		}
+		if(invulnerableRounds>0) return;
 		boolean haveHardened = false;
 		double minDamage = Math.min(SHIELD_MIN_DAMAGE, baseAmount);
 		for(BaseComponent c : components.get(ComponentClass.ARMOR)) {

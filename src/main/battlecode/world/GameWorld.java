@@ -556,6 +556,13 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return null;
     }
 
+	public Exception visitIronShieldSignal(IronShieldSignal s) {
+		InternalRobot r = getRobotByID(s.robotID);
+		r.activateShield();
+		addSignal(s);
+		return null;
+	}
+
 	public Exception visitLoadSignal(LoadSignal s) {
 		InternalRobot transport = getRobotByID(s.transportID);
 		InternalRobot passenger = getRobotByID(s.passengerID);
