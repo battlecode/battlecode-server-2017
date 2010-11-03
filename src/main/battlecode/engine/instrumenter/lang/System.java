@@ -25,7 +25,7 @@ public final class System {
 	public static void arraycopy(Object src, int srcPos, Object dest, int destPos, int length) {
 		java.lang.System.arraycopy(src, srcPos, dest, destPos, length);
 		if(length>0)
-			RobotMonitor.incrementBytecodes(length * 8);
+			RobotMonitor.incrementBytecodes(length);
 	}
 
 	// set by RobotMonitor
