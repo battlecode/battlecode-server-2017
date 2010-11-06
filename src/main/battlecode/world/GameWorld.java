@@ -1075,10 +1075,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return null;
     }
 
-    public Exception visitMapOriginSignal(MapOriginSignal s) {
-        addSignal(s);
-        return null;
-    }
     // *****************************
     //    UTILITY METHODS
     // *****************************
