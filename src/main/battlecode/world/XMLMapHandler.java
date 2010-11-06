@@ -28,7 +28,6 @@ import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.PlayerFactory;
 import battlecode.world.GameMap.MapProperties;
-import battlecode.world.signal.MapOriginSignal;
 import battlecode.world.signal.SpawnSignal;
 import battlecode.engine.signal.Signal;
 
@@ -547,9 +546,6 @@ class XMLMapHandler extends DefaultHandler {
             GameWorld gw = new GameWorld(gm, teamA, teamB, archonMemory);
 
             MapLocation origin = gm.getMapOrigin();
-
-            Signal s = new MapOriginSignal(origin);
-            s.accept(gw);
 
             ArrayList<MapCoordinate> robotCoordinates = new ArrayList<MapCoordinate>();
             for (int j = 0; j < mapHeight; j++) {

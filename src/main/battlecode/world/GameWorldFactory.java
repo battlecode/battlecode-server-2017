@@ -20,7 +20,6 @@ import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.PlayerFactory;
 import battlecode.world.GameMap.MapProperties;
-import battlecode.world.signal.MapOriginSignal;
 import battlecode.world.signal.SpawnSignal;
 import battlecode.engine.signal.Signal;
 
