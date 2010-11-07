@@ -46,29 +46,17 @@ TODO:
  */
 public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld {
 
-    private static final int NUM_ARCHONS_PER_TEAM = 6; // also need to change value in Match.java
     private final GameMap gameMap;
     private RoundStats roundStats = null;	// stats for each round; new object is created for each round
     private final GameStats gameStats = new GameStats();		// end-of-game stats
-    private double[] teamPoints;
-    private final Map<MapLocation3D, InternalObject> gameObjectsByLoc;
-	//private final Multimap<MapLocation, InternalComponent> looseComponents;
-    private final Set<MapLocation>[] teleportersByTeam;
-    
-    private boolean[][] minedLocs;
+    private double[] teamPoints = new double [2];
+    private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
+   	private double [] teamResources = new double [2];
 
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldArchonMemory) {
 		super(gm.getSeed(),teamA,teamB,oldArchonMemory);
         gameMap = gm;
-        gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
-		//looseComponents = HashMultimap.create();
-        teleportersByTeam = new Set[]{
-                    new HashSet<MapLocation>(),
-                    new HashSet<MapLocation>()};
-        minedLocs = new boolean[gm.getHeight()][gm.getWidth()];
-        teamPoints = new double[2];
-        //testScoreCounter();
     }
 
 	public int getMapSeed() {
@@ -103,8 +91,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         // calculate some stats
         double[] totalEnergon = new double[3];
-        int[] numArchons = new int[2];
-        double[][] archonProduction = new double[2][NUM_ARCHONS_PER_TEAM];
         //~ int[] numRobots = new int[2];
         boolean teamADead = true, teamBDead = true;
         for (InternalObject obj : gameObjectsByID.values()) {
@@ -123,20 +109,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 if (teamBDead && r.getTeam() == Team.B) teamBDead = false;
             }
         }
-        //~ stats.setActiveTotal(numRobots[0], Team.A);
-        //~ stats.setActiveTotal(numRobots[1], Team.B);
-        //~ stats.setEnergon(totalEnergon[0], Team.A);
-        //~ stats.setEnergon(totalEnergon[1], Team.B);
-        //~ stats.setNumArchons(numArchons[0], Team.A);
-        //~ stats.setNumArchons(numArchons[1], Team.B);
-        //~ stats.setArchonProduction(archonProduction[0], Team.A);
-        //~ stats.setArchonProduction(archonProduction[1], Team.B);
 
         teamPoints[Team.A.ordinal()] += getRoundPoints(Team.A);
         teamPoints[Team.B.ordinal()] += getRoundPoints(Team.B);
         int aPoints = (int) (teamPoints[Team.A.ordinal()]), bPoints = (int) (teamPoints[Team.B.ordinal()]);
 
-        roundStats = new RoundStats(archonProduction[0], archonProduction[1], aPoints, bPoints);
+        roundStats = new RoundStats(aPoints, bPoints);
 
         // check for mercy rule
         //boolean teamAHasMinPoints = teamPoints[Team.A.ordinal()] >= gameMap.getMinPoints() || gameMap.getMaxRounds() < currentRound;
@@ -174,22 +152,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
             gameStats.setPoints(Team.A, aPoints);
             gameStats.setPoints(Team.B, bPoints);
-            gameStats.setNumArchons(Team.A, numArchons[0]);
-            gameStats.setNumArchons(Team.B, numArchons[1]);
             gameStats.setTotalEnergon(Team.A, totalEnergon[0]);
             gameStats.setTotalEnergon(Team.B, totalEnergon[1]);
             if (!teamADead && teamBDead) {
                 winner = Team.A;
-                if (numArchons[0] >= NUM_ARCHONS_PER_TEAM)
-                    gameStats.setDominationFactor(DominationFactor.DESTROYED);
-                else
-                    gameStats.setDominationFactor(DominationFactor.PWNED);
+                gameStats.setDominationFactor(DominationFactor.DESTROYED);
             } else if (!teamBDead && teamADead) {
                 winner = Team.B;
-                if (numArchons[1] >= NUM_ARCHONS_PER_TEAM)
-                    gameStats.setDominationFactor(DominationFactor.DESTROYED);
-                else
-                    gameStats.setDominationFactor(DominationFactor.PWNED);
+                gameStats.setDominationFactor(DominationFactor.DESTROYED);
             } else if (aPoints != bPoints) {
                 if (teamAMercy) {
                     gameStats.setDominationFactor(DominationFactor.OWNED);
@@ -205,13 +175,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                         winner = Team.B;
                 }
             } else {
-                if (numArchons[0] > numArchons[1]) {
-                    winner = Team.A;
-                    gameStats.setDominationFactor(DominationFactor.BARELY_BEAT);
-                } else if (numArchons[0] < numArchons[1]) {
-                    winner = Team.B;
-                    gameStats.setDominationFactor(DominationFactor.BARELY_BEAT);
-                } else {
                     gameStats.setDominationFactor(DominationFactor.WON_BY_DUBIOUS_REASONS);
                     if (totalEnergon[0] > totalEnergon[1])
                         winner = Team.A;
@@ -223,7 +186,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                         else
                             winner = Team.B;
                     }
-                }
             }
         }
 
@@ -258,21 +220,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             return null;
     }
 
-	/**
-	 * Returns a set of all loose components at {@code loc}.
-	 */
-	/*
-	public Collection<InternalComponent> getComponentsAt(MapLocation loc) {
-		return looseComponents.get(loc);
-	}
-
-	public Iterable<InternalComponent> getLooseComponents(Predicate<MapLocation> p) {
-		Set<MapLocation> keys = looseComponents.keySet();
-		Iterable<Collection<InternalComponent>> c = Iterables.transform(keys,Functions.forMap(looseComponents.asMap()));
-		return Iterables.concat(c);
-	}
-	*/
-
     // should only be called by the InternalObject constructor
     public void notifyAddingNewObject(InternalObject o) {
         if (gameObjectsByID.containsKey(o.getID()))
@@ -283,19 +230,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
     }
 
-	/*
-	public static boolean canStealComponent(InternalRobot thief, InternalRobot victim) {
-		return (!victim.isOn())&&thief.getLocation().distanceSquaredTo(victim.getLocation())<=2;
-	}
-	*/
-
 	public Collection<InternalObject> allObjects() {
 		return gameObjectsByID.values();
 	}
-
-    public void notifyAddingNewTeleporter(InternalRobot r) {
-        teleportersByTeam[r.getTeam().ordinal()].add(r.getLocation());
-    }
 
     // TODO: move stuff to here
     // should only be called by InternalObject.setLocation
@@ -729,6 +666,19 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         return locations.toArray(new MapLocation[locations.size()]);
     }
+
+	protected boolean spendResources(Team t, double amount) {
+		if(teamResources[t.ordinal()]>=amount) {
+			teamResources[t.ordinal()]-=amount;
+			return true;
+		}
+		else
+			return false;
+	}
+
+	protected void adjustResources(Team t, double amount) {
+		teamResources[t.ordinal()] += amount;
+	}
 
     protected void adjustTeamPoints(InternalRobot r, int points) {
         teamPoints[r.getTeam().ordinal()] += points;

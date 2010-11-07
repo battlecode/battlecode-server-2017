@@ -41,10 +41,7 @@ class XMLMapHandler extends DefaultHandler {
         private LinkedList<String> xmlStack = new LinkedList<String>();
         /** Stores all the map properties. */
         private int mapWidth, mapHeight;
-        private TerrainTile.TerrainType[][] mapTypes = null;
-        private int[][] mapHeights = null;
-        private InternalTerrainTile[][] mapTiles = null;
-        private int[][] blockMap = null;
+        private TerrainTile[][] mapTiles = null;
         private char[][] map = null;
         private Map<Character, SymbolData> symbolMap = new HashMap<Character, SymbolData>();
 
@@ -86,10 +83,10 @@ class XMLMapHandler extends DefaultHandler {
 
             final public SymbolType type;
             final public Team team;
-            final public TerrainTile.TerrainType terrainType;
+            final public TerrainTile terrainType;
             final public double amount;
 
-            public SymbolData(SymbolType type, Team team, TerrainTile.TerrainType terrainType, double amount) {
+            public SymbolData(SymbolType type, Team team, TerrainTile terrainType, double amount) {
                 this.type = type;
                 this.amount = amount;
 
@@ -99,7 +96,7 @@ class XMLMapHandler extends DefaultHandler {
                     this.team = team;
 
                 if (terrainType == null)
-                    this.terrainType = TerrainTile.TerrainType.LAND;
+                    this.terrainType = TerrainTile.LAND;
                 else
                     this.terrainType = terrainType;
             }
@@ -194,11 +191,8 @@ class XMLMapHandler extends DefaultHandler {
                 mapProperties.put(MapProperties.WIDTH, mapWidth);
 
                 // Allocate map tiles based on the width and height.
-                mapTiles = new InternalTerrainTile[mapWidth][mapHeight];
-                mapTypes = new TerrainTile.TerrainType[mapWidth][mapHeight];
-                mapHeights = new int[mapWidth][mapHeight];
+                mapTiles = new TerrainTile[mapWidth][mapHeight];
                 map = new char[mapWidth][mapHeight];
-                blockMap = new int[mapWidth][mapHeight];
 
             } else if (qName.equals("game")) {
 
@@ -242,7 +236,7 @@ class XMLMapHandler extends DefaultHandler {
                 }
 
                 Team team;
-                TerrainTile.TerrainType terrainType;
+                TerrainTile terrainType;
                 double amount;
                 String teamString = getOptional(attributes, "team"), terrainString = getOptional(attributes, "terrain"), amountString = getOptional(attributes, "amount");
 
@@ -261,7 +255,7 @@ class XMLMapHandler extends DefaultHandler {
                     terrainType = null;
                 else {
                     try {
-                        terrainType = TerrainTile.TerrainType.valueOf(terrainString);
+                        terrainType = TerrainTile.valueOf(terrainString);
                     } catch (IllegalArgumentException iae) {
                         fail("invalid terrain type '" + terrainString + "'", "Check that all symbol nodes have a terrain attribute defined in the map file specs.\n");
                         return;
@@ -323,21 +317,8 @@ class XMLMapHandler extends DefaultHandler {
         public void characters(char[] ch, int start, int length) {
 
             // Only parse if we're in "data" or "height" -- ignores comments and other junk.
-            if (!xmlStack.getLast().equals("data")
-                    && !xmlStack.getLast().equals("height")
-                    && !xmlStack.getLast().equals("blocks"))
+            if (!xmlStack.getLast().equals("data"))
                 return;
-            if (xmlStack.getLast().equals("height")) {
-                //if this is a "height" cdata block, dispatch to the heights() method
-                heights(ch, start, length);
-                return;
-            }
-
-            if (xmlStack.getLast().equals("blocks")) {
-                //if this is a "blocks" cdata block, dispatch to the blocks() method
-                //blocks(ch, start, length);
-                return;
-            }
 
             if (currentRow >= mapHeight) {
                 // if we have an extra row at the end, check if it's only whitespace
@@ -373,142 +354,14 @@ class XMLMapHandler extends DefaultHandler {
                     fail("unrecognized symbol in map: '" + c + "'", "Check that '" + c + "' is defined as one of the symbols in the map file.\n");
 
                 map[currentCol][currentRow] = c;
-                mapTypes[currentCol][currentRow] = symbolMap.get(c).terrainType;
+                mapTiles[currentCol][currentRow] = symbolMap.get(c).terrainType;
                 currentCol++;
             }
 
             typesHaveBeenSet = true;
-            constructMapIfWeHaveEverything();
         }
-        private boolean heightsHaveBeenSet = false;
-        private boolean blocksHaveBeenSet = false;
+
         private boolean typesHaveBeenSet = false;
-
-        private void constructMapIfWeHaveEverything() {
-            if (heightsHaveBeenSet && typesHaveBeenSet)
-                for (int i = 0; i < mapWidth; i++)
-                    for (int j = 0; j < mapHeight; j++)
-                        mapTiles[i][j] = new InternalTerrainTile(mapHeights[i][j], mapTypes[i][j]);
-            /*else if (typesHaveBeenSet && !heightsHaveBeenSet){
-            for (int i = 0; i < mapWidth; i++)
-            for (int j = 0; j < mapHeight; j++)
-            mapTiles[i][j] = TerrainTile.createTerrainTile(0, mapTypes[i][j]);
-            }*/
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void heights(char[] ch, int start, int length) {
-
-            // Only parse if we're in "data" -- ignores comments and other junk.
-            if (!xmlStack.getLast().equals("height"))
-                return;
-
-            if (currentRow >= mapHeight) {
-                // if we have an extra row at the end, check if it's only whitespace
-                for (int i = start; i < length; i++) {
-                    // if it isn't whitespace, fail
-                    if (!Character.isWhitespace(ch[i]) && ch[i] != '\n')
-                        fail("the <height> node has too many rows", "Check that the number of rows is consistent with the 'height' attribute of <map>.\n");
-                }
-                return;		// if it is whitespace, just ignore it
-            }
-
-            // Parse each character into TerrainTypes.
-            for (int i = start; i < length; i++) {
-                char c = ch[i];
-                // ignore tabs
-                if (c == '\t')
-                    continue;
-                // if its a newline, update currentRow and currentCol
-                if (c == '\n') {
-                    if (currentRow != -1) {
-                        if (currentCol < mapWidth)
-                            fail("row " + currentRow + " in <height> has too few characters", "Check that the number of characters in each row is consistent with the 'width' attribute of <map>.\n");
-                    }
-                    currentRow++;
-                    currentCol = 0;
-                    continue;
-                }
-                if (currentRow < 0)
-                    fail("spurious character in <height> node", "Check that the first row of map characters starts on the line after <data><![CDATA[ (see example maps).\n");
-                if (currentCol >= mapWidth)
-                    fail("row " + currentRow + " in <data> has too many characters", "Check that the number of characters in each row is consistent with the 'width' attribute of <map>.\n");
-
-                String s = "" + c;
-                int height = -1;
-                if (c == '.' || c == ' ') //parse '.' as 0
-                    height = 0;
-                else
-                    try {
-                        height = Integer.parseInt(s, 36);
-                    } catch (NumberFormatException e) {
-                        fail("unusable height in <height> node data", "Check to make sure you only use heights 0-9 only, " + c + " is unsupported right now.");
-                    }
-                mapHeights[currentCol][currentRow] = height;
-                currentCol++;
-            }
-            heightsHaveBeenSet = true;
-            constructMapIfWeHaveEverything();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void blocks(char[] ch, int start, int length) {
-
-            // Only parse if we're in "data" -- ignores comments and other junk.
-            if (!xmlStack.getLast().equals("blocks"))
-                return;
-
-            if (currentRow >= mapHeight) {
-                // if we have an extra row at the end, check if it's only whitespace
-                for (int i = start; i < length; i++) {
-                    // if it isn't whitespace, fail
-                    if (!Character.isWhitespace(ch[i]) && ch[i] != '\n')
-                        fail("the <height> node has too many rows", "Check that the number of rows is consistent with the 'height' attribute of <map>.\n");
-                }
-                return;		// if it is whitespace, just ignore it
-            }
-
-            // Parse each character into TerrainTypes.
-            for (int i = start; i < length; i++) {
-                char c = ch[i];
-                // ignore tabs
-                if (c == '\t')
-                    continue;
-                // if its a newline, update currentRow and currentCol
-                if (c == '\n') {
-                    if (currentRow != -1) {
-                        if (currentCol < mapWidth)
-                            fail("row " + currentRow + " in <height> has too few characters", "Check that the number of characters in each row is consistent with the 'width' attribute of <map>.\n");
-                    }
-                    currentRow++;
-                    currentCol = 0;
-                    continue;
-                }
-                if (currentRow < 0)
-                    fail("spurious character in <height> node", "Check that the first row of map characters starts on the line after <data><![CDATA[ (see example maps).\n");
-                if (currentCol >= mapWidth)
-                    fail("row " + currentRow + " in <data> has too many characters", "Check that the number of characters in each row is consistent with the 'width' attribute of <map>.\n");
-
-                String s = "" + c;
-                int blocks = 0;
-                if (c == '.' || c == ' ') //parse '.' as 0
-                    blocks = 0;
-                else
-                    try {
-                        blocks = Integer.parseInt(s, 36);
-                    } catch (NumberFormatException e) {
-                        fail("unusable # of blocks in <block> node data", "Check to make sure you only use 0-35 blocks only, " + c + " is unsupported right now.");
-                    }
-                blockMap[currentCol][currentRow] = blocks;
-                currentCol++;
-            }
-            blocksHaveBeenSet = true;
-            constructMapIfWeHaveEverything();
-        }
 
         /**
          * {@inheritDoc}
@@ -541,7 +394,7 @@ class XMLMapHandler extends DefaultHandler {
 
             System.out.println("Creating a game%%%%%%%%%");
 
-            GameMap gm = new GameMap(mapProperties, mapTiles, blockMap);
+            GameMap gm = new GameMap(mapProperties, mapTiles);
             //gm.setTheme(theme);
             GameWorld gw = new GameWorld(gm, teamA, teamB, archonMemory);
 

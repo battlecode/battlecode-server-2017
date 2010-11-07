@@ -29,14 +29,11 @@ public class GameMap implements GenericGameMap {
     private final int mapWidth, mapHeight;
 
 	/** The tiles on the map. */
-    private final InternalTerrainTile[][] mapTiles; 
+    private final TerrainTile[][] mapTiles; 
 
 	/** The coordinates of the origin. */
 	private final int mapOriginX, mapOriginY;
 	
-	private int[][] initialBlockMap;
-	private int[][] blockMap;
-
 	/** The name of the map theme. */
 	private String mapTheme;
 
@@ -58,12 +55,9 @@ public class GameMap implements GenericGameMap {
 	public GameMap(GameMap gm){
 		this.mapWidth = gm.mapWidth;
 		this.mapHeight = gm.mapHeight;
-		this.mapTiles = new InternalTerrainTile[this.mapWidth][this.mapHeight];
+		this.mapTiles = new TerrainTile[this.mapWidth][this.mapHeight];
 		for(int i = 0; i < this.mapWidth; i++){
-			for(int j = 0; j < this.mapHeight; j++){
-				this.mapTiles[i][j] = new InternalTerrainTile(gm.mapTiles[i][j]);
-			}
-			
+			System.arraycopy(gm.mapTiles[i],0,this.mapTiles[i],0,this.mapHeight);
 		}
 		this.mapOriginX = gm.mapOriginX;
 		this.mapOriginY = gm.mapOriginY;
@@ -81,7 +75,7 @@ public class GameMap implements GenericGameMap {
 	 * @param mapTiles a matrix of TerrainTypes representing the map
 	 * @param territoryLocations an array of the MapLocations of the territories
 	 */
-	GameMap(Map<MapProperties, Integer> mapProperties,  InternalTerrainTile[][] mapTiles, int[][] blockMap) {
+	GameMap(Map<MapProperties, Integer> mapProperties,  TerrainTile[][] mapTiles) {
 
 		if (mapProperties.containsKey(MapProperties.WIDTH))
 			this.mapWidth = mapProperties.get(MapProperties.WIDTH);
@@ -104,18 +98,11 @@ public class GameMap implements GenericGameMap {
 		else this.minPoints = GAME_DEFAULT_MIN_POINTS;
 		
 		Random rand = new Random(this.seed);
-		this.mapOriginX = rand.nextInt(65000);
-		this.mapOriginY = rand.nextInt(65000);
+		this.mapOriginX = rand.nextInt(32000);
+		this.mapOriginY = rand.nextInt(32000);
 
 		this.mapTiles = mapTiles;
-		this.blockMap = blockMap;
 		
-		this.initialBlockMap = new int[blockMap.length][blockMap[0].length];
-		for (int i = 0; i < blockMap.length; i++) {
-			for (int j = 0; j < blockMap[0].length; j++) {
-				initialBlockMap[i][j] = blockMap[i][j];
-			}
-		}
 	}
 
 	public void setTheme(String theme) {
@@ -194,113 +181,15 @@ public class GameMap implements GenericGameMap {
 		return mapTiles[location.getX() - mapOriginX][location.getY() - mapOriginY];
 	}
 
-	public int getFlux(MapLocation location) {
-		if (!onTheMap(location))
-			return 0;
-
-		return mapTiles[location.getX() - mapOriginX][location.getY() - mapOriginY].getFlux();
-	}
-
-	public int mineFlux(MapLocation location) {
-		if (!onTheMap(location))
-			return 0;
-
-		return mapTiles[location.getX() - mapOriginX][location.getY() - mapOriginY].mineFlux();
-	}
-	
-	public int getLocationHeight(MapLocation location) {
-		if (!onTheMap(location))
-			return 0;
-		
-		return getTerrainTile(location).getHeight() + getNumBlocks(location);
-	}
-	
-	/**
-	 * Determines the number of blocks at the given location.
- 	 *
-	 * @param location the MapLocation at which to look
-	 * @return an integer representing the number of blocks
-	 * at the given location. Will return 0 if the given location is
-	 * off the map
-	 */
-	public int getNumBlocks(MapLocation location) {
-		if (!onTheMap(location))
-			return 0;
-		
-		return blockMap[location.getX() - mapOriginX][location.getY() - mapOriginY];
-	}
-	
-	/**
-	 * Determines the block delta at the given location.
- 	 *
-	 * @param location the MapLocation at which to look
-	 * @return an integer representing the block delta
-	 * at the given location. Will return 0 if the given location is
-	 * off the map
-	 */
-	public int getBlockDelta(MapLocation location) {
-		if (!onTheMap(location))
-			return 0;
-		
-		int x = location.getX() - mapOriginX;
-		int y = location.getY() - mapOriginY;
-		
-		return blockMap[x][y] - initialBlockMap[x][y];
-	}
-	
-	/**
-	 * Removes a block from the specified location. Does not
-	 * do any checking to ensure non-negative values.
- 	 *
-	 * @param location the MapLocation at which to look
-	 */
-	public void removeBlock(MapLocation location) {
-		if (!onTheMap(location))
-			return;
-		
-		blockMap[location.getX() - mapOriginX][location.getY() - mapOriginY]--;
-	}
-	
-	/**
-	 * Adds a block to the specified location. Does not
-	 * do any checking to ensure non-negative values.
- 	 *
-	 * @param location the MapLocation at which to look
-	 */
-	public void addBlock(MapLocation location) {
-		if (!onTheMap(location))
-			return;
-		
-		blockMap[location.getX() - mapOriginX][location.getY() - mapOriginY]++;
-	}
-
 	/**
 	 * Returns a two-dimensional array of terrain data for this map.
 	 * 
 	 * @return the map's terrain in a 2D array
 	 */
-	public InternalTerrainTile[][] getTerrainMatrix() {
+	public TerrainTile[][] getTerrainMatrix() {
 		return mapTiles;
 	}
 	
-	/**
-	 * Returns a two-dimensional array of block heights for this map.
-	 * 
-	 * @return the block map's terrain in a 2D array
-	 */
-	public int[][] getBlockMapMatrix() {
-		return blockMap;
-	}
-	
-	/**
-	 * Returns a two-dimensional array of the initial block heights for this map.
-	 * 
-	 * @return the block map's terrain in a 2D array
-	 */
-	public int[][] getInitialBlockMapMatrix() {
-		return initialBlockMap;
-	}
-
 	/**
 	 * Gets the maximum number of rounds for this game.
 	 * 
@@ -309,10 +198,10 @@ public class GameMap implements GenericGameMap {
 	public int getMaxRounds() {
 		return maxRounds + (int)Math.round(1.0 / GameConstants.POINTS_DECREASE_PER_ROUND_FACTOR);
 	}
-
-        public int getStraightMaxRounds(){
-            return maxRounds;
-        }
+	
+	public int getStraightMaxRounds(){
+		return maxRounds;
+	}
 	
 	public int getSeed() {
 		return seed;
@@ -331,8 +220,17 @@ public class GameMap implements GenericGameMap {
 	public static class MapMemory {
 		
 		// should be ge the max of all robot sensor ranges
-		private final static int BUFFER = 11;
-		
+		private final static int BUFFER;
+	
+		static {
+			int buf = 0;
+			for(ComponentType t : ComponentType.values()) {
+				if(t.componentClass==ComponentClass.SENSOR&&t.range>buf)
+					buf = t.range;
+			}
+			BUFFER = buf;
+		}
+
 		private final boolean data[][];
 		private final GameMap map;
 		private final int Xwidth;
@@ -402,7 +300,7 @@ public class GameMap implements GenericGameMap {
 	}
 
 	public static Map<ComponentType,int[][][]> computeVisibleOffsets() {
-		final int MAX_RANGE = 6;
+		int MAX_RANGE;
 		final MapLocation CENTER = new MapLocation(0, 0);
 		Map<ComponentType,int[][][]> offsets = new EnumMap<ComponentType,int[][][]> (ComponentType.class);
 		int [][][] offsetsForType;
@@ -424,6 +322,7 @@ public class GameMap implements GenericGameMap {
 				for (int i = 0; i < 8; i ++) {
 					Direction dir = Direction.values()[i];
 					nOffsets = 0;
+					MAX_RANGE = (int)Math.sqrt(type.range);
 					for (int y = -MAX_RANGE; y <= MAX_RANGE; y++) {
 						for (int x = -MAX_RANGE; x <= MAX_RANGE; x++) {
 							MapLocation loc = new MapLocation(x, y);

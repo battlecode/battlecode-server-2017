@@ -8,7 +8,6 @@ import battlecode.serial.MatchHeader;
 import battlecode.serial.MatchFooter;
 import battlecode.serial.RoundDelta;
 import battlecode.serial.RoundStats;
-import battlecode.world.InternalTerrainTile;
 import battlecode.world.GameMap;
 import battlecode.engine.signal.Signal;
 import battlecode.engine.signal.SignalHandler;
@@ -217,72 +216,37 @@ public class XStreamProxy extends Proxy {
 
 	public static class MapTileConverter implements Converter {
 
-		public static enum DataType { terrain, height }
-
 		public boolean canConvert(Class cls) {
-			return cls.equals(InternalTerrainTile [][].class);
-		}
-
-		public void writeTerrainData(InternalTerrainTile [][] tiles, HierarchicalStreamWriter writer, DataType type) {
-			StringBuilder builder = new StringBuilder();
-			boolean first = true;
-			for(InternalTerrainTile [] row: tiles) {
-				if(first)
-					first=false;
-				else
-					builder.append("/");
-				for(InternalTerrainTile t: row) {
-					switch(type) {
-					case terrain:
-						builder.append(t.getType()==TerrainTile.TerrainType.LAND?".":"#");
-						break;
-					case height:
-						builder.append(Integer.toString(t.getHeight(),Character.MAX_RADIX));
-					}
-				}
-			}
-			writer.addAttribute(type.toString(),builder.toString());
+			return cls.equals(TerrainTile [].class);
 		}
 
 		public void marshal(Object value, HierarchicalStreamWriter writer,
 			MarshallingContext context) {
-			InternalTerrainTile [][] tiles = (InternalTerrainTile [][])value;
 			// I tried to do this in the easiest way possible, rather than
 			// using the map file format.  Feel free to change.  -dgulotta
-			writeTerrainData(tiles,writer,DataType.terrain);
-			writeTerrainData(tiles,writer,DataType.height);
+			TerrainTile [] tiles = (TerrainTile [])value;
+			char [] chars = new char [ tiles.length ];
+			int i;
+			for(i=0;i<tiles.length;i++)
+				chars[i] = (tiles[i]==TerrainTile.LAND)?'.':'#';
+			writer.setValue(new String(chars));
 		}
 
 		public Object unmarshal(HierarchicalStreamReader reader,
 			UnmarshallingContext context) throws ConversionException {
-			String [] terrain = reader.getAttribute("terrain").split("/");
-			String [] height = reader.getAttribute("height").split("/");
-			if(terrain.length!=height.length) throw new ConversionException("incorrect terrain/heightmap size");
-			InternalTerrainTile [][] tiles = new InternalTerrainTile [terrain.length][];
-			for(int i=0;i<terrain.length;i++) {
-				if(terrain[i].length()!=height[i].length()) throw new ConversionException("incorrect terrain/heightmap size");
-				tiles[i] = new InternalTerrainTile [terrain[i].length()];
-				for(int j=0;j<terrain[i].length();j++) {
-					
-					int h;
-					TerrainTile.TerrainType t;
-					try {
-						h=Integer.parseInt(height[i].substring(j,j+1),Character.MAX_RADIX);
-					} catch(NumberFormatException e) {
-						throw new ConversionException("Illegal value in heightmap");
-					}
-					switch(terrain[i].charAt(j)) {
-						case '#':
-							t = TerrainTile.TerrainType.VOID;
-							break;
-						case '.':
-						case ' ':
-							t = TerrainTile.TerrainType.LAND;
-							break;
-						default:
-							throw new ConversionException("Illegal value in terrain map");
-					}
-					tiles[i][j] = new InternalTerrainTile(h,t);
+			String str = reader.getValue();
+			TerrainTile [] tiles = new TerrainTile [str.length()];
+			int i;
+			for(i=0;i<str.length();i++) {
+				switch(str.charAt(i)) {
+				case '#':
+					tiles[i] = TerrainTile.VOID;
+					break;
+				case '.':
+					tiles[i] = TerrainTile.LAND;
+					break;
+				default:
+					throw new ConversionException("Illegal character in InternalTerrainTile [][].");
 				}
 			}
 			return tiles;
@@ -341,7 +305,8 @@ public class XStreamProxy extends Proxy {
 		xstream.useAttributeFor(battlecode.common.ComponentType.class);
 		xstream.useAttributeFor(battlecode.common.Team.class);
 		xstream.useAttributeFor(battlecode.serial.DominationFactor.class);
-		//xstream.aliasPackage("","battlecode.world.signal");
+		//xstream.aliasPackage("sig","battlecode.world.signal");
+		//xstream.aliasPackage("ser","battlecode.serial");
 	}
 
 	static public XStream getXStream() {

@@ -56,7 +56,12 @@ public class Util {
 
 	public static Predicate<MapLocation> withinDistance(MapLocation loc, int distance) { return new WithinDistance(loc,distance); }
 
-	public static Predicate<MapLocation> withinAngle(MapLocation loc, Direction dir, double cosHalfTheta) { return new WithinAngle(loc,dir,cosHalfTheta); }
+	public static Predicate<MapLocation> withinAngle(MapLocation loc, Direction dir, double cosHalfTheta) {
+		if(cosHalfTheta<=-.99999)
+			return Predicates.alwaysTrue();
+		else
+			return new WithinAngle(loc,dir,cosHalfTheta);
+	}
 
 	public static Predicate<MapLocation> withinWedge(MapLocation loc, int range, Direction dir, double cosHalfTheta) {
 		return Predicates.and(withinDistance(loc,range),withinAngle(loc,dir,cosHalfTheta));
@@ -77,6 +82,8 @@ public class Util {
 	*/
 
 	static final Predicate<Object> isRobot = Predicates.instanceOf(InternalRobot.class);
+
+	static final Predicate<Object> isMine = Predicates.instanceOf(InternalMine.class);
 
 	static final Function<BaseComponent,ComponentType> typeOfComponent = new Function<BaseComponent,ComponentType>() {
 		public ComponentType apply(BaseComponent c) {

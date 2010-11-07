@@ -127,6 +127,11 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 		return ir;
 	}
 
+	protected void spendResources(double amount) throws GameActionException {
+		if(!gameWorld.spendResources(robot.getTeam(),amount))
+			throw new GameActionException(NOT_ENOUGH_RESOURCES,"You do not have enough resources for that.");
+	}
+
 	protected BaseComponent(ComponentType type, InternalRobot robot) {
 		super(robot.getGameWorld(),robot);
 		this.type = type;

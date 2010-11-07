@@ -12,36 +12,7 @@ package battlecode.common;
  */
 public enum Team {
 
-    /** Represents team A. */
-    A {
-
-        /**
-         * {@inheritDoc}
-         */
-        public Team opponent() {
-            return B;
-        }
-    },
-    /** Represents team B. */
-    B {
-
-        /**
-         * {@inheritDoc}
-         */
-        public Team opponent() {
-            return A;
-        }
-    },
-    /** Represents neither team A nor team B. */
-    NEUTRAL {
-
-        /**
-         * {@inheritDoc}
-         */
-        public Team opponent() {
-            return NEUTRAL;
-        }
-    };
+    A, B, NEUTRAL;
 
     /**
      * Determines the team that is the opponent of this team.
@@ -49,5 +20,14 @@ public enum Team {
      * @return the opponent of this team, or NEUTRAL if this team
      * is NEUTRAL
      */
-    public abstract Team opponent();
+    public Team opponent() {
+		switch(this) {
+		case A:
+			return B;
+		case B:
+			return A;
+		default:
+			return NEUTRAL;
+		}
+	}
 }

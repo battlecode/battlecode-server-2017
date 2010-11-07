@@ -56,6 +56,9 @@ public final class GameConstants {
 	 * dropship, regardless of its components.
 	 */
 	public static final int TRANSPORT_CAPACITY = 24;
+	public static final double MINE_RESOURCES = 1.;
+	public static final double MINE_DEPLETED_RESOURCES = .15;
+	public static final int MINE_ROUNDS = 600;
 
     // This class cannot be instantiated.
     private GameConstants() {

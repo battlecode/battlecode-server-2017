@@ -40,7 +40,9 @@ public interface GameObject {
 	 * @return this GameObject's Team
 	 * @see battlecode.common.Team
 	 */
-	//public Team getTeam();
+	public Team getTeam();
+
+	public RobotLevel getRobotLevel();
 		
 	/**
 	 * Gives the ObjectType of this GameObject

@@ -8,6 +8,8 @@ import battlecode.common.ComponentType;
 import battlecode.common.GameActionException;
 import battlecode.common.GameObject;
 import battlecode.common.MapLocation;
+import battlecode.common.Mine;
+import battlecode.common.MineInfo;
 import battlecode.common.Robot;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotLevel;
@@ -21,21 +23,20 @@ public class Sensor extends BaseComponent implements SensorController {
 		super(type,robot);
 	}
 
-	public Robot senseRobotAtLocation(MapLocation loc, RobotLevel height) throws GameActionException {
+	public GameObject senseObjectAtLocation(MapLocation loc, RobotLevel height) throws GameActionException {
 		assertEquipped();
 		assertNotNull(loc);
 		assertNotNull(height);
 		assertWithinRange(loc);
-		return gameWorld.getObjectOfType(loc,height,InternalRobot.class);
+		return gameWorld.getObject(loc,height);
 	}
 
 	@SuppressWarnings("unchecked")
-	public Robot [] senseNearbyRobots() {
-		assertEquipped();
-		Predicate<GameObject> p = Predicates.and(objectWithinRangePredicate(),Util.isRobot,Predicates.not(Predicates.equalTo(robot)));
-		return (Robot [])Iterables.toArray(Iterables.filter(gameWorld.allObjects(),p),GameObject.class);
+	public <T> T [] senseNearbyGameObjects(Class<T> type) {
+		Predicate<GameObject> p = Predicates.and(objectWithinRangePredicate(),Predicates.instanceOf(type),Predicates.not(Predicates.equalTo(robot)));
+		return (T [])Iterables.toArray(Iterables.filter(gameWorld.allObjects(),p),GameObject.class);
 	}
-
+	
 	public RobotInfo senseRobotInfo(Robot r) throws GameActionException {
 		assertEquipped();
 		InternalRobot ir = castInternalRobot(r);
@@ -55,26 +56,17 @@ public class Sensor extends BaseComponent implements SensorController {
 		
 	}
 
+	public MineInfo senseMineInfo(Mine m) throws GameActionException {
+		InternalMine im = castInternalMine(m);
+		assertWithinRange(im);
+		return new MineInfo(im,im.getRoundsLeft());
+	}
+
 	public MapLocation senseLocationOf(GameObject o) throws GameActionException {
-		assertEquipped();
 		InternalObject io = castInternalObject(o);
 		assertWithinRange(io);
 		return io.getLocation();
 	}
-
-	/*
-	public InternalComponent [] senseNearbyComponents() {
-		assertEquipped();
-		return Iterables.toArray(gameWorld.getLooseComponents(locWithinRangePredicate()),InternalComponent.class);
-	}
-
-	public InternalComponent [] senseComponentsAtLocation(MapLocation loc) throws GameActionException {
-		assertEquipped();
-		assertNotNull(loc);
-		assertWithinRange(loc);
-		return gameWorld.getComponentsAt(loc).toArray(new InternalComponent [0]);
-	}
-	*/
 
 	public boolean canSenseObject(GameObject o) {
 		assertEquipped();

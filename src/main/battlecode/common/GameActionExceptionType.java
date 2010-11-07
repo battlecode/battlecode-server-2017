@@ -8,6 +8,8 @@ public enum GameActionExceptionType {
 	INTERNAL_ERROR,
 	/** Indicates when a robot tries to perform an action (e.g. transfer energon, spawn) for which it does not have enough energon */
 	NOT_ENOUGH_ENERGON,
+	/** Indicates when a robot tries to perform an action (e.g. transfer energon, spawn) for which it does not have enough resources */
+	NOT_ENOUGH_RESOURCES,
 	/** Indicates when a robot tries to move into non-empty square */
 	CANT_MOVE_THERE,
 	/** Indicates when a robot tries to execute an action, but is not currentl IDLE */

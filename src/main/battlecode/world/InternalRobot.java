@@ -187,10 +187,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 			controller = new Radio(type,this);
 			break;
 		case RECYCLER:
+			controller = new Miner(this);
+			break;
 		case CONSTRUCTOR:
 		case FACTORY:
 		case ARMORY:
 			controller = new Builder(type,this);
+			break;
 		case SMALL_MOTOR:
 		case MEDIUM_MOTOR:
 		case LARGE_MOTOR:
