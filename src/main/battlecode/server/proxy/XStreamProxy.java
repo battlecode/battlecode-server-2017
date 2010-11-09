@@ -125,7 +125,7 @@ public class XStreamProxy extends Proxy {
 		
 		public String toString(Object obj) {
 			MapLocation loc = (MapLocation)obj;
-			return String.format("%s,%s",loc.getX(),loc.getY());
+			return String.format("%s,%s",loc.x,loc.y);
 		}
 
 		public Object fromString(String name) {
@@ -305,8 +305,8 @@ public class XStreamProxy extends Proxy {
 		xstream.useAttributeFor(battlecode.common.ComponentType.class);
 		xstream.useAttributeFor(battlecode.common.Team.class);
 		xstream.useAttributeFor(battlecode.serial.DominationFactor.class);
-		//xstream.aliasPackage("sig","battlecode.world.signal");
-		//xstream.aliasPackage("ser","battlecode.serial");
+		xstream.aliasPackage("sig","battlecode.world.signal");
+		xstream.aliasPackage("ser","battlecode.serial");
 	}
 
 	static public XStream getXStream() {
