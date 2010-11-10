@@ -9,6 +9,12 @@ public enum TerrainTile {
 
 	LAND, VOID, OFF_MAP;
 
+	@Deprecated
+	public TerrainTile getType() { return this; }
+	
+	@Deprecated
+	public int getHeight() { return 1; }
+
     public boolean isTraversableAtHeight(RobotLevel height) {
         switch (this) {
             case VOID:

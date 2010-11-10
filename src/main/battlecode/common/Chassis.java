@@ -30,6 +30,9 @@ public enum Chassis {
 	/** The type of motor this chassis uses. */
 	public final ComponentType motor;
 
+	@Deprecated
+	public boolean isAirborne() { return level == RobotLevel.IN_AIR; }
+
 	Chassis(int weight, double maxHp, double upkeep,
 	        int cost, RobotLevel level, ComponentType motor) {
 			this.weight = weight;

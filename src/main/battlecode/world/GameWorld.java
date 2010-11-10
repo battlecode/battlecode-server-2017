@@ -381,6 +381,13 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		return 0.;
 	}
 
+	public InternalMine createMine(MapLocation loc) {
+		InternalMine m = new InternalMine(this,loc);
+		notifyAddingNewObject(m);
+		addSignal(new MineBirthSignal(m));
+		return m;
+	}
+
     // ******************************
     // SIGNAL HANDLER METHODS
     // ******************************

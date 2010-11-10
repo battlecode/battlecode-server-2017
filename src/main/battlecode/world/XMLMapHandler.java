@@ -142,6 +142,7 @@ class XMLMapHandler extends DefaultHandler {
 			public MineData(Team team) { this.team = team; }
 			public TerrainTile tile() { return TerrainTile.LAND; }
 			public void createGameObject(GameWorld world, MapLocation loc) {
+				world.createMine(loc);
 				if(team!=Team.NEUTRAL) {
 					InternalRobot robot = GameWorldFactory.createPlayer(world,Chassis.BUILDING,loc,team,null,false);
 					world.visitSignal(new EquipSignal(robot,null,ComponentType.RECYCLER));
