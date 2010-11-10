@@ -146,6 +146,7 @@
 
 	<target name="common-doc">
 		<javadoc
+			classpathref="classpath-libs"
 			sourcepath="${src.dir}"
 			packagenames="battlecode.common.*"
 			destdir="${commondoc.destdir}"
