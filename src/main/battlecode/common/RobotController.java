@@ -187,6 +187,8 @@ public interface RobotController {
      */
     public void setTeamMemory(int index, long value);
 
+	public void setTeamMemory(int index, long value, long mask);
+
     /**
      * Returns the archon memory from the archons in the last game of the match.
      * The return value is an array of length 8. If an archon did not call

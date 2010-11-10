@@ -234,6 +234,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	gameWorld.setArchonMemory(robot.getTeam(),index,value);
 	}
 
+    public void setTeamMemory(int index, long value, long mask) {
+    	gameWorld.setArchonMemory(robot.getTeam(),index,value,mask);
+	}
+
     public long[] getTeamMemory() {
         return gameWorld.getOldArchonMemory()[robot.getTeam().ordinal()];
     }

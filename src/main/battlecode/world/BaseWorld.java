@@ -104,4 +104,11 @@ public class BaseWorld<WorldObject extends BaseObject> {
 		archonMemory[t.ordinal()][archonID] = state;
     }
 
+	public void setArchonMemory(Team t, int archonID, long state, long mask) {
+		long n = archonMemory[t.ordinal()][archonID];
+		n &= ~mask;
+		n |= (state & mask);
+		archonMemory[t.ordinal()][archonID] = n;
+	}
+
 }
