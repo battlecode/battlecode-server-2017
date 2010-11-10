@@ -37,16 +37,17 @@ public class GameWorldFactory {
         return handler.createGameWorld(teamA, teamB, archonMemory);
     }
 
-	public static void createPlayer(GameWorld gw, Chassis type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
+	public static InternalRobot createPlayer(GameWorld gw, Chassis type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
 
 		// first, make the robot
 		InternalRobot robot = new InternalRobot(gw, type, loc, t, wakeDelay);
 		loadPlayer(gw, robot, t, parent);
+		return robot;
 	}
 
 	// defaults to wakeDelay = true
-	public static void createPlayer(GameWorld gw, Chassis type, MapLocation loc, Team t, InternalRobot parent) {
-		createPlayer(gw, type, loc, t, parent, true);
+	public static InternalRobot createPlayer(GameWorld gw, Chassis type, MapLocation loc, Team t, InternalRobot parent) {
+		return createPlayer(gw, type, loc, t, parent, true);
 	}
 
 	private static void loadPlayer(GameWorld gw, InternalRobot robot, Team t, InternalRobot parent) {

@@ -484,6 +484,13 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return null;
     }
 
+	public Exception visitEquipSignal(EquipSignal s) {
+		InternalRobot r = (InternalRobot) getObjectByID(s.robotID);
+		r.equip(s.component);
+		addSignal(s);
+		return null;
+	}
+
     public Exception visitIndicatorStringSignal(IndicatorStringSignal s) {
         try {
             addSignal(s);

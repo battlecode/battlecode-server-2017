@@ -7,6 +7,7 @@ import battlecode.engine.signal.Signal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Collections;
 import java.util.Random;
 
 public class BaseWorld<WorldObject extends BaseObject> {
@@ -22,6 +23,7 @@ public class BaseWorld<WorldObject extends BaseObject> {
 	protected final long[][] archonMemory;
     protected final long[][] oldArchonMemory;
 	protected final Map<Integer, WorldObject> gameObjectsByID;
+	protected final ArrayList<Integer> randomIDs = new ArrayList<Integer>();
 
 	public BaseWorld(int seed, String teamA, String teamB, long [][] oldArchonMemory) {
 		currentRound = -1;
@@ -35,8 +37,23 @@ public class BaseWorld<WorldObject extends BaseObject> {
 		this.oldArchonMemory = oldArchonMemory;
 	}
 
+	public void reserveRandomIDs(int num) {
+		while(num>0) {
+			randomIDs.add(nextID++);
+			num--;
+		}
+		Collections.shuffle(randomIDs,randGen);
+	}
+
+	public void endRandomIDs() {
+		randomIDs.clear();
+	}
+
 	public int nextID() {
-        return nextID++;
+		if(randomIDs.isEmpty())
+        	return nextID++;
+		else
+			return randomIDs.remove(randomIDs.size()-1);
     }
 
     public int getCurrentRound() {

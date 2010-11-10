@@ -8,6 +8,7 @@ import static battlecode.common.GameConstants.MAP_MIN_WIDTH;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,12 +23,14 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import battlecode.common.MapLocation;
 import battlecode.common.RobotLevel;
+import battlecode.common.ComponentType;
 import battlecode.common.Chassis;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.PlayerFactory;
 import battlecode.world.GameMap.MapProperties;
+import battlecode.world.signal.EquipSignal;
 import battlecode.world.signal.SpawnSignal;
 import battlecode.engine.signal.Signal;
 
@@ -41,70 +44,141 @@ class XMLMapHandler extends DefaultHandler {
         private LinkedList<String> xmlStack = new LinkedList<String>();
         /** Stores all the map properties. */
         private int mapWidth, mapHeight;
-        private TerrainTile[][] mapTiles = null;
-        private char[][] map = null;
+        private SymbolData[][] map = null;
         private Map<Character, SymbolData> symbolMap = new HashMap<Character, SymbolData>();
 
-        private static enum SymbolType {
+		private interface SymbolData {
+			public TerrainTile tile();
+			/* Returns {@code true} if createGameObject() does anything. */
+			public void createGameObject(GameWorld world, MapLocation loc);
+			public boolean equalsMirror(SymbolData data);
+		}
 
-            TERRAIN,
-            DEPOSIT,
-            SOLDIER,
-            ARCHON,
-            CHAINER,
-            WOUT,
-            TURRET,
-            AURA,
-            TELEPORTER,
-            COMM;
+		private interface SymbolDataFactory {
+			public SymbolData create(Attributes att);
+		}
 
-			private final Chassis myChassis;
+		private static class TerrainData implements SymbolData {
 
-			SymbolType() {
-				Chassis type;
-				try {
-					type = Enum.valueOf(Chassis.class, name());
-				} catch(IllegalArgumentException e) {
-					type = null;
+			public static final SymbolDataFactory factory = new SymbolDataFactory() {
+				public TerrainData create(Attributes att)
+				{
+					String type = getRequired(att,"terrain");
+					return new TerrainData(TerrainTile.valueOf(type));
 				}
-				myChassis = type;
+			};
+
+			private TerrainTile tile;
+			public TerrainData(TerrainTile tile) { this.tile = tile; }
+			public TerrainTile tile() { return tile; }
+			public void createGameObject(GameWorld world, MapLocation loc) {}
+			public boolean equalsMirror(SymbolData data) {
+				if (!(data instanceof TerrainData)) return false;
+				TerrainData d = (TerrainData) data;
+				return d.tile==tile;
+			}
+			
+		}
+
+		private static class RobotData implements SymbolData {
+
+			public static final SymbolDataFactory factory = new SymbolDataFactory() {
+				public RobotData create(Attributes att) {
+					Chassis type = Chassis.valueOf(getRequired(att,"chassis"));
+					String comp = getOptional(att,"components");
+					ComponentType [] components;
+					if(comp == null || comp.isEmpty()) {
+						components = new ComponentType [0];
+					}
+					else {
+						String [] s = comp.split(",");
+						components = new ComponentType [s.length];
+						for(int i=0;i<s.length;i++)
+							components[i] = ComponentType.valueOf(s[i]);
+					}
+					Team team = Team.valueOf(getRequired(att,"team"));
+					return new RobotData(type,components,team);
+				}
+			};
+
+			private Chassis type;
+			private ComponentType [] components;
+			private Team team;
+			public RobotData(Chassis type, ComponentType [] components, Team team) {
+				this.type = type;
+				this.components = components;
+				this.team = team;
+			}
+			public TerrainTile tile() { return TerrainTile.LAND; }
+			public void createGameObject(GameWorld world, MapLocation loc) {
+				InternalRobot robot = GameWorldFactory.createPlayer(world,type,loc,team,null,false);
+				for(ComponentType t : components) {
+					world.visitSignal(new EquipSignal(robot,null,t));
+				}
+			}
+			public boolean equalsMirror(SymbolData data) {
+				if(!(data instanceof RobotData)) return false;
+				RobotData d = (RobotData) data;
+				return type==d.type&&Arrays.equals(components,d.components)&&team==d.team.opponent();
 			}
 
-			public Chassis getChassis() {
-				return myChassis;
+		}
+
+		private static class MineData implements SymbolData {
+	
+			public static final SymbolDataFactory factory = new SymbolDataFactory() { 
+				public MineData create(Attributes att) {
+					String tm = getOptional(att,"team");
+					Team team;
+					if(tm==null)
+						team = Team.NEUTRAL;
+					else
+						team = Team.valueOf(tm);
+					return new MineData(team);
+				}
+			};
+
+			private Team team;
+			public MineData(Team team) { this.team = team; }
+			public TerrainTile tile() { return TerrainTile.LAND; }
+			public void createGameObject(GameWorld world, MapLocation loc) {
+				if(team!=Team.NEUTRAL) {
+					InternalRobot robot = GameWorldFactory.createPlayer(world,Chassis.BUILDING,loc,team,null,false);
+					world.visitSignal(new EquipSignal(robot,null,ComponentType.RECYCLER));
+				}
+			}
+			public boolean equalsMirror(SymbolData data) {
+				if(!(data instanceof MineData)) return false;
+				MineData d = (MineData) data;
+				return team==d.team.opponent();
+			}
+		}
+
+		private class SymbolTile {
+	
+			SymbolData data;
+			MapLocation loc;
+
+			public SymbolTile(SymbolData data, MapLocation loc) {
+				this.data = data;
+				this.loc = loc;
 			}
 
-            public boolean isRobot() {
-				return myChassis!=null;
-            }
-        }
-
-        private static class SymbolData {
-
-            final public SymbolType type;
-            final public Team team;
-            final public TerrainTile terrainType;
-            final public double amount;
-
-            public SymbolData(SymbolType type, Team team, TerrainTile terrainType, double amount) {
-                this.type = type;
-                this.amount = amount;
-
-                if (team == null)
-                    this.team = Team.NEUTRAL;
-                else
-                    this.team = team;
-
-                if (terrainType == null)
-                    this.terrainType = TerrainTile.LAND;
-                else
-                    this.terrainType = terrainType;
-            }
-
-			public boolean isMirrorOf(SymbolData data) {
-				return type == data.type && team == data.team.opponent() && terrainType == data.terrainType && amount == data.amount;
+			public void createGameObject(GameWorld world) {
+				data.createGameObject(world,loc);
 			}
-        }
+
+		}
+
+		private static final Map<String, SymbolDataFactory> factories = new HashMap<String, SymbolDataFactory>();
+		private final ArrayList<SymbolTile> objectsToCreate = new ArrayList<SymbolTile>(); 
+
+		static {
+			factories.put("TERRAIN",TerrainData.factory);
+			factories.put("ROBOT",RobotData.factory);
+			factories.put("MINE",MineData.factory);
+		}
+
         /** Used to pass to the GameMap constructor. */
         private Map<MapProperties, Integer> mapProperties = new HashMap<MapProperties, Integer>();
         private int currentRow = 0;
@@ -118,7 +192,7 @@ class XMLMapHandler extends DefaultHandler {
          * @param property the property to check for
          * @return the String value of the specified attribute
          */
-        private String getRequired(Attributes attributes, String property) {
+        private static String getRequired(Attributes attributes, String property) {
 
             String result = getOptional(attributes, property);
 
@@ -138,7 +212,7 @@ class XMLMapHandler extends DefaultHandler {
          * @return the String value of the specified attribute, or
          * <code>null</code> if it doesn't exist
          */
-        private String getOptional(Attributes attributes, String property) {
+        private static String getOptional(Attributes attributes, String property) {
 
             int propertyIndex = attributes.getIndex(property);
             if (propertyIndex < 0) return null;
@@ -191,8 +265,7 @@ class XMLMapHandler extends DefaultHandler {
                 mapProperties.put(MapProperties.WIDTH, mapWidth);
 
                 // Allocate map tiles based on the width and height.
-                mapTiles = new TerrainTile[mapWidth][mapHeight];
-                map = new char[mapWidth][mapHeight];
+                map = new SymbolData[mapWidth][mapHeight];
 
             } else if (qName.equals("game")) {
 
@@ -227,53 +300,19 @@ class XMLMapHandler extends DefaultHandler {
                     fail("invalid 'character' attribute '" + character + "' -- 'character' must have length 1", "Check that all 'character' attributes are just one character.\n");
 
                 String type = getRequired(attributes, "type");
-                SymbolType symbolType;
-                try {
-                    symbolType = SymbolType.valueOf(type);
-                } catch (IllegalArgumentException iae) {
+				SymbolDataFactory factory = factories.get(type);
+                if(factory==null) {
                     fail("invalid symbol type '" + type + "'", "Check that all symbol nodes have a type attribute defined in the map file specs.\n");
-                    return;
+					return;
                 }
 
-                Team team;
-                TerrainTile terrainType;
-                double amount;
-                String teamString = getOptional(attributes, "team"), terrainString = getOptional(attributes, "terrain"), amountString = getOptional(attributes, "amount");
-
-                if (teamString == null)
-                    team = null;
-                else {
-                    try {
-                        team = Team.valueOf(teamString);
-                    } catch (IllegalArgumentException iae) {
-                        fail("invalid team '" + teamString + "'", "Check that all team attributes are 'A' or 'B'.\n");
-                        return;
-                    }
-                }
-
-                if (terrainString == null)
-                    terrainType = null;
-                else {
-                    try {
-                        terrainType = TerrainTile.valueOf(terrainString);
-                    } catch (IllegalArgumentException iae) {
-                        fail("invalid terrain type '" + terrainString + "'", "Check that all symbol nodes have a terrain attribute defined in the map file specs.\n");
-                        return;
-                    }
-                }
-
-                if (amountString == null)
-                    amount = 0.0;
-                else {
-                    try {
-                        amount = Double.valueOf(amountString);
-                    } catch (IllegalArgumentException iae) {
-                        fail("invalid amount '" + amountString + "'", "Check that all amounts are valid doubles.\n");
-                        return;
-                    }
-                }
-
-                SymbolData data = new SymbolData(symbolType, team, terrainType, amount);
+                SymbolData data;
+				try {
+					data = factory.create(attributes);
+				} catch(IllegalArgumentException e) {
+					fail(e.getMessage(),"Check that all parameters are spelled correctly.");
+					return;
+				}
 
                 symbolMap.put(character.charAt(0), data);
 
@@ -286,22 +325,6 @@ class XMLMapHandler extends DefaultHandler {
                 currentRow = -1;
 
                 // The actual map data will be parsed by characters()...
-
-            } else if (qName.equals("height")) {
-                //Ensure that <height> only occurs under <map>
-                requireElement(qName, "map");
-
-                currentRow = -1;
-
-                // The actual height data gets parsed by heights()
-
-            } else if (qName.equals("blocks")) {
-                //Ensure that <blocks> only occurs under <map>
-                requireElement(qName, "map");
-
-                currentRow = -1;
-
-                // The actual height data gets parsed by blocks()
 
             } else
                 fail("unrecognized map element '<" + qName + ">'", "Check that all nodes are spelled correctly.\n");
@@ -353,8 +376,7 @@ class XMLMapHandler extends DefaultHandler {
                 if (!symbolMap.containsKey(c))
                     fail("unrecognized symbol in map: '" + c + "'", "Check that '" + c + "' is defined as one of the symbols in the map file.\n");
 
-                map[currentCol][currentRow] = c;
-                mapTiles[currentCol][currentRow] = symbolMap.get(c).terrainType;
+                map[currentCol][currentRow] = symbolMap.get(c);
                 currentCol++;
             }
 
@@ -379,54 +401,32 @@ class XMLMapHandler extends DefaultHandler {
 
         }
 
-        private static class MapCoordinate {
-
-            public int x;
-            public int y;
-
-            public MapCoordinate(int x, int y) {
-                this.x = x;
-                this.y = y;
-            }
-        }
-
         public GameWorld createGameWorld(String teamA, String teamB, long[][] archonMemory) {
 
             System.out.println("Creating a game%%%%%%%%%");
+
+			TerrainTile [][] mapTiles = new TerrainTile [map.length][];
+			for(int i=0;i<map.length;i++) {
+				mapTiles[i] = new TerrainTile [map[i].length];
+				for(int j=0;j<map[i].length;j++)
+					mapTiles[i][j] = map[i][j].tile();
+			}
 
             GameMap gm = new GameMap(mapProperties, mapTiles);
             //gm.setTheme(theme);
             GameWorld gw = new GameWorld(gm, teamA, teamB, archonMemory);
 
+			gw.reserveRandomIDs(100);
+
             MapLocation origin = gm.getMapOrigin();
 
-            ArrayList<MapCoordinate> robotCoordinates = new ArrayList<MapCoordinate>();
-            for (int j = 0; j < mapHeight; j++) {
-                for (int i = 0; i < mapWidth; i++) {
-                    SymbolType symbolType = symbolMap.get(map[i][j]).type;
-                    if (symbolType.isRobot()) {
-                        robotCoordinates.add(new MapCoordinate(i, j));
-                    }
-                }
-            }
+			for(int i=0;i<map.length;i++) {
+				for(int j=0;j<map[i].length;j++)
+					map[i][j].createGameObject(gw,new MapLocation(origin.x+i,origin.y+j));
+			}
 
-            //Pad initial IDs up to 100
-            for (int i = 100 - robotCoordinates.size(); i > 0; i--) {
-                robotCoordinates.add(null);
-            }
+			gw.endRandomIDs();
 
-            // Shuffle order we create Robots
-            Collections.shuffle(robotCoordinates, gw.getRandGen());
-
-            for (MapCoordinate coordinate : robotCoordinates) {
-                if (coordinate == null) {
-                    gw.nextID(); // Allocate next ID to no one
-                } else {
-                    MapLocation loc = new MapLocation(origin.getX() + coordinate.x, origin.getY() + coordinate.y);
-                    SymbolData data = symbolMap.get(map[coordinate.x][coordinate.y]);
-					GameWorldFactory.createPlayer(gw,data.type.getChassis(),loc,data.team,null,false);
-                }
-            }
             return gw;
         }
 	
@@ -446,9 +446,7 @@ class XMLMapHandler extends DefaultHandler {
 		// check that the map is symmetric
 		for(y = 0, my = mapHeight-1; my>=y; y++, my--)
 			for (x = 0, mx = mapWidth-1 ; (my>y)?(mx>=0):(mx>=x); x++, mx--) {
-				d = symbolMap.get(map[x][y]);
-				md = symbolMap.get(map[mx][my]);
-				if(!d.isMirrorOf(md)) {
+				if(!map[x][y].equalsMirror(map[mx][my])) {
 					if(!asymmetric) {
 						System.err.println("found asymmetry:");
 						asymmetric = true;
