@@ -32,7 +32,7 @@ public class Sensor extends BaseComponent implements SensorController {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T [] senseNearbyGameObjects(Class<T> type) {
+	public <T extends GameObject> T [] senseNearbyGameObjects(Class<T> type) {
 		Predicate<GameObject> p = Predicates.and(objectWithinRangePredicate(),Predicates.instanceOf(type),Predicates.not(Predicates.equalTo(robot)));
 		return (T [])Iterables.toArray(Iterables.filter(gameWorld.allObjects(),p),GameObject.class);
 	}
