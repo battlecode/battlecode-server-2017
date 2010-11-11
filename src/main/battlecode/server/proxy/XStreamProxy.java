@@ -217,61 +217,45 @@ public class XStreamProxy extends Proxy {
 	public static class MapTileConverter implements Converter {
 
 		public boolean canConvert(Class cls) {
-			return cls.equals(TerrainTile [].class);
+			return cls.equals(TerrainTile [][].class);
 		}
 
 		public void marshal(Object value, HierarchicalStreamWriter writer,
 			MarshallingContext context) {
-			// I tried to do this in the easiest way possible, rather than
-			// using the map file format.  Feel free to change.  -dgulotta
-			TerrainTile [] tiles = (TerrainTile [])value;
-			char [] chars = new char [ tiles.length ];
-			int i;
-			for(i=0;i<tiles.length;i++)
-				chars[i] = (tiles[i]==TerrainTile.LAND)?'.':'#';
-			writer.setValue(new String(chars));
+			// The map tiles are in column major order
+			TerrainTile [][] tiles = (TerrainTile [][])value;
+			StringBuilder builder = new StringBuilder();
+			for(int y=0;y<tiles[0].length;y++) {
+				builder.append('\n');
+				for(int x=0;x<tiles.length;x++)
+					builder.append((tiles[x][y]==TerrainTile.LAND)?'.':'#');
+			}
+			writer.setValue(builder.toString());
 		}
 
 		public Object unmarshal(HierarchicalStreamReader reader,
 			UnmarshallingContext context) throws ConversionException {
-			String str = reader.getValue();
-			TerrainTile [] tiles = new TerrainTile [str.length()];
-			int i;
-			for(i=0;i<str.length();i++) {
-				switch(str.charAt(i)) {
-				case '#':
-					tiles[i] = TerrainTile.VOID;
-					break;
-				case '.':
-					tiles[i] = TerrainTile.LAND;
-					break;
-				default:
-					throw new ConversionException("Illegal character in InternalTerrainTile [][].");
+			String [] rows = StringUtils.split(reader.getValue());
+			TerrainTile [][] tiles = new TerrainTile [rows[0].length()][];
+			for(int x=0;x<rows[0].length();x++) {
+				tiles[x] = new TerrainTile[rows.length];
+				for(int y=0;y<rows.length;y++) {
+					switch(rows[y].charAt(x)) {
+					case '#':
+						tiles[x][y] = TerrainTile.VOID;
+						break;
+					case '.':
+						tiles[x][y] = TerrainTile.LAND;
+						break;
+					default:
+						throw new ConversionException("Illegal character in InternalTerrainTile [][].");
+					}
 				}
 			}
 			return tiles;
 		}
 
 	}
-
-	/*
-	public static class MatchHeaderConverter implements Converter {
-
-		public boolean canConvert(Class cls) {
-			return cls.equals(MatchHeader.class);
-		}
-
-		public void marshal(Object value, HierarchicalStreamWriter writer,
-							MarshallingContext context) {
-        }
-
-        public Object unmarshal(HierarchicalStreamReader reader,
-                        UnmarshallingContext context) {
-			return null;
-        }
-
-	}
-	*/
 
 	static protected void initXStream() {
 		if(xstream!=null) return;
@@ -283,12 +267,7 @@ public class XStreamProxy extends Proxy {
 		xstream.registerConverter(new DoubleArrayConverter());
 		xstream.registerConverter(new MapLocationConverter());
 		xstream.registerConverter(new ExtensibleMetadataConverter());
-		xstream.registerConverter(new MapTileConverter());
-		//xstream.registerConverter(new MatchHeaderConverter());
-		EmptyConverter empty = new EmptyConverter();
-		xstream.registerLocalConverter(GameMap.class,"blockMap",empty);
-		xstream.registerLocalConverter(GameMap.class,"initialBlockMap",empty);
-		//xstream.registerLocalConverter(GameMap.class,"mapTiles",empty);
+		xstream.registerLocalConverter(GameMap.class,"mapTiles",new MapTileConverter());
 		xstream.registerConverter(new RoundDeltaConverter());
 		xstream.useAttributeFor(int.class);
 		xstream.useAttributeFor(int [].class);
