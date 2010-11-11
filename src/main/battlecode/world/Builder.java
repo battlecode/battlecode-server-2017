@@ -18,9 +18,10 @@ public class Builder extends BaseComponent implements BuilderController {
 	}
 
 	public void build(ComponentType type, MapLocation loc, RobotLevel level) throws GameActionException {
-		assertInactive();
-		assertNotNull(type);
 		assertNotNull(level);
+		assertNotNull(type);
+		assertCanBuild(type);
+		assertInactive();
 		assertWithinRange(loc);
 		InternalRobot ir = alliedRobotAt(loc,level);
 		spendResources(type.cost);
@@ -28,8 +29,9 @@ public class Builder extends BaseComponent implements BuilderController {
 	}
 
 	public void build(Chassis type, MapLocation loc) throws GameActionException {
-		assertInactive();
 		assertNotNull(type);
+		assertCanBuild(type);
+		assertInactive();
 		assertWithinRange(loc);
 		if(!gameWorld.canMove(type.level,loc))
 			throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE,"That square is occupied.");

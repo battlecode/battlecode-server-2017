@@ -25,5 +25,9 @@ public enum GameActionExceptionType {
 	/** Indicates when a robot tries to perform an action on another robot, but there is
 	 * no suitable robot there. */
 	NO_ROBOT_THERE,
+	/** Indicates that there is not enough space left in the robot's chassis for a new component. */
+	NO_ROOM_IN_CHASSIS,
+	/** Indicates when a robot tries to perform an action on another robot, but the latter robot is not of the correct type */
+	WRONG_ROBOT_TYPE,
 
 }

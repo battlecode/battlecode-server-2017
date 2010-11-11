@@ -1,5 +1,8 @@
 package battlecode.common;
 
+/**
+ * An interface for controlling a component of a robot.
+ */
 public interface ComponentController
 {
 	/**
@@ -18,7 +21,7 @@ public interface ComponentController
 	public ComponentType type();
 
 	/**
-	 * Equivalent to type().componentClass.
+	 * Equivalent to <code>type().componentClass</code>.
 	 */
 	public ComponentClass componentClass();
 

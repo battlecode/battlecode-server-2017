@@ -1,5 +1,8 @@
 package battlecode.common;
 
+/**
+ * An enum that categorizes components by their purpose.
+ */
 public enum ComponentClass {
 	ARMOR,
 	BUILDER,
