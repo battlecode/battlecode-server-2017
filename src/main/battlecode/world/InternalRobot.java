@@ -29,6 +29,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.Message;
 import battlecode.common.Robot;
 import battlecode.common.Team;
+import battlecode.engine.Engine;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
@@ -62,7 +63,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 	/** all actions that have been performed in the current round */
 	private List<Signal> actions;
 	private List<BaseComponent> newComponents;
-	private volatile Signal equipSignal;
 	private volatile boolean on;
 	private volatile boolean hasBeenOff;
 	private volatile int cores;
@@ -95,7 +95,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 	}
 
-	private final ComponentSet components;
+	private ComponentSet components = new ComponentSet();
 
     public InternalRobotBuffs getBuffs() {
         return buffs;
@@ -116,7 +116,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         saveMapMemory(null, loc, false);
         controlBits = 0;
 
-		components = new ComponentSet();
 		newComponents = new ArrayList<BaseComponent>();
 		if(chassis.motor!=null)
 			equip(chassis.motor);
@@ -139,10 +138,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 	public void setPower(boolean b) {
 		on = b;
 		if(!b) hasBeenOff=true;
-	}
-
-	public void setEquipSignal(Signal s) {
-		equipSignal = s;
 	}
 
 	public boolean queryHasBeenOff() {
@@ -198,14 +193,16 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		case MEDIUM_MOTOR:
 		case LARGE_MOTOR:
 		case FLYING_MOTOR:
+		case BUILDING_MOTOR:
 			controller = new Motor(type,this);
 			break;
 		default:
-			controller = null;
+			throw new RuntimeException("component "+type+" is not supported yet");
 		}
 		components.add(controller);
 		newComponents.add(controller);
-		controller.activate(EQUIP_WAKE_DELAY);
+		if(myGameWorld.getCurrentRound()>=0)
+			controller.activate(EQUIP_WAKE_DELAY);
 		weight+=type.weight;
 		switch(type) {
 		case PLATING:
@@ -501,5 +498,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         incomingMessageQueue = null;
         mapMemory = null;
         buffs = null;
+		components = null;
+		newComponents = null;
+		actions = null;
+		passengers = null;
     }
 }

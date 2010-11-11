@@ -40,6 +40,11 @@ public interface RobotController {
      */
     public MapLocation getLocation();
 
+	/**
+     * Gets the direction this robot is currently facing.
+     *
+     * @return this robot's current Direction
+     */
 	public Direction getDirection();
 
     /**
@@ -150,13 +155,9 @@ public interface RobotController {
      *            <code>stringIndex >= 0 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS</code>
      * @param newString
      *            the value to which the indicator string should be set
+	 *
      */
     public void setIndicatorString(int stringIndex, String newString);
-
-	/**
-	 * Equivalent to setIndicatorString(stringIndex,String.format(format,args)).
-	 */
-	public void setIndicatorStringFormat(int stringIndex, String format, Object ... args);
 
 	/**
 	 * Senses the terrain at loc, if loc was ever within the range of any
@@ -181,25 +182,57 @@ public interface RobotController {
     public void addMatchObservation(String observation);
 
     /**
-     * Sets this robot's "memory", which is saved for the next game in the
-     * match. This method can only be called by an archon. If this method is
-     * called more than once in a game, the last call is what is saved for the
+     * Sets the team's "memory", which is saved for the next game in the
+     * match. The memory is an array of {@link GameConstants#TEAM_MEMORY_LENGTH}
+	 * longs.  If this method is called more than once with the same index
+	 * in the same game, the last call is what is saved for the
      * next game.
      *
-     * @param memory
-     *            the data that this archon should remember for the next game
+	 * @param index
+	 *		the index of the array to set		
+     * @param value
+     * 		the data that the team should remember for the next game
+	 *
+	 * @throws java.lang.ArrayIndexOutOfBoundsException if {@code index} is less
+	 * than zero or greater than {@link GameConstants#TEAM_MEMORY_LENGTH}
+	 *
+	 * @see #getTeamMemory
+	 * @see #setTeamMemory(int,long)
      */
     public void setTeamMemory(int index, long value);
 
+	/**
+	 * Sets this team's "memory". This function allows for finer control
+	 * than {@link #setTeamMemory(int,long)} provides.  For example,
+	 * if {@code mask == 0xFF} then only the eight least significant bits of
+	 * the memory will be set.
+	 *
+	 * @param index
+	 *		the index of the array to set		
+     * @param value
+     * 		the data that the team should remember for the next game
+	 * @param mask
+	 * 		indicates which bits should be set
+	 *
+	 * @throws java.lang.ArrayIndexOutOfBoundsException if {@code index} is less
+	 * than zero or greater than {@link GameConstants#TEAM_MEMORY_LENGTH}
+	 *
+	 * @see #getTeamMemory
+	 * @see #setTeamMemory(int,long,long)
+	 */
 	public void setTeamMemory(int index, long value, long mask);
 
     /**
      * Returns the archon memory from the archons in the last game of the match.
-     * The return value is an array of length 8. If an archon did not call
+     * The return value is an array of length {@link GameConstants#TEAM_MEMORY_LENGTH}.
+	 * If an archon did not call
      * setArchonMemory in the last game, or there was no last game, the
      * corresponding long defaults to 0.
      *
      * @return the archon memory from the archons in the last game of the match
+	 *
+	 * @see #setTeamMemory(int,long)
+	 * @see #setTeamMemory(int,long,long)
      */
     public long[] getTeamMemory();
 

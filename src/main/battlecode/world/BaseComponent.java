@@ -18,8 +18,6 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 {
 	protected ComponentType type;
 	protected int roundsUntilIdle;
-	protected InternalRobot robot;
-	protected GameWorld gameWorld;
 
 	public boolean isActive() {
 		return roundsUntilIdle>0;

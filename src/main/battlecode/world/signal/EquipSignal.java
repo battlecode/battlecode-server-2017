@@ -12,7 +12,10 @@ public class EquipSignal extends Signal {
 
 	public EquipSignal(InternalRobot robot, InternalRobot builder, ComponentType component) {
 		robotID = robot.getID();
-		builderID = builder.getID();
+		if(builder!=null)
+			builderID = builder.getID();
+		else
+			builderID = 0;
 		this.component = component;
 	}
 }

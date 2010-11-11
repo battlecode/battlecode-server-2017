@@ -49,6 +49,8 @@ public class Motor extends BaseComponent implements MovementController
 	}
 
 	public void assertCanMove(Direction d) throws GameActionException {
+		if(type==ComponentType.BUILDING_MOTOR)
+			throw new IllegalStateException("Buildings cannot move.");
 		if(!gameWorld.canMove(robot,d))
 			throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move in the given direction: " + d);
 	}

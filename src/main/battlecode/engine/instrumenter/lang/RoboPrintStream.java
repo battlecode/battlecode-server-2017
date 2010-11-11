@@ -169,7 +169,7 @@ public class RoboPrintStream extends PrintStream {
 	
 	private void checkHeader() {
 		if(header==null) {
-			header = String.format("%s@%d",RobotMonitor.getCurrentRobot().toString(),Engine.getRoundNum());
+			header = String.format("[%s@%d] ",RobotMonitor.getCurrentRobot().toString(),Engine.getRoundNum());
 		}				
 	}
 

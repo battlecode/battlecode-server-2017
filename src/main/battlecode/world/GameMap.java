@@ -266,8 +266,8 @@ public class GameMap implements GenericGameMap {
 	}
 
 	public static int [][] computeOffsets360(int radiusSquared) {
-		int [] XOffsets = new int [400];
-		int [] YOffsets = new int [400];
+		int [] XOffsets = new int [4*radiusSquared+7];
+		int [] YOffsets = new int [4*radiusSquared+7];
 		int nOffsets = 0;
 		for (int y = 0; y*y <= radiusSquared; y++) {
 			XOffsets[nOffsets]=0;
