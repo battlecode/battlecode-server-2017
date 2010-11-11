@@ -13,7 +13,12 @@ public enum TerrainTile {
 	public TerrainTile getType() { return this; }
 	
 	@Deprecated
-	public int getHeight() { return 1; }
+	public int getHeight() {
+		if(this==LAND)
+			return 30;
+		else
+			return 0;
+	}
 
     public boolean isTraversableAtHeight(RobotLevel height) {
         switch (this) {

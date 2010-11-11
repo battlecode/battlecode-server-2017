@@ -42,7 +42,9 @@ public enum Chassis {
 	 */
 	public final int moveDelayDiagonal;
 
-	@Deprecated
+	/**
+	 * Equvalent to <code>level==RobotLevel.IN_AIR</code>.
+	 */
 	public boolean isAirborne() { return level == RobotLevel.IN_AIR; }
 
 	Chassis(int weight, double maxHp, double upkeep,
