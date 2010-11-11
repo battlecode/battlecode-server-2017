@@ -31,12 +31,16 @@ public interface RobotController {
      */
     public double getMaxHp();
 
-    /**
+	public double getTeamResources();
+
+	/**
      * Gets the current location of this robot.
      *
      * @return this robot's current location
      */
     public MapLocation getLocation();
+
+	public Direction getDirection();
 
     /**
      * Retrieve the next message waiting in your incoming message queue. Also

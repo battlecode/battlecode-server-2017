@@ -77,6 +77,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getEnergonLevel();
     }
 
+	public double getTeamResources() {
+		return gameWorld.resources(getTeam());
+	}
+
     /**
      * {@inheritDoc}
      */

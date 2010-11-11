@@ -681,6 +681,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return locations.toArray(new MapLocation[locations.size()]);
     }
 
+	public double resources(Team t) {
+		return teamResources[t.ordinal()];
+	}
+
 	protected boolean spendResources(Team t, double amount) {
 		if(teamResources[t.ordinal()]>=amount) {
 			teamResources[t.ordinal()]-=amount;
