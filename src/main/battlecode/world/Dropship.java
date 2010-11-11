@@ -23,6 +23,7 @@ public class Dropship extends BaseComponent implements DropshipController {
 		assertNotNull(loc);
 		assertWithinRange(loc);
 		InternalRobot ir = alliedRobotAt(loc,RobotLevel.ON_GROUND);
+		assertNotBuilding(ir);
 		assertSpaceAvailable(ir.getChassis());
 		activate(new LoadSignal(robot,ir));
 	}
@@ -64,6 +65,11 @@ public class Dropship extends BaseComponent implements DropshipController {
 	public void assertCarrying(InternalRobot r) throws GameActionException {
 		if(r.container()!=robot)
 			throw new GameActionException(GameActionExceptionType.OUT_OF_RANGE,"You are not carrying that robot.");
+	}
+
+	public void assertNotBuilding(InternalRobot r) throws GameActionException {
+		if(r.getChassis()==Chassis.BUILDING)
+			throw new GameActionException(GameActionExceptionType.WRONG_ROBOT_TYPE,"You cannot transport a building.");
 	}
 
 }

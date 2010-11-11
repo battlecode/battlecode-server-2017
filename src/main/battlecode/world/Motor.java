@@ -12,13 +12,8 @@ import battlecode.world.signal.SetDirectionSignal;
 public class Motor extends BaseComponent implements MovementController
 {
 
-	private static double sq2 = Math.sqrt(2.);
-
-	int delayDiagonal;
-
 	public Motor(ComponentType type, InternalRobot robot) {
 		super(type,robot);
-		delayDiagonal = (int)Math.round(type().delay*sq2);
 	}
 
 	public void moveForward() throws GameActionException {
@@ -32,7 +27,8 @@ public class Motor extends BaseComponent implements MovementController
 	private void move(Direction d) throws GameActionException {
 		assertInactive();
 		assertCanMove(robot.getDirection());
-		int delay = d.isDiagonal()?delayDiagonal:type.delay;
+		int delay = d.isDiagonal()?robot.getChassis().moveDelayDiagonal:
+			robot.getChassis().moveDelayOrthogonal;
 		activate(new MovementSignal(robot,robot.getLocation().add(d),
 			d==robot.getDirection(),delay),delay);
 	}

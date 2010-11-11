@@ -30,6 +30,18 @@ public enum Chassis {
 	/** The type of motor this chassis uses. */
 	public final ComponentType motor;
 
+	/** 
+	 * The time that it takes for this robot to move
+	 * orthogonally.  Equal to <code>motor.delay</code>.
+	 */
+	public final int moveDelayOrthogonal;
+
+	/**
+	 * The time it takes for this robot to move diagonally.
+	 * Equal to <code>(int)Math.round(motor.delay*Math.sqrt(2.))</code>.
+	 */
+	public final int moveDelayDiagonal;
+
 	@Deprecated
 	public boolean isAirborne() { return level == RobotLevel.IN_AIR; }
 
@@ -41,5 +53,7 @@ public enum Chassis {
 			this.cost = cost;
 			this.level = level;
 			this.motor = motor;
+			this.moveDelayOrthogonal = motor.delay;
+			this.moveDelayDiagonal = (int)Math.round(motor.delay*Math.sqrt(2.));
 	}
 }

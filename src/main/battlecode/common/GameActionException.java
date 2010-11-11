@@ -6,6 +6,16 @@ package battlecode.common;
  * <p>
  * Each <code>GameActionException</code> has a type that roughly identifies what
  * caused the exception.
+ * <p>
+ * In addition to <code>GameActionException</code>,
+ * some robot functions can throw the unchecked exceptions
+ * {@link IllegalStateException} and {@link IllegalArgumentException}.
+ * An <code>IllegalStateException</code> is thrown if this robot can
+ * never successfully call the function (for example, a building trying to
+ * move).  An <code>IllegalArgumentException</code> is thrown if this type of
+ * robot can never successfully call the function with the given arguments
+ * (for example, a Recycler trying to construct a motor).
+ * A <code>GameActionException</code> is thrown in all other circumstances.
  *
  * @author Teh Devs
  */
