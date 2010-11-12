@@ -283,6 +283,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public void processBeginningOfTurn() {
 		changeEnergonLevel(regens * REGEN_AMOUNT);
+		for(BaseComponent c : components.values())
+			c.processBeginningOfTurn();
+		if(on&&!myGameWorld.spendResources(getTeam(),chassis.upkeep))
+			on = false;
 	}
 
     @Override

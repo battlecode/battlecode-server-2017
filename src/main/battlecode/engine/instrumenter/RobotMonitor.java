@@ -78,6 +78,7 @@ public class RobotMonitor {
 		}
 
 		if(newData.ID>=0) {
+			myGameWorld.beginningOfExecution(newData.ID);
 			GenericRobot robot = myGameWorld.getRobotByID(newData.ID);
 			bytecodeLimit = robot.getBytecodeLimit();
 			debugLevel = currentRobotData.debugLevel;
@@ -95,7 +96,6 @@ public class RobotMonitor {
 				stream.changeRobot();
 				battlecode.engine.instrumenter.lang.System.out = stream;
 			}
-			myGameWorld.beginningOfExecution(newData.ID);
 		}
 	}		
 	

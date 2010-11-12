@@ -27,6 +27,9 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 		return roundsUntilIdle;
 	}
 
+	public void processBeginningOfTurn() {
+	}
+
 	public void processEndOfTurn() {
 		if(roundsUntilIdle>0)
 			roundsUntilIdle--;

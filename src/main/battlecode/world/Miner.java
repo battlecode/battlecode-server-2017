@@ -13,8 +13,8 @@ public class Miner extends Builder {
 		mine = (InternalMine) gameWorld.getObject(robot.getLocation(),RobotLevel.MINE);
 	}
 
-	public void processEndOfTurn() {
-		super.processEndOfTurn();
+	public void processBeginningOfTurn() {
+		super.processBeginningOfTurn();
 		if(mine!=null)
 			gameWorld.adjustResources(robot.getTeam(),mine.mine());
 	}
