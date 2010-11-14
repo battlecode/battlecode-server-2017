@@ -271,10 +271,15 @@ class ClassReferenceUtil {
 	
 	// called whenever an illegal class is found; throws an InstrumentationException
 	private static String illegalClass(String className, String teamPackageName) {
-		ErrorReporter.report("Illegal class: " + className + "\nThis class cannot be referenced by player " + teamPackageName, false);
-		InstrumentationException e = new InstrumentationException();
-		e.printStackTrace();
-		throw e;
+		if(InstrumentingClassLoader.lazy()) {
+			return "forbidden/"+className;
+		}
+		else {
+			ErrorReporter.report("Illegal class: " + className + "\nThis class cannot be referenced by player " + teamPackageName, false);
+			InstrumentationException e = new InstrumentationException();
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 

@@ -42,7 +42,9 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 
 	public IndividualClassLoader(String teamPackageName, boolean debugMethodsEnabled, boolean silenced) throws InstrumentationException {
 		super(silenced,debugMethodsEnabled,singletonLoader);
-		
+	
+		checkSettings();
+
 		// check that the package we're trying to load isn't contained in a disallowed package
 		String teamNameSlash = teamPackageName + "/";
 		for(String sysName : disallowedPlayerPackages) {
@@ -112,9 +114,9 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 				finishedClass = saveAndDefineClass(name,classBytes);
 			}
 			// Each robot has its own version of java.util classes.
-			// We do this so that robots can't comminucate by calling
-			// object.hashCode().  If permgen space becomes a problem,
-			// we could make hash codes pseudorandom.
+			// If permgen space becomes a problem, we could make it so
+			// that only one copy of these classes is loaded, but
+			// we would need to modify ObjectHashCode.
 			else if(name.startsWith("instrumented")) {
 				byte [] classBytes;
 				try {
@@ -124,6 +126,10 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 					throw ie;
 				}
 				finishedClass = saveAndDefineClass(name,classBytes);
+			}
+			else if(name.startsWith("forbidden/")) {
+				ErrorReporter.report("Illegal class: " + name.substring(10) + "\nThis class cannot be referenced by player " + teamPackageName, false);
+				throw new InstrumentationException();
 			}
 			else {
 				try {

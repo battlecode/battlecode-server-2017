@@ -18,6 +18,7 @@ import org.objectweb.asm.Type;
 import static org.objectweb.asm.ClassReader.*;
 
 import battlecode.engine.ErrorReporter;
+import battlecode.server.Config;
 
 /**
  * Instruments a method.  See InstrumenterASMImpl for more info on what this instrumentation does.
@@ -45,8 +46,6 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 
 	private static HashSet<String> instrumentedStringFuncs;
 
-	private static boolean usingFastHash;
-	private static boolean checkedFastHash = false;
 
 	static {
 		instrumentedStringFuncs = new HashSet<String>();
@@ -97,9 +96,6 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 		this.checkDisallowed = checkDisallowed;
 		this.methodDesc = methodDesc;
 		exceptionHandlers = new HashSet<Label>();
-		if(!checkedFastHash) {
-			usingFastHash = Boolean.getBoolean(battlecode.server.Config.getGlobalConfig().get("bc.server.fast-hash"));
-		}
     }
     
 	public void visitCode() {
@@ -139,7 +135,7 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 			break;
 		case MONITORENTER:
 		case MONITOREXIT:
-			if(checkDisallowed) {
+			if(checkDisallowed && !InstrumentingClassLoader.lazy()) {
 				ErrorReporter.report("synchronized() may not be used by a player.",false);
 				throw new InstrumentationException();
 			}
@@ -195,13 +191,6 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 	
 	public void visitMethodInsn(int opcode, String owner, String name, String desc) {
 
-		/*
-		if(methodName.equals("<init>")&&owner.equals("java/lang/Object")&&name.equals("<init>")) {
-			super.visitMethodInsn(opcode,"battlecode/java/lang/Object",name,desc);
-			return;
-		}
-		*/
-
 		if(name.equals("hashCode")&&desc.equals("()I")&&opcode!=INVOKESTATIC) {
 			incrementBytecodeCtr();
 			endOfBasicBlock();
@@ -226,7 +215,7 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 			super.visitInsn(POP);
 			super.visitJumpInsn(GOTO,doneLabel);
 			super.visitLabel(sameLabel);
-			if(usingFastHash) {
+			if(InstrumentingClassLoader.fastHash()) {
 				super.visitInsn(SWAP);
 				super.visitInsn(POP);
 				super.visitMethodInsn(INVOKESTATIC,"battlecode/engine/instrumenter/lang/ObjectHashCode","identityHashCode","(Ljava/lang/Object;)I");
@@ -262,29 +251,15 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 			// do wait/notify monitoring
 			if((desc.equals("()V") && (name.equals("wait") || name.equals("notify") || name.equals("notifyAll")))
 			   || (name.equals("wait") && (desc.equals("(J)V") || desc.equals("(JI)V")))) {
-				ErrorReporter.report("Illegal method: Object." + name + "() cannot be called by a player", false);
-				throw new InstrumentationException();
+				forbidden("Illegal method: Object." + name + "() cannot be called by a player");
 			}
-
-			//if(name.equals("add")) {
-			//	System.out.println("notstatic |"+owner);
-			//}
-
-			/*
-			if(owner.equals("java/lang/String") && name.equals("matches")) {
-				ErrorReporter.report("Illegal method in " + className + ": String.matches() cannot be called by a player.", false);
-				throw new InstrumentationException();
-			}
-			*/
 
 			if(owner.equals("java/lang/Class")&&name.equals("forName")) {
-				ErrorReporter.report("Illegal method in "+className+": You may not use Class.forName().", false);
-				throw new InstrumentationException();
+				forbidden("Illegal method in "+className+": You may not use Class.forName().");
 			}
 
 			if(owner.equals("java/io/PrintStream")&&name.equals("<init>")&&desc.startsWith("(Ljava/lang/String;")) {
-				ErrorReporter.report("Illegal method in "+className+": You may not use PrintStream to open files.", false);
-				throw new InstrumentationException();
+				forbidden("Illegal method in "+className+": You may not use PrintStream to open files.");
 			}
 			
 			if(owner.equals("java/lang/String")&&instrumentedStringFuncs.contains(name)) {
@@ -295,20 +270,16 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 			
 			// do random monitoring
 			else if(owner.equals("java/lang/Math") && name.equals("random")) {
-				ErrorReporter.report("Illegal method in " + className + ": Math.random() cannot be called by a player.  Use java.util.Random instead.", false);
-				throw new InstrumentationException();
+				forbidden("Illegal method in " + className + ": Math.random() cannot be called by a player.  Use java.util.Random instead.");
 			}
 			else if(owner.equals("java/util/Collections") && name.equals("shuffle") && desc.equals("(Ljava/util/List;)V")) {
-				ErrorReporter.report("Illegal method in " + className + ": You must supply Collections.shuffle() with a Random.", false);
-				throw new InstrumentationException();
+				forbidden("Illegal method in " + className + ": You must supply Collections.shuffle() with a Random.");
 			}
 			else if(owner.equals("java/lang/StrictMath") && name.equals("random")) {
-				ErrorReporter.report("Illegal method in " + className + ": StrictMath.random() cannot be called by a player.  Use java.util.Random instead.", false);
-				throw new InstrumentationException();
+				forbidden("Illegal method in " + className + ": StrictMath.random() cannot be called by a player.  Use java.util.Random instead.");
 			}
 			else if(owner.equals("java/lang/String") && name.equals("intern")) {
-				ErrorReporter.report("Illegal method in " + className + ": String.intern() cannot be called by a player.", false);
-				throw new InstrumentationException();
+				forbidden("Illegal method in " + className + ": String.intern() cannot be called by a player.");
 			}
 		}
 		
@@ -466,27 +437,6 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 		endOfBasicBlock();
 		super.visitLabel(label);
 		
-		// dgulotta: this shouldn't be necessary any more, since we create
-		// a special handler for RobotDeathException
-		//if(finallyHandlers.contains(label)) {
-			//amrik:
-			//1. add a handler different from the default for finally clauses
-			//2. The issue is the standard mechanism of killing robots by throwing an exception
-			// in their thread does not work when the robot dies in a finally clause.
-			// The workaround is to manually unschedule the thread in a custom finally clause
-			// called roboFinallyClause. This is known to permgen since there is obviously
-			// a memory leak here.
-			/*
-			super.visitMethodInsn(INVOKESTATIC,
-								  "battlecode/engine/instrumenter/RobotMonitor",
-								  "roboFinallyClause",
-								  "()V");
-			*/
-
-			//incrementBytecodeCtr(EXCEPTION_BYTECODE_PENALTY);
-			//endOfBasicBlock();
-		//}
-		
 		if(exceptionHandlers.contains(label)) {
 			// I don't know if this is ever necessary (it would only be
 			// needed if some non-instrumented code calls back to
@@ -510,10 +460,6 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 
 	public void visitTypeInsn(int opcode, String desc) {
 		incrementBytecodeCtr();
-		/*
-		if(opcode==NEW&&desc=="java/lang/Object")
-			desc="battlecode/java/lang/Object";
-		*/
 		super.visitTypeInsn(opcode, ClassReferenceUtil.classReference(desc, teamPackageName, silenced, checkDisallowed));
 	}
 	
@@ -562,6 +508,22 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 	
 	/******Utility Methods******/
 	
+	private void forbidden(String reason) {
+		if(InstrumentingClassLoader.lazy()) {
+			super.visitLdcInsn(reason);
+			super.visitLdcInsn(false);
+			super.visitMethodInsn(INVOKESTATIC, "battlecode/engine/ErrorReporter", "report", "(Ljava/lang/String;Z)V");
+			super.visitTypeInsn(NEW, "battlecode/engine/instrumenter/InstrumentationException");
+			super.visitInsn(DUP);
+			super.visitMethodInsn(INVOKESPECIAL, "battlecode/engine/instrumenter/InstrumentationException", "<init>", "()V");
+			super.visitInsn(ATHROW);
+		}
+		else {
+			ErrorReporter.report(reason,false);
+			throw new InstrumentationException();
+		}
+	}
+
 	private void incrementBytecodeCtr() {
 		bytecodeCtr++;
 	}

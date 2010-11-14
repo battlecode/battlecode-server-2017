@@ -15,12 +15,54 @@ import battlecode.engine.ErrorReporter;
 import org.objectweb.asm.*;
 import static org.objectweb.asm.ClassWriter.*;
 
+import battlecode.server.Config;
+
 public abstract class InstrumentingClassLoader extends ClassLoader {
 		
-	// whether classes instrumented by this ICL should have their System.out silenced
-
+	// silenced is not used any more
 	protected final boolean silenced;
 	protected final boolean debugMethodsEnabled;
+
+	private static boolean lazy;
+	private static boolean fastHash;
+	private static boolean checkedSettings;
+
+	/**
+	 * Returns the value of the property bc.engine.lazy-instrumenter.
+	 * If the instrumenter is not lazy, then robots are killed if their class files
+	 * contain any forbidden code.  If the instrumenter is lazy, then robots are killed
+	 * if they try to execute any forbidden code.
+	 *
+	 * Laziness might be necessary if we want to allow external libraries like Guava or
+	 * languages like Scala.  If you're only using your own code then it's better to
+	 * turn laziness off so you don't get any bad surprises.
+	 *
+	 * {@see ClassReferenceUtil#illegalClass}
+	 * {@see RoboMethodAdapter#forbidden}
+	 */
+	public static boolean lazy() { return lazy; }
+
+	/**
+	 * Returns the value of the property bc.engine.fast-hash.
+	 * If fast-hash is set, then the instrumenter will not use
+	 * reflection to check whether an object overrides hashCode().
+	 * The check is slow but without it, there is a one in 2^32 chance
+	 * of the instrumenter thinking that hashCode() is not overridden
+	 * when in fact it is overridden.
+	 *
+	 * {@see battlecode.engine.instrumenter.lang.ObjectHashCode}
+	 * {@see RoboMethodAdapter#visitMethodInsn}
+	 */
+	public static boolean fastHash() { return fastHash; }
+
+	protected static void checkSettings() {
+		if(!checkedSettings) {
+			checkedSettings = true;
+			Config config = Config.getGlobalConfig();
+			lazy = config.getBoolean("bc.engine.lazy-instrumenter");
+			fastHash = config.getBoolean("bc.engine.fast-hash");
+		}
+	}
 
 	public InstrumentingClassLoader(boolean silenced, boolean debugMethodsEnabled) {
 		super();
