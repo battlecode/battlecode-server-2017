@@ -89,12 +89,15 @@ public class RobotMonitor {
 				bytecodesLeft = DEBUG_BYTECODES;
 			
 			if(silenced[robot.getTeam().ordinal()]) {
-				battlecode.engine.instrumenter.lang.System.out = SilencedPrintStream.theInstance();
+				SilencedPrintStream stream = SilencedPrintStream.theInstance();
+				battlecode.engine.instrumenter.lang.System.out = stream;
+				battlecode.engine.instrumenter.lang.System.err = stream;
 			}
 			else {
 				RoboPrintStream stream = RoboPrintStream.theInstance();
 				stream.changeRobot();
 				battlecode.engine.instrumenter.lang.System.out = stream;
+				battlecode.engine.instrumenter.lang.System.err = stream;
 			}
 		}
 	}		

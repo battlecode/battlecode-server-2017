@@ -1,5 +1,6 @@
 package battlecode.engine.instrumenter.lang;
 
+import java.io.InputStream;
 import java.io.PrintStream;
 
 import battlecode.engine.instrumenter.RobotMonitor;
@@ -30,4 +31,8 @@ public final class System {
 
 	// set by RobotMonitor
 	public static PrintStream out;
+	public static PrintStream err;
+	public static InputStream in = new InputStream() {
+		public int read() throws java.io.IOException { throw new java.io.EOFException(); }
+	};
 }
