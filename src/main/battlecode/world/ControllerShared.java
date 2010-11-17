@@ -11,6 +11,9 @@ public abstract class ControllerShared
 
 	public InternalRobot getRobot() { return robot; }
 
+	protected abstract MapLocation getLocation();
+	protected abstract Direction getDirection();
+
 	protected ControllerShared(GameWorld gw, InternalRobot r) {
 		gameWorld = gw;
 		robot = r;
@@ -23,7 +26,7 @@ public abstract class ControllerShared
 	}
 
 	protected void assertWithinRange(MapLocation loc, int distance) throws GameActionException {
-		if(robot.getLocation().distanceSquaredTo(loc)>distance)
+		if(getLocation().distanceSquaredTo(loc)>distance)
 			outOfRange();
 	}
 	

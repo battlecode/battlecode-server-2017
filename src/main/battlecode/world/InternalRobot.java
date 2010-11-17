@@ -49,8 +49,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     private volatile double myEnergonLevel;
     protected volatile Direction myDirection;
-	protected volatile MapLocation futureLoc;
-	protected volatile Direction futureDir;
     private volatile boolean energonChanged = true;
     protected volatile long controlBits;
     // is this used ever?
@@ -74,6 +72,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 	private volatile int invulnerableRounds;
 	private volatile InternalRobot transporter;
 	private Set<InternalRobot> passengers;
+	private RobotControllerImpl rc;
 
 	public static class ComponentSet extends ForwardingMultimap<ComponentClass,BaseComponent> {
 
@@ -103,6 +102,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return buffs;
     }
 
+	public RobotControllerImpl getRC() { return rc; }
+	public void setRC(RobotControllerImpl rc) { this.rc = rc; }
+
 	@SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, Chassis chassis, MapLocation loc, Team t,
             boolean spawnedRobot) {
@@ -123,9 +125,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 			equip(chassis.motor);
 
 		on = true;
-		
-		futureLoc = myLocation;
-		futureDir = myDirection;
     }
 
 	public boolean inTransport() {
@@ -300,13 +299,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		for(BaseComponent c : components.values()) {
 			c.processEndOfTurn();
 		}
-		if(!futureLoc.equals(myLocation)) {
-        	saveMapMemory(myLocation, futureLoc, false);
-			myLocation = futureLoc;
-		}
-		if(futureDir!=myDirection) {
-			setDirection(futureDir);
-		}
 	}
 
     @Override
@@ -407,8 +399,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public void setDirection(Direction dir) {
         myDirection = dir;
-		futureDir = dir;
-        saveMapMemory(getLocation(), getLocation(), false);
     }
 
     public void suicide() {
@@ -462,32 +452,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		this.transporter = transporter;
 		myGameWorld.notifyMovingObject(this,myLocation,null);
 		myLocation = VERY_FAR_AWAY;
-		futureLoc = VERY_FAR_AWAY;
 	}
 
 	public void unloadTo(MapLocation loc) {
 		myLocation = loc;
-		futureLoc = loc;
 		transporter = null;
 		myGameWorld.notifyMovingObject(this,null,myLocation);
 	}
-
-	public void setLocationDelayed(MapLocation newLoc) {
-		myGameWorld.notifyMovingObject(this,futureLoc,newLoc);
-		futureLoc = newLoc;
-	}
-
-	public void setDirectionDelayed(Direction dir) {
-		futureDir = dir;
-	}
-
-    @Override
-    public void setLocation(MapLocation newLoc) {
-        MapLocation oldLoc = getLocation();
-        super.setLocation(newLoc);
-        saveMapMemory(oldLoc, newLoc, false);
-		futureLoc = newLoc;
-    }
 
     public void setControlBits(long l) {
         controlBits = l;

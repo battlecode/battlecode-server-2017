@@ -6,6 +6,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.GameActionExceptionType;
 import battlecode.common.MapLocation;
 import battlecode.common.MovementController;
+import battlecode.common.TerrainTile;
 import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.SetDirectionSignal;
 
@@ -29,8 +30,8 @@ public class Motor extends BaseComponent implements MovementController
 		assertCanMove(robot.getDirection());
 		int delay = d.isDiagonal()?robot.getChassis().moveDelayDiagonal:
 			robot.getChassis().moveDelayOrthogonal;
-		activate(new MovementSignal(robot,robot.getLocation().add(d),
-			d==robot.getDirection(),delay),delay);
+		activate(new MovementSignal(robot,getLocation().add(d),
+			d==getDirection(),delay),delay);
 	}
 
 	public void setDirection(Direction d) throws GameActionException {
@@ -42,6 +43,10 @@ public class Motor extends BaseComponent implements MovementController
 	public boolean canMove(Direction d) {
 		assertValidDirection(d);
 		return gameWorld.canMove(robot,d);
+	}
+
+	public TerrainTile senseTerrainTile(MapLocation loc) {
+		return rc.senseTerrainTile(loc);
 	}
 
 	public void assertCanMove(Direction d) throws GameActionException {

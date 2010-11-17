@@ -52,4 +52,13 @@ public interface MovementController extends ComponentController {
      */
 	public boolean canMove(Direction dir);
 
+	/** Same as {@link RobotController#getLocation}.  Provided for convenience. */
+	public MapLocation getLocation();
+
+	/** Same as {@link RobotController#getDirection}.  Provided for convenience. */
+	public Direction getDirection();
+
+	/** Same as {@link RobotController#senseTerrainTile}.  Provided for convenience. */
+	public TerrainTile senseTerrainTile(MapLocation loc);
+
 }

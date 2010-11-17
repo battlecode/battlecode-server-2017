@@ -3,6 +3,7 @@ package battlecode.world;
 import battlecode.common.ComponentClass;
 import battlecode.common.ComponentController;
 import battlecode.common.ComponentType;
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameObject;
 import battlecode.common.MapLocation;
@@ -18,6 +19,7 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 {
 	protected ComponentType type;
 	protected int roundsUntilIdle;
+	protected RobotControllerImpl rc = robot.getRC();
 
 	public boolean isActive() {
 		return roundsUntilIdle>0;
@@ -95,9 +97,9 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 	}
 
 	protected boolean checkWithinRange(MapLocation loc) {
-		if(robot.getLocation().distanceSquaredTo(loc)>type.range)
+		if(getLocation().distanceSquaredTo(loc)>type.range)
 			return false;
-		return GameWorld.inAngleRange(robot.getLocation(),robot.getDirection(),
+		return GameWorld.inAngleRange(getLocation(),getDirection(),
 			loc,type.cosHalfAngle);
 	}
 
@@ -132,6 +134,9 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 		if(!gameWorld.spendResources(robot.getTeam(),amount))
 			throw new GameActionException(NOT_ENOUGH_RESOURCES,"You do not have enough resources for that.");
 	}
+
+	public MapLocation getLocation() { return rc.getLocation(); }
+	public Direction getDirection() { return rc.getDirection(); }
 
 	protected BaseComponent(ComponentType type, InternalRobot robot) {
 		super(robot.getGameWorld(),robot);
