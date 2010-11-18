@@ -5,9 +5,6 @@ import com.sun.tools.doclets.Taglet;
 
 import battlecode.engine.instrumenter.MethodCostUtil;
 
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map;
 
 public class MethodCost implements Taglet {

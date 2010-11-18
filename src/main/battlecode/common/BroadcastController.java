@@ -20,7 +20,6 @@ public interface BroadcastController extends ComponentController {
      * Each robot can only have one message to broadcast in a given round at a time.
      *
 	 * @cooldown 1
-	 * @methodcost
 	 *
      * @param msg
      *            the message you want to broadcast; cannot be <code>null</code>.
