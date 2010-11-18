@@ -22,7 +22,20 @@ class InterfaceReader implements ClassVisitor {
 	public InterfaceReader() {
 		super();
 	}
+
+	public InterfaceReader(String className) {
+		ClassReader cr;
+		try{
+			cr = new ClassReader(className);
+		}catch(IOException ioe) {
+			ErrorReporter.report("Can't find the class \"" + className + "\", and this wasn't caught until the MethodData stage.", true);
+			throw new InstrumentationException();
+		}
+		InterfaceReader ir = new InterfaceReader();
+		cr.accept(ir, SKIP_DEBUG);
 	
+	}
+
 	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
 		// first, put all interfaces/classes directly implemented/extended by the given class into result
 		HashSet<String> result = new HashSet<String>();

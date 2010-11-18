@@ -30,4 +30,9 @@ public interface ComponentController
 	 */
 	public boolean withinRange(MapLocation loc);
 
+	/**
+	 * Returns the RobotController for this component's robot.
+	 */
+	public RobotController getRC();
+
 }

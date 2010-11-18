@@ -21,7 +21,7 @@ import static org.objectweb.asm.ClassReader.*;
  *
  * @author adamd
  */
-class MethodCostUtil {
+public class MethodCostUtil {
 	
 	private MethodCostUtil() {}
 
@@ -76,6 +76,15 @@ class MethodCostUtil {
 		
 		interfacesMap = new HashMap<String, String[]>();
 	}
+
+	public static MethodData getMethodDataNoAsm(String className, String methodName) {
+		if(className.charAt(0) == '[')
+			return null;
+		String key = className + "/" + methodName;
+
+		return methodCosts.get(key);
+
+	}
 	
 	/**
 	 * Returns the MethodData associated with the given method, or null if no MethodData exists for the given method.
@@ -94,17 +103,7 @@ class MethodCostUtil {
 		if(interfacesMap.containsKey(className))
 			interfaces = interfacesMap.get(className);
 		else {
-			ClassReader cr;
-			try{
-				cr = new ClassReader(className);
-			}catch(IOException ioe) {
-				ErrorReporter.report("Can't find the class \"" + className + "\", and this wasn't caught until the MethodData stage.", true);
-				// this isn't all that bad an error, so don't throw an InstrumentationException
-				return null;
-			}
-			InterfaceReader ir = new InterfaceReader();
-			cr.accept(ir, SKIP_DEBUG);
-			interfaces = ir.getInterfaces();
+			interfaces = new InterfaceReader(className).getInterfaces();
 			interfacesMap.put(className, interfaces);
 		}
 		

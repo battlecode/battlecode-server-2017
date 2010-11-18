@@ -144,14 +144,17 @@
 
     <!-- ========== TESTING ========= -->
 
-	<target name="common-doc">
+	<target name="common-doc" depends="compile">
 		<javadoc
 			classpathref="classpath-libs"
 			sourcepath="${src.dir}"
 			packagenames="battlecode.common.*"
 			destdir="${commondoc.destdir}"
 			windowtitle="Battlecode ${year}"
-			link="http://download.oracle.com/javase/6/docs/api/"/>
+			link="http://download.oracle.com/javase/6/docs/api/">
+			<taglet name="battlecode.doc.Cooldown" path="${pkg.build.dir}"/>
+			<taglet name="battlecode.doc.MethodCost" path="${pkg.build.dir}"/>
+		</javadoc>
 	</target>
 
     <target name="doc">

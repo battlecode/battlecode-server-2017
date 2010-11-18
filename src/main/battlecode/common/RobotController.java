@@ -37,6 +37,7 @@ public interface RobotController {
      * Gets the current location of this robot.
      *
      * @return this robot's current location
+	 *
      */
     public MapLocation getLocation();
 

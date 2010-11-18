@@ -12,6 +12,8 @@ public interface MovementController extends ComponentController {
 	 * orthogonal movement and {@code Math.round(type().delay*Math.sqrt(2))} for
 	 * diagonal movement).
      *
+	 * @cooldown <code>type().wakeDelay()</code> if orthogonal, <code>Math.round(type().wakeDelay()*Math.sqrt(2.))</code> if diagonal
+	 *
 	 * @throws java.lang.IllegalStateException if this robot is a building
 	 * @throws GameActionException if this component is already in use (ALREADY_ACTIVE)
 	 * @throws GameActionException if the destination terrain is not traversable by
@@ -33,10 +35,12 @@ public interface MovementController extends ComponentController {
      * Queues a direction change to be performed at the end of this robot's turn.
 	 * When the action is executed, the robot will change its direction.
      *
+	 * @cooldown 1
+	 *
      * @param dir
      *            the direction the robot should face
 	 * @throws GameActionException if this component is already in use (ALREADY_ACTIVE)
-     */
+	 */
 	public void setDirection(Direction dir) throws GameActionException;
 	
 	

@@ -10,6 +10,8 @@ public interface BuilderController extends ComponentController {
 	 * The new component will not be able to perform any actions for
 	 * <code>GameConstants.WAKE_DELAY</code> rounds.
 	 *
+	 * @cooldown
+	 *
 	 * @throws IllegalArgumentException if this component cannot build a component of type <code>type</code>
 	 * @throws GameActionException if this component is already engaged in an action (ALREADY_ACTIVE)
 	 * @throws GameActionException if <code>loc</code> is not adjacent to this robot's location (OUT_OF_RANGE)
@@ -28,6 +30,8 @@ public interface BuilderController extends ComponentController {
 	 * it will not be able to perform any actions for <code>GameConstants.WAKE_DELAY</code>
 	 * rounds.
      *
+	 * @cooldown
+	 *
 	 * @throws IllegalArgumentException if this component cannot build a chassis of type <code>type</code>
 	 * @throws GameActionException if this component is already engaged in an action (ALREADY_ACTIVE)
 	 * @throws GameActionException if <code>loc</code> is not adjacent to this robot's location (OUT_OF_RANGE)

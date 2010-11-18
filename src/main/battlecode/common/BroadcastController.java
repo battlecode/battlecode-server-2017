@@ -19,6 +19,9 @@ public interface BroadcastController extends ComponentController {
      * <p>
      * Each robot can only have one message to broadcast in a given round at a time.
      *
+	 * @cooldown 1
+	 * @methodcost
+	 *
      * @param msg
      *            the message you want to broadcast; cannot be <code>null</code>.
      * @throws GameActionException if this robot already has a message queued in the current round (ALREADY_ACTIVE).
