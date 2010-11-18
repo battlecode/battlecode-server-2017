@@ -35,9 +35,12 @@ public class Cooldown implements Taglet {
 	}
 
 	public String toString(Tag [] tags) {
-		if(tags.length!=1)
+		if(tags.length==0)
+			return null;
+		else if(tags.length==1)
+			return toString(tags[0]);
+		else
 			throw new IllegalArgumentException("Only one cooldown tag is allowed per method.");
-		return toString(tags[0]);
 	}
 
 }

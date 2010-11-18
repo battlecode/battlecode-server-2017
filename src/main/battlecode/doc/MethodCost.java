@@ -5,6 +5,9 @@ import com.sun.tools.doclets.Taglet;
 
 import battlecode.engine.instrumenter.MethodCostUtil;
 
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 
 public class MethodCost implements Taglet {
@@ -27,20 +30,17 @@ public class MethodCost implements Taglet {
 
 	public boolean isInlineTag() { return false; }
 
-	protected static MethodDoc lastMethod;
-	
 	public String toString(Tag tag) {
 		throw new IllegalArgumentException("The methodcost tag may not be used inline.");
 	}
 
+	String [] methods;
+	int n;
+
 	public String toString(Tag [] tags) {
-		if(tags.length==0) return "";
-		MethodDoc doc = (MethodDoc)tags[0].holder();
-		lastMethod = null;
-		String name = doc.name();
-		String cls = doc.containingClass().qualifiedName().replace(".","/");
-		MethodCostUtil.MethodData data = MethodCostUtil.getMethodDataNoAsm(cls,name);
-		if(data==null||data.cost==0) return "";
+		if(methods==null) methods = System.getProperty("battlecode.doc.methods").split("\n");
+		MethodCostUtil.MethodData data = MethodCostUtil.getMethodDataRaw(methods[n++]);
+		if(data==null||data.cost==0) return null;
 		StringBuilder builder = new StringBuilder();
 		builder.append("<dt><strong>Bytecode cost:</strong></dt><dd>");
 		builder.append(data.cost);

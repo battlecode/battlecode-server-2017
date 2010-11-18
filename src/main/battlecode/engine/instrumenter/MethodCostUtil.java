@@ -77,13 +77,8 @@ public class MethodCostUtil {
 		interfacesMap = new HashMap<String, String[]>();
 	}
 
-	public static MethodData getMethodDataNoAsm(String className, String methodName) {
-		if(className.charAt(0) == '[')
-			return null;
-		String key = className + "/" + methodName;
-
-		return methodCosts.get(key);
-
+	public static MethodData getMethodDataRaw(String fullName) {
+		return methodCosts.get(fullName);
 	}
 	
 	/**
