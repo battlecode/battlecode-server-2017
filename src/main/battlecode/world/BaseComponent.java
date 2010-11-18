@@ -60,6 +60,8 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 
 	public ComponentClass componentClass() { return type.componentClass; }
 
+	public RobotControllerImpl getRC() { return rc; }
+
 	/*
 	public void unequip() {
 		// add unequip signal
