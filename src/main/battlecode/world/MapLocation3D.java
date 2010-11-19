@@ -26,7 +26,7 @@ public class MapLocation3D {
 	 * @param height the vertical components of this 3D location
 	 */
 	public MapLocation3D(MapLocation location, RobotLevel height) {
-		this.location = new MapLocation(location.getX(), location.getY());
+		this.location = location;
 		this.height = height;
 	}
 

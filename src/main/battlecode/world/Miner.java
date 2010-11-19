@@ -10,7 +10,7 @@ public class Miner extends Builder {
 	@SuppressWarnings("unchecked")
 	public Miner(InternalRobot robot) {
 		super(ComponentType.RECYCLER,robot);
-		mine = (InternalMine) gameWorld.getObject(getLocation(),RobotLevel.MINE);
+		mine = (InternalMine) gameWorld.getObject(robot.getLocation(),RobotLevel.MINE);
 	}
 
 	public void processBeginningOfTurn() {

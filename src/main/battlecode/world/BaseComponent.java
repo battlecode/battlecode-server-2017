@@ -19,7 +19,7 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 {
 	protected ComponentType type;
 	protected int roundsUntilIdle;
-	protected RobotControllerImpl rc = robot.getRC();
+	protected RobotControllerImpl rc;
 
 	public boolean isActive() {
 		return roundsUntilIdle>0;
@@ -143,6 +143,7 @@ public class BaseComponent extends ControllerShared implements ComponentControll
 	protected BaseComponent(ComponentType type, InternalRobot robot) {
 		super(robot.getGameWorld(),robot);
 		this.type = type;
+		rc = robot.getRC();
 	}
 
 }

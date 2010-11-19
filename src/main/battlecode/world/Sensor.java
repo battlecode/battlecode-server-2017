@@ -32,8 +32,12 @@ public class Sensor extends BaseComponent implements SensorController {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends GameObject> T [] senseNearbyGameObjects(Class<T> type) {
-		Predicate p = Predicates.and(objectWithinRangePredicate(),Predicates.instanceOf(type),Predicates.not(Predicates.equalTo(robot)));
+	public <T extends GameObject> T [] senseNearbyGameObjects(final Class<T> type) {
+		Predicate <InternalObject> p = new Predicate<InternalObject>() {
+			public boolean apply(InternalObject o) {
+				return checkWithinRange(o) && (type.isInstance(o)) && (!o.equals(robot));
+			}
+		};
 		return (T [])Iterables.toArray(Iterables.filter(gameWorld.allObjects(),p),GameObject.class);
 	}
 	

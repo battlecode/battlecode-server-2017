@@ -121,8 +121,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         controlBits = 0;
 
 		newComponents = new ArrayList<BaseComponent>();
-		if(chassis.motor!=null)
-			equip(chassis.motor);
 
 		on = true;
     }
@@ -285,6 +283,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public void processBeginningOfTurn() {
 		changeEnergonLevel(regens * REGEN_AMOUNT);
+		rc.processBeginningOfTurn();
 		for(BaseComponent c : components.values())
 			c.processBeginningOfTurn();
 		if(on&&!myGameWorld.spendResources(getTeam(),chassis.upkeep))

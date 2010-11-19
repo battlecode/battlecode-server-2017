@@ -1,6 +1,7 @@
 package battlecode.engine.signal;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -74,6 +75,8 @@ public class AutoSignalHandler<T> implements SignalHandler<T> {
 			if(method!=null)
 				try {
 					return (T)method.invoke(myObject,signal);
+				} catch(InvocationTargetException ite) {
+					return exceptionResponse((Exception)ite.getCause());
 				} catch(Exception e) {
 					return exceptionResponse(e);
 				}

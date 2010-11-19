@@ -53,6 +53,8 @@ public class GameWorldFactory {
 	private static void loadPlayer(GameWorld gw, InternalRobot robot, Team t, InternalRobot parent) {
 		gw.addSignal(new SpawnSignal(robot, parent));
 		RobotControllerImpl rc = new RobotControllerImpl(gw, robot);
+		if(robot.getChassis().motor!=null)
+			robot.equip(robot.getChassis().motor);
 		String teamName = gw.getTeamName(t);
 		PlayerFactory.loadPlayer(rc,teamName);
 	}
