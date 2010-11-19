@@ -98,7 +98,17 @@ public class MethodCostUtil {
 		if(interfacesMap.containsKey(className))
 			interfaces = interfacesMap.get(className);
 		else {
-			interfaces = new InterfaceReader(className).getInterfaces();
+			ClassReader cr;
+			try{
+				cr = new ClassReader(className);
+			}catch(IOException ioe) {
+				ErrorReporter.report("Can't find the class \"" + className + "\", and this wasn't caught until the MethodData stage.", true);
+				// this isn't all that bad an error, so don't throw an InstrumentationException
+				return null;
+			}
+			InterfaceReader ir = new InterfaceReader();
+			cr.accept(ir, SKIP_DEBUG);
+			interfaces = ir.getInterfaces();
 			interfacesMap.put(className, interfaces);
 		}
 		
