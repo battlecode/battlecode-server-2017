@@ -29,6 +29,18 @@ public final class System {
 			RobotMonitor.incrementBytecodes(length);
 	}
 
+	public static String getProperty(String key) {
+		if(key.startsWith("bc.testing."))
+			return java.lang.System.getProperty(key);
+		else
+			return null;
+	}
+
+	public static String getProperty(String key, String def) {
+		String s = getProperty(key);
+		return (s==null)?def:s;
+	}
+
 	// set by RobotMonitor
 	public static PrintStream out;
 	public static PrintStream err;
