@@ -154,7 +154,12 @@
 			link="http://download.oracle.com/javase/6/docs/api/">
 			<doclet name="battlecode.doc.Doclet" path="${pkg.build.dir}"/>
 			<taglet name="battlecode.doc.Cooldown" path="${pkg.build.dir}"/>
-			<taglet name="battlecode.doc.MethodCost" path="${pkg.build.dir}:lib/asm-3.2.jar"/>
+			<taglet name="battlecode.doc.MethodCost">
+				<path refid="classpath-libs"/>
+			</taglet>
+			<taglet name="battlecode.doc.Components">
+				<path refid="classpath-libs"/>
+			</taglet>
 		</javadoc>
 	</target>
 

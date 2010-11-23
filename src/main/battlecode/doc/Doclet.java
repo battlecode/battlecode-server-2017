@@ -12,7 +12,8 @@ public class Doclet extends Standard {
 		// Due to various issues with the javadoc api we have to
 		// use some bad hacks to tell the bytecode cost taglet the
 		// method names.
-		StringBuilder builder = new StringBuilder();
+		StringBuilder methodBuilder = new StringBuilder();
+		StringBuilder memberBuilder = new StringBuilder();
 		ClassDoc [] doc = root.classes();
 		Arrays.sort(doc, new Comparator<ClassDoc>() {
 			public int compare(ClassDoc o1, ClassDoc o2) {
@@ -22,13 +23,24 @@ public class Doclet extends Standard {
 		for(ClassDoc cl : doc) {
 			String clname = cl.qualifiedName().replace(".","/");
 			for(MethodDoc m : cl.methods()) {
-				builder.append(clname);
-				builder.append("/");
-				builder.append(m.name());
-				builder.append("\n");
+				methodBuilder.append(clname);
+				methodBuilder.append("/");
+				methodBuilder.append(m.name());
+				methodBuilder.append("\n");
+			}
+			for(FieldDoc f : cl.enumConstants()) {
+				if("ComponentType".equals(f.containingClass().name()))
+					memberBuilder.append(f.name());
+				else
+					memberBuilder.append("\0");
+				memberBuilder.append("\n");
+			}
+			for(FieldDoc f : cl.fields()) {
+				memberBuilder.append("\0\n");
 			}
 		}
-		System.setProperty("battlecode.doc.methods",builder.toString());
+		System.setProperty("battlecode.doc.methods",methodBuilder.toString());
+		System.setProperty("battlecode.doc.components",memberBuilder.toString());
 		return Standard.start(root);
 	}
 

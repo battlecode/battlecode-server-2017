@@ -35,6 +35,7 @@ public class MethodCost implements Taglet {
 	int n;
 
 	public String toString(Tag [] tags) {
+		System.getProperty("battlecode.doc.methods");
 		if(methods==null) methods = System.getProperty("battlecode.doc.methods").split("\n");
 		MethodCostUtil.MethodData data = MethodCostUtil.getMethodDataRaw(methods[n++]);
 		if(data==null||data.cost==0) return null;
