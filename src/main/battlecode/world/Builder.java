@@ -39,6 +39,14 @@ public class Builder extends BaseComponent implements BuilderController {
 		activate(new SpawnSignal(loc,type,robot.getTeam(),robot));
 	}
 
+	public static boolean canBuild(ComponentType myType, ComponentType type) {
+		return true;
+	}
+
+	public static boolean canBuild(ComponentType myType, Chassis chassis) {
+		return true;
+	}
+
 	public void assertCanBuild(ComponentType type) {
 	}
 
