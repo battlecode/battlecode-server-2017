@@ -27,17 +27,24 @@ public class AttackSignal extends Signal {
 	/** The weapon that was used */
 	public final ComponentType weaponType;
 
+	public final double damage;
+
 	/** 
 	 * Creates a signal for a robot broadcast.
 	 *
 	 * @param robot the robot that attacked
 	 * @param targetLoc the location that the robot attacked
 	 */
-	public AttackSignal(InternalRobot robot, ComponentType weapon, MapLocation targetLoc, RobotLevel targetHeight) {
+	public AttackSignal(InternalRobot robot, ComponentType weapon, MapLocation targetLoc, RobotLevel targetHeight, double damage) {
 		this.robotID = robot.getID();
 		this.weaponType = weapon;
 		this.targetLoc = targetLoc;
 		this.targetHeight = targetHeight;
+		this.damage = damage;
+	}
+
+	public AttackSignal(InternalRobot robot, ComponentType weapon, MapLocation targetLoc, RobotLevel targetHeight) {
+		this(robot,weapon,targetLoc,targetHeight,weapon.attackPower);
 	}
 
 	/**

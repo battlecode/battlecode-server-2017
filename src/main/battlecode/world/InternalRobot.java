@@ -170,6 +170,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		case MEDIC:
 			controller = new Weapon(type,this);
 			break;
+		case BEAM:
+			controller = new Beam(type,this);
+			break;
 		case SATELLITE:
 		case TELESCOPE:
 		case SIGHT:

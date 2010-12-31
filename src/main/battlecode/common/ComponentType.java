@@ -16,6 +16,7 @@ public enum ComponentType
 	CANNON        (  6,  0,  5,  9, 90,2.5, WEAPON,WeaponController.class),
 	RAILGUN       (  6,  0,  4, 16, 90,6.5, WEAPON,WeaponController.class),
 	HAMMER        (  2,  0,  1,  4, 90, .4, WEAPON,WeaponController.class),
+	BEAM          (  4,  0,  2, 36, 90,  0, WEAPON,WeaponController.class),
 	GLUEGUN       (  3,  0,  6, 16, 90,  0, WEAPON,WeaponController.class),
 	MEDIC         (  4,  0,  4,  9,360,-.2, WEAPON,WeaponController.class),
 	SATELLITE     (  7,  0,  0,100,360,  0, SENSOR,SensorController.class),
