@@ -46,7 +46,7 @@ public class Sensor extends BaseComponent implements SensorController {
 		InternalRobot ir = castInternalRobot(r);
 		assertWithinRange(ir);
 		ComponentType [] components;
-		if(type()==ComponentType.SATELLITE)
+		if(type()==ComponentType.SATELLITE||robot.getTeam()==ir.getTeam())
 			components = ir.getComponentTypes();
 		else
 			components = null;
