@@ -31,8 +31,8 @@ public final class GameConstants {
     /** The number of indicator strings that a player can associate with a robot */
     public static final int NUMBER_OF_INDICATOR_STRINGS = 3;
     /** The base number of bytecodes a robot can execute each round */
-    public static final int BYTECODE_LIMIT_BASE = 2000;
-	public static final int BYTECODE_LIMIT_ADDON = 2000;
+    public static final int BYTECODE_LIMIT_BASE = 3000;
+	public static final int BYTECODE_LIMIT_ADDON = 3000;
     /** The chainer's splash damage radius */
     public final static int CHAINER_SPLASH_RADIUS_SQUARED = 2;
     /** The radius at which flux is mined */
