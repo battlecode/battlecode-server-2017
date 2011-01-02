@@ -4,17 +4,10 @@ import battlecode.common.Chassis;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 
-import com.google.common.base.Functions;
 import com.google.common.base.Predicate;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -27,13 +20,11 @@ import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.GenericWorld;
-import battlecode.engine.PlayerFactory;
 import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.signal.*;
 import battlecode.serial.DominationFactor;
 import battlecode.serial.GameStats;
 import battlecode.serial.RoundStats;
-import battlecode.server.Config;
 import battlecode.world.signal.*;
 
 /**
