@@ -132,7 +132,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void setPower(boolean b) {
-        if (on && !b){
+        if (on && !b) {
             onInRounds = -1;
             on = false;
 
@@ -149,6 +149,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public boolean hasRoomFor(ComponentType c) {
+        if (c == ComponentType.IRON) {
+            for (BaseComponent bc : components.get(ComponentClass.ARMOR)) {
+                if (bc.type == ComponentType.IRON) {
+                    return false;
+                }
+            }
+        }
         return c.weight + weight <= chassis.weight;
     }
 
@@ -198,6 +205,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             case FLYING_MOTOR:
             case BUILDING_MOTOR:
                 controller = new Motor(type, this);
+                break;
+            case JUMP:
+                controller = new JumpCore(type, this);
                 break;
             default:
                 throw new RuntimeException("component " + type + " is not supported yet");
@@ -281,7 +291,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void processBeginningOfRound() {
         super.processBeginningOfRound();
         buffs.processBeginningOfRound();
-        if(onInRounds > 0)
+        if (onInRounds > 0)
             onInRounds--;
     }
 

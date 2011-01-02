@@ -25,6 +25,7 @@ public class Builder extends BaseComponent implements BuilderController {
         assertInactive();
         assertWithinRange(loc);
         InternalRobot ir = alliedRobotAt(loc, level);
+        assertHasRoomFor(ir, type);
         spendResources(type.cost);
         activate(new EquipSignal(robot, ir, type));
     }
@@ -49,12 +50,17 @@ public class Builder extends BaseComponent implements BuilderController {
     }
 
     public void assertCanBuild(ComponentType type) throws GameActionException {
-        if(!canBuild(this.type, type))
+        if (!canBuild(this.type, type))
             throw new GameActionException(GameActionExceptionType.CANT_BUILD_THAT, this.type + " cannot build " + type);
     }
 
     public void assertCanBuild(Chassis type) throws GameActionException {
-        if(!canBuild(this.type, type)) 
+        if (!canBuild(this.type, type))
             throw new GameActionException(GameActionExceptionType.CANT_BUILD_THAT, this.type + " cannot build " + type);
+    }
+
+    public void assertHasRoomFor(InternalRobot r, ComponentType c) throws GameActionException {
+        if (!r.hasRoomFor(c))
+            throw new GameActionException(GameActionExceptionType.NO_ROOM_IN_CHASSIS, "Target has no room component");
     }
 }
