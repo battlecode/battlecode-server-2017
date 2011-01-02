@@ -30,4 +30,6 @@ public enum GameActionExceptionType {
 	/** Indicates when a robot tries to perform an action on another robot, but the latter robot is not of the correct type */
 	WRONG_ROBOT_TYPE,
 
+        CANT_BUILD_THAT
+
 }
