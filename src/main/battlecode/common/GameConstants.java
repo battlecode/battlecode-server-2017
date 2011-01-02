@@ -64,6 +64,8 @@ public final class GameConstants {
     public static final double MINE_MINIMUM = 0.15;
     public static final int MINE_DEPLETION_RATE = 5;
 
+    public static final double[] BEAM_RAMP = {0, 0, 0, 1, 1, 2, 3, 4, 5};
+
     // This class cannot be instantiated.
     private GameConstants() {
     }

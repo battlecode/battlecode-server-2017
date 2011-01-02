@@ -9,7 +9,7 @@ public enum ComponentType
 	HARDENED      (  5, 23,  0,  0,  0,  0,  ARMOR,ComponentController.class),
 	REGEN         (  4, 10,  0,  0,  0,  0,  ARMOR,ComponentController.class),
 	PLASMA        (  3, 16,  2,  0,  0,  0,  ARMOR,ComponentController.class),
-	IRON          (  3, 20, 10,  0,  0,  0,  ARMOR,SpecialController.class),
+	IRON          (  3, 20, 10,  0,  0,  0,  ARMOR,IronController.class),
 	PLATING       (  1,  8,  0,  0,  0,  0,  ARMOR,ComponentController.class),
 	SMG           (  1,  7,  2, 36, 90, .2, WEAPON,WeaponController.class),
 	BLASTER       (  2, 18,  4, 16, 90,  3, WEAPON,WeaponController.class),

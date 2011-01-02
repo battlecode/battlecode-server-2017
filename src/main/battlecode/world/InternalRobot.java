@@ -220,6 +220,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         switch (type) {
             case PLATING:
                 platings++;
+                changeEnergonLevel(GameConstants.PLATING_HP_BONUS);
                 break;
             case PROCESSOR:
                 cores++;
@@ -300,7 +301,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         rc.processBeginningOfTurn();
         for (BaseComponent c : components.values())
             c.processBeginningOfTurn();
-
+        if (invulnerableRounds > 0)
+            invulnerableRounds--;
         if (onInRounds == 0) {
             on = true;
         }
@@ -311,8 +313,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @Override
     public void processEndOfTurn() {
         super.processEndOfTurn();
-        if (invulnerableRounds > 0)
-            invulnerableRounds--;
+        
         for (BaseComponent c : components.values()) {
             c.processEndOfTurn();
         }
@@ -341,7 +342,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void takeDamage(double baseAmount) {
-        // TODO: iron (use buffs)
         if (baseAmount < 0) {
             changeEnergonLevel(-baseAmount);
             return;
