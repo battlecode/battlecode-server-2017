@@ -9,12 +9,4 @@ package battlecode.common;
  * @see battlecode.common.RobotController
  */
 public interface Robot extends GameObject {
-    /**
-     * Gives the RobotLevel of this GameObject
-     * @return this GameObject's RobotLevel
-     * @see battlecode.common.RobotLevel
-     */
-
-	public Chassis getChassis();
-
 }

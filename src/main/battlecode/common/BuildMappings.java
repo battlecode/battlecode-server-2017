@@ -29,6 +29,7 @@ public class BuildMappings {
                 Chassis.LIGHT,
                 Chassis.MEDIUM,
                 Chassis.HEAVY));
+        chassisMappings.put(ComponentType.DUMMY, EnumSet.of(Chassis.DUMMY));
 
         componentMappings.put(ComponentType.RECYCLER, EnumSet.of(
                 ComponentType.SHIELD,

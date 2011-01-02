@@ -10,6 +10,7 @@ public enum Chassis {
 	HEAVY   ( 14, 40, 0.80, 60,ON_GROUND,   LARGE_MOTOR),
 	FLYING  (  5, 10, 0.35, 50,   IN_AIR,  FLYING_MOTOR),
 	BUILDING( 18, 30, 0.30, 80,ON_GROUND,BUILDING_MOTOR),
+        DUMMY   (  0, 20,    0,  0,ON_GROUND, null);
 	;
 
 	/** The weight that this chassis can support. */
