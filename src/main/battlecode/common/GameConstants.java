@@ -32,7 +32,7 @@ public final class GameConstants {
     public static final int NUMBER_OF_INDICATOR_STRINGS = 3;
     /** The base number of bytecodes a robot can execute each round */
     public static final int BYTECODE_LIMIT_BASE = 3000;
-	public static final int BYTECODE_LIMIT_ADDON = 3000;
+    public static final int BYTECODE_LIMIT_ADDON = 3000;
     /** The chainer's splash damage radius */
     public final static int CHAINER_SPLASH_RADIUS_SQUARED = 2;
     /** The radius at which flux is mined */
@@ -41,24 +41,28 @@ public final class GameConstants {
     public static final int SOLDIER_SLOW_ROUNDS = 60;
     /** Decreace percentage of point differential needed to win per round after round limit */
     public static final double POINTS_DECREASE_PER_ROUND_FACTOR = 0.0005;
-	/** The number of rounds after a component is equipped before it may be used */
-	public static final int EQUIP_WAKE_DELAY = 10;
-	public static final double HARDENED_MAX_DAMAGE = 2.5;
-	public static final double SHIELD_MIN_DAMAGE = .05;
-	public static final double SHIELD_DAMAGE_REDUCTION = .2;
-	public static final int IRON_EFFECT_ROUNDS = 2;
-	public static final double PLATING_HP_BONUS = .1;
-	public static final double REGEN_AMOUNT = .1;
-	/** The number of longs that your team can remember between games. */
-	public static final int TEAM_MEMORY_LENGTH = 32;
-	/** The maximum capacity that dropships can transport.  Note that
-	 * a chassis of capacity, say, six will take up six space in the
-	 * dropship, regardless of its components.
-	 */
-	public static final int TRANSPORT_CAPACITY = 24;
-	public static final double MINE_RESOURCES = 1.;
-	public static final double MINE_DEPLETED_RESOURCES = .15;
-	public static final int MINE_ROUNDS = 600;
+    /** The number of rounds after a component is equipped before it may be used */
+    public static final int EQUIP_WAKE_DELAY = 10;
+
+    public static final int POWER_WAKE_DELAY = 20;
+    public static final double HARDENED_MAX_DAMAGE = 2.5;
+    public static final double SHIELD_MIN_DAMAGE = .05;
+    public static final double SHIELD_DAMAGE_REDUCTION = .2;
+    public static final int IRON_EFFECT_ROUNDS = 2;
+    public static final double PLATING_HP_BONUS = .1;
+    public static final double REGEN_AMOUNT = .1;
+    /** The number of longs that your team can remember between games. */
+    public static final int TEAM_MEMORY_LENGTH = 32;
+    /** The maximum capacity that dropships can transport.  Note that
+     * a chassis of capacity, say, six will take up six space in the
+     * dropship, regardless of its components.
+     */
+    public static final int TRANSPORT_CAPACITY = 24;
+    public static final double MINE_RESOURCES = 1.;
+    public static final double MINE_DEPLETED_RESOURCES = .15;
+    public static final int MINE_ROUNDS = 2000;
+    public static final double MINE_MINIMUM = 0.15;
+    public static final int MINE_DEPLETION_RATE = 5;
 
     // This class cannot be instantiated.
     private GameConstants() {

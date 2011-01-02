@@ -55,18 +55,17 @@ TODO:
  */
 public class RobotControllerImpl extends ControllerShared implements RobotController, GenericController {
 
-	protected MapLocation locThisTurn;
-	protected Direction dirThisTurn;
+    protected MapLocation locThisTurn;
+    protected Direction dirThisTurn;
 
     public RobotControllerImpl(GameWorld gw, InternalRobot r) {
-        super(gw,r);
-		r.setRC(this);
+        super(gw, r);
+        r.setRC(this);
     }
 
     //*********************************
     //****** QUERY METHODS ********
     //*********************************
-   
     /**
      * {@inheritDoc}
      */
@@ -81,9 +80,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getEnergonLevel();
     }
 
-	public double getTeamResources() {
-		return gameWorld.resources(getTeam());
-	}
+    public double getTeamResources() {
+        return gameWorld.resources(getTeam());
+    }
 
     /**
      * {@inheritDoc}
@@ -120,45 +119,45 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getTeam();
     }
 
-	public int getBytecodeLimit() {
-		return robot.getBytecodeLimit();
-	}
+    public int getBytecodeLimit() {
+        return robot.getBytecodeLimit();
+    }
 
     public int getMapMinPoints() {
         return gameWorld.getGameMap().getMinPoints();
     }
 
-	public Chassis getChassis() {
-		return robot.getChassis(); 
-	}
+    public Chassis getChassis() {
+        return robot.getChassis();
+    }
 
-	public ComponentController [] components() {
-		return robot.getComponentControllers();
-	}
+    public ComponentController[] components() {
+        return robot.getComponentControllers();
+    }
 
-	public ComponentController [] newComponents() {
-		return robot.getNewComponentControllers();
-	}
+    public ComponentController[] newComponents() {
+        return robot.getNewComponentControllers();
+    }
 
-	public ComponentController [] components(ComponentType type) {
-		return robot.getComponentControllers(type);
-	}
+    public ComponentController[] components(ComponentType type) {
+        return robot.getComponentControllers(type);
+    }
 
-	public ComponentController [] components(ComponentClass cls) {
-		return robot.getComponentControllers(cls);
-	}
-    
-	//***********************************
+    public ComponentController[] components(ComponentClass cls) {
+        return robot.getComponentControllers(cls);
+    }
+
+    //***********************************
     //****** ACTION METHODS *************
     //***********************************
-    
-	public void turnOff() {
-		robot.setPower(false);
-	}
 
-	public boolean wasTurnedOff() {
-		return robot.queryHasBeenOff();
-	}
+    public void turnOff() {
+        robot.setPower(false);
+    }
+
+    public boolean wasTurnedOff() {
+        return robot.queryHasBeenOff();
+    }
 
     /**
      * {@inheritDoc}
@@ -181,23 +180,21 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public void breakpoint() {
         gameWorld.notifyBreakpoint();
     }
-	
-	/*
-	public void equip(Component c) throws GameActionException {
-		InternalComponent ic = castInternalComponent(c);
-		assertWithinRange(ic.getLocation(),2);
-		if(!ic.canBeEquipped())
-			throw new GameActionException(CANT_EQUIP_THAT,"You can't equip that component.");
-		if(!robot.hasRoomFor(ic))
-			throw new GameActionException(CANT_EQUIP_THAT,"There is not enough room in the chassis for that component.");
-		robot.equip(ic);
-	}
-	*/
 
+    /*
+    public void equip(Component c) throws GameActionException {
+    InternalComponent ic = castInternalComponent(c);
+    assertWithinRange(ic.getLocation(),2);
+    if(!ic.canBeEquipped())
+    throw new GameActionException(CANT_EQUIP_THAT,"You can't equip that component.");
+    if(!robot.hasRoomFor(ic))
+    throw new GameActionException(CANT_EQUIP_THAT,"There is not enough room in the chassis for that component.");
+    robot.equip(ic);
+    }
+     */
     //***********************************
     //****** SENSING METHODS *******
     //***********************************
-
     /**
      * {@inheritDoc}
      */
@@ -217,9 +214,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             (new IndicatorStringSignal(robot, stringIndex, newString)).accept(gameWorld);
     }
 
-	public void setIndicatorStringFormat(int stringIndex, String format, Object ... args) {
-		setIndicatorString(stringIndex,String.format(format,args));
-	}
+    public void setIndicatorStringFormat(int stringIndex, String format, Object... args) {
+        setIndicatorString(stringIndex, String.format(format, args));
+    }
 
     /**
      * {@inheritDoc}
@@ -239,27 +236,26 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
      * {@inheritDoc}
      */
     public void setTeamMemory(int index, long value) {
-    	gameWorld.setArchonMemory(robot.getTeam(),index,value);
-	}
+        gameWorld.setArchonMemory(robot.getTeam(), index, value);
+    }
 
     public void setTeamMemory(int index, long value, long mask) {
-    	gameWorld.setArchonMemory(robot.getTeam(),index,value,mask);
-	}
+        gameWorld.setArchonMemory(robot.getTeam(), index, value, mask);
+    }
 
     public long[] getTeamMemory() {
         return gameWorld.getOldArchonMemory()[robot.getTeam().ordinal()];
     }
 
-	public int hashCode() {
-		return robot.getID();
-	}
+    public int hashCode() {
+        return robot.getID();
+    }
 
-	public void processBeginningOfTurn() {
-		if(!(robot.getLocation().equals(locThisTurn)&&robot.getDirection().equals(dirThisTurn))) {
-			robot.saveMapMemory(locThisTurn,robot.getLocation(),false);
-			locThisTurn = robot.getLocation();
-			dirThisTurn = robot.getDirection();
-		}
-	}
-
+    public void processBeginningOfTurn() {
+        if (!(robot.getLocation().equals(locThisTurn) && robot.getDirection().equals(dirThisTurn))) {
+            robot.saveMapMemory(locThisTurn, robot.getLocation(), false);
+            locThisTurn = robot.getLocation();
+            dirThisTurn = robot.getDirection();
+        }
+    }
 }

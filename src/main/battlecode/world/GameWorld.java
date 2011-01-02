@@ -49,19 +49,19 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final GameMap gameMap;
     private RoundStats roundStats = null;	// stats for each round; new object is created for each round
     private final GameStats gameStats = new GameStats();		// end-of-game stats
-    private double[] teamPoints = new double [2];
+    private double[] teamPoints = new double[2];
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
-   	private double [] teamResources = new double [2];
+    private double[] teamResources = new double[2];
 
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldArchonMemory) {
-		super(gm.getSeed(),teamA,teamB,oldArchonMemory);
+        super(gm.getSeed(), teamA, teamB, oldArchonMemory);
         gameMap = gm;
     }
 
-	public int getMapSeed() {
-		return gameMap.getSeed();
-	}
+    public int getMapSeed() {
+        return gameMap.getSeed();
+    }
 
     public GameMap getGameMap() {
         return gameMap;
@@ -79,7 +79,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             gameObjects[i].processBeginningOfRound();
         }
 
-	}
+    }
 
     public void processEndOfRound() {
         // process all gameobjects
@@ -175,42 +175,33 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                         winner = Team.B;
                 }
             } else {
-                    gameStats.setDominationFactor(DominationFactor.WON_BY_DUBIOUS_REASONS);
-                    if (totalEnergon[0] > totalEnergon[1])
+                gameStats.setDominationFactor(DominationFactor.WON_BY_DUBIOUS_REASONS);
+                if (totalEnergon[0] > totalEnergon[1])
+                    winner = Team.A;
+                else if (totalEnergon[1] > totalEnergon[0])
+                    winner = Team.B;
+                else {
+                    if (teamAName.compareTo(teamBName) <= 0)
                         winner = Team.A;
-                    else if (totalEnergon[1] > totalEnergon[0])
+                    else
                         winner = Team.B;
-                    else {
-                        if (teamAName.compareTo(teamBName) <= 0)
-                            winner = Team.A;
-                        else
-                            winner = Team.B;
-                    }
+                }
             }
         }
 
-        // TESTING
-        //~ if(winner != null) {
-        //~ System.out.println("DF: " + gameStats.getDominationFactor());
-        //~ System.out.println("XF: " + gameStats.getExcitementFactor());
-        //~ int[] firstKill = gameStats.getTimeToFirstKill();
-        //~ System.out.println("1st kill: " + firstKill[0] + ", " + firstKill[1]);
-        //~ int[] firstArchonKill = gameStats.getTimeToFirstArchonKill();
-        //~ System.out.println("1st archon kill: " + firstArchonKill[0] + ", " + firstArchonKill[1]);
-        //~ }
     }
 
     public InternalObject getObject(MapLocation loc, RobotLevel level) {
         return gameObjectsByLoc.get(new MapLocation3D(loc, level));
     }
 
-	public <T extends InternalObject> T getObjectOfType(MapLocation loc, RobotLevel level, Class <T> cl) {
-		InternalObject o = getObject(loc,level);
-		if(cl.isInstance(o))
-			return cl.cast(o);
-		else
-			return null;
-	}
+    public <T extends InternalObject> T getObjectOfType(MapLocation loc, RobotLevel level, Class<T> cl) {
+        InternalObject o = getObject(loc, level);
+        if (cl.isInstance(o))
+            return cl.cast(o);
+        else
+            return null;
+    }
 
     public InternalRobot getRobot(MapLocation loc, RobotLevel level) {
         InternalObject obj = getObject(loc, level);
@@ -230,9 +221,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
     }
 
-	public Collection<InternalObject> allObjects() {
-		return gameObjectsByID.values();
-	}
+    public Collection<InternalObject> allObjects() {
+        return gameObjectsByID.values();
+    }
 
     // TODO: move stuff to here
     // should only be called by InternalObject.setLocation
@@ -328,13 +319,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return gameObjectsByID.values().toArray(new InternalObject[gameObjectsByID.size()]);
     }
 
-	public InternalRobot getRobotByID(int id) {
-		return (InternalRobot)getObjectByID(id);
-	}
+    public InternalRobot getRobotByID(int id) {
+        return (InternalRobot) getObjectByID(id);
+    }
 
     public Signal[] getAllSignals(boolean includeBytecodesUsedSignal) {
         ArrayList<InternalRobot> energonChangedRobots = new ArrayList<InternalRobot>();
-        ArrayList<InternalRobot> fluxChangedRobots = new ArrayList<InternalRobot>();
         ArrayList<InternalRobot> allRobots = null;
         if (includeBytecodesUsedSignal)
             allRobots = new ArrayList<InternalRobot>();
@@ -345,7 +335,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             if (includeBytecodesUsedSignal)
                 allRobots.add(r);
             if (r.clearEnergonChanged()) {
-            	energonChangedRobots.add(r);
+                energonChangedRobots.add(r);
             }
         }
         signals.add(new EnergonChangeSignal(energonChangedRobots.toArray(new InternalRobot[]{})));
@@ -374,33 +364,32 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         r.processEndOfTurn();
     }
 
-	public void resetStatic() {
-	}
+    public void resetStatic() {
+    }
 
-	public double getRoundPoints(Team t) {
-		return 0.;
-	}
+    public double getRoundPoints(Team t) {
+        return 0.;
+    }
 
-	public InternalMine createMine(MapLocation loc) {
-		InternalMine m = new InternalMine(this,loc);
-		notifyAddingNewObject(m);
-		addSignal(new MineBirthSignal(m));
-		return m;
-	}
-
+    public InternalMine createMine(MapLocation loc) {
+        InternalMine m = new InternalMine(this, loc);
+        notifyAddingNewObject(m);
+        addSignal(new MineBirthSignal(m));
+        return m;
+    }
     // ******************************
     // SIGNAL HANDLER METHODS
     // ******************************
+    SignalHandler<Exception> signalHandler = new AutoSignalHandler<Exception>(this) {
 
-	SignalHandler<Exception> signalHandler = new AutoSignalHandler<Exception>(this) {
-		public Exception exceptionResponse(Exception e) {
-			return e;
-		}
-	};
+        public Exception exceptionResponse(Exception e) {
+            return e;
+        }
+    };
 
-	public Exception visitSignal(Signal s) {
-		return signalHandler.visitSignal(s);
-	}
+    public Exception visitSignal(Signal s) {
+        return signalHandler.visitSignal(s);
+    }
 
     public Exception visitAttackSignal(AttackSignal s) {
         try {
@@ -411,22 +400,22 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
             double totalDamage = s.damage;
 
-			if(target!=null) {
-				// takeDamage is responsible for checking the armor
-				target.takeDamage(totalDamage);
-			}
-
-			/* splash, in case we still want it
-            if (attacker.getRobotType() == RobotType.CHAINER) {
-                InternalRobot[] hits = getAllRobotsWithinRadiusDonutSq(targetLoc, GameConstants.CHAINER_SPLASH_RADIUS_SQUARED, -1);
-                for (InternalRobot r : hits) {
-                    if (r.getRobotLevel() == level)
-                        r.changeEnergonLevelFromAttack(-totalDamage);
-                }
-            } else if (target != null) {
-                target.changeEnergonLevelFromAttack(-totalDamage);
+            if (target != null) {
+                // takeDamage is responsible for checking the armor
+                target.takeDamage(totalDamage);
             }
-			*/
+
+            /* splash, in case we still want it
+            if (attacker.getRobotType() == RobotType.CHAINER) {
+            InternalRobot[] hits = getAllRobotsWithinRadiusDonutSq(targetLoc, GameConstants.CHAINER_SPLASH_RADIUS_SQUARED, -1);
+            for (InternalRobot r : hits) {
+            if (r.getRobotLevel() == level)
+            r.changeEnergonLevelFromAttack(-totalDamage);
+            }
+            } else if (target != null) {
+            target.changeEnergonLevelFromAttack(-totalDamage);
+            }
+             */
 
             addSignal(s);
         } catch (Exception e) {
@@ -435,18 +424,18 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return null;
     }
 
-	public Exception visitBroadcastSignal(BroadcastSignal s) {
-		InternalObject sender = gameObjectsByID.get(s.robotID);
-		Collection<InternalObject> objs = gameObjectsByLoc.values();
-		Predicate<InternalObject> pred = Util.robotWithinDistance(sender.getLocation(),s.range);
-		for(InternalObject o : Iterables.filter(objs,pred)) {
-			InternalRobot r = (InternalRobot)o;
-			r.enqueueIncomingMessage((Message)s.message.clone());
-		}
-		s.message = null;
-		addSignal(s);
-		return null;
-	}
+    public Exception visitBroadcastSignal(BroadcastSignal s) {
+        InternalObject sender = gameObjectsByID.get(s.robotID);
+        Collection<InternalObject> objs = gameObjectsByLoc.values();
+        Predicate<InternalObject> pred = Util.robotWithinDistance(sender.getLocation(), s.range);
+        for (InternalObject o : Iterables.filter(objs, pred)) {
+            InternalRobot r = (InternalRobot) o;
+            r.enqueueIncomingMessage((Message) s.message.clone());
+        }
+        s.message = null;
+        addSignal(s);
+        return null;
+    }
 
     public Exception visitDeathSignal(DeathSignal s) {
         if (!running) {
@@ -463,7 +452,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 InternalRobot r = (InternalRobot) obj;
                 RobotMonitor.killRobot(ID);
                 if (r.hasBeenAttacked()) {
-                	gameStats.setUnitKilled(r.getTeam(), currentRound);
+                    gameStats.setUnitKilled(r.getTeam(), currentRound);
                 }
             }
             if (obj != null) {
@@ -491,12 +480,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return null;
     }
 
-	public Exception visitEquipSignal(EquipSignal s) {
-		InternalRobot r = (InternalRobot) getObjectByID(s.robotID);
-		r.equip(s.component);
-		addSignal(s);
-		return null;
-	}
+    public Exception visitEquipSignal(EquipSignal s) {
+        InternalRobot r = (InternalRobot) getObjectByID(s.robotID);
+        r.equip(s.component);
+        addSignal(s);
+        return null;
+    }
 
     public Exception visitIndicatorStringSignal(IndicatorStringSignal s) {
         try {
@@ -507,30 +496,30 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return null;
     }
 
-	public Exception visitIronShieldSignal(IronShieldSignal s) {
-		InternalRobot r = getRobotByID(s.robotID);
-		r.activateShield();
-		addSignal(s);
-		return null;
-	}
+    public Exception visitIronShieldSignal(IronShieldSignal s) {
+        InternalRobot r = getRobotByID(s.robotID);
+        r.activateShield();
+        addSignal(s);
+        return null;
+    }
 
-	public Exception visitLoadSignal(LoadSignal s) {
-		InternalRobot transport = getRobotByID(s.transportID);
-		InternalRobot passenger = getRobotByID(s.passengerID);
-		transport.addPassenger(passenger);
-		passenger.loadOnto(transport);
-		addSignal(s);
-		return null;
-	}
+    public Exception visitLoadSignal(LoadSignal s) {
+        InternalRobot transport = getRobotByID(s.transportID);
+        InternalRobot passenger = getRobotByID(s.passengerID);
+        transport.addPassenger(passenger);
+        passenger.loadOnto(transport);
+        addSignal(s);
+        return null;
+    }
 
-	public Exception visitUnloadSignal(UnloadSignal s) {
-		InternalRobot transport = getRobotByID(s.transportID);
-		InternalRobot passenger = getRobotByID(s.passengerID);
-		transport.removePassenger(passenger);
-		passenger.unloadTo(s.unloadLoc);
-		addSignal(s);
-		return null;
-	}
+    public Exception visitUnloadSignal(UnloadSignal s) {
+        InternalRobot transport = getRobotByID(s.transportID);
+        InternalRobot passenger = getRobotByID(s.passengerID);
+        transport.removePassenger(passenger);
+        passenger.unloadTo(s.unloadLoc);
+        addSignal(s);
+        return null;
+    }
 
     public Exception visitMatchObservationSignal(MatchObservationSignal s) {
         addSignal(s);
@@ -615,7 +604,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
         return null;
     }
-
     // *****************************
     //    UTILITY METHODS
     // *****************************
@@ -681,22 +669,21 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return locations.toArray(new MapLocation[locations.size()]);
     }
 
-	public double resources(Team t) {
-		return teamResources[t.ordinal()];
-	}
+    public double resources(Team t) {
+        return teamResources[t.ordinal()];
+    }
 
-	protected boolean spendResources(Team t, double amount) {
-		if(teamResources[t.ordinal()]>=amount) {
-			teamResources[t.ordinal()]-=amount;
-			return true;
-		}
-		else
-			return false;
-	}
+    protected boolean spendResources(Team t, double amount) {
+        if (teamResources[t.ordinal()] >= amount) {
+            teamResources[t.ordinal()] -= amount;
+            return true;
+        } else
+            return false;
+    }
 
-	protected void adjustResources(Team t, double amount) {
-		teamResources[t.ordinal()] += amount;
-	}
+    protected void adjustResources(Team t, double amount) {
+        teamResources[t.ordinal()] += amount;
+    }
 
     protected void adjustTeamPoints(InternalRobot r, int points) {
         teamPoints[r.getTeam().ordinal()] += points;
