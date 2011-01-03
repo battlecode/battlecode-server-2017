@@ -47,11 +47,6 @@
     <property name="ivy.jar.dir" value="${ivy.home}/lib"/>
     <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar"/>
     <property name="ivy.remote.jar" value="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"/>
-	<condition property="ivy.exists">
-		<resourceexists>
-			<file file="${ivy.jar.file}"/>
-		</resourceexists>
-	</condition>
 
     <!-- the normal classpath -->
     <path id="classpath-libs">
@@ -81,7 +76,7 @@
         <!-- try to load ivy here from ivy home, in case the user has not
         already dropped it into ant's lib dir (note that the latter copy will
         always take precedence).  We will not fail as long as local lib dir
-        exists (it may be empty) and ivy is in at least one of ant's lib dir or
+        'exists (it may be empty) and ivy is in at least one of ant's lib dir or
         the local lib dir. -->
         <path id="ivy.lib.path">
             <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
