@@ -51,6 +51,16 @@ public class GameWorldFactory {
 		return createPlayer(gw, type, loc, t, parent, true);
 	}
 
+	public static boolean isInanimate(Chassis ch) {
+		switch(ch) {
+			case DUMMY:
+			case DEBRIS:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	private static void loadPlayer(GameWorld gw, InternalRobot robot, Team t, InternalRobot parent) {
 		gw.addSignal(new SpawnSignal(robot, parent));
 		RobotControllerImpl rc = new RobotControllerImpl(gw, robot);
@@ -59,7 +69,8 @@ public class GameWorldFactory {
 		if(robot.getChassis()==Chassis.BUILDING)
 			robot.equip(ComponentType.BUILDING_SENSOR);
 		String teamName = gw.getTeamName(t);
-		PlayerFactory.loadPlayer(rc,teamName);
+		if(!isInanimate(robot.getChassis()))
+			PlayerFactory.loadPlayer(rc,teamName);
 	}
 
 }

@@ -114,6 +114,8 @@ class XMLMapHandler extends DefaultHandler {
 				InternalRobot robot = GameWorldFactory.createPlayer(world,type,loc,team,null,false);
 				for(ComponentType t : components) {
 					world.visitSignal(new EquipSignal(robot,null,t));
+					if(t==ComponentType.RECYCLER)
+						world.createMine(loc);
 				}
 			}
 			public boolean equalsMirror(SymbolData data) {
@@ -130,28 +132,17 @@ class XMLMapHandler extends DefaultHandler {
 				public MineData create(Attributes att) {
 					String tm = getOptional(att,"team");
 					Team team;
-					if(tm==null)
-						team = Team.NEUTRAL;
-					else
-						team = Team.valueOf(tm);
-					return new MineData(team);
+					return new MineData();
 				}
 			};
 
-			private Team team;
-			public MineData(Team team) { this.team = team; }
+			public MineData() {}
 			public TerrainTile tile() { return TerrainTile.LAND; }
 			public void createGameObject(GameWorld world, MapLocation loc) {
 				world.createMine(loc);
-				if(team!=Team.NEUTRAL) {
-					InternalRobot robot = GameWorldFactory.createPlayer(world,Chassis.BUILDING,loc,team,null,false);
-					world.visitSignal(new EquipSignal(robot,null,ComponentType.RECYCLER));
-				}
 			}
 			public boolean equalsMirror(SymbolData data) {
-				if(!(data instanceof MineData)) return false;
-				MineData d = (MineData) data;
-				return team==d.team.opponent();
+				return data instanceof MineData;
 			}
 		}
 
