@@ -353,6 +353,7 @@ public class Server implements Observer, Runnable {
 				}
 
 				callback.round = match.getRound();
+				//System.out.println("current round: "+ match.getRoundNumber() + " runUntil " + runUntil);
 				if (callback.round == null)
 					break;
 
@@ -365,8 +366,13 @@ public class Server implements Observer, Runnable {
 				}
 
 				// Compute stats bytes.
+				//System.out.println("writing out stats");
 				callback.stats = match.getStats();
-
+				/*for (Proxy p : proxies) {
+					p.writeRound(callback.round);
+					p.writeStats(callback.stats);
+				}*/
+				
 				break;
 
 			case PAUSED:
