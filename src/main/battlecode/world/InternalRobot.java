@@ -184,10 +184,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             case RAILGUN:
             case HAMMER:
             case MEDIC:
-                controller = new Weapon(type, this);
-                break;
             case BEAM:
-                controller = new Beam(type, this);
+                controller = new Weapon(type, this);
                 break;
             case SATELLITE:
             case TELESCOPE:
@@ -195,6 +193,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             case RADAR:
                 controller = new Sensor(type, this);
                 break;
+			case BUG:
+				controller = new Bug(type, this);
             case ANTENNA:
             case DISH:
             case NETWORK:
@@ -206,6 +206,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             case CONSTRUCTOR:
             case FACTORY:
             case ARMORY:
+			case DUMMY:
                 controller = new Builder(type, this);
                 break;
             case SMALL_MOTOR:

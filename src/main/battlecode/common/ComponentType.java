@@ -27,7 +27,7 @@ public enum ComponentType
 	PROCESSOR     (  1,  3,  0,  0,  0,  0,   MISC,ComponentController.class),
 	JUMP          (  3,  8, 25, 16,360,  0,   MISC,JumpController.class),
 	DUMMY         (  3, 10,  5, 25,360,  0,   MISC,BuilderController.class),
-	BUG           (  2, 12,125, 25,180,  0, SENSOR,SensorController.class),
+	BUG           (  2, 12,125, 25,180,  0,   MISC,BugController.class),
 	DROPSHIP      (  4, 16,  3,  2,360,  0,   MISC,DropshipController.class),
 	RECYCLER      ( 15, 70,  1,  2,  0,  0,BUILDER,BuilderController.class),
 	FACTORY       ( 15, 70,  1,  2,  0,  0,BUILDER,BuilderController.class),
