@@ -5,13 +5,13 @@ import static battlecode.common.ComponentType.*;
 
 public enum Chassis {
     //       WGT  HP UPK COS
-
-    LIGHT(6, 12, 0.25, 30, ON_GROUND, SMALL_MOTOR),
-    MEDIUM(9, 20, 0.45, 40, ON_GROUND, MEDIUM_MOTOR),
-    HEAVY(14, 40, 0.80, 60, ON_GROUND, LARGE_MOTOR),
-    FLYING(5, 10, 0.35, 50, IN_AIR, FLYING_MOTOR),
+    LIGHT(    6, 12, 0.25, 30, ON_GROUND, SMALL_MOTOR),
+    MEDIUM(   9, 20, 0.45, 40, ON_GROUND, MEDIUM_MOTOR),
+    HEAVY(   14, 40, 0.80, 60, ON_GROUND, LARGE_MOTOR),
+    FLYING(   5, 10, 0.35, 50, IN_AIR,    FLYING_MOTOR),
     BUILDING(18, 30, 0.30, 80, ON_GROUND, BUILDING_MOTOR),
-    DUMMY(0, 20, 0, 0, ON_GROUND, null);
+    DUMMY(    0, 20, 0   ,  0, ON_GROUND, null),
+    DEBRIS(   0,500, 0   ,  0, ON_GROUND, null);
 
     ;
     /** The weight that this chassis can support. */
