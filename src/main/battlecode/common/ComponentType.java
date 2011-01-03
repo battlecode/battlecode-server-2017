@@ -31,7 +31,7 @@ public enum ComponentType
 	DROPSHIP       (  4, 16,  3,  2,360,  0,   MISC,DropshipController.class),
 	RECYCLER       ( 15, 70,  1,  2,  0,  0,BUILDER,BuilderController.class),
 	FACTORY        ( 15, 70,  1,  2,  0,  0,BUILDER,BuilderController.class),
-	CONSTRUCTOR    (  6, 40,  1,  2,  0,  0,BUILDER,BuilderController.class),
+	CONSTRUCTOR    (  4, 40,  1,  2,  0,  0,BUILDER,BuilderController.class),
 	ARMORY         ( 15, 70,  1,  2,  0,  0,BUILDER,BuilderController.class),
 	SMALL_MOTOR    (  0,  0,  3,  2,360,  0,  MOTOR,MovementController.class),
 	MEDIUM_MOTOR   (  0,  0,  7,  2,360,  0,  MOTOR,MovementController.class),
