@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import battlecode.server.Config;
 import battlecode.server.proxy.Proxy;
 import battlecode.server.proxy.XStreamProxy;
+import battlecode.util.SQLQueue;
 
 /**
  * Produces controller instances from different control data sources.
@@ -42,4 +43,9 @@ public class ControllerFactory {
 	public static Controller createLocalController(Config options, Proxy proxy) {
 		return new LocalController(options, proxy);
 	}
+
+	public static Controller createSQLController(SQLQueue queue) {
+		return new SQLController(queue);
+	}
+
 }
