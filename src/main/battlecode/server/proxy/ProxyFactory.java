@@ -1,10 +1,11 @@
 package battlecode.server.proxy;
-
+import battlecode.serial.MatchFooter;
 import java.io.IOException;
 import java.io.OutputStream;
-
+import java.io.File;
+import java.sql.SQLException;
 import battlecode.server.Config;
-
+import battlecode.util.SQLQueue;
 /**
  * This class is a factory for Proxy objects. It returns
  * implementation-independent Proxies of different types based on the needs of
@@ -64,4 +65,36 @@ public class ProxyFactory {
 
 		};
 	}
+
+	public static Proxy createSQLProxy(SQLQueue queue, boolean bestOfThree)
+		
+		throws IOException {
+		return new FileProxy("test.rms",queue) {
+			public OutputStream getOutputStream() throws IOException {
+				return XStreamProxy.getXStream().createObjectOutputStream(stream);
+			}
+
+			public void writeObject(Object o) throws IOException {
+				// XStream object output streams do not support reset
+				output.writeObject(o);
+			}
+
+			public void writeFooter(MatchFooter footer) throws IOException {
+			super.writeFooter(footer);
+			try {
+				String name = queue.complete(footer.getWinner());
+				this.file = new File(name);
+					
+			} catch (SQLException e) {
+				throw new IOException(e.getMessage());
+			}
+		}
+
+		};
+
+		
+
+	}
+
+		
 }
