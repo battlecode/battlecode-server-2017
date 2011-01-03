@@ -1,5 +1,6 @@
 package battlecode.world;
 
+import static battlecode.common.GameConstants.BYTECODE_LIMIT_BASE;
 import static battlecode.common.GameConstants.NUMBER_OF_INDICATOR_STRINGS;
 import static battlecode.common.GameConstants.YIELD_BONUS;
 import static battlecode.common.GameActionExceptionType.*;
@@ -172,7 +173,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
      * {@inheritDoc}
      */
     public void yield() {
-        robot.changeEnergonLevel(YIELD_BONUS * RobotMonitor.getBytecodesUsedPercent() * robot.chassis.upkeep);
+		int bytecodesBelowBase = BYTECODE_LIMIT_BASE - RobotMonitor.getBytecodesUsed();
+		if(bytecodesBelowBase>0)
+			gameWorld.adjustResources(robot.getTeam(),YIELD_BONUS*bytecodesBelowBase/BYTECODE_LIMIT_BASE*robot.chassis.upkeep);	
         RobotMonitor.endRunner();
     }
 
