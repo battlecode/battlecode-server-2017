@@ -191,6 +191,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             case TELESCOPE:
             case SIGHT:
             case RADAR:
+			case BUILDING_SENSOR:
                 controller = new Sensor(type, this);
                 break;
 			case BUG:
