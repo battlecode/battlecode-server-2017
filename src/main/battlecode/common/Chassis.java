@@ -55,8 +55,7 @@ public enum Chassis {
         if (motor != null) {
             this.moveDelayOrthogonal = motor.delay;
             this.moveDelayDiagonal = (int) Math.round(motor.delay * Math.sqrt(2.));
-        }
-        else {
+        } else {
             moveDelayOrthogonal = 0;
             moveDelayDiagonal = 0;
         }

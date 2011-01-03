@@ -11,31 +11,27 @@ package battlecode.common;
  */
 public enum RobotLevel {
 
-	MINE(0),
+    MINE(0),
+    /** The vertical location of ground robots. */
+    ON_GROUND(1),
+    /** The vertical location of air robots. */
+    IN_AIR(2);
+    /** An integer representation of the height. */
+    private int height;
 
-	/** The vertical location of ground robots. */
-	ON_GROUND(1),
+    /**
+     * Creates a new RobotLevel, based on the given height.
+     *
+     * @param height the integer representation of the MapHeight
+     */
+    private RobotLevel(int height) {
+        this.height = height;
+    }
 
-	/** The vertical location of air robots. */
-	IN_AIR(2);
-	
-	/** An integer representation of the height. */
-	private int height;
-
-	/**
-	 * Creates a new RobotLevel, based on the given height.
-	 *
-	 * @param height the integer representation of the MapHeight
-	 */
-	private RobotLevel(int height) {
-		this.height = height;
-	}
-
-	/**
-	 * Returns an integral height-wise ordering of the height type. 
-	 */
-	public int getHeight() {
-		return height;	
-	}
-	
+    /**
+     * Returns an integral height-wise ordering of the height type.
+     */
+    public int getHeight() {
+        return height;
+    }
 }

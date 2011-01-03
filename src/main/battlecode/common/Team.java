@@ -21,13 +21,13 @@ public enum Team {
      * is NEUTRAL
      */
     public Team opponent() {
-		switch(this) {
-		case A:
-			return B;
-		case B:
-			return A;
-		default:
-			return NEUTRAL;
-		}
-	}
+        switch (this) {
+            case A:
+                return B;
+            case B:
+                return A;
+            default:
+                return NEUTRAL;
+        }
+    }
 }

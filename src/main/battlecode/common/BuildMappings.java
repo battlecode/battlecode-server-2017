@@ -65,12 +65,16 @@ public class BuildMappings {
     }
 
     public static boolean canBuild(ComponentType t, Chassis c) {
-        if (chassisMappings.get(t).contains(c)) return true;
+        if (chassisMappings.get(t).contains(c)) {
+            return true;
+        }
         return false;
     }
 
     public static boolean canBuild(ComponentType t, ComponentType c) {
-        if (componentMappings.get(t).contains(c)) return true;
+        if (componentMappings.get(t).contains(c)) {
+            return true;
+        }
         return false;
     }
 }

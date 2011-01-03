@@ -1,4 +1,4 @@
-package battlecode.common;   
+package battlecode.common;
 
 /**
  * This enumeration represents a direction from one MapLocation to another.
@@ -14,73 +14,79 @@ package battlecode.common;
  */
 public enum Direction {
 
-	NORTH(0,-1),
-	NORTH_EAST(1,-1),
-	EAST(1,0),
-	SOUTH_EAST(1,1),
-	SOUTH(0,1),
-	SOUTH_WEST(-1,1),
-	WEST(-1,0),
-	NORTH_WEST(-1,-1),
+    NORTH(0, -1),
+    NORTH_EAST(1, -1),
+    EAST(1, 0),
+    SOUTH_EAST(1, 1),
+    SOUTH(0, 1),
+    SOUTH_WEST(-1, 1),
+    WEST(-1, 0),
+    NORTH_WEST(-1, -1),
+    /** No direction. */
+    NONE(0, 0),
+    /** All directions. */
+    OMNI(0, 0);
+    public final int dx, dy;
 
-	/** No direction. */
-	NONE(0,0),
-	
-	/** All directions. */
-	OMNI(0,0);
+    Direction(int dx, int dy) {
+        this.dx = dx;
+        this.dy = dy;
+    }
 
-	public final int dx, dy;
+    /**
+     * Determines whether or not this direction is a diagonal one.
+     *
+     * @return true if this Direction is diagonal (northwest, northeast,
+     * southwest, southeast) or false if it's a cardinal, NONE, or OMNI.
+     */
+    public boolean isDiagonal() {
+        return (ordinal() < 8 && ordinal() % 2 == 1);
+    }
 
-	Direction(int dx,int dy) {
-		this.dx = dx;
-		this.dy = dy;
-	}
+    /**
+     * Computes the direction opposite this one.
+     *
+     * @return the direction pointing in the opposite direction
+     * to this one, or NONE if it's NONE, or OMNI if it's OMNI
+     */
+    public Direction opposite() {
+        if (ordinal() >= 8) {
+            return this;
+        }
+        return Direction.values()[(ordinal() + 4) % 8];
+    }
 
-	/**
-	 * Determines whether or not this direction is a diagonal one.
-	 *
-	 * @return true if this Direction is diagonal (northwest, northeast,
-	 * southwest, southeast) or false if it's a cardinal, NONE, or OMNI.
-	 */
-	public boolean isDiagonal() {
-		return (ordinal() < 8 && ordinal() % 2 == 1);
-	}
+    /**
+     * Computes the direction 45 degrees to the left (counter-clockwise)
+     * of this one.
+     *
+     * @return the direction 45 degrees left of this one, or NONE if it's NONE,
+     * or OMNI if it's OMNI
+     */
+    public Direction rotateLeft() {
+        if (ordinal() >= 8) {
+            return this;
+        }
+        if (ordinal() == 0) {
+            return Direction.values()[7];
+        }
+        return Direction.values()[(ordinal() - 1)];
+    }
 
-	/**
-	 * Computes the direction opposite this one.
-	 *
-	 * @return the direction pointing in the opposite direction
-	 * to this one, or NONE if it's NONE, or OMNI if it's OMNI
-	 */
-	public Direction opposite() {
-		if (ordinal() >= 8) return this;
-		return Direction.values()[(ordinal() + 4) % 8];
-	}
-
-	/**
-	 * Computes the direction 45 degrees to the left (counter-clockwise)
-	 * of this one.
- 	 *
-	 * @return the direction 45 degrees left of this one, or NONE if it's NONE,
-	 * or OMNI if it's OMNI
-	 */
-	public Direction rotateLeft() {
-		if (ordinal() >= 8) return this;
-		if (ordinal() == 0) return Direction.values()[7];
-		return Direction.values()[(ordinal() - 1)];
-	}
-
-	/**
-	 * Computes the direction 45 degrees to the right (clockwise)
-	 * of this one.
- 	 *
-	 * @return the direction 45 degrees right of this one, or NONE if it's NONE,
-	 * or OMNI if it's OMNI
-	 */
-	public Direction rotateRight() {
-		if (ordinal() >= 8) return this;
-		if (ordinal() == 7) return Direction.values()[0];
-		return Direction.values()[(ordinal() + 1)];
-	}
-
+    /**
+     * Computes the direction 45 degrees to the right (clockwise)
+     * of this one.
+     *
+     * @return the direction 45 degrees right of this one, or NONE if it's NONE,
+     * or OMNI if it's OMNI
+     */
+    public Direction rotateRight() {
+        if (ordinal() >= 8) {
+            return this;
+        }
+        if (ordinal() == 7) {
+            return Direction.values()[0];
+        }
+        return Direction.values()[(ordinal() + 1)];
+    }
 }

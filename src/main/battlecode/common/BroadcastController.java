@@ -2,7 +2,7 @@ package battlecode.common;
 
 public interface BroadcastController extends ComponentController {
 
-	/**
+    /**
      * Adds a message for your robot to broadcast. At the end of your
      * robot's execution block, if a broadcast has been set, the message is removed
      * and immediately added to the incoming message queues of all robots in
@@ -19,12 +19,11 @@ public interface BroadcastController extends ComponentController {
      * <p>
      * Each robot can only have one message to broadcast in a given round at a time.
      *
-	 * @cooldown 1
-	 *
+     * @cooldown 1
+     *
      * @param msg
      *            the message you want to broadcast; cannot be <code>null</code>.
      * @throws GameActionException if this robot already has a message queued in the current round (ALREADY_ACTIVE).
      */
-	public void broadcast(Message msg) throws GameActionException;
-
+    public void broadcast(Message msg) throws GameActionException;
 }

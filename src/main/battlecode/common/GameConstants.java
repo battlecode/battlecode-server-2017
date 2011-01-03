@@ -43,7 +43,6 @@ public final class GameConstants {
     public static final double POINTS_DECREASE_PER_ROUND_FACTOR = 0.0005;
     /** The number of rounds after a component is equipped before it may be used */
     public static final int EQUIP_WAKE_DELAY = 10;
-
     public static final int POWER_WAKE_DELAY = 20;
     public static final double HARDENED_MAX_DAMAGE = 2.5;
     public static final double SHIELD_MIN_DAMAGE = .05;
@@ -58,16 +57,14 @@ public final class GameConstants {
      * dropship, regardless of its components.
      */
     public static final int TRANSPORT_CAPACITY = 24;
-    public static final double MINE_RESOURCES = 1.;
+    public static final double MINE_RESOURCES = 1.0;
     public static final double MINE_DEPLETED_RESOURCES = .15;
     public static final int MINE_ROUNDS = 2000;
     public static final double MINE_MINIMUM = 0.15;
     public static final int MINE_DEPLETION_RATE = 5;
-
     public static final double[] BEAM_RAMP = {0, 0, 0, 1, 1, 2, 3, 4, 5};
-
-	public static final int BUG_DURATION = 250;
-	public static final int BUG_SENSOR_RANGE = 8;
+    public static final int BUG_DURATION = 250;
+    public static final int BUG_SENSOR_RANGE = 8;
 
     // This class cannot be instantiated.
     private GameConstants() {

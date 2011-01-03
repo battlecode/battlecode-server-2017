@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import static java.lang.Math.pow;
 
-
 // We don't want contestants to be able to subclass MapLocation because
 // that would allow them to pass arbitrary data structures in messages
 /**
@@ -16,9 +15,8 @@ public final class MapLocation implements Serializable {
     private static final long serialVersionUID = -8945913587066072824L;
     /** The x-coordinate. */
     public final int x;
-
-	/** The y-coordinate. */
-	public final int y;
+    /** The y-coordinate. */
+    public final int y;
 
     /**
      * Creates a new MapLocation representing the location
@@ -38,10 +36,10 @@ public final class MapLocation implements Serializable {
      * Returns the x-coordinate of the location.
      *
      * @return the x-coordinate of the location
-	 *
-	 * @deprecated Replaced by {@link #x}
+     *
+     * @deprecated Replaced by {@link #x}
      */
-	@Deprecated
+    @Deprecated
     public final int getX() {
         return this.x;
     }
@@ -50,10 +48,10 @@ public final class MapLocation implements Serializable {
      * Returns the y-coordinate of the location.
      *
      * @return the y-coordinate of the location
-	 *
-	 * @deprecated Replaced by {@link #y}
+     *
+     * @deprecated Replaced by {@link #y}
      */
-	@Deprecated
+    @Deprecated
     public final int getY() {
         return this.y;
     }
@@ -67,8 +65,9 @@ public final class MapLocation implements Serializable {
     @Override
     public boolean equals(Object obj) {
 
-        if (!(obj instanceof MapLocation))
+        if (!(obj instanceof MapLocation)) {
             return false;
+        }
 
         return (((MapLocation) obj).x == this.x) && (((MapLocation) obj).y == this.y);
 
@@ -115,8 +114,9 @@ public final class MapLocation implements Serializable {
     public final boolean isAdjacentTo(MapLocation location) {
 
         int distTo;
-        if ((distTo = this.distanceSquaredTo(location)) == 1 || distTo == 2)
+        if ((distTo = this.distanceSquaredTo(location)) == 1 || distTo == 2) {
             return true;
+        }
 
         return false;
 
@@ -135,28 +135,32 @@ public final class MapLocation implements Serializable {
         double dy = location.y - this.y;
 
         if (Math.abs(dx) >= 2.414 * Math.abs(dy)) {
-            if (dx > 0)
+            if (dx > 0) {
                 return Direction.EAST;
-            else if (dx < 0)
+            } else if (dx < 0) {
                 return Direction.WEST;
-            else
+            } else {
                 return Direction.OMNI;
+            }
         } else if (Math.abs(dy) >= 2.414 * Math.abs(dx)) {
-            if (dy > 0)
+            if (dy > 0) {
                 return Direction.SOUTH;
-            else
+            } else {
                 return Direction.NORTH;
+            }
         } else {
             if (dy > 0) {
-                if (dx > 0)
+                if (dx > 0) {
                     return Direction.SOUTH_EAST;
-                else
+                } else {
                     return Direction.SOUTH_WEST;
+                }
             } else {
-                if (dx > 0)
+                if (dx > 0) {
                     return Direction.NORTH_EAST;
-                else
+                } else {
                     return Direction.NORTH_WEST;
+                }
             }
         }
     }
@@ -174,28 +178,28 @@ public final class MapLocation implements Serializable {
         return new MapLocation(x + direction.dx, y + direction.dy);
     }
 
- 	/**
+    /**
      * Returns a new MapLocation object representing a location
      * {@code multiple} squares from this one in the given direction.
      *
      * @param direction the direction to add to this location
-	 * @param multiple the number of squares to add
+     * @param multiple the number of squares to add
      * @return a MapLocation for the location one square in the given
      * direction, or this location if the direction is NONE or OMNI
      */
-	public final MapLocation add(Direction direction, int multiple) {
-		return new MapLocation(x + multiple * direction.dx, y + multiple * direction.dy);
-	}
+    public final MapLocation add(Direction direction, int multiple) {
+        return new MapLocation(x + multiple * direction.dx, y + multiple * direction.dy);
+    }
 
-	/**
-	 * Returns a new MapLocation object translated from this location
-	 * by a fixed amount
-	 * @param dx the amount to translate in the x direction
-	 * @param dy the amount to translate in the y direction
-	 */
-	public final MapLocation add(int dx, int dy) {
-		return new MapLocation(x+dx,y+dy);
-	}
+    /**
+     * Returns a new MapLocation object translated from this location
+     * by a fixed amount
+     * @param dx the amount to translate in the x direction
+     * @param dy the amount to translate in the y direction
+     */
+    public final MapLocation add(int dx, int dy) {
+        return new MapLocation(x + dx, y + dy);
+    }
 
     /** 
      * Returns a new MapLocation object representing a location

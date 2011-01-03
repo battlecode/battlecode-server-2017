@@ -50,7 +50,9 @@ public final class Message implements Cloneable {
                 if (str != null) {
                     strCost = str.length();
                 }
-                if (strCost < 4) strCost = 4;
+                if (strCost < 4) {
+                    strCost = 4;
+                }
                 cost += strCost;
             }
         }

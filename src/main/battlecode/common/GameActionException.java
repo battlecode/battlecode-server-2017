@@ -20,27 +20,25 @@ package battlecode.common;
  * @author Teh Devs
  */
 public class GameActionException extends Exception {
-	
-	static final long serialVersionUID = 0x5def11da;
-	
-	private final GameActionExceptionType type;
-	
-	/**
-	 * Creates a GameActionException with the given type and message.
-	 */
-	public GameActionException(GameActionExceptionType type, String message) {
-		super(message);
-		this.type = type;
-	}
-	
-	/**
-	 * Gives the type of gameworld interaction that caused this GameActionException, which
-	 * was specified when this instance was constructed.
-	 *
-	 * @return this GameActionException's type
-	 */
-	public GameActionExceptionType getType() {
-		return type;
-	}
 
+    static final long serialVersionUID = 0x5def11da;
+    private final GameActionExceptionType type;
+
+    /**
+     * Creates a GameActionException with the given type and message.
+     */
+    public GameActionException(GameActionExceptionType type, String message) {
+        super(message);
+        this.type = type;
+    }
+
+    /**
+     * Gives the type of gameworld interaction that caused this GameActionException, which
+     * was specified when this instance was constructed.
+     *
+     * @return this GameActionException's type
+     */
+    public GameActionExceptionType getType() {
+        return type;
+    }
 }

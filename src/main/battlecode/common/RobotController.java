@@ -13,16 +13,12 @@ public interface RobotController {
     // *********************************
     // ****** QUERY METHODS ********
     // *********************************
-
-
-
     /**
      * Gets the current hit points of this robot.
      *
      * @return this robot's current energon level
      */
     public double getHitpoints();
-
 
     /**
      * Gets the maximum hit points of this robot.
@@ -31,22 +27,22 @@ public interface RobotController {
      */
     public double getMaxHp();
 
-	public double getTeamResources();
+    public double getTeamResources();
 
-	/**
+    /**
      * Gets the current location of this robot.
      *
      * @return this robot's current location
-	 *
+     *
      */
     public MapLocation getLocation();
 
-	/**
+    /**
      * Gets the direction this robot is currently facing.
      *
      * @return this robot's current Direction
      */
-	public Direction getDirection();
+    public Direction getDirection();
 
     /**
      * Retrieve the next message waiting in your incoming message queue. Also
@@ -89,29 +85,27 @@ public interface RobotController {
      */
     public Chassis getChassis();
 
-	/**
-	 * Returns all this robot's components.
-	 */
-	public ComponentController [] components();
+    /**
+     * Returns all this robot's components.
+     */
+    public ComponentController[] components();
 
-	/**
-	 * Returns the components that have been added to this robot
-	 * since the last call to newComponents().
-	 */
-	public ComponentController [] newComponents();
+    /**
+     * Returns the components that have been added to this robot
+     * since the last call to newComponents().
+     */
+    public ComponentController[] newComponents();
 
-	/**
-	 * Returns all components of the given type that this robot
-	 * possesses.
-	 */
-	//public ComponentController [] components(ComponentType type);
-
-	/**
-	 * Returns all components of the given component class that
-	 * this robot possesses.
-	 */
-	//public ComponentController [] components(ComponentClass cls);
-
+    /**
+     * Returns all components of the given type that this robot
+     * possesses.
+     */
+    //public ComponentController [] components(ComponentType type);
+    /**
+     * Returns all components of the given component class that
+     * this robot possesses.
+     */
+    //public ComponentController [] components(ComponentClass cls);
     /**
      * Gets the minimum number of points needed to win a game on this map
      */
@@ -120,22 +114,21 @@ public interface RobotController {
     // ***********************************
     // ****** ACTION METHODS ********
     // ***********************************
+    public void turnOff();
 
-	public void turnOff();
+    /**
+     * Returns true if the robot has been turned off since the last call
+     * to {@code wasTurnedOff()}.
+     */
+    public boolean wasTurnedOff();
 
-	/**
-	 * Returns true if the robot has been turned off since the last call
-	 * to {@code wasTurnedOff()}.
-	 */
-	public boolean wasTurnedOff();
-
-	/**
-	 * Turns on the robot at the given location and level.  The robot must be
-	 * allied and adjacent.
-	 *
-	 * @throws GameActionException
-	 */
-	public void turnOn(MapLocation Loc, RobotLevel level) throws GameActionException;
+    /**
+     * Turns on the robot at the given location and level.  The robot must be
+     * allied and adjacent.
+     *
+     * @throws GameActionException
+     */
+    public void turnOn(MapLocation Loc, RobotLevel level) throws GameActionException;
 
     /**
      * Ends the current round and gives your robot a slight energon bonus, given
@@ -164,15 +157,15 @@ public interface RobotController {
      *            <code>stringIndex >= 0 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS</code>
      * @param newString
      *            the value to which the indicator string should be set
-	 *
+     *
      */
     public void setIndicatorString(int stringIndex, String newString);
 
-	/**
-	 * Senses the terrain at loc, if loc was ever within the range of any
-	 * of this robot's sensors.
-	 */
-	public TerrainTile senseTerrainTile(MapLocation loc);
+    /**
+     * Senses the terrain at loc, if loc was ever within the range of any
+     * of this robot's sensors.
+     */
+    public TerrainTile senseTerrainTile(MapLocation loc);
 
     /**
      * Gets this robot's 'control bits' for debugging purposes. These bits can
@@ -193,55 +186,54 @@ public interface RobotController {
     /**
      * Sets the team's "memory", which is saved for the next game in the
      * match. The memory is an array of {@link GameConstants#TEAM_MEMORY_LENGTH}
-	 * longs.  If this method is called more than once with the same index
-	 * in the same game, the last call is what is saved for the
+     * longs.  If this method is called more than once with the same index
+     * in the same game, the last call is what is saved for the
      * next game.
      *
-	 * @param index
-	 *		the index of the array to set		
+     * @param index
+     *		the index of the array to set
      * @param value
      * 		the data that the team should remember for the next game
-	 *
-	 * @throws java.lang.ArrayIndexOutOfBoundsException if {@code index} is less
-	 * than zero or greater than {@link GameConstants#TEAM_MEMORY_LENGTH}
-	 *
-	 * @see #getTeamMemory
-	 * @see #setTeamMemory(int,long)
+     *
+     * @throws java.lang.ArrayIndexOutOfBoundsException if {@code index} is less
+     * than zero or greater than {@link GameConstants#TEAM_MEMORY_LENGTH}
+     *
+     * @see #getTeamMemory
+     * @see #setTeamMemory(int,long)
      */
     public void setTeamMemory(int index, long value);
 
-	/**
-	 * Sets this team's "memory". This function allows for finer control
-	 * than {@link #setTeamMemory(int,long)} provides.  For example,
-	 * if {@code mask == 0xFF} then only the eight least significant bits of
-	 * the memory will be set.
-	 *
-	 * @param index
-	 *		the index of the array to set		
+    /**
+     * Sets this team's "memory". This function allows for finer control
+     * than {@link #setTeamMemory(int,long)} provides.  For example,
+     * if {@code mask == 0xFF} then only the eight least significant bits of
+     * the memory will be set.
+     *
+     * @param index
+     *		the index of the array to set
      * @param value
      * 		the data that the team should remember for the next game
-	 * @param mask
-	 * 		indicates which bits should be set
-	 *
-	 * @throws java.lang.ArrayIndexOutOfBoundsException if {@code index} is less
-	 * than zero or greater than {@link GameConstants#TEAM_MEMORY_LENGTH}
-	 *
-	 * @see #getTeamMemory
-	 * @see #setTeamMemory(int,long,long)
-	 */
-	public void setTeamMemory(int index, long value, long mask);
+     * @param mask
+     * 		indicates which bits should be set
+     *
+     * @throws java.lang.ArrayIndexOutOfBoundsException if {@code index} is less
+     * than zero or greater than {@link GameConstants#TEAM_MEMORY_LENGTH}
+     *
+     * @see #getTeamMemory
+     * @see #setTeamMemory(int,long,long)
+     */
+    public void setTeamMemory(int index, long value, long mask);
 
     /**
-     * Returns the archon memory from the archons in the last game of the match.
+     * Returns the team memory from the  last game of the match.
      * The return value is an array of length {@link GameConstants#TEAM_MEMORY_LENGTH}.
-	 * If an archon did not call
-     * setArchonMemory in the last game, or there was no last game, the
+     * If setTeamMemory was not called in the last game, or there was no last game, the
      * corresponding long defaults to 0.
      *
-     * @return the archon memory from the archons in the last game of the match
-	 *
-	 * @see #setTeamMemory(int,long)
-	 * @see #setTeamMemory(int,long,long)
+     * @return the team memory from the the last game of the match
+     *
+     * @see #setTeamMemory(int,long)
+     * @see #setTeamMemory(int,long,long)
      */
     public long[] getTeamMemory();
 
@@ -251,5 +243,4 @@ public interface RobotController {
      * resume execution.
      */
     public void breakpoint();
-
 }

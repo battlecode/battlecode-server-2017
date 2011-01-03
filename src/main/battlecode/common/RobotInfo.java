@@ -21,7 +21,6 @@ public class RobotInfo {
     public final Direction direction;
     /** Whether or not this Robot is currently powered on. */
     public final boolean on;
-
     public final Chassis chassis;
     /**
      * The components of the robot that was sensed, if the sensor is capable

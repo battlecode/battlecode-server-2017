@@ -4,6 +4,5 @@ import battlecode.common.GameActionException;
 
 public interface IronController extends ComponentController {
 
-	public void activateShield() throws GameActionException;
-
+    public void activateShield() throws GameActionException;
 }
