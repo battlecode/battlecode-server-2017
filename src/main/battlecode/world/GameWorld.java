@@ -106,7 +106,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         teamPoints[Team.B.ordinal()] += getRoundPoints(Team.B);
         int aPoints = (int) (teamPoints[Team.A.ordinal()]), bPoints = (int) (teamPoints[Team.B.ordinal()]);
 
-        roundStats = new RoundStats(aPoints, bPoints);
+        roundStats = new RoundStats(teamResources[0] * 100, teamResources[1] * 100);
 
         // check for mercy rule
         //boolean teamAHasMinPoints = teamPoints[Team.A.ordinal()] >= gameMap.getMinPoints() || gameMap.getMaxRounds() < currentRound;
