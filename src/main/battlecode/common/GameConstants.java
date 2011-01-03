@@ -32,23 +32,25 @@ public final class GameConstants {
     public static final int NUMBER_OF_INDICATOR_STRINGS = 3;
     /** The base number of bytecodes a robot can execute each round */
     public static final int BYTECODE_LIMIT_BASE = 3000;
+    /** The number of additioal bytecodes granted by a processor */
     public static final int BYTECODE_LIMIT_ADDON = 3000;
-    /** The chainer's splash damage radius */
-    public final static int CHAINER_SPLASH_RADIUS_SQUARED = 2;
-    /** The radius at which flux is mined */
-    public static final int SOLDIER_MOVEMENT_DECREASE_ROUNDS = 4;
-    /** How many rounds a soldier will slow a Robot for */
-    public static final int SOLDIER_SLOW_ROUNDS = 60;
     /** Decreace percentage of point differential needed to win per round after round limit */
     public static final double POINTS_DECREASE_PER_ROUND_FACTOR = 0.0005;
     /** The number of rounds after a component is equipped before it may be used */
     public static final int EQUIP_WAKE_DELAY = 10;
+    /** The number of rounds for a robot to turn on and start running bytecode after it is turned on*/
     public static final int POWER_WAKE_DELAY = 20;
+    /** The maximum amount of damage done to a robot with Hardened from any one attack */
     public static final double HARDENED_MAX_DAMAGE = 2.5;
+    /** A shield can reduce the damage done no lower than this value */
     public static final double SHIELD_MIN_DAMAGE = .05;
+    /** The amount by which each shield reduces the damage from any attack */
     public static final double SHIELD_DAMAGE_REDUCTION = .2;
+    /** Number of rounds Iron stays in effect after it is activated */
     public static final int IRON_EFFECT_ROUNDS = 2;
-    public static final double PLATING_HP_BONUS = .1;
+    /* Hp granted by every plate on a robot */
+    public static final double PLATING_HP_BONUS = 1.5;
+    /** Hp regen bonus per round for each regen equipped */
     public static final double REGEN_AMOUNT = .1;
     /** The number of longs that your team can remember between games. */
     public static final int TEAM_MEMORY_LENGTH = 32;
@@ -57,13 +59,19 @@ public final class GameConstants {
      * dropship, regardless of its components.
      */
     public static final int TRANSPORT_CAPACITY = 24;
+    /** Maximum resources granted per flux mine before it starts to deplete */
     public static final double MINE_RESOURCES = 1.0;
-    public static final double MINE_DEPLETED_RESOURCES = .15;
+    /** Minimum resources granted per flux mine after it is fully depleted */
+    public static final double MINE_DEPLETED_RESOURCES = 0.15;
+    /** Rounds that a mine is fully operational */
     public static final int MINE_ROUNDS = 2000;
-    public static final double MINE_MINIMUM = 0.15;
+    /** Rounds for the mine to lose 0.01 */
     public static final int MINE_DEPLETION_RATE = 5;
+    /** Damage done by successive attacks of the beam as long as it is focused */
     public static final double[] BEAM_RAMP = {0, 0, 0, 1, 1, 2, 3, 4, 5};
+    /** Duration for which bug is in effect after it is planted */
     public static final int BUG_DURATION = 250;
+    /** Radius squared that the bug can sense */
     public static final int BUG_SENSOR_RANGE = 8;
 
     // This class cannot be instantiated.

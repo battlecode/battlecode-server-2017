@@ -30,5 +30,6 @@ public enum GameActionExceptionType {
     NO_ROOM_IN_CHASSIS,
     /** Indicates when a robot tries to perform an action on another robot, but the latter robot is not of the correct type */
     WRONG_ROBOT_TYPE,
+    /** Indicated that the builder component cannot build the item */
     CANT_BUILD_THAT
 }
