@@ -125,9 +125,9 @@ class XMLMapHandler extends DefaultHandler {
 			public void createGameObject(GameWorld world, MapLocation loc) {
 				InternalRobot robot = GameWorldFactory.createPlayer(world,type,loc,team,null,false);
 				for(ComponentType t : components) {
-					world.visitSignal(new EquipSignal(robot,null,t));
 					if(t==ComponentType.RECYCLER)
 						world.createMine(loc);
+					world.visitSignal(new EquipSignal(robot,null,t));
 				}
 			}
 			public boolean equalsMirror(SymbolData data) {
