@@ -15,6 +15,7 @@ import java.util.Map;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotLevel;
 import battlecode.common.Chassis;
+import battlecode.common.ComponentType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
@@ -55,6 +56,8 @@ public class GameWorldFactory {
 		RobotControllerImpl rc = new RobotControllerImpl(gw, robot);
 		if(robot.getChassis().motor!=null)
 			robot.equip(robot.getChassis().motor);
+		if(robot.getChassis()==Chassis.BUILDING)
+			robot.equip(ComponentType.BUILDING_SENSOR);
 		String teamName = gw.getTeamName(t);
 		PlayerFactory.loadPlayer(rc,teamName);
 	}
