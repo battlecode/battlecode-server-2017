@@ -146,7 +146,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 	public void setBugged(Bug b) {
 		if(buggedBy!=null) {
-			buggedBy.removeBug(this);
+			buggedBy.removeBug();
 		}
 		buggedBy = b;
 	}

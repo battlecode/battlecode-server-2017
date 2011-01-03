@@ -67,6 +67,7 @@ public final class GameConstants {
     public static final double[] BEAM_RAMP = {0, 0, 0, 1, 1, 2, 3, 4, 5};
 
 	public static final int BUG_DURATION = 250;
+	public static final int BUG_SENSOR_RANGE = 8;
 
     // This class cannot be instantiated.
     private GameConstants() {
