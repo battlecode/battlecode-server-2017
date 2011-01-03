@@ -601,7 +601,21 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
         return null;
     }
-    // *****************************
+    
+	public Exception visitTurnOnSignal(TurnOnSignal s) {
+		for(int i : s.robotIDs)
+			getRobotByID(i).setPower(true);
+		addSignal(s);
+		return null;
+	}
+
+	public Exception visitTurnOffSignal(TurnOffSignal s) {
+		getRobotByID(s.robotID).setPower(false);
+		addSignal(s);
+		return null;
+	}
+	
+	// *****************************
     //    UTILITY METHODS
     // *****************************
     private static MapLocation origin = new MapLocation(0, 0);

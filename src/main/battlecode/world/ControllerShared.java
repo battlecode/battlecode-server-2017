@@ -40,11 +40,22 @@ public abstract class ControllerShared
 	protected static void invalidObject() {
 		throw new IllegalArgumentException("Invalid GameObject (don't extend GameObject!)");
 	}
-	
+
+	protected static void assertRobotHeight(RobotLevel h) {
+		assertNotNull(h);
+		if(h==RobotLevel.MINE)
+			throw new IllegalArgumentException("There are no robots at that height.");
+	}
+
 	protected static void assertNotNull(Object o) {
         if (o == null)
             throw new NullPointerException("Argument has an invalid null value");
     }
+
+	protected void assertSameTeam(InternalObject o) throws GameActionException {
+		if (o == null || o.getTeam() != robot.getTeam())
+			throw new GameActionException(CANT_SENSE_THAT,"There is no allied robot there.");
+	}
 
 	protected static void outOfRange() throws GameActionException {
 		throw new GameActionException(CANT_SENSE_THAT,"That is not within range.");

@@ -7,6 +7,7 @@ import com.google.common.base.Predicates;
 import battlecode.common.ComponentType;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
+import battlecode.common.Team;
 
 public class Util {
 
@@ -80,6 +81,14 @@ public class Util {
 		}
 	};
 	*/
+
+	public static Predicate<InternalObject> isAllied(final Team tm) {
+		return new Predicate<InternalObject>() {
+			public boolean apply(InternalObject o) {
+				return o.getTeam()==tm;
+			}
+		};
+	}
 
 	static final Predicate<Object> isRobot = Predicates.instanceOf(InternalRobot.class);
 

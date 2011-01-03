@@ -129,6 +129,14 @@ public interface RobotController {
 	 */
 	public boolean wasTurnedOff();
 
+	/**
+	 * Turns on the robot at the given location and level.  The robot must be
+	 * allied and adjacent.
+	 *
+	 * @throws GameActionException
+	 */
+	public void turnOn(MapLocation Loc, RobotLevel level) throws GameActionException;
+
     /**
      * Ends the current round and gives your robot a slight energon bonus, given
      * by

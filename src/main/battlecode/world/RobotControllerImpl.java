@@ -152,14 +152,23 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //***********************************
 
     public void turnOff() {
-        robot.setPower(false);
+		gameWorld.visitSignal(new TurnOffSignal(robot,true));
     }
 
     public boolean wasTurnedOff() {
         return robot.queryHasBeenOff();
     }
 
-    /**
+	public void turnOn(MapLocation loc, RobotLevel height) throws GameActionException {
+		assertNotNull(loc);
+		assertRobotHeight(height);
+		assertWithinRange(loc,2);
+		InternalRobot ir = gameWorld.getRobot(loc,height);
+		assertSameTeam(ir);
+		gameWorld.visitSignal(new TurnOnSignal(ir,robot,false));
+	}
+
+	/**
      * {@inheritDoc}
      */
     public void yield() {

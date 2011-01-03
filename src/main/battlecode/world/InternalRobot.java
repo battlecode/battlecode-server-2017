@@ -28,6 +28,7 @@ import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
 import battlecode.world.signal.DeathSignal;
+import battlecode.world.signal.TurnOffSignal;
 
 public class InternalRobot extends InternalObject implements Robot, GenericRobot {
 
@@ -63,6 +64,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private Set<InternalRobot> passengers;
     private RobotControllerImpl rc;
     private int onInRounds = 0;
+	private Bug buggedBy;
 
     public static class ComponentSet extends ForwardingMultimap<ComponentClass, BaseComponent> {
 
@@ -141,6 +143,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
         if (!b) hasBeenOff = true;
     }
+
+	public void setBugged(Bug b) {
+		if(buggedBy!=null) {
+			buggedBy.removeBug(this);
+		}
+		buggedBy = b;
+	}
 
     public boolean queryHasBeenOff() {
         boolean tmp = hasBeenOff;
@@ -306,8 +315,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         if (onInRounds == 0) {
             on = true;
         }
-        if (on && !myGameWorld.spendResources(getTeam(), chassis.upkeep))
-            setPower(false);
+        if (on && !myGameWorld.spendResources(getTeam(), chassis.upkeep)) {
+			myGameWorld.visitSignal(new TurnOffSignal(this,false));
+		}
     }
 
     @Override
