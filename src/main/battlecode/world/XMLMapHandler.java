@@ -84,20 +84,32 @@ class XMLMapHandler extends DefaultHandler {
 
 			public static final SymbolDataFactory factory = new SymbolDataFactory() {
 				public RobotData create(Attributes att) {
-					Chassis type = Chassis.valueOf(getRequired(att,"chassis"));
-					String comp = getOptional(att,"components");
+					String stype = getRequired(att,"type");
+					Chassis chassis;
 					ComponentType [] components;
-					if(comp == null || comp.isEmpty()) {
-						components = new ComponentType [0];
+					if("RECYCLER".equals(stype)) {
+						chassis = Chassis.BUILDING;
+						components = new ComponentType [] { ComponentType.RECYCLER };
+					}
+					else if ("CONSTRUCTOR".equals(stype)) {
+						chassis = Chassis.LIGHT;
+						components = new ComponentType [] { ComponentType.CONSTRUCTOR, ComponentType.SIGHT };
 					}
 					else {
-						String [] s = comp.split(",");
-						components = new ComponentType [s.length];
-						for(int i=0;i<s.length;i++)
-							components[i] = ComponentType.valueOf(s[i]);
+						chassis = Chassis.valueOf(stype);
+						String comp = getOptional(att,"components");
+						if(comp == null || comp.isEmpty()) {
+							components = new ComponentType [0];
+						}
+						else {
+							String [] s = comp.split(",");
+							components = new ComponentType [s.length];
+							for(int i=0;i<s.length;i++)
+								components[i] = ComponentType.valueOf(s[i]);
+						}
 					}
 					Team team = Team.valueOf(getRequired(att,"team"));
-					return new RobotData(type,components,team);
+					return new RobotData(chassis,components,team);
 				}
 			};
 
@@ -167,7 +179,11 @@ class XMLMapHandler extends DefaultHandler {
 
 		static {
 			factories.put("TERRAIN",TerrainData.factory);
-			factories.put("ROBOT",RobotData.factory);
+			factories.put("RECYCLER",RobotData.factory);
+			factories.put("CONSTRUCTOR",RobotData.factory);
+			for(Chassis ch : Chassis.values()) {
+				factories.put(ch.name(),RobotData.factory);
+			}
 			factories.put("MINE",MineData.factory);
 		}
 
@@ -318,8 +334,9 @@ class XMLMapHandler extends DefaultHandler {
 
                 // The actual map data will be parsed by characters()...
 
-            } else
-                fail("unrecognized map element '<" + qName + ">'", "Check that all nodes are spelled correctly.\n");
+            } else {
+                //fail("unrecognized map element '<" + qName + ">'", "Check that all nodes are spelled correctly.\n");
+			}
 
             // Put this element on the XML element stack.
             xmlStack.addLast(qName);
@@ -428,7 +445,9 @@ class XMLMapHandler extends DefaultHandler {
      */
     private static void fail(String reason, String thingsToTry) {
         ErrorReporter.report("Malformed map file: " + reason, thingsToTry);
-        throw new IllegalArgumentException();
+		RuntimeException e = new IllegalArgumentException();
+		//e.printStackTrace();
+        throw e;
     }
 	
 	public boolean isTournamentLegal() {
@@ -490,6 +509,7 @@ class XMLMapHandler extends DefaultHandler {
         	parser.parse(file, handler);
 		}
 		catch(Exception e) {
+			e.printStackTrace();
 			fail("can't load '" + fileName + "' beacause of an exception:\n" + e.getMessage(), "Check that the map is valid XML.\n");
 			return null;
 		}
