@@ -41,7 +41,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final GameMap gameMap;
     private RoundStats roundStats = null;	// stats for each round; new object is created for each round
     private final GameStats gameStats = new GameStats();		// end-of-game stats
-    private double[] teamPoints = new double[2];
+    private double[] teamRoundResources = new double[2];
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
     private double[] teamResources = new double[] { GameConstants.INITIAL_FLUX, GameConstants.INITIAL_FLUX };
 
@@ -102,12 +102,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             }
         }
 
-        teamPoints[Team.A.ordinal()] += getRoundPoints(Team.A);
-        teamPoints[Team.B.ordinal()] += getRoundPoints(Team.B);
-        int aPoints = (int) (teamPoints[Team.A.ordinal()]), bPoints = (int) (teamPoints[Team.B.ordinal()]);
+        teamRoundResources[Team.A.ordinal()] += getRoundPoints(Team.A);
+        teamRoundResources[Team.B.ordinal()] += getRoundPoints(Team.B);
+        int aPoints = (int) (teamRoundResources[Team.A.ordinal()]), bPoints = (int) (teamRoundResources[Team.B.ordinal()]);
 
-        roundStats = new RoundStats(teamResources[0] * 100, teamResources[1] * 100);
-
+        roundStats = new RoundStats(teamResources[0] * 100, teamResources[1] * 100, teamRoundResources[0] * 100 , teamRoundResources[1] * 100);
+        teamRoundResources[0] = teamRoundResources[1] = 0;
         // check for mercy rule
         //boolean teamAHasMinPoints = teamPoints[Team.A.ordinal()] >= gameMap.getMinPoints() || gameMap.getMaxRounds() < currentRound;
         //boolean teamBHasMinPoints = teamPoints[Team.B.ordinal()] >= gameMap.getMinPoints() || gameMap.getMaxRounds() < currentRound;
@@ -116,7 +116,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         //boolean teamBMercy = teamBHasMinPoints && ((teamPoints[Team.B.ordinal()] - teamPoints[Team.A.ordinal()]) >= gameMap.getMinPoints() * (1 - GameConstants.PointsDecreaseFactor * (currentRound - gameMap.getMaxRounds() + 1)));
 
 
-        double diff = teamPoints[Team.A.ordinal()] - teamPoints[Team.B.ordinal()];
+        double diff = teamRoundResources[Team.A.ordinal()] - teamRoundResources[Team.B.ordinal()];
         boolean teamAMercy = diff > gameMap.getMinPoints() || diff >= gameMap.getMinPoints() * (1 - GameConstants.POINTS_DECREASE_PER_ROUND_FACTOR * (currentRound - gameMap.getStraightMaxRounds() + 1));
         diff -= 2 * diff;
         boolean teamBMercy = diff > gameMap.getMinPoints() || diff >= gameMap.getMinPoints() * (1 - GameConstants.POINTS_DECREASE_PER_ROUND_FACTOR * (currentRound - gameMap.getStraightMaxRounds() + 1));
@@ -277,7 +277,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public double getPoints(Team team) {
-        return teamPoints[team.ordinal()];
+        return teamRoundResources[team.ordinal()];
     }
 
     public boolean canMove(InternalRobot r, Direction dir) {
@@ -693,10 +693,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     protected void adjustResources(Team t, double amount) {
+        if(amount >= GameConstants.MINE_DEPLETED_RESOURCES)
+            teamRoundResources[t.ordinal()] += amount;
         teamResources[t.ordinal()] += amount;
     }
 
-    protected void adjustTeamPoints(InternalRobot r, int points) {
-        teamPoints[r.getTeam().ordinal()] += points;
-    }
 }
