@@ -26,4 +26,8 @@ public interface BroadcastController extends ComponentController {
      * @throws GameActionException if this robot already has a message queued in the current round (ALREADY_ACTIVE).
      */
     public void broadcast(Message msg) throws GameActionException;
+
+	public void broadcastTurnOn(int [] ids) throws GameActionException;
+
+	public void broadcastTurnOnAll() throws GameActionException;
 }
