@@ -25,7 +25,7 @@ public class BuildMappings {
                 Chassis.LIGHT,
                 Chassis.MEDIUM,
                 Chassis.FLYING));
-        chassisMappings.put(ComponentType.ARMORY, EnumSet.of(
+        chassisMappings.put(ComponentType.FACTORY, EnumSet.of(
                 Chassis.LIGHT,
                 Chassis.MEDIUM,
                 Chassis.HEAVY));
