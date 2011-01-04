@@ -43,7 +43,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final GameStats gameStats = new GameStats();		// end-of-game stats
     private double[] teamPoints = new double[2];
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
-    private double[] teamResources = new double[2];
+    private double[] teamResources = new double[] { GameConstants.INITIAL_FLUX, GameConstants.INITIAL_FLUX };
 
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldArchonMemory) {

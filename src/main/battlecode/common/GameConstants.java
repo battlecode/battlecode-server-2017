@@ -73,6 +73,8 @@ public final class GameConstants {
     public static final int BUG_DURATION = 250;
     /** Radius squared that the bug can sense */
     public static final int BUG_SENSOR_RANGE = 8;
+	/** Initial flux for each team */
+	public static final double INITIAL_FLUX = 30.;
 
     // This class cannot be instantiated.
     private GameConstants() {
