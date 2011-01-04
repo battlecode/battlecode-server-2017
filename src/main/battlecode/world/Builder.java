@@ -27,7 +27,7 @@ public class Builder extends BaseComponent implements BuilderController {
         InternalRobot ir = alliedRobotAt(loc, level);
         assertHasRoomFor(ir, type);
         spendResources(type.cost);
-        activate(new EquipSignal(robot, ir, type));
+        activate(new EquipSignal(ir, robot, type));
     }
 
     public void build(Chassis type, MapLocation loc) throws GameActionException {
