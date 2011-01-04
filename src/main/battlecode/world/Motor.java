@@ -27,7 +27,7 @@ public class Motor extends BaseComponent implements MovementController
 
 	private void move(Direction d) throws GameActionException {
 		assertInactive();
-		assertCanMove(robot.getDirection());
+		assertCanMove(d);
 		int delay = d.isDiagonal()?robot.getChassis().moveDelayDiagonal:
 			robot.getChassis().moveDelayOrthogonal;
 		activate(new MovementSignal(robot,getLocation().add(d),
