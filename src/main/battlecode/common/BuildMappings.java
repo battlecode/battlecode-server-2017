@@ -43,7 +43,9 @@ public class BuildMappings {
                 ComponentType.CONSTRUCTOR));
 
         componentMappings.put(ComponentType.CONSTRUCTOR, EnumSet.of(
-                ComponentType.RECYCLER));
+                ComponentType.RECYCLER,
+				ComponentType.ARMORY,
+				ComponentType.FACTORY));
 
         componentMappings.put(ComponentType.FACTORY, EnumSet.of(
                 ComponentType.HARDENED,
