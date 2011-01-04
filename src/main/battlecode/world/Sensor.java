@@ -38,7 +38,7 @@ public class Sensor extends BaseComponent implements SensorController {
                 return checkWithinRange(o) && (type.isInstance(o)) && (!o.equals(robot));
             }
         };
-        return (T[]) Iterables.toArray(Iterables.filter(gameWorld.allObjects(), p), GameObject.class);
+        return Iterables.toArray((Iterable<T>)Iterables.filter(gameWorld.allObjects(), p), type);
     }
 
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException {
