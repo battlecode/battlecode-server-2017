@@ -154,7 +154,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public void turnOff() {
 		gameWorld.visitSignal(new TurnOffSignal(robot,true));
-    }
+    	RobotMonitor.endRunner();
+	}
 
     public boolean wasTurnedOff() {
         return robot.queryHasBeenOff();
