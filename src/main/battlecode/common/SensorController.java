@@ -21,5 +21,7 @@ public interface SensorController extends ComponentController {
 
     public MineInfo senseMineInfo(Mine r) throws GameActionException;
 
-    public boolean canSenseObject(GameObject o) throws GameActionException;
+    public boolean canSenseObject(GameObject o);
+
+	public boolean canSenseSquare(MapLocation loc);
 }

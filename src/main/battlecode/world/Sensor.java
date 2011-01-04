@@ -86,4 +86,8 @@ public class Sensor extends BaseComponent implements SensorController {
         assertEquipped();
         return checkWithinRange(castInternalObject(o));
     }
+
+	public boolean canSenseSquare(MapLocation loc) {
+		return checkWithinRange(loc);
+	}
 }
