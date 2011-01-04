@@ -64,7 +64,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private Set<InternalRobot> passengers;
     private RobotControllerImpl rc;
     private int onInRounds = 0;
-	private Bug buggedBy;
+    private Bug buggedBy;
 
     public static class ComponentSet extends ForwardingMultimap<ComponentClass, BaseComponent> {
 
@@ -141,15 +141,17 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         } else if (!on && b && onInRounds <= 0) {
             onInRounds = GameConstants.POWER_WAKE_DELAY;
         }
-        if (!b) hasBeenOff = true;
+        if (!b) {
+            hasBeenOff = true;
+        }
     }
 
-	public void setBugged(Bug b) {
-		if(buggedBy!=null) {
-			buggedBy.removeBug();
-		}
-		buggedBy = b;
-	}
+    public void setBugged(Bug b) {
+        if (buggedBy != null) {
+            buggedBy.removeBug();
+        }
+        buggedBy = b;
+    }
 
     public boolean queryHasBeenOff() {
         boolean tmp = hasBeenOff;
@@ -191,11 +193,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             case TELESCOPE:
             case SIGHT:
             case RADAR:
-			case BUILDING_SENSOR:
+            case BUILDING_SENSOR:
                 controller = new Sensor(type, this);
                 break;
-			case BUG:
-				controller = new Bug(type, this);
+            case BUG:
+                controller = new Bug(type, this);
             case ANTENNA:
             case DISH:
             case NETWORK:
@@ -207,7 +209,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             case CONSTRUCTOR:
             case FACTORY:
             case ARMORY:
-			case DUMMY:
+            case DUMMY:
                 controller = new Builder(type, this);
                 break;
             case SMALL_MOTOR:
@@ -225,8 +227,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
         components.add(controller);
         newComponents.add(controller);
-        if (myGameWorld.getCurrentRound() >= 0)
+        if (myGameWorld.getCurrentRound() >= 0) {
             controller.activate(EQUIP_WAKE_DELAY);
+        }
         weight += type.weight;
         switch (type) {
             case PLATING:
@@ -303,29 +306,33 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void processBeginningOfRound() {
         super.processBeginningOfRound();
         buffs.processBeginningOfRound();
-        if (onInRounds > 0)
+        if (onInRounds > 0) {
             onInRounds--;
+        }
     }
 
     public void processBeginningOfTurn() {
-        changeEnergonLevel(regens * REGEN_AMOUNT);
         rc.processBeginningOfTurn();
-        for (BaseComponent c : components.values())
+        for (BaseComponent c : components.values()) {
             c.processBeginningOfTurn();
-        if (invulnerableRounds > 0)
+        }
+        if (invulnerableRounds > 0) {
             invulnerableRounds--;
+        }
         if (onInRounds == 0) {
             on = true;
         }
         if (on && !myGameWorld.spendResources(getTeam(), chassis.upkeep)) {
-			myGameWorld.visitSignal(new TurnOffSignal(this,false));
-		}
+            myGameWorld.visitSignal(new TurnOffSignal(this, false));
+        }
+        if(isOn())
+            changeEnergonLevel(regens * REGEN_AMOUNT);
     }
 
     @Override
     public void processEndOfTurn() {
         super.processEndOfTurn();
-        
+
         for (BaseComponent c : components.values()) {
             c.processEndOfTurn();
         }
@@ -358,7 +365,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             changeEnergonLevel(-baseAmount);
             return;
         }
-        if (invulnerableRounds > 0) return;
+        if (!isOn()) {
+            changeEnergonLevelFromAttack(-baseAmount);
+            return;
+        }
+        if (invulnerableRounds > 0) {
+            return;
+        }
         boolean haveHardened = false;
         double minDamage = Math.min(SHIELD_MIN_DAMAGE, baseAmount);
         for (BaseComponent c : components.get(ComponentClass.ARMOR)) {
@@ -377,10 +390,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
                     break;
             }
         }
-        if (haveHardened && baseAmount > HARDENED_MAX_DAMAGE)
+        if (haveHardened && baseAmount > HARDENED_MAX_DAMAGE) {
             changeEnergonLevelFromAttack(-HARDENED_MAX_DAMAGE);
-        else
+        } else {
             changeEnergonLevelFromAttack(-Math.max(minDamage, baseAmount));
+        }
     }
 
     public void changeEnergonLevelFromAttack(double amount) {
@@ -505,7 +519,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public int getBytecodeLimit() {
-        if ((!on) || inTransport()) return 0;
+        if ((!on) || inTransport()) {
+            return 0;
+        }
         return BYTECODE_LIMIT_BASE + BYTECODE_LIMIT_ADDON * cores;
     }
 
