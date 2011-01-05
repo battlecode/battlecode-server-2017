@@ -18,7 +18,13 @@ public interface DropshipController extends ComponentController {
 
     public boolean canUnload(MapLocation loc);
 
+	/**
+	 * Returns the robots that aren currently loaded into the dropship.
+	 */
     public Robot[] robotsOnBoard();
 
+	/**
+	 * Returns the amount of space available in the dropship.
+	 */
     public int spaceAvailable();
 }

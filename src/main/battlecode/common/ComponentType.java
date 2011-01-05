@@ -81,6 +81,9 @@ public enum ComponentType
 	 */
 	public final ComponentClass componentClass;
 
+	/**
+	 * The interface that is used to control this component.
+	 */
 	public final Class<? extends ComponentController> controller;
 
 	ComponentType(int weight, int cost, int delay, int range, double angle,

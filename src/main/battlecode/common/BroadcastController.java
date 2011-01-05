@@ -27,7 +27,25 @@ public interface BroadcastController extends ComponentController {
      */
     public void broadcast(Message msg) throws GameActionException;
 
+	/**
+	 * Broadcasts a message that tells the robots with the given RobotIDs to
+	 * wake up.  They will automatically turn on if they are allied and within
+	 * broadcast range.
+	 *
+	 * @cooldown 1
+	 *
+	 * @param ids
+	 *     the RobotIDs of the robots to wake up
+     * @throws GameActionException if this robot already has a message queued in the current round (ALREADY_ACTIVE).
+	 */
 	public void broadcastTurnOn(int [] ids) throws GameActionException;
 
+	/**
+	 * Broadcasts a message that tells all allied robots within sensor range
+	 * to wake up.
+	 *
+	 * @cooldown 1
+     * @throws GameActionException if this robot already has a message queued in the current round (ALREADY_ACTIVE).
+	 */
 	public void broadcastTurnOnAll() throws GameActionException;
 }

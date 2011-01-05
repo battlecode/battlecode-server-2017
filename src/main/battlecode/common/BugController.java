@@ -2,5 +2,8 @@ package battlecode.common;
 
 public interface BugController extends SensorController, WeaponController {
 
-    public MapLocation buggedLocation();
+    /**
+	 * Returns the location of the bugged robot, or null no robot is bugged.
+	 */
+	public MapLocation buggedLocation();
 }
