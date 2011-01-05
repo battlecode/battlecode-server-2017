@@ -24,7 +24,7 @@ public final class GameConstants {
     public static final int MAP_MIN_WIDTH = 20;
     /** The maxiumum possible map width. */
     public static final int MAP_MAX_WIDTH = 65;
-    /** Percent of upkeep returned per unused bytecode for ending the round early */
+    /** The maximum fraction of upkeep that can be regained by yielding */
     public static final double YIELD_BONUS = 0.1;
     /** The bytecode penalty that is imposed each time an exception is thrown */
     public static final int EXCEPTION_BYTECODE_PENALTY = 500;
