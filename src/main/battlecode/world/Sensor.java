@@ -59,6 +59,10 @@ public class Sensor extends BaseComponent implements SensorController {
         Chassis ch = ir.getChassis();
         if (ir.getChassis() == Chassis.DUMMY && ir.getTeam() != this.getRobot().getTeam()) {
             ch = Chassis.MEDIUM;
+            if (type() == ComponentType.SATELLITE) {
+                components = new ComponentType[] {ComponentType.MEDIUM_MOTOR};
+            }
+
         }
 
         return new RobotInfo(ir, ir.getLocation(), ir.getEnergonLevel(), ir.getMaxEnergon(),

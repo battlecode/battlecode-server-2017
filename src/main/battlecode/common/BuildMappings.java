@@ -36,7 +36,7 @@ public class BuildMappings {
                 ComponentType.PLATING,
                 ComponentType.SMG,
                 ComponentType.HAMMER,
-				ComponentType.BLASTER,
+                ComponentType.BLASTER,
                 ComponentType.SIGHT,
                 ComponentType.RADAR,
                 ComponentType.ANTENNA,
@@ -45,8 +45,8 @@ public class BuildMappings {
 
         componentMappings.put(ComponentType.CONSTRUCTOR, EnumSet.of(
                 ComponentType.RECYCLER,
-				ComponentType.ARMORY,
-				ComponentType.FACTORY));
+                ComponentType.ARMORY,
+                ComponentType.FACTORY));
 
         componentMappings.put(ComponentType.FACTORY, EnumSet.of(
                 ComponentType.HARDENED,
@@ -57,7 +57,7 @@ public class BuildMappings {
                 ComponentType.TELESCOPE,
                 ComponentType.DUMMY,
                 ComponentType.DROPSHIP,
-				ComponentType.DISH));
+                ComponentType.DISH));
 
         componentMappings.put(ComponentType.ARMORY, EnumSet.of(
                 ComponentType.PLASMA,
