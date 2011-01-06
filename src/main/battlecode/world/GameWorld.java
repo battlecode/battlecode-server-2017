@@ -585,7 +585,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 }
             } else {
                 parent = (InternalRobot) getObjectByID(parentID);
-                loc = parent.getLocation().add(parent.getDirection());
+                loc = s.getLoc();
             }
 
             //note: this also adds the signal

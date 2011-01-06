@@ -61,6 +61,6 @@ public class Builder extends BaseComponent implements BuilderController {
 
     public void assertHasRoomFor(InternalRobot r, ComponentType c) throws GameActionException {
         if (!r.hasRoomFor(c))
-            throw new GameActionException(GameActionExceptionType.NO_ROOM_IN_CHASSIS, "Target has no room component");
+            throw new GameActionException(GameActionExceptionType.NO_ROOM_IN_CHASSIS, "Target has no room for component");
     }
 }
