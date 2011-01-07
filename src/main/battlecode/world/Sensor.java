@@ -20,6 +20,7 @@ public class Sensor extends BaseComponent implements SensorController {
 
     public Sensor(ComponentType type, InternalRobot robot) {
         super(type, robot);
+		robot.saveMapMemory(robot.getLocation(),type);
     }
 
     public GameObject senseObjectAtLocation(MapLocation loc, RobotLevel height) throws GameActionException {

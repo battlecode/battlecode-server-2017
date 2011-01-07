@@ -473,10 +473,16 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void saveMapMemory(MapLocation oldLoc, MapLocation newLoc,
             boolean fringeOnly) {
         for (BaseComponent c : components.get(ComponentClass.SENSOR)) {
-            int[][] myOffsets = offsets.get(c.type())[myDirection.ordinal()];
-            mapMemory.rememberLocations(newLoc, myOffsets[0], myOffsets[1]);
+			saveMapMemory(newLoc,c.type());
         }
     }
+
+	public void saveMapMemory(MapLocation newLoc, ComponentType t) {
+		if(t!=ComponentType.BUG) {
+			int[][] myOffsets = offsets.get(t)[myDirection.ordinal()];
+			mapMemory.rememberLocations(newLoc, myOffsets[0], myOffsets[1]);
+		}
+	}
 
     public void addPassenger(InternalRobot passenger) {
         passengers.add(passenger);
