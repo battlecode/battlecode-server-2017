@@ -8,10 +8,8 @@ import java.util.List;
 
 import battlecode.server.controller.Controller;
 import battlecode.server.controller.ControllerFactory;
-import battlecode.server.controller.SQLController;
 import battlecode.server.proxy.Proxy;
 import battlecode.server.proxy.ProxyFactory;
-import battlecode.util.SQLQueue;
 
 public class ServerFactory {
 
@@ -115,23 +113,5 @@ public class ServerFactory {
 		controller.addObserver(server);
 		return server;
 	}
-
-	public static Server createSQLServer(Config options, SQLQueue queue,
-			Server.Mode mode) throws IOException {
-
-		Controller controller = ControllerFactory.createSQLController(queue);
-
-		boolean bestOfThree = (mode == Server.Mode.TOURNAMENT ||
-				mode == Server.Mode.SCRIMMAGE ||
-				mode == Server.Mode.AUTOTEST || mode == Server.Mode.MATCH);
-		
-		Server server = new Server(options, mode, controller,
-				new Proxy[] { ProxyFactory.createSQLProxy(queue, bestOfThree) });
-
-		controller.addObserver(server);
-
-		return server;
-	}
-
 
 }
