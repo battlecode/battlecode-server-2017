@@ -30,7 +30,7 @@ public class GameStats implements Serializable {
 	
 	public void setUnitKilled(Team t, int numRounds) {
 		int index = t.opponent().ordinal();
-		if(timeToFirstKill[index] == 0)
+		if(index<2 && timeToFirstKill[index] == 0)
 			timeToFirstKill[index] = numRounds;
 	}
 	
