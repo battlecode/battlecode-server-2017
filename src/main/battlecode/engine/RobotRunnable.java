@@ -43,7 +43,7 @@ class RobotRunnable implements Runnable {
                 o = ctor.newInstance(myRobotController);
 
             } catch (Throwable t) {
-                if (t.getCause() instanceof RobotDeathException)
+                if ((t instanceof RobotDeathException) || (t.getCause() instanceof RobotDeathException))
                     return;
                 ErrorReporter.report(t, "Check that the player does not throw an exception in its constructor.\n");
                 return;
