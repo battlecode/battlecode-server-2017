@@ -249,19 +249,15 @@ public class Match extends Observable {
         double[] energon = stats.getTotalEnergon();
         int[] archons = stats.getNumArchons();
         if (dom == DominationFactor.DESTROYED)
-        	sb.append("The losing team was destroyed easily.");
-        else if (dom == DominationFactor.PWNED)
         	sb.append("The losing team was destroyed.");
         else if (dom == DominationFactor.OWNED)
-        	sb.append("Team A had "+(int)points[0]+" points and Team B had "+(int)points[1]+" points, ending the match early");
+        	sb.append("Team A had "+(points[0]/100.)+" production and Team B had "+(points[1]/100.)+" production.");
         else if (dom == DominationFactor.BEAT)
-        	sb.append("Team A had "+(int)points[0]+" points and Team B had "+(int)points[1]+" points.");
+        	sb.append("Team A had "+energon[0]+" hitpoints and Team B had "+energon[1]+" hitpoints.");
         else if (dom == DominationFactor.BARELY_BEAT)
-        	sb.append("Team A had "+archons[0]+" archons and Team B had "+archons[1]+" archons.");
+        	sb.append("The winning team had more flux.");
         else if (dom == DominationFactor.WON_BY_DUBIOUS_REASONS)
-        	sb.append("Team A had "+energon[0]+" total energon and Team B had "+energon[1]+" total energon.");
-        else
-        	sb.append("Team A won by default.");
+        	sb.append("Team " + getWinner() + " won by default.");
 
         return sb.toString();
     }

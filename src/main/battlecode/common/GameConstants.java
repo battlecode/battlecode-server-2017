@@ -34,8 +34,6 @@ public final class GameConstants {
     public static final int BYTECODE_LIMIT_BASE = 3000;
     /** The number of additioal bytecodes granted by a processor */
     public static final int BYTECODE_LIMIT_ADDON = 3000;
-    /** Decreace percentage of point differential needed to win per round after round limit */
-    public static final double POINTS_DECREASE_PER_ROUND_FACTOR = 0.0005;
     /** The number of rounds after a component is equipped before it may be used */
     public static final int EQUIP_WAKE_DELAY = 10;
     /** The number of rounds for a robot to turn on and start running bytecode after it is turned on*/

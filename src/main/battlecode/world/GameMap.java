@@ -196,7 +196,7 @@ public class GameMap implements GenericGameMap {
  	 * @return the maximum number of rounds for this game
 	 */
 	public int getMaxRounds() {
-		return maxRounds + (int)Math.round(1.0 / GameConstants.POINTS_DECREASE_PER_ROUND_FACTOR);
+		return maxRounds; 
 	}
 	
 	public int getStraightMaxRounds(){

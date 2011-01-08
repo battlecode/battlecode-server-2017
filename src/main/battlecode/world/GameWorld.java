@@ -83,55 +83,32 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         // calculate some stats
         double[] totalEnergon = new double[3];
-        //~ int[] numRobots = new int[2];
         boolean teamADead = true, teamBDead = true;
         for (InternalObject obj : gameObjectsByID.values()) {
             if (!(obj instanceof InternalRobot))
                 continue;
             InternalRobot r = (InternalRobot) obj;
-            int team = r.getTeam().ordinal();
-            totalEnergon[team] += r.getEnergonLevel();
-            //~ numRobots[team]++;
-            if (r instanceof InternalRobot) {
-                // Buildings can survive for a really long time, so the game
-                // should end if one team only has buildings left.  It seems
-                // more natural to end the game when all archons are killed
-                // then when all non-buildings are killed.
-                if (teamADead && r.getTeam() == Team.A) teamADead = false;
-                if (teamBDead && r.getTeam() == Team.B) teamBDead = false;
+			if(r.isOn()) {
+            	Team team = r.getTeam();
+            	totalEnergon[team.ordinal()] += r.getEnergonLevel();
+				if(team==Team.A) teamADead = false;
+				if(team==Team.B) teamBDead = false;
             }
         }
 
-        teamRoundResources[Team.A.ordinal()] += getRoundPoints(Team.A);
-        teamRoundResources[Team.B.ordinal()] += getRoundPoints(Team.B);
-        int aPoints = (int) (teamRoundResources[Team.A.ordinal()]), bPoints = (int) (teamRoundResources[Team.B.ordinal()]);
+        long aPoints = Math.round(teamRoundResources[Team.A.ordinal()]*100), bPoints = Math.round(teamRoundResources[Team.B.ordinal()]*100);
 
         roundStats = new RoundStats(teamResources[0] * 100, teamResources[1] * 100, teamRoundResources[0] * 100 , teamRoundResources[1] * 100);
         teamRoundResources[0] = teamRoundResources[1] = 0;
-        // check for mercy rule
-        //boolean teamAHasMinPoints = teamPoints[Team.A.ordinal()] >= gameMap.getMinPoints() || gameMap.getMaxRounds() < currentRound;
-        //boolean teamBHasMinPoints = teamPoints[Team.B.ordinal()] >= gameMap.getMinPoints() || gameMap.getMaxRounds() < currentRound;
-        //boolean teamAMercy = teamAHasMinPoints  &&
-        //        ((teamPoints[Team.A.ordinal()] - teamPoints[Team.B.ordinal()]) >= gameMap.getMinPoints() * (1 - GameConstants.PointsDecreaseFactor * (currentRound - gameMap.getMaxRounds() + 1)));
-        //boolean teamBMercy = teamBHasMinPoints && ((teamPoints[Team.B.ordinal()] - teamPoints[Team.A.ordinal()]) >= gameMap.getMinPoints() * (1 - GameConstants.PointsDecreaseFactor * (currentRound - gameMap.getMaxRounds() + 1)));
-
-
-        double diff = teamRoundResources[Team.A.ordinal()] - teamRoundResources[Team.B.ordinal()];
-        boolean teamAMercy = diff > gameMap.getMinPoints() || diff >= gameMap.getMinPoints() * (1 - GameConstants.POINTS_DECREASE_PER_ROUND_FACTOR * (currentRound - gameMap.getStraightMaxRounds() + 1));
-        diff -= 2 * diff;
-        boolean teamBMercy = diff > gameMap.getMinPoints() || diff >= gameMap.getMinPoints() * (1 - GameConstants.POINTS_DECREASE_PER_ROUND_FACTOR * (currentRound - gameMap.getStraightMaxRounds() + 1));
-
-        // determine if the game is over, and if so, who the winner is
-        // the game ends when either team has no living archons, when the round limit is up
-        // or when one team has exceeded the map's MIN_POINTS and has a lead of at least MIN_POINTS / 2
-        // the algorithm to determine the winner is:
-        // (1) team that killed the other team's archons
-        // (3) team that has the most points (mined the most flux)
-        // (4) team with the greatest energon production among living archons
-        // (5) team with the most total energon at the end of the game
-        // (6) team with the "smaller" team string
-        // (7) Team A wins
-        if (teamADead || teamBDead || teamAMercy || teamBMercy) {// || currentRound >= gameMap.getMaxRounds() - 1) {
+        
+		// the algorithm to determine the winner is:
+        // (1) team that deactivated the other team's robots
+		// (2) team that mined the most flux last turn
+		// (3) team with the most hitpoints among activated robots
+		// (4) team with the most flux
+        // (5) team with the "smaller" team string
+        // (6) Team A wins
+        if (teamADead || teamBDead || currentRound >= gameMap.getMaxRounds() - 1) {
 
             running = false;
 
@@ -152,32 +129,30 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             } else if (!teamBDead && teamADead) {
                 winner = Team.B;
                 gameStats.setDominationFactor(DominationFactor.DESTROYED);
-            } else if (aPoints != bPoints) {
-                if (teamAMercy) {
-                    gameStats.setDominationFactor(DominationFactor.OWNED);
-                    winner = Team.A;
-                } else if (teamBMercy) {
-                    gameStats.setDominationFactor(DominationFactor.OWNED);
-                    winner = Team.B;
-                } else {
-                    gameStats.setDominationFactor(DominationFactor.BEAT);
-                    if (aPoints > bPoints)
-                        winner = Team.A;
-                    else
-                        winner = Team.B;
-                }
-            } else {
+            } else if (aPoints > bPoints) {
+				gameStats.setDominationFactor(DominationFactor.OWNED);
+                winner = Team.A;
+            } else if (bPoints > aPoints) {
+                gameStats.setDominationFactor(DominationFactor.OWNED);
+                winner = Team.B;
+            } else if (totalEnergon[0]>totalEnergon[1]) {
+                gameStats.setDominationFactor(DominationFactor.BEAT);
+				winner = Team.A;
+            } else if (totalEnergon[0]<totalEnergon[1]) {
+				gameStats.setDominationFactor(DominationFactor.BEAT);
+				winner = Team.B;
+            } else if (teamResources[0]>teamResources[1]) {
+				gameStats.setDominationFactor(DominationFactor.BARELY_BEAT);
+				winner = Team.A;
+			} else if (teamResources[0]<teamResources[1]) {
+				gameStats.setDominationFactor(DominationFactor.BARELY_BEAT);
+				winner = Team.B;
+			} else {
                 gameStats.setDominationFactor(DominationFactor.WON_BY_DUBIOUS_REASONS);
-                if (totalEnergon[0] > totalEnergon[1])
-                    winner = Team.A;
-                else if (totalEnergon[1] > totalEnergon[0])
+				if (teamAName.compareTo(teamBName) <= 0)
+                	winner = Team.A;
+                else
                     winner = Team.B;
-                else {
-                    if (teamAName.compareTo(teamBName) <= 0)
-                        winner = Team.A;
-                    else
-                        winner = Team.B;
-                }
             }
         }
 
@@ -357,10 +332,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public void resetStatic() {
-    }
-
-    public double getRoundPoints(Team t) {
-        return 0.;
     }
 
     public InternalMine createMine(MapLocation loc) {
