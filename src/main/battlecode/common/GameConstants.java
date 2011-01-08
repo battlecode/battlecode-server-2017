@@ -36,7 +36,7 @@ public final class GameConstants {
     public static final int BYTECODE_LIMIT_ADDON = 3000;
     /** The number of rounds after a component is equipped before it may be used */
     public static final int EQUIP_WAKE_DELAY = 10;
-    /** The number of rounds for a robot to turn on and start running bytecode after it is turned on*/
+    /** The number of rounds it takes for components to wake up after a robot is powered on */
     public static final int POWER_WAKE_DELAY = 20;
     /** The maximum amount of damage done to a robot with Hardened from any one attack */
     public static final double HARDENED_MAX_DAMAGE = 2.5;

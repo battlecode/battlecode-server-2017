@@ -63,7 +63,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private volatile InternalRobot transporter;
     private Set<InternalRobot> passengers;
     private RobotControllerImpl rc;
-    private int onInRounds = 0;
     private Bug buggedBy;
 
     public static class ComponentSet extends ForwardingMultimap<ComponentClass, BaseComponent> {
@@ -134,16 +133,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void setPower(boolean b) {
-        if (on && !b) {
-            onInRounds = -1;
-            on = false;
-
-        } else if (!on && b && onInRounds <= 0) {
-            onInRounds = GameConstants.POWER_WAKE_DELAY;
-        }
-        if (!b) {
-            hasBeenOff = true;
-        }
+		if(b&&!on) {
+			hasBeenOff = true;
+			for(BaseComponent c : components.values()) {
+				c.activate(POWER_WAKE_DELAY);
+			}
+		}
+		on = b;
     }
 
     public void setBugged(Bug b) {
@@ -306,9 +302,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void processBeginningOfRound() {
         super.processBeginningOfRound();
         buffs.processBeginningOfRound();
-        if (onInRounds > 0) {
-            onInRounds--;
-        }
     }
 
     public void processBeginningOfTurn() {
@@ -318,9 +311,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
         if (invulnerableRounds > 0) {
             invulnerableRounds--;
-        }
-        if (onInRounds == 0) {
-            on = true;
         }
         if (on && !myGameWorld.spendResources(getTeam(), chassis.upkeep)) {
             myGameWorld.visitSignal(new TurnOffSignal(this, false));
