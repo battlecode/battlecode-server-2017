@@ -94,11 +94,17 @@ public class FileProxy extends Proxy {
 			// Move the file to its desired location.
 			if (file.exists())
 				file.delete();
-			boolean result = temp.renameTo(file);
+			boolean result = renameTo(temp,file);
 			if (!result)
 				Server.warn("unable to rename match file");
 		}
 	}
+
+	public boolean renameTo(File temp, File file)
+	{
+		return temp.renameTo(file);
+	}
+
 
 	public void writeObject(Object o) throws IOException {
 		if (o instanceof Notification)
