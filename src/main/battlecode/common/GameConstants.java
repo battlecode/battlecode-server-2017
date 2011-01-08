@@ -75,6 +75,10 @@ public final class GameConstants {
     public static final int BUG_SENSOR_RANGE = 8;
 	/** Initial flux for each team */
 	public static final double INITIAL_FLUX = 30.;
+	/** Minimum number of mines allowed on official maps. */
+	public static final int MINES_MIN = 8;
+	/** Maximum number of mines allowed on official maps. */
+	public static final int MINES_MAX = 100;
 
     // This class cannot be instantiated.
     private GameConstants() {

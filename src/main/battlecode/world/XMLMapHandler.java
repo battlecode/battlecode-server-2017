@@ -4,6 +4,9 @@ import static battlecode.common.GameConstants.MAP_MAX_HEIGHT;
 import static battlecode.common.GameConstants.MAP_MAX_WIDTH;
 import static battlecode.common.GameConstants.MAP_MIN_HEIGHT;
 import static battlecode.common.GameConstants.MAP_MIN_WIDTH;
+import static battlecode.common.GameConstants.MINES_MAX;
+import static battlecode.common.GameConstants.MINES_MIN;
+import battlecode.server.Config;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,8 +14,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -82,6 +88,9 @@ class XMLMapHandler extends DefaultHandler {
 
 		private static class RobotData implements SymbolData {
 
+			public static final ComponentType [] RECYCLER_COMPONENTS = new ComponentType [] { ComponentType.RECYCLER };
+			public static final ComponentType [] CONSTRUCTOR_COMPONENTS = new ComponentType [] { ComponentType.CONSTRUCTOR, ComponentType.SIGHT };
+
 			public static final SymbolDataFactory factory = new SymbolDataFactory() {
 				public RobotData create(Attributes att) {
 					String stype = getRequired(att,"type");
@@ -89,11 +98,11 @@ class XMLMapHandler extends DefaultHandler {
 					ComponentType [] components;
 					if("RECYCLER".equals(stype)) {
 						chassis = Chassis.BUILDING;
-						components = new ComponentType [] { ComponentType.RECYCLER };
+						components = RECYCLER_COMPONENTS;
 					}
 					else if ("CONSTRUCTOR".equals(stype)) {
 						chassis = Chassis.LIGHT;
-						components = new ComponentType [] { ComponentType.CONSTRUCTOR, ComponentType.SIGHT };
+						components = CONSTRUCTOR_COMPONENTS;
 					}
 					else {
 						chassis = Chassis.valueOf(stype);
@@ -113,9 +122,9 @@ class XMLMapHandler extends DefaultHandler {
 				}
 			};
 
-			private Chassis type;
-			private ComponentType [] components;
-			private Team team;
+			public final Chassis type;
+			public final ComponentType [] components;
+			public final Team team;
 			public RobotData(Chassis type, ComponentType [] components, Team team) {
 				this.type = type;
 				this.components = components;
@@ -136,14 +145,16 @@ class XMLMapHandler extends DefaultHandler {
 				return type==d.type&&Arrays.equals(components,d.components)&&team==d.team.opponent();
 			}
 
+			public String toString() {
+				return String.format("%s:%s:%s",type,team,Arrays.toString(components));
+			}
+
 		}
 
 		private static class MineData implements SymbolData {
 	
 			public static final SymbolDataFactory factory = new SymbolDataFactory() { 
 				public MineData create(Attributes att) {
-					String tm = getOptional(att,"team");
-					Team team;
 					return new MineData();
 				}
 			};
@@ -449,23 +460,152 @@ class XMLMapHandler extends DefaultHandler {
 		//e.printStackTrace();
         throw e;
     }
-	
+
+	class FloodFill {
+
+		Stack<MapLocation> queue;
+		Set<MapLocation> marked;
+		int n_marked;
+
+		public FloodFill(int x, int y) {
+			queue = new Stack<MapLocation>();
+			marked = new HashSet<MapLocation>();
+			add(x,y);
+		}
+
+		public int size() {
+			MapLocation loc;
+			while(!queue.isEmpty()) {
+				loc = queue.pop();
+				add(loc.x+1,loc.y);
+				add(loc.x-1,loc.y);
+				add(loc.x,loc.y+1);
+				add(loc.x,loc.y-1);
+			}
+			return n_marked;
+		}
+
+		public void add(int x, int y) {
+			if(x<0||x>=mapWidth||y<0||y>=mapHeight)
+				return;
+			if(map[x][y].tile()!=TerrainTile.LAND)
+				return;
+			MapLocation loc = new MapLocation(x,y);
+			if(marked.contains(loc)) return;
+			queue.push(loc);
+			marked.add(loc);
+			n_marked++;
+		}
+
+	}
+
+	private void warnIllegalUnit(RobotData r) {
+		System.err.println("Illegal unit: "+r);
+	}
+
 	public boolean isTournamentLegal() {
-		boolean asymmetric = false;
+		boolean legal = true;
 		int x, y, mx, my;
 		SymbolData d, md;
 		// check that the map is symmetric
 		for(y = 0, my = mapHeight-1; my>=y; y++, my--)
 			for (x = 0, mx = mapWidth-1 ; (my>y)?(mx>=0):(mx>=x); x++, mx--) {
 				if(!map[x][y].equalsMirror(map[mx][my])) {
-					if(!asymmetric) {
-						System.err.println("found asymmetry:");
-						asymmetric = true;
-					}
 					System.err.format("%d,%d does not match %d,%d\n",x,y,mx,my);
+					legal = false;
 				}
 			}
-		return !asymmetric;
+		int grounds = 0, gx=0, gy=0, mines=0;
+		StringBuilder b = new StringBuilder();
+		for(y = 0; y<mapHeight; y++) {
+			for( x = 0; x<mapWidth; x++) {
+				d = map[x][y];
+				if(d instanceof MineData) {
+					b.append('@');
+					mines++;
+				}
+				else if(d instanceof RobotData) {
+					RobotData rd = (RobotData)d;
+					switch(rd.type) {
+					case DEBRIS:
+						b.append('+');
+						if(rd.team!=Team.NEUTRAL) {
+							warnIllegalUnit(rd);
+							legal = false;
+						}
+						break;
+					case BUILDING:
+						if(rd.team==Team.NEUTRAL||!Arrays.equals(rd.components,RobotData.RECYCLER_COMPONENTS)) {
+							warnIllegalUnit(rd);
+							legal = false;
+						}
+						if(rd.team==Team.A)
+							b.append('R');
+						else
+							b.append('r');
+						break;
+					case LIGHT:
+						if(rd.team==Team.NEUTRAL||!Arrays.equals(rd.components,RobotData.CONSTRUCTOR_COMPONENTS)) {
+							warnIllegalUnit(rd);
+							legal = false;
+						}
+						if(rd.team==Team.A)
+							b.append('C');
+						else
+							b.append('c');
+						break;
+					default:
+						b.append('.');
+						warnIllegalUnit(rd);
+						legal = false;
+					}
+				}
+				else {
+					b.append('.');
+				}
+				if(d.tile()==TerrainTile.LAND) {
+					grounds++;
+					gx = x;
+					gy = y;
+				}
+			}
+			b.append('\n');
+		}
+		// check that team A has a valid starting configuration
+		// if the map is symmetric, then team B must also have a
+		// valid starting configuration
+		String mapstr = b.toString();
+		//System.out.println(mapstr);
+		//System.out.println(String.format("^[^RC]*C[^RC]{%d,%d}RR[^RC]{%d}@@[^RC]*$",mapWidth-1,mapWidth,mapWidth-1));
+		boolean robots_legal =
+			mapstr.matches(String.format("^[^RC]*C[^RC]{%d,%d}RR[^RC]{%d}@@[^RC]*$",mapWidth-1,mapWidth,mapWidth-1)) ||
+			mapstr.matches(String.format("^[^RC]*@@[^RC]{%d}RR[^RC]{%d,%d}C[^RC]*$",mapWidth-1,mapWidth-1,mapWidth)) ||
+			mapstr.matches(String.format("^[^RC]*CR@[^RC]{%d}R@[^RC]*$",mapWidth-1))||
+			mapstr.matches(String.format("^[^RC]*R@[^RC]{%d}CR@[^RC]*$",mapWidth-2))||
+			mapstr.matches(String.format("^[^RC]*@RC[^RC]{%d}@R[^RC]*$",mapWidth-2))||
+			mapstr.matches(String.format("^[^RC]*@R[^RC]{%d}@RC[^RC]*$",mapWidth-1));
+		if(!robots_legal) {
+			System.err.println("Team A does not have a valid starting configuration.");
+			legal = false;
+		}
+		// check that the ground squares are connected
+		if(grounds==0) {
+			System.err.println("There are no land squares on the entire map!");
+			legal = false;
+		}
+		else {
+			int reachable = new FloodFill(gx, gy).size();
+			if(reachable!=grounds) {
+				System.err.println(String.format("There are %d land squares but only %d are reachable from %d,%d",grounds,reachable,gx,gy));
+				legal = false;
+			}
+		}
+		// check that the number of mines conforms to the spec
+		if(mines<MINES_MIN||mines>MINES_MAX) {
+			System.err.println("illegal number of mines: " + mines);
+			legal = false;
+		}
+		return legal;
 	}
 
 	public static boolean isTournamentLegal(String mapName, String mapPath) {
@@ -474,6 +614,7 @@ class XMLMapHandler extends DefaultHandler {
 		try {
 			handler = loadMap(mapName,mapPath);
 		} catch(IllegalArgumentException e) {
+			System.err.println("failed to load map");
 			return false;
 		}
 		return handler.isTournamentLegal();
@@ -514,6 +655,13 @@ class XMLMapHandler extends DefaultHandler {
 			return null;
 		}
 		return handler;
+	}
+
+	public static void main(String [] s) {
+		String mapPath = Config.getGlobalConfig().get("bc.game.map-path");
+		for(String str : s) {
+			isTournamentLegal(str,mapPath);
+		}
 	}
 }
 
