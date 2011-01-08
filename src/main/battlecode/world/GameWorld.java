@@ -393,7 +393,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         Predicate<InternalObject> pred = Util.robotWithinDistance(sender.getLocation(), s.range);
         for (InternalObject o : Iterables.filter(objs, pred)) {
             InternalRobot r = (InternalRobot) o;
-            r.enqueueIncomingMessage((Message) s.message.clone());
+			if(r!=sender)
+            	r.enqueueIncomingMessage((Message) s.message.clone());
         }
         s.message = null;
         addSignal(s);
