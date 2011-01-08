@@ -17,7 +17,7 @@ public class Doclet extends Standard {
 		ClassDoc [] doc = root.classes();
 		Arrays.sort(doc, new Comparator<ClassDoc>() {
 			public int compare(ClassDoc o1, ClassDoc o2) {
-				return o1.qualifiedName().compareTo(o2.qualifiedName());
+				return o1.qualifiedName().compareToIgnoreCase(o2.qualifiedName());
 			}
 		});
 		for(ClassDoc cl : doc) {
