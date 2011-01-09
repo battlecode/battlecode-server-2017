@@ -518,7 +518,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public Exception visitMovementSignal(MovementSignal s) {
         try {
             InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
-            MapLocation loc = (s.isMovingForward() ? r.getLocation().add(r.getDirection()) : r.getLocation().add(r.getDirection().opposite()));
+            MapLocation loc = s.getNewLoc();//(s.isMovingForward() ? r.getLocation().add(r.getDirection()) : r.getLocation().add(r.getDirection().opposite()));
 
             r.setLocation(loc);
 
