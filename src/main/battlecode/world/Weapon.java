@@ -8,6 +8,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotLevel;
 import battlecode.common.WeaponController;
 import battlecode.world.signal.AttackSignal;
+import battlecode.engine.instrumenter.RobotDeathException;
 
 public class Weapon extends BaseComponent implements WeaponController {
 
@@ -40,5 +41,9 @@ public class Weapon extends BaseComponent implements WeaponController {
         } else {
             activate(new AttackSignal(robot, type, loc, height));
         }
+		// if this robot killed itself, its turn should end
+		if(robot.getEnergonLevel()<0) {
+			throw new RobotDeathException();
+		}
     }
 }

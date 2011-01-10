@@ -327,8 +327,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void endOfExecution(int robotID) {
         InternalRobot r = (InternalRobot) getObjectByID(robotID);
-        r.setBytecodesUsed(RobotMonitor.getBytecodesUsed());
-        r.processEndOfTurn();
+		// if the robot is dead, it won't be in the map any more
+		if(r!=null) {
+        	r.setBytecodesUsed(RobotMonitor.getBytecodesUsed());
+        	r.processEndOfTurn();
+		}
     }
 
     public void resetStatic() {
