@@ -221,6 +221,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 			case DROPSHIP:
 				controller = new Dropship(this);
 				break;
+			case IRON:
+				controller = new IronComponent(type, this);
+				break;
             default:
                 throw new RuntimeException("component " + type + " is not supported yet");
         }
