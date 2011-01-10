@@ -39,7 +39,7 @@ public class Config {
         defaults.setProperty("bc.engine.gc", "false");
         defaults.setProperty("bc.engine.gc-rounds", "50");
         defaults.setProperty("bc.engine.upkeep", "true");
-        defaults.setProperty("bc.engine.breakpoints", "true");
+        defaults.setProperty("bc.engine.breakpoints", "false");
         defaults.setProperty("bc.engine.bytecodes-used", "true");
 		defaults.setProperty("bc.engine.lazy-instrumenter", "false");
 		defaults.setProperty("bc.engine.fast-hash","false");
