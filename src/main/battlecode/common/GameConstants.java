@@ -19,11 +19,11 @@ public final class GameConstants {
     /** The minimum possible map height. */
     public static final int MAP_MIN_HEIGHT = 20;
     /** The maximum possible map height. */
-    public static final int MAP_MAX_HEIGHT = 65;
+    public static final int MAP_MAX_HEIGHT = 70;
     /** The minumum possible map width. */
     public static final int MAP_MIN_WIDTH = 20;
     /** The maxiumum possible map width. */
-    public static final int MAP_MAX_WIDTH = 65;
+    public static final int MAP_MAX_WIDTH = 70;
     /** The maximum fraction of upkeep that can be regained by yielding */
     public static final double YIELD_BONUS = 0.1;
     /** The bytecode penalty that is imposed each time an exception is thrown */
