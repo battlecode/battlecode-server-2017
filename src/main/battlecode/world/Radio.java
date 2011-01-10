@@ -29,7 +29,7 @@ public class Radio extends BaseComponent implements BroadcastController {
 		int [] turnOnIDs = new int [ ids.length ];
 		int i, j;
 		for(i = 0, j = 0; i<ids.length; i++) {
-			InternalRobot ir = gameWorld.getRobotByID(i);
+			InternalRobot ir = gameWorld.getRobotByID(ids[i]);
 			if(ir!=null&&ir.getTeam()==robot.getTeam()&&checkWithinRange(ir.getLocation()))
 				turnOnIDs[j++] = ir.getID();
 		}
