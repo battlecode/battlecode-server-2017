@@ -9,6 +9,7 @@ import java.util.Map;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
+import battlecode.common.ComponentType;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameActionExceptionType;
@@ -45,6 +46,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
     private double[] teamResources = new double[] { GameConstants.INITIAL_FLUX, GameConstants.INITIAL_FLUX };
 
+    protected ArrayList<ComponentType> aTeamComponents = new ArrayList<ComponentType>();
+    protected ArrayList<ComponentType> bTeamComponents = new ArrayList<ComponentType>();
+    
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldArchonMemory) {
         super(gm.getSeed(), teamA, teamB, oldArchonMemory);
@@ -98,7 +102,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         long aPoints = Math.round(teamRoundResources[Team.A.ordinal()]*100), bPoints = Math.round(teamRoundResources[Team.B.ordinal()]*100);
 
-        roundStats = new RoundStats(teamResources[0] * 100, teamResources[1] * 100, teamRoundResources[0] * 100 , teamRoundResources[1] * 100);
+        roundStats = new RoundStats(teamResources[0] * 100, teamResources[1] * 100, teamRoundResources[0] * 100 , teamRoundResources[1] * 100, aTeamComponents, bTeamComponents);
         teamRoundResources[0] = teamRoundResources[1] = 0;
         
 		// the algorithm to determine the winner is:
@@ -451,6 +455,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         InternalRobot r = (InternalRobot) getObjectByID(s.robotID);
         r.equip(s.component);
         addSignal(s);
+        Team objTeam = r.getTeam();
+        if(objTeam.equals(Team.A)){
+        	aTeamComponents.add(s.component);
+        }else{
+        	bTeamComponents.add(s.component);
+        }
         return null;
     }
 
