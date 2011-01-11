@@ -131,9 +131,10 @@ public interface RobotController {
     public void turnOn(MapLocation Loc, RobotLevel level) throws GameActionException;
 
     /**
-     * Ends the current round and gives your robot a slight energon bonus, given
-     * by
-     * <code>GameConstants.YIELD_BONUS * energonUpkeep * (fraction of unused bytecodes in the round)</code>.
+     * Ends the current round.  If your player used fewer than
+	 * BYTECODE_LIMIT_BASE bytecodes this round, then it will
+	 * receive a flux bonus of
+     * <code>GameConstants.YIELD_BONUS * chassis.upkeep * (bytecodes_used) / BYTECODE_LIMIT_BASE</code>.
      * Never fails.
      */
     public void yield();
