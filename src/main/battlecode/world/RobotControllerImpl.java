@@ -265,7 +265,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void processBeginningOfTurn() {
-        if (!(robot.getLocation().equals(locThisTurn) && robot.getDirection().equals(dirThisTurn))) {
+        if ((!robot.inTransport())&&!(robot.getLocation().equals(locThisTurn) && robot.getDirection().equals(dirThisTurn))) {
             robot.saveMapMemory(locThisTurn, robot.getLocation(), false);
             locThisTurn = robot.getLocation();
             dirThisTurn = robot.getDirection();
