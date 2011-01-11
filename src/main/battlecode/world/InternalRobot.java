@@ -63,7 +63,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private volatile InternalRobot transporter;
     private Set<InternalRobot> passengers;
     private RobotControllerImpl rc;
-    private Bug buggedBy;
+    private volatile Bug buggedBy;
+	private volatile int dummyRounds = GameConstants.DUMMY_LIFETIME; 
 
     public static class ComponentSet extends ForwardingMultimap<ComponentClass, BaseComponent> {
 
@@ -338,6 +339,12 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void processEndOfRound() {
         super.processEndOfRound();
         buffs.processEndOfRound();
+
+		if(chassis==Chassis.DUMMY) {
+			dummyRounds--;
+			if(dummyRounds<=0)
+				suicide();
+		}
 
         if (myEnergonLevel <= 0) {
             suicide();

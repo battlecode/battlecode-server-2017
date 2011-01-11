@@ -77,6 +77,8 @@ public final class GameConstants {
 	public static final int MINES_MIN = 8;
 	/** Maximum number of mines allowed on official maps. */
 	public static final int MINES_MAX = 100;
+	/** The maximum lifetime of a DUMMY */
+	public static final int DUMMY_LIFETIME = 200;
 
     // This class cannot be instantiated.
     private GameConstants() {
