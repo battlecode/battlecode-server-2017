@@ -5,6 +5,7 @@ import java.lang.reflect.*;
 
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
+import battlecode.engine.scheduler.Scheduler;
 
 /*
 RobotRunnable is a wrapper for a player's main class.  It is basically a Runnable, whose run method both instantiates the player's
@@ -30,6 +31,7 @@ class RobotRunnable implements Runnable {
         Object o;
         Runnable r;
 		
+
         try {
             try {
                 ctor = myPlayerClass.getConstructor(Class.forName("battlecode.common.RobotController"));
@@ -40,6 +42,7 @@ class RobotRunnable implements Runnable {
 
             try {
 
+				Scheduler.endTurn();
                 o = ctor.newInstance(myRobotController);
 
             } catch (Throwable t) {

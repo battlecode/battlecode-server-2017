@@ -32,8 +32,8 @@ public class ScheduledRunnable implements Runnable {
 	 * This method is automatically called by the ScheduledRunnable constructor, and should NOT be called by the client.
 	 */
 	public void run() {
-		Scheduler.endTurn();
-		
+	
+
 		try{
 			
 			myRunnable.run();
