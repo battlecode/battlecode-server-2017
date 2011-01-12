@@ -42,6 +42,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private RoundStats roundStats = null;	// stats for each round; new object is created for each round
     private final GameStats gameStats = new GameStats();		// end-of-game stats
     private double[] teamRoundResources = new double[2];
+    private double[] lastRoundResources = new double[2];
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
     private double[] teamResources = new double[] { GameConstants.INITIAL_FLUX, GameConstants.INITIAL_FLUX };
 
@@ -99,7 +100,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         long aPoints = Math.round(teamRoundResources[Team.A.ordinal()]*100), bPoints = Math.round(teamRoundResources[Team.B.ordinal()]*100);
 
         roundStats = new RoundStats(teamResources[0] * 100, teamResources[1] * 100, teamRoundResources[0] * 100 , teamRoundResources[1] * 100);
-        teamRoundResources[0] = teamRoundResources[1] = 0;
+        lastRoundResources = teamRoundResources;
+        teamRoundResources = new double[2];
         
 		// the algorithm to determine the winner is:
         // (1) team that deactivated the other team's robots
@@ -156,6 +158,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             }
         }
 
+    }
+
+    public double[] getLastRoundResources() {
+        return lastRoundResources;
     }
 
     public InternalObject getObject(MapLocation loc, RobotLevel level) {

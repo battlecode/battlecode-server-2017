@@ -20,54 +20,61 @@ import java.util.Map;
 
 public class Bug extends Sensor implements BugController {
 
-	InternalRobot buggedRobot;
-	int expiration;
+    InternalRobot buggedRobot;
+    int expiration;
 
-	public Bug(ComponentType type, InternalRobot robot) {
-		super(type,robot);
-	}
+    public Bug(ComponentType type, InternalRobot robot) {
+        super(type, robot);
+    }
 
-	public MapLocation buggedLocation() {
-		if(buggedRobot==null)
-			return null;
-		else
-			return buggedRobot.getLocation();
-	}
+    public MapLocation buggedLocation() {
+        if (buggedRobot == null)
+            return null;
+        else
+            return buggedRobot.getLocation();
+    }
 
-	public void processEndOfTurn() {
-		super.processEndOfTurn();
-		if(buggedRobot!=null&&gameWorld.getCurrentRound()>=expiration)
-			buggedRobot.setBugged(null);
-	}
+    @Override
+    public void processEndOfTurn() {
+        super.processEndOfTurn();
+        if (buggedRobot != null && gameWorld.getCurrentRound() >= expiration)
+            buggedRobot.setBugged(null);
+    }
 
-	// Called by InternalRobot when the robot gets bugged by someone else.
-	public void removeBug() {
-		buggedRobot = null;
-	}
+    // Called by InternalRobot when the robot gets bugged by someone else.
+    public void removeBug() {
+        buggedRobot = null;
+    }
 
-	public boolean canSenseComponents(InternalRobot ir) {
-		return false;
-	}
+    @Override
+    public boolean canSenseComponents(InternalRobot ir) {
+        return false;
+    }
 
-	public boolean checkWithinRange(MapLocation loc) {
-		if(buggedRobot==null)
-			return false;
-		return buggedRobot.getLocation().distanceSquaredTo(loc)<=GameConstants.BUG_SENSOR_RANGE;
-	}
+    @Override
+    public boolean checkWithinRange(MapLocation loc) {
+        if (buggedRobot == null)
+            return false;
+        return buggedRobot.getLocation().distanceSquaredTo(loc) <= GameConstants.BUG_SENSOR_RANGE;
+    }
 
-	public void attackSquare(MapLocation loc, RobotLevel height) throws GameActionException {
-		assertEquipped();
-		assertInactive();
-		assertNotNull(loc);
-		assertNotNull(height);
-		if(robot.getLocation().distanceSquaredTo(loc)>type.range)
-			outOfRange();
-		activate(new AttackSignal(robot,type,loc,height));
-		InternalRobot ir = gameWorld.getRobot(loc,height);
-		if(ir!=null) {
-			if(buggedRobot!=null)
-				buggedRobot.setBugged(null);
-			buggedRobot=ir;
-		}
-	}
+    public void attackSquare(MapLocation loc, RobotLevel height) throws GameActionException {
+        assertEquipped();
+        assertInactive();
+        assertNotNull(loc);
+        assertNotNull(height);
+        if (robot.getLocation().distanceSquaredTo(loc) > type.range)
+            outOfRange();
+        activate(new AttackSignal(robot, type, loc, height));
+        InternalRobot ir = gameWorld.getRobot(loc, height);
+        if (ir != null) {
+            if (buggedRobot != null)
+                buggedRobot.setBugged(null);
+            buggedRobot = ir;
+        }
+    }
+
+    public double seneseIncome(Robot r) throws GameActionException {
+        throw new GameActionException(GameActionExceptionType.CANT_SENSE_THAT, "Bug cannot sense income");
+    }
 }

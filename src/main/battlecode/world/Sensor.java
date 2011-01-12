@@ -6,6 +6,7 @@ import com.google.common.collect.Iterables;
 
 import battlecode.common.ComponentType;
 import battlecode.common.GameActionException;
+import battlecode.common.GameActionExceptionType;
 import battlecode.common.GameObject;
 import battlecode.common.MapLocation;
 import battlecode.common.Mine;
@@ -15,12 +16,11 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotLevel;
 import battlecode.common.SensorController;
 
-
 public class Sensor extends BaseComponent implements SensorController {
 
     public Sensor(ComponentType type, InternalRobot robot) {
         super(type, robot);
-		robot.saveMapMemory(robot.getLocation(),type);
+        robot.saveMapMemory(robot.getLocation(), type);
     }
 
     public GameObject senseObjectAtLocation(MapLocation loc, RobotLevel height) throws GameActionException {
@@ -39,7 +39,7 @@ public class Sensor extends BaseComponent implements SensorController {
                 return checkWithinRange(o) && (type.isInstance(o)) && (!o.equals(robot));
             }
         };
-        return Iterables.toArray((Iterable<T>)Iterables.filter(gameWorld.allObjects(), p), type);
+        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
     }
 
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException {
@@ -58,13 +58,13 @@ public class Sensor extends BaseComponent implements SensorController {
             loc = ir.getLocation();
 
         Chassis ch = ir.getChassis();
-		boolean on = ir.isOn();
+        boolean on = ir.isOn();
         if (ir.getChassis() == Chassis.DUMMY && ir.getTeam() != this.getRobot().getTeam()) {
             ch = Chassis.MEDIUM;
             if (type() == ComponentType.SATELLITE) {
-                components = new ComponentType[] {ComponentType.MEDIUM_MOTOR};
+                components = new ComponentType[]{ComponentType.MEDIUM_MOTOR};
             }
-			on = false;
+            on = false;
 
         }
 
@@ -73,9 +73,9 @@ public class Sensor extends BaseComponent implements SensorController {
 
     }
 
-	public boolean canSenseComponents(InternalRobot ir) {
-		return type() == ComponentType.SATELLITE || robot.getTeam() == ir.getTeam();
-	}
+    public boolean canSenseComponents(InternalRobot ir) {
+        return type() == ComponentType.SATELLITE || robot.getTeam() == ir.getTeam();
+    }
 
     public MineInfo senseMineInfo(Mine m) throws GameActionException {
         InternalMine im = castInternalMine(m);
@@ -94,7 +94,17 @@ public class Sensor extends BaseComponent implements SensorController {
         return checkWithinRange(castInternalObject(o));
     }
 
-	public boolean canSenseSquare(MapLocation loc) {
-		return checkWithinRange(loc);
-	}
+    public boolean canSenseSquare(MapLocation loc) {
+        return checkWithinRange(loc);
+    }
+
+    public double seneseIncome(Robot r) throws GameActionException {
+        InternalRobot ir = castInternalRobot(r);
+        assertWithinRange(ir);
+        if (ir.hasComponentType(ComponentType.RECYCLER)) {
+            return 2;
+
+        } else
+            throw new GameActionException(GameActionExceptionType.WRONG_ROBOT_TYPE, "Must sense a robot with a recycler");
+    }
 }
