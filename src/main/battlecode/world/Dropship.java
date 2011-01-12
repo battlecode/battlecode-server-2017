@@ -19,12 +19,19 @@ public class Dropship extends BaseComponent implements DropshipController {
 	}
 
 	public void load(MapLocation loc) throws GameActionException {
+		load(loc,RobotLevel.ON_GROUND);
+	}
+
+	public void load(MapLocation loc, RobotLevel height) throws GameActionException {
 		assertInactive();
 		assertNotNull(loc);
 		assertWithinRange(loc);
-		InternalRobot ir = alliedRobotAt(loc,RobotLevel.ON_GROUND);
+		InternalRobot ir = alliedRobotAt(loc,height);
 		assertNotBuilding(ir);
 		assertSpaceAvailable(ir.getChassis());
+		if(ir==robot) {
+			throw new GameActionException(GameActionExceptionType.NO_ROOM_IN_CHASSIS,"This robot cannot transport itself!");
+		}
 		activate(new LoadSignal(robot,ir));
 	}
 
@@ -35,11 +42,15 @@ public class Dropship extends BaseComponent implements DropshipController {
 		assertCanUnload(loc);
 		activate(new UnloadSignal(robot,ir,loc));
 	}
-
+	
 	public boolean canUnload(MapLocation loc) {
+		return canUnload(loc,RobotLevel.ON_GROUND);
+	}
+
+	public boolean canUnload(MapLocation loc, RobotLevel height) {
 		assertNotNull(loc);
 		if(!checkWithinRange(loc)) return false;
-		return gameWorld.canMove(RobotLevel.ON_GROUND,loc);
+		return gameWorld.canMove(height,loc);
 	}
 
 	public InternalRobot [] robotsOnBoard() {
