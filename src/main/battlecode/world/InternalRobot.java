@@ -122,7 +122,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
         newComponents = new ArrayList<BaseComponent>();
 
-        on = true;
+        switch(chassis) {
+			case DUMMY:
+			case DEBRIS:
+				on = false;
+			default:
+				on = true;
+		}
     }
 
     public boolean inTransport() {
