@@ -3,6 +3,7 @@ package battlecode.world;
 import static battlecode.common.GameConstants.*;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,10 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ForwardingMultimap;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
 
 import battlecode.common.Chassis;
 import battlecode.common.ComponentClass;
@@ -66,27 +64,34 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private volatile Bug buggedBy;
 	private volatile int dummyRounds = GameConstants.DUMMY_LIFETIME; 
 
-    public static class ComponentSet extends ForwardingMultimap<ComponentClass, BaseComponent> {
+	static class ComponentList {
 
-        Multimap<ComponentClass, BaseComponent> backingMap = HashMultimap.create();
+		ArrayList<BaseComponent> all;
+		EnumMap<ComponentClass, ArrayList<BaseComponent>> byClass;
+		
+		public ComponentList() {
+			all = new ArrayList<BaseComponent>();
+			byClass = new EnumMap<ComponentClass, ArrayList<BaseComponent>>(ComponentClass.class);
+			for(ComponentClass c: ComponentClass.values())
+				byClass.put(c,new ArrayList<BaseComponent>());
+		}
 
-        protected Multimap<ComponentClass, BaseComponent> delegate() {
-            return backingMap;
-        }
+		public void add(BaseComponent t) {
+			all.add(t);
+			byClass.get(t.type().componentClass).add(t);
+		}
+	
+		public ArrayList<BaseComponent> get(ComponentClass cls) {
+			return byClass.get(cls);
+		}
 
-        public boolean add(BaseComponent c) {
-            return put(c.componentClass(), c);
-        }
+		public ArrayList<BaseComponent> values() {
+			return all;
+		}
 
-        public boolean remove(BaseComponent c) {
-            return remove(c.componentClass(), c);
-        }
+	}
 
-        public boolean contains(BaseComponent c) {
-            return containsEntry(c.componentClass(), c);
-        }
-    }
-    private ComponentSet components = new ComponentSet();
+    private ComponentList components = new ComponentList();
 
     public InternalRobotBuffs getBuffs() {
         return buffs;
