@@ -25,5 +25,11 @@ public interface SensorController extends ComponentController {
 
     public boolean canSenseSquare(MapLocation loc);
 
+	/**
+	 * Senses the income of the recycler robot {@code r}' s team.
+	 *
+	 * @throws GameActionException if {@code r} is not within range
+	 * @throws GameActionException if {@code r} does not have a RECYCLER component
+	 */
     public double seneseIncome(Robot r) throws GameActionException;
 }
