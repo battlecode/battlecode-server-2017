@@ -62,35 +62,42 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private Set<InternalRobot> passengers;
     private RobotControllerImpl rc;
     private volatile Bug buggedBy;
-	private volatile int dummyRounds = GameConstants.DUMMY_LIFETIME; 
+    private volatile int dummyRounds = GameConstants.DUMMY_LIFETIME;
 
-	static class ComponentList {
+    static class ComponentList {
 
-		ArrayList<BaseComponent> all;
-		EnumMap<ComponentClass, ArrayList<BaseComponent>> byClass;
-		
-		public ComponentList() {
-			all = new ArrayList<BaseComponent>();
-			byClass = new EnumMap<ComponentClass, ArrayList<BaseComponent>>(ComponentClass.class);
-			for(ComponentClass c: ComponentClass.values())
-				byClass.put(c,new ArrayList<BaseComponent>());
-		}
+        ArrayList<BaseComponent> all;
+        EnumMap<ComponentClass, ArrayList<BaseComponent>> byClass;
 
-		public void add(BaseComponent t) {
-			all.add(t);
-			byClass.get(t.type().componentClass).add(t);
-		}
-	
-		public ArrayList<BaseComponent> get(ComponentClass cls) {
-			return byClass.get(cls);
-		}
+        public ComponentList() {
+            all = new ArrayList<BaseComponent>();
+            byClass = new EnumMap<ComponentClass, ArrayList<BaseComponent>>(ComponentClass.class);
+            for (ComponentClass c : ComponentClass.values())
+                byClass.put(c, new ArrayList<BaseComponent>());
+        }
 
-		public ArrayList<BaseComponent> values() {
-			return all;
-		}
+        public void add(BaseComponent t) {
+            all.add(t);
+            byClass.get(t.type().componentClass).add(t);
+        }
 
-	}
+        public ArrayList<BaseComponent> get(ComponentClass cls) {
+            return byClass.get(cls);
+        }
 
+        public ArrayList<BaseComponent> values() {
+            return all;
+        }
+
+        public boolean hasComponent(ComponentType type) {
+            for (BaseComponent bc : all) {
+                if (bc.type == type) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
     private ComponentList components = new ComponentList();
 
     public InternalRobotBuffs getBuffs() {
@@ -122,13 +129,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
         newComponents = new ArrayList<BaseComponent>();
 
-        switch(chassis) {
-			case DUMMY:
-			case DEBRIS:
-				on = false;
-			default:
-				on = true;
-		}
+        switch (chassis) {
+            case DUMMY:
+            case DEBRIS:
+                on = false;
+            default:
+                on = true;
+        }
     }
 
     public boolean inTransport() {
@@ -145,13 +152,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void setPower(boolean b) {
-		if(b&&!on) {
-			hasBeenOff = true;
-			for(BaseComponent c : components.values()) {
-				c.activate(POWER_WAKE_DELAY);
-			}
-		}
-		on = b;
+        if (b && !on) {
+            hasBeenOff = true;
+            for (BaseComponent c : components.values()) {
+                c.activate(POWER_WAKE_DELAY);
+            }
+        }
+        on = b;
     }
 
     public void setBugged(Bug b) {
@@ -230,12 +237,12 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             case JUMP:
                 controller = new JumpCore(type, this);
                 break;
-			case DROPSHIP:
-				controller = new Dropship(this);
-				break;
-			case IRON:
-				controller = new IronComponent(type, this);
-				break;
+            case DROPSHIP:
+                controller = new Dropship(this);
+                break;
+            case IRON:
+                controller = new IronComponent(type, this);
+                break;
             default:
                 throw new RuntimeException("component " + type + " is not supported yet");
         }
@@ -333,7 +340,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         if (on && !myGameWorld.spendResources(getTeam(), chassis.upkeep)) {
             myGameWorld.visitSignal(new TurnOffSignal(this, false));
         }
-        if(isOn())
+        if (isOn())
             changeEnergonLevel(regens * REGEN_AMOUNT);
     }
 
@@ -351,11 +358,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         super.processEndOfRound();
         buffs.processEndOfRound();
 
-		if(chassis==Chassis.DUMMY) {
-			dummyRounds--;
-			if(dummyRounds<=0)
-				suicide();
-		}
+        if (chassis == Chassis.DUMMY) {
+            dummyRounds--;
+            if (dummyRounds <= 0)
+                suicide();
+        }
 
         if (myEnergonLevel <= 0) {
             suicide();
@@ -487,16 +494,16 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void saveMapMemory(MapLocation oldLoc, MapLocation newLoc,
             boolean fringeOnly) {
         for (BaseComponent c : components.get(ComponentClass.SENSOR)) {
-			saveMapMemory(newLoc,c.type());
+            saveMapMemory(newLoc, c.type());
         }
     }
 
-	public void saveMapMemory(MapLocation newLoc, ComponentType t) {
-		if(t!=ComponentType.BUG) {
-			int[][] myOffsets = offsets.get(t)[myDirection.ordinal()];
-			mapMemory.rememberLocations(newLoc, myOffsets[0], myOffsets[1]);
-		}
-	}
+    public void saveMapMemory(MapLocation newLoc, ComponentType t) {
+        if (t != ComponentType.BUG) {
+            int[][] myOffsets = offsets.get(t)[myDirection.ordinal()];
+            mapMemory.rememberLocations(newLoc, myOffsets[0], myOffsets[1]);
+        }
+    }
 
     public void addPassenger(InternalRobot passenger) {
         passengers.add(passenger);
@@ -547,6 +554,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public boolean hasBeenAttacked() {
         return hasBeenAttacked;
+    }
+
+    public boolean hasComponentType(ComponentType type) {
+        return components.hasComponent(type);
     }
 
     @Override

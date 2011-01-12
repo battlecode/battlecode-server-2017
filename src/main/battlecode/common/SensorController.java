@@ -23,5 +23,7 @@ public interface SensorController extends ComponentController {
 
     public boolean canSenseObject(GameObject o);
 
-	public boolean canSenseSquare(MapLocation loc);
+    public boolean canSenseSquare(MapLocation loc);
+
+    public double seneseIncome(Robot r) throws GameActionException;
 }
