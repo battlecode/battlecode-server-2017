@@ -23,6 +23,11 @@ public interface SensorController extends ComponentController {
 
     public boolean canSenseObject(GameObject o);
 
+	/**
+	 * Returns true if this sensor can sense the location {@code loc}.
+	 * Note that this is equivalent to {@code withinRange()}, unless this
+	 * component is a BUG.
+	 */
     public boolean canSenseSquare(MapLocation loc);
 
 	/**
