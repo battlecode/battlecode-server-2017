@@ -102,8 +102,7 @@ public class Sensor extends BaseComponent implements SensorController {
         InternalRobot ir = castInternalRobot(r);
         assertWithinRange(ir);
         if (ir.hasComponentType(ComponentType.RECYCLER)) {
-            return 2;
-
+            return this.gameWorld.getLastRoundResources()[ir.getTeam().ordinal()];
         } else
             throw new GameActionException(GameActionExceptionType.WRONG_ROBOT_TYPE, "Must sense a robot with a recycler");
     }
