@@ -22,12 +22,7 @@ public class Radio extends BaseComponent implements BroadcastController {
     public void broadcast(Message m) throws GameActionException {
         assertInactive();
         assertNotNull(m);
-        int size = m.ints.length * 4
-                + m.locations.length * 8;
-        for (String s : m.strings)
-            if (s != null)
-                size += s.length();
-        spendResources(GameConstants.BROADCAST_FIXED_COST + GameConstants.BROADCAST_COST_PER_BYTE * size);
+        spendResources(GameConstants.BROADCAST_FIXED_COST + GameConstants.BROADCAST_COST_PER_BYTE * m.getNumBytes());
         activate(new BroadcastSignal(robot, type().range, m));
     }
 
