@@ -98,7 +98,7 @@ public class Sensor extends BaseComponent implements SensorController {
         return checkWithinRange(loc);
     }
 
-    public double seneseIncome(Robot r) throws GameActionException {
+    public double senseIncome(Robot r) throws GameActionException {
         InternalRobot ir = castInternalRobot(r);
         assertWithinRange(ir);
         if (ir.hasComponentType(ComponentType.RECYCLER)) {

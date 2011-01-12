@@ -36,5 +36,5 @@ public interface SensorController extends ComponentController {
 	 * @throws GameActionException if {@code r} is not within range
 	 * @throws GameActionException if {@code r} does not have a RECYCLER component
 	 */
-    public double seneseIncome(Robot r) throws GameActionException;
+    public double senseIncome(Robot r) throws GameActionException;
 }
