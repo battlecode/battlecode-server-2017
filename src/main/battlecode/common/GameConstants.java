@@ -43,20 +43,20 @@ public final class GameConstants {
     /** A shield can reduce the damage done no lower than this value */
     public static final double SHIELD_MIN_DAMAGE = .05;
     /** The amount by which each shield reduces the damage from any attack */
-    public static final double SHIELD_DAMAGE_REDUCTION = .2;
+    public static final double SHIELD_DAMAGE_REDUCTION = .6;
     /** Number of rounds Iron stays in effect after it is activated */
     public static final int IRON_EFFECT_ROUNDS = 2;
     /* Hp granted by every plate on a robot */
-    public static final double PLATING_HP_BONUS = 1.5;
+    public static final double PLATING_HP_BONUS = 3.;
     /** Hp regen bonus per round for each regen equipped */
-    public static final double REGEN_AMOUNT = .1;
+    public static final double REGEN_AMOUNT = .8;
     /** The number of longs that your team can remember between games. */
     public static final int TEAM_MEMORY_LENGTH = 32;
     /** The maximum capacity that dropships can transport.  Note that
      * a chassis of capacity, say, six will take up six space in the
      * dropship, regardless of its components.
      */
-    public static final int TRANSPORT_CAPACITY = 24;
+    public static final int TRANSPORT_CAPACITY = 30;
     /** Maximum resources granted per flux mine before it starts to deplete */
     public static final double MINE_RESOURCES = 1.0;
     /** Minimum resources granted per flux mine after it is fully depleted */

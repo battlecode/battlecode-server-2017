@@ -11,12 +11,12 @@ public enum ComponentType
 	PLASMA         (  3, 16,  2,  0,  0,  0,  ARMOR,ComponentController.class),
 	IRON           (  3, 20, 10,  0,  0,  0,  ARMOR,IronController.class),
 	PLATING        (  1,  8,  0,  0,  0,  0,  ARMOR,ComponentController.class),
-	SMG            (  1,  7,  2, 36, 90, .2, WEAPON,WeaponController.class),
+	SMG            (  1,  7,  2, 36, 90, .6, WEAPON,WeaponController.class),
 	BLASTER        (  2, 18,  4, 16, 90,  3, WEAPON,WeaponController.class),
-	RAILGUN        (  5, 25,  4, 16, 90,6.5, WEAPON,WeaponController.class),
-	HAMMER         (  2, 16,  1,  4, 90, .4, WEAPON,WeaponController.class),
-	BEAM           (  4, 17,  5, 36, 90,  0, WEAPON,WeaponController.class),
-	MEDIC          (  4, 13,  4,  9,360,-.2, WEAPON,WeaponController.class),
+	RAILGUN        (  5, 25,  4, 25, 90,6.5, WEAPON,WeaponController.class),
+	HAMMER         (  2, 16,  1,  4, 90,1.5, WEAPON,WeaponController.class),
+	BEAM           (  4, 17,  2, 36, 90,  0, WEAPON,WeaponController.class),
+	MEDIC          (  4, 13,  1, 16,360,-.4, WEAPON,WeaponController.class),
 	SATELLITE      (  7, 25,  0,100,360,  0, SENSOR,SensorController.class),
 	TELESCOPE      (  4, 11,  0,144, 45,  0, SENSOR,SensorController.class),
 	SIGHT          (  1,  5,  0,  9, 90,  0, SENSOR,SensorController.class),
@@ -26,17 +26,17 @@ public enum ComponentType
 	NETWORK        (  6, 25,  0,144,360,  0,   COMM,BroadcastController.class),
 	PROCESSOR      (  1,  3,  0,  0,  0,  0,   MISC,ComponentController.class),
 	JUMP           (  3,  8, 25, 16,360,  0,   MISC,JumpController.class),
-	DUMMY          (  3, 10,  5, 25,360,  0,   MISC,BuilderController.class),
+	DUMMY          (  3, 10, 20, 25,360,  0,   MISC,BuilderController.class),
 	BUG            (  2, 12,125, 25,180,  0,   MISC,BugController.class),
 	DROPSHIP       (  4, 16,  3,  2,360,  0,   MISC,DropshipController.class),
 	RECYCLER       ( 15, 70,  1,  2,360,  0,BUILDER,BuilderController.class),
 	FACTORY        ( 15, 70,  1,  2,360,  0,BUILDER,BuilderController.class),
 	CONSTRUCTOR    (  4, 40,  1,  2,360,  0,BUILDER,BuilderController.class),
 	ARMORY         ( 15, 70,  1,  2,360,  0,BUILDER,BuilderController.class),
-	SMALL_MOTOR    (  0,  0,  3,  2,360,  0,  MOTOR,MovementController.class),
+	SMALL_MOTOR    (  0,  0,  4,  2,360,  0,  MOTOR,MovementController.class),
 	MEDIUM_MOTOR   (  0,  0,  7,  2,360,  0,  MOTOR,MovementController.class),
-	LARGE_MOTOR    (  0,  0, 15,  2,360,  0,  MOTOR,MovementController.class),
-	FLYING_MOTOR   (  0,  0,  4,  2,360,  0,  MOTOR,MovementController.class),
+	LARGE_MOTOR    (  0,  0, 10,  2,360,  0,  MOTOR,MovementController.class),
+	FLYING_MOTOR   (  0,  0,  5,  2,360,  0,  MOTOR,MovementController.class),
 	BUILDING_MOTOR (  0,  0,  1,  2,360,  0,  MOTOR,MovementController.class),
 	BUILDING_SENSOR(  0,  0,  0,  2,360,  0, SENSOR,SensorController.class),
 	;
@@ -58,8 +58,8 @@ public enum ComponentType
 	public final int delay;
 
 	/**
-	 * The maximum distance at which this component's ability may
-	 * be used.
+	 * The square of the maximum distance at which this component's
+	 * ability may be used.
 	 */
 	public final int range;
 

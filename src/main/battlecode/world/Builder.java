@@ -26,6 +26,8 @@ public class Builder extends BaseComponent implements BuilderController {
         assertWithinRange(loc);
         InternalRobot ir = alliedRobotAt(loc, level);
         assertHasRoomFor(ir, type);
+		if(ir.getChassis()!=Chassis.BUILDING&&(type==ComponentType.ARMORY||type==ComponentType.FACTORY||type==ComponentType.RECYCLER))
+			throw new GameActionException(GameActionExceptionType.CANT_BUILD_THAT, "You cannot build a " + type + " on a " + ir.getChassis());
         spendResources(type.cost);
         activate(new EquipSignal(ir, robot, type));
     }
