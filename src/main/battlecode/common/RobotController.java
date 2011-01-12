@@ -106,10 +106,6 @@ public interface RobotController {
      * this robot possesses.
      */
     //public ComponentController [] components(ComponentClass cls);
-    /**
-     * Gets the minimum number of points needed to win a game on this map
-     */
-    public int getMapMinPoints();
 
     // ***********************************
     // ****** ACTION METHODS ********
