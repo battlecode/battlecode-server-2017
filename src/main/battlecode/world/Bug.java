@@ -58,6 +58,10 @@ public class Bug extends Sensor implements BugController {
         return buggedRobot.getLocation().distanceSquaredTo(loc) <= GameConstants.BUG_SENSOR_RANGE;
     }
 
+	public boolean withinRange(MapLocation loc) {
+		return super.checkWithinRange(loc);
+	}
+
     public void attackSquare(MapLocation loc, RobotLevel height) throws GameActionException {
         assertEquipped();
         assertInactive();
