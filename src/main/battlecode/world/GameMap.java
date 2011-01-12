@@ -23,7 +23,7 @@ public class GameMap implements GenericGameMap {
 	public static final int GAME_DEFAULT_MAX_ROUNDS = 10000;
 	
 	/** The default game minimum number of points. */
-	public static final int GAME_DEFAULT_MIN_POINTS = 5000;
+	//public static final int GAME_DEFAULT_MIN_POINTS = 5000;
 	
 	/** The width and height of the map. */    
     private final int mapWidth, mapHeight;
@@ -44,13 +44,13 @@ public class GameMap implements GenericGameMap {
 	private final int maxRounds;
 	
 	/** The minimum number of points needed to win the game */
-	private final int minPoints;
+	//private final int minPoints;
 	  
 	/**
 	 * Represents the various integer properties a GameMap
 	 * can have.
 	 */
-	static enum MapProperties {	WIDTH, HEIGHT, SEED, MAX_ROUNDS, THEME, MIN_POINTS }
+	static enum MapProperties {	WIDTH, HEIGHT, SEED, MAX_ROUNDS, THEME /*, MIN_POINTS*/ }
 	
 	public GameMap(GameMap gm){
 		this.mapWidth = gm.mapWidth;
@@ -64,7 +64,7 @@ public class GameMap implements GenericGameMap {
 		this.mapTheme = gm.mapTheme;
 		this.seed = gm.seed;
 		this.maxRounds = gm.maxRounds;
-		this.minPoints = gm.minPoints;
+		//this.minPoints = gm.minPoints;
 	
 	}
 	/**
@@ -93,9 +93,9 @@ public class GameMap implements GenericGameMap {
 			this.maxRounds = mapProperties.get(MapProperties.MAX_ROUNDS);
 		else this.maxRounds = GAME_DEFAULT_MAX_ROUNDS;
 		
-		if (mapProperties.containsKey(MapProperties.MIN_POINTS))
-			this.minPoints = mapProperties.get(MapProperties.MIN_POINTS);
-		else this.minPoints = GAME_DEFAULT_MIN_POINTS;
+		//if (mapProperties.containsKey(MapProperties.MIN_POINTS))
+		//	this.minPoints = mapProperties.get(MapProperties.MIN_POINTS);
+		//else this.minPoints = GAME_DEFAULT_MIN_POINTS;
 		
 		Random rand = new Random(this.seed);
 		this.mapOriginX = rand.nextInt(32000);
@@ -137,9 +137,9 @@ public class GameMap implements GenericGameMap {
 		return mapTheme;
 	}
 	
-	public int getMinPoints() {
-		return minPoints;
-	}
+	//public int getMinPoints() {
+	//	return minPoints;
+	//}
 
 	/**
 	 * Determines whether or not the location at the specified 
