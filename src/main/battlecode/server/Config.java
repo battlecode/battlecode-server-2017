@@ -34,6 +34,7 @@ public class Config {
 		defaults.setProperty("bc.server.output-xml", "true");
 
         defaults.setProperty("bc.engine.debug-methods", "true");
+		defaults.setProperty("bc.engine.debug-max-bytecodes", "64000");
         defaults.setProperty("bc.engine.silence-a", "false");
         defaults.setProperty("bc.engine.silence-b", "false");
         defaults.setProperty("bc.engine.gc", "false");

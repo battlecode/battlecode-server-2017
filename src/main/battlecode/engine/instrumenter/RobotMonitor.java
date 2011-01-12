@@ -20,7 +20,7 @@ import battlecode.server.Config;
  */
 public class RobotMonitor {
 
-	private static final int DEBUG_BYTECODES = 0x8000;
+	private static int DEBUG_BYTECODES;
 		
 	private static final Set<Integer> robotsToKill = new HashSet<Integer>();
 		
@@ -57,6 +57,7 @@ public class RobotMonitor {
 		Config options = Config.getGlobalConfig();
 		silenced[0] = options.getBoolean("bc.engine.silence-a");
 		silenced[1] = options.getBoolean("bc.engine.silence-b");
+		DEBUG_BYTECODES = options.getInt("bc.engine.debug-max-bytecodes");
 	}
 	
 	/** Resets the internal state of the RobotMonitor.  Should be called between games. */
