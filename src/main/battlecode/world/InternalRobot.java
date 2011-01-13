@@ -213,6 +213,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
                 break;
             case BUG:
                 controller = new Bug(type, this);
+				break;
             case ANTENNA:
             case DISH:
             case NETWORK:
