@@ -27,10 +27,16 @@ public class Builder extends BaseComponent implements BuilderController {
         InternalRobot ir = alliedRobotAt(loc, level);
         assertHasRoomFor(ir, type);
 		if(ir.getChassis()!=Chassis.BUILDING&&(type==ComponentType.ARMORY||type==ComponentType.FACTORY||type==ComponentType.RECYCLER))
-			throw new GameActionException(GameActionExceptionType.CANT_BUILD_THAT, "You cannot build a " + type + " on a " + ir.getChassis());
+			cantBuildOnThat(type,ir.getChassis());
+		if(ir.getChassis()==Chassis.BUILDING&&type==ComponentType.JUMP)
+			cantBuildOnThat(type,ir.getChassis());
         spendResources(type.cost);
         activate(new EquipSignal(ir, robot, type));
     }
+
+	public void cantBuildOnThat(ComponentType component, Chassis chassis) throws GameActionException {
+		throw new GameActionException(GameActionExceptionType.CANT_BUILD_THAT, "You cannot build a " + component + " on a " + chassis);
+	}
 
     public void build(Chassis type, MapLocation loc) throws GameActionException {
         assertNotNull(type);
