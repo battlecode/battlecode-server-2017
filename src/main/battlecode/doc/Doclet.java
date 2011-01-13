@@ -29,18 +29,20 @@ public class Doclet extends Standard {
 				methodBuilder.append("\n");
 			}
 			for(FieldDoc f : cl.enumConstants()) {
-				if("ComponentType".equals(f.containingClass().name()))
-					memberBuilder.append(f.name());
-				else
-					memberBuilder.append("\0");
+				memberBuilder.append(f.containingClass().name());
+				memberBuilder.append('.');
+				memberBuilder.append(f.name());
 				memberBuilder.append("\n");
 			}
 			for(FieldDoc f : cl.fields()) {
-				memberBuilder.append("\0\n");
+				memberBuilder.append(f.containingClass().name());
+				memberBuilder.append('.');
+				memberBuilder.append(f.name());
+				memberBuilder.append("\n");
 			}
 		}
 		System.setProperty("battlecode.doc.methods",methodBuilder.toString());
-		System.setProperty("battlecode.doc.components",memberBuilder.toString());
+		System.setProperty("battlecode.doc.members",memberBuilder.toString());
 		return Standard.start(root);
 	}
 
