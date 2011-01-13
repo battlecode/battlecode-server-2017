@@ -42,7 +42,7 @@ public class Motor extends BaseComponent implements MovementController
 
 	public boolean canMove(Direction d) {
 		assertValidDirection(d);
-		return gameWorld.canMove(robot,d);
+		return gameWorld.canMove(robot.getRobotLevel(),getLocation().add(d));
 	}
 
 	public TerrainTile senseTerrainTile(MapLocation loc) {
@@ -52,7 +52,7 @@ public class Motor extends BaseComponent implements MovementController
 	public void assertCanMove(Direction d) throws GameActionException {
 		if(type==ComponentType.BUILDING_MOTOR)
 			throw new IllegalStateException("Buildings cannot move.");
-		if(!gameWorld.canMove(robot,d))
+		if(!canMove(d))
 			throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move in the given direction: " + d);
 	}
 
