@@ -168,10 +168,18 @@ public class RobotMonitor {
 	 * Returns the bytecode number that the active robot is currently on.  Note that this can be above bytecodeLimit in some cases.
 	 */
 	public static int getBytecodeNum() {
+		return bytecodeLimit - getBytecodesLeft();
+	}
+
+	public static int getBytecodeLimit() {
+		return bytecodeLimit;
+	}
+
+	public static int getBytecodesLeft() {
 		if(debugLevel == 0)
-			return bytecodeLimit - bytecodesLeft;
+			return bytecodesLeft;
 		else
-			return bytecodeLimit - currentRobotData.bytecodesLeft;
+			return currentRobotData.bytecodesLeft;
 	}
 
 	/**

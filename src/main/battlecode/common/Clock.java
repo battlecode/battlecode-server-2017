@@ -28,4 +28,18 @@ public class Clock {
     public static int getRoundNum() {
         return Engine.getRoundNum();
     }
+
+	/**
+	 * Returns this robot's bytecode limit for the round.
+	 */
+	public static int getBytecodeLimit() {
+		return RobotMonitor.getBytecodeLimit();
+	}
+
+	/**
+	 * Returns the number of bytecodes this robot has left in this round.
+	 */
+	public static int getBytecodesLeft() {
+		return RobotMonitor.getBytecodesLeft();
+	}
 }
