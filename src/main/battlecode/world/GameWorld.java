@@ -263,15 +263,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return teamRoundResources[team.ordinal()];
     }
 
-    public boolean canMove(InternalRobot r, Direction dir) {
-        if (dir == Direction.NONE || dir == Direction.OMNI)
-            return false;
-
-        MapLocation loc = r.getLocation().add(dir);
-
-        return canMove(r.getRobotLevel(), loc);
-    }
-
     public boolean canMove(RobotLevel level, MapLocation loc) {
 
         return gameMap.getTerrainTile(loc).isTraversableAtHeight(level) && (gameObjectsByLoc.get(new MapLocation3D(loc, level)) == null);

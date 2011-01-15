@@ -155,6 +155,9 @@
 			<taglet name="battlecode.doc.Components">
 				<path refid="classpath-libs"/>
 			</taglet>
+			<taglet name="battlecode.doc.ChassisDoc">
+				<path refid="classpath-libs"/>
+			</taglet>
 		</javadoc>
 	</target>
 
