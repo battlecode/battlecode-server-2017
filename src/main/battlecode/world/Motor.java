@@ -56,10 +56,6 @@ public class Motor extends BaseComponent implements MovementController
 			throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move in the given direction: " + d);
 	}
 
-	public void assertValidDirection(Direction d) {
-		assertNotNull(d);
-		if(d==Direction.NONE||d==Direction.OMNI)
-			throw new IllegalArgumentException("You cannot move in the direction NONE or OMNI.");
-	}
+
 
 }

@@ -42,4 +42,6 @@ public interface BuilderController extends ComponentController {
      *            the type of chassis to spawn; cannot be null.
      */
     public void build(Chassis type, MapLocation loc) throws GameActionException;
+
+    public boolean canBuild(Direction dir, RobotLevel level);
 }
