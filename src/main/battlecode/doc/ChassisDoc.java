@@ -14,7 +14,7 @@ import com.sun.javadoc.*;
 import com.sun.tools.doclets.Taglet;
 
 public class ChassisDoc implements Taglet {
-	public static void register(Map map) { map.put("chassis", new ChassisDoc()); }
+	public static void register(Map<String, Taglet> map) { map.put("chassis", new ChassisDoc()); }
 
 	public String getName() { return "chassis"; }
 

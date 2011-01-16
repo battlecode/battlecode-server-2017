@@ -13,7 +13,7 @@ import com.sun.javadoc.*;
 import com.sun.tools.doclets.Taglet;
 
 public class Components implements Taglet {
-	public static void register(Map map) { map.put("components", new Components()); }
+	public static void register(Map<String, Taglet> map) { map.put("components", new Components()); }
 
 	public String getName() { return "components"; }
 

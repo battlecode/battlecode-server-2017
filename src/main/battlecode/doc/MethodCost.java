@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class MethodCost implements Taglet {
 
-	public static void register(Map map) { map.put("methodcost", new MethodCost()); }
+	public static void register(Map<String, Taglet> map) { map.put("methodcost", new MethodCost()); }
 	
 	public String getName() { return "methodcost"; }
 
