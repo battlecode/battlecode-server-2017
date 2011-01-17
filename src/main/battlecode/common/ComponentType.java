@@ -6,14 +6,14 @@ public enum ComponentType
 {
 	//              WGT COS DEL RNG ANG POW
 	SHIELD         (  1, 10,  0,  0,  0,  0,  ARMOR,ComponentController.class),
-	HARDENED       (  5, 23,  0,  0,  0,  0,  ARMOR,ComponentController.class),
+	HARDENED       (  3, 23,  0,  0,  0,  0,  ARMOR,ComponentController.class),
 	REGEN          (  4, 10,  0,  0,  0,  0,  ARMOR,ComponentController.class),
 	PLASMA         (  3, 16,  2,  0,  0,  0,  ARMOR,ComponentController.class),
 	IRON           (  3, 20, 10,  0,  0,  0,  ARMOR,IronController.class),
 	PLATING        (  1,  8,  0,  0,  0,  0,  ARMOR,ComponentController.class),
 	SMG            (  1,  7,  2, 36, 90, .6, WEAPON,WeaponController.class),
 	BLASTER        (  2, 18,  4, 16, 90,  3, WEAPON,WeaponController.class),
-	RAILGUN        (  5, 25,  4, 25, 90,6.5, WEAPON,WeaponController.class),
+	RAILGUN        (  5, 25,  5, 25, 90,8.0, WEAPON,WeaponController.class),
 	HAMMER         (  2, 16,  1,  4, 90,1.5, WEAPON,WeaponController.class),
 	BEAM           (  4, 17,  2, 36, 90,  0, WEAPON,WeaponController.class),
 	MEDIC          (  4, 13,  1, 16,360,-.4, WEAPON,WeaponController.class),

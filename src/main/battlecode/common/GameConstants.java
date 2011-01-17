@@ -39,9 +39,9 @@ public final class GameConstants {
     /** The number of rounds it takes for components to wake up after a robot is powered on */
     public static final int POWER_WAKE_DELAY = 20;
     /** The maximum amount of damage done to a robot with Hardened from any one attack */
-    public static final double HARDENED_MAX_DAMAGE = 2.5;
+    public static final double HARDENED_MAX_DAMAGE = 2.;
     /** A shield can reduce the damage done no lower than this value */
-    public static final double SHIELD_MIN_DAMAGE = .05;
+    public static final double SHIELD_MIN_DAMAGE = .15;
     /** The amount by which each shield reduces the damage from any attack */
     public static final double SHIELD_DAMAGE_REDUCTION = .6;
     /** Number of rounds Iron stays in effect after it is activated */
