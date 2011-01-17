@@ -118,7 +118,8 @@
                 optimize="${javac.optimize}"
                 target="${javac.version}"
                 source="${javac.version}"
-                deprecation="${javac.deprecation}">
+                deprecation="${javac.deprecation}"
+                includeantruntime="true">
             <compilerarg line="${javac.args} ${javac.args.warnings}"/>
             <classpath refid="classpath-libs"/>
         </javac>

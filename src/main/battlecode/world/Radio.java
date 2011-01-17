@@ -1,6 +1,7 @@
 package battlecode.world;
 
 import battlecode.common.BroadcastController;
+import battlecode.common.Chassis;
 import battlecode.common.ComponentType;
 import battlecode.common.GameActionException;
 import battlecode.common.GameActionExceptionType;
@@ -33,7 +34,7 @@ public class Radio extends BaseComponent implements BroadcastController {
         int i, j;
         for (i = 0, j = 0; i < ids.length; i++) {
             InternalRobot ir = gameWorld.getRobotByID(ids[i]);
-            if (ir != null && ir.getTeam() == robot.getTeam() && checkWithinRange(ir.getLocation()))
+            if (ir != null && ir.getTeam() == robot.getTeam() && checkWithinRange(ir.getLocation()) && ir.chassis != Chassis.DUMMY)
                 turnOnIDs[j++] = ir.getID();
         }
         gameWorld.visitSignal(new TurnOnSignal(Arrays.copyOf(turnOnIDs, j), robot, true));
@@ -43,7 +44,7 @@ public class Radio extends BaseComponent implements BroadcastController {
         assertInactive();
         ArrayList<Integer> ids = new ArrayList<Integer>();
         for (InternalObject o : gameWorld.allObjects()) {
-            if (o.getTeam() == robot.getTeam() && checkWithinRange(o))
+            if (o.getTeam() == robot.getTeam() && checkWithinRange(o) && o instanceof InternalRobot && ((InternalRobot) o).chassis != Chassis.DUMMY)
                 ids.add(o.getID());
         }
         gameWorld.visitSignal(new TurnOnSignal(Ints.toArray(ids), robot, true));

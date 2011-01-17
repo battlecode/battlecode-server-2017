@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class Cooldown implements Taglet {
 	
-	public static void register(Map map) { map.put("cooldown", new Cooldown()); }
+	public static void register(Map<String, Taglet> map) { map.put("cooldown", new Cooldown()); }
 
 	public String getName() { return "cooldown"; }
 
