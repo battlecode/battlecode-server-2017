@@ -116,7 +116,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public InternalRobot(GameWorld gw, Chassis chassis, MapLocation loc, Team t,
             boolean spawnedRobot) {
         super(gw, loc, chassis.level, t);
-        myDirection = Direction.values()[gw.getRandGen().nextInt(8)];
+        if (chassis == Chassis.DEBRIS)
+            myDirection = Direction.NORTH;
+        else
+            myDirection = Direction.values()[gw.getRandGen().nextInt(8)];
         this.chassis = chassis;
 
         myEnergonLevel = getMaxEnergon();
@@ -213,7 +216,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
                 break;
             case BUG:
                 controller = new Bug(type, this);
-				break;
+                break;
             case ANTENNA:
             case DISH:
             case NETWORK:

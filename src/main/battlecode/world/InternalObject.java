@@ -6,19 +6,19 @@ public abstract class InternalObject extends BaseObject {
 
     protected volatile MapLocation myLocation;
     protected final RobotLevel myHeight;
-	protected final GameWorld myGameWorld;
+    protected final GameWorld myGameWorld;
 
     protected InternalObject(GameWorld gw, MapLocation loc, RobotLevel height, Team t) {
-        super(gw,t);
-		myGameWorld = gw;
+        super(gw, t);
+        myGameWorld = gw;
         myLocation = loc;
-		myHeight = height;
+        myHeight = height;
         gw.notifyAddingNewObject(this);
     }
 
-	public void setLocation(MapLocation newLoc) {
-		myGameWorld.notifyMovingObject(this, myLocation, newLoc);
-		myLocation = newLoc;
+    public void setLocation(MapLocation newLoc) {
+        myGameWorld.notifyMovingObject(this, myLocation, newLoc);
+        myLocation = newLoc;
     }
 
     public MapLocation getLocation() {
@@ -27,17 +27,17 @@ public abstract class InternalObject extends BaseObject {
 
     public RobotLevel getRobotLevel() {
         return myHeight;
-	}
+    }
 
-	public GameWorld getGameWorld() {
-		return myGameWorld;
-	}
+    public GameWorld getGameWorld() {
+        return myGameWorld;
+    }
 
-	public boolean exists() {
-		return myGameWorld.exists(this);
-	}
+    public boolean exists() {
+        return myGameWorld.exists(this);
+    }
 
-	public InternalObject container() {
-		return null;
-	}
+    public InternalObject container() {
+        return null;
+    }
 }
