@@ -77,7 +77,8 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 				byte[] classBytes = instrumentedClasses.get(name);
 				finishedClass = defineClass(null, classBytes, 0, classBytes.length);
 			}
-			else if(name.equals("battlecode/engine/instrumenter/lang/ObjectHashCode")) {
+			else if(name.equals("battlecode/engine/instrumenter/lang/ObjectHashCode")||
+				name.equals("battlecode/common/GameConstants")) {
 				// We want each robot to have its own copy of this class
 				// so that it isn't possible to send messages by calling
 				// hashCode repeatedly.  But we don't want to instrument it.
