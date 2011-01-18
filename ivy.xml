@@ -9,14 +9,14 @@
   <dependencies>
     <dependency org="commons-lang" name="commons-lang" rev="2.5" />
     <dependency org="commons-cli" name="commons-cli" rev="1.2" />
-	<dependency org="com.google.guava" name="guava" rev="r07"/>
+    <dependency org="com.google.guava" name="guava" rev="r07"/>
     <dependency org="asm" name="asm" rev="3.2" />
     <dependency org="asm" name="asm-tree" rev="3.2" />
-	<!-- ivy thinks xstream depends on 6 different xml parsers and 3 optional packages but we only need xpp3 -->
+    <!-- ivy thinks xstream depends on 6 different xml parsers and 3 optional packages but we only need xpp3 -->
     <dependency org="com.thoughtworks.xstream" name="xstream" rev="1.3.1" transitive="false"/>
-	<dependency org="xpp3" name="xpp3_min" rev="1.1.4c"/>
+    <dependency org="xpp3" name="xpp3_min" rev="1.1.4c"/>
     <dependency org="junit" name="junit" rev="4.4" />
-	<!-- we only use WeakIdentityHashMap which doesn't depend on anything-->
-	<dependency org="org.hibernate" name="hibernate-search" rev="3.1.0.GA" transitive="false"/>
+    <!-- we only use WeakIdentityHashMap which doesn't depend on anything-->
+    <dependency org="org.hibernate" name="hibernate-search" rev="3.1.0.GA" transitive="false"/>
   </dependencies>
 </ivy-module>
