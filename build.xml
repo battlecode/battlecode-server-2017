@@ -4,7 +4,7 @@
         xmlns:ivy="antlib:org.apache.ivy.ant"
         default="compile">
 
-	<property file="build.conf.local"/>
+    <property file="build.conf.local"/>
 
     <property name="rootname" value="battlecode-server"/>
     <property name="src.dir" value="${basedir}/src/main"/>
@@ -24,10 +24,10 @@
     <property name="javac.args.warnings" value="-Xlint:unchecked"/>
 
     <property name="javadoc.destdir" value="docs/api"/>
-	<property name="commondoc.destdir" value="docs/common"/>
+    <property name="commondoc.destdir" value="docs/common"/>
 
-	<property name="extern.dir" value=".."/>
-	<property name="extern.target" value="run"/>
+    <property name="extern.dir" value=".."/>
+    <property name="extern.target" value="run"/>
 
     <!-- Unit tests -->
     <property name="test.src.dir" value="${basedir}/src/test"/>
@@ -86,10 +86,10 @@
                 classpathref="ivy.lib.path"/>
     </target>
 
-	<target name="retrieve" depends="init,init-ivy">
+    <target name="retrieve" depends="init,init-ivy">
         <ivy:settings file="ivyconf.xml"/>
         <ivy:retrieve/>
-	</target>
+    </target>
 
     <target name="init">
         <mkdir dir="${build.dir}"/>
@@ -101,7 +101,7 @@
             description="Clean up build directory.">
         <delete dir="${build.dir}"/>
         <delete dir="${javadoc.destdir}"/>
-		<delete dir="${commondoc.destdir}"/>
+        <delete dir="${commondoc.destdir}"/>
         <delete file="${build.jar}"/>
         <delete file="${test.build.jar}"/>
         <delete file="${test.report.file}.xml"/>
@@ -130,37 +130,37 @@
             description="Build the jar (with dependencies included)."
             depends="compile">
         <jar jarfile="${pkg.build.jar}" basedir="${pkg.build.dir}">
-			<zipgroupfileset dir="${lib.dir}" excludes="battlecode-*, junit-*"/>
-		</jar>
+            <zipgroupfileset dir="${lib.dir}" excludes="battlecode-*, junit-*"/>
+        </jar>
     </target>
 
-	<target name="extern" depends="jar" description="Build the jar, then run an external build file.">
-		<ant dir="${extern.dir}" target="${extern.target}"/>
-	</target>
+    <target name="extern" depends="jar" description="Build the jar, then run an external build file.">
+        <ant dir="${extern.dir}" target="${extern.target}"/>
+    </target>
 
     <!-- ========== TESTING ========= -->
 
-	<target name="common-doc" depends="compile">
-		<javadoc
-			classpathref="classpath-libs"
-			sourcepath="${src.dir}"
-			packagenames="battlecode.common.*"
-			destdir="${commondoc.destdir}"
-			windowtitle="Battlecode ${year}"
-			link="http://download.oracle.com/javase/6/docs/api/">
-			<doclet name="battlecode.doc.Doclet" path="${pkg.build.dir}"/>
-			<taglet name="battlecode.doc.Cooldown" path="${pkg.build.dir}"/>
-			<taglet name="battlecode.doc.MethodCost">
-				<path refid="classpath-libs"/>
-			</taglet>
-			<taglet name="battlecode.doc.Components">
-				<path refid="classpath-libs"/>
-			</taglet>
-			<taglet name="battlecode.doc.ChassisDoc">
-				<path refid="classpath-libs"/>
-			</taglet>
-		</javadoc>
-	</target>
+    <target name="common-doc" depends="compile">
+        <javadoc
+                classpathref="classpath-libs"
+                sourcepath="${src.dir}"
+                packagenames="battlecode.common.*"
+                destdir="${commondoc.destdir}"
+                windowtitle="Battlecode ${year}"
+                link="http://download.oracle.com/javase/6/docs/api/">
+            <doclet name="battlecode.doc.Doclet" path="${pkg.build.dir}"/>
+            <taglet name="battlecode.doc.Cooldown" path="${pkg.build.dir}"/>
+            <taglet name="battlecode.doc.MethodCost">
+                <path refid="classpath-libs"/>
+            </taglet>
+            <taglet name="battlecode.doc.Components">
+                <path refid="classpath-libs"/>
+            </taglet>
+            <taglet name="battlecode.doc.ChassisDoc">
+                <path refid="classpath-libs"/>
+            </taglet>
+        </javadoc>
+    </target>
 
     <target name="doc">
         <javadoc destdir="${javadoc.destdir}"
