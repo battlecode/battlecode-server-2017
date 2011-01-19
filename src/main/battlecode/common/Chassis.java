@@ -9,7 +9,7 @@ public enum Chassis {
     MEDIUM(  12, 20, 0.45, 40, ON_GROUND, MEDIUM_MOTOR),
     HEAVY(   18, 40, 0.80, 60, ON_GROUND, LARGE_MOTOR),
     FLYING(   5, 10, 0.35, 50, IN_AIR,    FLYING_MOTOR),
-    BUILDING(18, 30, 0.30, 80, ON_GROUND, BUILDING_MOTOR),
+    BUILDING(20, 30, 0.20, 80, ON_GROUND, BUILDING_MOTOR),
     DUMMY(    0, 20, 0   ,  0, ON_GROUND, null),
     DEBRIS(   0,200, 0   ,  0, ON_GROUND, null);
 

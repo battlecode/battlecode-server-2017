@@ -39,15 +39,15 @@ public final class GameConstants {
     /** The number of rounds it takes for components to wake up after a robot is powered on */
     public static final int POWER_WAKE_DELAY = 20;
     /** The maximum amount of damage done to a robot with Hardened from any one attack */
-    public static final double HARDENED_MAX_DAMAGE = 2.5;
+    public static final double HARDENED_MAX_DAMAGE = 2.;
     /** A shield can reduce the damage done no lower than this value */
-    public static final double SHIELD_MIN_DAMAGE = .05;
+    public static final double SHIELD_MIN_DAMAGE = .15;
     /** The amount by which each shield reduces the damage from any attack */
     public static final double SHIELD_DAMAGE_REDUCTION = .6;
     /** Number of rounds Iron stays in effect after it is activated */
     public static final int IRON_EFFECT_ROUNDS = 2;
     /* Hp granted by every plate on a robot */
-    public static final double PLATING_HP_BONUS = 3.;
+    public static final double PLATING_HP_BONUS = 5.;
     /** Hp regen bonus per round for each regen equipped */
     public static final double REGEN_AMOUNT = .8;
     /** The number of longs that your team can remember between games. */
@@ -66,7 +66,7 @@ public final class GameConstants {
     /** Rounds for the mine to lose 0.01 */
     public static final int MINE_DEPLETION_RATE = 5;
     /** Damage done by successive attacks of the beam as long as it is focused */
-    public static final double[] BEAM_RAMP = {0, 0, 0, 1, 1, 2, 3, 4, 5};
+    public static final double[] BEAM_RAMP = {0, 1, 2, 3, 4, 6};
     /** Duration for which bug is in effect after it is planted */
     public static final int BUG_DURATION = 250;
     /** Radius squared that the bug can sense */

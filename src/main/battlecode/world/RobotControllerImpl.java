@@ -10,6 +10,7 @@ import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.signal.Signal;
 import battlecode.world.signal.*;
+import java.util.Arrays;
 
 /*
 TODO:
@@ -254,7 +255,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public long[] getTeamMemory() {
-        return gameWorld.getOldArchonMemory()[robot.getTeam().ordinal()];
+		long [] arr = gameWorld.getOldArchonMemory()[robot.getTeam().ordinal()];
+		return Arrays.copyOf(arr,arr.length);
     }
 
     public int hashCode() {
