@@ -137,7 +137,8 @@ public class BaseComponent extends ControllerShared implements ComponentControll
     }
 
     protected void assertWithinRange(InternalObject obj) throws GameActionException {
-        assertWithinRange(obj.getLocation());
+        if (!checkWithinRange(obj))
+			outOfRange();
     }
 
     protected InternalRobot alliedRobotAt(MapLocation loc, RobotLevel height) throws GameActionException {
