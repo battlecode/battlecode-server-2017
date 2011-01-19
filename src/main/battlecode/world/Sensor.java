@@ -74,7 +74,10 @@ public class Sensor extends BaseComponent implements SensorController {
     }
 
     public boolean canSenseComponents(InternalRobot ir) {
-        return type() == ComponentType.SATELLITE || robot.getTeam() == ir.getTeam();
+        return type() == ComponentType.SATELLITE ||
+			type() == ComponentType.BUG ||
+			type() == ComponentType.TELESCOPE ||
+			robot.getTeam() == ir.getTeam();
     }
 
     public MineInfo senseMineInfo(Mine m) throws GameActionException {
