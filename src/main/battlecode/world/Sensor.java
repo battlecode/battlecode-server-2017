@@ -61,7 +61,7 @@ public class Sensor extends BaseComponent implements SensorController {
         boolean on = ir.isOn();
         if (ir.getChassis() == Chassis.DUMMY && ir.getTeam() != this.getRobot().getTeam()) {
             ch = Chassis.MEDIUM;
-            if (type() == ComponentType.SATELLITE) {
+            if (canSenseComponents(ir)) {
                 components = new ComponentType[]{ComponentType.MEDIUM_MOTOR};
             }
             on = false;
