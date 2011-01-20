@@ -47,11 +47,6 @@ public class Bug extends Sensor implements BugController {
     }
 
     @Override
-    public boolean canSenseComponents(InternalRobot ir) {
-        return false;
-    }
-
-    @Override
     public boolean checkWithinRange(MapLocation loc) {
         if (buggedRobot == null)
             return false;

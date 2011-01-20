@@ -43,5 +43,20 @@ public interface BuilderController extends ComponentController {
      */
     public void build(Chassis type, MapLocation loc) throws GameActionException;
 
+	/**
+	 * @deprecated Use {@link #canBuild(Chassis, MapLocation)}.
+	 */
+	@Deprecated
     public boolean canBuild(Direction dir, RobotLevel level);
+
+	/**
+	 * Returns true if this builder is capable of building
+	 * {@code chassis}, and {@code loc} is within range and unoccupied
+	 * at height {@code chassis.level}.
+	 * Does not take into account whether this builder component is
+	 * currently active, or whether enough resources are available.
+	 *
+	 * @throws IllegalStateException if this component is a DUMMY
+	 */	
+	public boolean canBuild(Chassis chassis, MapLocation loc);
 }

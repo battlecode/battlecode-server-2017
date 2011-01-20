@@ -75,6 +75,20 @@ public class Builder extends BaseComponent implements BuilderController {
 
     public boolean canBuild(Direction dir, RobotLevel level) {
         assertValidDirection(dir);
+		if(type()==ComponentType.DUMMY)
+			throw new IllegalStateException("DUMMY cannot use canBuild.");
+		else if(level==RobotLevel.IN_AIR&&!BuildMappings.canBuild(type,Chassis.FLYING))
+			return false;
         return gameWorld.canMove(level, getLocation().add(dir));
     }
+
+	public boolean canBuild(Chassis chassis, MapLocation loc) {
+		if(type()==ComponentType.DUMMY)
+			throw new IllegalStateException("DUMMY cannot use canBuildChassis.");
+		assertNotNull(chassis);
+		assertNotNull(loc);
+		if(!BuildMappings.canBuild(type,chassis)) return false;
+		if(!withinRange(loc)) return false;
+		return gameWorld.canMove(chassis.level, loc);
+	}
 }
