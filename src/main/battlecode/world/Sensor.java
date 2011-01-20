@@ -47,7 +47,7 @@ public class Sensor extends BaseComponent implements SensorController {
         InternalRobot ir = castInternalRobot(r);
         assertWithinRange(ir);
         ComponentType[] components;
-        if (type() == ComponentType.SATELLITE || robot.getTeam() == ir.getTeam())
+        if (canSenseComponents(ir))
             components = ir.getComponentTypes();
         else
             components = null;
@@ -65,12 +65,9 @@ public class Sensor extends BaseComponent implements SensorController {
                 components = new ComponentType[]{ComponentType.MEDIUM_MOTOR};
             }
             on = false;
-
         }
-
         return new RobotInfo(ir, ir.getLocation(), ir.getEnergonLevel(), ir.getMaxEnergon(),
                 ir.getDirection(), on, components, ch);
-
     }
 
     public boolean canSenseComponents(InternalRobot ir) {
