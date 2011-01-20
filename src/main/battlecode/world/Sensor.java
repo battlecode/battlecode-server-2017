@@ -64,7 +64,7 @@ public class Sensor extends BaseComponent implements SensorController {
             if (canSenseComponents(ir)) {
                 components = new ComponentType[]{ComponentType.MEDIUM_MOTOR};
             }
-            on = false;
+            on = true;
         }
         return new RobotInfo(ir, ir.getLocation(), ir.getEnergonLevel(), ir.getMaxEnergon(),
                 ir.getDirection(), on, components, ch);
