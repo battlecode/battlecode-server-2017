@@ -46,7 +46,7 @@ public class Builder extends BaseComponent implements BuilderController {
         assertWithinRange(loc);
         if (!gameWorld.canMove(type.level, loc))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
-        spendResources(type.cost*(robot.buffs.getSpawnCostMultiplier()+1));
+        spendResources(type.cost);
         activate(new SpawnSignal(loc, type, robot.getTeam(), robot));
     }
 
