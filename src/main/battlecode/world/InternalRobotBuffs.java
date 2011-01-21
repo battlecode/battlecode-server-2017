@@ -193,7 +193,7 @@ public class InternalRobotBuffs {
     	double alternatedCount;
     	if(this.behaviorIntervalLength==0)
     		return true;
-    	if(startTime>=0)
+    	if(startTime>0)
     	{
     		alternatedCount = Math.floor(new Double(startTime).doubleValue() / new Double(this.behaviorIntervalLength).doubleValue()); 
     		if(alternatedCount%2==0)
