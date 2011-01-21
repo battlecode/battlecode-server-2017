@@ -31,8 +31,7 @@ public class Builder extends BaseComponent implements BuilderController {
             cantBuildOnThat(type, ir.getChassis());
         if (ir.getChassis() == Chassis.BUILDING && type == ComponentType.JUMP)
             cantBuildOnThat(type, ir.getChassis());
-        
-        spendResources(type.cost*(robot.getBuffs().getSpawnCostMultiplier()+1));
+        spendResources(type.cost);
         activate(new EquipSignal(ir, robot, type));
     }
 
@@ -47,7 +46,6 @@ public class Builder extends BaseComponent implements BuilderController {
         assertWithinRange(loc);
         if (!gameWorld.canMove(type.level, loc))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
-        System.out.println("Team: " + robot.getTeam()+ " spawn multiplier: " + robot.getBuffs().getSpawnCostMultiplier());
         spendResources(type.cost*(robot.getBuffs().getSpawnCostMultiplier()+1));
         activate(new SpawnSignal(loc, type, robot.getTeam(), robot));
     }
