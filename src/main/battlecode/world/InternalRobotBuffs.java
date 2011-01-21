@@ -211,6 +211,4 @@ public class InternalRobotBuffs {
     	}
     	return 0.0;
     }
-
-	
 }
