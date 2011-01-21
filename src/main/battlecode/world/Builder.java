@@ -31,7 +31,8 @@ public class Builder extends BaseComponent implements BuilderController {
             cantBuildOnThat(type, ir.getChassis());
         if (ir.getChassis() == Chassis.BUILDING && type == ComponentType.JUMP)
             cantBuildOnThat(type, ir.getChassis());
-        spendResources(type.cost);
+        
+        spendResources(type.cost*(robot.getBuffs().getSpawnCostMultiplier()+1));
         activate(new EquipSignal(ir, robot, type));
     }
 

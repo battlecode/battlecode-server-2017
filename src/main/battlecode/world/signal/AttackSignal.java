@@ -40,7 +40,7 @@ public class AttackSignal extends Signal {
 		this.weaponType = weapon;
 		this.targetLoc = targetLoc;
 		this.targetHeight = targetHeight;
-		this.damage = damage;
+		this.damage = damage * (robot.getBuffs().getDamageDealtMultiplier()+1);
 	}
 
 	public AttackSignal(InternalRobot robot, ComponentType weapon, MapLocation targetLoc, RobotLevel targetHeight) {
