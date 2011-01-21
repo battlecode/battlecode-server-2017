@@ -34,15 +34,17 @@ class RobotRunnable implements Runnable {
 
         try {
             try {
+				Scheduler.endTurn();
                 ctor = myPlayerClass.getConstructor(Class.forName("battlecode.common.RobotController"));
             } catch (Throwable t) {
+                if ((t instanceof RobotDeathException) || (t.getCause() instanceof RobotDeathException))
+                    return;
                 ErrorReporter.report(t, "Check that the player class '" + myPlayerClass.getSimpleName() + "' has a constructor with one argument, of type RobotController.\n");
                 return;
             }
 
             try {
 
-				Scheduler.endTurn();
                 o = ctor.newInstance(myRobotController);
 
             } catch (Throwable t) {
