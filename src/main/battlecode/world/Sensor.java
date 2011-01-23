@@ -31,12 +31,17 @@ public class Sensor extends BaseComponent implements SensorController {
         return gameWorld.getObject(loc, height);
     }
 
+	public boolean checkWithinRangeNoDropship(InternalObject obj) {
+		if(!obj.exists()) return false;
+		return checkWithinRange(obj.getLocation());
+	}
+
     @SuppressWarnings("unchecked")
     public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type) {
         Predicate<InternalObject> p = new Predicate<InternalObject>() {
 
             public boolean apply(InternalObject o) {
-                return checkWithinRange(o) && (type.isInstance(o)) && (!o.equals(robot));
+                return checkWithinRangeNoDropship(o) && (type.isInstance(o)) && (!o.equals(robot));
             }
         };
         return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
@@ -66,7 +71,7 @@ public class Sensor extends BaseComponent implements SensorController {
             }
             on = true;
         }
-        return new RobotInfo(ir, ir.getLocation(), ir.getEnergonLevel(), ir.getMaxEnergon(),
+        return new RobotInfo(ir, loc, ir.getEnergonLevel(), ir.getMaxEnergon(),
                 ir.getDirection(), on, components, ch);
     }
 
