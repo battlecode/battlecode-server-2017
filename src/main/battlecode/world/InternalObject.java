@@ -40,4 +40,11 @@ public abstract class InternalObject extends BaseObject {
     public InternalObject container() {
         return null;
     }
+
+	public MapLocation sensedLocation() {
+		if(container()!=null)
+			return container().sensedLocation();
+		else
+			return getLocation();
+	}
 }

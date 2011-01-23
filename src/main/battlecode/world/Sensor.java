@@ -56,11 +56,6 @@ public class Sensor extends BaseComponent implements SensorController {
             components = ir.getComponentTypes();
         else
             components = null;
-        MapLocation loc;
-        if (ir.container() != null)
-            loc = ir.container().getLocation();
-        else
-            loc = ir.getLocation();
 
         Chassis ch = ir.getChassis();
         boolean on = ir.isOn();
@@ -71,7 +66,7 @@ public class Sensor extends BaseComponent implements SensorController {
             }
             on = true;
         }
-        return new RobotInfo(ir, loc, ir.getEnergonLevel(), ir.getMaxEnergon(),
+        return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getMaxEnergon(),
                 ir.getDirection(), on, components, ch);
     }
 
@@ -91,7 +86,7 @@ public class Sensor extends BaseComponent implements SensorController {
     public MapLocation senseLocationOf(GameObject o) throws GameActionException {
         InternalObject io = castInternalObject(o);
         assertWithinRange(io);
-        return io.getLocation();
+        return io.sensedLocation();
     }
 
     public boolean canSenseObject(GameObject o) {
