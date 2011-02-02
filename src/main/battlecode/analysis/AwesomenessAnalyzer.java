@@ -22,6 +22,7 @@ import battlecode.engine.signal.Signal;
 import battlecode.serial.*;
 import battlecode.server.proxy.Proxy;
 import battlecode.server.proxy.ProxyFactory;
+import battlecode.server.proxy.XStreamProxy;
 import battlecode.world.GameMap;
 import battlecode.world.signal.*;
 
@@ -31,8 +32,8 @@ public class AwesomenessAnalyzer {
 	private static final float ARCHON_AWESOMENESS = 100;
 	private static final float DEATH_AWESOMENESS = 50;
 	private static final float ATTACK_AWESOMENESS = 10;
-	private static final float CONVEX_HULL_AWESOMENESS_PER_AREA = 6;
 	private static final float SPAWN_AWESOMENESS = 5;
+	private static final float EQUIP_AWESOMENESS = 1;
 	private static final float EVOLVE_AWESOMENESS = 5;
 	private static final float ACTIVE_AWESOMENESS = 1;
 
@@ -89,7 +90,7 @@ public class AwesomenessAnalyzer {
 			//else if(type.equals(Chassis.WOUT))
 			//	robotAwesomeness=WOUT_AWESOMENESS_MULTIPLIER;
 			//else
-				robotAwesomeness=1.f;
+			robotAwesomeness=type.weight;
 		}
 
 		public void resetCountDown() {
@@ -478,6 +479,10 @@ public class AwesomenessAnalyzer {
 					r = new RobotStat(loc,s.getType());
 					robots.put(s.getRobotID(), r);
 					events.add(new Event(SPAWN_AWESOMENESS*r.robotAwesomeness, loc));
+				} else if(signal instanceof EquipSignal) {
+					EquipSignal s = (EquipSignal)signal;
+					RobotStat robot = robots.get(s.robotID);
+					events.add(new Event(EQUIP_AWESOMENESS*robot.robotAwesomeness, robot.location));
 				} else if(signal instanceof MovementSignal) {
 					MovementSignal s = (MovementSignal)signal;
 					RobotStat robot = robots.get(s.getRobotID());
@@ -555,7 +560,7 @@ public class AwesomenessAnalyzer {
 	public void analyze() {
 		ObjectInputStream input = null;
 		try {
-			input = new ObjectInputStream(new GZIPInputStream(new FileInputStream(filename)));
+			input = XStreamProxy.getXStream().createObjectInputStream(new GZIPInputStream(new FileInputStream(filename)));
 		} catch (Exception e) {
 			System.err.println("Error: couldn't open match file " + filename);
 			e.printStackTrace();
