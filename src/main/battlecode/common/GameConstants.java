@@ -33,7 +33,7 @@ public final class GameConstants {
     /** The base number of bytecodes a robot can execute each round */
     public static final int BYTECODE_LIMIT_BASE = 3000;
     /** The number of additioal bytecodes granted by a processor */
-    public static final int BYTECODE_LIMIT_ADDON = 3000;
+    public static final int BYTECODE_LIMIT_ADDON = 4500;
     /** The number of rounds after a component is equipped before it may be used */
     public static final int EQUIP_WAKE_DELAY = 10;
     /** The number of rounds it takes for components to wake up after a robot is powered on */
@@ -45,9 +45,9 @@ public final class GameConstants {
     /** The amount by which each shield reduces the damage from any attack */
     public static final double SHIELD_DAMAGE_REDUCTION = .6;
     /** Number of rounds Iron stays in effect after it is activated */
-    public static final int IRON_EFFECT_ROUNDS = 2;
+    public static final int IRON_EFFECT_ROUNDS = 4;
     /* Hp granted by every plate on a robot */
-    public static final double PLATING_HP_BONUS = 5.;
+    public static final double PLATING_HP_BONUS = 7.;
     /** Hp regen bonus per round for each regen equipped */
     public static final double REGEN_AMOUNT = .8;
     /** The number of longs that your team can remember between games. */
