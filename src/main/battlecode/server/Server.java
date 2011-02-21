@@ -53,7 +53,8 @@ public class Server implements Observer, Runnable {
 	 * operation.
 	 */
 	public static enum Mode {
-		HEADLESS, LOCAL, TCP, SCRIMMAGE, TOURNAMENT, TESTS, AUTOTEST, MATCH, PIPE
+		HEADLESS, LOCAL, TCP, SCRIMMAGE, TOURNAMENT, TESTS, AUTOTEST, MATCH, PIPE,BADGEREVIEW
+
 	}
 
 	/**
