@@ -39,6 +39,7 @@ public class ScheduledRunnable implements Runnable {
 			myRunnable.run();
 			
 		} catch(Exception e) {
+			e.printStackTrace();
 			ErrorReporter.report("Unexpected exception in ScheduledRunnable: " + e.getMessage());
 		} finally {
 			Scheduler.die();

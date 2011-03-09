@@ -59,7 +59,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private volatile int weight;
     private volatile int invulnerableRounds;
     private volatile InternalRobot transporter;
-    private Set<InternalRobot> passengers;
+    private Set<InternalRobot> passengers = new HashSet<InternalRobot>();
     private RobotControllerImpl rc;
     private volatile Bug buggedBy;
     private volatile int dummyRounds = GameConstants.DUMMY_LIFETIME;
@@ -267,9 +267,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             case REGEN:
                 regens++;
                 break;
-            case DROPSHIP:
-                passengers = new HashSet<InternalRobot>();
-                break;
         }
     }
 
@@ -469,6 +466,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void suicide() {
+		if(passengers!=null) {
+			for(InternalRobot r : passengers) {
+				r.suicide();
+			}
+		}
         (new DeathSignal(this)).accept(myGameWorld);
     }
 
