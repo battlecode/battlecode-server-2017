@@ -36,6 +36,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
      */
     public static final MapLocation VERY_FAR_AWAY = new MapLocation(-1000, -1000);
     private volatile double myEnergonLevel;
+	private volatile double flux;
     protected volatile Direction myDirection;
     private volatile boolean energonChanged = true;
     protected volatile long controlBits;
@@ -373,6 +374,23 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public double getEnergonLevel() {
         return myEnergonLevel;
     }
+
+	public double getFlux() {
+		return flux;
+	}
+
+	public boolean payFlux(double amt) {
+		if(amt<flux)
+			return false;
+		else {
+			flux-=amt;
+			return true;
+		}
+	}
+
+	public void adjustFlux(double amt) {
+		flux+=amt;
+	}
 
     public Direction getDirection() {
         return myDirection;

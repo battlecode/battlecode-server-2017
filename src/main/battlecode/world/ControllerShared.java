@@ -26,6 +26,7 @@ public abstract class ControllerShared
 	}
 
 	protected void assertWithinRange(MapLocation loc, int distance) throws GameActionException {
+		assertNotNull(loc);
 		if(getLocation().distanceSquaredTo(loc)>distance)
 			outOfRange();
 	}
@@ -71,6 +72,20 @@ public abstract class ControllerShared
 
 	protected static InternalObject castInternalObject(GameObject o) {
 		return castInternalObject(o,InternalObject.class);
+	}
+
+	protected void payFlux(double amount) throws GameActionException {
+		if(!robot.payFlux(amount))
+			throw new GameActionException(NOT_ENOUGH_FLUX,"You don't have enough flux to do that.");
+	}
+
+	protected InternalRobot robotOrException(MapLocation loc, RobotLevel height) throws GameActionException {
+		assertNotNull(loc);
+		assertNotNull(height);
+		InternalRobot r = gameWorld.getRobot(loc, height);
+		if(r==null)
+			throw new GameActionException(NO_ROBOT_THERE,"There is no robot there.");
+		return r;
 	}
 	
 }

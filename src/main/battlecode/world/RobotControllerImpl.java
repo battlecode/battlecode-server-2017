@@ -178,6 +178,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         RobotMonitor.endRunner();
     }
 
+	public void transferFlux(MapLocation loc, RobotLevel height, double amount) throws GameActionException {
+		assertWithinRange(loc,2);
+		InternalRobot ir = robotOrException(loc,height);
+		robot.payFlux(amount);
+		ir.adjustFlux(amount);
+		gameWorld.addSignal(new TransferFluxSignal(robot,ir,amount));
+	}
+
     /**
      * {@inheritDoc}
      */
