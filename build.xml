@@ -8,7 +8,7 @@
 
     <property name="rootname" value="battlecode-server"/>
     <property name="src.dir" value="${basedir}/src/main"/>
-    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="lib.dir" value="${basedir}/lib/"/>
     <property name="build.dir" value="${basedir}/build"/>
     <property name="build.encoding" value="UTF-8"/>
     <property name="build.jar" value="${basedir}/${rootname}.jar"/>

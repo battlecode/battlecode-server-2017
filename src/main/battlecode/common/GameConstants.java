@@ -79,6 +79,9 @@ public final class GameConstants {
 	public static final int MINES_MAX = 100;
 	/** The maximum lifetime of a DUMMY */
 	public static final int DUMMY_LIFETIME = 200;
+	
+	public static final double MAX_NODE_HEALTH = 100.0;
+	public static final double NODE_CAPTURE_LIMIT = 10.0;
 
     // This class cannot be instantiated.
     private GameConstants() {
