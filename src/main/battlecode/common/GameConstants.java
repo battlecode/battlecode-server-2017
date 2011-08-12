@@ -46,7 +46,7 @@ public final class GameConstants {
     public static final double SHIELD_DAMAGE_REDUCTION = .6;
     /** Number of rounds Iron stays in effect after it is activated */
     public static final int IRON_EFFECT_ROUNDS = 4;
-    /* Hp granted by every plate on a robot */
+    /** Hp granted by every plate on a robot */
     public static final double PLATING_HP_BONUS = 7.;
     /** Hp regen bonus per round for each regen equipped */
     public static final double REGEN_AMOUNT = .8;

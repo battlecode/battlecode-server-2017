@@ -1,5 +1,6 @@
 package battlecode.world;
 
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.PowerNode;
 import battlecode.common.RobotLevel;
@@ -43,4 +44,6 @@ public class InternalPowerNode extends InternalObject implements PowerNode {
 			capture = 0;
 		}
 	}
+	
+	//public void capture()
 }
