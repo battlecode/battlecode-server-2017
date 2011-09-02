@@ -5,5 +5,5 @@ TODO:
 
  */
 
-public interface PowerNode implements GameObject {
+public interface PowerNode extends GameObject {
 }

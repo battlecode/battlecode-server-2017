@@ -46,6 +46,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
     private double[] teamResources = new double[]{GameConstants.INITIAL_FLUX, GameConstants.INITIAL_FLUX};
 
+    public Map<Integer, ArrayList<Integer>> PowerNodeGraph = new HashMap<Integer, ArrayList<Integer>>();
+    public ArrayList<InternalPowerNode> powerNodes = new ArrayList<InternalPowerNode>();
+    
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldArchonMemory) {
         super(gm.getSeed(), teamA, teamB, oldArchonMemory);
@@ -341,6 +344,41 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         notifyAddingNewObject(m);
         addSignal(new MineBirthSignal(m));
         return m;
+    }
+
+    public void createNodeLink(int id, int[] adj)
+    {
+    	for(int a : adj)
+    		addNodeLink(id, a);
+    }
+    
+    private void addNodeLink(int id1, int id2)
+    {
+    	if(!this.PowerNodeGraph.containsKey(id1))
+    		this.PowerNodeGraph.put(id1, new ArrayList<Integer>());
+		this.PowerNodeGraph.get(id1).add(id2);
+
+    	if(!this.PowerNodeGraph.containsKey(id2))
+    		this.PowerNodeGraph.put(id2, new ArrayList<Integer>());
+		this.PowerNodeGraph.get(id2).add(id1);
+    }
+    
+    public InternalPowerNode getPowerNode(int nodeid)
+    {
+    	for(InternalPowerNode pn : powerNodes)
+    	{
+    		if(pn.nodeid == nodeid)
+    			return pn;
+    	}
+    	return null;
+    }
+    
+    public InternalPowerNode createNode(MapLocation loc, Team team, int id) {
+    	InternalPowerNode n = new InternalPowerNode(this, loc, team, id);
+        notifyAddingNewObject(n);
+        addSignal(new NodeBirthSignal(n));
+        powerNodes.add(n);
+        return n;
     }
     // ******************************
     // SIGNAL HANDLER METHODS

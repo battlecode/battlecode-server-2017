@@ -190,6 +190,38 @@ class XMLMapHandler extends DefaultHandler {
         }
     }
 
+    private static class NodeData implements SymbolData {
+
+        public static final SymbolDataFactory factory = new SymbolDataFactory() {
+        
+        	public NodeData create(Attributes att) {
+        		Team team = Team.valueOf(getRequired(att, "team"));
+        		int nodeid = Integer.valueOf(getRequired(att, "nodeid"));
+        		return new NodeData(team, nodeid);
+            }
+        };
+
+        private Team team;
+        private int nodeid;
+        
+        public NodeData(Team t, int nid) {
+    		team = t;
+    		nodeid = nid;
+        }
+
+        public TerrainTile tile() {
+            return TerrainTile.LAND;
+        }
+
+        public void createGameObject(GameWorld world, MapLocation loc) {
+            world.createNode(loc, team, nodeid);
+        }
+
+        public boolean equalsMirror(SymbolData data) {
+            return data instanceof NodeData;
+        }
+    }
+
     private class SymbolTile {
 
         SymbolData data;
@@ -215,6 +247,7 @@ class XMLMapHandler extends DefaultHandler {
             factories.put(ch.name(), RobotData.factory);
         }
         factories.put("MINE", MineData.factory);
+        factories.put("NODE", NodeData.factory)
     }
     /** Used to pass to the GameMap constructor. */
     private Map<MapProperties, Integer> mapProperties = new HashMap<MapProperties, Integer>();
