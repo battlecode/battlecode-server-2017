@@ -19,20 +19,17 @@ public class InternalPowerNode extends InternalObject implements PowerNode {
 	//States: 0 (Neutral/No Connect), 1 (Team A Connected), 2 (Team B Connected), 3 (Team A&B Connected)
 	//Maybe have different glow around it depending on connection
 	public short state = 0;
-	
-	public int nodeid = 0;
-	
-	public InternalPowerNode(GameWorld gw, MapLocation loc, Team team, int id) {
+		
+	public InternalPowerNode(GameWorld gw, MapLocation loc, Team team) {
         super(gw, loc, RobotLevel.MINE, team);
-        nodeid = id;
     }
 	
 	public boolean connected(Team t)
 	{
-		ArrayList<Integer> adj = this.getGameWorld().PowerNodeGraph.get(this.nodeid);
-		for(int i : adj)
+		ArrayList<MapLocation> adj = this.getGameWorld().PowerNodeGraph.get(this.getLocation());
+		for(MapLocation ml : adj)
 		{
-			InternalPowerNode pn = this.getGameWorld().getPowerNode(i);
+			InternalPowerNode pn = this.getGameWorld().getObjectOfType(ml, RobotLevel.MINE, InternalPowerNode.class);
 			if(pn.getTeam() == t)
 				return true;
 		}

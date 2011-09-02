@@ -196,17 +196,14 @@ class XMLMapHandler extends DefaultHandler {
         
         	public NodeData create(Attributes att) {
         		Team team = Team.valueOf(getRequired(att, "team"));
-        		int nodeid = Integer.valueOf(getRequired(att, "nodeid"));
-        		return new NodeData(team, nodeid);
+        		return new NodeData(team);
             }
         };
 
         private Team team;
-        private int nodeid;
         
-        public NodeData(Team t, int nid) {
+        public NodeData(Team t) {
     		team = t;
-    		nodeid = nid;
         }
 
         public TerrainTile tile() {
@@ -214,7 +211,7 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         public void createGameObject(GameWorld world, MapLocation loc) {
-            world.createNode(loc, team, nodeid);
+            world.createNode(loc, team);
         }
 
         public boolean equalsMirror(SymbolData data) {

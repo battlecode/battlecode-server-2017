@@ -82,6 +82,17 @@ public final class MapLocation implements Serializable {
         return this.x * 13 + this.y * 23;
 
     }
+    
+    public static MapLocation valueOf(String s)
+    {
+    	String[] coord = s.substring(1, s.length() - 1).split(",");
+    	int x = Integer.valueOf(coord[0].trim());
+    	int y = Integer.valueOf(coord[1].trim());
+    	
+    	MapLocation ml = new MapLocation(x, y);
+
+    	return ml;
+    }
 
     /**
      * {@inheritDoc}

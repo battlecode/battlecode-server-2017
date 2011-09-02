@@ -46,7 +46,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
     private double[] teamResources = new double[]{GameConstants.INITIAL_FLUX, GameConstants.INITIAL_FLUX};
 
-    public Map<Integer, ArrayList<Integer>> PowerNodeGraph = new HashMap<Integer, ArrayList<Integer>>();
+    public Map<MapLocation, ArrayList<MapLocation>> PowerNodeGraph = new HashMap<MapLocation, ArrayList<MapLocation>>();
     public ArrayList<InternalPowerNode> powerNodes = new ArrayList<InternalPowerNode>();
     
     @SuppressWarnings("unchecked")
@@ -346,35 +346,25 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return m;
     }
 
-    public void createNodeLink(int id, int[] adj)
+    public void createNodeLink(MapLocation id, MapLocation[] adj)
     {
-    	for(int a : adj)
+    	for(MapLocation a : adj)
     		addNodeLink(id, a);
     }
     
-    private void addNodeLink(int id1, int id2)
+    private void addNodeLink(MapLocation id1, MapLocation id2)
     {
     	if(!this.PowerNodeGraph.containsKey(id1))
-    		this.PowerNodeGraph.put(id1, new ArrayList<Integer>());
+    		this.PowerNodeGraph.put(id1, new ArrayList<MapLocation>());
 		this.PowerNodeGraph.get(id1).add(id2);
 
     	if(!this.PowerNodeGraph.containsKey(id2))
-    		this.PowerNodeGraph.put(id2, new ArrayList<Integer>());
+    		this.PowerNodeGraph.put(id2, new ArrayList<MapLocation>());
 		this.PowerNodeGraph.get(id2).add(id1);
     }
-    
-    public InternalPowerNode getPowerNode(int nodeid)
-    {
-    	for(InternalPowerNode pn : powerNodes)
-    	{
-    		if(pn.nodeid == nodeid)
-    			return pn;
-    	}
-    	return null;
-    }
-    
-    public InternalPowerNode createNode(MapLocation loc, Team team, int id) {
-    	InternalPowerNode n = new InternalPowerNode(this, loc, team, id);
+        
+    public InternalPowerNode createNode(MapLocation loc, Team team) {
+    	InternalPowerNode n = new InternalPowerNode(this, loc, team);
         notifyAddingNewObject(n);
         addSignal(new NodeBirthSignal(n));
         powerNodes.add(n);
