@@ -346,13 +346,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return m;
     }
 
-    public void createNodeLink(MapLocation id, MapLocation[] adj)
-    {
-    	for(MapLocation a : adj)
-    		addNodeLink(id, a);
-    }
-    
-    private void addNodeLink(MapLocation id1, MapLocation id2)
+    public void createNodeLink(MapLocation id1, MapLocation id2)
     {
     	if(!this.PowerNodeGraph.containsKey(id1))
     		this.PowerNodeGraph.put(id1, new ArrayList<MapLocation>());

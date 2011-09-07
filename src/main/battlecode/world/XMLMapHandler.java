@@ -235,6 +235,8 @@ class XMLMapHandler extends DefaultHandler {
     }
     private static final Map<String, SymbolDataFactory> factories = new HashMap<String, SymbolDataFactory>();
     private final ArrayList<SymbolTile> objectsToCreate = new ArrayList<SymbolTile>();
+    
+    private ArrayList<MapLocation[]> nodeLinks = new ArrayList<MapLocation[]>();
 
     static {
         factories.put("TERRAIN", TerrainData.factory);
@@ -244,7 +246,7 @@ class XMLMapHandler extends DefaultHandler {
             factories.put(ch.name(), RobotData.factory);
         }
         factories.put("MINE", MineData.factory);
-        factories.put("NODE", NodeData.factory)
+        factories.put("NODE", NodeData.factory);
     }
     /** Used to pass to the GameMap constructor. */
     private Map<MapProperties, Integer> mapProperties = new HashMap<MapProperties, Integer>();
@@ -396,6 +398,13 @@ class XMLMapHandler extends DefaultHandler {
 
             // The actual map data will be parsed by characters()...
 
+        } else if(qName.equals("nodelinks")) {
+        	requireElement(qName, "map");
+        } else if(qName.equals("nodelink")) {
+        	requireElement(qName, "nodelinks");
+        	MapLocation locA = MapLocation.valueOf(getRequired(attributes, "from"));
+        	MapLocation locB = MapLocation.valueOf(getRequired(attributes, "to"));
+        	nodeLinks.add(new MapLocation[]{locA, locB});
         } else {
             //fail("unrecognized map element '<" + qName + ">'", "Check that all nodes are spelled correctly.\n");
         }
@@ -494,7 +503,10 @@ class XMLMapHandler extends DefaultHandler {
             for (int j = 0; j < map[i].length; j++)
                 map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
         }
-
+        for(MapLocation[] link : nodeLinks)
+        {
+        	gw.createNodeLink(link[0], link[1]);
+        }
         gw.endRandomIDs();
 
         return gw;
