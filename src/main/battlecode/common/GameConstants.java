@@ -79,7 +79,9 @@ public final class GameConstants {
 	public static final int MINES_MAX = 100;
 	/** The maximum lifetime of a DUMMY */
 	public static final int DUMMY_LIFETIME = 200;
-	
+	/** The square of the maximum distance a message can travel. */
+	public static final int BROADCAST_RADIUS_SQUARED = 64;
+
 	public static final double MAX_NODE_HEALTH = 100.0;
 	public static final double NODE_CAPTURE_LIMIT = 10.0;
 

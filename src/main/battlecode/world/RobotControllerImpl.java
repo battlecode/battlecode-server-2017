@@ -1,8 +1,6 @@
 package battlecode.world;
 
-import static battlecode.common.GameConstants.BYTECODE_LIMIT_BASE;
-import static battlecode.common.GameConstants.NUMBER_OF_INDICATOR_STRINGS;
-import static battlecode.common.GameConstants.YIELD_BONUS;
+import static battlecode.common.GameConstants.*;
 import static battlecode.common.GameActionExceptionType.*;
 import battlecode.common.*;
 import battlecode.engine.GenericController;
@@ -66,6 +64,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public RobotControllerImpl(GameWorld gw, InternalRobot r) {
         super(gw, r);
     }
+
+	public void assertHaveFlux(double amount) throws GameActionException {
+		if(amount>robot.getFlux())
+			throw new GameActionException(NOT_ENOUGH_FLUX,"You do not have enough flux to do that.");
+	}
 
     //*********************************
     //****** QUERY METHODS ********
@@ -149,8 +152,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 	public void transferFlux(MapLocation loc, RobotLevel height, double amount) throws GameActionException {
 		if(amount<=0||Double.isNaN(amount))
 			throw new IllegalArgumentException("The amount of flux transferred must be positive.");
-		if(amount>robot.getFlux())
-			throw new GameActionException(NOT_ENOUGH_FLUX,"You do not have enough flux to do that.");
+		assertHaveFlux(amount);
 		assertWithinRange(loc,2);
 		InternalRobot ir = robotOrException(loc,height);
 		robot.adjustFlux(-amount);
@@ -343,6 +345,24 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		if(robot.getEnergonLevel()<0) {
 			throw new RobotDeathException();
 		}
+    }
+    
+	//************************************
+    //******** BROADCAST METHODS **********
+    //************************************
+
+	public boolean hasBroadcasted() {
+		return robot.hasBroadcasted();
+	}
+	
+	public void broadcast(Message m) throws GameActionException {
+        if(hasBroadcasted())
+			throw new GameActionException(ALREADY_ACTIVE,"This robot has already broadcasted this turn.");
+        assertNotNull(m);
+		double cost = m.getFluxCost();
+		assertHaveFlux(cost);
+        robot.activateBroadcast(new BroadcastSignal(robot, BROADCAST_RADIUS_SQUARED, m));
+		robot.adjustFlux(-cost);
     }
 
     //************************************

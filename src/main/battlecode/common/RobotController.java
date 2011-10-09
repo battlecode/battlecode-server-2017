@@ -130,8 +130,6 @@ public interface RobotController {
      * orthogonal movement and {@code Math.round(type().delay*Math.sqrt(2))} for
      * diagonal movement).
      *
-     * @cooldown <code>type().delay</code> if orthogonal, <code>Math.round(type().delay*Math.sqrt(2.))</code> if diagonal
-     *
      * @throws GameActionException if the robot is already moving (ALREADY_ACTIVE)
      * @throws GameActionException if the destination terrain is not traversable by
      * this robot (CANT_MOVE_THERE)
@@ -151,8 +149,6 @@ public interface RobotController {
     /**
      * Queues a direction change to be performed at the end of this robot's turn.
      * When the action is executed, the robot will change its direction.
-     *
-     * @cooldown 1
      *
      * @param dir
      *            the direction the robot should face
@@ -184,16 +180,66 @@ public interface RobotController {
 
  	/**
      * Attacks the given location and height.
-     *
-     * @cooldown
      */
     public void attackSquare(MapLocation loc, RobotLevel height) throws GameActionException;
 
+   	// ***********************************
+    // ****** BROADCAST METHODS *******
     // ***********************************
+	
+	/** Returns true if this robot has already broadcasted this turn. */
+	public boolean hasBroadcasted();
+	
+	/**
+     * Adds a message for your robot to broadcast. At the end of your
+     * robot's execution block, if a broadcast has been set, the message is removed
+     * and immediately added to the incoming message queues of all robots in
+     * your broadcast range (except for the sending robot). Note that robots
+     * are thus limited to sending at most one message per round.
+     * </p>
+     * <p>
+     * You are charged a small amount of energon for every message that you
+     * broadcast. The cost of sending a message is equal to
+     * <code>(GameConstants.BROADCAST_FIXED_COST +
+     * GameConstants.BROADCAST_COST_PER_BYTE*sizeBytes)</code>
+     * where <code>sizeBytes</code> is the size of the message, in bytes.
+     * <p>
+     * <p>
+     * Each robot can only have one message to broadcast in a given round at a time.
+     *
+     * @param msg
+     *            the message you want to broadcast; cannot be <code>null</code>.
+     * @throws GameActionException if this robot already has a message queued in the current round (ALREADY_ACTIVE).
+     * @throws GameActionException if this robot does not have enough flux to pay for the broadcast (NOT_ENOUGH_FLUX).
+     */
+    public void broadcast(Message msg) throws GameActionException;
+
+
+ 	// ***********************************
     // ****** OTHER ACTION METHODS *******
     // ***********************************
 
-    /**
+	 /**
+     * Transfers the specified amount of flux to the robot at location
+     * <code>loc</code> and RobotLevel <code>height</code>. The robot
+     * receiving the transfer must be adjacent to or in the same location as the
+     * robot giving the transfer. Robots may not transfer more flux than they
+     * currently have.
+     *
+     * @param amount
+     *            the amount of flux to transfer to the specified robot
+     * @param loc
+     *            the <code>MapLocation</code> of the robot to transfer to
+     * @param level
+     *            the <code>RobotLevel</code> of the robot to transfer to
+	 * @throws IllegalArgumentException if <code>amount</code> is negative, zero, or NaN.
+     * @throws GameActionException if the robot does not have <code>amount</code> flux (NOT_ENOUGH_FLUX).
+	 * @throws GameActionExceptiom if <code>loc</code> is not the same as or adjacent to this robot's location (CANT_SENSE_THAT).
+	 * @throws GameActionException if there is no robot at the given location and height (NO_ROBOT_THERE).
+     */
+    public void transferFlux(MapLocation loc, RobotLevel height, double amount) throws GameActionException;
+	
+	/**
      * Ends the current round.  If your player used fewer than
 	 * BYTECODE_LIMIT_BASE bytecodes this round, then it will
 	 * receive a flux bonus of
