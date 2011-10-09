@@ -51,6 +51,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 	private int turnsUntilMovementIdle;
 	private int turnsUntilAttackIdle;
 	private boolean broadcasted;
+	private boolean upkeepPaid;
 
 	private Signal movementSignal;
 
@@ -88,6 +89,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void processBeginningOfTurn() {
+		if(upkeepEnabled) {
+			upkeepPaid = flux>=type.upkeep;
+			if(upkeepPaid)
+				flux-=type.upkeep;
+		}
+		else
+			upkeepPaid = true;
     }
 
     @Override
@@ -133,6 +141,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 	public void adjustFlux(double amt) {
 		flux+=amt;
+		if(flux>=type.maxFlux)
+			flux=type.maxFlux;
 	}
 
     public Direction getDirection() {
@@ -207,6 +217,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		return broadcasted;
 	}
 
+	public void setLocation(MapLocation loc) {
+		super.setLocation(loc);
+		saveMapMemory(loc);
+	}
+
     public void setDirection(Direction dir) {
         myDirection = dir;
     }
@@ -265,7 +280,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public int getBytecodeLimit() {
-        return BYTECODE_LIMIT_BASE;
+        return upkeepPaid?BYTECODE_LIMIT_BASE:0;
     }
 
     public boolean hasBeenAttacked() {
