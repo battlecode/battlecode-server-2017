@@ -17,7 +17,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import battlecode.common.MapLocation;
-import battlecode.common.Chassis;
+import battlecode.common.RobotType;
 import battlecode.engine.signal.Signal;
 import battlecode.serial.*;
 import battlecode.server.proxy.Proxy;
@@ -75,22 +75,22 @@ public class AwesomenessAnalyzer {
 		public MapLocation location;
 		public int idleCountdown;
 		public float robotAwesomeness;
-		public Chassis type;
+		public RobotType type;
 
-		public RobotStat(MapLocation location, Chassis type) {
+		public RobotStat(MapLocation location, RobotType type) {
 			this.location = location;
 			idleCountdown = COUNTDOWN;
 			transform(type);
 		}
 
-		public void transform(Chassis type) {
+		public void transform(RobotType type) {
 			this.type=type;
-			//if(type.equals(Chassis.ARCHON))
-			//	robotAwesomeness=ARCHON_AWESOMENESS_MULTIPLIER;
-			//else if(type.equals(Chassis.WOUT))
+			if(type.equals(RobotType.ARCHON))
+				robotAwesomeness=ARCHON_AWESOMENESS_MULTIPLIER;
+			//else if(type.equals(RobotType.WOUT))
 			//	robotAwesomeness=WOUT_AWESOMENESS_MULTIPLIER;
-			//else
-			robotAwesomeness=type.weight;
+			else
+				robotAwesomeness=1.f;
 		}
 
 		public void resetCountDown() {

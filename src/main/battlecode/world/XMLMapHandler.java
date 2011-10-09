@@ -29,8 +29,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import battlecode.common.MapLocation;
 import battlecode.common.RobotLevel;
-import battlecode.common.ComponentType;
-import battlecode.common.Chassis;
+import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
@@ -100,43 +99,21 @@ class XMLMapHandler extends DefaultHandler {
 
     private static class RobotData implements SymbolData {
 
-        public static final ComponentType[] RECYCLER_COMPONENTS = new ComponentType[]{ComponentType.RECYCLER};
-        public static final ComponentType[] CONSTRUCTOR_COMPONENTS = new ComponentType[]{ComponentType.CONSTRUCTOR, ComponentType.SIGHT};
         public static final SymbolDataFactory factory = new SymbolDataFactory() {
 
             public RobotData create(Attributes att) {
                 String stype = getRequired(att, "type");
-                Chassis chassis;
-                ComponentType[] components;
-                if ("RECYCLER".equals(stype)) {
-                    chassis = Chassis.BUILDING;
-                    components = RECYCLER_COMPONENTS;
-                } else if ("CONSTRUCTOR".equals(stype)) {
-                    chassis = Chassis.LIGHT;
-                    components = CONSTRUCTOR_COMPONENTS;
-                } else {
-                    chassis = Chassis.valueOf(stype);
-                    String comp = getOptional(att, "components");
-                    if (comp == null || comp.isEmpty()) {
-                        components = new ComponentType[0];
-                    } else {
-                        String[] s = comp.split(",");
-                        components = new ComponentType[s.length];
-                        for (int i = 0; i < s.length; i++)
-                            components[i] = ComponentType.valueOf(s[i]);
-                    }
-                }
+                RobotType chassis;
+                chassis = RobotType.valueOf(stype);
                 Team team = Team.valueOf(getRequired(att, "team"));
-                return new RobotData(chassis, components, team);
+                return new RobotData(chassis, team);
             }
         };
-        public final Chassis type;
-        public final ComponentType[] components;
+        public final RobotType type;
         public final Team team;
 
-        public RobotData(Chassis type, ComponentType[] components, Team team) {
+        public RobotData(RobotType type, Team team) {
             this.type = type;
-            this.components = components;
             this.team = team;
         }
 
@@ -146,22 +123,17 @@ class XMLMapHandler extends DefaultHandler {
 
         public void createGameObject(GameWorld world, MapLocation loc) {
             InternalRobot robot = GameWorldFactory.createPlayer(world, type, loc, team, null, false);
-            for (ComponentType t : components) {
-                if (t == ComponentType.RECYCLER)
-                    world.createMine(loc);
-                world.visitSignal(new EquipSignal(robot, null, t));
-            }
         }
 
         public boolean equalsMirror(SymbolData data) {
             if (!(data instanceof RobotData))
                 return false;
             RobotData d = (RobotData) data;
-            return type == d.type && Arrays.equals(components, d.components) && team == d.team.opponent();
+            return type == d.type && team == d.team.opponent();
         }
 
         public String toString() {
-            return String.format("%s:%s:%s", type, team, Arrays.toString(components));
+            return String.format("%s:%s", type, team);
         }
     }
 
@@ -242,7 +214,7 @@ class XMLMapHandler extends DefaultHandler {
         factories.put("TERRAIN", TerrainData.factory);
         factories.put("RECYCLER", RobotData.factory);
         factories.put("CONSTRUCTOR", RobotData.factory);
-        for (Chassis ch : Chassis.values()) {
+        for (RobotType ch : RobotType.values()) {
             factories.put(ch.name(), RobotData.factory);
         }
         factories.put("MINE", MineData.factory);
@@ -588,25 +560,8 @@ class XMLMapHandler extends DefaultHandler {
                 } else if (d instanceof RobotData) {
                     RobotData rd = (RobotData) d;
                     switch (rd.type) {
-                        case DEBRIS:
-                            b.append('+');
-                            if (rd.team != Team.NEUTRAL) {
-                                warnIllegalUnit(rd);
-                                legal = false;
-                            }
-                            break;
-                        case BUILDING:
-                            if (rd.team == Team.NEUTRAL || !Arrays.equals(rd.components, RobotData.RECYCLER_COMPONENTS)) {
-                                warnIllegalUnit(rd);
-                                legal = false;
-                            }
-                            if (rd.team == Team.A)
-                                b.append('R');
-                            else
-                                b.append('r');
-                            break;
-                        case LIGHT:
-                            if (rd.team == Team.NEUTRAL || !Arrays.equals(rd.components, RobotData.CONSTRUCTOR_COMPONENTS)) {
+                    	case ARCHON:
+                            if (rd.team == Team.NEUTRAL) {
                                 warnIllegalUnit(rd);
                                 legal = false;
                             }

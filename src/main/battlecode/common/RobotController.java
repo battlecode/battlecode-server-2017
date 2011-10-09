@@ -79,52 +79,15 @@ public interface RobotController {
     public Robot getRobot();
 
     /**
-     * Gets this robot's chassis type.
+     * Gets this robot's type.
      *
-     * @return this robot's chassis type.
+     * @return this robot's type.
      */
-    public Chassis getChassis();
-
-    /**
-     * Returns all this robot's components.
-     */
-    public ComponentController[] components();
-
-    /**
-     * Returns the components that have been added to this robot
-     * since the last call to newComponents().
-     */
-    public ComponentController[] newComponents();
-
-    /**
-     * Returns all components of the given type that this robot
-     * possesses.
-     */
-    //public ComponentController [] components(ComponentType type);
-    /**
-     * Returns all components of the given component class that
-     * this robot possesses.
-     */
-    //public ComponentController [] components(ComponentClass cls);
+    public RobotType getType();
 
     // ***********************************
     // ****** ACTION METHODS ********
     // ***********************************
-    public void turnOff();
-
-    /**
-     * Returns true if the robot has been turned off since the last call
-     * to {@code wasTurnedOff()}.
-     */
-    public boolean wasTurnedOff();
-
-    /**
-     * Turns on the robot at the given location and level.  The robot must be
-     * allied and adjacent.
-     *
-     * @throws GameActionException
-     */
-    public void turnOn(MapLocation Loc, RobotLevel level) throws GameActionException;
 
     /**
      * Ends the current round.  If your player used fewer than

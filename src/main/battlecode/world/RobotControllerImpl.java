@@ -62,7 +62,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public RobotControllerImpl(GameWorld gw, InternalRobot r) {
         super(gw, r);
-        r.setRC(this);
     }
 
     //*********************************
@@ -126,47 +125,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
 
-    public Chassis getChassis() {
-        return robot.getChassis();
-    }
-
-    public ComponentController[] components() {
-        return robot.getComponentControllers();
-    }
-
-    public ComponentController[] newComponents() {
-        return robot.getNewComponentControllers();
-    }
-
-    public ComponentController[] components(ComponentType type) {
-        return robot.getComponentControllers(type);
-    }
-
-    public ComponentController[] components(ComponentClass cls) {
-        return robot.getComponentControllers(cls);
+    public RobotType getType() {
+        return robot.type;
     }
 
     //***********************************
     //****** ACTION METHODS *************
     //***********************************
-
-    public void turnOff() {
-		gameWorld.visitSignal(new TurnOffSignal(robot,true));
-    	RobotMonitor.endRunner();
-	}
-
-    public boolean wasTurnedOff() {
-        return robot.queryHasBeenOff();
-    }
-
-	public void turnOn(MapLocation loc, RobotLevel height) throws GameActionException {
-		assertNotNull(loc);
-		assertRobotHeight(height);
-		assertWithinRange(loc,2);
-		InternalRobot ir = gameWorld.getRobot(loc,height);
-		assertSameTeam(ir);
-		gameWorld.visitSignal(new TurnOnSignal(ir,robot,false));
-	}
 
 	/**
      * {@inheritDoc}
@@ -174,7 +139,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public void yield() {
 		int bytecodesBelowBase = BYTECODE_LIMIT_BASE - RobotMonitor.getBytecodesUsed();
 		if(bytecodesBelowBase>0)
-			gameWorld.adjustResources(robot.getTeam(),YIELD_BONUS*bytecodesBelowBase/BYTECODE_LIMIT_BASE*robot.chassis.upkeep);	
+			gameWorld.adjustResources(robot.getTeam(),YIELD_BONUS*bytecodesBelowBase/BYTECODE_LIMIT_BASE*robot.type.upkeep);	
         RobotMonitor.endRunner();
     }
 
@@ -271,11 +236,4 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getID();
     }
 
-    public void processBeginningOfTurn() {
-        if ((!robot.inTransport())&&!(robot.getLocation().equals(locThisTurn) && robot.getDirection().equals(dirThisTurn))) {
-            robot.saveMapMemory(locThisTurn, robot.getLocation(), false);
-            locThisTurn = robot.getLocation();
-            dirThisTurn = robot.getDirection();
-        }
-    }
 }

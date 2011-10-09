@@ -291,21 +291,21 @@ public class GameMap implements GenericGameMap {
         return new int[][]{Arrays.copyOf(XOffsets, nOffsets), Arrays.copyOf(YOffsets, nOffsets)};
     }
 
-    public static Map<ComponentType, int[][][]> computeVisibleOffsets() {
+    public static Map<RobotType, int[][][]> computeVisibleOffsets() {
         int MAX_RANGE;
         final MapLocation CENTER = new MapLocation(0, 0);
-        Map<ComponentType, int[][][]> offsets = new EnumMap<ComponentType, int[][][]>(ComponentType.class);
+        Map<RobotType, int[][][]> offsets = new EnumMap<RobotType, int[][][]>(RobotType.class);
         int[][][] offsetsForType;
         int[] XOffsets = new int[169];
         int[] YOffsets = new int[169];
         int nOffsets;
-        for (ComponentType type : ComponentType.values()) {
+        for (RobotType type : RobotType.values()) {
             offsetsForType = new int[9][][];
             offsets.put(type, offsetsForType);
-            if ((type.angle >= 360.0)) {
+            if ((type.sensorAngle >= 360.0)) {
                 // Same range of vision independent of direction;
                 // save memory by using the same array each time
-                int[][] tmpOffsets = computeOffsets360(type.range);
+                int[][] tmpOffsets = computeOffsets360(type.sensorRadiusSquared);
                 for (int i = 0; i < 8; i++) {
                     offsetsForType[i] = tmpOffsets;
                 }
@@ -313,12 +313,12 @@ public class GameMap implements GenericGameMap {
                 for (int i = 0; i < 8; i++) {
                     Direction dir = Direction.values()[i];
                     nOffsets = 0;
-                    MAX_RANGE = (int) Math.sqrt(type.range);
+                    MAX_RANGE = (int) Math.sqrt(type.sensorRadiusSquared);
                     for (int y = -MAX_RANGE; y <= MAX_RANGE; y++) {
                         for (int x = -MAX_RANGE; x <= MAX_RANGE; x++) {
                             MapLocation loc = new MapLocation(x, y);
-                            if (CENTER.distanceSquaredTo(loc) <= type.range
-                                    && GameWorld.inAngleRange(CENTER, dir, loc, type.cosHalfAngle)) {
+                            if (CENTER.distanceSquaredTo(loc) <= type.sensorRadiusSquared
+                                    && GameWorld.inAngleRange(CENTER, dir, loc, type.sensorCosHalfTheta)) {
                                 XOffsets[nOffsets] = x;
                                 YOffsets[nOffsets] = y;
                                 nOffsets++;

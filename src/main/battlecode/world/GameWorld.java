@@ -92,7 +92,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             if (!(obj instanceof InternalRobot))
                 continue;
             InternalRobot r = (InternalRobot) obj;
-            if (r.isOn()) {
+            if (r.getFlux()>=r.type.upkeep) {
                 Team team = r.getTeam();
                 totalEnergon[team.ordinal()] += r.getEnergonLevel();
                 if (team == Team.A)
@@ -469,44 +469,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return null;
     }
 
-    public Exception visitEquipSignal(EquipSignal s) {
-        InternalRobot r = (InternalRobot) getObjectByID(s.robotID);
-        r.equip(s.component);
-        addSignal(s);
-        return null;
-    }
-
     public Exception visitIndicatorStringSignal(IndicatorStringSignal s) {
         try {
             addSignal(s);
         } catch (Exception e) {
             return e;
         }
-        return null;
-    }
-
-    public Exception visitIronShieldSignal(IronShieldSignal s) {
-        InternalRobot r = getRobotByID(s.robotID);
-        r.activateShield();
-        addSignal(s);
-        return null;
-    }
-
-    public Exception visitLoadSignal(LoadSignal s) {
-        InternalRobot transport = getRobotByID(s.transportID);
-        InternalRobot passenger = getRobotByID(s.passengerID);
-        transport.addPassenger(passenger);
-        passenger.loadOnto(transport);
-        addSignal(s);
-        return null;
-    }
-
-    public Exception visitUnloadSignal(UnloadSignal s) {
-        InternalRobot transport = getRobotByID(s.transportID);
-        InternalRobot passenger = getRobotByID(s.passengerID);
-        transport.removePassenger(passenger);
-        passenger.unloadTo(s.unloadLoc);
-        addSignal(s);
         return null;
     }
 
@@ -586,12 +554,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             }
 
             //note: this also adds the signal
-            if (s.getType() == Chassis.DUMMY) {
-                InternalRobot dummy = new InternalRobot(this, s.getType(), loc, s.getTeam(), false);
-                this.addSignal(new SpawnSignal(dummy, parent));
-            } else {
-                GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent);
-            }
+            GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent);
 
         } catch (Exception e) {
             return e;
@@ -599,18 +562,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return null;
     }
 
-    public Exception visitTurnOnSignal(TurnOnSignal s) {
-        for (int i : s.robotIDs)
-            getRobotByID(i).setPower(true);
-        addSignal(s);
-        return null;
-    }
-
-    public Exception visitTurnOffSignal(TurnOffSignal s) {
-        getRobotByID(s.robotID).setPower(false);
-        addSignal(s);
-        return null;
-    }
     // *****************************
     //    UTILITY METHODS
     // *****************************

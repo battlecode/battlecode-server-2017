@@ -14,8 +14,7 @@ import java.util.Map;
 
 import battlecode.common.MapLocation;
 import battlecode.common.RobotLevel;
-import battlecode.common.Chassis;
-import battlecode.common.ComponentType;
+import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
@@ -38,7 +37,7 @@ public class GameWorldFactory {
         return handler.createGameWorld(teamA, teamB, archonMemory);
     }
 
-	public static InternalRobot createPlayer(GameWorld gw, Chassis type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
+	public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
 
 		// first, make the robot
 		InternalRobot robot = new InternalRobot(gw, type, loc, t, wakeDelay);
@@ -47,30 +46,15 @@ public class GameWorldFactory {
 	}
 
 	// defaults to wakeDelay = true
-	public static InternalRobot createPlayer(GameWorld gw, Chassis type, MapLocation loc, Team t, InternalRobot parent) {
+	public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent) {
 		return createPlayer(gw, type, loc, t, parent, true);
-	}
-
-	public static boolean isInanimate(Chassis ch) {
-		switch(ch) {
-			case DUMMY:
-			case DEBRIS:
-				return true;
-			default:
-				return false;
-		}
 	}
 
 	private static void loadPlayer(GameWorld gw, InternalRobot robot, Team t, InternalRobot parent) {
 		gw.addSignal(new SpawnSignal(robot, parent));
 		RobotControllerImpl rc = new RobotControllerImpl(gw, robot);
-		if(robot.getChassis().motor!=null)
-			robot.equip(robot.getChassis().motor);
-		if(robot.getChassis()==Chassis.BUILDING)
-			robot.equip(ComponentType.BUILDING_SENSOR);
 		String teamName = gw.getTeamName(t);
-		if(!isInanimate(robot.getChassis()))
-			PlayerFactory.loadPlayer(rc,teamName);
+		PlayerFactory.loadPlayer(rc,teamName);
 	}
 
 }
