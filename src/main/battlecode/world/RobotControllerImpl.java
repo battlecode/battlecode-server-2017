@@ -12,6 +12,9 @@ import battlecode.engine.signal.Signal;
 import battlecode.world.signal.*;
 import java.util.Arrays;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+
 /*
 TODO:
 - tweak player
@@ -179,7 +182,68 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //***********************************
     //****** SENSING METHODS *******
     //***********************************
-    /**
+  
+	public void assertCanSense(MapLocation loc) throws GameActionException {
+		if(!checkCanSense(loc))
+			throw new GameActionException(CANT_SENSE_THAT,"That location is not within the robot's sensor range.");
+	}
+
+	public void assertCanSense(InternalObject obj) throws GameActionException {
+		if(!checkCanSense(obj))
+			throw new GameActionException(CANT_SENSE_THAT,"That object is not within the robot's sensor range.");
+	}
+
+	public boolean checkCanSense(MapLocation loc) {
+		MapLocation myLoc = robot.getLocation();
+		return myLoc.distanceSquaredTo(loc)<=robot.type.sensorRadiusSquared
+			&& gameWorld.inAngleRange(myLoc,robot.getDirection(),loc,robot.type.sensorCosHalfTheta);
+	}
+
+	public boolean checkCanSense(InternalObject obj) {
+		return obj.exists() && checkCanSense(obj.getLocation());
+	}
+
+	public GameObject senseObjectAtLocation(MapLocation loc, RobotLevel height) throws GameActionException {
+        assertNotNull(loc);
+        assertNotNull(height);
+        assertCanSense(loc);
+        return gameWorld.getObject(loc, height);
+    } 
+
+    @SuppressWarnings("unchecked")
+    public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type) {
+        Predicate<InternalObject> p = new Predicate<InternalObject>() {
+            public boolean apply(InternalObject o) {
+                return checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
+            }
+        };
+        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
+    }
+
+    public RobotInfo senseRobotInfo(Robot r) throws GameActionException {
+        InternalRobot ir = castInternalRobot(r);
+        assertCanSense(ir);
+        RobotType ch = ir.type;
+        boolean on = true;
+        return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getMaxEnergon(),
+                ir.getDirection(), ch);
+    }
+
+    public MapLocation senseLocationOf(GameObject o) throws GameActionException {
+        InternalObject io = castInternalObject(o);
+        assertCanSense(io);
+        return io.sensedLocation();
+    }
+
+    public boolean canSenseObject(GameObject o) {
+        return checkCanSense(castInternalObject(o));
+    }
+
+    public boolean canSenseSquare(MapLocation loc) {
+        return checkCanSense(loc);
+    }
+
+	/**
      * {@inheritDoc}
      */
     public TerrainTile senseTerrainTile(MapLocation loc) {

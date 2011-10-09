@@ -85,6 +85,33 @@ public interface RobotController {
      */
     public RobotType getType();
 
+	// ***********************************
+    // ****** SENSOR METHODS ********
+    // ***********************************
+
+	/**
+     * Sense objects of type <code>type</code> that are within this sensor's range.
+     */
+    public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type);
+
+    /**
+     * Sense the location of the object <code>o</code>
+     */
+    public MapLocation senseLocationOf(GameObject o) throws GameActionException;
+
+    /**
+     * Sense the RobotInfo for the robot <code>r</code>.
+     */
+    public RobotInfo senseRobotInfo(Robot r) throws GameActionException;
+
+    public boolean canSenseObject(GameObject o);
+
+	/**
+	 * Returns true if this robot can sense the location {@code loc}.
+	 */
+    public boolean canSenseSquare(MapLocation loc);
+
+
     // ***********************************
     // ****** ACTION METHODS ********
     // ***********************************

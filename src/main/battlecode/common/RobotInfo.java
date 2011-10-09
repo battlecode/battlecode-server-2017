@@ -19,30 +19,18 @@ public class RobotInfo {
     public final double maxHp;
     /** The direction this Robot is facing. */
     public final Direction direction;
-    /** Whether or not this Robot is currently powered on. */
-    public final boolean on;
-    public final Chassis chassis;
-    /**
-     * The components of the robot that was sensed, if the sensor is capable
-     * of sensing them.  Components can be sensed if: <ul>
-     * <li>the sensor is a satellite sensor, or</li>
-     * <li>the two robots are adjacent, and the robot being sensed is off.</li></ul>
-     * Otherwise, {@code components} will be {@code null}.
-     */
-    public final ComponentType[] components;
-
+    public final RobotType type;
+    
     public RobotInfo(Robot robot, MapLocation location,
             double hitpoints, double maxHp, Direction direction,
-            boolean on, ComponentType[] components, Chassis chassis) {
+            RobotType type) {
         super();
         this.robot = robot;
         this.location = location;
         this.hitpoints = hitpoints;
         this.maxHp = maxHp;
         this.direction = direction;
-        this.on = on;
-        this.components = components;
-        this.chassis = chassis;
+        this.type = type;
     }
 
     public int hashCode() {
