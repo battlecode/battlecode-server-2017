@@ -147,9 +147,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
 	public void transferFlux(MapLocation loc, RobotLevel height, double amount) throws GameActionException {
+		if(amount<=0||Double.isNaN(amount))
+			throw new IllegalArgumentException("The amount of flux transferred must be positive.");
+		if(amount>robot.getFlux())
+			throw new GameActionException(NOT_ENOUGH_FLUX,"You do not have enough flux to do that.");
 		assertWithinRange(loc,2);
 		InternalRobot ir = robotOrException(loc,height);
-		robot.payFlux(amount);
+		robot.adjustFlux(-amount);
 		ir.adjustFlux(amount);
 		gameWorld.addSignal(new TransferFluxSignal(robot,ir,amount));
 	}
@@ -168,17 +172,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         gameWorld.notifyBreakpoint();
     }
 
-    /*
-    public void equip(Component c) throws GameActionException {
-    InternalComponent ic = castInternalComponent(c);
-    assertWithinRange(ic.getLocation(),2);
-    if(!ic.canBeEquipped())
-    throw new GameActionException(CANT_EQUIP_THAT,"You can't equip that component.");
-    if(!robot.hasRoomFor(ic))
-    throw new GameActionException(CANT_EQUIP_THAT,"There is not enough room in the chassis for that component.");
-    robot.equip(ic);
-    }
-     */
     //***********************************
     //****** SENSING METHODS *******
     //***********************************
