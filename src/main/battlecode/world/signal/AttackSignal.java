@@ -24,31 +24,20 @@ public class AttackSignal extends Signal {
 	/** The height of the position that the robot attacked */
 	public final RobotLevel targetHeight;
 
-	/** The weapon that was used */
-	public final ComponentType weaponType;
-
-	public final double damage;
-
 	/** 
 	 * Creates a signal for a robot broadcast.
 	 *
 	 * @param robot the robot that attacked
 	 * @param targetLoc the location that the robot attacked
 	 */
-	public AttackSignal(InternalRobot robot, ComponentType weapon, MapLocation targetLoc, RobotLevel targetHeight, double damage) {
+	public AttackSignal(InternalRobot robot, MapLocation targetLoc, RobotLevel targetHeight) {
 		this.robotID = robot.getID();
-		this.weaponType = weapon;
 		this.targetLoc = targetLoc;
 		this.targetHeight = targetHeight;
-		this.damage = damage;
-	}
-
-	public AttackSignal(InternalRobot robot, ComponentType weapon, MapLocation targetLoc, RobotLevel targetHeight) {
-		this(robot,weapon,targetLoc,targetHeight,weapon.attackPower);
 	}
 
 	/**
-	 * Returns the ID of the robot that just broadcast.
+	 * Returns the ID of the robot that just attacked.
 	 *
 	 * @return the messaging robot's ID
 	 */
@@ -56,10 +45,6 @@ public class AttackSignal extends Signal {
 		return robotID;
 	}
 
-	public ComponentType getWeaponType() {
-		return weaponType;
-	}
-	
 	/**
 	 * Returns the location that the robot attacked
 	 *

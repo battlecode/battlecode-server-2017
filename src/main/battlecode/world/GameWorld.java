@@ -385,7 +385,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             RobotLevel level = s.getTargetHeight();
             InternalRobot target = getRobot(targetLoc, level);
 
-            double totalDamage = s.damage;
+            double totalDamage = attacker.type.attackPower;
 
             if (target != null) {
                 // takeDamage is responsible for checking the armor

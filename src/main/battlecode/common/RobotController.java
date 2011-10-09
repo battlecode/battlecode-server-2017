@@ -172,6 +172,23 @@ public interface RobotController {
      */
     public boolean canMove(Direction dir);
 
+	// ***********************************
+    // ****** ATTACK METHODS *******
+    // ***********************************
+
+	public int roundsUntilAttackIdle();
+
+	public boolean isAttackActive();
+
+	public boolean canAttackSquare(MapLocation loc);
+
+ 	/**
+     * Attacks the given location and height.
+     *
+     * @cooldown
+     */
+    public void attackSquare(MapLocation loc, RobotLevel height) throws GameActionException;
+
     // ***********************************
     // ****** OTHER ACTION METHODS *******
     // ***********************************

@@ -187,9 +187,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 	}
 
 	public boolean checkCanSense(MapLocation loc) {
-		MapLocation myLoc = robot.getLocation();
+		MapLocation myLoc = getLocation();
 		return myLoc.distanceSquaredTo(loc)<=robot.type.sensorRadiusSquared
-			&& gameWorld.inAngleRange(myLoc,robot.getDirection(),loc,robot.type.sensorCosHalfTheta);
+			&& gameWorld.inAngleRange(myLoc,getDirection(),loc,robot.type.sensorCosHalfTheta);
 	}
 
 	public boolean checkCanSense(InternalObject obj) {
@@ -299,6 +299,50 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotNull(d);
         if (d == Direction.NONE || d == Direction.OMNI)
             throw new IllegalArgumentException("You cannot move in the direction NONE or OMNI.");
+    }
+	
+	// ***********************************
+	// ****** ATTACK METHODS ********
+	// ***********************************
+
+	public int roundsUntilAttackIdle() {
+		return robot.roundsUntilAttackIdle();
+	}
+
+	public boolean isAttackActive() {
+		return robot.roundsUntilAttackIdle()>0;
+	}
+
+	protected void assertNotAttacking() throws GameActionException {
+		if(isAttackActive())
+			throw new GameActionException(ALREADY_ACTIVE,"This robot is already attacking.");
+	}
+
+	protected void assertCanAttack(MapLocation loc, RobotLevel height) throws GameActionException {
+		if(!robot.type.canAttack(height))
+			throw new GameActionException(OUT_OF_RANGE,"This robot can't attack robots at that height.");
+		if(!canAttackSquare(loc))
+			throw new GameActionException(OUT_OF_RANGE,"That location is out of this robot's attack range");
+	}
+
+	public boolean canAttackSquare(MapLocation loc) {
+		assertNotNull(loc);
+		MapLocation myLoc = getLocation();
+		int d = myLoc.distanceSquaredTo(loc);
+		return d<=robot.type.attackRadiusMaxSquared && d>= robot.type.attackRadiusMinSquared
+			&& gameWorld.inAngleRange(myLoc,getDirection(),loc,robot.type.attackCosHalfTheta);
+	}
+
+	public void attackSquare(MapLocation loc, RobotLevel height) throws GameActionException {
+        assertNotAttacking();
+        assertNotNull(loc);
+        assertNotNull(height);
+        assertCanAttack(loc,height);
+        robot.activateAttack(new AttackSignal(robot, loc, height),robot.type.attackDelay);
+		// if this robot killed itself, its turn should end
+		if(robot.getEnergonLevel()<0) {
+			throw new RobotDeathException();
+		}
     }
 
     //************************************
