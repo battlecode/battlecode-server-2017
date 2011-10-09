@@ -48,6 +48,12 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     protected GameMap.MapMemory mapMemory;
     public final RobotType type;
 
+	private int turnsUntilMovementIdle;
+	private int turnsUntilAttackIdle;
+	private boolean broadcasted;
+
+	private Signal movementSignal;
+
 	private InternalRobotBuffs buffs;
 
     public InternalRobotBuffs getBuffs() {
@@ -87,6 +93,15 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @Override
     public void processEndOfTurn() {
         super.processEndOfTurn();
+		if(movementSignal!=null) {
+			myGameWorld.visitSignal(movementSignal);
+			movementSignal=null;
+		}
+		if(turnsUntilAttackIdle>0)
+			turnsUntilAttackIdle--;
+		if(turnsUntilMovementIdle>0)
+			turnsUntilMovementIdle--;
+		broadcasted = false;
     }
 
     @Override
@@ -164,6 +179,33 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public double getMaxEnergon() {
         return type.maxEnergon;
     }
+
+	public void activateMovement(Signal s, int delay) {
+		movementSignal = s;
+		turnsUntilMovementIdle = delay;
+	}
+
+	public void activateAttack(Signal s, int delay) {
+		myGameWorld.visitSignal(s);
+		turnsUntilAttackIdle = delay;
+	}
+	
+	public void activateBroadcast(Signal s) {
+		myGameWorld.visitSignal(s);
+		broadcasted = true;
+	}
+
+	public int roundsUntilAttackIdle() {
+		return turnsUntilAttackIdle;
+	}
+
+	public int roundsUntilMovementIdle() {
+		return turnsUntilMovementIdle;
+	}
+
+	public boolean hasBroadcasted() {
+		return broadcasted;
+	}
 
     public void setDirection(Direction dir) {
         myDirection = dir;
