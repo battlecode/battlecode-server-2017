@@ -58,9 +58,6 @@ TODO:
  */
 public class RobotControllerImpl extends ControllerShared implements RobotController, GenericController {
 
-    protected MapLocation locThisTurn;
-    protected Direction dirThisTurn;
-
     public RobotControllerImpl(GameWorld gw, InternalRobot r) {
         super(gw, r);
     }
@@ -77,7 +74,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
      * {@inheritDoc}
      */
     public Direction getDirection() {
-        return dirThisTurn;
+        return robot.getDirection();
     }
 
     /**
@@ -102,8 +99,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
      * {@inheritDoc}
      */
     public MapLocation getLocation() {
-        return locThisTurn;
-    }
+    	return robot.getLocation();
+	}
 
     /**
      * {@inheritDoc}
