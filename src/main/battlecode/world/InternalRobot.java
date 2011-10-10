@@ -76,6 +76,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         saveMapMemory(null, loc, false);
         controlBits = 0;
 
+		buffs = new InternalRobotBuffs(this);
+
     }
 
 	public void addAction(Signal s) {
