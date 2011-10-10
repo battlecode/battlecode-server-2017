@@ -76,6 +76,10 @@ public enum RobotType {
 		}
 	}
 
+	public boolean isAirborne() {
+		return level==RobotLevel.IN_AIR;
+	}
+
 	RobotType(RobotLevel level,
 		double maxEnergon,
 		double maxFlux,
