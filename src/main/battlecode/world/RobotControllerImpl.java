@@ -80,7 +80,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     /**
      * {@inheritDoc}
      */
-    public double getHitpoints() {
+    public double getEnergon() {
         return robot.getEnergonLevel();
     }
 
@@ -91,9 +91,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     /**
      * {@inheritDoc}
      */
-    public double getMaxHp() {
+    public double getMaxEnergon() {
         return robot.getMaxEnergon();
     }
+
+	public double getFlux() {
+		return robot.getFlux();
+	}
 
     /**
      * {@inheritDoc}
@@ -231,7 +235,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         RobotType ch = ir.type;
         boolean on = true;
         return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getMaxEnergon(),
-                ir.getDirection(), ch);
+                ir.getFlux(), ir.getDirection(), ch);
     }
 
     public MapLocation senseLocationOf(GameObject o) throws GameActionException {

@@ -14,21 +14,23 @@ public class RobotInfo {
     /** Location of this Robot. */
     public final MapLocation location;
     /** Hit points of this Robot. */
-    public final double hitpoints;
+    public final double energon;
     /** Maximum hit points of this Robot. */
-    public final double maxHp;
+    public final double maxEnergon;
+	public final double flux;
     /** The direction this Robot is facing. */
     public final Direction direction;
     public final RobotType type;
     
     public RobotInfo(Robot robot, MapLocation location,
-            double hitpoints, double maxHp, Direction direction,
+            double hitpoints, double maxHp, double flux, Direction direction,
             RobotType type) {
         super();
         this.robot = robot;
         this.location = location;
-        this.hitpoints = hitpoints;
-        this.maxHp = maxHp;
+        this.energon = hitpoints;
+        this.maxEnergon = maxHp;
+		this.flux = flux;
         this.direction = direction;
         this.type = type;
     }

@@ -14,18 +14,20 @@ public interface RobotController {
     // ****** QUERY METHODS ********
     // *********************************
     /**
-     * Gets the current hit points of this robot.
+     * Gets the current energon of this robot.
      *
      * @return this robot's current energon level
      */
-    public double getHitpoints();
+    public double getEnergon();
 
     /**
-     * Gets the maximum hit points of this robot.
+     * Gets the maximum energon of this robot.
      *
      * @return this robot's maximum energon level
      */
-    public double getMaxHp();
+    public double getMaxEnergon();
+
+	public double getFlux();
 
     public double getTeamResources();
 
