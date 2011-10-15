@@ -157,6 +157,19 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		gameWorld.addSignal(new TransferFluxSignal(robot,ir,amount));
 	}
 
+	public void spawn(RobotType type) throws GameActionException {
+		if(robot.type!=RobotType.ARCHON)
+			throw new IllegalStateException("Only archons can spawn.");
+        assertNotNull(type);
+        assertNotMoving();
+        assertHaveFlux(type.spawnCost);
+		MapLocation loc = getLocation().add(getDirection());
+		if (!gameWorld.canMove(type.level, loc))
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
+        robot.adjustFlux(-type.spawnCost);
+        robot.activateMovement(new SpawnSignal(loc, type, robot.getTeam(), robot),1);
+    }
+
     /**
      * {@inheritDoc}
      */

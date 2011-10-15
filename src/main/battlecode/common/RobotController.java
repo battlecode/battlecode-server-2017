@@ -89,6 +89,8 @@ public interface RobotController {
     // ****** SENSOR METHODS ********
     // ***********************************
 
+	public GameObject senseObjectAtLocation(MapLocation loc, RobotLevel height) throws GameActionException;
+
 	/**
      * Sense objects of type <code>type</code> that are within this sensor's range.
      */
@@ -219,7 +221,25 @@ public interface RobotController {
     // ****** OTHER ACTION METHODS *******
     // ***********************************
 
-	 /**
+	/**
+     * Queues a spawn action to be performed at the end of this robot's turn.
+     * When the action is executed, a new robot will be created at
+     * directly in front of this robot.  The square must not already be occupied.
+     * The new robot is created and starts executing bytecodes immediately, but
+     * it will not be able to perform any actions for <code>GameConstants.WAKE_DELAY</code>
+     * rounds.
+     *
+	 * @throws IllegalStateException if this robot is not an ARCHON
+     * @throws GameActionException if this robot is currently moving (ALREADY_ACTIVE)
+     * @throws GameActionException if there not enough resources to build a robot of type <code>type</code> (NOT_ENOUGH_FLUX)
+     * @throws GameActionException if <code>loc</code> is already occupied (CANT_MOVE_THERE)
+     *
+     * @param type
+     *            the type of chassis to spawn; cannot be null.
+     */
+    public void spawn(RobotType type) throws GameActionException;
+	
+	/**
      * Transfers the specified amount of flux to the robot at location
      * <code>loc</code> and RobotLevel <code>height</code>. The robot
      * receiving the transfer must be adjacent to or in the same location as the

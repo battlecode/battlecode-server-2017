@@ -1,10 +1,10 @@
 package battlecode.world;
 
-import battlecode.common.Chassis;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -20,6 +20,7 @@ import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.GenericWorld;
+import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.signal.*;
 import battlecode.serial.DominationFactor;
@@ -46,9 +47,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
     private double[] teamResources = new double[]{GameConstants.INITIAL_FLUX, GameConstants.INITIAL_FLUX};
 
-    public Map<MapLocation, ArrayList<MapLocation>> PowerNodeGraph = new HashMap<MapLocation, ArrayList<MapLocation>>();
-    public ArrayList<InternalPowerNode> powerNodes = new ArrayList<InternalPowerNode>();
-    
+    private Map<MapLocation, ArrayList<MapLocation>> powerNodeGraph = new HashMap<MapLocation, ArrayList<MapLocation>>();
+    private ArrayList<InternalPowerNode> powerNodes = new ArrayList<InternalPowerNode>();
+   
+	// robots to remove from the game at end of turn
+	private List<InternalRobot> deadRobots = new ArrayList<InternalRobot>();
+
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldArchonMemory) {
         super(gm.getSeed(), teamA, teamB, oldArchonMemory);
@@ -348,14 +352,18 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void createNodeLink(MapLocation id1, MapLocation id2)
     {
-    	if(!this.PowerNodeGraph.containsKey(id1))
-    		this.PowerNodeGraph.put(id1, new ArrayList<MapLocation>());
-		this.PowerNodeGraph.get(id1).add(id2);
+    	if(!this.powerNodeGraph.containsKey(id1))
+    		this.powerNodeGraph.put(id1, new ArrayList<MapLocation>());
+		this.powerNodeGraph.get(id1).add(id2);
 
-    	if(!this.PowerNodeGraph.containsKey(id2))
-    		this.PowerNodeGraph.put(id2, new ArrayList<MapLocation>());
-		this.PowerNodeGraph.get(id2).add(id1);
+    	if(!this.powerNodeGraph.containsKey(id2))
+    		this.powerNodeGraph.put(id2, new ArrayList<MapLocation>());
+		this.powerNodeGraph.get(id2).add(id1);
     }
+
+	public ArrayList<MapLocation> getAdjacentNodes(MapLocation loc) {
+		return powerNodeGraph.get(loc);
+	}
         
     public InternalPowerNode createNode(MapLocation loc, Team team) {
     	InternalPowerNode n = new InternalPowerNode(this, loc, team);
@@ -364,6 +372,21 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         powerNodes.add(n);
         return n;
     }
+
+	public void notifyDied(InternalRobot r) {
+		if(r==RobotMonitor.getCurrentRobot())
+			throw new RobotDeathException();
+		else
+			deadRobots.add(r);
+	}
+
+	public void removeDead() {
+		for(InternalRobot r : deadRobots) {
+			visitSignal(new DeathSignal(r));
+		}
+		deadRobots.clear();
+	}
+
     // ******************************
     // SIGNAL HANDLER METHODS
     // ******************************
@@ -391,18 +414,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 // takeDamage is responsible for checking the armor
                 target.takeDamage(totalDamage);
             }
-
-            /* splash, in case we still want it
-            if (attacker.getRobotType() == RobotType.CHAINER) {
-            InternalRobot[] hits = getAllRobotsWithinRadiusDonutSq(targetLoc, GameConstants.CHAINER_SPLASH_RADIUS_SQUARED, -1);
-            for (InternalRobot r : hits) {
-            if (r.getRobotLevel() == level)
-            r.changeEnergonLevelFromAttack(-totalDamage);
-            }
-            } else if (target != null) {
-            target.changeEnergonLevelFromAttack(-totalDamage);
-            }
-             */
 
             addSignal(s);
         } catch (Exception e) {

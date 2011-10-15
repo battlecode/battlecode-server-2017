@@ -103,6 +103,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @Override
     public void processEndOfTurn() {
         super.processEndOfTurn();
+		myGameWorld.removeDead();
 		if(movementSignal!=null) {
 			myGameWorld.visitSignal(movementSignal);
 			movementSignal=null;
@@ -154,11 +155,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void takeDamage(double baseAmount) {
         if (baseAmount < 0) {
             changeEnergonLevel(-baseAmount);
-            return;
         }
 		else {
             changeEnergonLevelFromAttack(-baseAmount);
-            return;
         }
     }
 
@@ -175,7 +174,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         energonChanged = true;
 
         if (myEnergonLevel <= 0) {
-            suicide();
+            myGameWorld.notifyDied(this);
         }
     }
 

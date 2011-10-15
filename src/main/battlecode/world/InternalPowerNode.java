@@ -26,7 +26,7 @@ public class InternalPowerNode extends InternalObject implements PowerNode {
 	
 	public boolean connected(Team t)
 	{
-		ArrayList<MapLocation> adj = this.getGameWorld().PowerNodeGraph.get(this.getLocation());
+		ArrayList<MapLocation> adj = this.getGameWorld().getAdjacentNodes(getLocation());
 		for(MapLocation ml : adj)
 		{
 			InternalPowerNode pn = this.getGameWorld().getObjectOfType(ml, RobotLevel.MINE, InternalPowerNode.class);
