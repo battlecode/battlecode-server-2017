@@ -100,8 +100,12 @@ public class Engine {
      */
     public boolean receiveSignal(Signal s) {
         gameWorld.clearAllSignals();
-        Exception result = s.accept(gameWorld);
-        return (result == null);
+		try {
+        	s.accept(gameWorld);
+		} catch(RuntimeException e) {
+			return false; 
+		}
+		return true;
     }
 
     public boolean isRunning() {

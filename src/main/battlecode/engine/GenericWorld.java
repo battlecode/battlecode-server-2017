@@ -6,7 +6,7 @@ import battlecode.engine.signal.SignalHandler;
  * An interface that includes the part of the game world that isn't expected to change
  * from year to year.
  */
-public interface GenericWorld extends GameWorldViewer, SignalHandler<Exception> {
+public interface GenericWorld extends GameWorldViewer, SignalHandler {
 
 	public void beginningOfExecution(int id);
 

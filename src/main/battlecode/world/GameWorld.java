@@ -33,7 +33,7 @@ import battlecode.world.signal.*;
  * containing and modifying the game map and the objects on it.
  */
 /*
-TODO:
+oODO:
 - comments
 - move methods from RCimpl to here, add signalhandler methods
  */
@@ -390,39 +390,29 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     // ******************************
     // SIGNAL HANDLER METHODS
     // ******************************
-    SignalHandler<Exception> signalHandler = new AutoSignalHandler<Exception>(this) {
+    SignalHandler signalHandler = new AutoSignalHandler(this);
 
-        public Exception exceptionResponse(Exception e) {
-            return e;
-        }
-    };
-
-    public Exception visitSignal(Signal s) {
-        return signalHandler.visitSignal(s);
+    public void visitSignal(Signal s) {
+        signalHandler.visitSignal(s);
     }
 
-    public Exception visitAttackSignal(AttackSignal s) {
-        try {
-            InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
-            MapLocation targetLoc = s.getTargetLoc();
-            RobotLevel level = s.getTargetHeight();
-            InternalRobot target = getRobot(targetLoc, level);
+    public void visitAttackSignal(AttackSignal s) {
+        InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
+        MapLocation targetLoc = s.getTargetLoc();
+        RobotLevel level = s.getTargetHeight();
+        InternalRobot target = getRobot(targetLoc, level);
 
-            double totalDamage = attacker.type.attackPower;
+        double totalDamage = attacker.type.attackPower;
 
-            if (target != null) {
-                // takeDamage is responsible for checking the armor
-                target.takeDamage(totalDamage);
-            }
-
-            addSignal(s);
-        } catch (Exception e) {
-            return e;
+        if (target != null) {
+            // takeDamage is responsible for checking the armor
+            target.takeDamage(totalDamage);
         }
-        return null;
+
+        addSignal(s);
     }
 
-    public Exception visitBroadcastSignal(BroadcastSignal s) {
+    public void visitBroadcastSignal(BroadcastSignal s) {
         InternalObject sender = gameObjectsByID.get(s.robotID);
         Collection<InternalObject> objs = gameObjectsByLoc.values();
         Predicate<InternalObject> pred = Util.robotWithinDistance(sender.getLocation(), s.range);
@@ -434,143 +424,96 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         s.message = null;
 
         addSignal(s);
-        return null;
     }
 
-    public Exception visitDeathSignal(DeathSignal s) {
+    public void visitDeathSignal(DeathSignal s) {
         if (!running) {
             // All robots emit death signals after the game
             // ends.  We still want the client to draw
             // the robots.
-            return null;
+            return;
         }
-        try {
-            int ID = s.getObjectID();
-            InternalObject obj = getObjectByID(ID);
+        int ID = s.getObjectID();
+        InternalObject obj = getObjectByID(ID);
 
-            if (obj instanceof InternalRobot) {
-                InternalRobot r = (InternalRobot) obj;
-                RobotMonitor.killRobot(ID);
-                if (r.hasBeenAttacked()) {
-                    gameStats.setUnitKilled(r.getTeam(), currentRound);
-                }
+        if (obj instanceof InternalRobot) {
+            InternalRobot r = (InternalRobot) obj;
+            RobotMonitor.killRobot(ID);
+            if (r.hasBeenAttacked()) {
+                gameStats.setUnitKilled(r.getTeam(), currentRound);
             }
-            if (obj != null) {
-                removeObject(obj);
-                addSignal(s);
-            }
-        } catch (Exception e) {
-            return e;
         }
-        return null;
+        if (obj != null) {
+            removeObject(obj);
+            addSignal(s);
+        }
     }
 
-    public Exception visitEnergonChangeSignal(EnergonChangeSignal s) {
+    public void visitEnergonChangeSignal(EnergonChangeSignal s) {
         int[] robotIDs = s.getRobotIDs();
         double[] energon = s.getEnergon();
         for (int i = 0; i < robotIDs.length; i++) {
-            try {
-                InternalRobot r = (InternalRobot) getObjectByID(robotIDs[i]);
-                System.out.println("el " + energon[i] + " " + r.getEnergonLevel());
-                r.changeEnergonLevel(energon[i] - r.getEnergonLevel());
-            } catch (Exception e) {
-                return e;
-            }
+            InternalRobot r = (InternalRobot) getObjectByID(robotIDs[i]);
+            System.out.println("el " + energon[i] + " " + r.getEnergonLevel());
+            r.changeEnergonLevel(energon[i] - r.getEnergonLevel());
         }
-        return null;
     }
 
-    public Exception visitIndicatorStringSignal(IndicatorStringSignal s) {
-        try {
-            addSignal(s);
-        } catch (Exception e) {
-            return e;
-        }
-        return null;
+    public void visitIndicatorStringSignal(IndicatorStringSignal s) {
+    	addSignal(s);
     }
 
-    public Exception visitMatchObservationSignal(MatchObservationSignal s) {
+    public void visitMatchObservationSignal(MatchObservationSignal s) {
         addSignal(s);
-        return null;
     }
 
-    public Exception visitControlBitsSignal(ControlBitsSignal s) {
-        try {
-            InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
-            r.setControlBits(s.getControlBits());
+    public void visitControlBitsSignal(ControlBitsSignal s) {
+        InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
+        r.setControlBits(s.getControlBits());
 
-            addSignal(s);
-        } catch (Exception e) {
-            return e;
-        }
-        return null;
-    }
-
-    public Exception visitMovementOverrideSignal(MovementOverrideSignal s) {
-        try {
-            InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
-            if (!canMove(r.getRobotLevel(), s.getNewLoc()))
-                return new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move to location: " + s.getNewLoc());
-            r.setLocation(s.getNewLoc());
-        } catch (Exception e) {
-            return e;
-        }
         addSignal(s);
-        return null;
     }
 
-    public Exception visitMovementSignal(MovementSignal s) {
-        try {
-            InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
-            MapLocation loc = s.getNewLoc();//(s.isMovingForward() ? r.getLocation().add(r.getDirection()) : r.getLocation().add(r.getDirection().opposite()));
-
-            r.setLocation(loc);
-
-            addSignal(s);
-        } catch (Exception e) {
-            return e;
-        }
-        return null;
+    public void visitMovementOverrideSignal(MovementOverrideSignal s) {
+        InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
+        if (!canMove(r.getRobotLevel(), s.getNewLoc()))
+            throw new RuntimeException("GameActionException in MovementOverrideSignal",new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move to location: " + s.getNewLoc()));
+        r.setLocation(s.getNewLoc());
+        addSignal(s);
     }
 
-    public Exception visitSetDirectionSignal(SetDirectionSignal s) {
-        try {
-            InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
-            Direction dir = s.getDirection();
+    public void visitMovementSignal(MovementSignal s) {
+        InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
+        MapLocation loc = s.getNewLoc();//(s.isMovingForward() ? r.getLocation().add(r.getDirection()) : r.getLocation().add(r.getDirection().opposite()));
 
-            r.setDirection(dir);
+        r.setLocation(loc);
 
-            addSignal(s);
-        } catch (Exception e) {
-            return e;
-        }
-        return null;
+        addSignal(s);
     }
 
-    public Exception visitSpawnSignal(SpawnSignal s) {
-        try {
-            InternalRobot parent;
-            int parentID = s.getParentID();
-            MapLocation loc;
-            if (parentID == 0) {
-                parent = null;
-                loc = s.getLoc();
-                if (loc == null) {
-                    ErrorReporter.report("Null parent and loc in visitSpawnSignal", true);
-                    return new Exception();
-                }
-            } else {
-                parent = (InternalRobot) getObjectByID(parentID);
-                loc = s.getLoc();
-            }
+    public void visitSetDirectionSignal(SetDirectionSignal s) {
+        InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
+        Direction dir = s.getDirection();
 
-            //note: this also adds the signal
-            GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent);
+        r.setDirection(dir);
 
-        } catch (Exception e) {
-            return e;
+        addSignal(s);
+    }
+
+    public void visitSpawnSignal(SpawnSignal s) {
+        InternalRobot parent;
+        int parentID = s.getParentID();
+        MapLocation loc;
+        if (parentID == 0) {
+            parent = null;
+            loc = s.getLoc();
+        } else {
+            parent = (InternalRobot) getObjectByID(parentID);
+            loc = s.getLoc();
         }
-        return null;
+
+        //note: this also adds the signal
+        GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent);
     }
 
     // *****************************

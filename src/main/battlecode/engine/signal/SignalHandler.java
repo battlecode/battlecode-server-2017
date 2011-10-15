@@ -1,7 +1,7 @@
 package battlecode.engine.signal;
 
-public interface SignalHandler<T> {
+public interface SignalHandler {
 
-	public T visitSignal(Signal s);
+	public void visitSignal(Signal s);
 
 }

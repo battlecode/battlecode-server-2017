@@ -15,7 +15,7 @@ import java.util.HashMap;
  * parameter that is a subclass of {@link Signal} (but not Signal itself).
  * Currently it uses reflection, which is kind of inelegant and slow (but probably not slow enough to matter).  I guess we could avoid reflection and instead create classes on the fly.
  */
-public class AutoSignalHandler<T> implements SignalHandler<T> {
+public class AutoSignalHandler implements SignalHandler {
 
 	static HashMap<Class, HashMap<Class, Method>> metaMap = new HashMap<Class, HashMap<Class,Method>>();
 	HashMap<Class, Method> methodMap; 
@@ -58,32 +58,30 @@ public class AutoSignalHandler<T> implements SignalHandler<T> {
 		}
 	}
 
-	protected T exceptionResponse(Exception e) {
-		e.printStackTrace();
-		return null;
-	}
-
-	protected T defaultResponse() {
-		return null;
+	public void handleException(Throwable e) {
+		if(e instanceof RuntimeException)
+			throw (RuntimeException)e;
+		else
+			throw new RuntimeException("Exception in signal handler",e.getCause());
 	}
 
     @SuppressWarnings("unchecked")
-	public T visitSignal(Signal signal) {
+	public void visitSignal(Signal signal) {
 		Class<?> cls = signal.getClass();
 		do {
 			Method method = methodMap.get(cls);
 			if(method!=null)
 				try {
-					return (T)method.invoke(myObject,signal);
-				} catch(InvocationTargetException ite) {
-					return exceptionResponse((Exception)ite.getCause());
+					method.invoke(myObject,signal);
 				} catch(Exception e) {
-					return exceptionResponse(e);
+					if(e instanceof InvocationTargetException)
+						handleException(e.getCause());
+					else
+						handleException(e);
 				}
 			cls = cls.getSuperclass();
 		}
 		while(Signal.class.isAssignableFrom(cls));
-		return defaultResponse();
 	}
 
 }
