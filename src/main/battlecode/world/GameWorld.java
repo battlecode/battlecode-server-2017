@@ -2,12 +2,14 @@ package battlecode.world;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -53,10 +55,15 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 	// robots to remove from the game at end of turn
 	private List<InternalRobot> deadRobots = new ArrayList<InternalRobot>();
 
+	private EnumMap<Team,List<InternalRobot>> archons;
+
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldArchonMemory) {
         super(gm.getSeed(), teamA, teamB, oldArchonMemory);
         gameMap = gm;
+		archons = new EnumMap<Team,List<InternalRobot>>(Team.class);
+		archons.put(Team.A,new ArrayList<InternalRobot>());
+		archons.put(Team.B,new ArrayList<InternalRobot>());
     }
 
     public int getMapSeed() {
@@ -265,6 +272,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         return result;
     }
+
+	public MapLocation [] getArchons(Team team) {
+		return Lists.transform(archons.get(team),Util.objectLocation).toArray(new MapLocation [0]);
+	}
 
     public double getPoints(Team team) {
         return teamRoundResources[team.ordinal()];

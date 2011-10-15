@@ -252,6 +252,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return checkCanSense(loc);
     }
 
+	public MapLocation [] senseAlliedArchons() {
+		return gameWorld.getArchons(robot.getTeam());
+	}
+
 	/**
      * {@inheritDoc}
      */

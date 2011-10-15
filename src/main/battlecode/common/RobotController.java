@@ -115,6 +115,16 @@ public interface RobotController {
 	 */
     public boolean canSenseSquare(MapLocation loc);
 
+	/**
+     * Returns the locations of all the archons on the calling robot's team. The
+     * length of the returned array is equal to the number of allied archons on
+     * the map. The order of archons in the returned array is the same between
+     * different calls to this method.
+     *
+     * @return the locations of all the allied archons
+     */
+    public MapLocation[] senseAlliedArchons();
+	
 	// ***********************************
     // ****** MOVEMENT METHODS ********
     // ***********************************
