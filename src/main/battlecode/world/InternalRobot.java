@@ -28,14 +28,11 @@ import battlecode.world.signal.TurnOffSignal;
 
 public class InternalRobot extends InternalObject implements Robot, GenericRobot {
 
-    /**
-     * Robots that are inside a transport are considered to be at this
-     * location, so that no one but the dropship will be able to sense them.
-     */
     private volatile double myEnergonLevel;
 	private volatile double flux;
     protected volatile Direction myDirection;
     private volatile boolean energonChanged = true;
+	private volatile boolean fluxChanged = true;
     protected volatile long controlBits;
     // is this used ever?
     protected volatile boolean hasBeenAttacked = false;
@@ -48,8 +45,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     protected GameMap.MapMemory mapMemory;
     public final RobotType type;
 
-	private int turnsUntilMovementIdle;
-	private int turnsUntilAttackIdle;
+	private volatile int turnsUntilMovementIdle;
+	private volatile int turnsUntilAttackIdle;
 	private boolean broadcasted;
 	private boolean upkeepPaid;
 
@@ -91,6 +88,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void processBeginningOfTurn() {
+		if(type==RobotType.ARCHON)
+			adjustFlux(ARCHON_PRODUCTION);
 		if(upkeepEnabled) {
 			upkeepPaid = flux>=type.upkeep;
 			if(upkeepPaid)
@@ -146,6 +145,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		flux+=amt;
 		if(flux>=type.maxFlux)
 			flux=type.maxFlux;
+		fluxChanged = true;
 	}
 
     public Direction getDirection() {
@@ -179,12 +179,15 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public boolean clearEnergonChanged() {
-        if (energonChanged) {
-            energonChanged = false;
-            return true;
-        } else {
-            return false;
-        }
+		boolean wasChanged = energonChanged;
+		energonChanged = false;
+		return wasChanged;
+    }
+
+    public boolean clearFluxChanged() {
+		boolean wasChanged = fluxChanged;
+		fluxChanged = false;
+		return wasChanged;
     }
 
     public double getMaxEnergon() {

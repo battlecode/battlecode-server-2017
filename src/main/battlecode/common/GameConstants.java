@@ -81,6 +81,8 @@ public final class GameConstants {
 	public static final int DUMMY_LIFETIME = 200;
 	/** The square of the maximum distance a message can travel. */
 	public static final int BROADCAST_RADIUS_SQUARED = 64;
+	/** The amount of flux produced by an archon each turn. */
+	public static final double ARCHON_PRODUCTION = 1.;
 
 	public static final double MAX_NODE_HEALTH = 100.0;
 	public static final double NODE_CAPTURE_LIMIT = 10.0;
