@@ -381,6 +381,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 	public ArrayList<MapLocation> getAdjacentNodes(MapLocation loc) {
 		return powerNodeGraph.get(loc);
 	}
+
+	public Iterable<InternalPowerNode> getPowerNodesByTeam(Team t) {
+		return Iterables.filter(powerNodes,Util.isAllied(t));
+	}
         
     public InternalPowerNode createNode(MapLocation loc, Team team) {
     	InternalPowerNode n = new InternalPowerNode(this, loc, team);

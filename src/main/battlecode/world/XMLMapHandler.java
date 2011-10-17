@@ -477,7 +477,8 @@ class XMLMapHandler extends DefaultHandler {
         }
         for(MapLocation[] link : nodeLinks)
         {
-        	gw.createNodeLink(link[0], link[1]);
+        	gw.createNodeLink(new MapLocation(origin.x + link[0].x, origin.y + link[0].y),
+				new MapLocation(origin.x + link[1].x, origin.y + link[1].y));
         }
         gw.endRandomIDs();
 

@@ -35,6 +35,10 @@ public class InternalPowerNode extends InternalObject implements PowerNode {
 		}
 		return false;
 	}
+
+	public MapLocation [] neighbors() {
+		return myGameWorld.getAdjacentNodes(getLocation()).toArray(new MapLocation [0]);
+	}
 	
 	public void takeDamage(double baseDamage)
 	{

@@ -9,4 +9,11 @@ package battlecode.common;
  * @see battlecode.common.RobotController
  */
 public interface Robot extends GameObject {
+    /**
+     * Gives the Team (A, B, or neutral) to which this GameObject belongs
+     * @return this GameObject's Team
+     * @see battlecode.common.Team
+     */
+    public Team getTeam();
+
 }

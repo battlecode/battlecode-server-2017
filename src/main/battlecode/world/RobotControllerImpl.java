@@ -256,6 +256,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		return gameWorld.getArchons(robot.getTeam());
 	}
 
+	public PowerNode [] senseAlliedPowerNodes() {
+		return Iterables.toArray(gameWorld.getPowerNodesByTeam(robot.getTeam()),PowerNode.class);
+	}
+
 	/**
      * {@inheritDoc}
      */

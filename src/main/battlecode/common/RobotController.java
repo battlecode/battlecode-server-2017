@@ -125,6 +125,8 @@ public interface RobotController {
      */
     public MapLocation[] senseAlliedArchons();
 	
+	public PowerNode [] senseAlliedPowerNodes();
+	
 	// ***********************************
     // ****** MOVEMENT METHODS ********
     // ***********************************

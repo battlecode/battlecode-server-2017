@@ -2,7 +2,7 @@ package battlecode.common;
 
 import java.io.Serializable;
 
-import static java.lang.Math.pow;
+import org.apache.commons.lang.StringUtils;
 
 // We don't want contestants to be able to subclass MapLocation because
 // that would allow them to pass arbitrary data structures in messages
@@ -82,10 +82,12 @@ public final class MapLocation implements Serializable {
         return this.x * 13 + this.y * 23;
 
     }
-    
+   
     public static MapLocation valueOf(String s)
     {
-    	String[] coord = s.substring(1, s.length() - 1).split(",");
+    	String[] coord = StringUtils.replaceChars(s,"[](){}",null).split(",");
+		if(coord.length!=2)
+			throw new IllegalArgumentException("Invalid map location string");
     	int x = Integer.valueOf(coord[0].trim());
     	int y = Integer.valueOf(coord[1].trim());
     	
