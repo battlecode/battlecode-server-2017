@@ -124,8 +124,17 @@ public interface RobotController {
      * @return the locations of all the allied archons
      */
     public MapLocation[] senseAlliedArchons();
-	
+
+	/**
+	 * Returns an array containing all of the power nodes owned by this robot's team.
+	 */
 	public PowerNode [] senseAlliedPowerNodes();
+
+	/**
+	 * Returns an array containing the locations of all of the nodes
+	 * that this team can capture.
+	 */
+	public MapLocation [] senseAdjacentPowerNodes();
 	
 	// ***********************************
     // ****** MOVEMENT METHODS ********

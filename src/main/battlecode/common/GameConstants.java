@@ -25,13 +25,13 @@ public final class GameConstants {
     /** The maxiumum possible map width. */
     public static final int MAP_MAX_WIDTH = 70;
     /** The maximum fraction of upkeep that can be regained by yielding */
-    public static final double YIELD_BONUS = 0.1;
+    public static final double YIELD_BONUS = 0.998;
     /** The bytecode penalty that is imposed each time an exception is thrown */
     public static final int EXCEPTION_BYTECODE_PENALTY = 500;
     /** The number of indicator strings that a player can associate with a robot */
     public static final int NUMBER_OF_INDICATOR_STRINGS = 3;
     /** The base number of bytecodes a robot can execute each round */
-    public static final int BYTECODE_LIMIT_BASE = 3000;
+    public static final int BYTECODE_LIMIT_BASE = 10000;
     /** The number of additioal bytecodes granted by a processor */
     public static final int BYTECODE_LIMIT_ADDON = 4500;
     /** The number of rounds after a component is equipped before it may be used */

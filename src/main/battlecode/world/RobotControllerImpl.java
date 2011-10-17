@@ -9,6 +9,7 @@ import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.signal.Signal;
 import battlecode.world.signal.*;
 import java.util.Arrays;
+import java.util.HashSet;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -260,6 +261,16 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		return Iterables.toArray(gameWorld.getPowerNodesByTeam(robot.getTeam()),PowerNode.class);
 	}
 
+	public MapLocation [] senseAdjacentPowerNodes() {
+		HashSet<MapLocation> adjacent = new HashSet<MapLocation>();
+		Iterable<InternalPowerNode> owned = gameWorld.getPowerNodesByTeam(robot.getTeam());
+		for(InternalPowerNode p : owned)
+			adjacent.addAll(gameWorld.getAdjacentNodes(p.getLocation()));
+		for(InternalPowerNode p : owned) 
+			adjacent.remove(p.getLocation());
+		return adjacent.toArray(new MapLocation [0]);
+	}
+
 	/**
      * {@inheritDoc}
      */
@@ -296,11 +307,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
 	private void move(Direction d) throws GameActionException {
 		assertNotMoving();
+		assertHaveFlux(robot.type.moveCost);
 		assertCanMove(d);
 		int delay = d.isDiagonal()?robot.type.moveDelayDiagonal:
 			robot.type.moveDelayOrthogonal;
 		robot.activateMovement(new MovementSignal(robot,getLocation().add(d),
 			d==getDirection(),delay),delay);
+		robot.adjustFlux(-robot.type.moveCost);
 	}
 
 	public void setDirection(Direction d) throws GameActionException {

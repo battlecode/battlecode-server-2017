@@ -21,6 +21,7 @@ import battlecode.common.Robot;
 import battlecode.common.Team;
 import battlecode.common.RobotType;
 import battlecode.engine.GenericRobot;
+import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
 import battlecode.world.signal.DeathSignal;
@@ -36,7 +37,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     protected volatile long controlBits;
     // is this used ever?
     protected volatile boolean hasBeenAttacked = false;
-    private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean("bc.engine.upkeep-enabled");
+    private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean("bc.engine.upkeep");
     /** first index is robot type, second is direction, third is x or y */
     private static final Map<RobotType, int[][][]> offsets = GameMap.computeVisibleOffsets();
     /** number of bytecodes used in the most recent round */
@@ -93,7 +94,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		if(upkeepEnabled) {
 			upkeepPaid = flux>=type.upkeep;
 			if(upkeepPaid)
-				flux-=type.upkeep;
+				adjustFlux(-type.upkeep);
 		}
 		else
 			upkeepPaid = true;
@@ -112,7 +113,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		if(turnsUntilMovementIdle>0)
 			turnsUntilMovementIdle--;
 		broadcasted = false;
-    }
+		double refund = type.upkeep * YIELD_BONUS * (BYTECODE_LIMIT_BASE - RobotMonitor.getBytecodeNum()) / BYTECODE_LIMIT_BASE;
+    	if(refund>0)
+			adjustFlux(refund);
+	}
 
     @Override
     public void processEndOfRound() {
