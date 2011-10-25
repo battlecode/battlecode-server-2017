@@ -175,6 +175,17 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         robot.activateMovement(new SpawnSignal(loc, type, robot.getTeam(), robot),1);
     }
 
+	public void regenerate() throws GameActionException {
+		if(robot.type!=RobotType.SCOUT)
+			throw new IllegalStateException("Only scouts can regenerate.");
+		assertHaveFlux(REGEN_COST);
+		robot.adjustFlux(-REGEN_COST);
+		for(InternalRobot ir : gameWorld.getAllRobotsWithinRadiusDonutSq(getLocation(),RobotType.SCOUT.attackRadiusMaxSquared,RobotType.SCOUT.attackRadiusMinSquared)) {
+			if(ir.getTeam()==robot.getTeam())
+				ir.setRegen();
+		}
+	}
+
     /**
      * {@inheritDoc}
      */

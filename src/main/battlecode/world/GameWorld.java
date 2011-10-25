@@ -570,7 +570,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     // TODO: make a faster implementation of this
-    private InternalRobot[] getAllRobotsWithinRadiusDonutSq(MapLocation center, int outerRadiusSquared, int innerRadiusSquared) {
+    protected InternalRobot[] getAllRobotsWithinRadiusDonutSq(MapLocation center, int outerRadiusSquared, int innerRadiusSquared) {
         ArrayList<InternalRobot> robots = new ArrayList<InternalRobot>();
 
         for (InternalObject o : gameObjectsByID.values()) {

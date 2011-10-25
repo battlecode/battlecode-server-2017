@@ -296,12 +296,24 @@ public interface RobotController {
      */
     public void suicide();
 
+	/**
+	 * Causes each allied robot within its attack radius to regenerate
+	 * <code>GameConstants.REGEN_AMOUNT</code> energon at the beginning
+	 * of its next turn.  Each robot may only regenerate once per turn.
+	 * This action can only be activated by scouts and costs
+	 * <code>GameConstants.REGEN_COST</code> flux.
+	 *
+	 * @throws IllegalStateException if this robot is not a scout
+	 * @throws GameActionException if this robot does not have <code>GameConstants.REGEN_COST</code> flux (NOT_ENOUGH_FLUX)
+	 */
+	public void regenerate() throws GameActionException;
+
     // ***********************************
     // ******** MISC. METHODS *********
     // ***********************************
     /**
      * Sets one of this robot's 'indicator strings' for debugging purposes.
-     * These strings are displayed in the client. This method has no affect on
+     * These strings are displayed in the client. This method has no effect on
      * gameplay (aside from the number of bytecodes executed to call this
      * method).
      *

@@ -48,8 +48,6 @@ public final class GameConstants {
     public static final int IRON_EFFECT_ROUNDS = 4;
     /** Hp granted by every plate on a robot */
     public static final double PLATING_HP_BONUS = 7.;
-    /** Hp regen bonus per round for each regen equipped */
-    public static final double REGEN_AMOUNT = .8;
     /** The number of longs that your team can remember between games. */
     public static final int TEAM_MEMORY_LENGTH = 32;
     /** The maximum capacity that dropships can transport.  Note that
@@ -83,6 +81,10 @@ public final class GameConstants {
 	public static final int BROADCAST_RADIUS_SQUARED = 64;
 	/** The amount of flux produced by an archon each turn. */
 	public static final double ARCHON_PRODUCTION = 1.;
+	/** The cost in flux for a scout to regenerate nearby units. */
+	public static final double REGEN_COST = .4;
+	/** The amount of energon gained when a unit regenerates. */
+	public static final double REGEN_AMOUNT = .2;
 
 	public static final double MAX_NODE_HEALTH = 100.0;
 	public static final double NODE_CAPTURE_LIMIT = 10.0;

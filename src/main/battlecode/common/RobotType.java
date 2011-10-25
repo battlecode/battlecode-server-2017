@@ -4,8 +4,9 @@ import static battlecode.common.RobotLevel.*;
 
 public enum RobotType {
 	//          LEVEL,    MXE MXF  COS UPK MD MVC SR SANG AR AR  AA AD AP,  AIR GROUND
-	ARCHON(     ON_GROUND,100,300,  0,  0,  7,  0,36,360., 0, 0,  0, 5, 0,false,false),
-	SOLDIER(    ON_GROUND, 40,100,120, .15, 6, .4,10, 90., 0, 4, 90, 5, 6,true ,true );
+	ARCHON(     ON_GROUND,150,300,  0,  0,  5,  0,36,360., 0, 0,  0, 5, 0,false,false),
+	SOLDIER(    ON_GROUND, 40,100,120, .15, 6, .4,10, 90., 0, 4, 90, 5, 6,true ,true ),
+	SCOUT(      IN_AIR,    20, 50, 80, .08, 4, .2,25,360., 0, 5,360, 5, 0,true ,true ); 
 
 	/** The robot's level. */
 	public final RobotLevel level;

@@ -48,6 +48,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 	private volatile int turnsUntilMovementIdle;
 	private volatile int turnsUntilAttackIdle;
+	private volatile boolean regen;
 	private boolean broadcasted;
 	private boolean upkeepPaid;
 
@@ -94,6 +95,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void processBeginningOfTurn() {
 		if(type==RobotType.ARCHON)
 			archonProduction();
+		if(regen) {
+			changeEnergonLevel(REGEN_AMOUNT);
+			regen = false;
+		}
 		if(upkeepEnabled) {
 			upkeepPaid = flux>=type.upkeep;
 			if(upkeepPaid)
@@ -168,6 +173,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public Direction getDirection() {
         return myDirection;
     }
+
+	public void setRegen() {
+		regen = true;
+	}
 
     public void takeDamage(double baseAmount) {
         if (baseAmount < 0) {
