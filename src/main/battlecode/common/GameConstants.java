@@ -85,6 +85,8 @@ public final class GameConstants {
 	public static final double REGEN_COST = .4;
 	/** The amount of energon gained when a unit regenerates. */
 	public static final double REGEN_AMOUNT = .2;
+	/** The number of archons each team starts with. */
+	public static final int NUMBER_OF_ARCHONS = 6;
 
 	public static final double MAX_NODE_HEALTH = 100.0;
 	public static final double NODE_CAPTURE_LIMIT = 10.0;
