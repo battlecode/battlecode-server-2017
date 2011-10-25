@@ -76,6 +76,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 		buffs = new InternalRobotBuffs(this);
 
+		if(type==RobotType.ARCHON)
+			gw.addArchon(this);	
+
     }
 
 	public void addAction(Signal s) {
@@ -90,7 +93,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public void processBeginningOfTurn() {
 		if(type==RobotType.ARCHON)
-			adjustFlux(ARCHON_PRODUCTION);
+			archonProduction();
 		if(upkeepEnabled) {
 			upkeepPaid = flux>=type.upkeep;
 			if(upkeepPaid)
@@ -99,6 +102,16 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		else
 			upkeepPaid = true;
     }
+
+	public void archonProduction() {
+		int d, dmin = RobotType.ARCHON.sensorRadiusSquared;
+		for(MapLocation l : myGameWorld.getArchons(getTeam())) {
+			d = getLocation().distanceSquaredTo(l);
+			if(d>0&&d<=dmin)
+				dmin=d;
+		}
+		adjustFlux(.5*(1.+(double)dmin/RobotType.ARCHON.sensorRadiusSquared));
+	}
 
     @Override
     public void processEndOfTurn() {

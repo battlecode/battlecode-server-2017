@@ -18,6 +18,7 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.Message;
 import battlecode.common.RobotLevel;
+import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
@@ -209,6 +210,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             gameObjectsByLoc.put(new MapLocation3D(o.getLocation(), o.getRobotLevel()), o);
         }
     }
+
+	public void addArchon(InternalRobot r) {
+		archons.get(r.getTeam()).add(r);
+	}
 
     public Collection<InternalObject> allObjects() {
         return gameObjectsByID.values();
