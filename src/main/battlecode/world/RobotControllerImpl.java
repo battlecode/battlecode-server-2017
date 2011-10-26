@@ -246,7 +246,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         InternalRobot ir = castInternalRobot(r);
         assertCanSense(ir);
         return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getMaxEnergon(),
-                ir.getFlux(), ir.getDirection(), ir.type, ir.getTeam());
+                ir.getFlux(), ir.getDirection(), ir.type, ir.getTeam(), ir.getRegen());
     }
 
     public MapLocation senseLocationOf(GameObject o) throws GameActionException {
@@ -278,6 +278,12 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 	public boolean senseConnected(PowerNode p) {
 		InternalPowerNode ip = castInternalPowerNode(p);
 		return ip.connected(robot.getTeam());
+	}
+	
+	public boolean senseOpponentConnected(PowerNode p) throws GameActionException {
+		InternalPowerNode ip = castInternalPowerNode(p);
+		assertCanSense(ip);
+		return ip.connected(robot.getTeam().opponent());
 	}
 
 	/**

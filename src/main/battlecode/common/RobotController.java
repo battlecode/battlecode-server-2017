@@ -136,7 +136,20 @@ public interface RobotController {
 	 */
 	public MapLocation [] senseCapturablePowerNodes();
 
+	/**
+	 * Returns <code>true</code> if the node <code>p</code> is connected to
+	 * this robot's team's power core.  Note that <code>p</code> does not need to
+	 * be within sensor range.
+	 */
 	public boolean senseConnected(PowerNode p);
+	
+	/**
+	 * Returns <code>true</code> if the node <code>p</code> is connected to
+	 * this robot's team's opponent's power core.
+	 *
+	 * @throws GameActionException if <code>p</code> is not within this robot's sensor range
+	 */
+	public boolean senseOpponentConnected(PowerNode p) throws GameActionException;
 
 	// ***********************************
     // ****** MOVEMENT METHODS ********

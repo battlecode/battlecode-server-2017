@@ -37,6 +37,7 @@ public class InternalPowerNode extends InternalRobot implements PowerNode {
 		myGameWorld.teamChanged(this,oldTeam,t);
 		capture = 0;
 		energonChanged = true;
+		regen = false;
 		if(t==Team.NEUTRAL)
 			myEnergonLevel = 0.;
 		else

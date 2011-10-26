@@ -172,6 +172,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		regen = true;
 	}
 
+	public boolean getRegen() {
+		return regen;
+	}
+
     public void takeDamage(double baseAmount) {
         if (baseAmount < 0) {
             changeEnergonLevel(-baseAmount);
