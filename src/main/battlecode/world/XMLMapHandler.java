@@ -36,6 +36,7 @@ import battlecode.engine.ErrorReporter;
 import battlecode.engine.PlayerFactory;
 import battlecode.world.GameMap.MapProperties;
 import battlecode.world.signal.EquipSignal;
+import battlecode.world.signal.NodeConnectionSignal;
 import battlecode.world.signal.SpawnSignal;
 import battlecode.engine.signal.Signal;
 
@@ -483,6 +484,7 @@ class XMLMapHandler extends DefaultHandler {
         gw.endRandomIDs();
 
 		gw.recomputeConnections();
+		gw.addSignal(new NodeConnectionSignal(nodeLinks.toArray(new MapLocation[0][])));
 
         return gw;
     }
