@@ -36,7 +36,7 @@ public class RobotDoc implements Taglet {
 	int n;
 
 	static public void append(StringBuilder builder, String label, String value) {
-		builder.append("<strong>%s:</strong> %s ");
+		builder.append(String.format("<strong>%s:</strong> %s<br />",label,value));
 	}
 
 	public String toString(String comp) {
