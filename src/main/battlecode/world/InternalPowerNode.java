@@ -35,11 +35,12 @@ public class InternalPowerNode extends InternalRobot implements PowerNode {
 		Team oldTeam = getTeam();
 		super.setTeam(t);
 		myGameWorld.teamChanged(this,oldTeam,t);
-		capture = 0;
 		energonChanged = true;
 		regen = false;
-		if(t==Team.NEUTRAL)
+		if(t==Team.NEUTRAL) {
 			myEnergonLevel = 0.;
+			capture = 0;
+		}
 		else
 			myEnergonLevel = RobotType.POWER_NODE.maxEnergon;
 	}
@@ -69,6 +70,10 @@ public class InternalPowerNode extends InternalRobot implements PowerNode {
 				takeDamage(GameConstants.DISCONNECTED_NODE_DAMAGE);
 		}
 		regen = false;
+	}
+
+	public int loyalty() {
+		return capture;
 	}
 
 	public void setRegen() {

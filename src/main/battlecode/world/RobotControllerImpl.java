@@ -286,6 +286,12 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		return ip.connected(robot.getTeam().opponent());
 	}
 
+	public int senseLoyalty(PowerNode p) throws GameActionException {
+		InternalPowerNode ip = castInternalPowerNode(p);
+		assertCanSense(ip);
+		return robot.getTeam()==Team.A?ip.loyalty():-ip.loyalty();
+	}
+
 	/**
      * {@inheritDoc}
      */
