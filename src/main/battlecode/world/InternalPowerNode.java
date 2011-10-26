@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.PowerNode;
+import battlecode.common.RobotLevel;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.world.signal.NodeCaptureSignal;
@@ -14,7 +15,7 @@ public class InternalPowerNode extends InternalRobot implements PowerNode {
 	//it is neutral. Once |capture| > 10, it switches team.
 	private int capture = 0;
 	
-	private boolean [] connected = new boolean [2];
+	private boolean [] connected = new boolean [3];
 		
 	public InternalPowerNode(GameWorld gw, MapLocation loc, Team team) {
         super(gw, RobotType.POWER_NODE, loc, team, false);
@@ -31,15 +32,15 @@ public class InternalPowerNode extends InternalRobot implements PowerNode {
 	}
 
 	public void setTeam(Team t) {
+		Team oldTeam = getTeam();
 		super.setTeam(t);
+		myGameWorld.teamChanged(this,oldTeam,t);
 		capture = 0;
 		energonChanged = true;
 		if(t==Team.NEUTRAL)
 			myEnergonLevel = 0.;
 		else
 			myEnergonLevel = RobotType.POWER_NODE.maxEnergon;
-		myGameWorld.recomputeConnections();
-		myGameWorld.addSignal(new NodeCaptureSignal(this,t));
 	}
 
 	public void processLethalDamage() {
@@ -48,14 +49,30 @@ public class InternalPowerNode extends InternalRobot implements PowerNode {
 		myEnergonLevel = 0.;
 	}
 
-	public void processBeginnngOfTurn() {
-		if(myGameWorld.timeLimitReached()) {
-			takeDamage(GameConstants.TIME_LIMIT_DAMAGE);
-			regen = false;
+	public boolean isNeutral() {
+		return getTeam() == Team.NEUTRAL;
+	}
+
+	public void processBeginningOfRound() {
+		super.processBeginningOfRound();
+		if(isNeutral()) {
+			InternalRobot ir = (InternalRobot)myGameWorld.getObject(getLocation(),RobotLevel.ON_GROUND);
+			if(ir!=null&&ir.type==RobotType.ARCHON)
+				capture(ir.getTeam());
 		}
-		if(!connected(getTeam()))
-			takeDamage(GameConstants.DISCONNECTED_NODE_DAMAGE);
-		super.processBeginningOfTurn();
+		else {
+			if(regen) {
+				changeEnergonLevel(GameConstants.REGEN_AMOUNT);
+			}
+			if(!connected(getTeam()))
+				takeDamage(GameConstants.DISCONNECTED_NODE_DAMAGE);
+		}
+		regen = false;
+	}
+
+	public void setRegen() {
+		if(!myGameWorld.timeLimitReached())
+			super.setRegen();
 	}
 
 	public MapLocation [] neighbors() {
@@ -73,11 +90,11 @@ public class InternalPowerNode extends InternalRobot implements PowerNode {
 			
 			if(capture <= GameConstants.NODE_CAPTURE_LIMIT * -1)
 			{
-				this.setTeam(Team.A);
+				this.setTeam(Team.B);
 			}
 			else if(capture >= GameConstants.NODE_CAPTURE_LIMIT)
 			{
-				this.setTeam(Team.B);
+				this.setTeam(Team.A);
 			}
 		}
 	}

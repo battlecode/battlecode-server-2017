@@ -1,7 +1,5 @@
 package battlecode.world;
 
-import static battlecode.common.GameConstants.*;
-
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -96,7 +94,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		if(type==RobotType.ARCHON)
 			archonProduction();
 		if(regen) {
-			changeEnergonLevel(REGEN_AMOUNT);
+			changeEnergonLevel(GameConstants.REGEN_AMOUNT);
 			regen = false;
 		}
 		if(upkeepEnabled) {
@@ -131,7 +129,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		if(turnsUntilMovementIdle>0)
 			turnsUntilMovementIdle--;
 		broadcasted = false;
-		double refund = type.upkeep * YIELD_BONUS * (BYTECODE_LIMIT_BASE - RobotMonitor.getBytecodeNum()) / BYTECODE_LIMIT_BASE;
+		double refund = type.upkeep * GameConstants.YIELD_BONUS * (GameConstants.BYTECODE_LIMIT_BASE - RobotMonitor.getBytecodeNum()) / GameConstants.BYTECODE_LIMIT_BASE;
     	if(refund>0)
 			adjustFlux(refund);
 	}
@@ -314,7 +312,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public int getBytecodeLimit() {
-        return upkeepPaid?BYTECODE_LIMIT_BASE:0;
+        return upkeepPaid?GameConstants.BYTECODE_LIMIT_BASE:0;
     }
 
     public boolean hasBeenAttacked() {

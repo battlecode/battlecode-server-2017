@@ -57,7 +57,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private Map<MapLocation, ArrayList<MapLocation>> powerNodeGraph = new HashMap<MapLocation, ArrayList<MapLocation>>();
     private List<InternalPowerNode> powerNodes = new ArrayList<InternalPowerNode>();
 	private Map<Team,InternalPowerNode> baseNodes = new EnumMap<Team,InternalPowerNode>(Team.class);
-	private Map<Team,List<InternalPowerNode>> nodesByTeam = new EnumMap<Team,List<InternalPowerNode>>(Team.class);
+	private Map<Team,List<InternalPowerNode>> connectedNodesByTeam = new EnumMap<Team,List<InternalPowerNode>>(Team.class);
 	private Map<Team,List<InternalPowerNode>> adjacentNodesByTeam = new EnumMap<Team,List<InternalPowerNode>>(Team.class);
 
 	// robots to remove from the game at end of turn
@@ -72,8 +72,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		archons = new EnumMap<Team,List<InternalRobot>>(Team.class);
 		archons.put(Team.A,new ArrayList<InternalRobot>());
 		archons.put(Team.B,new ArrayList<InternalRobot>());
-		nodesByTeam.put(Team.A,new ArrayList<InternalPowerNode>());
-		nodesByTeam.put(Team.B,new ArrayList<InternalPowerNode>());
+		connectedNodesByTeam.put(Team.A,new ArrayList<InternalPowerNode>());
+		connectedNodesByTeam.put(Team.B,new ArrayList<InternalPowerNode>());
 		adjacentNodesByTeam.put(Team.A,new ArrayList<InternalPowerNode>());
 		adjacentNodesByTeam.put(Team.B,new ArrayList<InternalPowerNode>());
     }
@@ -107,23 +107,18 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         for (int i = 0; i < gameObjects.length; i++) {
             gameObjects[i].processEndOfRound();
         }
-
-        // calculate some stats
-        double[] totalEnergon = new double[3];
-        boolean teamADead = true, teamBDead = true;
-        for (InternalObject obj : gameObjectsByID.values()) {
-            if (!(obj instanceof InternalRobot))
-                continue;
-            InternalRobot r = (InternalRobot) obj;
-            if (r.getFlux()>=r.type.upkeep) {
-                Team team = r.getTeam();
-                totalEnergon[team.ordinal()] += r.getEnergonLevel();
-                if (team == Team.A)
-                    teamADead = false;
-                if (team == Team.B)
-                    teamBDead = false;
-            }
-        }
+		
+		if(timeLimitReached()) {
+			// copy the node lists, because the damage could kill a node and disconnect the graph
+			List<InternalPowerNode> teamANodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.A));
+			List<InternalPowerNode> teamBNodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.B));
+			for(InternalPowerNode n : teamANodes)
+				n.takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamANodes.size());
+			for(InternalPowerNode n : teamBNodes)
+				n.takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamBNodes.size());
+			// TODO: find a more fair way to break ties if both teams die to the time limit damage
+			// in the same round?
+		}
 
         long aPoints = Math.round(teamRoundResources[Team.A.ordinal()] * 100), bPoints = Math.round(teamRoundResources[Team.B.ordinal()] * 100);
 
@@ -131,62 +126,33 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         lastRoundResources = teamRoundResources;
         teamRoundResources = new double[2];
 
-        // the algorithm to determine the winner is:
-        // (1) team that deactivated the other team's robots
-        // (2) team that mined the most flux last turn
-        // (3) team with the most hitpoints among activated robots
-        // (4) team with the most flux
-        // (5) team with the "smaller" team string
-        // (6) Team A wins
-        if (teamADead || teamBDead || currentRound >= gameMap.getMaxRounds() - 1) {
-
-            running = false;
-
-            for (InternalObject o : gameObjectsByID.values()) {
-                if (o instanceof InternalRobot)
-                    RobotMonitor.killRobot(o.getID());
-            }
-
-            //System.out.println("Game ended");
-
-            gameStats.setPoints(Team.A, aPoints);
-            gameStats.setPoints(Team.B, bPoints);
-            gameStats.setTotalEnergon(Team.A, totalEnergon[0]);
-            gameStats.setTotalEnergon(Team.B, totalEnergon[1]);
-            if (!teamADead && teamBDead) {
-                winner = Team.A;
-                gameStats.setDominationFactor(DominationFactor.DESTROYED);
-            } else if (!teamBDead && teamADead) {
-                winner = Team.B;
-                gameStats.setDominationFactor(DominationFactor.DESTROYED);
-            } else if (aPoints > bPoints) {
-                gameStats.setDominationFactor(DominationFactor.OWNED);
-                winner = Team.A;
-            } else if (bPoints > aPoints) {
-                gameStats.setDominationFactor(DominationFactor.OWNED);
-                winner = Team.B;
-            } else if (totalEnergon[0] > totalEnergon[1]) {
-                gameStats.setDominationFactor(DominationFactor.BEAT);
-                winner = Team.A;
-            } else if (totalEnergon[0] < totalEnergon[1]) {
-                gameStats.setDominationFactor(DominationFactor.BEAT);
-                winner = Team.B;
-            } else if (teamResources[0] > teamResources[1]) {
-                gameStats.setDominationFactor(DominationFactor.BARELY_BEAT);
-                winner = Team.A;
-            } else if (teamResources[0] < teamResources[1]) {
-                gameStats.setDominationFactor(DominationFactor.BARELY_BEAT);
-                winner = Team.B;
-            } else {
-                gameStats.setDominationFactor(DominationFactor.WON_BY_DUBIOUS_REASONS);
-                if (teamAName.compareTo(teamBName) <= 0)
-                    winner = Team.A;
-                else
-                    winner = Team.B;
-            }
-        }
-
     }
+
+	public void setWinner(Team t) {
+		winner = t;
+		if(archons.get(winner).size()>=GameConstants.NUMBER_OF_ARCHONS)
+			gameStats.setDominationFactor(DominationFactor.DESTROYED);
+		else if(!timeLimitReached())
+			gameStats.setDominationFactor(DominationFactor.OWNED);
+		else
+			gameStats.setDominationFactor(DominationFactor.BEAT);
+        running = false;
+
+        for (InternalObject o : gameObjectsByID.values()) {
+            if (o instanceof InternalRobot)
+                RobotMonitor.killRobot(o.getID());
+		}
+	}
+
+	public void teamChanged(InternalPowerNode p, Team oldTeam, Team newTeam) {
+		recomputeConnections();
+		addSignal(new NodeCaptureSignal(p,newTeam));
+		if(baseNodes.get(oldTeam)==p) {
+			if(winner==null) {
+				setWinner(oldTeam.opponent());
+			}
+		}
+	}
 
 	private class Connections {
 
@@ -204,7 +170,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 				visited.add(n);
 				n.setConnected(team,true);
 				if(n.getTeam()==team) {
-					nodesByTeam.get(team).add(n);
+					connectedNodesByTeam.get(team).add(n);
 					queue.push(n);
 				}
 				else
@@ -228,16 +194,20 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			n.setConnected(Team.A,false);
 			n.setConnected(Team.B,false);
 		}
-		nodesByTeam.get(Team.A).clear();
-		nodesByTeam.get(Team.B).clear();
+		connectedNodesByTeam.get(Team.A).clear();
+		connectedNodesByTeam.get(Team.B).clear();
 		adjacentNodesByTeam.get(Team.A).clear();
 		adjacentNodesByTeam.get(Team.B).clear();
 		new Connections(Team.A).findAll();
 		new Connections(Team.B).findAll();
 	}
 
+	public int getConnectedNodeCount(Team t) {
+		return connectedNodesByTeam.get(t).size();
+	}
+
 	public boolean timeLimitReached() {
-		return false;
+		return currentRound >= gameMap.getMaxRounds()-1;
 	}
 
     public double[] getLastRoundResources() {
