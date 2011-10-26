@@ -219,9 +219,9 @@ public class GameMap implements GenericGameMap {
 
         static {
             int buf = 0;
-            for (ComponentType t : ComponentType.values()) {
-                if (t.componentClass == ComponentClass.SENSOR && t.range > buf)
-                    buf = t.range;
+            for (RobotType t : RobotType.values()) {
+                if (t.sensorRadiusSquared > buf)
+                    buf = t.sensorRadiusSquared;
             }
             BUFFER = buf;
         }

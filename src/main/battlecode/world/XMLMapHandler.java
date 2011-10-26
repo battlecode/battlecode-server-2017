@@ -35,7 +35,6 @@ import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.PlayerFactory;
 import battlecode.world.GameMap.MapProperties;
-import battlecode.world.signal.EquipSignal;
 import battlecode.world.signal.NodeConnectionSignal;
 import battlecode.world.signal.SpawnSignal;
 import battlecode.engine.signal.Signal;
@@ -138,31 +137,6 @@ class XMLMapHandler extends DefaultHandler {
         }
     }
 
-    private static class MineData implements SymbolData {
-
-        public static final SymbolDataFactory factory = new SymbolDataFactory() {
-
-            public MineData create(Attributes att) {
-                return new MineData();
-            }
-        };
-
-        public MineData() {
-        }
-
-        public TerrainTile tile() {
-            return TerrainTile.LAND;
-        }
-
-        public void createGameObject(GameWorld world, MapLocation loc) {
-            world.createMine(loc);
-        }
-
-        public boolean equalsMirror(SymbolData data) {
-            return data instanceof MineData;
-        }
-    }
-
     private static class NodeData implements SymbolData {
 
         public static final SymbolDataFactory factory = new SymbolDataFactory() {
@@ -213,12 +187,10 @@ class XMLMapHandler extends DefaultHandler {
 
     static {
         factories.put("TERRAIN", TerrainData.factory);
-        factories.put("RECYCLER", RobotData.factory);
-        factories.put("CONSTRUCTOR", RobotData.factory);
         for (RobotType ch : RobotType.values()) {
             factories.put(ch.name(), RobotData.factory);
         }
-        factories.put("MINE", MineData.factory);
+        factories.put("POWER_NODE", NodeData.factory);
         factories.put("NODE", NodeData.factory);
     }
     /** Used to pass to the GameMap constructor. */
@@ -559,10 +531,7 @@ class XMLMapHandler extends DefaultHandler {
         for (y = 0; y < mapHeight; y++) {
             for (x = 0; x < mapWidth; x++) {
                 d = map[x][y];
-                if (d instanceof MineData) {
-                    b.append('@');
-                    mines++;
-                } else if (d instanceof RobotData) {
+                if (d instanceof RobotData) {
                     RobotData rd = (RobotData) d;
                     switch (rd.type) {
                     	case ARCHON:

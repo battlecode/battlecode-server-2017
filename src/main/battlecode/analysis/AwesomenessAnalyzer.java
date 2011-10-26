@@ -479,10 +479,6 @@ public class AwesomenessAnalyzer {
 					r = new RobotStat(loc,s.getType());
 					robots.put(s.getRobotID(), r);
 					events.add(new Event(SPAWN_AWESOMENESS*r.robotAwesomeness, loc));
-				} else if(signal instanceof EquipSignal) {
-					EquipSignal s = (EquipSignal)signal;
-					RobotStat robot = robots.get(s.robotID);
-					events.add(new Event(EQUIP_AWESOMENESS*robot.robotAwesomeness, robot.location));
 				} else if(signal instanceof MovementSignal) {
 					MovementSignal s = (MovementSignal)signal;
 					RobotStat robot = robots.get(s.getRobotID());

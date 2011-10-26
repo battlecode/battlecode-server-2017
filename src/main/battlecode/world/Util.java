@@ -83,5 +83,4 @@ public class Util {
         };
     }
     static final Predicate<Object> isRobot = Predicates.instanceOf(InternalRobot.class);
-    static final Predicate<Object> isMine = Predicates.instanceOf(InternalMine.class);
 }

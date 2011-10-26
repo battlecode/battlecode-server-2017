@@ -407,13 +407,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public void resetStatic() {
     }
 
-    public InternalMine createMine(MapLocation loc) {
-        InternalMine m = new InternalMine(this, loc);
-        notifyAddingNewObject(m);
-        addSignal(new MineBirthSignal(m));
-        return m;
-    }
-
     public void createNodeLink(MapLocation id1, MapLocation id2)
     {
     	if(!this.powerNodeGraph.containsKey(id1))

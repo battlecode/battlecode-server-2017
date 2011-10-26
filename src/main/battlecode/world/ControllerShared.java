@@ -70,10 +70,6 @@ public abstract class ControllerShared
 		return castInternalObject(r,InternalRobot.class);
 	}
 
-	protected static InternalMine castInternalMine(Mine m) {
-		return castInternalObject(m,InternalMine.class);
-	}
-
 	protected static InternalObject castInternalObject(GameObject o) {
 		return castInternalObject(o,InternalObject.class);
 	}

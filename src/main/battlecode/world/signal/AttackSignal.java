@@ -2,7 +2,6 @@ package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
-import battlecode.common.ComponentType;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotLevel;
 
