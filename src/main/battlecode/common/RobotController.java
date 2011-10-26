@@ -205,6 +205,12 @@ public interface RobotController {
 
  	/**
      * Attacks the given location and height.
+	 * If this robot is a <code>SCORCHER</code>, attacks every square in the robot's
+	 * attack range at ground level instead; <code>loc</code> and <code>height</code>
+	 * are ignored.
+	 *
+	 * @throws GameActionException if this robot's attack cooldown is not zero (ALREADY_ACTIVE)
+	 * @throws GameActionException if this robot is not a <code>SCORCHER</code> and it cannot attack the given height or location (OUT_OF_RANGE)
      */
     public void attackSquare(MapLocation loc, RobotLevel height) throws GameActionException;
 

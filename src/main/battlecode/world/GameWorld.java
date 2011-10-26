@@ -424,16 +424,35 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void visitAttackSignal(AttackSignal s) {
         InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
-        MapLocation targetLoc = s.getTargetLoc();
-        RobotLevel level = s.getTargetHeight();
-        InternalRobot target = getRobot(targetLoc, level);
+		if(attacker.type==RobotType.SCORCHER) {
+			for(InternalObject o : gameObjectsByID.values()) {
+				if(attacker.type.canAttack(o.getRobotLevel())&&canAttackSquare(attacker,o.getLocation())&&(o instanceof InternalRobot)) {
+					InternalRobot target = (InternalRobot)o;
+					target.takeDamage(attacker.type.attackPower);
+				}
+			}
+		}
+		else {
+        	MapLocation targetLoc = s.getTargetLoc();
+        	RobotLevel level = s.getTargetHeight();
+        	InternalRobot target = getRobot(targetLoc, level);
 
-        double totalDamage = attacker.type.attackPower;
-
-        if (target != null) {
-            // takeDamage is responsible for checking the armor
-            target.takeDamage(totalDamage);
-        }
+        	if (target != null) {
+				switch(attacker.type) {
+				case SCOUT:
+					double drain = Math.min(attacker.type.attackPower,target.getFlux());
+					target.adjustFlux(-drain);
+					attacker.adjustFlux(drain);
+					break;
+				case DISRUPTER:
+            		target.takeDamage(attacker.type.attackPower);
+					target.delayAttack(GameConstants.DISRUPTER_DELAY);
+					break;
+				default:
+            		target.takeDamage(attacker.type.attackPower);
+				}
+        	}
+		}
 
         addSignal(s);
     }
@@ -546,6 +565,13 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     //    UTILITY METHODS
     // *****************************
     private static MapLocation origin = new MapLocation(0, 0);
+
+	protected static boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
+		MapLocation myLoc = ir.getLocation();
+		int d = myLoc.distanceSquaredTo(loc);
+		return d<=ir.type.attackRadiusMaxSquared && d>= ir.type.attackRadiusMinSquared
+			&& inAngleRange(myLoc,ir.getDirection(),loc,ir.type.attackCosHalfTheta);
+	}
 
     protected static boolean inAngleRange(MapLocation sensor, Direction dir, MapLocation target, double cosHalfTheta) {
         MapLocation dirVec = origin.add(dir);

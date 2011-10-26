@@ -375,17 +375,20 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
 	public boolean canAttackSquare(MapLocation loc) {
 		assertNotNull(loc);
-		MapLocation myLoc = getLocation();
-		int d = myLoc.distanceSquaredTo(loc);
-		return d<=robot.type.attackRadiusMaxSquared && d>= robot.type.attackRadiusMinSquared
-			&& gameWorld.inAngleRange(myLoc,getDirection(),loc,robot.type.attackCosHalfTheta);
+		return GameWorld.canAttackSquare(robot,loc);
 	}
 
 	public void attackSquare(MapLocation loc, RobotLevel height) throws GameActionException {
         assertNotAttacking();
-        assertNotNull(loc);
-        assertNotNull(height);
-        assertCanAttack(loc,height);
+		if(robot.type==RobotType.SCORCHER) {
+			loc = null;
+			height = null;
+		}
+		else {
+        	assertNotNull(loc);
+        	assertNotNull(height);
+        	assertCanAttack(loc,height);
+		}
         robot.activateAttack(new AttackSignal(robot, loc, height),robot.type.attackDelay);
 		// if this robot killed itself, its turn should end
 		if(robot.getEnergonLevel()<0) {

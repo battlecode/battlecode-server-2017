@@ -87,6 +87,9 @@ public final class GameConstants {
 	public static final double REGEN_AMOUNT = .2;
 	/** The number of archons each team starts with. */
 	public static final int NUMBER_OF_ARCHONS = 6;
+	/** The increase in a unit's attack timeout when it is hit by a
+	 * DISRUPTER. */
+	public static final int DISRUPTER_DELAY = 2;
 
 	public static final double MAX_NODE_HEALTH = 100.0;
 	public static final double NODE_CAPTURE_LIMIT = 10.0;

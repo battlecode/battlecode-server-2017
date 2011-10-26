@@ -225,6 +225,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		turnsUntilMovementIdle = delay;
 	}
 
+	public void delayAttack(int delay) {
+		turnsUntilAttackIdle += delay;
+	}
+
 	public void activateAttack(Signal s, int delay) {
 		myGameWorld.visitSignal(s);
 		turnsUntilAttackIdle = delay;
