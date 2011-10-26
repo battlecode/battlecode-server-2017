@@ -183,7 +183,7 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         public void createGameObject(GameWorld world, MapLocation loc) {
-            world.createNode(loc, team);
+            GameWorldFactory.createPlayer(world,RobotType.POWER_NODE,loc,team,null,false);
         }
 
         public boolean equalsMirror(SymbolData data) {
@@ -481,6 +481,8 @@ class XMLMapHandler extends DefaultHandler {
 				new MapLocation(origin.x + link[1].x, origin.y + link[1].y));
         }
         gw.endRandomIDs();
+
+		gw.recomputeConnections();
 
         return gw;
     }

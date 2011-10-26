@@ -29,10 +29,10 @@ import battlecode.world.signal.TurnOffSignal;
 
 public class InternalRobot extends InternalObject implements Robot, GenericRobot {
 
-    private volatile double myEnergonLevel;
+    protected volatile double myEnergonLevel;
 	private volatile double flux;
     protected volatile Direction myDirection;
-    private volatile boolean energonChanged = true;
+    protected volatile boolean energonChanged = true;
 	private volatile boolean fluxChanged = true;
     protected volatile long controlBits;
     // is this used ever?
@@ -48,7 +48,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 	private volatile int turnsUntilMovementIdle;
 	private volatile int turnsUntilAttackIdle;
-	private volatile boolean regen;
+	protected volatile boolean regen;
 	private boolean broadcasted;
 	private boolean upkeepPaid;
 
@@ -140,10 +140,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void processEndOfRound() {
         super.processEndOfRound();
         buffs.processEndOfRound();
-
-        if (myEnergonLevel <= 0) {
-            suicide();
-        }
     }
 
     public double getEnergonLevel() {
@@ -200,9 +196,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         energonChanged = true;
 
         if (myEnergonLevel <= 0) {
-            myGameWorld.notifyDied(this);
+			processLethalDamage();
         }
     }
+
+	public void processLethalDamage() {
+        myGameWorld.notifyDied(this);
+	}
 
     public boolean clearEnergonChanged() {
 		boolean wasChanged = energonChanged;

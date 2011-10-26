@@ -21,10 +21,11 @@ public class RobotInfo {
     /** The direction this Robot is facing. */
     public final Direction direction;
     public final RobotType type;
+	public final Team team;
     
     public RobotInfo(Robot robot, MapLocation location,
             double hitpoints, double maxHp, double flux, Direction direction,
-            RobotType type) {
+            RobotType type, Team team) {
         super();
         this.robot = robot;
         this.location = location;
@@ -33,6 +34,7 @@ public class RobotInfo {
 		this.flux = flux;
         this.direction = direction;
         this.type = type;
+		this.team = team;
     }
 
     public int hashCode() {

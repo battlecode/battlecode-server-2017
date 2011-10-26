@@ -1,11 +1,15 @@
 package battlecode.world;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.List;
+import java.util.Set;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -51,12 +55,15 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private double[] teamResources = new double[]{GameConstants.INITIAL_FLUX, GameConstants.INITIAL_FLUX};
 
     private Map<MapLocation, ArrayList<MapLocation>> powerNodeGraph = new HashMap<MapLocation, ArrayList<MapLocation>>();
-    private ArrayList<InternalPowerNode> powerNodes = new ArrayList<InternalPowerNode>();
-   
+    private List<InternalPowerNode> powerNodes = new ArrayList<InternalPowerNode>();
+	private Map<Team,InternalPowerNode> baseNodes = new EnumMap<Team,InternalPowerNode>(Team.class);
+	private Map<Team,List<InternalPowerNode>> nodesByTeam = new EnumMap<Team,List<InternalPowerNode>>(Team.class);
+	private Map<Team,List<InternalPowerNode>> adjacentNodesByTeam = new EnumMap<Team,List<InternalPowerNode>>(Team.class);
+
 	// robots to remove from the game at end of turn
 	private List<InternalRobot> deadRobots = new ArrayList<InternalRobot>();
 
-	private EnumMap<Team,List<InternalRobot>> archons;
+	private Map<Team,List<InternalRobot>> archons;
 
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldArchonMemory) {
@@ -65,6 +72,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		archons = new EnumMap<Team,List<InternalRobot>>(Team.class);
 		archons.put(Team.A,new ArrayList<InternalRobot>());
 		archons.put(Team.B,new ArrayList<InternalRobot>());
+		nodesByTeam.put(Team.A,new ArrayList<InternalPowerNode>());
+		nodesByTeam.put(Team.B,new ArrayList<InternalPowerNode>());
+		adjacentNodesByTeam.put(Team.A,new ArrayList<InternalPowerNode>());
+		adjacentNodesByTeam.put(Team.B,new ArrayList<InternalPowerNode>());
     }
 
     public int getMapSeed() {
@@ -177,6 +188,58 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     }
 
+	private class Connections {
+
+		private Set<InternalPowerNode> visited = new HashSet<InternalPowerNode>();
+		private Deque<InternalPowerNode> queue = new ArrayDeque<InternalPowerNode>();
+		private Team team;
+
+		public Connections(Team t) {
+			team = t;
+			add(baseNodes.get(t));
+		}
+
+		public void add(InternalPowerNode n) {
+			if(!visited.contains(n)) {
+				visited.add(n);
+				n.setConnected(team,true);
+				if(n.getTeam()==team) {
+					nodesByTeam.get(team).add(n);
+					queue.push(n);
+				}
+				else
+					adjacentNodesByTeam.get(team).add(n);
+			}
+		}
+
+		public void findAll() {
+			while(!queue.isEmpty()) {
+				InternalPowerNode n = queue.pop();
+				for(MapLocation l : powerNodeGraph.get(n.getLocation())) {
+					add((InternalPowerNode)gameObjectsByLoc.get(new MapLocation3D(l, RobotType.POWER_NODE.level)));
+				}
+			}
+		}
+
+	}
+
+	public void recomputeConnections() {
+		for(InternalPowerNode n: powerNodes) {
+			n.setConnected(Team.A,false);
+			n.setConnected(Team.B,false);
+		}
+		nodesByTeam.get(Team.A).clear();
+		nodesByTeam.get(Team.B).clear();
+		adjacentNodesByTeam.get(Team.A).clear();
+		adjacentNodesByTeam.get(Team.B).clear();
+		new Connections(Team.A).findAll();
+		new Connections(Team.B).findAll();
+	}
+
+	public boolean timeLimitReached() {
+		return false;
+	}
+
     public double[] getLastRoundResources() {
         return lastRoundResources;
     }
@@ -209,7 +272,16 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         if (o.getLocation() != null) {
             gameObjectsByLoc.put(new MapLocation3D(o.getLocation(), o.getRobotLevel()), o);
         }
+		if (o instanceof InternalPowerNode) {
+			addPowerNode((InternalPowerNode)o);
+		}
     }
+
+	public void addPowerNode(InternalPowerNode p) {
+		powerNodes.add(p);
+		if(p.getTeam()!=Team.NEUTRAL)
+			baseNodes.put(p.getTeam(),p);
+	}
 
 	public void addArchon(InternalRobot r) {
 		archons.get(r.getTeam()).add(r);
@@ -390,15 +462,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 	public Iterable<InternalPowerNode> getPowerNodesByTeam(Team t) {
 		return Iterables.filter(powerNodes,Util.isAllied(t));
 	}
-        
-    public InternalPowerNode createNode(MapLocation loc, Team team) {
-    	InternalPowerNode n = new InternalPowerNode(this, loc, team);
-        notifyAddingNewObject(n);
-        addSignal(new NodeBirthSignal(n));
-        powerNodes.add(n);
-        return n;
-    }
 
+	public List<InternalPowerNode> getCapturableNodes(Team t) {
+		return adjacentNodesByTeam.get(t);
+	}
+        
 	public void notifyDied(InternalRobot r) {
 		if(r==RobotMonitor.getCurrentRobot())
 			throw new RobotDeathException();
@@ -545,6 +613,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         addSignal(s);
     }
 
+	@SuppressWarnings("unchecked")
     public void visitSpawnSignal(SpawnSignal s) {
         InternalRobot parent;
         int parentID = s.getParentID();
@@ -558,7 +627,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
 
         //note: this also adds the signal
-        GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent);
+        InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent);
     }
 
     // *****************************

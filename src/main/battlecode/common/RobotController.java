@@ -134,8 +134,10 @@ public interface RobotController {
 	 * Returns an array containing the locations of all of the nodes
 	 * that this team can capture.
 	 */
-	public MapLocation [] senseAdjacentPowerNodes();
-	
+	public MapLocation [] senseCapturablePowerNodes();
+
+	public boolean senseConnected(PowerNode p);
+
 	// ***********************************
     // ****** MOVEMENT METHODS ********
     // ***********************************

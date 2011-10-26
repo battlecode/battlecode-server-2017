@@ -90,9 +90,14 @@ public final class GameConstants {
 	/** The increase in a unit's attack timeout when it is hit by a
 	 * DISRUPTER. */
 	public static final int DISRUPTER_DELAY = 2;
+	/** The amount of damage dealt each turn to a node that is not connected
+	 * to its team's power core. */
+	public static final double DISCONNECTED_NODE_DAMAGE = .2;
+	/** The total amount of damage to be divided evenly among each team's
+	 * power nodes each turn once the time limit is reached. */
+	public static final double TIME_LIMIT_DAMAGE = .4;
 
-	public static final double MAX_NODE_HEALTH = 100.0;
-	public static final double NODE_CAPTURE_LIMIT = 10.0;
+	public static final int NODE_CAPTURE_LIMIT = 10;
 
     // This class cannot be instantiated.
     private GameConstants() {

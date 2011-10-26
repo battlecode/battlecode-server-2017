@@ -13,6 +13,7 @@ import java.util.HashSet;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 /*
 TODO:
@@ -244,10 +245,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException {
         InternalRobot ir = castInternalRobot(r);
         assertCanSense(ir);
-        RobotType ch = ir.type;
-        boolean on = true;
         return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getMaxEnergon(),
-                ir.getFlux(), ir.getDirection(), ch);
+                ir.getFlux(), ir.getDirection(), ir.type, ir.getTeam());
     }
 
     public MapLocation senseLocationOf(GameObject o) throws GameActionException {
@@ -272,14 +271,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		return Iterables.toArray(gameWorld.getPowerNodesByTeam(robot.getTeam()),PowerNode.class);
 	}
 
-	public MapLocation [] senseAdjacentPowerNodes() {
-		HashSet<MapLocation> adjacent = new HashSet<MapLocation>();
-		Iterable<InternalPowerNode> owned = gameWorld.getPowerNodesByTeam(robot.getTeam());
-		for(InternalPowerNode p : owned)
-			adjacent.addAll(gameWorld.getAdjacentNodes(p.getLocation()));
-		for(InternalPowerNode p : owned) 
-			adjacent.remove(p.getLocation());
-		return adjacent.toArray(new MapLocation [0]);
+	public MapLocation [] senseCapturablePowerNodes() {
+		return Lists.transform(gameWorld.getCapturableNodes(robot.getTeam()),Util.objectLocation).toArray(new MapLocation [0]); 
+	}
+
+	public boolean senseConnected(PowerNode p) {
+		InternalPowerNode ip = castInternalPowerNode(p);
+		return ip.connected(robot.getTeam());
 	}
 
 	/**

@@ -40,8 +40,15 @@ public class GameWorldFactory {
 	public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
 
 		// first, make the robot
-		InternalRobot robot = new InternalRobot(gw, type, loc, t, wakeDelay);
-		loadPlayer(gw, robot, t, parent);
+		InternalRobot robot;
+		if(type!=RobotType.POWER_NODE) {
+			robot = new InternalRobot(gw, type, loc, t, wakeDelay);
+			loadPlayer(gw, robot, t, parent);
+		}
+		else {
+			robot = new InternalPowerNode(gw,loc,t);
+			gw.addSignal(new SpawnSignal(robot, parent));
+		}
 		return robot;
 	}
 

@@ -62,6 +62,10 @@ public abstract class ControllerShared
 		throw new GameActionException(CANT_SENSE_THAT,"That is not within range.");
 	}
 
+	protected static InternalPowerNode castInternalPowerNode(PowerNode r) {
+		return castInternalObject(r,InternalPowerNode.class);
+	}
+
 	protected static InternalRobot castInternalRobot(Robot r) {
 		return castInternalObject(r,InternalRobot.class);
 	}

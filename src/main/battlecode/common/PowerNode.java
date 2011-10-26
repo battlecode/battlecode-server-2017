@@ -5,7 +5,7 @@ TODO:
 
  */
 
-public interface PowerNode extends GameObject {
+public interface PowerNode extends Robot {
 
 	public MapLocation getLocation();
 	
