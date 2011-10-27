@@ -264,7 +264,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
 	public MapLocation [] senseAlliedArchons() {
-		return gameWorld.getArchons(robot.getTeam());
+		return gameWorld.getArchons(robot);
 	}
 
 	public PowerNode [] senseAlliedPowerNodes() {

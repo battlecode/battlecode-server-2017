@@ -9,7 +9,7 @@ public enum RobotType {
 	SCOUT(      IN_AIR,    20, 50, 80, .08, 4, .2,25,360, 0, 5,360, 5, 1,true ,true ),
 	DISRUPTER(	ON_GROUND, 70,100,180, .25, 8, .6,16,180, 0,10, 90, 5, 4,true ,true ),
 	SCORCHER(   ON_GROUND, 70,100,220, .3 ,10, .8,10,135, 1,10,180, 5, 4,false,true ),
-	POWER_NODE( IN_AIR,   150,  0,  0,  0,  0,  0,-1,  0, 0, 0,  0, 0, 0,false,false); 
+	POWER_NODE( IN_AIR,   250,  0,  0,  0,  0,  0,-1,  0, 0, 0,  0, 0, 0,false,false); 
 
 	/** The robot's level. */
 	public final RobotLevel level;

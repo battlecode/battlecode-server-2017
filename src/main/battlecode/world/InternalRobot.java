@@ -108,9 +108,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 	public void archonProduction() {
 		int d, dmin = RobotType.ARCHON.sensorRadiusSquared;
-		for(MapLocation l : myGameWorld.getArchons(getTeam())) {
+		for(MapLocation l : myGameWorld.getArchons(this)) {
 			d = getLocation().distanceSquaredTo(l);
-			if(d>0&&d<=dmin)
+			if(d<=dmin)
 				dmin=d;
 		}
 		adjustFlux(.5*(1.+(double)dmin/RobotType.ARCHON.sensorRadiusSquared));
