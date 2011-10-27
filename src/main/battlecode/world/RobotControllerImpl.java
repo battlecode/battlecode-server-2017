@@ -292,6 +292,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		return robot.getTeam()==Team.A?ip.loyalty():-ip.loyalty();
 	}
 
+	public PowerNode sensePowerCore() {
+		return gameWorld.getPowerCore(robot.getTeam());
+	}
+
 	/**
      * {@inheritDoc}
      */

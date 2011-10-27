@@ -158,6 +158,8 @@ public interface RobotController {
 	 */
 	public int senseLoyalty(PowerNode p) throws GameActionException;
 
+	public PowerNode sensePowerCore();
+
 	// ***********************************
     // ****** MOVEMENT METHODS ********
     // ***********************************

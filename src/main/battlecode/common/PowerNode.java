@@ -11,4 +11,6 @@ public interface PowerNode extends Robot {
 	
 	public MapLocation [] neighbors();
 
+	public boolean isPowerCore();
+
 }

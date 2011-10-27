@@ -15,10 +15,12 @@ public class InternalPowerNode extends InternalRobot implements PowerNode {
 	//it is neutral. Once |capture| > 10, it switches team.
 	private int capture = 0;
 	
-	private boolean [] connected = new boolean [3];
+	private boolean [] connected = new boolean [2];
+	private boolean isCore;
 		
 	public InternalPowerNode(GameWorld gw, MapLocation loc, Team team) {
         super(gw, RobotType.POWER_NODE, loc, team, false);
+		isCore=team!=Team.NEUTRAL;
     }
 
 	public void setConnected(Team t, boolean b) {
@@ -45,6 +47,10 @@ public class InternalPowerNode extends InternalRobot implements PowerNode {
 
 	public boolean isNeutral() {
 		return getTeam() == Team.NEUTRAL;
+	}
+
+	public boolean isPowerCore() {
+		return isCore;
 	}
 
 	public void takeDamage(double amt, InternalRobot source) {

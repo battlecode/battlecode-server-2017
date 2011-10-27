@@ -154,6 +154,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		}
 	}
 
+	public InternalPowerNode getPowerCore(Team t) {
+		return baseNodes.get(t);
+	}
+
 	public interface Graph {
 		
 		public List<MapLocation> neighbors(MapLocation loc);
