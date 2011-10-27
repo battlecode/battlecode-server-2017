@@ -154,35 +154,66 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		}
 	}
 
-	private class Connections {
+	public interface Graph {
+		
+		public List<MapLocation> neighbors(MapLocation loc);
+		public MapLocation baseNode(Team t);
+		public Team team(MapLocation loc);
+		public void setConnected(MapLocation loc, Team t);
 
-		private Set<InternalPowerNode> visited = new HashSet<InternalPowerNode>();
-		private Deque<InternalPowerNode> queue = new ArrayDeque<InternalPowerNode>();
-		private Team team;
+	}
 
-		public Connections(Team t) {
-			team = t;
-			add(baseNodes.get(t));
+	private Graph graphImpl = new Graph () {
+		
+		public List<MapLocation> neighbors(MapLocation loc) {
+			return powerNodeGraph.get(loc);
 		}
 
-		public void add(InternalPowerNode n) {
+		public MapLocation baseNode(Team t) {
+			return baseNodes.get(t).getLocation();
+		}
+
+		public Team team(MapLocation loc) {
+			return gameObjectsByLoc.get(new MapLocation3D(loc,RobotType.POWER_NODE.level)).getTeam();
+		}
+
+		public void setConnected(MapLocation loc, Team t) {
+			InternalPowerNode p = (InternalPowerNode)gameObjectsByLoc.get(new MapLocation3D(loc,RobotType.POWER_NODE.level));
+			p.setConnected(t,true);
+			if(p.getTeam()==t)
+				connectedNodesByTeam.get(t).add(p);
+			else
+				adjacentNodesByTeam.get(t).add(p);
+		}
+	};
+
+	public static class Connections {
+
+		private Set<MapLocation> visited = new HashSet<MapLocation>();
+		private Deque<MapLocation> queue = new ArrayDeque<MapLocation>();
+		private Team team;
+		private Graph graph;
+
+		public Connections(Graph g, Team t) {
+			team = t;
+			graph = g;
+			add(g.baseNode(t));
+		}
+
+		public void add(MapLocation n) {
 			if(!visited.contains(n)) {
 				visited.add(n);
-				n.setConnected(team,true);
-				if(n.getTeam()==team) {
-					connectedNodesByTeam.get(team).add(n);
+				graph.setConnected(n,team);
+				if(graph.team(n)==team)
 					queue.push(n);
-				}
-				else
-					adjacentNodesByTeam.get(team).add(n);
 			}
 		}
 
 		public void findAll() {
 			while(!queue.isEmpty()) {
-				InternalPowerNode n = queue.pop();
-				for(MapLocation l : powerNodeGraph.get(n.getLocation())) {
-					add((InternalPowerNode)gameObjectsByLoc.get(new MapLocation3D(l, RobotType.POWER_NODE.level)));
+				MapLocation n = queue.pop();
+				for(MapLocation l : graph.neighbors(n)) {
+					add(l);
 				}
 			}
 		}
@@ -198,8 +229,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		connectedNodesByTeam.get(Team.B).clear();
 		adjacentNodesByTeam.get(Team.A).clear();
 		adjacentNodesByTeam.get(Team.B).clear();
-		new Connections(Team.A).findAll();
-		new Connections(Team.B).findAll();
+		new Connections(graphImpl,Team.A).findAll();
+		new Connections(graphImpl,Team.B).findAll();
 	}
 
 	public int getConnectedNodeCount(Team t) {
@@ -322,13 +353,17 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
 	public MapLocation [] getArchons(InternalRobot robot) {
 		List<InternalRobot> allies = archons.get(robot.getTeam());
-		MapLocation [] locs = new MapLocation [allies.size()-1];
-		int j=-1;
-		for(InternalRobot r : allies) {
-			if(r!=robot)
-				locs[++j]=r.getLocation();
+		if(robot.type==RobotType.ARCHON) {
+			MapLocation [] locs = new MapLocation [allies.size()-1];
+			int j=-1;
+			for(InternalRobot r : allies) {
+				if(r!=robot)
+					locs[++j]=r.getLocation();
+			}
+			return locs;
 		}
-		return locs;
+		else
+			return Lists.transform(archons.get(robot.getTeam()),Util.objectLocation).toArray(new MapLocation [0]);
 	}
 
     public double getPoints(Team team) {
@@ -466,7 +501,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			for(InternalObject o : gameObjectsByID.values()) {
 				if(attacker.type.canAttack(o.getRobotLevel())&&canAttackSquare(attacker,o.getLocation())&&(o instanceof InternalRobot)) {
 					InternalRobot target = (InternalRobot)o;
-					target.takeDamage(attacker.type.attackPower);
+					target.takeDamage(attacker.type.attackPower,attacker);
 				}
 			}
 		}
@@ -483,11 +518,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 					attacker.adjustFlux(drain);
 					break;
 				case DISRUPTER:
-            		target.takeDamage(attacker.type.attackPower);
+            		target.takeDamage(attacker.type.attackPower,attacker);
 					target.delayAttack(GameConstants.DISRUPTER_DELAY);
 					break;
 				default:
-            		target.takeDamage(attacker.type.attackPower);
+            		target.takeDamage(attacker.type.attackPower,attacker);
 				}
         	}
 		}

@@ -185,6 +185,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
     }
 
+	public void takeDamage(double amt, InternalRobot source) {
+		takeDamage(amt);
+	}
+
     public void changeEnergonLevelFromAttack(double amount) {
         hasBeenAttacked = true;
         changeEnergonLevel(amount * (buffs.getDamageReceivedMultiplier() + 1));

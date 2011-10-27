@@ -61,8 +61,10 @@ public class AutoSignalHandler implements SignalHandler {
 	public void handleException(Throwable e) {
 		if(e instanceof RuntimeException)
 			throw (RuntimeException)e;
+		else if(e instanceof Error)
+			throw (Error)e;
 		else
-			throw new RuntimeException("Exception in signal handler",e.getCause());
+			throw new RuntimeException("Exception in signal handler",e);
 	}
 
     @SuppressWarnings("unchecked")

@@ -19,8 +19,6 @@ public class InternalPowerNode extends InternalRobot implements PowerNode {
 		
 	public InternalPowerNode(GameWorld gw, MapLocation loc, Team team) {
         super(gw, RobotType.POWER_NODE, loc, team, false);
-		if(team==Team.NEUTRAL)
-			myEnergonLevel = 0.;
     }
 
 	public void setConnected(Team t, boolean b) {
@@ -35,31 +33,30 @@ public class InternalPowerNode extends InternalRobot implements PowerNode {
 		Team oldTeam = getTeam();
 		super.setTeam(t);
 		myGameWorld.teamChanged(this,oldTeam,t);
-		energonChanged = true;
 		regen = false;
-		if(t==Team.NEUTRAL) {
-			myEnergonLevel = 0.;
+		if(t==Team.NEUTRAL)
 			capture = 0;
-		}
-		else
-			myEnergonLevel = RobotType.POWER_NODE.maxEnergon;
 	}
 
 	public void processLethalDamage() {
-		if(getTeam()!=Team.NEUTRAL)
-			setTeam(Team.NEUTRAL);
-		myEnergonLevel = 0.;
+		setTeam(Team.NEUTRAL);
+		myEnergonLevel = type.maxEnergon;
 	}
 
 	public boolean isNeutral() {
 		return getTeam() == Team.NEUTRAL;
 	}
 
+	public void takeDamage(double amt, InternalRobot source) {
+		if(connected(source.getTeam()))
+			super.takeDamage(amt,source);
+	}
+
 	public void processBeginningOfRound() {
 		super.processBeginningOfRound();
 		if(isNeutral()) {
 			InternalRobot ir = (InternalRobot)myGameWorld.getObject(getLocation(),RobotLevel.ON_GROUND);
-			if(ir!=null&&ir.type==RobotType.ARCHON)
+			if(ir!=null)
 				capture(ir.getTeam());
 		}
 		else {
