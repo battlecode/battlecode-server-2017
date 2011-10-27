@@ -448,15 +448,19 @@ class XMLMapHandler extends DefaultHandler {
             for (int j = 0; j < map[i].length; j++)
                 map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
         }
+		MapLocation [][] links = new MapLocation [nodeLinks.size()][];
+		int i=0;
         for(MapLocation[] link : nodeLinks)
         {
-        	gw.createNodeLink(new MapLocation(origin.x + link[0].x, origin.y + link[0].y),
-				new MapLocation(origin.x + link[1].x, origin.y + link[1].y));
+			MapLocation t1 = origin.add(link[0].x,link[0].y);
+			MapLocation t2 = origin.add(link[1].x,link[1].y);
+			gw.createNodeLink(t1,t2);
+			links[i++] = new MapLocation [] { t1, t2 };
         }
         gw.endRandomIDs();
 
 		gw.recomputeConnections();
-		gw.addSignal(new NodeConnectionSignal(nodeLinks.toArray(new MapLocation[0][])));
+		gw.addSignal(new NodeConnectionSignal(links));
 
         return gw;
     }
