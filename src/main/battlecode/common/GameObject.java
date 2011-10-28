@@ -35,5 +35,7 @@ public interface GameObject {
      */
     public int getID();
 
+	public Team getTeam();
+
     public RobotLevel getRobotLevel();
 }

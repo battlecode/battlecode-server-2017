@@ -88,6 +88,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void processBeginningOfRound() {
         super.processBeginningOfRound();
         buffs.processBeginningOfRound();
+		// towers don't get a turn, so regenerate them here
+		if(type==RobotType.TOWER) {
+			if(regen) {
+				changeEnergonLevel(GameConstants.REGEN_AMOUNT);
+			}
+			regen = false;
+		}
     }
 
     public void processBeginningOfTurn() {

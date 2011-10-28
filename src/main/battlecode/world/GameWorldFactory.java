@@ -41,12 +41,12 @@ public class GameWorldFactory {
 
 		// first, make the robot
 		InternalRobot robot;
-		if(type!=RobotType.POWER_NODE) {
+		if(type!=RobotType.TOWER) {
 			robot = new InternalRobot(gw, type, loc, t, wakeDelay);
 			loadPlayer(gw, robot, t, parent);
 		}
 		else {
-			robot = new InternalPowerNode(gw,loc,t);
+			robot = new InternalRobot(gw,type,loc,t,wakeDelay);
 			gw.addSignal(new SpawnSignal(robot, parent));
 		}
 		return robot;

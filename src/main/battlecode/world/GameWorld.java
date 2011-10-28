@@ -100,6 +100,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     }
 
+	public InternalPowerNode towerToNode(InternalRobot tower) {
+		return getPowerNode(tower.getLocation());
+	}
+	
+	public InternalRobot nodeToTower(InternalPowerNode node) {
+		return getRobot(node.getLocation(),RobotType.TOWER.level);
+	}
+
     public void processEndOfRound() {
         // process all gameobjects
         InternalObject[] gameObjects = new InternalObject[gameObjectsByID.size()];
@@ -113,9 +121,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			List<InternalPowerNode> teamANodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.A));
 			List<InternalPowerNode> teamBNodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.B));
 			for(InternalPowerNode n : teamANodes)
-				n.takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamANodes.size());
+				nodeToTower(n).takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamANodes.size());
 			for(InternalPowerNode n : teamBNodes)
-				n.takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamBNodes.size());
+				nodeToTower(n).takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamBNodes.size());
 			// TODO: find a more fair way to break ties if both teams die to the time limit damage
 			// in the same round?
 		}
@@ -144,16 +152,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		}
 	}
 
-	public void teamChanged(InternalPowerNode p, Team oldTeam, Team newTeam) {
-		recomputeConnections();
-		addSignal(new NodeCaptureSignal(p,newTeam));
-		if(baseNodes.get(oldTeam)==p) {
-			if(winner==null) {
-				setWinner(oldTeam.opponent());
-			}
-		}
-	}
-
 	public InternalPowerNode getPowerCore(Team t) {
 		return baseNodes.get(t);
 	}
@@ -178,11 +176,15 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		}
 
 		public Team team(MapLocation loc) {
-			return gameObjectsByLoc.get(new MapLocation3D(loc,RobotType.POWER_NODE.level)).getTeam();
+			InternalObject tower = gameObjectsByLoc.get(new MapLocation3D(loc,RobotType.TOWER.level));
+			if(tower==null)
+				return Team.NEUTRAL;
+			else
+				return tower.getTeam();
 		}
 
 		public void setConnected(MapLocation loc, Team t) {
-			InternalPowerNode p = (InternalPowerNode)gameObjectsByLoc.get(new MapLocation3D(loc,RobotType.POWER_NODE.level));
+			InternalPowerNode p = (InternalPowerNode)gameObjectsByLoc.get(new MapLocation3D(loc,RobotLevel.MINE));
 			p.setConnected(t,true);
 			if(p.getTeam()==t)
 				connectedNodesByTeam.get(t).add(p);
@@ -269,6 +271,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             return null;
     }
 
+	public InternalPowerNode getPowerNode(MapLocation loc) {
+		return (InternalPowerNode)getObject(loc,RobotLevel.MINE);
+	}
+
     // should only be called by the InternalObject constructor
     public void notifyAddingNewObject(InternalObject o) {
         if (gameObjectsByID.containsKey(o.getID()))
@@ -284,8 +290,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
 	public void addPowerNode(InternalPowerNode p) {
 		powerNodes.add(p);
-		if(p.getTeam()!=Team.NEUTRAL)
-			baseNodes.put(p.getTeam(),p);
 	}
 
 	public void addArchon(InternalRobot r) {
@@ -558,16 +562,19 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         int ID = s.getObjectID();
         InternalObject obj = getObjectByID(ID);
 
+        if (obj != null) {
+            removeObject(obj);
+            addSignal(s);
+        }
         if (obj instanceof InternalRobot) {
             InternalRobot r = (InternalRobot) obj;
             RobotMonitor.killRobot(ID);
             if (r.hasBeenAttacked()) {
                 gameStats.setUnitKilled(r.getTeam(), currentRound);
             }
-        }
-        if (obj != null) {
-            removeObject(obj);
-            addSignal(s);
+			if(r.type == RobotType.TOWER) {
+				recomputeConnections();
+			}
         }
     }
 
@@ -622,6 +629,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         addSignal(s);
     }
 
+	public void setPowerCore(InternalPowerNode p, Team t) {
+		baseNodes.put(t,p);
+	}
+
 	@SuppressWarnings("unchecked")
     public void visitSpawnSignal(SpawnSignal s) {
         InternalRobot parent;
@@ -637,6 +648,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         //note: this also adds the signal
         InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent);
+		if(s.getType()==RobotType.TOWER)
+			recomputeConnections();
     }
 
     // *****************************

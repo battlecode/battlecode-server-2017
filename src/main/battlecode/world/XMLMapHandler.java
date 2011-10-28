@@ -158,7 +158,13 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         public void createGameObject(GameWorld world, MapLocation loc) {
-            GameWorldFactory.createPlayer(world,RobotType.POWER_NODE,loc,team,null,false);
+			if(team==Team.NEUTRAL)
+				new InternalPowerNode(world,loc,false);
+			else {
+				InternalPowerNode p = new InternalPowerNode(world,loc,true);
+				GameWorldFactory.createPlayer(world,RobotType.TOWER,loc,team,null,false);
+				world.setPowerCore(p,team);
+			}
         }
 
         public boolean equalsMirror(SymbolData data) {

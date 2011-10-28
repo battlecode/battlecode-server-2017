@@ -151,13 +151,6 @@ public interface RobotController {
 	 */
 	public boolean senseOpponentConnected(PowerNode p) throws GameActionException;
 
-	/**
-	 * Returns the loyalty of the power node <code>p</code> to this robot's team.
-	 *
-	 * @throws GameActionException if <code>p</code> is not within this robot's sensor range
-	 */
-	public int senseLoyalty(PowerNode p) throws GameActionException;
-
 	public PowerNode sensePowerCore();
 
 	// ***********************************

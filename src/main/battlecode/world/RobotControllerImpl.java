@@ -164,6 +164,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 	}
 
 	public void spawn(RobotType type) throws GameActionException {
+		// If we decide to let other robots spawn, then we should make
+		// sure that air units can't spawn ground units.
 		if(robot.type!=RobotType.ARCHON)
 			throw new IllegalStateException("Only archons can spawn.");
         assertNotNull(type);
@@ -172,6 +174,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		MapLocation loc = getLocation().add(getDirection());
 		if (!gameWorld.canMove(type.level, loc))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
+		if (type==RobotType.TOWER) {
+			InternalPowerNode node = gameWorld.getPowerNode(loc);
+			if(node==null)
+            	throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "A tower may only be built on top of a power node.");
+			if(!node.connected(robot.getTeam()))
+            	throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That node is not connected to your power core.");
+		}
         robot.adjustFlux(-type.spawnCost);
         robot.activateMovement(new SpawnSignal(loc, type, robot.getTeam(), robot),1);
     }
@@ -284,12 +293,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		InternalPowerNode ip = castInternalPowerNode(p);
 		assertCanSense(ip);
 		return ip.connected(robot.getTeam().opponent());
-	}
-
-	public int senseLoyalty(PowerNode p) throws GameActionException {
-		InternalPowerNode ip = castInternalPowerNode(p);
-		assertCanSense(ip);
-		return robot.getTeam()==Team.A?ip.loyalty():-ip.loyalty();
 	}
 
 	public PowerNode sensePowerCore() {
