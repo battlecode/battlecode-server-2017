@@ -105,11 +105,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 	}
 	
 	public InternalRobot nodeToTower(InternalPowerNode node) {
-		InternalRobot r = getRobot(node.getLocation(),RobotType.TOWER.level);
-		if(r==null||r.type!=RobotType.TOWER)
-			return null;
-		else
-			return r;
+		return getTower(node.getLocation());
 	}
 
     public void processEndOfRound() {
@@ -124,6 +120,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			// copy the node lists, because the damage could kill a node and disconnect the graph
 			List<InternalPowerNode> teamANodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.A));
 			List<InternalPowerNode> teamBNodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.B));
+			System.out.println(teamBNodes);
 			InternalRobot tower;
 			for(InternalPowerNode n : teamANodes) {
 				tower = nodeToTower(n);
@@ -133,7 +130,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			for(InternalPowerNode n : teamBNodes) {
 				tower = nodeToTower(n);
 				if(tower!=null)
-					tower.takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamANodes.size());
+					tower.takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamBNodes.size());
 			}
 			// TODO: find a more fair way to break ties if both teams die to the time limit damage
 			// in the same round?
@@ -187,7 +184,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		}
 
 		public Team team(MapLocation loc) {
-			InternalObject tower = gameObjectsByLoc.get(new MapLocation3D(loc,RobotType.TOWER.level));
+			InternalRobot tower = getTower(loc);
 			if(tower==null)
 				return Team.NEUTRAL;
 			else
@@ -195,7 +192,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		}
 
 		public void setConnected(MapLocation loc, Team t) {
-			InternalPowerNode p = (InternalPowerNode)gameObjectsByLoc.get(new MapLocation3D(loc,RobotLevel.MINE));
+			InternalPowerNode p = getPowerNode(loc);
 			p.setConnected(t,true);
 			if(team(loc)==t)
 				connectedNodesByTeam.get(t).add(p);
@@ -284,6 +281,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
 	public InternalPowerNode getPowerNode(MapLocation loc) {
 		return (InternalPowerNode)getObject(loc,RobotLevel.MINE);
+	}
+
+	public InternalRobot getTower(MapLocation loc) {
+		InternalRobot r = getRobot(loc,RobotType.TOWER.level);
+		if(r==null||r.type!=RobotType.TOWER)
+			return null;
+		else
+			return r;
 	}
 
     // should only be called by the InternalObject constructor

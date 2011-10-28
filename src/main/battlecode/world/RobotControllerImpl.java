@@ -166,6 +166,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 	public void spawn(RobotType type) throws GameActionException {
 		// If we decide to let other robots spawn, then we should make
 		// sure that air units can't spawn ground units.
+		if(type==RobotType.ARCHON)
+			throw new IllegalArgumentException("Archons may not be spawned.");
 		if(robot.type!=RobotType.ARCHON)
 			throw new IllegalStateException("Only archons can spawn.");
         assertNotNull(type);
