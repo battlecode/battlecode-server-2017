@@ -193,7 +193,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
 	public void takeDamage(double amt, InternalRobot source) {
-		takeDamage(amt);
+		if(type!=RobotType.TOWER||myGameWorld.towerToNode(this).connected(source.getTeam()))
+			takeDamage(amt);
 	}
 
     public void changeEnergonLevelFromAttack(double amount) {

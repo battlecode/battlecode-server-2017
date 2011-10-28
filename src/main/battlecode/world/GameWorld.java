@@ -120,7 +120,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             gameObjects[i].processEndOfRound();
         }
 		
-		if(timeLimitReached()) {
+		if(timeLimitReached()&&winner==null) {
 			// copy the node lists, because the damage could kill a node and disconnect the graph
 			List<InternalPowerNode> teamANodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.A));
 			List<InternalPowerNode> teamBNodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.B));
