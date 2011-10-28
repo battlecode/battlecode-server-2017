@@ -105,7 +105,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 	}
 	
 	public InternalRobot nodeToTower(InternalPowerNode node) {
-		return getRobot(node.getLocation(),RobotType.TOWER.level);
+		InternalRobot r = getRobot(node.getLocation(),RobotType.TOWER.level);
+		if(r==null||r.type!=RobotType.TOWER)
+			return null;
+		else
+			return r;
 	}
 
     public void processEndOfRound() {
@@ -120,10 +124,17 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			// copy the node lists, because the damage could kill a node and disconnect the graph
 			List<InternalPowerNode> teamANodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.A));
 			List<InternalPowerNode> teamBNodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.B));
-			for(InternalPowerNode n : teamANodes)
-				nodeToTower(n).takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamANodes.size());
-			for(InternalPowerNode n : teamBNodes)
-				nodeToTower(n).takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamBNodes.size());
+			InternalRobot tower;
+			for(InternalPowerNode n : teamANodes) {
+				tower = nodeToTower(n);
+				if(tower!=null)
+					tower.takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamANodes.size());
+			}
+			for(InternalPowerNode n : teamBNodes) {
+				tower = nodeToTower(n);
+				if(tower!=null)
+					tower.takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamANodes.size());
+			}
 			// TODO: find a more fair way to break ties if both teams die to the time limit damage
 			// in the same round?
 		}
@@ -186,7 +197,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		public void setConnected(MapLocation loc, Team t) {
 			InternalPowerNode p = (InternalPowerNode)gameObjectsByLoc.get(new MapLocation3D(loc,RobotLevel.MINE));
 			p.setConnected(t,true);
-			if(p.getTeam()==t)
+			if(team(loc)==t)
 				connectedNodesByTeam.get(t).add(p);
 			else
 				adjacentNodesByTeam.get(t).add(p);
@@ -574,6 +585,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             }
 			if(r.type == RobotType.TOWER) {
 				recomputeConnections();
+				if(towerToNode(r).isPowerCore())
+					setWinner(r.getTeam().opponent());
 			}
         }
     }
