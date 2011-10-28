@@ -51,8 +51,6 @@ public class RobotDoc implements Taglet {
 			append(builder,"Max Flux",String.format("%1.0f", rt.maxFlux));
 			if(rt.spawnCost>0)
 				append(builder,"Spawn Cost",String.format("%1.0f",rt.spawnCost));
-			if(rt.upkeep>0)
-				append(builder,"Upkeep",String.format("%1.2f",rt.upkeep));
 			if(rt.moveDelayOrthogonal>0) {
 				append(builder,"Move Delay Orthogonal",String.format("%d",rt.moveDelayOrthogonal));
 				append(builder,"Move Delay Diagonal",String.format("%d",rt.moveDelayDiagonal));

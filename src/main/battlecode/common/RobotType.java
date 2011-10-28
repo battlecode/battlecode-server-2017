@@ -3,13 +3,13 @@ package battlecode.common;
 import static battlecode.common.RobotLevel.*;
 
 public enum RobotType {
-	//          LEVEL,    MXE MXF  COS UPK MD MVC SR  SA AR AR  AA AD AP,AIR  GROUND
-	ARCHON(     ON_GROUND,150,300,  0,  0,  5,  0,36,360, 0, 0,  0, 5, 0,false,false),
-	SOLDIER(    ON_GROUND, 40,100,120, .15, 6, .4,10,180, 0, 4, 90, 5, 6,true ,true ),
-	SCOUT(      IN_AIR,    20, 50, 80, .08, 4, .2,25,360, 0, 5,360, 5, 1,true ,true ),
-	DISRUPTER(	ON_GROUND, 70,100,180, .25, 8, .6,16,180, 0,10, 90, 5, 4,true ,true ),
-	SCORCHER(   ON_GROUND, 70,100,220, .3 ,10, .8,10,135, 1,10,180, 5, 4,false,true ),
-	TOWER(      ON_GROUND,250,  0,200,  0,  0,  0,-1,  0, 0, 0,  0, 0, 0,false,false); 
+	//          LEVEL,    MXE MXF  COS MD MVC SR  SA AR AR  AA AD AP,AIR  GROUND
+	ARCHON(     ON_GROUND,150,300,  0,  5,  0,36,360, 0, 0,  0, 5, 0,false,false),
+	SOLDIER(    ON_GROUND, 40,100,120,  6, .3,10,180, 0, 4, 90, 5, 6,true ,true ),
+	SCOUT(      IN_AIR,    20, 50, 80,  4, .1,25,360, 0, 5,360, 5, 1,true ,true ),
+	DISRUPTER(	ON_GROUND, 70,100,180,  8, .8,16,180, 0,10, 90, 5, 4,true ,true ),
+	SCORCHER(   ON_GROUND, 70,100,220, 10,1.5,10,135, 1,10,180, 5, 4,false,true ),
+	TOWER(      ON_GROUND,250,  0,200,  0,  0,-1,  0, 0, 0,  0, 0, 0,false,false); 
 
 	/** The robot's level. */
 	public final RobotLevel level;
@@ -22,9 +22,6 @@ public enum RobotType {
 
 	/** The amount of flux needed to spawn the robot. */
 	public final double spawnCost;
-
-	/** The amount of flux needed to keep the robot running for one turn. */
-	public final double upkeep;
 
 	/** The number of turns it takes the robot to move orthogonally. */
 	public final int moveDelayOrthogonal;
@@ -88,7 +85,6 @@ public enum RobotType {
 		double maxEnergon,
 		double maxFlux,
 		double spawnCost,
-		double upkeep,
 		int moveDelayOrthogonal,
 		double moveCost,
 		int sensorRadiusSquared,
@@ -105,7 +101,6 @@ public enum RobotType {
 		this.maxEnergon=maxEnergon;
 		this.maxFlux=maxFlux;
 		this.spawnCost=spawnCost;
-		this.upkeep=upkeep;
 		this.moveDelayOrthogonal=moveDelayOrthogonal;
 		this.moveDelayDiagonal=(int)Math.round(moveDelayOrthogonal*Math.sqrt(2.));
 		this.moveCost=moveCost;

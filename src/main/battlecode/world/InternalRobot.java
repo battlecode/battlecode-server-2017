@@ -104,10 +104,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 			changeEnergonLevel(GameConstants.REGEN_AMOUNT);
 			regen = false;
 		}
-		if(upkeepEnabled) {
-			upkeepPaid = flux>=type.upkeep;
+		if(upkeepEnabled && type!=RobotType.ARCHON) {
+			upkeepPaid = flux>=GameConstants.UNIT_UPKEEP;
 			if(upkeepPaid)
-				adjustFlux(-type.upkeep);
+				adjustFlux(-GameConstants.UNIT_UPKEEP);
 		}
 		else
 			upkeepPaid = true;
@@ -136,9 +136,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		if(turnsUntilMovementIdle>0)
 			turnsUntilMovementIdle--;
 		broadcasted = false;
-		double refund = type.upkeep * GameConstants.YIELD_BONUS * (GameConstants.BYTECODE_LIMIT_BASE - RobotMonitor.getBytecodeNum()) / GameConstants.BYTECODE_LIMIT_BASE;
-    	if(refund>0)
-			adjustFlux(refund);
 	}
 
     @Override

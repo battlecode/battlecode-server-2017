@@ -96,6 +96,9 @@ public final class GameConstants {
 	/** The total amount of damage to be divided evenly among each team's
 	 * power nodes each turn once the time limit is reached. */
 	public static final double TIME_LIMIT_DAMAGE = .4;
+	/** The upkeep cost per turn for each unit that is not an archon or
+	 * tower */
+	public static final double UNIT_UPKEEP = .15;
 
 	public static final int NODE_CAPTURE_LIMIT = 10;
 
