@@ -305,6 +305,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
 	public void addPowerNode(InternalPowerNode p) {
 		powerNodes.add(p);
+		powerNodeGraph.put(p.getLocation(),new ArrayList<MapLocation>());
 	}
 
 	public void addArchon(InternalRobot r) {
@@ -479,17 +480,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void createNodeLink(MapLocation id1, MapLocation id2, boolean bidir)
     {
-    	if(!this.powerNodeGraph.containsKey(id1))
-    		this.powerNodeGraph.put(id1, new ArrayList<MapLocation>());
-	this.powerNodeGraph.get(id1).add(id2);
-
-	if(bidir)
-	{
-    		if(!this.powerNodeGraph.containsKey(id2))
-    			this.powerNodeGraph.put(id2, new ArrayList<MapLocation>());
-		this.powerNodeGraph.get(id2).add(id1);
-	}
+		this.powerNodeGraph.get(id1).add(id2);
+		if(bidir)
+			this.powerNodeGraph.get(id2).add(id1);
     }
+
 
 	public ArrayList<MapLocation> getAdjacentNodes(MapLocation loc) {
 		return powerNodeGraph.get(loc);

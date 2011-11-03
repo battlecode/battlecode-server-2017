@@ -457,6 +457,8 @@ class XMLMapHandler extends DefaultHandler {
 		int i=0;
         for(MapLocation[] link : nodeLinks)
         {
+			checkNodeLink(link[0]);
+			checkNodeLink(link[1]);
 			MapLocation t1 = origin.add(link[0].x,link[0].y);
 			MapLocation t2 = origin.add(link[1].x,link[1].y);
 			if(link.length == 3)
@@ -471,6 +473,12 @@ class XMLMapHandler extends DefaultHandler {
 
         return gw;
     }
+
+	public void checkNodeLink(MapLocation l) {
+		if(!(map[l.x][l.y] instanceof NodeData)) {
+			fail(String.format("Nodelink contains %d,%d but there is no node there",l.x,l.y),"Make sure the nodelink data is correct.");
+		}
+	}
 
     /**
      * My favoritist method of them all!
