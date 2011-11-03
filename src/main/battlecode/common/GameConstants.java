@@ -40,6 +40,7 @@ public final class GameConstants {
      */
 	/** The square of the maximum distance a message can travel. */
 	public static final int BROADCAST_RADIUS_SQUARED = 64;
+	/** The cost in flux to regenerate. */
 	public static final double REGEN_COST = .4;
 	/** The amount of energon gained when a unit regenerates. */
 	public static final double REGEN_AMOUNT = .2;
@@ -71,11 +72,11 @@ public final class GameConstants {
 	 * are no allied archons within PRODUCTION_PENALTY_R2 of it
 	 */
 	public static final int PRODUCTION_PENALTY_R2 = 16;
-
 	/** The number of turns before a newly spawned robot can move or attack */
 	public static final int WAKE_DELAY = 20;
-
+	/** The minimum number of power nodes that can appear on a map. */
 	public static final int MIN_POWER_NODES = 4;
+	/** The maximum number of power nodes that can appaer on a map. */
 	public static final int MAX_POWER_NODES = 30;
 
     // This class cannot be instantiated.

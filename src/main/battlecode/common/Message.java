@@ -58,7 +58,10 @@ public final class Message implements Cloneable {
         }
         return cost;
     }
-
+	
+	/**
+	 * Returns the cost in flux to broadcast the message.
+	 */
 	public double getFluxCost() {
 		return GameConstants.BROADCAST_FIXED_COST + GameConstants.BROADCAST_COST_PER_BYTE * getNumBytes();
 	}

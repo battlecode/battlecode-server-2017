@@ -26,10 +26,9 @@ public interface RobotController {
      * @return this robot's maximum energon level
      */
     public double getMaxEnergon();
-
+	
+	/** Returns this robot's current flux level. */
 	public double getFlux();
-
-    public double getTeamResources();
 
     /**
      * Gets the current location of this robot.
@@ -91,6 +90,12 @@ public interface RobotController {
     // ****** SENSOR METHODS ********
     // ***********************************
 
+	/**
+	 * Returns the object at the given location and height, or <code>null</code>
+	 * if there is no object there.
+	 *
+	 * @throws GameActionException if <code>loc</code> is not within sensor range (CANT_SENSE_THAT)
+	 */
 	public GameObject senseObjectAtLocation(MapLocation loc, RobotLevel height) throws GameActionException;
 
 	/**
@@ -99,15 +104,22 @@ public interface RobotController {
     public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type);
 
     /**
-     * Sense the location of the object <code>o</code>
+     * Sense the location of the object <code>o</code>.
+	 *
+	 * @throws GameActionException if <code>o</code> is not within sensor range (CANT_SENSE_THAT)
      */
     public MapLocation senseLocationOf(GameObject o) throws GameActionException;
 
     /**
      * Sense the RobotInfo for the robot <code>r</code>.
+	 *
+	 * @throws GameActionException if <code>r</code> is not within sensor range (CANT_SENSE_THAT)
      */
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException;
 
+	/**
+	 * Returns true if <code>o</code> is within sensor range.
+	 */
     public boolean canSenseObject(GameObject o);
 
 	/**
@@ -147,19 +159,23 @@ public interface RobotController {
 	 * Returns <code>true</code> if the node <code>p</code> is connected to
 	 * this robot's team's opponent's power core.
 	 *
-	 * @throws GameActionException if <code>p</code> is not within this robot's sensor range
+	 * @throws GameActionException if <code>p</code> is not within this robot's sensor range (CANT_SENSE_THAT)
 	 */
 	public boolean senseOpponentConnected(PowerNode p) throws GameActionException;
 
+	/**
+	 * Returns this robot's team's power core.
+	 */
 	public PowerNode sensePowerCore();
 
 	// ***********************************
     // ****** MOVEMENT METHODS ********
     // ***********************************
 
-	
+	/** Returns the number of rounds until this robot's movement cooldown reaches zero. */	
 	public int roundsUntilMovementIdle();
 
+	/** Returns true if this robot's movement cooldown is nonzero. */
 	public boolean isMovementActive();
     
 	/**
@@ -172,7 +188,7 @@ public interface RobotController {
      * orthogonal movement and {@code Math.round(type().delay*Math.sqrt(2))} for
      * diagonal movement).
      *
-     * @throws GameActionException if the robot is already moving (ALREADY_ACTIVE)
+     * @throws GameActionException if this robot is already moving (ALREADY_ACTIVE)
      * @throws GameActionException if the destination terrain is not traversable by
      * this robot (CANT_MOVE_THERE)
      * @throws GameActionException if the destination is occupied by another {@code GameObject}
@@ -194,7 +210,7 @@ public interface RobotController {
      *
      * @param dir
      *            the direction the robot should face
-     * @throws GameActionException if this component is already in use (ALREADY_ACTIVE)
+     * @throws GameActionException if this robot is already moving (ALREADY_ACTIVE)
      */
     public void setDirection(Direction dir) throws GameActionException;
 
@@ -214,10 +230,20 @@ public interface RobotController {
     // ****** ATTACK METHODS *******
     // ***********************************
 
+	/**
+	 * Returns the number of rounds until this robot's attack cooldown reaches zero.
+	 */
 	public int roundsUntilAttackIdle();
 
+	/**
+	 * Returns true if this robot's attack cooldown is nonzero.
+	 */
 	public boolean isAttackActive();
 
+	/**
+	 * Returns true if the given location is within this robot's attack range.
+	 * Does not take into account whether the robot is currently attacking.
+	 */
 	public boolean canAttackSquare(MapLocation loc);
 
  	/**
@@ -309,7 +335,7 @@ public interface RobotController {
      * Ends the current round.  If your player used fewer than
 	 * BYTECODE_LIMIT_BASE bytecodes this round, then it will
 	 * receive a flux bonus of
-     * <code>GameConstants.YIELD_BONUS * chassis.upkeep * (BYTECODE_LIMIT_BASE - (bytecodes_used)) / BYTECODE_LIMIT_BASE</code>.
+     * <code>GameConstants.YIELD_BONUS * GameConstants.UNIT_UPKEEP * (BYTECODE_LIMIT_BASE - (bytecodes_used)) / BYTECODE_LIMIT_BASE</code>.
      * Never fails.
      */
     public void yield();

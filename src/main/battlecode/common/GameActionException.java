@@ -11,10 +11,10 @@ package battlecode.common;
  * some robot functions can throw the unchecked exceptions
  * {@link IllegalStateException} and {@link IllegalArgumentException}.
  * An <code>IllegalStateException</code> is thrown if this robot can
- * never successfully call the function (for example, a building trying to
- * move).  An <code>IllegalArgumentException</code> is thrown if this type of
+ * never successfully call the function (for example, a solder trying to regenerate).
+ * An <code>IllegalArgumentException</code> is thrown if this type of
  * robot can never successfully call the function with the given arguments
- * (for example, a Recycler trying to construct a motor).
+ * (for example, an archon trying to spawn another archon).
  * A <code>GameActionException</code> is thrown in all other circumstances.
  *
  * @author Teh Devs
