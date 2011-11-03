@@ -350,7 +350,11 @@ class XMLMapHandler extends DefaultHandler {
         	requireElement(qName, "nodelinks");
         	MapLocation locA = MapLocation.valueOf(getRequired(attributes, "from"));
         	MapLocation locB = MapLocation.valueOf(getRequired(attributes, "to"));
-        	nodeLinks.add(new MapLocation[]{locA, locB});
+		String onedir = getOptional(attributes, "oneway");
+		if(onedir != null)
+        		nodeLinks.add(new MapLocation[]{locA, locB, null});
+		else
+			nodeLinks.add(new MapLocation[]{locA, locB});
         } else {
             //fail("unrecognized map element '<" + qName + ">'", "Check that all nodes are spelled correctly.\n");
         }
@@ -455,7 +459,9 @@ class XMLMapHandler extends DefaultHandler {
         {
 			MapLocation t1 = origin.add(link[0].x,link[0].y);
 			MapLocation t2 = origin.add(link[1].x,link[1].y);
-			gw.createNodeLink(t1,t2);
+			if(link.length == 3)
+				gw.createNodeLink(t1, t2, false);
+			gw.createNodeLink(t1,t2,true);
 			links[i++] = new MapLocation [] { t1, t2 };
         }
         gw.endRandomIDs();
