@@ -1,11 +1,6 @@
 package battlecode.world;
 
-import static battlecode.common.GameConstants.MAP_MAX_HEIGHT;
-import static battlecode.common.GameConstants.MAP_MAX_WIDTH;
-import static battlecode.common.GameConstants.MAP_MIN_HEIGHT;
-import static battlecode.common.GameConstants.MAP_MIN_WIDTH;
-import static battlecode.common.GameConstants.MINES_MAX;
-import static battlecode.common.GameConstants.MINES_MIN;
+import battlecode.common.GameConstants;
 import battlecode.server.Config;
 
 import java.io.FileInputStream;
@@ -271,12 +266,12 @@ class XMLMapHandler extends DefaultHandler {
 
             // Check the bounds of the map height.
             mapHeight = Integer.parseInt(getRequired(attributes, "height"));
-            if (mapHeight < MAP_MIN_HEIGHT || mapHeight > MAP_MAX_HEIGHT)
+            if (mapHeight < GameConstants.MAP_MIN_HEIGHT || mapHeight > GameConstants.MAP_MAX_HEIGHT)
                 fail("map height '" + mapHeight + "' exceeds limits", "Check that the map file defines a height that is consistent with GameConstants.MAP_MAX_HEIGHT and GameConstants.MAP_MIN_HEIGHT.\n");
 
             // Check the bounds of the map width.
             mapWidth = Integer.parseInt(getRequired(attributes, "width"));
-            if (mapWidth < MAP_MIN_WIDTH || mapWidth > MAP_MAX_WIDTH)
+            if (mapWidth < GameConstants.MAP_MIN_WIDTH || mapWidth > GameConstants.MAP_MAX_WIDTH)
                 fail("map width '" + mapWidth + "' exceeds limits", "Check that the map file defines a width that is consistent with GameConstants.MAP_MAX_WIDTH and GameConstants.MAP_MIN_WIDTH.\n");
 
             /* String result;
@@ -599,7 +594,7 @@ class XMLMapHandler extends DefaultHandler {
             }
         }
         // check that the number of mines conforms to the spec
-        if (mines < MINES_MIN || mines > MINES_MAX) {
+        if (mines < GameConstants.MIN_POWER_NODES || mines > GameConstants.MAX_POWER_NODES) {
             System.err.println("illegal number of mines: " + mines);
             legal = false;
         }

@@ -75,6 +75,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 		buffs = new InternalRobotBuffs(this);
 
+		turnsUntilMovementIdle = GameConstants.WAKE_DELAY;
+		turnsUntilAttackIdle = GameConstants.WAKE_DELAY;
+
 		if(type==RobotType.ARCHON)
 			gw.addArchon(this);	
 
@@ -114,13 +117,14 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
 	public void archonProduction() {
-		int d, dmin = RobotType.ARCHON.sensorRadiusSquared;
+		int d, dmin = GameConstants.PRODUCTION_PENALTY_R2;
 		for(MapLocation l : myGameWorld.getArchons(this)) {
 			d = getLocation().distanceSquaredTo(l);
 			if(d<=dmin)
 				dmin=d;
 		}
-		adjustFlux(.5*(1.+(double)dmin/RobotType.ARCHON.sensorRadiusSquared));
+		double prod = GameConstants.MIN_PRODUCTION + (GameConstants.MAX_PRODUCTION - GameConstants.MIN_PRODUCTION)*Math.sqrt(((double)dmin)/GameConstants.PRODUCTION_PENALTY_R2);
+		adjustFlux(prod);
 	}
 
     @Override
@@ -190,6 +194,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
 	public void takeDamage(double amt, InternalRobot source) {
+		// uncomment this to test immortal base nodes
+		//if(type==RobotType.TOWER&&myGameWorld.towerToNode(this).isPowerCore())
+		//	return;
 		if(type!=RobotType.TOWER||myGameWorld.towerToNode(this).connected(source.getTeam()))
 			takeDamage(amt);
 	}

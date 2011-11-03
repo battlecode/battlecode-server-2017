@@ -52,7 +52,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private double[] teamRoundResources = new double[2];
     private double[] lastRoundResources = new double[2];
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
-    private double[] teamResources = new double[]{GameConstants.INITIAL_FLUX, GameConstants.INITIAL_FLUX};
+    private double[] teamResources = new double[2];
 
     private Map<MapLocation, ArrayList<MapLocation>> powerNodeGraph = new HashMap<MapLocation, ArrayList<MapLocation>>();
     private List<InternalPowerNode> powerNodes = new ArrayList<InternalPowerNode>();
@@ -754,8 +754,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     protected void adjustResources(Team t, double amount) {
-        if (amount >= GameConstants.MINE_DEPLETED_RESOURCES)
-            teamRoundResources[t.ordinal()] += amount;
         teamResources[t.ordinal()] += amount;
     }
 }
