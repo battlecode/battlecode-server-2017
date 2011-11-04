@@ -375,19 +375,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return result;
     }
 
-	public MapLocation [] getArchons(InternalRobot robot) {
-		List<InternalRobot> allies = archons.get(robot.getTeam());
-		if(robot.type==RobotType.ARCHON) {
-			MapLocation [] locs = new MapLocation [allies.size()-1];
-			int j=-1;
-			for(InternalRobot r : allies) {
-				if(r!=robot)
-					locs[++j]=r.getLocation();
-			}
-			return locs;
-		}
-		else
-			return Lists.transform(archons.get(robot.getTeam()),Util.objectLocation).toArray(new MapLocation [0]);
+	public MapLocation [] getArchons(Team team) {
+		return Lists.transform(archons.get(team),Util.objectLocation).toArray(new MapLocation [0]);
 	}
 
     public double getPoints(Team team) {

@@ -8,7 +8,7 @@ public enum RobotType {
 	SOLDIER(    ON_GROUND, 40,100,120,  6, .5,10,180, 0, 4, 90, 5, 6,true ,true ),
 	SCOUT(      IN_AIR,    20, 50, 80,  4, .1,25,360, 0, 5,360, 5, 1,true ,true ),
 	DISRUPTER(	ON_GROUND, 70,100,180,  8, .8,16,180, 0,10, 90, 5, 4,true ,true ),
-	SCORCHER(   ON_GROUND, 70,100,220, 10, 2.,10,135, 1,10,180, 5, 9,false,true ),
+	SCORCHER(   ON_GROUND, 70,100,220, 10, 2.,10, 90, 1,10,135, 5, 9,false,true ),
 	TOWER(      ON_GROUND,250,  0,200,  0,  0,-1,  0, 0, 0,  0, 0, 0,false,false); 
 
 	/** The robot's level. */

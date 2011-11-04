@@ -118,9 +118,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 	public void archonProduction() {
 		int d, dmin = GameConstants.PRODUCTION_PENALTY_R2;
-		for(MapLocation l : myGameWorld.getArchons(this)) {
+		for(MapLocation l : myGameWorld.getArchons(getTeam())) {
 			d = getLocation().distanceSquaredTo(l);
-			if(d<=dmin)
+			if(d>0&&d<=dmin)
 				dmin=d;
 		}
 		double prod = GameConstants.MIN_PRODUCTION + (GameConstants.MAX_PRODUCTION - GameConstants.MIN_PRODUCTION)*Math.sqrt(((double)dmin)/GameConstants.PRODUCTION_PENALTY_R2);
