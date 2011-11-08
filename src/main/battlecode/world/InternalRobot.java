@@ -146,6 +146,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void processEndOfRound() {
         super.processEndOfRound();
         buffs.processEndOfRound();
+		if(type==RobotType.TOWER&&!myGameWorld.towerToNode(this).connected(getTeam()))
+			takeDamage(GameConstants.DISCONNECTED_NODE_DAMAGE);
     }
 
     public double getEnergonLevel() {
@@ -348,5 +350,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         incomingMessageQueue = null;
         mapMemory = null;
         buffs = null;
+		movementSignal = null;
     }
 }
