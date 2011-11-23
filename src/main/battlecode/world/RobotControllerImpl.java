@@ -196,6 +196,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 			if(ir.getTeam()==robot.getTeam())
 				ir.setRegen();
 		}
+		gameWorld.addSignal(new RegenSignal(robot));
 	}
 
     /**
