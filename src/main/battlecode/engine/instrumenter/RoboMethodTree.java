@@ -233,7 +233,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 			// send the object, its hash code, and the hash code method owner to
 			// ObjectHashCode for analysis
 			instructions.insertBefore(n,new InsnNode(DUP));
-			instructions.insertBefore(n,new MethodInsnNode(n.getOpcode(),n.owner,n.name,n.desc));
+			instructions.insertBefore(n,new MethodInsnNode(n.getOpcode(),classReference(n.owner),"hashCode","()I"));
 			instructions.insertBefore(n,new InsnNode(SWAP));
 			if(n.getOpcode()==INVOKESPECIAL) {
 				instructions.insertBefore(n,new LdcInsnNode(Type.getObjectType(n.owner)));
