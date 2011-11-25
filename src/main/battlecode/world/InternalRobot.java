@@ -130,7 +130,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @Override
     public void processEndOfTurn() {
         super.processEndOfTurn();
-		myGameWorld.removeDead();
 		if(movementSignal!=null) {
 			myGameWorld.visitSignal(movementSignal);
 			movementSignal=null;

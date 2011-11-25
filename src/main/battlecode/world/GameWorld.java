@@ -133,6 +133,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			}
 			// TODO: find a more fair way to break ties if both teams die to the time limit damage
 			// in the same round?
+			removeDead();
 		}
 
         long aPoints = Math.round(teamRoundResources[Team.A.ordinal()] * 100), bPoints = Math.round(teamRoundResources[Team.B.ordinal()] * 100);
@@ -445,12 +446,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public void beginningOfExecution(int robotID) {
+		removeDead();
         InternalRobot r = (InternalRobot) getObjectByID(robotID);
         if (r != null)
             r.processBeginningOfTurn();
     }
 
     public void endOfExecution(int robotID) {
+		removeDead();
         InternalRobot r = (InternalRobot) getObjectByID(robotID);
         // if the robot is dead, it won't be in the map any more
         if (r != null) {
