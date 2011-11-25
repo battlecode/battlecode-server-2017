@@ -31,14 +31,24 @@ public class ObjectHashCode {
 	// reflection is slow so cache the results
 	static HashMap<Class,Boolean> usesOHC = new HashMap<Class,Boolean>();
 
-	// these exceptions should never actually be thrown because every object
-	// has a hashCode method
 	static public int hashCode(int hash, Object o, Class<?> cl) throws NoSuchMethodException {
-		if(usesObjectHashCode(cl)) {
+		int idHash = java.lang.System.identityHashCode(o);
+		if(hash!=idHash)
+			return hash;
+		if(usesObjectHashCode(cl))
 			return identityHashCode(o);
-		}
 		else
 			return hash;
+	}
+
+	// Assumes that if hashCode and System.identityHashCode are
+	// the same then hashCode has been reimplemented.  Chance
+	// of a collision is 1 in 2^32.
+	static public int fastHashCode(int hash, Object o, Class<?> cl) {
+		int idHash = java.lang.System.identityHashCode(o);
+		if(hash!=idHash)
+			return hash;
+		return identityHashCode(o);
 	}
 
 	static private boolean usesObjectHashCode(Class<?> cl) throws NoSuchMethodException {

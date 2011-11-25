@@ -202,6 +202,9 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 				instructions.insertBefore(n,new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "decrementDebugLevel", "()V"));
 			}
 			break;
+		case ATHROW:
+			endOfBasicBlock(n);
+			break;
 		case MONITORENTER:
 		case MONITOREXIT:
 			if(checkDisallowed) {
@@ -227,43 +230,27 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 			bytecodeCtr++;
 			endOfBasicBlock(n);
 			// replace hashCode with deterministic version
-			// First, we check if the hash code is the same as
-			// the identity hash code.  If they are different, we know
-			// hashCode was reimplemented.  If they are the same and
-			// bc.server.fast-hash is set, then we assume that hashCode
-			// was not reimplemented.  (Chance of accidental collision
-			// is 1/2^32.)  If bc.server.fast-hash is not set, then
-			// we check if hashCode was reimplemented using reflection.
-			// (Around 30x slower, but guaranteed correct.)
-			n.owner = ClassReferenceUtil.classReference(n.owner, teamPackageName, silenced, checkDisallowed);
+			// send the object, its hash code, and the hash code method owner to
+			// ObjectHashCode for analysis
 			instructions.insertBefore(n,new InsnNode(DUP));
-			InsnList newInsns = new InsnList();
-			newInsns.add(new InsnNode(SWAP));
-			newInsns.add(new InsnNode(DUP2));
-			newInsns.add(new MethodInsnNode(INVOKESTATIC,"java/lang/System","identityHashCode","(Ljava/lang/Object;)I"));
-			LabelNode doneLabel = new LabelNode(new Label());
-			LabelNode sameLabel = new LabelNode(new Label());
-			newInsns.add(new JumpInsnNode(IF_ICMPEQ,sameLabel));
-			newInsns.add(new InsnNode(POP));
-			newInsns.add(new JumpInsnNode(GOTO,doneLabel));
-			newInsns.add(sameLabel);
-			if(usingFastHash) {
-				newInsns.add(new InsnNode(SWAP));
-				newInsns.add(new InsnNode(POP));
-				newInsns.add(new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/lang/ObjectHashCode","identityHashCode","(Ljava/lang/Object;)I"));
+			instructions.insertBefore(n,new MethodInsnNode(n.getOpcode(),n.owner,n.name,n.desc));
+			instructions.insertBefore(n,new InsnNode(SWAP));
+			if(n.getOpcode()==INVOKESPECIAL) {
+				instructions.insertBefore(n,new LdcInsnNode(Type.getObjectType(n.owner)));
 			}
 			else {
-				if(n.getOpcode()==INVOKESPECIAL) {
-					newInsns.add(new LdcInsnNode(Type.getObjectType(n.owner)));
-				}
-				else {
-					newInsns.add(new InsnNode(DUP));
-					newInsns.add(new MethodInsnNode(n.getOpcode(),n.owner,"getClass","()Ljava/lang/Class;"));
-				}
-				newInsns.add(new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/lang/ObjectHashCode","hashCode","(ILjava/lang/Object;Ljava/lang/Class;)I"));
+				instructions.insertBefore(n,new InsnNode(DUP));
+				instructions.insertBefore(n,new MethodInsnNode(INVOKEVIRTUAL,"java/lang/Object","getClass","()Ljava/lang/Class;"));
 			}
-			newInsns.add(doneLabel);
-			instructions.insert(n,newInsns);
+			n.name = usingFastHash ? "fastHashCode" : "hashCode";
+			n.owner = "battlecode/engine/instrumenter/lang/ObjectHashCode";
+			n.desc = "(ILjava/lang/Object;Ljava/lang/Class;)I";
+			n.setOpcode(INVOKESTATIC);
+			return;
+		}
+
+		if(n.name.equals("identityHashCode")&&n.owner.equals("java/lang/System")) {
+			n.owner = "battlecode/engine/instrumenter/lang/ObjectHashCode";
 			return;
 		}
 
