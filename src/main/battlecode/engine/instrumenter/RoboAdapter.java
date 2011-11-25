@@ -86,8 +86,8 @@ public class RoboAdapter extends ClassAdapter implements Opcodes {
                 ClassReferenceUtil.methodSignatureReference(signature, teamPackageName, silenced, checkDisallowed),
                 exceptions);
 	    // create a new RoboMethodAdapter, and let it loose on this method
-        return mv == null ? null : new RoboMethodAdapter(mv, className, name, desc, teamPackageName, debugMethodsEnabled, silenced, checkDisallowed);
-		//return mv == null ? null : new RoboMethodTree(mv, className, access, name, desc, signature, exceptions, teamPackageName, debugMethodsEnabled, silenced, checkDisallowed);
+        //return mv == null ? null : new RoboMethodAdapter(mv, className, name, desc, teamPackageName, debugMethodsEnabled, silenced, checkDisallowed);
+		return mv == null ? null : new RoboMethodTree(mv, className, access, name, desc, signature, exceptions, teamPackageName, debugMethodsEnabled, silenced, checkDisallowed);
     }
     
      /**

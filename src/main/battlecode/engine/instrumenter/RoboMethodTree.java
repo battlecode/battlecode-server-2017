@@ -122,6 +122,9 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 			case LABEL:
 				visitLabelNode((LabelNode)node);
 				break;
+			case FRAME:
+				visitFrameNode((FrameNode)node);
+				break;
 			case JUMP_INSN:
 			case LOOKUPSWITCH_INSN:
 			case TABLESWITCH_INSN:
@@ -165,6 +168,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 		LabelNode robotDeathLabel = new LabelNode(new Label());
 		tryCatchBlocks.add(0,new TryCatchBlockNode(startLabel,robotDeathLabel,robotDeathLabel,"java/lang/VirtualMachineError"));
 		instructions.add(robotDeathLabel);
+		instructions.add(new FrameNode(F_FULL,0,new Object [0],1,new Object[]{"java/lang/VirtualMachineError"}));
 		instructions.add(new InsnNode(ATHROW));
 	}
 
@@ -340,7 +344,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 		// But in practice this should be good enough.
 		else if (n.name.equals("printStackTrace") && n.desc.equals("()V") &&
 			(n.owner == null || n.owner.equals("java/lang/Throwable")|| isSuperClass(n.owner, "java/lang/Throwable"))) {
-			instructions.insertBefore(n,new FieldInsnNode(GETSTATIC,"battlecode/engine/instrumenter/lang/System","out","Ljava/io/PrintStream"));
+			instructions.insertBefore(n,new FieldInsnNode(GETSTATIC,"battlecode/engine/instrumenter/lang/System","out","Ljava/io/PrintStream;"));
 			n.desc="(Ljava/io/PrintStream;)V";
 		}
 		else {
@@ -416,6 +420,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 			// a label node will never be the last node so there
 			// must be a next node
 			AbstractInsnNode next = n.getNext();
+			while((next instanceof LineNumberNode)||(next instanceof FrameNode)) next = next.getNext();
 			instructions.insertBefore(next,new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/RobotMonitor","checkForRobotDeath","()V"));
 			bytecodeCtr+=EXCEPTION_BYTECODE_PENALTY;
 			endOfBasicBlock(next);
@@ -438,33 +443,32 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 		n.signature = fieldSignatureReference(n.signature);
 	}
 
+	@SuppressWarnings("unchecked")
+	private void replaceVars(List l) {
+		if(l==null)
+			return;
+		for(int i=0;i<l.size();i++) {
+			if(l.get(i) instanceof String) {
+				l.set(i,classReference((String)l.get(i)));
+			}
+		}
+
+	}
+
+	private void visitFrameNode(FrameNode n) {
+		replaceVars(n.local);
+		replaceVars(n.stack);
+	}
+
 	private void endOfBasicBlock(AbstractInsnNode n) {
 		if(name.equals("<clinit>")&&!checkDisallowed) {
 			// Don't charge for static initializers of
 			// builtin classes
 			return;
 		}
-		switch(bytecodeCtr) {
-		case 0:
+		if(bytecodeCtr==0)
 			return;
-		case 1:
-			instructions.insertBefore(n,new InsnNode(ICONST_1));
-			break;
-		case 2:
-			instructions.insertBefore(n,new InsnNode(ICONST_2));
-			break;
-		case 3:
-			instructions.insertBefore(n,new InsnNode(ICONST_3));
-			break;
-		case 4:
-			instructions.insertBefore(n,new InsnNode(ICONST_4));
-			break;
-		case 5:
-			instructions.insertBefore(n,new InsnNode(ICONST_5));
-			break;
-		default:
-			instructions.insertBefore(n,new LdcInsnNode(new Integer(bytecodeCtr)));
-		}
+		instructions.insertBefore(n,new LdcInsnNode(new Integer(bytecodeCtr)));
 		instructions.insertBefore(n,new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/RobotMonitor", "incrementBytecodes", "(I)V"));
 		bytecodeCtr = 0;
 	}

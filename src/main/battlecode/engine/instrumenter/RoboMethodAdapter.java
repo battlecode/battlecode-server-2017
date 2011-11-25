@@ -22,9 +22,11 @@ import battlecode.server.Config;
 
 /**
  * Instruments a method.  See InstrumenterASMImpl for more info on what this instrumentation does.
+ * @deprecated Does not work in Java 7 due to stricter verification of stack frames.  May be fixable, but it's easier to fix RoboMethodTree.
  *
  * @author adamd
 */
+@Deprecated
 public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 
 	private final String methodName;
