@@ -263,13 +263,6 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 			return;
 		}
 
-		// I hate BigInteger so much for this.
-		if(n.owner.equals("sun/misc/Unsafe")&&n.name.equals("getUnsafe")) {
-			endOfBasicBlock(n);
-			instructions.insertBefore(n,new InsnNode(RETURN));
-			return;
-		}
-
 		if(n.owner.equals("java/util/Random")&&n.name.equals("<init>")&&
 			n.desc.equals("()V")) {
 			instructions.insertBefore(n,new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/lang/RoboRandom","getMapSeed","()J"));

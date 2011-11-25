@@ -58,6 +58,15 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 		
 	}
 
+	private void dumpToFile(String name, byte [] bytes) {
+		try {
+			java.io.File file = new java.io.File("classes/"+name+".class");
+			java.io.FileOutputStream stream = new java.io.FileOutputStream(file);
+			stream.write(bytes);
+			stream.close();
+		} catch(Exception e) { }
+	}
+
 	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 
 		synchronized(teamPackageName) {
@@ -102,16 +111,6 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 					throw ie;
 				}
 			
-				
-				if(name.startsWith("testplayer/")) {
-					try {
-						java.io.File file = new java.io.File("classes/"+name+".class");
-						java.io.FileOutputStream stream = new java.io.FileOutputStream(file);
-						stream.write(classBytes);
-						stream.close();
-				  	} catch(Exception e) { }
-				}
-
 				finishedClass = saveAndDefineClass(name,classBytes);
 			}
 			// Each robot has its own version of java.util classes.
@@ -122,6 +121,7 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 				byte [] classBytes;
 				try {
 					classBytes = instrument(name,false,teamPackageName);
+					//dumpToFile(name,classBytes);
 				} catch(InstrumentationException ie) {
 					teamsWithErrors.add(teamPackageName);
 					throw ie;

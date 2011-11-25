@@ -164,6 +164,8 @@ class ClassReferenceUtil {
 			return "battlecode/engine/instrumenter/lang/System";
 		else if(className.equals("java/util/concurrent/atomic/AtomicLong"))
 			return "battlecode/engine/instrumenter/lang/AtomicLong";
+		else if(className.equals("sun/misc/Unsafe"))
+			return "battlecode/engine/instrumenter/lang/Unsafe";
 		//else if(className.equals("java/util/Random"))
 			//if(checkDisallowed)
 		//	return "battlecode/engine/instrumenter/lang/RoboRandom";

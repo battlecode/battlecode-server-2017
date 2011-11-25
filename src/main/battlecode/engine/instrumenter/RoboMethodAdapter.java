@@ -234,12 +234,6 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 			return;
 		}
 
-		// I hate BigInteger so much for this.
-		if(owner.equals("sun/misc/Unsafe")&&name.equals("getUnsafe")) {
-			endOfBasicBlock();
-			visitInsn(RETURN);
-		}
-
 		if(owner.equals("java/util/Random")&&name.equals("<init>")&&
 			desc.equals("()V")) {
 			super.visitMethodInsn(INVOKESTATIC,"battlecode/engine/instrumenter/lang/RoboRandom","getMapSeed","()J");
