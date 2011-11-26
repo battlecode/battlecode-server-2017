@@ -19,7 +19,7 @@ import battlecode.engine.ErrorReporter;
  *
  * @author adamd
  */
-class ClassReferenceUtil {
+public class ClassReferenceUtil {
 	// packages for which the player is allowed to use any of the contained classes; loaded from AllowedPackages.txt in idata
 	private final static Set<String> allowedPackages;
 		
@@ -106,6 +106,9 @@ class ClassReferenceUtil {
 		//	return false;
 		if(className.startsWith("instrumented/"))
 			return false;
+		if(className.startsWith("java/util/jar")||
+			className.startsWith("java/util/zip"))
+			return false;
 		if(className.startsWith("java/util/")||
 		   className.startsWith("java/math/"))
 			return true;
@@ -162,8 +165,14 @@ class ClassReferenceUtil {
 			return className;
 		else if(className.equals("java/lang/System"))
 			return "battlecode/engine/instrumenter/lang/System";
+		else if(className.equals("java/util/concurrent/ConcurrentHashMap"))
+			return "battlecode/engine/instrumenter/lang/ConcurrentHashMap";
+		else if(className.equals("java/util/concurrent/atomic/AtomicInteger"))
+			return "battlecode/engine/instrumenter/lang/AtomicInteger";
 		else if(className.equals("java/util/concurrent/atomic/AtomicLong"))
 			return "battlecode/engine/instrumenter/lang/AtomicLong";
+		else if(className.equals("java/util/concurrent/atomic/AtomicReference"))
+			return "battlecode/engine/instrumenter/lang/AtomicReference";
 		else if(className.equals("sun/misc/Unsafe"))
 			return "battlecode/engine/instrumenter/lang/Unsafe";
 		//else if(className.equals("java/util/Random"))

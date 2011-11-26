@@ -5,6 +5,8 @@ public class AtomicLong {
 
 	private long l;
 
+	public AtomicLong() {}
+
 	public AtomicLong(long x) {
 		l=x;
 	}
@@ -21,6 +23,10 @@ public class AtomicLong {
 		boolean b = (l==expect);
 		if(b) l=update;
 		return b;
+	}
+
+	public long getAndIncrement() {
+		return l++;
 	}
 
 }

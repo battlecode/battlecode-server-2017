@@ -47,4 +47,10 @@ public final class System {
 	public static InputStream in = new InputStream() {
 		public int read() throws java.io.IOException { throw new java.io.EOFException(); }
 	};
+
+	/*
+	public static long currentTimeMillis() {
+		return battlecode.common.GameConstants.BYTECODE_LIMIT_BASE*battlecode.engine.Engine.getRoundNum()+RobotMonitor.getBytecodeNum();
+	}
+	*/
 }

@@ -24,4 +24,12 @@ public class AtomicInteger {
 		return b;
 	}
 
+	public int incrementAndGet() {
+		return ++l;
+	}
+
+	public int decrementAndGet() {
+		return --l;
+	}
+
 }

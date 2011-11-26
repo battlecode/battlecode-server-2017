@@ -90,13 +90,11 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 		for(Object o : tryCatchBlocks) {
 			visitTryCatchBlockNode((TryCatchBlockNode)o);
 		}
-		AbstractInsnNode node, nextNode;
-		for(node = instructions.getFirst(); node != null; node = nextNode) {
+		for(AbstractInsnNode node : instructions.toArray()) {
 			// node could be taken out of the list
 			// or have stuff inserted after it,
 			// so node.getNext() might not be valid
 			// after we visit node
-			nextNode = node.getNext();
 			switch(node.getType()) {
 			case FIELD_INSN:
 				visitFieldInsnNode((FieldInsnNode)node);
@@ -262,6 +260,15 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 			return;
 		}
 
+		/* We need to be careful with reflection - it's easy to make
+		 * a mistake and let people access things that they shouldn't
+		 * be able to access
+		if(n.owner.equals("java/lang/Class")&&n.name.equals("forName")) {
+			n.owner = "battlecode/engine/instrumenter/lang/Reflect";
+			n.name = "classForName";
+		}
+		*/
+
 		// check for banned functions
 		if(checkDisallowed) {
 			// do wait/notify monitoring
@@ -303,7 +310,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 		}
 
 		boolean isDebugMethod = n.name.startsWith("debug_") && n.desc.endsWith("V") && n.owner.startsWith(teamPackageName);
-		boolean endBasicBlock = true;
+		boolean endBasicBlock = n.owner.startsWith(teamPackageName) || classReference(n.owner).startsWith("instrumented") || n.owner.startsWith("battlecode");
 
 		if(!isDebugMethod)
 			bytecodeCtr++;
@@ -408,7 +415,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 			// must be a next node
 			AbstractInsnNode next = n.getNext();
 			while((next instanceof LineNumberNode)||(next instanceof FrameNode)) next = next.getNext();
-			instructions.insertBefore(next,new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/RobotMonitor","checkForRobotDeath","()V"));
+			//instructions.insertBefore(next,new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/RobotMonitor","checkForRobotDeath","()V"));
 			bytecodeCtr+=EXCEPTION_BYTECODE_PENALTY;
 			endOfBasicBlock(next);
 		}
@@ -448,11 +455,6 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 	}
 
 	private void endOfBasicBlock(AbstractInsnNode n) {
-		if(name.equals("<clinit>")&&!checkDisallowed) {
-			// Don't charge for static initializers of
-			// builtin classes
-			return;
-		}
 		if(bytecodeCtr==0)
 			return;
 		instructions.insertBefore(n,new LdcInsnNode(new Integer(bytecodeCtr)));
