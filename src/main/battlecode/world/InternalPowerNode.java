@@ -38,4 +38,12 @@ public class InternalPowerNode extends InternalObject implements PowerNode {
 		return myGameWorld.getAdjacentNodes(getLocation()).toArray(new MapLocation [0]);
 	}
 
+	public Team getControllingTeam() {
+		InternalRobot tower = myGameWorld.nodeToTower(this);
+		if(tower==null)
+			return Team.NEUTRAL;
+		else
+			return tower.getTeam();
+	}
+
 }

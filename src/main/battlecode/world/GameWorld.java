@@ -131,9 +131,28 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 				if(tower!=null)
 					tower.takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamBNodes.size());
 			}
-			// TODO: find a more fair way to break ties if both teams die to the time limit damage
-			// in the same round?
 			removeDead();
+			// We have tiebreakers in case both power cores die to end-of-round damage in the same round.
+			// (If two power cores are killed by robots in the same round, then the team whose core died
+			// first loses.)
+			if(nodeToTower(baseNodes.get(Team.A))==null&&nodeToTower(baseNodes.get(Team.B))==null) {
+				running=false;
+				int diff=0;
+				for(InternalPowerNode p : powerNodes) {
+					if(p.getControllingTeam()==Team.A)
+						diff++;
+					else if(p.getControllingTeam()==Team.B)
+						diff--;
+				}
+				if(!(setWinnerIfNonzero(diff,DominationFactor.BARELY_BEAT)||
+					setWinnerIfNonzero(archons.get(Team.A).size()-archons.get(Team.B).size(),DominationFactor.BARELY_BEAT)))
+				{
+					if(teamAName.compareTo(teamBName)<=0)
+						setWinner(Team.A,DominationFactor.WON_BY_DUBIOUS_REASONS);
+					else
+						setWinner(Team.B,DominationFactor.WON_BY_DUBIOUS_REASONS);
+				}
+			}
 		}
 
         long aPoints = Math.round(teamRoundResources[Team.A.ordinal()] * 100), bPoints = Math.round(teamRoundResources[Team.B.ordinal()] * 100);
@@ -144,14 +163,26 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     }
 
-	public void setWinner(Team t) {
-		winner = t;
+	public boolean setWinnerIfNonzero(int n, DominationFactor d) {
+		if(n>0)
+			setWinner(Team.A,d);
+		else if(n<0)
+			setWinner(Team.B,d);
+		return n!=0;
+	}
+
+	public DominationFactor getDominationFactor(Team winner) {
 		if(archons.get(winner).size()>=GameConstants.NUMBER_OF_ARCHONS)
-			gameStats.setDominationFactor(DominationFactor.DESTROYED);
+			return DominationFactor.DESTROYED;
 		else if(!timeLimitReached())
-			gameStats.setDominationFactor(DominationFactor.OWNED);
+			return DominationFactor.OWNED;
 		else
-			gameStats.setDominationFactor(DominationFactor.BEAT);
+			return DominationFactor.BEAT;
+	}
+
+	public void setWinner(Team t, DominationFactor d) {
+		winner = t;
+		gameStats.setDominationFactor(d);
         running = false;
 
         for (InternalObject o : gameObjectsByID.values()) {
@@ -585,7 +616,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			if(r.type == RobotType.TOWER) {
 				recomputeConnections();
 				if(towerToNode(r).isPowerCore())
-					setWinner(r.getTeam().opponent());
+					setWinner(r.getTeam().opponent(),getDominationFactor(r.getTeam().opponent()));
 			}
         }
     }
