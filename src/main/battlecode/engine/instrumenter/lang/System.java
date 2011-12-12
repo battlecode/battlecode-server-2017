@@ -5,6 +5,7 @@ import java.io.PrintStream;
 
 import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.GenericWorld;
+import battlecode.server.Config;
 
 /**
  * A Wrapper for java.lang.System that supports only arraycopy and System.out.  battlecode.engine.instrumenter.lang.System.out is
@@ -31,7 +32,7 @@ public final class System {
 
 	public static String getProperty(String key) {
 		if(key.startsWith("bc.testing."))
-			return java.lang.System.getProperty(key);
+			return Config.getGlobalConfig().get(key);
 		else
 			return null;
 	}
@@ -51,6 +52,10 @@ public final class System {
 	/*
 	public static long currentTimeMillis() {
 		return battlecode.common.GameConstants.BYTECODE_LIMIT_BASE*battlecode.engine.Engine.getRoundNum()+RobotMonitor.getBytecodeNum();
+	}
+
+	public static long nanoTime() {
+		return currentTimeMillis()*1000000;
 	}
 	*/
 }
