@@ -64,6 +64,8 @@ public class ErrorReporter {
     }
 
     private static void printReportString() {
+		System.out.format("java version \"%s\"\n",System.getProperty("java.version"));
+		System.out.format("%s (build %s, %s)\n\n",System.getProperty("java.vm.name"),System.getProperty("java.vm.version"),System.getProperty("java.vm.info"));
         System.out.println("Please report this to the 6.370 devs, by posting to the forum\n"
                 + "under the \"bugs\" thread.  Include a copy of this printout and\n"
                 + "a brief description of the bug, including whether it's consistent\n"
