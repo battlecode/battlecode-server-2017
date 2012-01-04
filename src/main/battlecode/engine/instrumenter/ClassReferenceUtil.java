@@ -20,10 +20,10 @@ import battlecode.engine.ErrorReporter;
  * @author adamd
  */
 public class ClassReferenceUtil {
-	// packages for which the player is allowed to use any of the contained classes; loaded from AllowedPackages.txt in idata
+	// packages for which the player is allowed to use any of the contained classes; loaded from AllowedPackages.txt
 	private final static Set<String> allowedPackages;
 		
-	// a set of classes the player is not allowed to use; loaded from DisallowedClasses.txt in idata
+	// a set of classes the player is not allowed to use; loaded from DisallowedClasses.txt
 	private final static Set<String> disallowedClasses;
 
 	// We can't instrument these classes because they have native methods.  Java won't allow us
@@ -34,59 +34,40 @@ public class ClassReferenceUtil {
 		
 	private ClassReferenceUtil() {}
 
+	static void fileLoadError(String filename) {
+		ErrorReporter.report(String.format("Error loading %s", "Check that the '%s' file exists and is not corrupted.",filename,filename));
+		throw new InstrumentationException();
+	}
+
 	// the static constructor basically loads the whitelist files and caches them in allowedPackages and disallowedClasses
 	static {
 		BufferedReader reader;
 		String line;
 		ZipFile zfile;
 		
-		// load our zip file
-		try{
-			zfile = new ZipFile("idata");
-		} catch(Exception e) {
-			ErrorReporter.report("Error loading idata", "Check that the 'idata' file is in its proper place");
-			throw new InstrumentationException();
-		}
+		allowedPackages = new HashSet<String>();
+		disallowedClasses = new HashSet<String>();
 		
 		// load allowed packages
 		try{
-			allowedPackages = new HashSet<String>();
-			reader = new BufferedReader(new InputStreamReader(zfile.getInputStream(zfile.getEntry("AllowedPackages.txt"))));
+			reader = new BufferedReader(new InputStreamReader(new FileInputStream("AllowedPackages.txt")));
 			while((line = reader.readLine()) != null) {
 				allowedPackages.add(line);
 			}
 		}catch(Exception e) {
-			ErrorReporter.report("Error loading idata", "Check that the 'idata' file is not corrupted");
-			throw new InstrumentationException();
+			fileLoadError("AllowedPackages.txt");
 		}
 			
 		// load disallowed classes
 		try{
-			disallowedClasses = new HashSet<String>();
-			reader = new BufferedReader(new InputStreamReader(zfile.getInputStream(zfile.getEntry("DisallowedClasses.txt"))));
+			reader = new BufferedReader(new InputStreamReader(new FileInputStream("DisallowedClasses.txt")));
 			while((line = reader.readLine()) != null) {
 				disallowedClasses.add(line);
 			}
 		}catch(Exception e) {
-			ErrorReporter.report("Error loading idata", "Check that the 'idata' file is not corrupted");
-			throw new InstrumentationException();
+			fileLoadError("DisallowedClasses.txt");
 		}
 
-		/*
-		uninstrumentedClasses = new HashSet<String>();
-		uninstrumentedClasses.add("java/io/FileInputStream");
-		uninstrumentedClasses.add("java/io/FileOutputStream");
-		uninstrumentedClasses.add("java/io/ObjectInputStream");
-		uninstrumentedClasses.add("java/io/ObjectOutputStream");
-		uninstrumentedClasses.add("java/io/ObjectStreamClass");
-		uninstrumentedClasses.add("java/io/ObjectStreamField");
-		// instrumenting OutputStream will cause a type mismatch error when the player
-		// tries to use System.out.println
-		uninstrumentedClasses.add("java/io/OutputStream");
-		uninstrumentedClasses.add("java/io/RandomAccessFile");
-		// Serializable doesn't have any native methods but we don't want to instrument it anyway
-		uninstrumentedClasses.add("java/io/Serializable");
-		*/
 	}
 
 	protected static boolean isInAllowedPackage(String className) {

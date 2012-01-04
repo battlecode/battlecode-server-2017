@@ -6,8 +6,9 @@ import java.util.StringTokenizer;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
 
-import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 
 import battlecode.engine.ErrorReporter;
@@ -44,34 +45,22 @@ public class MethodCostUtil {
 		}
 	}
 	
-	// static initializer loads the MethodCosts file from idata, and stores it in the methodCosts field
-	// also initializes interfacesMap
 	static {
 		BufferedReader reader;
 		String line;
-		ZipFile zfile;
 		
-		// load our zip file
-		try{
-			zfile = new ZipFile("idata");
-		} catch(Exception e) {
-			ErrorReporter.report(e, "Check that the 'idata' file is in its proper place");
-			throw new InstrumentationException();
-		}
-					
+		methodCosts = new HashMap<String, MethodData>();
 		// load method costs
 		try{
-			methodCosts = new HashMap<String, MethodData>();
-			reader = new BufferedReader(new InputStreamReader(zfile.getInputStream(zfile.getEntry("MethodCosts.txt"))));
+			reader = new BufferedReader(new InputStreamReader(new FileInputStream("MethodCosts.txt")));
 			while((line = reader.readLine()) != null) {
 				StringTokenizer st = new StringTokenizer(line);
 				if(st.countTokens() != 3)
-					throw new RuntimeException("Malformed MethodCosts.txt file");
+					ClassReferenceUtil.fileLoadError("MethodCosts.txt");
 				methodCosts.put(st.nextToken(), new MethodData(Integer.parseInt(st.nextToken()), Boolean.parseBoolean(st.nextToken())));
 			}
-		} catch (Exception e) {
-			ErrorReporter.report("Error loading idata", "Check that the 'idata' file is not corrupted");
-			throw new InstrumentationException();
+		} catch (IOException e) {
+			ClassReferenceUtil.fileLoadError("MethodCosts.txt");
 		}
 		
 		interfacesMap = new HashMap<String, String[]>();
