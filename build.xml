@@ -23,11 +23,11 @@
     <property name="javac.args" value=""/>
     <property name="javac.args.warnings" value="-Xlint:unchecked"/>
 
-    <property name="javadoc.destdir" value="docs/api"/>
-    <property name="commondoc.destdir" value="docs/common"/>
-
     <property name="extern.dir" value=".."/>
     <property name="extern.target" value="run"/>
+
+    <property name="javadoc.destdir" value="${extern.dir}/javadoc/"/>
+    <property name="commondoc.destdir" value="docs/common"/>
 
     <!-- Unit tests -->
     <property name="test.src.dir" value="${basedir}/src/test"/>
@@ -145,7 +145,7 @@
                 classpathref="classpath-libs"
                 sourcepath="${src.dir}"
                 packagenames="battlecode.common.*"
-                destdir="${commondoc.destdir}"
+                destdir="${javadoc.destdir}"
                 windowtitle="Battlecode ${year}"
                 link="http://download.oracle.com/javase/6/docs/api/">
             <doclet name="battlecode.doc.Doclet" path="${pkg.build.dir}"/>
