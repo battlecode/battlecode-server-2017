@@ -23,7 +23,7 @@
     <property name="javac.args" value=""/>
     <property name="javac.args.warnings" value="-Xlint:unchecked"/>
 
-    <property name="extern.dir" value=".."/>
+    <property name="extern.dir" value="."/>
     <property name="extern.target" value="run"/>
 
     <property name="javadoc.destdir" value="${extern.dir}/javadoc/"/>
