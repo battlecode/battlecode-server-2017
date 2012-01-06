@@ -304,11 +304,11 @@ public interface RobotController {
      *
 	 * @throws IllegalStateException if this robot is not an ARCHON
      * @throws GameActionException if this robot is currently moving (ALREADY_ACTIVE)
-     * @throws GameActionException if there not enough resources to build a robot of type <code>type</code> (NOT_ENOUGH_FLUX)
+     * @throws GameActionException if this robot does not have enough flux to spawn a robot of type <code>type</code> (NOT_ENOUGH_FLUX)
      * @throws GameActionException if <code>loc</code> is already occupied (CANT_MOVE_THERE)
      *
      * @param type
-     *            the type of chassis to spawn; cannot be null.
+     *            the type of robot to spawn; cannot be null.
      */
     public void spawn(RobotType type) throws GameActionException;
 	
@@ -327,16 +327,14 @@ public interface RobotController {
      *            the <code>RobotLevel</code> of the robot to transfer to
 	 * @throws IllegalArgumentException if <code>amount</code> is negative, zero, or NaN.
      * @throws GameActionException if the robot does not have <code>amount</code> flux (NOT_ENOUGH_FLUX).
-	 * @throws GameActionExceptiom if <code>loc</code> is not the same as or adjacent to this robot's location (CANT_SENSE_THAT).
+	 * @throws GameActionException if <code>loc</code> is not the same as or adjacent to this robot's location (CANT_SENSE_THAT).
 	 * @throws GameActionException if there is no robot at the given location and height (NO_ROBOT_THERE).
      */
     public void transferFlux(MapLocation loc, RobotLevel height, double amount) throws GameActionException;
 	
 	/**
-     * Ends the current round.  If your player used fewer than
-	 * BYTECODE_LIMIT bytecodes this round, then it will
-	 * receive a flux bonus of
-     * <code>GameConstants.YIELD_BONUS * GameConstants.UNIT_UPKEEP * (BYTECODE_LIMIT - (bytecodes_used)) / BYTECODE_LIMIT</code>.
+     * Ends the current round.  This robot will receive a flux bonus of
+     * <code>GameConstants.YIELD_BONUS * GameConstants.UNIT_UPKEEP * Clock.getBytecodesLeft() / GameConstants.BYTECODE_LIMIT</code>.
      * Never fails.
      */
     public void yield();
@@ -377,8 +375,8 @@ public interface RobotController {
     public void setIndicatorString(int stringIndex, String newString);
 
     /**
-     * Senses the terrain at loc, if loc was ever within the range of any
-     * of this robot's sensors.
+     * Senses the terrain at <code>loc</code>, if <code>loc</code> was ever
+	 * within this robot's sensor range.  Otherwise, returns <code>null</code>.
      */
     public TerrainTile senseTerrainTile(MapLocation loc);
 
@@ -411,10 +409,10 @@ public interface RobotController {
      * 		the data that the team should remember for the next game
      *
      * @throws java.lang.ArrayIndexOutOfBoundsException if {@code index} is less
-     * than zero or greater than {@link GameConstants#TEAM_MEMORY_LENGTH}
+     * than zero or greater than or equal to {@link GameConstants#TEAM_MEMORY_LENGTH}
      *
      * @see #getTeamMemory
-     * @see #setTeamMemory(int,long)
+     * @see #setTeamMemory(int,long,long)
      */
     public void setTeamMemory(int index, long value);
 
@@ -432,10 +430,10 @@ public interface RobotController {
      * 		indicates which bits should be set
      *
      * @throws java.lang.ArrayIndexOutOfBoundsException if {@code index} is less
-     * than zero or greater than {@link GameConstants#TEAM_MEMORY_LENGTH}
+     * than zero or greater than or equal to {@link GameConstants#TEAM_MEMORY_LENGTH}
      *
      * @see #getTeamMemory
-     * @see #setTeamMemory(int,long,long)
+     * @see #setTeamMemory(int,long)
      */
     public void setTeamMemory(int index, long value, long mask);
 
