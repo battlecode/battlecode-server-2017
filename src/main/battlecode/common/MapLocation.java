@@ -33,30 +33,6 @@ public final class MapLocation implements Serializable {
     }
 
     /**
-     * Returns the x-coordinate of the location.
-     *
-     * @return the x-coordinate of the location
-     *
-     * @deprecated Replaced by {@link #x}
-     */
-    @Deprecated
-    public final int getX() {
-        return this.x;
-    }
-
-    /**
-     * Returns the y-coordinate of the location.
-     *
-     * @return the y-coordinate of the location
-     *
-     * @deprecated Replaced by {@link #y}
-     */
-    @Deprecated
-    public final int getY() {
-        return this.y;
-    }
-
-    /**
      * Two MapLocations are regarded as equal iff
      * their coordinates are the same.
      *
@@ -104,8 +80,8 @@ public final class MapLocation implements Serializable {
     }
 
     /**
-     * Computes the distance from this location to the specified
-     * location squared.
+     * Computes the square of the distance from this location to the specified
+     * location.
      *
      * @param location the location to compute the distance squared to
      * @return the distance to the given location squared

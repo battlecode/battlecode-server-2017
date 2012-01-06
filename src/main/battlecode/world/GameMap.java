@@ -158,7 +158,7 @@ public class GameMap implements GenericGameMap {
      * false if it's not
      */
     public boolean onTheMap(MapLocation location) {
-        return onTheMap(location.getX(), location.getY());
+        return onTheMap(location.x, location.y);
     }
 
     /**
@@ -174,7 +174,7 @@ public class GameMap implements GenericGameMap {
         if (!onTheMap(location))
             return TerrainTile.OFF_MAP;
 
-        return mapTiles[location.getX() - mapOriginX][location.getY() - mapOriginY];
+        return mapTiles[location.x - mapOriginX][location.y - mapOriginY];
     }
 
     /**
@@ -238,8 +238,8 @@ public class GameMap implements GenericGameMap {
         }
 
         public void rememberLocations(MapLocation loc, int[] offsetsX, int[] offsetsY) {
-            int X = loc.getX() - map.mapOriginX + BUFFER;
-            int Y = loc.getY() - map.mapOriginY + BUFFER;
+            int X = loc.x - map.mapOriginX + BUFFER;
+            int Y = loc.y - map.mapOriginY + BUFFER;
 
             for (int i = 0; i < offsetsX.length; i++) {
                 data[X + offsetsX[i]][Y + offsetsY[i]] = true;
@@ -247,8 +247,8 @@ public class GameMap implements GenericGameMap {
         }
 
         public TerrainTile recallTerrain(MapLocation loc) {
-            int X = loc.getX() - map.mapOriginX + BUFFER;
-            int Y = loc.getY() - map.mapOriginY + BUFFER;
+            int X = loc.x - map.mapOriginX + BUFFER;
+            int Y = loc.y - map.mapOriginY + BUFFER;
 
             if (X >= 0 && X < Xwidth && Y >= 0 && Y < Ywidth && data[X][Y])
                 return map.getTerrainTile(loc);

@@ -64,8 +64,8 @@ public class AwesomenessAnalyzer {
 
 		public Event(float awesomeness, MapLocation location) {
 			this.awesomeness = awesomeness;
-			x = location.getX() + 0.5f; // Center of square
-			y = location.getY() + 0.5f; // Center of square
+			x = location.x + 0.5f; // Center of square
+			y = location.y + 0.5f; // Center of square
 		}
 	}
 
@@ -423,8 +423,8 @@ public class AwesomenessAnalyzer {
 			final float halfHeight = ((float)map.getHeight()) / 2.0f;
 			final MapLocation origin = map.getMapOrigin();
 
-			centerX = origin.getX() + halfWidth;
-			centerY = origin.getY() + halfHeight;
+			centerX = origin.x + halfWidth;
+			centerY = origin.y + halfHeight;
 			radius = (float)Math.sqrt(halfWidth * halfWidth + halfHeight * halfHeight);
 
 			hulls = new ConvexHullData [] { new ConvexHullData(), new ConvexHullData() };
@@ -440,11 +440,11 @@ public class AwesomenessAnalyzer {
 				for(MapLocation [] hull : hulls) {
 					MapLocation oldLoc = hull[hull.length-1];
 					for(MapLocation newLoc : hull) {
-						dx = newLoc.getX()-oldLoc.getX();
-						dy = newLoc.getY()-oldLoc.getY();
-						area_2+=(newLoc.getY()+oldLoc.getY())*dx;
-						sum_X_6+=-(newLoc.getX()*newLoc.getX()+newLoc.getX()*oldLoc.getX()+oldLoc.getX()*oldLoc.getX())*dy;
-						sum_Y_6+=(newLoc.getY()*newLoc.getY()+newLoc.getY()*oldLoc.getY()+oldLoc.getY()*oldLoc.getY())*dx;
+						dx = newLoc.x-oldLoc.x;
+						dy = newLoc.y-oldLoc.y;
+						area_2+=(newLoc.y+oldLoc.y)*dx;
+						sum_X_6+=-(newLoc.x*newLoc.x+newLoc.x*oldLoc.x+oldLoc.x*oldLoc.x)*dy;
+						sum_Y_6+=(newLoc.y*newLoc.y+newLoc.y*oldLoc.y+oldLoc.y*oldLoc.y)*dx;
 						oldLoc=newLoc;
 					}
 				}

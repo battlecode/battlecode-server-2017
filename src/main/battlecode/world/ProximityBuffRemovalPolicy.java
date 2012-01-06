@@ -25,6 +25,6 @@ public class ProximityBuffRemovalPolicy extends BuffRemovalPolicy {
     public boolean remove() {
         MapLocation mt = target.getLocation(),
                 mm = getBuff().getRobot().getLocation();
-        return (Math.sqrt(Math.pow(mt.getX() - mm.getX(), 2) + Math.pow(mt.getY() - mm.getY(), 2)) >= radius);
+        return (Math.sqrt(Math.pow(mt.x - mm.x, 2) + Math.pow(mt.y - mm.y, 2)) >= radius);
     }
 }

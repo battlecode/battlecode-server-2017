@@ -709,10 +709,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     protected static boolean inAngleRange(MapLocation sensor, Direction dir, MapLocation target, double cosHalfTheta) {
         MapLocation dirVec = origin.add(dir);
-        double dx = target.getX() - sensor.getX();
-        double dy = target.getY() - sensor.getY();
-        int a = dirVec.getX();
-        int b = dirVec.getY();
+        double dx = target.x - sensor.x;
+        double dy = target.y - sensor.y;
+        int a = dirVec.x;
+        int b = dirVec.y;
         double dotProduct = a * dx + b * dy;
 
         if (dotProduct < 0) {
@@ -750,10 +750,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         int radius = (int) Math.sqrt(radiusSquared);
 
-        int minXPos = center.getX() - radius;
-        int maxXPos = center.getX() + radius;
-        int minYPos = center.getY() - radius;
-        int maxYPos = center.getY() + radius;
+        int minXPos = center.x - radius;
+        int maxXPos = center.x + radius;
+        int minYPos = center.y - radius;
+        int maxYPos = center.y + radius;
 
         for (int x = minXPos; x <= maxXPos; x++) {
             for (int y = minYPos; y <= maxYPos; y++) {
