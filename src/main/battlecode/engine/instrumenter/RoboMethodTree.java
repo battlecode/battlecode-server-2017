@@ -260,15 +260,6 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 			return;
 		}
 
-		/* We need to be careful with reflection - it's easy to make
-		 * a mistake and let people access things that they shouldn't
-		 * be able to access
-		if(n.owner.equals("java/lang/Class")&&n.name.equals("forName")) {
-			n.owner = "battlecode/engine/instrumenter/lang/Reflect";
-			n.name = "classForName";
-		}
-		*/
-
 		// check for banned functions
 		if(checkDisallowed) {
 			// do wait/notify monitoring
@@ -406,19 +397,8 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 
 	private void visitLabelNode(LabelNode n) {
 		endOfBasicBlock(n);
-		if(exceptionHandlers.contains(n)) {
-			// I don't know if this is ever necessary (it would only be
-			// needed if some non-instrumented code calls back to
-			// instrumented code from inside a try-catch loop that catches
-			// Errors), but just in case...
-			// a label node will never be the last node so there
-			// must be a next node
-			AbstractInsnNode next = n.getNext();
-			while((next instanceof LineNumberNode)||(next instanceof FrameNode)) next = next.getNext();
-			//instructions.insertBefore(next,new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/RobotMonitor","checkForRobotDeath","()V"));
+		if(exceptionHandlers.contains(n))
 			bytecodeCtr+=EXCEPTION_BYTECODE_PENALTY;
-			endOfBasicBlock(next);
-		}
 	}
 
 	private void visitTypeInsnNode(TypeInsnNode n) {

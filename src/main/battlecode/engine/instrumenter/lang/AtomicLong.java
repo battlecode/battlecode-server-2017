@@ -25,6 +25,10 @@ public class AtomicLong {
 		return b;
 	}
 
+	public long incrementAndGet() {
+		return ++l;
+	}
+
 	public long getAndIncrement() {
 		return l++;
 	}

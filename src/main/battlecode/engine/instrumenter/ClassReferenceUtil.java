@@ -88,7 +88,8 @@ public class ClassReferenceUtil {
 		if(className.startsWith("instrumented/"))
 			return false;
 		if(className.startsWith("java/util/jar")||
-			className.startsWith("java/util/zip"))
+			className.startsWith("java/util/zip")||
+			className.equals("java/util/concurrent/TimeUnit"))
 			return false;
 		if(className.startsWith("java/util/")||
 		   className.startsWith("java/math/"))
@@ -156,11 +157,6 @@ public class ClassReferenceUtil {
 			return "battlecode/engine/instrumenter/lang/AtomicReference";
 		else if(className.equals("sun/misc/Unsafe"))
 			return "battlecode/engine/instrumenter/lang/Unsafe";
-		//else if(className.equals("java/util/Random"))
-			//if(checkDisallowed)
-		//	return "battlecode/engine/instrumenter/lang/RoboRandom";
-		//else
-		//		return "instrumented/java/util/Random";
 		if(checkDisallowed) {
 			if(disallowedClasses.contains(className)||!isInAllowedPackage(className)) {
 				return illegalClass(className, teamPackageName);
