@@ -333,9 +333,9 @@ public interface RobotController {
 	
 	/**
      * Ends the current round.  If your player used fewer than
-	 * BYTECODE_LIMIT_BASE bytecodes this round, then it will
+	 * BYTECODE_LIMIT bytecodes this round, then it will
 	 * receive a flux bonus of
-     * <code>GameConstants.YIELD_BONUS * GameConstants.UNIT_UPKEEP * (BYTECODE_LIMIT_BASE - (bytecodes_used)) / BYTECODE_LIMIT_BASE</code>.
+     * <code>GameConstants.YIELD_BONUS * GameConstants.UNIT_UPKEEP * (BYTECODE_LIMIT - (bytecodes_used)) / BYTECODE_LIMIT</code>.
      * Never fails.
      */
     public void yield();

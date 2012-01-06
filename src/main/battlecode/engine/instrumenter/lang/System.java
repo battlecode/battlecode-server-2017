@@ -51,7 +51,7 @@ public final class System {
 
 	/*
 	public static long currentTimeMillis() {
-		return battlecode.common.GameConstants.BYTECODE_LIMIT_BASE*battlecode.engine.Engine.getRoundNum()+RobotMonitor.getBytecodeNum();
+		return battlecode.common.GameConstants.BYTECODE_LIMIT*battlecode.engine.Engine.getRoundNum()+RobotMonitor.getBytecodeNum();
 	}
 
 	public static long nanoTime() {

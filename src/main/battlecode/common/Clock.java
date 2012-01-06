@@ -30,13 +30,6 @@ public class Clock {
     }
 
 	/**
-	 * Returns this robot's bytecode limit for the round.
-	 */
-	public static int getBytecodeLimit() {
-		return RobotMonitor.getBytecodeLimit();
-	}
-
-	/**
 	 * Returns the number of bytecodes this robot has left in this round.
 	 */
 	public static int getBytecodesLeft() {

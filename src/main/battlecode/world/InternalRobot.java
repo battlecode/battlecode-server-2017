@@ -333,7 +333,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public int getBytecodeLimit() {
-        return upkeepPaid?GameConstants.BYTECODE_LIMIT_BASE:0;
+        return upkeepPaid?GameConstants.BYTECODE_LIMIT:0;
     }
 
     public boolean hasBeenAttacked() {

@@ -146,9 +146,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
      * {@inheritDoc}
      */
     public void yield() {
-		int bytecodesBelowBase = BYTECODE_LIMIT_BASE - RobotMonitor.getBytecodesUsed();
+		int bytecodesBelowBase = BYTECODE_LIMIT - RobotMonitor.getBytecodesUsed();
 		if(bytecodesBelowBase>0&&robot.type!=RobotType.ARCHON)
-			robot.adjustFlux(GameConstants.YIELD_BONUS*bytecodesBelowBase/GameConstants.BYTECODE_LIMIT_BASE*GameConstants.UNIT_UPKEEP);	
+			robot.adjustFlux(GameConstants.YIELD_BONUS*bytecodesBelowBase/GameConstants.BYTECODE_LIMIT*GameConstants.UNIT_UPKEEP);	
         RobotMonitor.endRunner();
     }
 

@@ -1,12 +1,9 @@
 package battlecode.common;
 
 /**
- * Defines game constants used throughout the packages.
- * This class is meant to be used in other classes with
- * an <code>import static battlecode.common.GameConstants.*;</code>.
- *
+ * Defines constants that affect gameplay.
  */
-public final class GameConstants {
+public interface GameConstants {
 
     /*
      * By convention, the names of the constants should begin with
@@ -31,7 +28,7 @@ public final class GameConstants {
     /** The number of indicator strings that a player can associate with a robot */
     public static final int NUMBER_OF_INDICATOR_STRINGS = 3;
     /** The base number of bytecodes a robot can execute each round */
-    public static final int BYTECODE_LIMIT_BASE = 10000;
+    public static final int BYTECODE_LIMIT = 10000;
     /** The number of longs that your team can remember between games. */
     public static final int TEAM_MEMORY_LENGTH = 32;
     /** The maximum capacity that dropships can transport.  Note that
@@ -56,30 +53,35 @@ public final class GameConstants {
 	 * power nodes each turn once the time limit is reached. */
 	public static final double TIME_LIMIT_DAMAGE = .4;
 	/** The upkeep cost per turn for each unit that is not an archon or
-	 * tower */
+	 * tower. */
 	public static final double UNIT_UPKEEP = .15;
 	/**
 	 * The minimum amount of flux that an archon can produce in a turn.
+	 * @see #MAX_PRODUCTION
+	 * @see #PRODUCTION_PENALTY_R2
 	 */
 	public static final double MIN_PRODUCTION = .5;
 	/**
-	 * The amount of flux that an archon would produce if there
-	 * was an archon at distance zero from it.
+	 * The maximum amount of flux that an archon can produce in a turn.
+	 * @see #MIN_PRODUCTION
+	 * @see #PRODUCTION_PENALTY_R2
 	 */
 	public static final double MAX_PRODUCTION = 1.;
 	/**
-	 * The amount of flux that an archon will produce if there
-	 * are no allied archons within PRODUCTION_PENALTY_R2 of it
+	 * An archon's production will decrease if it is within this
+	 * distance squared of an allied archon.  If <code>d</code>
+	 * is the minimum distance to an allied archon, then the amount
+	 * of flux produced is <code>GameConstants.MIN_PRODUCTION+(GameConstants.MAX_PRODUCTION-GameConstants.MIN_PRODUCTION)*Math.min(1.,(double)d/GameConstants.PRODUCTION_PENALTY_R2)</code>.
+	 *
+	 * @see #MAX_PRODUCTION
+	 * @see #MIN_PRODUCTION
 	 */
 	public static final int PRODUCTION_PENALTY_R2 = 16;
-	/** The number of turns before a newly spawned robot can move or attack */
+	/** The number of turns before a newly spawned robot can move or attack. */
 	public static final int WAKE_DELAY = 20;
 	/** The minimum number of power nodes that can appear on a map. */
 	public static final int MIN_POWER_NODES = 4;
 	/** The maximum number of power nodes that can appaer on a map. */
 	public static final int MAX_POWER_NODES = 30;
 
-    // This class cannot be instantiated.
-    private GameConstants() {
-    }
 }

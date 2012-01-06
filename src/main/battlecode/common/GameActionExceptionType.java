@@ -7,13 +7,11 @@ public enum GameActionExceptionType {
 
     /** Internal error in the GameWorld engine.	 This is bad. */
     INTERNAL_ERROR,
-    /** Indicates when a robot tries to perform an action for which it does not have enough energon */
-    NOT_ENOUGH_ENERGON,
     /** Indicates when a robot tries to perform an action (e.g. transfer flux, spawn) for which it does not have enough flux */
 	NOT_ENOUGH_FLUX,
     /** Indicates when a robot tries to move into non-empty square */
     CANT_MOVE_THERE,
-    /** Indicates when a robot tries to execute an action, but is not currently IDLE */
+    /** Indicates when a robot tries to execute an action, but is not currently idle */
     ALREADY_ACTIVE,
     /** Indicates when a robot tries to sense a <code>GameObject</code> that is no longer existant or no longer
      * in this robot's sensor range */
@@ -24,6 +22,4 @@ public enum GameActionExceptionType {
     /** Indicates when a robot tries to perform an action on another robot, but there is
      * no suitable robot there. */
     NO_ROBOT_THERE,
-    /** Indicated that the builder component cannot build the item */
-    CANT_BUILD_THAT
 }
