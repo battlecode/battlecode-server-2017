@@ -16,7 +16,7 @@ public class InternalPowerNode extends InternalObject implements PowerNode {
 	private boolean isCore;
 		
 	public InternalPowerNode(GameWorld gw, MapLocation loc, boolean core) {
-        super(gw, loc, RobotLevel.MINE, Team.NEUTRAL);
+        super(gw, loc, RobotLevel.POWER_NODE, Team.NEUTRAL);
 		isCore=core;
 		gw.addPowerNode(this);
 		gw.addSignal(new NodeBirthSignal(loc));
@@ -32,6 +32,13 @@ public class InternalPowerNode extends InternalObject implements PowerNode {
 
 	public boolean isPowerCore() {
 		return isCore;
+	}
+
+	public Team powerCoreTeam() {
+		if(isPowerCore())
+			return getControllingTeam();
+		else
+			return null;
 	}
 
 	public MapLocation [] neighbors() {

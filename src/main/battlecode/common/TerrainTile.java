@@ -9,23 +9,14 @@ public enum TerrainTile {
 
 	LAND, VOID, OFF_MAP;
 
-	@Deprecated
-	public TerrainTile getType() { return this; }
-	
-	@Deprecated
-	public int getHeight() {
-		if(this==LAND)
-			return 30;
-		else
-			return 0;
-	}
-
-    public boolean isTraversableAtHeight(RobotLevel height) {
+    /** Returns <code>true</code> if robots at the given
+	 * height can traverse this terrain tile. */
+	public boolean isTraversableAtHeight(RobotLevel height) {
         switch (this) {
             case VOID:
                 return height == RobotLevel.IN_AIR;
             case LAND:
-                return height != RobotLevel.MINE;
+                return height != RobotLevel.POWER_NODE;
 			default:
 				return false;
         }

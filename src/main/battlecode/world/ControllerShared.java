@@ -44,7 +44,7 @@ public abstract class ControllerShared
 
 	protected static void assertRobotHeight(RobotLevel h) {
 		assertNotNull(h);
-		if(h==RobotLevel.MINE)
+		if(h==RobotLevel.POWER_NODE)
 			throw new IllegalArgumentException("There are no robots at that height.");
 	}
 

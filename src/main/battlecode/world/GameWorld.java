@@ -311,7 +311,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
 	public InternalPowerNode getPowerNode(MapLocation loc) {
-		return (InternalPowerNode)getObject(loc,RobotLevel.MINE);
+		return (InternalPowerNode)getObject(loc,RobotLevel.POWER_NODE);
 	}
 
 	public InternalRobot getTower(MapLocation loc) {

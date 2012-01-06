@@ -257,7 +257,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException {
         InternalRobot ir = castInternalRobot(r);
         assertCanSense(ir);
-        return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getMaxEnergon(),
+        return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(),
                 ir.getFlux(), ir.getDirection(), ir.type, ir.getTeam(), ir.getRegen());
     }
 

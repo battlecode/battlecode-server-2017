@@ -11,29 +11,29 @@ public class RobotInfo {
 
     /** The robot that was sensed. */
     public final Robot robot;
-    /** Location of this Robot. */
+    /** The location of this Robot. */
     public final MapLocation location;
-    /** Hit points of this Robot. */
+    /** The energon of this Robot. */
     public final double energon;
-    /** Maximum hit points of this Robot. */
-    public final double maxEnergon;
+	/** The flux of this Robot. */
 	public final double flux;
     /** The direction this Robot is facing. */
     public final Direction direction;
+	/** The type of this Robot. */
     public final RobotType type;
+	/** The team of this Robot. */
 	public final Team team;
-	/** True if this robot is scheduled to regenerate
+	/** <code>true</code> if this robot is scheduled to regenerate
 	 * at the beginning of its next turn. */
    	public boolean regen;
 
     public RobotInfo(Robot robot, MapLocation location,
-            double hitpoints, double maxHp, double flux, Direction direction,
+            double hitpoints, double flux, Direction direction,
             RobotType type, Team team, boolean regen) {
         super();
         this.robot = robot;
         this.location = location;
         this.energon = hitpoints;
-        this.maxEnergon = maxHp;
 		this.flux = flux;
         this.direction = direction;
         this.type = type;

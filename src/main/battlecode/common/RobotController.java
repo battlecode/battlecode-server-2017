@@ -322,7 +322,7 @@ public interface RobotController {
      *            the amount of flux to transfer to the specified robot
      * @param loc
      *            the <code>MapLocation</code> of the robot to transfer to
-     * @param level
+     * @param height
      *            the <code>RobotLevel</code> of the robot to transfer to
 	 * @throws IllegalArgumentException if <code>amount</code> is negative, zero, or NaN.
      * @throws GameActionException if the robot does not have <code>amount</code> flux (NOT_ENOUGH_FLUX).
