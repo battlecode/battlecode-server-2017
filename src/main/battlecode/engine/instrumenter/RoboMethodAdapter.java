@@ -1,7 +1,5 @@
 package battlecode.engine.instrumenter;
 
-import static battlecode.common.GameConstants.EXCEPTION_BYTECODE_PENALTY;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,6 +15,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import static org.objectweb.asm.ClassReader.*;
 
+import battlecode.common.GameConstants;
 import battlecode.engine.ErrorReporter;
 import battlecode.server.Config;
 
@@ -439,7 +438,7 @@ public class RoboMethodAdapter extends MethodAdapter implements Opcodes {
 			// instrumented code from inside a try-catch loop that catches
 			// Errors), but just in case...
 			super.visitMethodInsn(INVOKESTATIC,"battlecode/engine/instrumenter/RobotMonitor","checkForRobotDeath","()V");
-			incrementBytecodeCtr(EXCEPTION_BYTECODE_PENALTY);
+			incrementBytecodeCtr(GameConstants.EXCEPTION_BYTECODE_PENALTY);
 			endOfBasicBlock();
 		}
 	}

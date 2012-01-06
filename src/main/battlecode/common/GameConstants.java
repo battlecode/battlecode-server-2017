@@ -71,7 +71,7 @@ public interface GameConstants {
 	 * An archon's production will decrease if it is within this
 	 * distance squared of an allied archon.  If <code>d</code>
 	 * is the minimum distance to an allied archon, then the amount
-	 * of flux produced is <code>GameConstants.MIN_PRODUCTION+(GameConstants.MAX_PRODUCTION-GameConstants.MIN_PRODUCTION)*Math.min(1.,(double)d/GameConstants.PRODUCTION_PENALTY_R2)</code>.
+	 * of flux produced is <code>GameConstants.MIN_PRODUCTION+(GameConstants.MAX_PRODUCTION-GameConstants.MIN_PRODUCTION)*Math.min(1.,Math.sqrt((double)d/GameConstants.PRODUCTION_PENALTY_R2))</code>.
 	 *
 	 * @see #MAX_PRODUCTION
 	 * @see #MIN_PRODUCTION
@@ -81,7 +81,7 @@ public interface GameConstants {
 	public static final int WAKE_DELAY = 20;
 	/** The minimum number of power nodes that can appear on a map. */
 	public static final int MIN_POWER_NODES = 4;
-	/** The maximum number of power nodes that can appaer on a map. */
+	/** The maximum number of power nodes that can appear on a map. */
 	public static final int MAX_POWER_NODES = 30;
 
 }

@@ -183,13 +183,14 @@ public interface RobotController {
      *
      * When this action is executed, the robot will attempt to move forward one
      * square in its current direction. If the move succeeds, this robot's new
-     * location will immediately change to the destination square, but this robot's
-     * motor will be engaged for some number of rounds ({@code type().delay} for
-     * orthogonal movement and {@code Math.round(type().delay*Math.sqrt(2))} for
+     * location will immediately change to the destination square, but this robot
+     * motor will not be able to move or change direction again for some number of rounds (<code>type().moveDelayOrthogonal</code> for
+     * orthogonal movement and <code>type().moveDelayDiagonal</code> for
      * diagonal movement).
      *
      * @throws GameActionException if this robot is already moving (ALREADY_ACTIVE)
-     * @throws GameActionException if the destination terrain is not traversable by
+     * @throws GameActionException if this robot does not have enough flux to move (NOT_ENOUGH_FLUX)
+	 * @throws GameActionException if the destination terrain is not traversable by
      * this robot (CANT_MOVE_THERE)
      * @throws GameActionException if the destination is occupied by another {@code GameObject}
      * at the same height (CANT_MOVE_THERE)
@@ -272,14 +273,14 @@ public interface RobotController {
      * are thus limited to sending at most one message per round.
      * </p>
      * <p>
-     * You are charged a small amount of energon for every message that you
+     * You are charged a small amount of flux for every message that you
      * broadcast. The cost of sending a message is equal to
      * <code>(GameConstants.BROADCAST_FIXED_COST +
      * GameConstants.BROADCAST_COST_PER_BYTE*sizeBytes)</code>
      * where <code>sizeBytes</code> is the size of the message, in bytes.
      * <p>
      * <p>
-     * Each robot can only have one message to broadcast in a given round at a time.
+     * Each robot can only broadcast one message per round.
      *
      * @param msg
      *            the message you want to broadcast; cannot be <code>null</code>.

@@ -1,10 +1,5 @@
 package battlecode.world;
 
-import static battlecode.common.GameConstants.MAP_MAX_HEIGHT;
-import static battlecode.common.GameConstants.MAP_MAX_WIDTH;
-import static battlecode.common.GameConstants.MAP_MIN_HEIGHT;
-import static battlecode.common.GameConstants.MAP_MIN_WIDTH;
-
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collections;

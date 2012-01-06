@@ -4,8 +4,6 @@ package battlecode.engine.instrumenter;
 // this in an attempt to fix a strange bug.  RoboMethodTree is more
 // extensible than RoboMethodAdapter, but also less well tested. -dgulotta
 
-import static battlecode.common.GameConstants.EXCEPTION_BYTECODE_PENALTY;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,6 +20,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import static org.objectweb.asm.tree.AbstractInsnNode.*;
 
+import battlecode.common.GameConstants;
 import battlecode.engine.ErrorReporter;
 
 public class RoboMethodTree extends MethodNode implements Opcodes {
@@ -398,7 +397,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 	private void visitLabelNode(LabelNode n) {
 		endOfBasicBlock(n);
 		if(exceptionHandlers.contains(n))
-			bytecodeCtr+=EXCEPTION_BYTECODE_PENALTY;
+			bytecodeCtr+=GameConstants.EXCEPTION_BYTECODE_PENALTY;
 	}
 
 	private void visitTypeInsnNode(TypeInsnNode n) {

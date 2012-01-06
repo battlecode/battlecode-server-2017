@@ -1,6 +1,6 @@
 package battlecode.world;
 
-import static battlecode.common.GameConstants.*;
+import battlecode.common.GameConstants;
 import static battlecode.common.GameActionExceptionType.*;
 import battlecode.common.*;
 import battlecode.engine.GenericController;
@@ -58,7 +58,7 @@ TODO:
 - TEST responding to signals
 - TEST clock
  */
-public class RobotControllerImpl extends ControllerShared implements RobotController, GenericController {
+public class RobotControllerImpl extends ControllerShared implements RobotController, GenericController, GameConstants {
 
     public RobotControllerImpl(GameWorld gw, InternalRobot r) {
         super(gw, r);
