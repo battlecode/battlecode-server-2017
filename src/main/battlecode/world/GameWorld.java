@@ -513,8 +513,13 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		return powerNodeGraph.get(loc);
 	}
 
-	public Iterable<InternalPowerNode> getPowerNodesByTeam(Team t) {
-		return Iterables.filter(powerNodes,Util.isAllied(t));
+	public Iterable<InternalPowerNode> getPowerNodesByTeam(final Team t) {
+		Predicate<InternalPowerNode> pred = new Predicate<InternalPowerNode>() {
+			public boolean apply(InternalPowerNode p) {
+				return p.getControllingTeam()==t;
+			}
+		};
+		return Iterables.filter(powerNodes,pred);
 	}
 
 	public List<InternalPowerNode> getCapturableNodes(Team t) {

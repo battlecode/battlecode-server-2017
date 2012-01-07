@@ -16,7 +16,6 @@ TODO:
  * a class that implements <code>GameObject</code>, that <code>GameObject</code> will be invalid, and will result in a
  * <code>GameActionException</code> of type <code>GameActionExceptionType.INVALID_OBJECT</code> if it is used.
  * <p>
- * Use <code>equals</code> to determine if two GameObject instances represent the same object.
  * 
  * @author Teh Devs
  * @see battlecode.common.Team
