@@ -265,7 +265,6 @@ public class ClassReferenceUtil {
 		else {
 			ErrorReporter.report("Illegal class: " + className + "\nThis class cannot be referenced by player " + teamPackageName, false);
 			InstrumentationException e = new InstrumentationException();
-			e.printStackTrace();
 			throw e;
 		}
 	}

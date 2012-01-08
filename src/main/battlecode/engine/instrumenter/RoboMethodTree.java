@@ -264,38 +264,31 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 			// do wait/notify monitoring
 			if((n.desc.equals("()V") && (n.name.equals("wait") || n.name.equals("notify") || n.name.equals("notifyAll")))
 			   || (n.name.equals("wait") && (n.desc.equals("(J)V") || n.desc.equals("(JI)V")))) {
-				ErrorReporter.report("Illegal method: Object." + n.name + "() cannot be called by a player", false);
-				throw new InstrumentationException();
+				illegalMethod(n,"Illegal method: Object." + n.name + "() cannot be called by a player.");
 			}
 
 			if(n.owner.equals("java/lang/Class")&&n.name.equals("forName")) {
-				ErrorReporter.report("Illegal method in" + className + ": Class.forName() may not be called by a player.", false);
-				throw new InstrumentationException();
+				illegalMethod(n,"Illegal method in" + className + ": Class.forName() may not be called by a player.");
 			}
 
 			if(n.owner.equals("java/io/PrintStream")&&n.name.equals("<init>")&&n.desc.startsWith("(Ljava/lang/String;")) {
-				ErrorReporter.report("Illegal method in" + className + ": You may not use PrintStream to open files.", false);
-				throw new InstrumentationException();
+				illegalMethod(n,"Illegal method in" + className + ": You may not use PrintStream to open files.");
 			}
 
 			if(n.owner.equals("java/lang/Math") && n.name.equals("random")) {
-				ErrorReporter.report("Illegal method in " + className + ": Math.random() cannot be called by a player.  Use java.util.Random instead.", false);
-				throw new InstrumentationException();
+				illegalMethod(n,"Illegal method in " + className + ": Math.random() cannot be called by a player.  Use java.util.Random instead.");
 			}
 
 			if(n.owner.equals("java/lang/StrictMath") && n.name.equals("random")) {
-				ErrorReporter.report("Illegal method in " + className + ": StrictMath.random() cannot be called by a player.  Use java.util.Random instead.", false);
-				throw new InstrumentationException();
+				illegalMethod(n,"Illegal method in " + className + ": StrictMath.random() cannot be called by a player.  Use java.util.Random instead.");
 			}
 
 			if(n.owner.equals("java/lang/String") && n.name.equals("intern")) {
-				ErrorReporter.report("Illegal method in " + className + ": String.intern() cannot be called by a player.", false);
-				throw new InstrumentationException();
+				illegalMethod(n,"Illegal method in " + className + ": String.intern() cannot be called by a player.");
 			}
 
 			if(n.owner.equals("java/util/Collections") && n.name.equals("shuffle") && n.desc.equals("(Ljava/util/List;)V")) {
-				ErrorReporter.report("Illegal method in " + className + ": You must supply Collections.shuffle() with a Random.", false);
-				throw new InstrumentationException();
+				illegalMethod(n,"Illegal method in " + className + ": You must supply Collections.shuffle() with a Random.");
 			}
 		}
 
@@ -387,6 +380,22 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 		if(endBasicBlock)
 			endOfBasicBlock(n);
 
+	}
+
+	private void illegalMethod(MethodInsnNode n, String message) {
+		if(InstrumentingClassLoader.lazy()) {
+			instructions.insertBefore(n,new LdcInsnNode(message));
+			instructions.insertBefore(n,new MethodInsnNode(INVOKESTATIC,"battlecode/engine/instrumenter/RoboMethodTree","reportIllegalMethod","(Ljava/lang/String;)V"));
+		}
+		else {
+			ErrorReporter.report(message,false);
+			throw new InstrumentationException();
+		}
+	}
+
+	public static void reportIllegalMethod(String message) {
+		ErrorReporter.report(message,false);
+		throw new RobotDeathException();
 	}
 
 	private void visitMultiANewArrayInsnNode(MultiANewArrayInsnNode n) {
