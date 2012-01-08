@@ -78,7 +78,7 @@ public class ClassReferenceUtil {
 
 	private static boolean shouldAddInstrumentedPrefix(String className) {
 		if(className.startsWith("battlecode/")) {
-			if(className.equals("battlecode/engine/instrumenter/lang/InstrumentableString"))
+			if(className.equals("battlecode/engine/instrumenter/lang/InstrumentableFunctions"))
 				return true;
 			else
 				return false;

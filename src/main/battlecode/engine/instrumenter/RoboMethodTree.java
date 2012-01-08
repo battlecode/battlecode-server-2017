@@ -275,21 +275,10 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 				illegalMethod(n,"Illegal method in" + className + ": You may not use PrintStream to open files.");
 			}
 
-			if(n.owner.equals("java/lang/Math") && n.name.equals("random")) {
-				illegalMethod(n,"Illegal method in " + className + ": Math.random() cannot be called by a player.  Use java.util.Random instead.");
-			}
-
-			if(n.owner.equals("java/lang/StrictMath") && n.name.equals("random")) {
-				illegalMethod(n,"Illegal method in " + className + ": StrictMath.random() cannot be called by a player.  Use java.util.Random instead.");
-			}
-
 			if(n.owner.equals("java/lang/String") && n.name.equals("intern")) {
 				illegalMethod(n,"Illegal method in " + className + ": String.intern() cannot be called by a player.");
 			}
 
-			if(n.owner.equals("java/util/Collections") && n.name.equals("shuffle") && n.desc.equals("(Ljava/util/List;)V")) {
-				illegalMethod(n,"Illegal method in " + className + ": You must supply Collections.shuffle() with a Random.");
-			}
 		}
 
 		boolean isDebugMethod = n.name.startsWith("debug_") && n.desc.endsWith("V") && n.owner.startsWith(teamPackageName);
@@ -310,7 +299,10 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 		if(n.owner.equals("java/lang/String")&&instrumentedStringFuncs.contains(n.name)) {
 			n.setOpcode(INVOKESTATIC);
 			n.desc="(Ljava/lang/String;"+n.desc.substring(1);
-			n.owner="instrumented/battlecode/engine/instrumenter/lang/InstrumentableString";
+			n.owner="instrumented/battlecode/engine/instrumenter/lang/InstrumentableFunctions";
+		}
+		else if((n.owner.equals("java/lang/Math")||n.owner.equals("java/lang/StrictMath"))&&n.name.equals("random")) {
+			n.owner="instrumented/battlecode/engine/instrumenter/lang/InstrumentableFunctions";
 		}
 		//hax the e.printStackTrace() method calls
 		// This isn't quite the correct behavior.  If

@@ -1,13 +1,26 @@
 package battlecode.engine.instrumenter.lang;
 
+import java.util.Random;
 import java.util.regex.Pattern;
 
 // This class allows us to instrument certain string operations.
 // The instrumenter replaces calls to java.lang.String methods,
 // which are not instrumented, with these methods, which are.
 
-public class InstrumentableString {
-	private InstrumentableString() { }
+public class InstrumentableFunctions {
+	private InstrumentableFunctions() { }
+
+	static private Random rnd;
+
+	static public double random() {
+		return getRandom().nextDouble();
+	}
+
+	static private Random getRandom() {
+		if(rnd==null)
+			rnd = new Random(RoboRandom.getMapSeed());
+		return rnd;
+	}
 
 	static public boolean matches(String str, String regex) {
 		return Pattern.matches(regex,str);
