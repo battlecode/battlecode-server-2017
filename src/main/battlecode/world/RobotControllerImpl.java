@@ -58,7 +58,7 @@ TODO:
 - TEST responding to signals
 - TEST clock
  */
-public class RobotControllerImpl extends ControllerShared implements RobotController, GenericController, GameConstants {
+public class RobotControllerImpl extends ControllerShared implements RobotController, GenericController {
 
     public RobotControllerImpl(GameWorld gw, InternalRobot r) {
         super(gw, r);
@@ -146,7 +146,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
      * {@inheritDoc}
      */
     public void yield() {
-		int bytecodesBelowBase = BYTECODE_LIMIT - RobotMonitor.getBytecodesUsed();
+		int bytecodesBelowBase = GameConstants.BYTECODE_LIMIT - RobotMonitor.getBytecodesUsed();
 		if(bytecodesBelowBase>0&&robot.type!=RobotType.ARCHON)
 			robot.adjustFlux(GameConstants.YIELD_BONUS*bytecodesBelowBase/GameConstants.BYTECODE_LIMIT*GameConstants.UNIT_UPKEEP);	
         RobotMonitor.endRunner();
@@ -190,8 +190,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 	public void regenerate() throws GameActionException {
 		if(robot.type!=RobotType.SCOUT)
 			throw new IllegalStateException("Only scouts can regenerate.");
-		assertHaveFlux(REGEN_COST);
-		robot.adjustFlux(-REGEN_COST);
+		assertHaveFlux(GameConstants.REGEN_COST);
+		robot.adjustFlux(-GameConstants.REGEN_COST);
 		for(InternalRobot ir : gameWorld.getAllRobotsWithinRadiusDonutSq(getLocation(),RobotType.SCOUT.attackRadiusMaxSquared,RobotType.SCOUT.attackRadiusMinSquared)) {
 			if(ir.getTeam()==robot.getTeam())
 				ir.setRegen();
@@ -438,7 +438,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotNull(m);
 		double cost = m.getFluxCost();
 		assertHaveFlux(cost);
-        robot.activateBroadcast(new BroadcastSignal(robot, BROADCAST_RADIUS_SQUARED, m));
+        robot.activateBroadcast(new BroadcastSignal(robot, GameConstants.BROADCAST_RADIUS_SQUARED, m));
 		robot.adjustFlux(-cost);
     }
 
@@ -449,7 +449,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
      * {@inheritDoc}
      */
     public void setIndicatorString(int stringIndex, String newString) {
-        if (stringIndex >= 0 && stringIndex < NUMBER_OF_INDICATOR_STRINGS)
+        if (stringIndex >= 0 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS)
             (new IndicatorStringSignal(robot, stringIndex, newString)).accept(gameWorld);
     }
 
