@@ -26,8 +26,6 @@ public interface GenericWorld extends GameWorldViewer, SignalHandler {
 
 	public GenericRobot getRobotByID(int id);
 
-	public void removeRobot(int id);
-
 	public int nextID();
 
 }

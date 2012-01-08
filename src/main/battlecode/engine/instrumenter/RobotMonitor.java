@@ -159,11 +159,6 @@ public class RobotMonitor {
 		Scheduler.passToNextThread();
 	}
 
-	public static void die() {
-		myGameWorld.endOfExecution(currentRobotData.ID);
-		myGameWorld.removeRobot(currentRobotData.ID);
-	}
-
 	/**
 	 * Kills the robot thread of the robot with the given ID.  More specifically, the next time the thread is activated,
 	 * it will throw a RobotDeathException.

@@ -538,12 +538,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			throw new RobotDeathException();
 	}
 
-	public void removeRobot(int id) {
-		InternalObject o = gameObjectsByID.get(id);
-		if(o instanceof InternalRobot)
-			visitSignal(new DeathSignal((InternalRobot)o));
-	}
-
     // ******************************
     // SIGNAL HANDLER METHODS
     // ******************************
