@@ -45,7 +45,7 @@ public interface GameConstants {
 	public static final int NUMBER_OF_ARCHONS = 6;
 	/** The increase in a unit's attack timeout when it is hit by a
 	 * DISRUPTER. */
-	public static final int DISRUPTER_DELAY = 2;
+	public static final int DISRUPTER_DELAY = 3;
 	/** The amount of damage dealt each turn to a node that is not connected
 	 * to its team's power core. */
 	public static final double DISCONNECTED_NODE_DAMAGE = .2;
@@ -80,8 +80,8 @@ public interface GameConstants {
 	/** The number of turns before a newly spawned robot can move or attack. */
 	public static final int WAKE_DELAY = 20;
 	/** The minimum number of power nodes that can appear on a map. */
-	public static final int MIN_POWER_NODES = 4;
+	public static final int MIN_POWER_NODES = 6;
 	/** The maximum number of power nodes that can appear on a map. */
-	public static final int MAX_POWER_NODES = 30;
+	public static final int MAX_POWER_NODES = 50;
 
 }
