@@ -59,6 +59,7 @@ public class Scheduler {
 	 * Should be called right before the thread exits.
 	n */
 	public static void die() {
+		RobotMonitor.die();
 		ScheduledThread last = current.prev;
 		current = current.next;
 		current.prev = last;

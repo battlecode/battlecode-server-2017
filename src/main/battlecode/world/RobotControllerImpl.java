@@ -199,6 +199,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		gameWorld.addSignal(new RegenSignal(robot));
 	}
 
+	public void resign() {
+		for(InternalObject obj : gameWorld.getAllGameObjects())
+			if((obj instanceof InternalRobot)&&obj.getTeam()==robot.getTeam())
+				gameWorld.notifyDied((InternalRobot)obj);
+		gameWorld.removeDead();
+	}
+
     /**
      * {@inheritDoc}
      */
@@ -415,10 +422,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         	assertCanAttack(loc,height);
 		}
         robot.activateAttack(new AttackSignal(robot, loc, height),robot.type.attackDelay);
-		// if this robot killed itself, its turn should end
-		if(robot.getEnergonLevel()<0) {
-			throw new RobotDeathException();
-		}
     }
     
 	//************************************

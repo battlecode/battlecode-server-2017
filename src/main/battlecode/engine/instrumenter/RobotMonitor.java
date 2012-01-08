@@ -102,7 +102,11 @@ public class RobotMonitor {
 			}
 		}
 	}		
-	
+
+	public static int getCurrentRobotID() {
+		return currentRobotData.ID;
+	}
+
 	public static GenericRobot getCurrentRobot() {
 		return myGameWorld.getRobotByID(currentRobotData.ID);
 	}
@@ -153,6 +157,11 @@ public class RobotMonitor {
 		if(currentRobotData.bytecodesLeft>0)
 			currentRobotData.bytecodesLeft=0;
 		Scheduler.passToNextThread();
+	}
+
+	public static void die() {
+		myGameWorld.endOfExecution(currentRobotData.ID);
+		myGameWorld.removeRobot(currentRobotData.ID);
 	}
 
 	/**

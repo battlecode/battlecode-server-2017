@@ -351,6 +351,11 @@ public interface RobotController {
     public void suicide();
 
 	/**
+	 * Causes your team to lose the game.  Mainly for testing purposes.
+	 */
+	public void resign();
+
+	/**
 	 * Causes each allied robot within its attack radius to regenerate
 	 * <code>GameConstants.REGEN_AMOUNT</code> energon at the beginning
 	 * of its next turn.  Each robot may only regenerate once per turn.

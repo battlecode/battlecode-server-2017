@@ -131,7 +131,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 				if(tower!=null)
 					tower.takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamBNodes.size());
 			}
-			removeDead();
 			// We have tiebreakers in case both power cores die to end-of-round damage in the same round.
 			// (If two power cores are killed by robots in the same round, then the team whose core died
 			// first loses.)
@@ -477,14 +476,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public void beginningOfExecution(int robotID) {
-		removeDead();
         InternalRobot r = (InternalRobot) getObjectByID(robotID);
         if (r != null)
             r.processBeginningOfTurn();
     }
 
     public void endOfExecution(int robotID) {
-		removeDead();
         InternalRobot r = (InternalRobot) getObjectByID(robotID);
         // if the robot is dead, it won't be in the map any more
         if (r != null) {
@@ -527,17 +524,24 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 	}
         
 	public void notifyDied(InternalRobot r) {
-		if(r==RobotMonitor.getCurrentRobot())
-			throw new RobotDeathException();
-		else
-			deadRobots.add(r);
+		deadRobots.add(r);
 	}
 
 	public void removeDead() {
+		boolean current = false;
 		for(InternalRobot r : deadRobots) {
+			if(r.getID() == RobotMonitor.getCurrentRobotID())
+				current = true;
 			visitSignal(new DeathSignal(r));
 		}
-		deadRobots.clear();
+		if(current)
+			throw new RobotDeathException();
+	}
+
+	public void removeRobot(int id) {
+		InternalObject o = gameObjectsByID.get(id);
+		if(o instanceof InternalRobot)
+			visitSignal(new DeathSignal((InternalRobot)o));
 	}
 
     // ******************************
@@ -582,6 +586,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		}
 
         addSignal(s);
+
+		removeDead();
     }
 
     public void visitBroadcastSignal(BroadcastSignal s) {
