@@ -291,6 +291,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		InternalPowerNode ip = castInternalPowerNode(p);
 		return ip.connected(robot.getTeam());
 	}
+
+	public boolean senseOwned(PowerNode p) {
+		InternalPowerNode ip = castInternalPowerNode(p);
+		return ip.getControllingTeam()==robot.getTeam();	
+	}
 	
 	public boolean senseOpponentConnected(PowerNode p) throws GameActionException {
 		InternalPowerNode ip = castInternalPowerNode(p);

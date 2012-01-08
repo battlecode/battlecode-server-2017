@@ -154,6 +154,12 @@ public interface RobotController {
 	 * be within sensor range.
 	 */
 	public boolean senseConnected(PowerNode p);
+
+	/**
+	 * Returns <code>true</code> if there is an allied tower at the power node <code>p</code>.
+	 * Note that <code>p</code> does not need to be within sensor range.
+	 */
+	public boolean senseOwned(PowerNode p);
 	
 	/**
 	 * Returns <code>true</code> if the node <code>p</code> is connected to
