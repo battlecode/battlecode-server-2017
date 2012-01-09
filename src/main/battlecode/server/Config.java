@@ -45,7 +45,7 @@ public class Config {
 		defaults.setProperty("bc.engine.lazy-instrumenter", "false");
 		defaults.setProperty("bc.engine.fast-hash","false");
 
-        defaults.setProperty("bc.client.opengl", "true");
+        defaults.setProperty("bc.client.opengl", "false");
         defaults.setProperty("bc.client.use-models", "true");
         defaults.setProperty("bc.client.applet", "false");
         defaults.setProperty("bc.client.applet.path", "http://battlecode.mit.edu/2010/online-client/");
