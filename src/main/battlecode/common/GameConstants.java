@@ -10,9 +10,9 @@ public interface GameConstants {
      * what they apply to, e.g. GAME_DEFAULT_SEED rather than DEFAULT_GAME_SEED.
      */
     /** Fixed cost to send a message */
-    public static final double BROADCAST_FIXED_COST = 0.0002;
+    public static final double BROADCAST_FIXED_COST = 0.01;
     /** Additional cost  per byte of message size */
-    public static final double BROADCAST_COST_PER_BYTE = 0.000002;
+    public static final double BROADCAST_COST_PER_BYTE = 0.0001;
     /** The minimum possible map height. */
     public static final int MAP_MIN_HEIGHT = 20;
     /** The maximum possible map height. */
