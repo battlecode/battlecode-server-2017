@@ -131,6 +131,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 				if(tower!=null)
 					tower.takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamBNodes.size());
 			}
+			removeDead();
 			// We have tiebreakers in case both power cores die to end-of-round damage in the same round.
 			// (If two power cores are killed by robots in the same round, then the team whose core died
 			// first loses.)
