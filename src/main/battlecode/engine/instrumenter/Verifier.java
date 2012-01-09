@@ -14,12 +14,15 @@ public class Verifier {
 	
 	public static void main(String[] args) {
 		String teamPackageName = args[0];
-		System.setOut(System.err);
+		System.err.println("WHY YOU NO WORK???");
+		//System.setOut(System.err);
 		try{
 			InstrumentingClassLoader icl = new IndividualClassLoader(teamPackageName, false, true);
 			icl.loadClass(teamPackageName + ".RobotPlayer");
 		}catch(Exception e) {
-			System.exit(1);
+			System.out.println(e);
+			e.printStackTrace(System.out);
+			System.exit(42);
 		}
 	}
 }
