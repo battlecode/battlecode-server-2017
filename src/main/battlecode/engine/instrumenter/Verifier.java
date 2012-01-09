@@ -14,7 +14,6 @@ public class Verifier {
 	
 	public static void main(String[] args) {
 		String teamPackageName = args[0];
-		System.err.println("WHY YOU NO WORK???");
 		//System.setOut(System.err);
 		try{
 			InstrumentingClassLoader icl = new IndividualClassLoader(teamPackageName, false, true);
