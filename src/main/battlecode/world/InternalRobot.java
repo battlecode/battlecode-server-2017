@@ -75,8 +75,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 		buffs = new InternalRobotBuffs(this);
 
-		turnsUntilMovementIdle = GameConstants.WAKE_DELAY;
-		turnsUntilAttackIdle = GameConstants.WAKE_DELAY;
+		if(spawnedRobot) {
+			turnsUntilMovementIdle = GameConstants.WAKE_DELAY;
+			turnsUntilAttackIdle = GameConstants.WAKE_DELAY;
+		}
 
 		if(type==RobotType.ARCHON)
 			gw.addArchon(this);	
