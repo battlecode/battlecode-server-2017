@@ -142,7 +142,7 @@ class XMLMapHandler extends DefaultHandler {
             }
         };
 
-        private Team team;
+        public final Team team;
         
         public NodeData(Team t) {
     		team = t;
@@ -480,6 +480,10 @@ class XMLMapHandler extends DefaultHandler {
 		}
 	}
 
+	public boolean isNode(MapLocation l) {
+		return map[l.x][l.y] instanceof NodeData;
+	}
+
     /**
      * My favoritist method of them all!
      *
@@ -529,24 +533,40 @@ class XMLMapHandler extends DefaultHandler {
         }
     }
 
-    private void warnIllegalUnit(RobotData r) {
-        System.err.println("Illegal unit: " + r);
-    }
+
+	public static class LegalityWarning {
+
+		public boolean legal = true;
+
+		public void warn(String s) {
+			System.err.println(s);
+			legal = false;
+		}
+
+		public void warnf(String s, Object ... obj) {
+			warn(String.format(s,obj));
+		}
+
+    	public void warnUnit(RobotData r) {
+        	warn("Illegal unit: " + r);
+    	}
+
+	}
 
     public boolean isTournamentLegal() {
-        boolean legal = true;
+        LegalityWarning warn = new LegalityWarning();
         int x, y, mx, my;
         SymbolData d, md;
+		boolean baseBad=false, archonsBad=false;
         // check that the map is symmetric
         for (y = 0, my = mapHeight - 1; my >= y; y++, my--)
             for (x = 0, mx = mapWidth - 1; (my > y) ? (mx >= 0) : (mx >= x); x++, mx--) {
                 if (!map[x][y].equalsMirror(map[mx][my])) {
-                    System.err.format("%d,%d does not match %d,%d\n", x, y, mx, my);
-                    legal = false;
+                    warn.warnf("%d,%d does not match %d,%d", x, y, mx, my);
                 }
             }
-        int grounds = 0, gx = 0, gy = 0, mines = 0;
-        StringBuilder b = new StringBuilder();
+        int grounds = 0, gx = 0, gy = 0;
+		int nodes=0, archonsA = 0, baseAx = -1, baseAy = -1;
         for (y = 0; y < mapHeight; y++) {
             for (x = 0; x < mapWidth; x++) {
                 d = map[x][y];
@@ -555,64 +575,103 @@ class XMLMapHandler extends DefaultHandler {
                     switch (rd.type) {
                     	case ARCHON:
                             if (rd.team == Team.NEUTRAL) {
-                                warnIllegalUnit(rd);
-                                legal = false;
+                                warn.warnUnit(rd);
                             }
                             if (rd.team == Team.A)
-                                b.append('C');
-                            else
-                                b.append('c');
+								archonsA++;
                             break;
-                        default:
-                            b.append('.');
-                            warnIllegalUnit(rd);
-                            legal = false;
+						default:
+                            warn.warnUnit(rd);
                     }
-                } else {
-                    b.append('.');
                 }
+				else if (d instanceof NodeData) {
+					nodes++;
+					if (((NodeData)d).team == Team.A) {
+						if(baseAx!=-1) {
+							warn.warn("Team A has more than one power core.");
+							baseBad = true;
+						}
+						else {
+							baseAx = x;
+							baseAy = y;
+						}
+					}
+				}
                 if (d.tile() == TerrainTile.LAND) {
                     grounds++;
                     gx = x;
                     gy = y;
                 }
             }
-            b.append('\n');
         }
-        // check that team A has a valid starting configuration
-        // if the map is symmetric, then team B must also have a
-        // valid starting configuration
-        String mapstr = b.toString();
-        //System.out.println(mapstr);
-        //System.out.println(String.format("^[^RC]*C[^RC]{%d,%d}RR[^RC]{%d}@@[^RC]*$",mapWidth-1,mapWidth,mapWidth-1));
-        boolean robots_legal =
-                mapstr.matches(String.format("^[^RC]*C[^RC]{%d,%d}RR[^RC]{%d}@@[^RC]*$", mapWidth - 1, mapWidth, mapWidth - 1))
-                || mapstr.matches(String.format("^[^RC]*@@[^RC]{%d}RR[^RC]{%d,%d}C[^RC]*$", mapWidth - 1, mapWidth - 1, mapWidth))
-                || mapstr.matches(String.format("^[^RC]*CR@[^RC]{%d}R@[^RC]*$", mapWidth - 1))
-                || mapstr.matches(String.format("^[^RC]*R@[^RC]{%d}CR@[^RC]*$", mapWidth - 2))
-                || mapstr.matches(String.format("^[^RC]*@RC[^RC]{%d}@R[^RC]*$", mapWidth - 2))
-                || mapstr.matches(String.format("^[^RC]*@R[^RC]{%d}@RC[^RC]*$", mapWidth - 1));
-        if (!robots_legal) {
-            System.err.println("Team A does not have a valid starting configuration.");
-            legal = false;
-        }
+
+		if(baseAx==-1) {
+			baseBad = true;
+			warn.warn("Team A does not have a power core.");
+		}
+
+		if (archonsA!=GameConstants.NUMBER_OF_ARCHONS) {
+			archonsBad = true;
+			warn.warn("Team A does not have the correct number of archons.");
+		}
+	
+		if(!(baseBad||archonsBad)) {
+			for(y=baseAy-1;y<=baseAy+1;y++)
+				for(x=baseAx-1;x<=baseAx+1;x++) {
+					if(x>=0&&x<mapWidth&&y>=0&&y<mapHeight) {
+						d = map[x][y];
+						if(d instanceof RobotData) {
+							RobotData rd = (RobotData) d;
+							if(rd.type==RobotType.ARCHON&&rd.team==Team.A)
+								archonsA--;
+						}
+					}
+				}
+			if(archonsA!=0)
+				warn.warn("Team A has an archon that is not next to its power core.");
+		}
+
         // check that the ground squares are connected
         if (grounds == 0) {
-            System.err.println("There are no land squares on the entire map!");
-            legal = false;
+            warn.warn("There are no land squares on the entire map!");
         } else {
             int reachable = new FloodFill(gx, gy).size();
             if (reachable != grounds) {
-                System.err.println(String.format("There are %d land squares but only %d are reachable from %d,%d", grounds, reachable, gx, gy));
-                legal = false;
+                warn.warn(String.format("There are %d land squares but only %d are reachable from %d,%d", grounds, reachable, gx, gy));
             }
         }
-        // check that the number of mines conforms to the spec
-        if (mines < GameConstants.MIN_POWER_NODES || mines > GameConstants.MAX_POWER_NODES) {
-            System.err.println("illegal number of mines: " + mines);
-            legal = false;
+        // check that the number of power nodes conforms to the spec
+        if (nodes < GameConstants.MIN_POWER_NODES || nodes > GameConstants.MAX_POWER_NODES) {
+            warn.warn("Illegal number of power nodes: " + nodes);
         }
-        return legal;
+
+		connected: {
+			HashMap<MapLocation,UnionFindNode> nodeMap = new HashMap<MapLocation,UnionFindNode>();
+			UnionFindNode n0, n1;
+			int components = nodes;
+			for(MapLocation [] link : nodeLinks) {
+				if(!isNode(link[0])) {
+					warn.warnf("Nodelink contains %d,%d but there is no node there",link[0].x,link[0].y);
+					break connected;
+				}
+				if(!isNode(link[1])) {
+					warn.warnf("Nodelink contains %d,%d but there is no node there",link[1].x,link[1].y);
+					break connected;
+				}
+				if(!nodeMap.containsKey(link[0]))
+					nodeMap.put(link[0],new UnionFindNode());
+				if(!nodeMap.containsKey(link[1]))
+					nodeMap.put(link[1],new UnionFindNode());
+				n0 = nodeMap.get(link[0]);
+				n1 = nodeMap.get(link[1]);
+				if(n0.find()!=n1.find())
+					components--;
+				n0.union(n1);
+			}
+			if(components!=1)
+				warn.warn("The power node graph is disconnected.");
+		}
+        return warn.legal;
     }
 
     public static boolean isTournamentLegal(String mapName, String mapPath) {
