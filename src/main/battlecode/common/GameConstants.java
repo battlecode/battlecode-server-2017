@@ -14,13 +14,13 @@ public interface GameConstants {
     /** Additional cost  per byte of message size */
     public static final double BROADCAST_COST_PER_BYTE = 0.0001;
     /** The minimum possible map height. */
-    public static final int MAP_MIN_HEIGHT = 20;
+    public static final int MAP_MIN_HEIGHT = 30;
     /** The maximum possible map height. */
-    public static final int MAP_MAX_HEIGHT = 70;
+    public static final int MAP_MAX_HEIGHT = 60;
     /** The minumum possible map width. */
-    public static final int MAP_MIN_WIDTH = 20;
+    public static final int MAP_MIN_WIDTH = 30;
     /** The maxiumum possible map width. */
-    public static final int MAP_MAX_WIDTH = 70;
+    public static final int MAP_MAX_WIDTH = 60;
     /** The maximum fraction of upkeep that can be regained by yielding */
     public static final double YIELD_BONUS = 0.998;
     /** The bytecode penalty that is imposed each time an exception is thrown */
