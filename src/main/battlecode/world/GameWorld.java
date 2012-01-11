@@ -624,6 +624,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 				if(towerToNode(r).isPowerCore())
 					setWinner(r.getTeam().opponent(),getDominationFactor(r.getTeam().opponent()));
 			}
+			if(r.type == RobotType.ARCHON) {
+				archons.get(r.getTeam()).remove(r);
+			}
         }
     }
 
