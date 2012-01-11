@@ -108,6 +108,19 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		return getTower(node.getLocation());
 	}
 
+	public double getEnergonDifference() {
+		double diff = 0.;
+		for(InternalObject o : gameObjectsByID.values())
+			if(o instanceof InternalRobot) {
+				double energon = ((InternalRobot)o).getEnergonLevel();
+				if(o.getTeam()==Team.A)
+					diff+=energon;
+				else if(o.getTeam()==Team.B)
+					diff-=energon;
+			}
+		return diff;
+	}
+
     public void processEndOfRound() {
         // process all gameobjects
         InternalObject[] gameObjects = new InternalObject[gameObjectsByID.size()];
@@ -145,7 +158,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 						diff--;
 				}
 				if(!(setWinnerIfNonzero(diff,DominationFactor.BARELY_BEAT)||
-					setWinnerIfNonzero(archons.get(Team.A).size()-archons.get(Team.B).size(),DominationFactor.BARELY_BEAT)))
+					setWinnerIfNonzero(archons.get(Team.A).size()-archons.get(Team.B).size(),DominationFactor.BARELY_BEAT)||
+					setWinnerIfNonzero(getEnergonDifference(),DominationFactor.BARELY_BEAT)))
 				{
 					if(teamAName.compareTo(teamBName)<=0)
 						setWinner(Team.A,DominationFactor.WON_BY_DUBIOUS_REASONS);
@@ -163,7 +177,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     }
 
-	public boolean setWinnerIfNonzero(int n, DominationFactor d) {
+	public boolean setWinnerIfNonzero(double n, DominationFactor d) {
 		if(n>0)
 			setWinner(Team.A,d);
 		else if(n<0)
