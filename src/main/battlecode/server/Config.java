@@ -11,7 +11,6 @@ import org.apache.commons.cli.*;
  */
 public class Config {
 
-    public static final String VERSION = "1.1.12";
     /** Default configuration options. */
     private static final Properties defaults;
     /** Command-line options (uses Apache CLI). */
@@ -52,6 +51,7 @@ public class Config {
 	defaults.setProperty("bc.client.renderprefs2d", "");
         defaults.setProperty("bc.client.renderprefs3d", "");
         defaults.setProperty("bc.client.sound-on", "true");
+		defaults.setProperty("bc.client.check-updates", "true");
         
 	defaults.setProperty("bc.game.team-a", "team000");
         defaults.setProperty("bc.game.team-b", "team000");
@@ -73,6 +73,14 @@ public class Config {
         options.addOption("s", "server", false, "server mode");
         options.addOption("n", "no-dialog", false, "skip the match dialog");
     }
+
+	public static String version() {
+		try {
+			return new BufferedReader(new FileReader("version.txt")).readLine();	
+		} catch(IOException e) {
+			return null;
+		}
+	}
 
     private static Config globalConfig = new Config(new String [0]);
 
