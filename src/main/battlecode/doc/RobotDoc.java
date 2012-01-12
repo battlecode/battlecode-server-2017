@@ -65,7 +65,7 @@ public class RobotDoc implements Taglet {
 				append(builder,"Min Attack Radius Squared",String.format("%d",rt.attackRadiusMinSquared));
 				append(builder,"Max Attack Radius Squared",String.format("%d",rt.attackRadiusMaxSquared));
 				append(builder,"Attack Angle",String.format("%1.0f",rt.attackAngle));
-				append(builder,"Attack Power",String.format("%1.0f",rt.attackPower));
+				append(builder,"Attack Power",String.format("%1.1f",rt.attackPower));
 				append(builder,"Attack Delay",String.format("%d",rt.attackDelay));
 				String attacks;
 				if(rt.canAttackAir && rt.canAttackGround)
