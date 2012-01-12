@@ -7,7 +7,7 @@ public enum RobotType {
 	ARCHON(     ON_GROUND,150,300,  0,  6,  0,36,360, 0, 0,  0, 5,  0,false,false),
 	SOLDIER(    ON_GROUND, 40,100,120,  6, .4,10,180, 0, 5, 90, 5,  6,true ,true ),
 	SCOUT(      IN_AIR,    20, 50, 80,  4, .1,25,360, 0, 5,360, 5,1.5,true ,true ),
-	DISRUPTER(	ON_GROUND, 70,100,180,  9,1.2,16,180, 0,10, 90, 5,1.5,true ,true ),
+	DISRUPTER(	ON_GROUND, 70,100,180,  9,1.2,16,180, 0,10, 90, 5,1.7,true ,true ),
 	SCORCHER(   ON_GROUND, 70,100,270,  8,1.8,10,135, 1,10,180, 5,  9,false,true ),
 	TOWER(      ON_GROUND,250,  0,200,  0,  0,-1,  0, 0, 0,  0, 0,  0,false,false); 
 
