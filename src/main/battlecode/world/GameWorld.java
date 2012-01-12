@@ -128,6 +128,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         for (int i = 0; i < gameObjects.length; i++) {
             gameObjects[i].processEndOfRound();
         }
+		removeDead();
 		
 		if(timeLimitReached()&&winner==null) {
 			// copy the node lists, because the damage could kill a node and disconnect the graph
