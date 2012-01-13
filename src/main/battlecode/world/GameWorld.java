@@ -170,6 +170,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			}
 		}
 
+		if(winner!=null)
+			running = false;
+
         long aPoints = Math.round(teamRoundResources[Team.A.ordinal()] * 100), bPoints = Math.round(teamRoundResources[Team.B.ordinal()] * 100);
 
         roundStats = new RoundStats(teamResources[0] * 100, teamResources[1] * 100, teamRoundResources[0] * 100, teamRoundResources[1] * 100);
@@ -198,7 +201,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 	public void setWinner(Team t, DominationFactor d) {
 		winner = t;
 		gameStats.setDominationFactor(d);
-        running = false;
+        //running = false;
 
         for (InternalObject o : gameObjectsByID.values()) {
             if (o instanceof InternalRobot)
