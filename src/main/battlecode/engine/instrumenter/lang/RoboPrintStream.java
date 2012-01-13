@@ -110,6 +110,10 @@ public class RoboPrintStream extends PrintStream {
 	public void println(String s) {
 		printlnHelper(s);
 	}
+
+	public void println() {
+		printlnHelper("");
+	}
 	
 	//*************************
 	//*** MISCELLANEOUS ***
