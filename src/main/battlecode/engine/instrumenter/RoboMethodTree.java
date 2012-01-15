@@ -137,7 +137,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 		startLabel = new LabelNode(new Label());
 		instructions.insert(startLabel);
 		boolean anyTryCatch=tryCatchBlocks.size()>0;
-		if(methodName.startsWith("debug_") && methodDesc.endsWith("V")) {
+		if(methodName.startsWith("debug_") && methodDesc.endsWith("V")&&debugMethodsEnabled) {
 			addDebugHandler();
 		}
 		if(anyTryCatch) {
@@ -160,6 +160,14 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 		}
 	}
 
+	private static AbstractInsnNode nextInstruction(AbstractInsnNode n) {
+		while(n.getType()==AbstractInsnNode.LINE||
+			n.getType()==AbstractInsnNode.FRAME||
+			n.getType()==AbstractInsnNode.LABEL)
+			n = n.getNext();
+		return n;
+	}
+
 	@SuppressWarnings("unchecked")
 	private void addRobotDeathHandler() {
 		LabelNode robotDeathLabel = new LabelNode(new Label());
@@ -173,8 +181,9 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 	private void addDebugHandler() {
 		LabelNode debugEndLabel = new LabelNode(new Label());
 		tryCatchBlocks.add(new TryCatchBlockNode(startLabel,debugEndLabel,debugEndLabel,null));
-		instructions.insert(new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "incrementDebugLevel", "()V"));
+		instructions.insertBefore(nextInstruction(instructions.getFirst()),new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "incrementDebugLevel", "()V"));
 		instructions.add(debugEndLabel);
+		instructions.add(new FrameNode(F_FULL,0,new Object [0],1,new Object[]{"java/lang/Throwable"}));
 		instructions.add(new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "decrementDebugLevel", "()V"));
 		instructions.add(new InsnNode(ATHROW));
 	}
