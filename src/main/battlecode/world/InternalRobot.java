@@ -279,6 +279,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public void setDirection(Direction dir) {
         myDirection = dir;
+		saveMapMemory(getLocation());
     }
 
     public void suicide() {
