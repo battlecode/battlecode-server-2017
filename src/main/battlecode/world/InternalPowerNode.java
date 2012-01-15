@@ -18,7 +18,6 @@ public class InternalPowerNode extends InternalObject implements PowerNode {
 	public InternalPowerNode(GameWorld gw, MapLocation loc, boolean core) {
         super(gw, loc, RobotLevel.POWER_NODE, Team.NEUTRAL);
 		isCore=core;
-		gw.addPowerNode(this);
 		gw.addSignal(new NodeBirthSignal(loc));
     }
 
