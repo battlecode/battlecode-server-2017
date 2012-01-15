@@ -192,7 +192,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 			throw new IllegalStateException("Only scouts can regenerate.");
 		assertHaveFlux(GameConstants.REGEN_COST);
 		robot.adjustFlux(-GameConstants.REGEN_COST);
-		for(InternalRobot ir : gameWorld.getAllRobotsWithinRadiusDonutSq(getLocation(),RobotType.SCOUT.attackRadiusMaxSquared,RobotType.SCOUT.attackRadiusMinSquared)) {
+		for(InternalRobot ir : gameWorld.getAllRobotsWithinRadiusDonutSq(getLocation(),RobotType.SCOUT.attackRadiusMaxSquared,RobotType.SCOUT.attackRadiusMinSquared-1)) {
 			if(ir.getTeam()==robot.getTeam())
 				ir.setRegen();
 		}
