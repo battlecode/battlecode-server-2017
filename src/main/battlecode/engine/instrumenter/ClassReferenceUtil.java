@@ -91,6 +91,8 @@ public class ClassReferenceUtil {
 			className.startsWith("java/util/zip")||
 			className.equals("java/util/concurrent/TimeUnit"))
 			return false;
+		if(className.equals("java/util/Iterator"))
+			return false;
 		if(className.startsWith("java/util/")||
 		   className.startsWith("java/math/"))
 			return true;
