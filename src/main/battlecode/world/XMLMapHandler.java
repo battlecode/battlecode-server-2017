@@ -675,7 +675,7 @@ class XMLMapHandler extends DefaultHandler {
     }
 
     public static boolean isTournamentLegal(String mapName, String mapPath) {
-        System.out.format("checking map %s for legality\n", mapName);
+        System.err.format("checking map %s for legality\n", mapName);
         XMLMapHandler handler;
         try {
             handler = loadMap(mapName, mapPath);
