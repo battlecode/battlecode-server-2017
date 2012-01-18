@@ -180,7 +180,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
 	public void setRegen() {
-		regen = true;
+		if(type!=RobotType.TOWER||!myGameWorld.timeLimitReached())
+			regen = true;
 	}
 
 	public boolean getRegen() {
