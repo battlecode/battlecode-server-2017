@@ -26,10 +26,13 @@ public class RobotInfo {
 	/** <code>true</code> if this robot is scheduled to regenerate
 	 * at the beginning of its next turn. */
    	public boolean regen;
+	public final int roundsUntilAttackIdle;
+	public final int roundsUntilMovementIdle;
 
     public RobotInfo(Robot robot, MapLocation location,
             double hitpoints, double flux, Direction direction,
-            RobotType type, Team team, boolean regen) {
+            RobotType type, Team team, boolean regen,
+			int roundsUntilAttackIdle, int roundsUntilMovementIdle) {
         super();
         this.robot = robot;
         this.location = location;
@@ -39,6 +42,8 @@ public class RobotInfo {
         this.type = type;
 		this.team = team;
 		this.regen = regen;
+		this.roundsUntilAttackIdle = roundsUntilAttackIdle;
+		this.roundsUntilMovementIdle = roundsUntilMovementIdle;
     }
 
     public int hashCode() {

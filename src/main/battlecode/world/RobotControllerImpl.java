@@ -265,7 +265,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         InternalRobot ir = castInternalRobot(r);
         assertCanSense(ir);
         return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(),
-                ir.getFlux(), ir.getDirection(), ir.type, ir.getTeam(), ir.getRegen());
+                ir.getFlux(), ir.getDirection(), ir.type, ir.getTeam(), ir.getRegen(),
+				ir.roundsUntilAttackIdle(), ir.roundsUntilMovementIdle());
     }
 
     public MapLocation senseLocationOf(GameObject o) throws GameActionException {
