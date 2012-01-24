@@ -70,7 +70,7 @@ public interface GameConstants {
 	/**
 	 * An archon's production will decrease if it is within this
 	 * distance squared of an allied archon.  If <code>d</code>
-	 * is the minimum distance to an allied archon, then the amount
+	 * is the minimum distance squared to an allied archon, then the amount
 	 * of flux produced is <code>GameConstants.MIN_PRODUCTION+(GameConstants.MAX_PRODUCTION-GameConstants.MIN_PRODUCTION)*Math.min(1.,Math.sqrt((double)d/GameConstants.PRODUCTION_PENALTY_R2))</code>.
 	 *
 	 * @see #MAX_PRODUCTION
@@ -83,5 +83,8 @@ public interface GameConstants {
 	public static final int MIN_POWER_NODES = 6;
 	/** The maximum number of power nodes that can appear on a map. */
 	public static final int MAX_POWER_NODES = 50;
-
+	/** The minimum possible round at which nodes may begin taking end-of-round damage */
+	public static final int MIN_ROUND_LIMIT = 2000;
+	/** The maximum possible round at which nodes may begin taking end-of-round damage */
+	public static final int MAX_ROUND_LIMIT = 10000;
 }
