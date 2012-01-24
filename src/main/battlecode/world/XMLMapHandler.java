@@ -657,6 +657,11 @@ class XMLMapHandler extends DefaultHandler {
         if (nodes < GameConstants.MIN_POWER_NODES || nodes > GameConstants.MAX_POWER_NODES) {
             warn.warn("Illegal number of power nodes: " + nodes);
         }
+		int rounds = mapProperties.get(MapProperties.MAX_ROUNDS);
+		if(rounds<GameConstants.MIN_ROUND_LIMIT)
+			warn.warn("The round limit is too small.");
+		else if(rounds>GameConstants.MAX_ROUND_LIMIT)
+			warn.warn("The round limit is too large.");
 
 		connected: {
 			HashMap<MapLocation,UnionFindNode> nodeMap = new HashMap<MapLocation,UnionFindNode>();
