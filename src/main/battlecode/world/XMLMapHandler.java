@@ -640,6 +640,19 @@ class XMLMapHandler extends DefaultHandler {
                 warn.warn(String.format("There are %d land squares but only %d are reachable from %d,%d", grounds, reachable, gx, gy));
             }
         }
+		// check for walls that are passable diagonally
+		// these aren't illegal, but we try to avoid them
+		for(y=1;y<mapHeight;y++)
+			for(x=1;x<mapWidth;x++) {
+				TerrainTile ul = map[x-1][y-1].tile();
+				TerrainTile ur = map[x][y-1].tile();
+				TerrainTile dl = map[x-1][y].tile();
+				TerrainTile dr = map[x][y].tile();
+				if(ul==TerrainTile.VOID&&dr==TerrainTile.VOID&&ur==TerrainTile.LAND&&dl==TerrainTile.LAND)
+					System.err.format("Warning: diagonal passageway at %d, %d\n",x-1,y);
+				if(ul==TerrainTile.LAND&&dr==TerrainTile.LAND&&ur==TerrainTile.VOID&&dl==TerrainTile.VOID)
+					System.err.format("Warning: diagonal passageway at %d, %d\n",x,y);
+			}
         // check that the number of power nodes conforms to the spec
         if (nodes < GameConstants.MIN_POWER_NODES || nodes > GameConstants.MAX_POWER_NODES) {
             warn.warn("Illegal number of power nodes: " + nodes);
