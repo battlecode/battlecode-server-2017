@@ -476,9 +476,11 @@ public class AwesomenessAnalyzer {
 					}
 
 					MapLocation loc = s.getLoc();
-					r = new RobotStat(loc,s.getType());
-					robots.put(s.getRobotID(), r);
-					events.add(new Event(SPAWN_AWESOMENESS*r.robotAwesomeness, loc));
+					if (loc != null) {
+						r = new RobotStat(loc,s.getType());
+						robots.put(s.getRobotID(), r);
+						events.add(new Event(SPAWN_AWESOMENESS*r.robotAwesomeness, loc));
+					}
 				} else if(signal instanceof MovementSignal) {
 					MovementSignal s = (MovementSignal)signal;
 					RobotStat robot = robots.get(s.getRobotID());
@@ -489,12 +491,17 @@ public class AwesomenessAnalyzer {
 					AttackSignal s = (AttackSignal)signal;
 					r = robots.get(s.getRobotID());
 					r.resetCountDown();
-					events.add(new Event(ATTACK_AWESOMENESS*r.robotAwesomeness, s.getTargetLoc()));
+					MapLocation loc = s.getTargetLoc();
+					if (loc != null) {
+						events.add(new Event(ATTACK_AWESOMENESS*r.robotAwesomeness, s.getTargetLoc()));
+					}
 				} else if(signal instanceof DeathSignal) {
 					DeathSignal s = (DeathSignal)signal;
 					r = robots.remove(s.getObjectID());
 					float awesomeness = DEATH_AWESOMENESS*r.robotAwesomeness;
-					events.add(new Event(awesomeness, r.location));
+					if (r.location != null) {
+						events.add(new Event(awesomeness, r.location));
+					}
 				}
 			}
 
