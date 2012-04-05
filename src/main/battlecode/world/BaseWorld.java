@@ -4,11 +4,7 @@ import battlecode.common.Team;
 import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Collections;
-import java.util.Random;
+import java.util.*;
 
 public class BaseWorld<WorldObject extends BaseObject> {
 

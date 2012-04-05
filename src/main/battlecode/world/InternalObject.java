@@ -1,6 +1,8 @@
 package battlecode.world;
 
-import battlecode.common.*;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotLevel;
+import battlecode.common.Team;
 
 public abstract class InternalObject extends BaseObject {
 
@@ -41,10 +43,10 @@ public abstract class InternalObject extends BaseObject {
         return null;
     }
 
-	public MapLocation sensedLocation() {
-		if(container()!=null)
-			return container().sensedLocation();
-		else
-			return getLocation();
-	}
+    public MapLocation sensedLocation() {
+        if (container() != null)
+            return container().sensedLocation();
+        else
+            return getLocation();
+    }
 }

@@ -8,10 +8,9 @@ package battlecode.world;
 import battlecode.common.MapLocation;
 
 /**
- *
  * @author Sasa
  */
-public class LocationBuffRemovalPolicy extends BuffRemovalPolicy{
+public class LocationBuffRemovalPolicy extends BuffRemovalPolicy {
     private final MapLocation loc;
 
     public LocationBuffRemovalPolicy(InternalBuff buff) {

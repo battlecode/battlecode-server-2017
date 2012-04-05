@@ -8,37 +8,38 @@ import java.util.regex.Pattern;
 // which are not instrumented, with these methods, which are.
 
 public class InstrumentableFunctions {
-	private InstrumentableFunctions() { }
+    private InstrumentableFunctions() {
+    }
 
-	static private Random rnd;
+    static private Random rnd;
 
-	static public double random() {
-		return getRandom().nextDouble();
-	}
+    static public double random() {
+        return getRandom().nextDouble();
+    }
 
-	static private Random getRandom() {
-		if(rnd==null)
-			rnd = new Random(RoboRandom.getMapSeed());
-		return rnd;
-	}
+    static private Random getRandom() {
+        if (rnd == null)
+            rnd = new Random(RoboRandom.getMapSeed());
+        return rnd;
+    }
 
-	static public boolean matches(String str, String regex) {
-		return Pattern.matches(regex,str);
-	}
+    static public boolean matches(String str, String regex) {
+        return Pattern.matches(regex, str);
+    }
 
-	static public String replaceAll(String str, String regex, String replacement) {
-		return Pattern.compile(regex).matcher(str).replaceAll(replacement);
-	}
+    static public String replaceAll(String str, String regex, String replacement) {
+        return Pattern.compile(regex).matcher(str).replaceAll(replacement);
+    }
 
-	static public String replaceFirst(String str, String regex, String replacement) {
-		return Pattern.compile(regex).matcher(str).replaceFirst(replacement);
-	}
+    static public String replaceFirst(String str, String regex, String replacement) {
+        return Pattern.compile(regex).matcher(str).replaceFirst(replacement);
+    }
 
-	static public String [] split(String str, String regex) {
-		return split(str,regex,0);
-	}
+    static public String[] split(String str, String regex) {
+        return split(str, regex, 0);
+    }
 
-	static public String [] split(String str, String regex, int limit) {
-		return Pattern.compile(regex).split(str,limit);
-	}
+    static public String[] split(String str, String regex, int limit) {
+        return Pattern.compile(regex).split(str, limit);
+    }
 }

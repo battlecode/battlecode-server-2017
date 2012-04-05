@@ -7,12 +7,10 @@ package battlecode.world;
 import battlecode.common.Team;
 import battlecode.server.Config;
 
-import java.util.Iterator;
 import java.util.EnumMap;
 import java.util.Map;
 
 /**
- *
  * @author Sasa
  */
 public class InternalRobotBuffs {
@@ -30,96 +28,81 @@ public class InternalRobotBuffs {
         this.robot = robot;
         Config options = Config.getGlobalConfig();
 
-        
-        if(options.get("drw.ENERGON_REGEN_A")!=null)
-        {
-        	this.ENERGON_REGEN_A = new Double(options.get("drw.ENERGON_REGEN_A")).doubleValue();
+
+        if (options.get("drw.ENERGON_REGEN_A") != null) {
+            this.ENERGON_REGEN_A = new Double(options.get("drw.ENERGON_REGEN_A")).doubleValue();
         }
-    
-        if(options.get("drw.ENERGON_REGEN_B")!=null)
-        {
-        	this.ENERGON_REGEN_B = new Double(options.get("drw.ENERGON_REGEN_B")).doubleValue();
+
+        if (options.get("drw.ENERGON_REGEN_B") != null) {
+            this.ENERGON_REGEN_B = new Double(options.get("drw.ENERGON_REGEN_B")).doubleValue();
         }
-        
-        if(options.get("drw.DAMAGE_DEALT_MULTIPLIER_A")!=null)
-        {
-        	this.DAMAGE_DEALT_MULTIPLIER_A = new Double(options.get("drw.DAMAGE_DEALT_MULTIPLIER_A")).doubleValue();
+
+        if (options.get("drw.DAMAGE_DEALT_MULTIPLIER_A") != null) {
+            this.DAMAGE_DEALT_MULTIPLIER_A = new Double(options.get("drw.DAMAGE_DEALT_MULTIPLIER_A")).doubleValue();
         }
-    
-        if(options.get("drw.DAMAGE_DEALT_MULTIPLIER_B")!=null)
-        {
-        	this.DAMAGE_DEALT_MULTIPLIER_B = new Double(options.get("drw.DAMAGE_DEALT_MULTIPLIER_B")).doubleValue();
+
+        if (options.get("drw.DAMAGE_DEALT_MULTIPLIER_B") != null) {
+            this.DAMAGE_DEALT_MULTIPLIER_B = new Double(options.get("drw.DAMAGE_DEALT_MULTIPLIER_B")).doubleValue();
         }
-        
-        if(options.get("drw.DAMAGE_RECIEVED_MULTIPLIER_A")!=null)
-        {
-        	this.DAMAGE_RECIEVED_MULTIPLIER_A = new Double(options.get("drw.DAMAGE_RECIEVED_MULTIPLIER_A")).doubleValue();
+
+        if (options.get("drw.DAMAGE_RECIEVED_MULTIPLIER_A") != null) {
+            this.DAMAGE_RECIEVED_MULTIPLIER_A = new Double(options.get("drw.DAMAGE_RECIEVED_MULTIPLIER_A")).doubleValue();
         }
-    
-        if(options.get("drw.DAMAGE_RECIEVED_MULTIPLIER_B")!=null)
-        {
-        	this.DAMAGE_RECIEVED_MULTIPLIER_B = new Double(options.get("drw.DAMAGE_RECIEVED_MULTIPLIER_B")).doubleValue();
+
+        if (options.get("drw.DAMAGE_RECIEVED_MULTIPLIER_B") != null) {
+            this.DAMAGE_RECIEVED_MULTIPLIER_B = new Double(options.get("drw.DAMAGE_RECIEVED_MULTIPLIER_B")).doubleValue();
         }
-        
-        if(options.get("drw.DAMAGE_DEALT_ADDER_A")!=null)
-        {
-        	this.DAMAGE_DEALT_ADDER_A= new Double(options.get("drw.DAMAGE_DEALT_ADDER_A")).doubleValue();
+
+        if (options.get("drw.DAMAGE_DEALT_ADDER_A") != null) {
+            this.DAMAGE_DEALT_ADDER_A = new Double(options.get("drw.DAMAGE_DEALT_ADDER_A")).doubleValue();
         }
-    
-        if(options.get("drw.DAMAGE_DEALT_ADDER_B")!=null)
-        {
-        	this.DAMAGE_DEALT_ADDER_B = new Double(options.get("drw.DAMAGE_DEALT_ADDER_B")).doubleValue();
+
+        if (options.get("drw.DAMAGE_DEALT_ADDER_B") != null) {
+            this.DAMAGE_DEALT_ADDER_B = new Double(options.get("drw.DAMAGE_DEALT_ADDER_B")).doubleValue();
         }
-        
-        if(options.get("drw.MOVEMENT_DELAY_ADDER_A")!=null)
-        {
-        	this.MOVEMENT_DELAY_ADDER_A = new Integer(options.get("drw.MOVEMENT_DELAY_ADDER_A")).intValue();
+
+        if (options.get("drw.MOVEMENT_DELAY_ADDER_A") != null) {
+            this.MOVEMENT_DELAY_ADDER_A = new Integer(options.get("drw.MOVEMENT_DELAY_ADDER_A")).intValue();
         }
-    
-        if(options.get("drw.MOVEMENT_DELAY_ADDER_B")!=null)
-        {
-        	this.MOVEMENT_DELAY_ADDER_B = new Integer(options.get("drw.MOVEMENT_DELAY_ADDER_B")).intValue();
+
+        if (options.get("drw.MOVEMENT_DELAY_ADDER_B") != null) {
+            this.MOVEMENT_DELAY_ADDER_B = new Integer(options.get("drw.MOVEMENT_DELAY_ADDER_B")).intValue();
         }
-        
-        if(options.get("drw.ATTACK_DELAY_ADDER_A")!=null)
-        {
-        	this.ATTACK_DELAY_ADDER_A = new Integer(options.get("drw.ATTACK_DELAY_ADDER_A")).intValue();
+
+        if (options.get("drw.ATTACK_DELAY_ADDER_A") != null) {
+            this.ATTACK_DELAY_ADDER_A = new Integer(options.get("drw.ATTACK_DELAY_ADDER_A")).intValue();
         }
-    
-        if(options.get("drw.ATTACK_DELAY_ADDER_B")!=null)
-        {
-        	this.ATTACK_DELAY_ADDER_B = new Integer(options.get("drw.ATTACK_DELAY_ADDER_B")).intValue();
+
+        if (options.get("drw.ATTACK_DELAY_ADDER_B") != null) {
+            this.ATTACK_DELAY_ADDER_B = new Integer(options.get("drw.ATTACK_DELAY_ADDER_B")).intValue();
         }
-        
-        if(options.get("drw.TURN_DELAY_ADDER_A")!=null)
-        {
-        	this.TURN_DELAY_ADDER_A = new Integer(options.get("drw.TURN_DELAY_ADDER_A")).intValue();
+
+        if (options.get("drw.TURN_DELAY_ADDER_A") != null) {
+            this.TURN_DELAY_ADDER_A = new Integer(options.get("drw.TURN_DELAY_ADDER_A")).intValue();
         }
-    
-        if(options.get("drw.TURN_DELAY_ADDER_B")!=null)
-        {
-        	this.TURN_DELAY_ADDER_B = new Integer(options.get("drw.TURN_DELAY_ADDER_B")).intValue();
+
+        if (options.get("drw.TURN_DELAY_ADDER_B") != null) {
+            this.TURN_DELAY_ADDER_B = new Integer(options.get("drw.TURN_DELAY_ADDER_B")).intValue();
         }
-        
+
 //       print();
     }
-    
-    public void print()
-    {
-    	System.out.println("this.ATTACK_DELAY_ADDER_A: " + this.ATTACK_DELAY_ADDER_A);
-    	System.out.println("this.ATTACK_DELAY_ADDER_B: " + this.ATTACK_DELAY_ADDER_B);
-    	System.out.println("this.DAMAGE_DEALT_ADDER_A: " + this.DAMAGE_DEALT_ADDER_A);
-    	System.out.println("this.DAMAGE_DEALT_ADDER_B: " + this.DAMAGE_DEALT_ADDER_B);
-    	System.out.println("this.DAMAGE_DEALT_MULTIPLIER_A: " + this.DAMAGE_DEALT_MULTIPLIER_A);
-    	System.out.println("this.DAMAGE_DEALT_MULTIPLIER_B: " + this.DAMAGE_DEALT_MULTIPLIER_B);
-    	System.out.println("this.DAMAGE_RECIEVED_MULTIPLIER_A: " + this.DAMAGE_RECIEVED_MULTIPLIER_A);
-    	System.out.println("this.DAMAGE_RECIEVED_MULTIPLIER_B: " + this.DAMAGE_RECIEVED_MULTIPLIER_B);
-    	System.out.println("this.ENERGON_REGEN_A: " + this.ENERGON_REGEN_A);
-    	System.out.println("this.ENERGON_REGEN_B: " + this.ENERGON_REGEN_B);
-    	System.out.println("this.MOVEMENT_DELAY_ADDER_A: " + this.MOVEMENT_DELAY_ADDER_A);
-    	System.out.println("this.MOVEMENT_DELAY_ADDER_B: " + this.MOVEMENT_DELAY_ADDER_B);
-    	System.out.println("this.TURN_DELAY_ADDER_A: " + this.TURN_DELAY_ADDER_A);
-    	System.out.println("this.TURN_DELAY_ADDER_B: " + this.TURN_DELAY_ADDER_B);
+
+    public void print() {
+        System.out.println("this.ATTACK_DELAY_ADDER_A: " + this.ATTACK_DELAY_ADDER_A);
+        System.out.println("this.ATTACK_DELAY_ADDER_B: " + this.ATTACK_DELAY_ADDER_B);
+        System.out.println("this.DAMAGE_DEALT_ADDER_A: " + this.DAMAGE_DEALT_ADDER_A);
+        System.out.println("this.DAMAGE_DEALT_ADDER_B: " + this.DAMAGE_DEALT_ADDER_B);
+        System.out.println("this.DAMAGE_DEALT_MULTIPLIER_A: " + this.DAMAGE_DEALT_MULTIPLIER_A);
+        System.out.println("this.DAMAGE_DEALT_MULTIPLIER_B: " + this.DAMAGE_DEALT_MULTIPLIER_B);
+        System.out.println("this.DAMAGE_RECIEVED_MULTIPLIER_A: " + this.DAMAGE_RECIEVED_MULTIPLIER_A);
+        System.out.println("this.DAMAGE_RECIEVED_MULTIPLIER_B: " + this.DAMAGE_RECIEVED_MULTIPLIER_B);
+        System.out.println("this.ENERGON_REGEN_A: " + this.ENERGON_REGEN_A);
+        System.out.println("this.ENERGON_REGEN_B: " + this.ENERGON_REGEN_B);
+        System.out.println("this.MOVEMENT_DELAY_ADDER_A: " + this.MOVEMENT_DELAY_ADDER_A);
+        System.out.println("this.MOVEMENT_DELAY_ADDER_B: " + this.MOVEMENT_DELAY_ADDER_B);
+        System.out.println("this.TURN_DELAY_ADDER_A: " + this.TURN_DELAY_ADDER_A);
+        System.out.println("this.TURN_DELAY_ADDER_B: " + this.TURN_DELAY_ADDER_B);
     }
 
     public boolean addBuff(InternalBuff b) {

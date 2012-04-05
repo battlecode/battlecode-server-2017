@@ -1,38 +1,18 @@
 package battlecode.world;
 
-import battlecode.common.GameConstants;
+import battlecode.common.*;
+import battlecode.engine.ErrorReporter;
 import battlecode.server.Config;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
+import battlecode.world.GameMap.MapProperties;
+import battlecode.world.signal.NodeConnectionSignal;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
-import battlecode.common.MapLocation;
-import battlecode.common.RobotLevel;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
-import battlecode.common.TerrainTile;
-import battlecode.engine.ErrorReporter;
-import battlecode.engine.PlayerFactory;
-import battlecode.world.GameMap.MapProperties;
-import battlecode.world.signal.NodeConnectionSignal;
-import battlecode.world.signal.SpawnSignal;
-import battlecode.engine.signal.Signal;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.*;
 
 /**
  * This class is the actual SAX handler that responds
@@ -40,9 +20,13 @@ import battlecode.engine.signal.Signal;
  */
 class XMLMapHandler extends DefaultHandler {
 
-    /** Implements a stack for keeping track of XML elements. */
+    /**
+     * Implements a stack for keeping track of XML elements.
+     */
     private LinkedList<String> xmlStack = new LinkedList<String>();
-    /** Stores all the map properties. */
+    /**
+     * Stores all the map properties.
+     */
     private int mapWidth, mapHeight;
     private SymbolData[][] map = null;
     private Map<Character, SymbolData> symbolMap = new HashMap<Character, SymbolData>();
@@ -135,17 +119,17 @@ class XMLMapHandler extends DefaultHandler {
     private static class NodeData implements SymbolData {
 
         public static final SymbolDataFactory factory = new SymbolDataFactory() {
-        
-        	public NodeData create(Attributes att) {
-        		Team team = Team.valueOf(getRequired(att, "team"));
-        		return new NodeData(team);
+
+            public NodeData create(Attributes att) {
+                Team team = Team.valueOf(getRequired(att, "team"));
+                return new NodeData(team);
             }
         };
 
         public final Team team;
-        
+
         public NodeData(Team t) {
-    		team = t;
+            team = t;
         }
 
         public TerrainTile tile() {
@@ -153,13 +137,13 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         public void createGameObject(GameWorld world, MapLocation loc) {
-			if(team==Team.NEUTRAL)
-				new InternalPowerNode(world,loc,false);
-			else {
-				InternalPowerNode p = new InternalPowerNode(world,loc,true);
-				GameWorldFactory.createPlayer(world,RobotType.TOWER,loc,team,null,false);
-				world.setPowerCore(p,team);
-			}
+            if (team == Team.NEUTRAL)
+                new InternalPowerNode(world, loc, false);
+            else {
+                InternalPowerNode p = new InternalPowerNode(world, loc, true);
+                GameWorldFactory.createPlayer(world, RobotType.TOWER, loc, team, null, false);
+                world.setPowerCore(p, team);
+            }
         }
 
         public boolean equalsMirror(SymbolData data) {
@@ -181,9 +165,10 @@ class XMLMapHandler extends DefaultHandler {
             data.createGameObject(world, loc);
         }
     }
+
     private static final Map<String, SymbolDataFactory> factories = new HashMap<String, SymbolDataFactory>();
     private final ArrayList<SymbolTile> objectsToCreate = new ArrayList<SymbolTile>();
-    
+
     private ArrayList<MapLocation[]> nodeLinks = new ArrayList<MapLocation[]>();
 
     static {
@@ -194,7 +179,10 @@ class XMLMapHandler extends DefaultHandler {
         factories.put("POWER_NODE", NodeData.factory);
         factories.put("NODE", NodeData.factory);
     }
-    /** Used to pass to the GameMap constructor. */
+
+    /**
+     * Used to pass to the GameMap constructor.
+     */
     private Map<MapProperties, Integer> mapProperties = new HashMap<MapProperties, Integer>();
     private int currentRow = 0;
     private int currentCol = 0;
@@ -204,7 +192,7 @@ class XMLMapHandler extends DefaultHandler {
      * if it is present and failing if it does not.
      *
      * @param attributes the SAX Attributes instance
-     * @param property the property to check for
+     * @param property   the property to check for
      * @return the String value of the specified attribute
      */
     private static String getRequired(Attributes attributes, String property) {
@@ -224,9 +212,9 @@ class XMLMapHandler extends DefaultHandler {
      * validating its existence.
      *
      * @param attributes the SAX Attributes instance
-     * @param property the property to get the value of
+     * @param property   the property to get the value of
      * @return the String value of the specified attribute, or
-     * <code>null</code> if it doesn't exist
+     *         <code>null</code> if it doesn't exist
      */
     private static String getOptional(Attributes attributes, String property) {
 
@@ -251,6 +239,7 @@ class XMLMapHandler extends DefaultHandler {
     }
 
     //private String theme = null;
+
     /**
      * {@inheritDoc}
      */
@@ -344,17 +333,17 @@ class XMLMapHandler extends DefaultHandler {
 
             // The actual map data will be parsed by characters()...
 
-        } else if(qName.equals("nodelinks")) {
-        	requireElement(qName, "map");
-        } else if(qName.equals("nodelink")) {
-        	requireElement(qName, "nodelinks");
-        	MapLocation locA = MapLocation.valueOf(getRequired(attributes, "from"));
-        	MapLocation locB = MapLocation.valueOf(getRequired(attributes, "to"));
-		String onedir = getOptional(attributes, "oneway");
-		if(onedir != null)
-        		nodeLinks.add(new MapLocation[]{locA, locB, null});
-		else
-			nodeLinks.add(new MapLocation[]{locA, locB});
+        } else if (qName.equals("nodelinks")) {
+            requireElement(qName, "map");
+        } else if (qName.equals("nodelink")) {
+            requireElement(qName, "nodelinks");
+            MapLocation locA = MapLocation.valueOf(getRequired(attributes, "from"));
+            MapLocation locB = MapLocation.valueOf(getRequired(attributes, "to"));
+            String onedir = getOptional(attributes, "oneway");
+            if (onedir != null)
+                nodeLinks.add(new MapLocation[]{locA, locB, null});
+            else
+                nodeLinks.add(new MapLocation[]{locA, locB});
         } else {
             //fail("unrecognized map element '<" + qName + ">'", "Check that all nodes are spelled correctly.\n");
         }
@@ -380,7 +369,7 @@ class XMLMapHandler extends DefaultHandler {
                 if (!Character.isWhitespace(ch[i]) && ch[i] != '\n')
                     fail("the <data> node has too many rows", "Check that the number of rows is consistent with the 'height' attribute of <map>.\n");
             }
-            return;		// if it is whitespace, just ignore it
+            return;        // if it is whitespace, just ignore it
         }
 
         // Parse each character into TerrainTypes.
@@ -412,6 +401,7 @@ class XMLMapHandler extends DefaultHandler {
 
         typesHaveBeenSet = true;
     }
+
     private boolean typesHaveBeenSet = false;
 
     /**
@@ -453,40 +443,38 @@ class XMLMapHandler extends DefaultHandler {
             for (int j = 0; j < map[i].length; j++)
                 map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
         }
-		MapLocation [][] links = new MapLocation [nodeLinks.size()][];
-		int i=0;
-        for(MapLocation[] link : nodeLinks)
-        {
-			checkNodeLink(link[0]);
-			checkNodeLink(link[1]);
-			MapLocation t1 = origin.add(link[0].x,link[0].y);
-			MapLocation t2 = origin.add(link[1].x,link[1].y);
-			if(link.length == 3)
-				gw.createNodeLink(t1, t2, false);
-			gw.createNodeLink(t1,t2,true);
-			links[i++] = new MapLocation [] { t1, t2 };
+        MapLocation[][] links = new MapLocation[nodeLinks.size()][];
+        int i = 0;
+        for (MapLocation[] link : nodeLinks) {
+            checkNodeLink(link[0]);
+            checkNodeLink(link[1]);
+            MapLocation t1 = origin.add(link[0].x, link[0].y);
+            MapLocation t2 = origin.add(link[1].x, link[1].y);
+            if (link.length == 3)
+                gw.createNodeLink(t1, t2, false);
+            gw.createNodeLink(t1, t2, true);
+            links[i++] = new MapLocation[]{t1, t2};
         }
         gw.endRandomIDs();
 
-		gw.recomputeConnections();
-		gw.addSignal(new NodeConnectionSignal(links));
+        gw.recomputeConnections();
+        gw.addSignal(new NodeConnectionSignal(links));
 
         return gw;
     }
 
-	public void checkNodeLink(MapLocation l) {
-		if(!(map[l.x][l.y] instanceof NodeData)) {
-			fail(String.format("Nodelink contains %d,%d but there is no node there",l.x,l.y),"Make sure the nodelink data is correct.");
-		}
-	}
+    public void checkNodeLink(MapLocation l) {
+        if (!(map[l.x][l.y] instanceof NodeData)) {
+            fail(String.format("Nodelink contains %d,%d but there is no node there", l.x, l.y), "Make sure the nodelink data is correct.");
+        }
+    }
 
-	public boolean isNode(MapLocation l) {
-		return map[l.x][l.y] instanceof NodeData;
-	}
+    public boolean isNode(MapLocation l) {
+        return map[l.x][l.y] instanceof NodeData;
+    }
 
     /**
      * My favoritist method of them all!
-     *
      */
     private static void fail(String reason, String thingsToTry) {
         ErrorReporter.report("Malformed map file: " + reason, thingsToTry);
@@ -534,30 +522,30 @@ class XMLMapHandler extends DefaultHandler {
     }
 
 
-	public static class LegalityWarning {
+    public static class LegalityWarning {
 
-		public boolean legal = true;
+        public boolean legal = true;
 
-		public void warn(String s) {
-			System.err.println(s);
-			legal = false;
-		}
+        public void warn(String s) {
+            System.err.println(s);
+            legal = false;
+        }
 
-		public void warnf(String s, Object ... obj) {
-			warn(String.format(s,obj));
-		}
+        public void warnf(String s, Object... obj) {
+            warn(String.format(s, obj));
+        }
 
-    	public void warnUnit(RobotData r) {
-        	warn("Illegal unit: " + r);
-    	}
+        public void warnUnit(RobotData r) {
+            warn("Illegal unit: " + r);
+        }
 
-	}
+    }
 
     public boolean isTournamentLegal() {
         LegalityWarning warn = new LegalityWarning();
         int x, y, mx, my;
         SymbolData d, md;
-		boolean baseBad=false, archonsBad=false;
+        boolean baseBad = false, archonsBad = false;
         // check that the map is symmetric
         for (y = 0, my = mapHeight - 1; my >= y; y++, my--)
             for (x = 0, mx = mapWidth - 1; (my > y) ? (mx >= 0) : (mx >= x); x++, mx--) {
@@ -566,37 +554,35 @@ class XMLMapHandler extends DefaultHandler {
                 }
             }
         int grounds = 0, gx = 0, gy = 0;
-		int nodes=0, archonsA = 0, baseAx = -1, baseAy = -1;
+        int nodes = 0, archonsA = 0, baseAx = -1, baseAy = -1;
         for (y = 0; y < mapHeight; y++) {
             for (x = 0; x < mapWidth; x++) {
                 d = map[x][y];
                 if (d instanceof RobotData) {
                     RobotData rd = (RobotData) d;
                     switch (rd.type) {
-                    	case ARCHON:
+                        case ARCHON:
                             if (rd.team == Team.NEUTRAL) {
                                 warn.warnUnit(rd);
                             }
                             if (rd.team == Team.A)
-								archonsA++;
+                                archonsA++;
                             break;
-						default:
+                        default:
                             warn.warnUnit(rd);
                     }
+                } else if (d instanceof NodeData) {
+                    nodes++;
+                    if (((NodeData) d).team == Team.A) {
+                        if (baseAx != -1) {
+                            warn.warn("Team A has more than one power core.");
+                            baseBad = true;
+                        } else {
+                            baseAx = x;
+                            baseAy = y;
+                        }
+                    }
                 }
-				else if (d instanceof NodeData) {
-					nodes++;
-					if (((NodeData)d).team == Team.A) {
-						if(baseAx!=-1) {
-							warn.warn("Team A has more than one power core.");
-							baseBad = true;
-						}
-						else {
-							baseAx = x;
-							baseAy = y;
-						}
-					}
-				}
                 if (d.tile() == TerrainTile.LAND) {
                     grounds++;
                     gx = x;
@@ -605,31 +591,31 @@ class XMLMapHandler extends DefaultHandler {
             }
         }
 
-		if(baseAx==-1) {
-			baseBad = true;
-			warn.warn("Team A does not have a power core.");
-		}
+        if (baseAx == -1) {
+            baseBad = true;
+            warn.warn("Team A does not have a power core.");
+        }
 
-		if (archonsA!=GameConstants.NUMBER_OF_ARCHONS) {
-			archonsBad = true;
-			warn.warn("Team A does not have the correct number of archons.");
-		}
-	
-		if(!(baseBad||archonsBad)) {
-			for(y=baseAy-1;y<=baseAy+1;y++)
-				for(x=baseAx-1;x<=baseAx+1;x++) {
-					if(x>=0&&x<mapWidth&&y>=0&&y<mapHeight) {
-						d = map[x][y];
-						if(d instanceof RobotData) {
-							RobotData rd = (RobotData) d;
-							if(rd.type==RobotType.ARCHON&&rd.team==Team.A)
-								archonsA--;
-						}
-					}
-				}
-			if(archonsA!=0)
-				warn.warn("Team A has an archon that is not next to its power core.");
-		}
+        if (archonsA != GameConstants.NUMBER_OF_ARCHONS) {
+            archonsBad = true;
+            warn.warn("Team A does not have the correct number of archons.");
+        }
+
+        if (!(baseBad || archonsBad)) {
+            for (y = baseAy - 1; y <= baseAy + 1; y++)
+                for (x = baseAx - 1; x <= baseAx + 1; x++) {
+                    if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
+                        d = map[x][y];
+                        if (d instanceof RobotData) {
+                            RobotData rd = (RobotData) d;
+                            if (rd.type == RobotType.ARCHON && rd.team == Team.A)
+                                archonsA--;
+                        }
+                    }
+                }
+            if (archonsA != 0)
+                warn.warn("Team A has an archon that is not next to its power core.");
+        }
 
         // check that the ground squares are connected
         if (grounds == 0) {
@@ -640,55 +626,56 @@ class XMLMapHandler extends DefaultHandler {
                 warn.warn(String.format("There are %d land squares but only %d are reachable from %d,%d", grounds, reachable, gx, gy));
             }
         }
-		// check for walls that are passable diagonally
-		// these aren't illegal, but we try to avoid them
-		for(y=1;y<mapHeight;y++)
-			for(x=1;x<mapWidth;x++) {
-				TerrainTile ul = map[x-1][y-1].tile();
-				TerrainTile ur = map[x][y-1].tile();
-				TerrainTile dl = map[x-1][y].tile();
-				TerrainTile dr = map[x][y].tile();
-				if(ul==TerrainTile.VOID&&dr==TerrainTile.VOID&&ur==TerrainTile.LAND&&dl==TerrainTile.LAND)
-					System.err.format("Warning: diagonal passageway at %d, %d\n",x-1,y);
-				if(ul==TerrainTile.LAND&&dr==TerrainTile.LAND&&ur==TerrainTile.VOID&&dl==TerrainTile.VOID)
-					System.err.format("Warning: diagonal passageway at %d, %d\n",x,y);
-			}
+        // check for walls that are passable diagonally
+        // these aren't illegal, but we try to avoid them
+        for (y = 1; y < mapHeight; y++)
+            for (x = 1; x < mapWidth; x++) {
+                TerrainTile ul = map[x - 1][y - 1].tile();
+                TerrainTile ur = map[x][y - 1].tile();
+                TerrainTile dl = map[x - 1][y].tile();
+                TerrainTile dr = map[x][y].tile();
+                if (ul == TerrainTile.VOID && dr == TerrainTile.VOID && ur == TerrainTile.LAND && dl == TerrainTile.LAND)
+                    System.err.format("Warning: diagonal passageway at %d, %d\n", x - 1, y);
+                if (ul == TerrainTile.LAND && dr == TerrainTile.LAND && ur == TerrainTile.VOID && dl == TerrainTile.VOID)
+                    System.err.format("Warning: diagonal passageway at %d, %d\n", x, y);
+            }
         // check that the number of power nodes conforms to the spec
         if (nodes < GameConstants.MIN_POWER_NODES || nodes > GameConstants.MAX_POWER_NODES) {
             warn.warn("Illegal number of power nodes: " + nodes);
         }
-		int rounds = mapProperties.get(MapProperties.MAX_ROUNDS);
-		if(rounds<GameConstants.MIN_ROUND_LIMIT)
-			warn.warn("The round limit is too small.");
-		else if(rounds>GameConstants.MAX_ROUND_LIMIT)
-			warn.warn("The round limit is too large.");
+        int rounds = mapProperties.get(MapProperties.MAX_ROUNDS);
+        if (rounds < GameConstants.MIN_ROUND_LIMIT)
+            warn.warn("The round limit is too small.");
+        else if (rounds > GameConstants.MAX_ROUND_LIMIT)
+            warn.warn("The round limit is too large.");
 
-		connected: {
-			HashMap<MapLocation,UnionFindNode> nodeMap = new HashMap<MapLocation,UnionFindNode>();
-			UnionFindNode n0, n1;
-			int components = nodes;
-			for(MapLocation [] link : nodeLinks) {
-				if(!isNode(link[0])) {
-					warn.warnf("Nodelink contains %d,%d but there is no node there",link[0].x,link[0].y);
-					break connected;
-				}
-				if(!isNode(link[1])) {
-					warn.warnf("Nodelink contains %d,%d but there is no node there",link[1].x,link[1].y);
-					break connected;
-				}
-				if(!nodeMap.containsKey(link[0]))
-					nodeMap.put(link[0],new UnionFindNode());
-				if(!nodeMap.containsKey(link[1]))
-					nodeMap.put(link[1],new UnionFindNode());
-				n0 = nodeMap.get(link[0]);
-				n1 = nodeMap.get(link[1]);
-				if(n0.find()!=n1.find())
-					components--;
-				n0.union(n1);
-			}
-			if(components!=1)
-				warn.warn("The power node graph is disconnected.");
-		}
+        connected:
+        {
+            HashMap<MapLocation, UnionFindNode> nodeMap = new HashMap<MapLocation, UnionFindNode>();
+            UnionFindNode n0, n1;
+            int components = nodes;
+            for (MapLocation[] link : nodeLinks) {
+                if (!isNode(link[0])) {
+                    warn.warnf("Nodelink contains %d,%d but there is no node there", link[0].x, link[0].y);
+                    break connected;
+                }
+                if (!isNode(link[1])) {
+                    warn.warnf("Nodelink contains %d,%d but there is no node there", link[1].x, link[1].y);
+                    break connected;
+                }
+                if (!nodeMap.containsKey(link[0]))
+                    nodeMap.put(link[0], new UnionFindNode());
+                if (!nodeMap.containsKey(link[1]))
+                    nodeMap.put(link[1], new UnionFindNode());
+                n0 = nodeMap.get(link[0]);
+                n1 = nodeMap.get(link[1]);
+                if (n0.find() != n1.find())
+                    components--;
+                n0.union(n1);
+            }
+            if (components != 1)
+                warn.warn("The power node graph is disconnected.");
+        }
         return warn.legal;
     }
 

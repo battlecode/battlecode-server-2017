@@ -1,12 +1,15 @@
 package battlecode.world;
 
-import java.io.Serializable;
-
-import java.util.*;
-
-import battlecode.common.*;
-
+import battlecode.common.Direction;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotType;
+import battlecode.common.TerrainTile;
 import battlecode.serial.GenericGameMap;
+
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * The class represents the map in the game world on which
@@ -15,34 +18,52 @@ import battlecode.serial.GenericGameMap;
 public class GameMap implements GenericGameMap {
 
     private static final long serialVersionUID = -2068896916199851260L;
-    /** The default game seed. */
+    /**
+     * The default game seed.
+     */
     public static final int GAME_DEFAULT_SEED = 6370;
-    /** The default game maxiumum number of rounds. */
+    /**
+     * The default game maxiumum number of rounds.
+     */
     public static final int GAME_DEFAULT_MAX_ROUNDS = 10000;
     /** The default game minimum number of points. */
     //public static final int GAME_DEFAULT_MIN_POINTS = 5000;
-    /** The width and height of the map. */
+    /**
+     * The width and height of the map.
+     */
     private final int mapWidth, mapHeight;
-    /** The tiles on the map. */
+    /**
+     * The tiles on the map.
+     */
     private final TerrainTile[][] mapTiles;
-    /** The coordinates of the origin. */
+    /**
+     * The coordinates of the origin.
+     */
     private final int mapOriginX, mapOriginY;
-    /** The name of the map theme. */
+    /**
+     * The name of the map theme.
+     */
     private String mapTheme;
-    /** The random seed contained in the map file */
+    /**
+     * The random seed contained in the map file
+     */
     private final int seed;
-    /** The maximum number of rounds in the game */
+    /**
+     * The maximum number of rounds in the game
+     */
     private final int maxRounds;
 
     /** The minimum number of points needed to win the game */
     //private final int minPoints;
+
     /**
      * Represents the various integer properties a GameMap
      * can have.
      */
     static enum MapProperties {
 
-        WIDTH, HEIGHT, SEED, MAX_ROUNDS, THEME /*, MIN_POINTS*/ }
+        WIDTH, HEIGHT, SEED, MAX_ROUNDS, THEME /*, MIN_POINTS*/
+    }
 
     public GameMap(GameMap gm) {
         this.mapWidth = gm.mapWidth;
@@ -64,8 +85,8 @@ public class GameMap implements GenericGameMap {
      * Creates a new GameMap from the given properties, tiles, and territory
      * locations.
      *
-     * @param mapProperties a map of MapProperties to their integer values containing dimensions, etc.
-     * @param mapTiles a matrix of TerrainTypes representing the map
+     * @param mapProperties      a map of MapProperties to their integer values containing dimensions, etc.
+     * @param mapTiles           a matrix of TerrainTypes representing the map
      * @param territoryLocations an array of the MapLocations of the territories
      */
     GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles) {
@@ -137,6 +158,7 @@ public class GameMap implements GenericGameMap {
     //public int getMinPoints() {
     //	return minPoints;
     //}
+
     /**
      * Determines whether or not the location at the specified
      * unshifted coordinates is on the map.
@@ -144,7 +166,7 @@ public class GameMap implements GenericGameMap {
      * @param x the (shifted) x-coordinate of the location
      * @param y the (shifted) y-coordinate of the location
      * @return true if the given coordinates are on the map,
-     * false if they're not
+     *         false if they're not
      */
     private boolean onTheMap(int x, int y) {
         return (x >= mapOriginX && y >= mapOriginY && x < mapOriginX + mapWidth && y < mapOriginY + mapHeight);
@@ -155,7 +177,7 @@ public class GameMap implements GenericGameMap {
      *
      * @param location the MapLocation to test
      * @return true if the given location is on the map,
-     * false if it's not
+     *         false if it's not
      */
     public boolean onTheMap(MapLocation location) {
         return onTheMap(location.x, location.y);
@@ -167,8 +189,8 @@ public class GameMap implements GenericGameMap {
      *
      * @param location the MapLocation to test
      * @return the TerrainTile at the given location
-     * of the map, and TerrainTile.OFF_MAP if the given location is
-     * off the map.
+     *         of the map, and TerrainTile.OFF_MAP if the given location is
+     *         off the map.
      */
     public TerrainTile getTerrainTile(MapLocation location) {
         if (!onTheMap(location))
@@ -225,6 +247,7 @@ public class GameMap implements GenericGameMap {
             }
             BUFFER = buf;
         }
+
         private final boolean data[][];
         private final GameMap map;
         private final int Xwidth;

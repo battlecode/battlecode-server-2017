@@ -1,7 +1,7 @@
 package battlecode.common;
 
-import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.Engine;
+import battlecode.engine.instrumenter.RobotMonitor;
 
 /**
  * A robot's internal clock, used for measuring "time" in bytecodes and rounds.
@@ -29,10 +29,10 @@ public class Clock {
         return Engine.getRoundNum();
     }
 
-	/**
-	 * Returns the number of bytecodes this robot has left in this round.
-	 */
-	public static int getBytecodesLeft() {
-		return RobotMonitor.getBytecodesLeft();
-	}
+    /**
+     * Returns the number of bytecodes this robot has left in this round.
+     */
+    public static int getBytecodesLeft() {
+        return RobotMonitor.getBytecodesLeft();
+    }
 }

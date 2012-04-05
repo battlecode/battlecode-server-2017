@@ -1,19 +1,17 @@
 package battlecode.world;
 
-import battlecode.common.GameConstants;
-import static battlecode.common.GameActionExceptionType.*;
 import battlecode.common.*;
 import battlecode.engine.GenericController;
-import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.instrumenter.RobotDeathException;
-import battlecode.engine.signal.Signal;
+import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.world.signal.*;
-import java.util.Arrays;
-import java.util.HashSet;
-
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
+import java.util.Arrays;
+
+import static battlecode.common.GameActionExceptionType.*;
 
 /*
 TODO:
@@ -64,14 +62,15 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         super(gw, r);
     }
 
-	public void assertHaveFlux(double amount) throws GameActionException {
-		if(amount>robot.getFlux())
-			throw new GameActionException(NOT_ENOUGH_FLUX,"You do not have enough flux to do that.");
-	}
+    public void assertHaveFlux(double amount) throws GameActionException {
+        if (amount > robot.getFlux())
+            throw new GameActionException(NOT_ENOUGH_FLUX, "You do not have enough flux to do that.");
+    }
 
     //*********************************
     //****** QUERY METHODS ********
     //*********************************
+
     /**
      * {@inheritDoc}
      */
@@ -97,16 +96,16 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getMaxEnergon();
     }
 
-	public double getFlux() {
-		return robot.getFlux();
-	}
+    public double getFlux() {
+        return robot.getFlux();
+    }
 
     /**
      * {@inheritDoc}
      */
     public MapLocation getLocation() {
-    	return robot.getLocation();
-	}
+        return robot.getLocation();
+    }
 
     /**
      * {@inheritDoc}
@@ -142,69 +141,69 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //****** ACTION METHODS *************
     //***********************************
 
-	/**
+    /**
      * {@inheritDoc}
      */
     public void yield() {
-		int bytecodesBelowBase = GameConstants.BYTECODE_LIMIT - RobotMonitor.getBytecodesUsed();
-		if(bytecodesBelowBase>0&&robot.type!=RobotType.ARCHON)
-			robot.adjustFlux(GameConstants.YIELD_BONUS*bytecodesBelowBase/GameConstants.BYTECODE_LIMIT*GameConstants.UNIT_UPKEEP);	
+        int bytecodesBelowBase = GameConstants.BYTECODE_LIMIT - RobotMonitor.getBytecodesUsed();
+        if (bytecodesBelowBase > 0 && robot.type != RobotType.ARCHON)
+            robot.adjustFlux(GameConstants.YIELD_BONUS * bytecodesBelowBase / GameConstants.BYTECODE_LIMIT * GameConstants.UNIT_UPKEEP);
         RobotMonitor.endRunner();
     }
 
-	public void transferFlux(MapLocation loc, RobotLevel height, double amount) throws GameActionException {
-		if(amount<=0||Double.isNaN(amount))
-			throw new IllegalArgumentException("The amount of flux transferred must be positive.");
-		assertHaveFlux(amount);
-		assertWithinRange(loc,2);
-		InternalRobot ir = robotOrException(loc,height);
-		robot.adjustFlux(-amount);
-		ir.adjustFlux(amount);
-		gameWorld.addSignal(new TransferFluxSignal(robot,ir,amount));
-	}
+    public void transferFlux(MapLocation loc, RobotLevel height, double amount) throws GameActionException {
+        if (amount <= 0 || Double.isNaN(amount))
+            throw new IllegalArgumentException("The amount of flux transferred must be positive.");
+        assertHaveFlux(amount);
+        assertWithinRange(loc, 2);
+        InternalRobot ir = robotOrException(loc, height);
+        robot.adjustFlux(-amount);
+        ir.adjustFlux(amount);
+        gameWorld.addSignal(new TransferFluxSignal(robot, ir, amount));
+    }
 
-	public void spawn(RobotType type) throws GameActionException {
-		// If we decide to let other robots spawn, then we should make
-		// sure that air units can't spawn ground units.
-		if(type==RobotType.ARCHON)
-			throw new IllegalArgumentException("Archons may not be spawned.");
-		if(robot.type!=RobotType.ARCHON)
-			throw new IllegalStateException("Only archons can spawn.");
+    public void spawn(RobotType type) throws GameActionException {
+        // If we decide to let other robots spawn, then we should make
+        // sure that air units can't spawn ground units.
+        if (type == RobotType.ARCHON)
+            throw new IllegalArgumentException("Archons may not be spawned.");
+        if (robot.type != RobotType.ARCHON)
+            throw new IllegalStateException("Only archons can spawn.");
         assertNotNull(type);
         assertNotMoving();
         assertHaveFlux(type.spawnCost);
-		MapLocation loc = getLocation().add(getDirection());
-		if (!gameWorld.canMove(type.level, loc))
+        MapLocation loc = getLocation().add(getDirection());
+        if (!gameWorld.canMove(type.level, loc))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
-		if (type==RobotType.TOWER) {
-			InternalPowerNode node = gameWorld.getPowerNode(loc);
-			if(node==null)
-            	throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "A tower may only be built on top of a power node.");
-			if(!node.connected(robot.getTeam()))
-            	throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That node is not connected to your power core.");
-		}
+        if (type == RobotType.TOWER) {
+            InternalPowerNode node = gameWorld.getPowerNode(loc);
+            if (node == null)
+                throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "A tower may only be built on top of a power node.");
+            if (!node.connected(robot.getTeam()))
+                throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That node is not connected to your power core.");
+        }
         robot.adjustFlux(-type.spawnCost);
-        robot.activateMovement(new SpawnSignal(loc, type, robot.getTeam(), robot),1);
+        robot.activateMovement(new SpawnSignal(loc, type, robot.getTeam(), robot), 1);
     }
 
-	public void regenerate() throws GameActionException {
-		if(robot.type!=RobotType.SCOUT)
-			throw new IllegalStateException("Only scouts can regenerate.");
-		assertHaveFlux(GameConstants.REGEN_COST);
-		robot.adjustFlux(-GameConstants.REGEN_COST);
-		for(InternalRobot ir : gameWorld.getAllRobotsWithinRadiusDonutSq(getLocation(),RobotType.SCOUT.attackRadiusMaxSquared,RobotType.SCOUT.attackRadiusMinSquared-1)) {
-			if(ir.getTeam()==robot.getTeam())
-				ir.setRegen();
-		}
-		gameWorld.addSignal(new RegenSignal(robot));
-	}
+    public void regenerate() throws GameActionException {
+        if (robot.type != RobotType.SCOUT)
+            throw new IllegalStateException("Only scouts can regenerate.");
+        assertHaveFlux(GameConstants.REGEN_COST);
+        robot.adjustFlux(-GameConstants.REGEN_COST);
+        for (InternalRobot ir : gameWorld.getAllRobotsWithinRadiusDonutSq(getLocation(), RobotType.SCOUT.attackRadiusMaxSquared, RobotType.SCOUT.attackRadiusMinSquared - 1)) {
+            if (ir.getTeam() == robot.getTeam())
+                ir.setRegen();
+        }
+        gameWorld.addSignal(new RegenSignal(robot));
+    }
 
-	public void resign() {
-		for(InternalObject obj : gameWorld.getAllGameObjects())
-			if((obj instanceof InternalRobot)&&obj.getTeam()==robot.getTeam())
-				gameWorld.notifyDied((InternalRobot)obj);
-		gameWorld.removeDead();
-	}
+    public void resign() {
+        for (InternalObject obj : gameWorld.getAllGameObjects())
+            if ((obj instanceof InternalRobot) && obj.getTeam() == robot.getTeam())
+                gameWorld.notifyDied((InternalRobot) obj);
+        gameWorld.removeDead();
+    }
 
     /**
      * {@inheritDoc}
@@ -223,33 +222,33 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //***********************************
     //****** SENSING METHODS *******
     //***********************************
-  
-	public void assertCanSense(MapLocation loc) throws GameActionException {
-		if(!checkCanSense(loc))
-			throw new GameActionException(CANT_SENSE_THAT,"That location is not within the robot's sensor range.");
-	}
 
-	public void assertCanSense(InternalObject obj) throws GameActionException {
-		if(!checkCanSense(obj))
-			throw new GameActionException(CANT_SENSE_THAT,"That object is not within the robot's sensor range.");
-	}
+    public void assertCanSense(MapLocation loc) throws GameActionException {
+        if (!checkCanSense(loc))
+            throw new GameActionException(CANT_SENSE_THAT, "That location is not within the robot's sensor range.");
+    }
 
-	public boolean checkCanSense(MapLocation loc) {
-		MapLocation myLoc = getLocation();
-		return myLoc.distanceSquaredTo(loc)<=robot.type.sensorRadiusSquared
-			&& gameWorld.inAngleRange(myLoc,getDirection(),loc,robot.type.sensorCosHalfTheta);
-	}
+    public void assertCanSense(InternalObject obj) throws GameActionException {
+        if (!checkCanSense(obj))
+            throw new GameActionException(CANT_SENSE_THAT, "That object is not within the robot's sensor range.");
+    }
 
-	public boolean checkCanSense(InternalObject obj) {
-		return obj.exists() && checkCanSense(obj.getLocation());
-	}
+    public boolean checkCanSense(MapLocation loc) {
+        MapLocation myLoc = getLocation();
+        return myLoc.distanceSquaredTo(loc) <= robot.type.sensorRadiusSquared
+                && gameWorld.inAngleRange(myLoc, getDirection(), loc, robot.type.sensorCosHalfTheta);
+    }
 
-	public GameObject senseObjectAtLocation(MapLocation loc, RobotLevel height) throws GameActionException {
+    public boolean checkCanSense(InternalObject obj) {
+        return obj.exists() && checkCanSense(obj.getLocation());
+    }
+
+    public GameObject senseObjectAtLocation(MapLocation loc, RobotLevel height) throws GameActionException {
         assertNotNull(loc);
         assertNotNull(height);
         assertCanSense(loc);
         return gameWorld.getObject(loc, height);
-    } 
+    }
 
     @SuppressWarnings("unchecked")
     public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type) {
@@ -266,7 +265,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertCanSense(ir);
         return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(),
                 ir.getFlux(), ir.getDirection(), ir.type, ir.getTeam(), ir.getRegen(),
-				ir.roundsUntilAttackIdle(), ir.roundsUntilMovementIdle());
+                ir.roundsUntilAttackIdle(), ir.roundsUntilMovementIdle());
     }
 
     public MapLocation senseLocationOf(GameObject o) throws GameActionException {
@@ -283,169 +282,169 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return checkCanSense(loc);
     }
 
-	public MapLocation [] senseAlliedArchons() {
-		return gameWorld.getArchons(robot.getTeam());
-	}
+    public MapLocation[] senseAlliedArchons() {
+        return gameWorld.getArchons(robot.getTeam());
+    }
 
-	public PowerNode [] senseAlliedPowerNodes() {
-		return Iterables.toArray(gameWorld.getPowerNodesByTeam(robot.getTeam()),PowerNode.class);
-	}
+    public PowerNode[] senseAlliedPowerNodes() {
+        return Iterables.toArray(gameWorld.getPowerNodesByTeam(robot.getTeam()), PowerNode.class);
+    }
 
-	public MapLocation [] senseCapturablePowerNodes() {
-		return Lists.transform(gameWorld.getCapturableNodes(robot.getTeam()),Util.objectLocation).toArray(new MapLocation [0]); 
-	}
+    public MapLocation[] senseCapturablePowerNodes() {
+        return Lists.transform(gameWorld.getCapturableNodes(robot.getTeam()), Util.objectLocation).toArray(new MapLocation[0]);
+    }
 
-	public boolean senseConnected(PowerNode p) {
-		InternalPowerNode ip = castInternalPowerNode(p);
-		return ip.connected(robot.getTeam());
-	}
+    public boolean senseConnected(PowerNode p) {
+        InternalPowerNode ip = castInternalPowerNode(p);
+        return ip.connected(robot.getTeam());
+    }
 
-	public boolean senseOwned(PowerNode p) {
-		InternalPowerNode ip = castInternalPowerNode(p);
-		return ip.getControllingTeam()==robot.getTeam();	
-	}
-	
-	public boolean senseOpponentConnected(PowerNode p) throws GameActionException {
-		InternalPowerNode ip = castInternalPowerNode(p);
-		assertCanSense(ip);
-		return ip.connected(robot.getTeam().opponent());
-	}
+    public boolean senseOwned(PowerNode p) {
+        InternalPowerNode ip = castInternalPowerNode(p);
+        return ip.getControllingTeam() == robot.getTeam();
+    }
 
-	public PowerNode sensePowerCore() {
-		return gameWorld.getPowerCore(robot.getTeam());
-	}
+    public boolean senseOpponentConnected(PowerNode p) throws GameActionException {
+        InternalPowerNode ip = castInternalPowerNode(p);
+        assertCanSense(ip);
+        return ip.connected(robot.getTeam().opponent());
+    }
 
-	/**
+    public PowerNode sensePowerCore() {
+        return gameWorld.getPowerCore(robot.getTeam());
+    }
+
+    /**
      * {@inheritDoc}
      */
     public TerrainTile senseTerrainTile(MapLocation loc) {
         assertNotNull(loc);
         return robot.getMapMemory().recallTerrain(loc);
     }
-	
-	// ***********************************
-	// ****** MOVEMENT METHODS ********
-	// ***********************************
+
+    // ***********************************
+    // ****** MOVEMENT METHODS ********
+    // ***********************************
 
 
-	public int roundsUntilMovementIdle() {
-		return robot.roundsUntilMovementIdle();
-	}
+    public int roundsUntilMovementIdle() {
+        return robot.roundsUntilMovementIdle();
+    }
 
-	public boolean isMovementActive() {
-		return roundsUntilMovementIdle()>0;
-	}
+    public boolean isMovementActive() {
+        return roundsUntilMovementIdle() > 0;
+    }
 
-	public void assertNotMoving() throws GameActionException {
-		if(isMovementActive())
-			throw new GameActionException(ALREADY_ACTIVE,"This robot is already moving.");
-	}
+    public void assertNotMoving() throws GameActionException {
+        if (isMovementActive())
+            throw new GameActionException(ALREADY_ACTIVE, "This robot is already moving.");
+    }
 
-	public void moveForward() throws GameActionException {
-		move(robot.getDirection());
-	}
+    public void moveForward() throws GameActionException {
+        move(robot.getDirection());
+    }
 
-	public void moveBackward() throws GameActionException {
-		move(robot.getDirection().opposite());
-	}
+    public void moveBackward() throws GameActionException {
+        move(robot.getDirection().opposite());
+    }
 
-	private void move(Direction d) throws GameActionException {
-		assertNotMoving();
-		assertHaveFlux(robot.type.moveCost);
-		assertCanMove(d);
-		int delay = d.isDiagonal()?robot.type.moveDelayDiagonal:
-			robot.type.moveDelayOrthogonal;
-		robot.activateMovement(new MovementSignal(robot,getLocation().add(d),
-			d==getDirection(),delay),delay);
-		robot.adjustFlux(-robot.type.moveCost);
-	}
+    private void move(Direction d) throws GameActionException {
+        assertNotMoving();
+        assertHaveFlux(robot.type.moveCost);
+        assertCanMove(d);
+        int delay = d.isDiagonal() ? robot.type.moveDelayDiagonal :
+                robot.type.moveDelayOrthogonal;
+        robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
+                d == getDirection(), delay), delay);
+        robot.adjustFlux(-robot.type.moveCost);
+    }
 
-	public void setDirection(Direction d) throws GameActionException {
-		assertNotMoving();
-		assertValidDirection(d);
-		robot.activateMovement(new SetDirectionSignal(robot,d),1);
-	}
+    public void setDirection(Direction d) throws GameActionException {
+        assertNotMoving();
+        assertValidDirection(d);
+        robot.activateMovement(new SetDirectionSignal(robot, d), 1);
+    }
 
-	public boolean canMove(Direction d) {
-		assertValidDirection(d);
-		return gameWorld.canMove(robot.getRobotLevel(),getLocation().add(d));
-	}
+    public boolean canMove(Direction d) {
+        assertValidDirection(d);
+        return gameWorld.canMove(robot.getRobotLevel(), getLocation().add(d));
+    }
 
-	public void assertCanMove(Direction d) throws GameActionException {
-		if(!canMove(d))
-			throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move in the given direction: " + d);
-	}
+    public void assertCanMove(Direction d) throws GameActionException {
+        if (!canMove(d))
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move in the given direction: " + d);
+    }
 
-	protected void assertValidDirection(Direction d) {
+    protected void assertValidDirection(Direction d) {
         assertNotNull(d);
         if (d == Direction.NONE || d == Direction.OMNI)
             throw new IllegalArgumentException("You cannot move in the direction NONE or OMNI.");
     }
-	
-	// ***********************************
-	// ****** ATTACK METHODS ********
-	// ***********************************
 
-	public int roundsUntilAttackIdle() {
-		return robot.roundsUntilAttackIdle();
-	}
+    // ***********************************
+    // ****** ATTACK METHODS ********
+    // ***********************************
 
-	public boolean isAttackActive() {
-		return robot.roundsUntilAttackIdle()>0;
-	}
-
-	protected void assertNotAttacking() throws GameActionException {
-		if(isAttackActive())
-			throw new GameActionException(ALREADY_ACTIVE,"This robot is already attacking.");
-	}
-
-	protected void assertCanAttack(MapLocation loc, RobotLevel height) throws GameActionException {
-		if(!robot.type.canAttack(height))
-			throw new GameActionException(OUT_OF_RANGE,"This robot can't attack robots at that height.");
-		if(!canAttackSquare(loc))
-			throw new GameActionException(OUT_OF_RANGE,"That location is out of this robot's attack range");
-	}
-
-	public boolean canAttackSquare(MapLocation loc) {
-		assertNotNull(loc);
-		return GameWorld.canAttackSquare(robot,loc);
-	}
-
-	public void attackSquare(MapLocation loc, RobotLevel height) throws GameActionException {
-        assertNotAttacking();
-		if(robot.type==RobotType.SCORCHER) {
-			loc = null;
-			height = null;
-		}
-		else {
-        	assertNotNull(loc);
-        	assertNotNull(height);
-        	assertCanAttack(loc,height);
-		}
-        robot.activateAttack(new AttackSignal(robot, loc, height),robot.type.attackDelay);
+    public int roundsUntilAttackIdle() {
+        return robot.roundsUntilAttackIdle();
     }
-    
-	//************************************
+
+    public boolean isAttackActive() {
+        return robot.roundsUntilAttackIdle() > 0;
+    }
+
+    protected void assertNotAttacking() throws GameActionException {
+        if (isAttackActive())
+            throw new GameActionException(ALREADY_ACTIVE, "This robot is already attacking.");
+    }
+
+    protected void assertCanAttack(MapLocation loc, RobotLevel height) throws GameActionException {
+        if (!robot.type.canAttack(height))
+            throw new GameActionException(OUT_OF_RANGE, "This robot can't attack robots at that height.");
+        if (!canAttackSquare(loc))
+            throw new GameActionException(OUT_OF_RANGE, "That location is out of this robot's attack range");
+    }
+
+    public boolean canAttackSquare(MapLocation loc) {
+        assertNotNull(loc);
+        return GameWorld.canAttackSquare(robot, loc);
+    }
+
+    public void attackSquare(MapLocation loc, RobotLevel height) throws GameActionException {
+        assertNotAttacking();
+        if (robot.type == RobotType.SCORCHER) {
+            loc = null;
+            height = null;
+        } else {
+            assertNotNull(loc);
+            assertNotNull(height);
+            assertCanAttack(loc, height);
+        }
+        robot.activateAttack(new AttackSignal(robot, loc, height), robot.type.attackDelay);
+    }
+
+    //************************************
     //******** BROADCAST METHODS **********
     //************************************
 
-	public boolean hasBroadcasted() {
-		return robot.hasBroadcasted();
-	}
-	
-	public void broadcast(Message m) throws GameActionException {
-        if(hasBroadcasted())
-			throw new GameActionException(ALREADY_ACTIVE,"This robot has already broadcasted this turn.");
+    public boolean hasBroadcasted() {
+        return robot.hasBroadcasted();
+    }
+
+    public void broadcast(Message m) throws GameActionException {
+        if (hasBroadcasted())
+            throw new GameActionException(ALREADY_ACTIVE, "This robot has already broadcasted this turn.");
         assertNotNull(m);
-		double cost = m.getFluxCost();
-		assertHaveFlux(cost);
+        double cost = m.getFluxCost();
+        assertHaveFlux(cost);
         robot.activateBroadcast(new BroadcastSignal(robot, GameConstants.BROADCAST_RADIUS_SQUARED, m));
-		robot.adjustFlux(-cost);
+        robot.adjustFlux(-cost);
     }
 
     //************************************
     //******** MISC. METHODS **********
     //************************************
+
     /**
      * {@inheritDoc}
      */
@@ -484,8 +483,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public long[] getTeamMemory() {
-		long [] arr = gameWorld.getOldArchonMemory()[robot.getTeam().ordinal()];
-		return Arrays.copyOf(arr,arr.length);
+        long[] arr = gameWorld.getOldArchonMemory()[robot.getTeam().ordinal()];
+        return Arrays.copyOf(arr, arr.length);
     }
 
     public int hashCode() {

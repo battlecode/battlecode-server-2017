@@ -10,22 +10,20 @@ import java.util.Observable;
  * observer/observable pattern to interface with the match server.
  */
 public abstract class Controller extends Observable {
-	
-	/**
-	 * Used to allow a controller to initialize any resources it may need just
-	 * before it is used.
-	 *
-	 * @throws IOException
-	 *             if the controller source cannot start
-	 */
-	public abstract void start() throws IOException;
-		
-	/**
-	 * Used for a controller to clean up any resources it may have used.
-	 *
-	 * @throws IOException
-	 *             if the controller source cannot stop
-	 */
-	public abstract void finish() throws IOException;
-	
+
+    /**
+     * Used to allow a controller to initialize any resources it may need just
+     * before it is used.
+     *
+     * @throws IOException if the controller source cannot start
+     */
+    public abstract void start() throws IOException;
+
+    /**
+     * Used for a controller to clean up any resources it may have used.
+     *
+     * @throws IOException if the controller source cannot stop
+     */
+    public abstract void finish() throws IOException;
+
 }

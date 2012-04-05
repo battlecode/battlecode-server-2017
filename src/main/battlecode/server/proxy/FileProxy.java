@@ -1,11 +1,10 @@
 package battlecode.server.proxy;
 
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.util.zip.GZIPOutputStream;
-
-import battlecode.serial.notification.*;
+import battlecode.serial.notification.Notification;
 import battlecode.server.Server;
+
+import java.io.*;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This class represents a "connection" to a file. It provides a method for
@@ -13,102 +12,107 @@ import battlecode.server.Server;
  */
 public class FileProxy extends Proxy {
 
-	/** The stream to use to write to the file. */
-	protected OutputStream fileWriter;
+    /**
+     * The stream to use to write to the file.
+     */
+    protected OutputStream fileWriter;
 
-	protected OutputStream stream;
+    protected OutputStream stream;
 
-	/** The original file. */
-	protected File file;
+    /**
+     * The original file.
+     */
+    protected File file;
 
-	/** The temp file. */
-	protected File temp;
+    /**
+     * The temp file.
+     */
+    protected File temp;
 
-	/** Whether or not the file is buffered. */
-	protected final boolean buffered;
-	
-	protected ByteArrayOutputStream buffer;
+    /**
+     * Whether or not the file is buffered.
+     */
+    protected final boolean buffered;
 
-	/**
-	 * Creates a new FileProxy that utilizes the file given by the specified
-	 * filename.
-	 * 
-	 * @param fileName
-	 *            The name of the file to write to.
-	 * @throws IOException
-	 *             if the file cannot be opened or written to.
-	 */
-	FileProxy(String fileName) throws IOException {
-		this(fileName, false);
-	}
+    protected ByteArrayOutputStream buffer;
 
-	protected FileProxy(String fileName, boolean buffered) throws IOException {
-		super();
+    /**
+     * Creates a new FileProxy that utilizes the file given by the specified
+     * filename.
+     *
+     * @param fileName The name of the file to write to.
+     * @throws IOException if the file cannot be opened or written to.
+     */
+    FileProxy(String fileName) throws IOException {
+        this(fileName, false);
+    }
 
-		this.buffered = buffered;
+    protected FileProxy(String fileName, boolean buffered) throws IOException {
+        super();
 
-		if (buffered) {
-			buffer = new ByteArrayOutputStream();
-			fileWriter = buffer; 
-			// Create directories if necessary.
-			file = new File(fileName);
-			if (!file.exists() && file.getParentFile() != null)
-				file.getParentFile().mkdirs();
-		} else {
-			buffer = null;
-			
-			// Create directories if necessary.
-			file = new File(fileName);
-			if (!file.exists() && file.getParentFile() != null)
-				file.getParentFile().mkdirs();
+        this.buffered = buffered;
 
-			temp = File.createTempFile("battlecode", ".tmp", new File(System
-					.getProperty("user.dir")));
-			temp.deleteOnExit();
+        if (buffered) {
+            buffer = new ByteArrayOutputStream();
+            fileWriter = buffer;
+            // Create directories if necessary.
+            file = new File(fileName);
+            if (!file.exists() && file.getParentFile() != null)
+                file.getParentFile().mkdirs();
+        } else {
+            buffer = null;
 
-			fileWriter = new FileOutputStream(temp);
-		}
+            // Create directories if necessary.
+            file = new File(fileName);
+            if (!file.exists() && file.getParentFile() != null)
+                file.getParentFile().mkdirs();
 
-		stream = new GZIPOutputStream(fileWriter);
+            temp = File.createTempFile("battlecode", ".tmp", new File(System
+                    .getProperty("user.dir")));
+            temp.deleteOnExit();
 
-	}
+            fileWriter = new FileOutputStream(temp);
+        }
 
-	public OutputStream getOutputStream() throws IOException {
-		return stream;
-	}
+        stream = new GZIPOutputStream(fileWriter);
 
-	public void close() throws IOException {
-		super.close();
+    }
 
-		fileWriter.close();
-		stream.close();
+    public OutputStream getOutputStream() throws IOException {
+        return stream;
+    }
 
-		if (buffered) {
-			if (file == null)
-				throw new IOException("no file to write to");
-			Server.say("writing to file " + file + " directly");
-			FileOutputStream out = new FileOutputStream(file);
-			out.write(buffer.toByteArray());
-			out.close();
-		} else {
-			// Move the file to its desired location.
-			if (file.exists())
-				file.delete();
-			boolean result = renameTo(temp,file);
-			if (!result)
-				Server.warn("unable to rename match file");
-		}
-	}
+    public void close() throws IOException {
+        super.close();
 
-	public boolean renameTo(File temp, File file)
-	{
-		return temp.renameTo(file);
-	}
+        fileWriter.close();
+        stream.close();
+
+        if (buffered) {
+            if (file == null)
+                throw new IOException("no file to write to");
+            Server.say("writing to file " + file + " directly");
+            FileOutputStream out = new FileOutputStream(file);
+            out.write(buffer.toByteArray());
+            out.close();
+        } else {
+            // Move the file to its desired location.
+            if (file.exists())
+                file.delete();
+            boolean result = renameTo(temp, file);
+            if (!result)
+                Server.warn("unable to rename match file");
+        }
+    }
+
+    public boolean renameTo(File temp, File file) {
+        return temp.renameTo(file);
+    }
 
 
-	public void writeObject(Object o) throws IOException {
-		if (o instanceof Notification)
-			return;
-		super.writeObject(o);
-	}
+    public void writeObject(Object o) throws IOException {
+        if (o instanceof Notification)
+            return;
+        super.writeObject(o);
+    }
 }

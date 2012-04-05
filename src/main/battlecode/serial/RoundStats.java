@@ -1,8 +1,8 @@
 package battlecode.serial;
 
-import java.io.Serializable;
-
 import battlecode.common.Team;
+
+import java.io.Serializable;
 
 // Stub for compatibility with last year's Proxy interface.
 public class RoundStats implements Serializable {

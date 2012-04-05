@@ -6,7 +6,7 @@ package battlecode.common;
  * and each of diagonals (northwest, southwest, northeast, southeast).
  * There is also NONE, representing no direction, and OMNI, representing
  * all directions.
- *
+ * <p/>
  * Since Direction is a Java 1.5 enum, you can use it in <code>switch</code>
  * statements, it has all the standard enum methods (<code>valueOf</code>,
  * <code>values</code>, etc.), and you can safely use <code>==</code> for
@@ -22,9 +22,13 @@ public enum Direction {
     SOUTH_WEST(-1, 1),
     WEST(-1, 0),
     NORTH_WEST(-1, -1),
-    /** No direction. */
+    /**
+     * No direction.
+     */
     NONE(0, 0),
-    /** All directions. */
+    /**
+     * All directions.
+     */
     OMNI(0, 0);
     public final int dx, dy;
 
@@ -37,7 +41,7 @@ public enum Direction {
      * Determines whether or not this direction is a diagonal one.
      *
      * @return true if this Direction is diagonal (northwest, northeast,
-     * southwest, southeast) or false if it's a cardinal, NONE, or OMNI.
+     *         southwest, southeast) or false if it's a cardinal, NONE, or OMNI.
      */
     public boolean isDiagonal() {
         return (ordinal() < 8 && ordinal() % 2 == 1);
@@ -47,7 +51,7 @@ public enum Direction {
      * Computes the direction opposite this one.
      *
      * @return the direction pointing in the opposite direction
-     * to this one, or NONE if it's NONE, or OMNI if it's OMNI
+     *         to this one, or NONE if it's NONE, or OMNI if it's OMNI
      */
     public Direction opposite() {
         if (ordinal() >= 8) {
@@ -61,7 +65,7 @@ public enum Direction {
      * of this one.
      *
      * @return the direction 45 degrees left of this one, or NONE if it's NONE,
-     * or OMNI if it's OMNI
+     *         or OMNI if it's OMNI
      */
     public Direction rotateLeft() {
         if (ordinal() >= 8) {
@@ -78,7 +82,7 @@ public enum Direction {
      * of this one.
      *
      * @return the direction 45 degrees right of this one, or NONE if it's NONE,
-     * or OMNI if it's OMNI
+     *         or OMNI if it's OMNI
      */
     public Direction rotateRight() {
         if (ordinal() >= 8) {

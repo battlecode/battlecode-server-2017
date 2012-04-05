@@ -9,38 +9,40 @@ import battlecode.world.InternalObject;
  * @author Matt
  */
 public class DeathSignal extends Signal {
-	
-	private static final long serialVersionUID = 8518453257317948520L;
-		
-	/** The ID of the object that died. */
-	private final int objectID;
 
-	/** 
-	 * Creates a signal representing the death of
-	 * the specified object.
-	 *
-	 * @param object the object that has died
-	 */
-	public DeathSignal(InternalObject object) {
-		this.objectID = object.getID();
-	}
+    private static final long serialVersionUID = 8518453257317948520L;
 
-	/**
-	 * Creates a signal representing the death of
-	 * the specified object.
-	 *
-	 * @param objectID the ID of the object that died
-	 */
-	public DeathSignal(int objectID) {
-		this.objectID = objectID;
-	}
+    /**
+     * The ID of the object that died.
+     */
+    private final int objectID;
 
-	/**
-	 * Returns the ID of the object that just died.
-	 *
-	 * @return the dying object's ID
-	 */
-	public int getObjectID() {
-		return objectID;
-	}
+    /**
+     * Creates a signal representing the death of
+     * the specified object.
+     *
+     * @param object the object that has died
+     */
+    public DeathSignal(InternalObject object) {
+        this.objectID = object.getID();
+    }
+
+    /**
+     * Creates a signal representing the death of
+     * the specified object.
+     *
+     * @param objectID the ID of the object that died
+     */
+    public DeathSignal(int objectID) {
+        this.objectID = objectID;
+    }
+
+    /**
+     * Returns the ID of the object that just died.
+     *
+     * @return the dying object's ID
+     */
+    public int getObjectID() {
+        return objectID;
+    }
 }

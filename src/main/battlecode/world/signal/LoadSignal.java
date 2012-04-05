@@ -5,12 +5,12 @@ import battlecode.world.InternalRobot;
 
 public class LoadSignal extends Signal {
 
-	public final int transportID;
-	public final int passengerID;
+    public final int transportID;
+    public final int passengerID;
 
-	public LoadSignal(InternalRobot transport, InternalRobot passenger) {
-		transportID = transport.getID();
-		passengerID = passenger.getID();
-	}
+    public LoadSignal(InternalRobot transport, InternalRobot passenger) {
+        transportID = transport.getID();
+        passengerID = passenger.getID();
+    }
 
 }

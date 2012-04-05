@@ -10,10 +10,10 @@ package battlecode.engine.instrumenter;
 public class RobotDeathException extends VirtualMachineError {
 
     static final long serialVersionUID = -7919557494710405575L;
-	
-	public RobotDeathException() {
-		super();
-		RobotMonitor.currentRobotData.thrownRobotDeathException = true;
-	}
-	
+
+    public RobotDeathException() {
+        super();
+        RobotMonitor.currentRobotData.thrownRobotDeathException = true;
+    }
+
 }

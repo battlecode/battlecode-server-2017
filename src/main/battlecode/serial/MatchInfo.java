@@ -4,31 +4,31 @@ import java.io.Serializable;
 
 public class MatchInfo implements Serializable {
 
-	private static final long serialVersionUID = 638514128835207033L;
-	
-	private final String teamA;
-	private final String teamB;
-	private final String[] maps;
+    private static final long serialVersionUID = 638514128835207033L;
 
-	public MatchInfo(String teamA, String teamB, String[] maps) {
-		this.teamA = teamA;
-		this.teamB = teamB;
-		this.maps = maps;
-	}
-	
-	public MatchInfo(String teamA, String teamB, String mapName) {
-		this(teamA, teamB, new String[] { mapName });
-	}
+    private final String teamA;
+    private final String teamB;
+    private final String[] maps;
 
-	public String[] getMaps() {
-		return maps;
-	}
+    public MatchInfo(String teamA, String teamB, String[] maps) {
+        this.teamA = teamA;
+        this.teamB = teamB;
+        this.maps = maps;
+    }
 
-	public String getTeamA() {
-		return teamA;
-	}
+    public MatchInfo(String teamA, String teamB, String mapName) {
+        this(teamA, teamB, new String[]{mapName});
+    }
 
-	public String getTeamB() {
-		return teamB;
-	}
+    public String[] getMaps() {
+        return maps;
+    }
+
+    public String getTeamA() {
+        return teamA;
+    }
+
+    public String getTeamB() {
+        return teamB;
+    }
 }

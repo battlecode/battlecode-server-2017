@@ -1,7 +1,6 @@
 package battlecode.analysis;
 
 import battlecode.engine.signal.Signal;
-import java.io.Serializable;
 
 public class AwesomenessSignal extends Signal {
     private static final long serialVersionUID = -5655877873179815593L;
@@ -17,24 +16,24 @@ public class AwesomenessSignal extends Signal {
     public float radius;
 
     public AwesomenessSignal(float totalAwesomeness, float centerX, float centerY, float radius) {
-	this.totalAwesomeness = totalAwesomeness;
-	//relativeAwesomeness = relativeAwesomeness(totalAwesomeness);
-	this.centerX = centerX;
-	this.centerY = centerY;
-	this.radius = radius;
+        this.totalAwesomeness = totalAwesomeness;
+        //relativeAwesomeness = relativeAwesomeness(totalAwesomeness);
+        this.centerX = centerX;
+        this.centerY = centerY;
+        this.radius = radius;
     }
 
     public void updateAwesomeness(float totalAwesomeness) {
-	this.totalAwesomeness = totalAwesomeness;
-	//relativeAwesomeness = relativeAwesomeness(totalAwesomeness);
+        this.totalAwesomeness = totalAwesomeness;
+        //relativeAwesomeness = relativeAwesomeness(totalAwesomeness);
     }
-    
-    public void renormalize(float aveAwesomeness) {
-	// Shift awesomeness to 0
-	float x = 4 * (totalAwesomeness - aveAwesomeness) / aveAwesomeness;
 
-	// Calculate sigmoid fuction to map value to [0, 1]
-	// 1 / (1 + e^-x)
-	relativeAwesomeness = (float)(1.0 / (1.0 + Math.exp(-x)));
+    public void renormalize(float aveAwesomeness) {
+        // Shift awesomeness to 0
+        float x = 4 * (totalAwesomeness - aveAwesomeness) / aveAwesomeness;
+
+        // Calculate sigmoid fuction to map value to [0, 1]
+        // 1 / (1 + e^-x)
+        relativeAwesomeness = (float) (1.0 / (1.0 + Math.exp(-x)));
     }
 }

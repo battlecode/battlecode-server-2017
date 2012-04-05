@@ -1,12 +1,12 @@
 package battlecode.engine;
 
-import java.lang.Runnable;
-import java.lang.reflect.*;
-
 import battlecode.common.RobotController;
 import battlecode.engine.instrumenter.RobotDeathException;
-import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.scheduler.Scheduler;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /*
 RobotRunnable is a wrapper for a player's main class.  It is basically a Runnable, whose run method both instantiates the player's
@@ -26,52 +26,52 @@ class RobotRunnable implements Runnable {
         myRobotController = rc;
     }
 
-	public static void warnRunFunctionMissing(String specificMessage) {
-		ErrorReporter.report(specificMessage+"\nYour player must have a function\npublic static void RobotPlayer.run(RobotController rc)",false);
-	}
+    public static void warnRunFunctionMissing(String specificMessage) {
+        ErrorReporter.report(specificMessage + "\nYour player must have a function\npublic static void RobotPlayer.run(RobotController rc)", false);
+    }
 
-	public static boolean causedByRobotDeath(Throwable t) {
-		while(t!=null) {
-			if(t instanceof RobotDeathException)
-				return true;
-			t = t.getCause();
-		}
-		return false;
-	}
+    public static boolean causedByRobotDeath(Throwable t) {
+        while (t != null) {
+            if (t instanceof RobotDeathException)
+                return true;
+            t = t.getCause();
+        }
+        return false;
+    }
 
     // instantiates the class passed to the RobotRunnable constructor, and runs its run method
     public void run() {
-		Method m;	
-	
-		runbot:
+        Method m;
+
+        runbot:
         try {
-			Scheduler.endTurn();
+            Scheduler.endTurn();
             try {
-				m = myPlayerClass.getMethod("run",RobotController.class);
+                m = myPlayerClass.getMethod("run", RobotController.class);
             } catch (NoSuchMethodException e) {
-				warnRunFunctionMissing(myPlayerClass.getSimpleName() + ".run(RobotController) not found");
+                warnRunFunctionMissing(myPlayerClass.getSimpleName() + ".run(RobotController) not found");
                 break runbot;
-            } catch(SecurityException e) {
-				warnRunFunctionMissing(myPlayerClass.getSimpleName() + ".run(RobotController) is not public");
-				break runbot;
-			}
+            } catch (SecurityException e) {
+                warnRunFunctionMissing(myPlayerClass.getSimpleName() + ".run(RobotController) is not public");
+                break runbot;
+            }
 
-			if((m.getModifiers()&Modifier.STATIC)==0) {
-				warnRunFunctionMissing(myPlayerClass.getSimpleName() + ".run(RobotController) is not static");
-				break runbot;
-			}
+            if ((m.getModifiers() & Modifier.STATIC) == 0) {
+                warnRunFunctionMissing(myPlayerClass.getSimpleName() + ".run(RobotController) is not static");
+                break runbot;
+            }
 
-			m.invoke(null,myRobotController);
+            m.invoke(null, myRobotController);
 
-			System.out.println("[Engine] Robot " + myRobotController.getRobot() + " died because its run method returned");
-		} catch(Throwable t) {
-			while((t instanceof InvocationTargetException) || (t instanceof ExceptionInInitializerError))
-				t = t.getCause();
-			if(!causedByRobotDeath(t)) {
-				System.out.println("[Engine] Robot " + myRobotController.getRobot() + " died because of:");
-				t.printStackTrace();
-			}
-		}
-		myRobotController.getRobot().suicide();
+            System.out.println("[Engine] Robot " + myRobotController.getRobot() + " died because its run method returned");
+        } catch (Throwable t) {
+            while ((t instanceof InvocationTargetException) || (t instanceof ExceptionInInitializerError))
+                t = t.getCause();
+            if (!causedByRobotDeath(t)) {
+                System.out.println("[Engine] Robot " + myRobotController.getRobot() + " died because of:");
+                t.printStackTrace();
+            }
+        }
+        myRobotController.getRobot().suicide();
     }
 }
