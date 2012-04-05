@@ -1,22 +1,10 @@
 package battlecode.world;
 
-import java.io.FileInputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
 import battlecode.common.MapLocation;
-import battlecode.common.RobotLevel;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import battlecode.common.TerrainTile;
-import battlecode.engine.ErrorReporter;
 import battlecode.engine.PlayerFactory;
-import battlecode.world.GameMap.MapProperties;
 import battlecode.world.signal.SpawnSignal;
-import battlecode.engine.signal.Signal;
 
 /*
 TODO:
@@ -25,38 +13,37 @@ TODO:
 - comments & javadoc
  */
 public class GameWorldFactory {
-    
+
     public static GameWorld createGameWorld(String teamA, String teamB, String mapName, String mapPath, long[][] archonMemory) throws IllegalArgumentException {
- 		XMLMapHandler handler = XMLMapHandler.loadMap(mapName,mapPath);
+        XMLMapHandler handler = XMLMapHandler.loadMap(mapName, mapPath);
 
         return handler.createGameWorld(teamA, teamB, archonMemory);
     }
 
-	public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
+    public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
 
-		// first, make the robot
-		InternalRobot robot;
-		if(type!=RobotType.TOWER) {
-			robot = new InternalRobot(gw, type, loc, t, wakeDelay);
-			loadPlayer(gw, robot, t, parent);
-		}
-		else {
-			robot = new InternalRobot(gw,type,loc,t,wakeDelay);
-			gw.addSignal(new SpawnSignal(robot, parent));
-		}
-		return robot;
-	}
+        // first, make the robot
+        InternalRobot robot;
+        if (type != RobotType.TOWER) {
+            robot = new InternalRobot(gw, type, loc, t, wakeDelay);
+            loadPlayer(gw, robot, t, parent);
+        } else {
+            robot = new InternalRobot(gw, type, loc, t, wakeDelay);
+            gw.addSignal(new SpawnSignal(robot, parent));
+        }
+        return robot;
+    }
 
-	// defaults to wakeDelay = true
-	public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent) {
-		return createPlayer(gw, type, loc, t, parent, true);
-	}
+    // defaults to wakeDelay = true
+    public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent) {
+        return createPlayer(gw, type, loc, t, parent, true);
+    }
 
-	private static void loadPlayer(GameWorld gw, InternalRobot robot, Team t, InternalRobot parent) {
-		gw.addSignal(new SpawnSignal(robot, parent));
-		RobotControllerImpl rc = new RobotControllerImpl(gw, robot);
-		String teamName = gw.getTeamName(t);
-		PlayerFactory.loadPlayer(rc,teamName);
-	}
+    private static void loadPlayer(GameWorld gw, InternalRobot robot, Team t, InternalRobot parent) {
+        gw.addSignal(new SpawnSignal(robot, parent));
+        RobotControllerImpl rc = new RobotControllerImpl(gw, robot);
+        String teamName = gw.getTeamName(t);
+        PlayerFactory.loadPlayer(rc, teamName);
+    }
 
 }

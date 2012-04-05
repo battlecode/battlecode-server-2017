@@ -1,8 +1,8 @@
 package battlecode.world.signal;
 
+import battlecode.common.Direction;
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
-import battlecode.common.Direction;
 
 /**
  * Signifies that a robot just changed its direction
@@ -11,30 +11,34 @@ import battlecode.common.Direction;
  */
 public class SetDirectionSignal extends Signal {
 
-	private static final long serialVersionUID = 4324248072036566798L;
-	
-	/** The new robot's ID */
-	private final int robotID;
+    private static final long serialVersionUID = 4324248072036566798L;
 
-	/** The new robot's direction */
-	private final Direction dir;
-	
-	/** 
-	 * Creates a signal for a robot that just changed its direction
-	 *
-	 * @param robot the robot that just changed its direction (after it changed)
-	 */
-	public SetDirectionSignal(InternalRobot robot, Direction dir) {
-		robotID = robot.getID();
-		this.dir = dir;
-	}
+    /**
+     * The new robot's ID
+     */
+    private final int robotID;
 
-	public int getRobotID() {
-		return robotID;
-	}
-	
-	public Direction getDirection() {
-		return dir;
-	}
+    /**
+     * The new robot's direction
+     */
+    private final Direction dir;
+
+    /**
+     * Creates a signal for a robot that just changed its direction
+     *
+     * @param robot the robot that just changed its direction (after it changed)
+     */
+    public SetDirectionSignal(InternalRobot robot, Direction dir) {
+        robotID = robot.getID();
+        this.dir = dir;
+    }
+
+    public int getRobotID() {
+        return robotID;
+    }
+
+    public Direction getDirection() {
+        return dir;
+    }
 
 }

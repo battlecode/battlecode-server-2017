@@ -2,34 +2,35 @@ package battlecode.engine.instrumenter.lang;
 
 public class AtomicInteger {
 
-	private int l;
+    private int l;
 
-	public AtomicInteger() {}
-	
-	public AtomicInteger(int x) {
-		l=x;
-	}
+    public AtomicInteger() {
+    }
 
-	public int get() {
-		return l;
-	}
+    public AtomicInteger(int x) {
+        l = x;
+    }
 
-	public void set(int x) {
-		l=x;
-	}
+    public int get() {
+        return l;
+    }
 
-	public boolean compareAndSet(int expect, int update) {
-		boolean b = (l==expect);
-		if(b) l=update;
-		return b;
-	}
+    public void set(int x) {
+        l = x;
+    }
 
-	public int incrementAndGet() {
-		return ++l;
-	}
+    public boolean compareAndSet(int expect, int update) {
+        boolean b = (l == expect);
+        if (b) l = update;
+        return b;
+    }
 
-	public int decrementAndGet() {
-		return --l;
-	}
+    public int incrementAndGet() {
+        return ++l;
+    }
+
+    public int decrementAndGet() {
+        return --l;
+    }
 
 }

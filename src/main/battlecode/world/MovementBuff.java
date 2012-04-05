@@ -6,10 +6,9 @@
 package battlecode.world;
 
 /**
- *
  * @author Sasa
  */
-public class MovementBuff extends InternalBuff{
+public class MovementBuff extends InternalBuff {
 
     private final BuffRemovalPolicy rp;
     private int movementAdder;
@@ -19,10 +18,8 @@ public class MovementBuff extends InternalBuff{
         super(robot);
         this.movementAdder = movementAdder;
         this.movementMultiplier = movementMultiplier;
-        this.rp = new TimedBuffRemovalPolicy(this,time);
+        this.rp = new TimedBuffRemovalPolicy(this, time);
     }
-
-
 
 
     @Override
@@ -41,9 +38,9 @@ public class MovementBuff extends InternalBuff{
         return true;
     }
 
-	public BuffType type() {
-		return BuffType.MOVEMENT;
-	}
+    public BuffType type() {
+        return BuffType.MOVEMENT;
+    }
 
     @Override
     public BuffRemovalPolicy getRemovalPolicy() {

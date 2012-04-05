@@ -4,6 +4,6 @@ import java.io.Serializable;
 
 public interface GenericGameMap extends Serializable {
 
-	public int getMaxRounds();
+    public int getMaxRounds();
 
 }

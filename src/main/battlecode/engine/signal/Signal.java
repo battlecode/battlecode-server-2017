@@ -6,8 +6,8 @@ import java.io.Serializable;
 
 public abstract class Signal implements Serializable {
 
-	public void accept(SignalHandler handler) {
-		handler.visitSignal(this);
-	}
+    public void accept(SignalHandler handler) {
+        handler.visitSignal(this);
+    }
 
 }
