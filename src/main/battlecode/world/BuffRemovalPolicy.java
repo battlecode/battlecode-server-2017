@@ -6,7 +6,6 @@
 package battlecode.world;
 
 /**
- *
  * @author Sasa
  */
 public abstract class BuffRemovalPolicy {

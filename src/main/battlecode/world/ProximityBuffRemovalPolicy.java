@@ -7,7 +7,6 @@ package battlecode.world;
 import battlecode.common.MapLocation;
 
 /**
- *
  * @author Sasa
  */
 public class ProximityBuffRemovalPolicy extends BuffRemovalPolicy {

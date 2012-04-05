@@ -1,7 +1,9 @@
 package battlecode.serial;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class ExtensibleMetadata implements Serializable {
 
@@ -20,11 +22,9 @@ public class ExtensibleMetadata implements Serializable {
     }
 
     /**
-     * @param key
-     *            the key whose associated value is to be returned
-     * @param defaultValue
-     *            the value to return if there's no value in the map for
-     *            {@code key}
+     * @param key          the key whose associated value is to be returned
+     * @param defaultValue the value to return if there's no value in the map for
+     *                     {@code key}
      * @return the value associated with key if it exists, else
      *         {@code defaultValue}
      */
@@ -39,8 +39,8 @@ public class ExtensibleMetadata implements Serializable {
     public Object put(String key, Object value) {
         return data.put(key, value);
     }
-    
+
     public Set<String> keySet() {
-    	return data.keySet();
+        return data.keySet();
     }
 }

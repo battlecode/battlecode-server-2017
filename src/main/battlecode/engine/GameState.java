@@ -1,7 +1,7 @@
 package battlecode.engine;
 
-public enum GameState{
-	RUNNING,
-	BREAKPOINT,
-	DONE;
+public enum GameState {
+    RUNNING,
+    BREAKPOINT,
+    DONE;
 }

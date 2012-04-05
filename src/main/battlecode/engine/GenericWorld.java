@@ -8,24 +8,24 @@ import battlecode.engine.signal.SignalHandler;
  */
 public interface GenericWorld extends GameWorldViewer, SignalHandler {
 
-	public void beginningOfExecution(int id);
+    public void beginningOfExecution(int id);
 
-	public void endOfExecution(int id);
+    public void endOfExecution(int id);
 
-	public void processBeginningOfRound();
+    public void processBeginningOfRound();
 
-	public void processEndOfRound();
+    public void processEndOfRound();
 
-	public long [][] getArchonMemory();
+    public long[][] getArchonMemory();
 
-	public void resetStatic();
+    public void resetStatic();
 
-	public void clearAllSignals();
+    public void clearAllSignals();
 
-	public boolean wasBreakpointHit();
+    public boolean wasBreakpointHit();
 
-	public GenericRobot getRobotByID(int id);
+    public GenericRobot getRobotByID(int id);
 
-	public int nextID();
+    public int nextID();
 
 }

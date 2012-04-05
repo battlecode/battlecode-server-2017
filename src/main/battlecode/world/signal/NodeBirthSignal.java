@@ -5,8 +5,10 @@ import battlecode.engine.signal.Signal;
 
 public class NodeBirthSignal extends Signal {
 
-	public final MapLocation location;
+    public final MapLocation location;
 
-	public NodeBirthSignal(MapLocation loc) { location = loc; }
+    public NodeBirthSignal(MapLocation loc) {
+        location = loc;
+    }
 
 }
