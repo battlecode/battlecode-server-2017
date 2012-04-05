@@ -1,11 +1,12 @@
 package battlecode.engine;
 
-import battlecode.engine.instrumenter.*;
+import battlecode.engine.instrumenter.IndividualClassLoader;
+import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.instrumenter.lang.RoboRandom;
 import battlecode.engine.scheduler.Scheduler;
 import battlecode.engine.signal.Signal;
-import battlecode.world.GameWorldFactory;
 import battlecode.server.Config;
+import battlecode.world.GameWorldFactory;
 
 //~ import java.lang.Thread;
 /*
@@ -96,16 +97,17 @@ public class Engine {
 
     /**
      * TODO: update this, since energon change signal breaks this
+     *
      * @return true if the gamestate may have changed, false if the gamestate did not change
      */
     public boolean receiveSignal(Signal s) {
         gameWorld.clearAllSignals();
-		try {
-        	s.accept(gameWorld);
-		} catch(RuntimeException e) {
-			return false; 
-		}
-		return true;
+        try {
+            s.accept(gameWorld);
+        } catch (RuntimeException e) {
+            return false;
+        }
+        return true;
     }
 
     public boolean isRunning() {

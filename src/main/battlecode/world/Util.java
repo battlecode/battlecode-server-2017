@@ -1,12 +1,11 @@
 package battlecode.world;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.Team;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 
 public class Util {
 
@@ -67,6 +66,7 @@ public class Util {
     public static Predicate<MapLocation> withinWedge(MapLocation loc, int range, Direction dir, double cosHalfTheta) {
         return Predicates.and(withinDistance(loc, range), withinAngle(loc, dir, cosHalfTheta));
     }
+
     static final Function<InternalObject, MapLocation> objectLocation = new Function<InternalObject, MapLocation>() {
 
         public MapLocation apply(InternalObject o) {
@@ -82,5 +82,6 @@ public class Util {
             }
         };
     }
+
     static final Predicate<Object> isRobot = Predicates.instanceOf(InternalRobot.class);
 }

@@ -1,14 +1,14 @@
 package battlecode.world.signal;
 
-import battlecode.world.InternalRobot;
 import battlecode.engine.signal.Signal;
+import battlecode.world.InternalRobot;
 
 public class IronShieldSignal extends Signal {
 
-	public final int robotID;
+    public final int robotID;
 
-	public IronShieldSignal(InternalRobot robot) {
-		robotID = robot.getID();
-	}
+    public IronShieldSignal(InternalRobot robot) {
+        robotID = robot.getID();
+    }
 
 }

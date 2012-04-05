@@ -1,13 +1,11 @@
 package battlecode.common;
 
-import battlecode.common.MapLocation;
-
 /**
  * A Message is an object that can be broadcast to other robots. You
  * may freely assign arrays or null to an instance's fields, and when
  * the Message is broadcast it is copied into the receiving robots'
  * message queues. Message instances may be mutated and rebroadcast.
- *
+ * <p/>
  * <p>See the specs for more information about communication.
  */
 public final class Message implements Cloneable {
@@ -58,13 +56,13 @@ public final class Message implements Cloneable {
         }
         return cost;
     }
-	
-	/**
-	 * Returns the cost in flux to broadcast the message.
-	 */
-	public double getFluxCost() {
-		return GameConstants.BROADCAST_FIXED_COST + GameConstants.BROADCAST_COST_PER_BYTE * getNumBytes();
-	}
+
+    /**
+     * Returns the cost in flux to broadcast the message.
+     */
+    public double getFluxCost() {
+        return GameConstants.BROADCAST_FIXED_COST + GameConstants.BROADCAST_COST_PER_BYTE * getNumBytes();
+    }
 
     /**
      * {@inheritDoc}

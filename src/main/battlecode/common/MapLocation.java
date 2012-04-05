@@ -1,11 +1,12 @@
 package battlecode.common;
 
-import java.io.Serializable;
-
 import org.apache.commons.lang.StringUtils;
+
+import java.io.Serializable;
 
 // We don't want contestants to be able to subclass MapLocation because
 // that would allow them to pass arbitrary data structures in messages
+
 /**
  * This class is an immutable representation of two-dimensional coordinates
  * in the battlecode world.
@@ -13,9 +14,13 @@ import org.apache.commons.lang.StringUtils;
 public final class MapLocation implements Serializable {
 
     private static final long serialVersionUID = -8945913587066072824L;
-    /** The x-coordinate. */
+    /**
+     * The x-coordinate.
+     */
     public final int x;
-    /** The y-coordinate. */
+    /**
+     * The y-coordinate.
+     */
     public final int y;
 
     /**
@@ -35,7 +40,7 @@ public final class MapLocation implements Serializable {
     /**
      * Two MapLocations are regarded as equal iff
      * their coordinates are the same.
-     *
+     * <p/>
      * {@inheritDoc}
      */
     @Override
@@ -58,18 +63,17 @@ public final class MapLocation implements Serializable {
         return this.x * 13 + this.y * 23;
 
     }
-   
-    public static MapLocation valueOf(String s)
-    {
-    	String[] coord = StringUtils.replaceChars(s,"[](){}",null).split(",");
-		if(coord.length!=2)
-			throw new IllegalArgumentException("Invalid map location string");
-    	int x = Integer.valueOf(coord[0].trim());
-    	int y = Integer.valueOf(coord[1].trim());
-    	
-    	MapLocation ml = new MapLocation(x, y);
 
-    	return ml;
+    public static MapLocation valueOf(String s) {
+        String[] coord = StringUtils.replaceChars(s, "[](){}", null).split(",");
+        if (coord.length != 2)
+            throw new IllegalArgumentException("Invalid map location string");
+        int x = Integer.valueOf(coord[0].trim());
+        int y = Integer.valueOf(coord[1].trim());
+
+        MapLocation ml = new MapLocation(x, y);
+
+        return ml;
     }
 
     /**
@@ -98,7 +102,7 @@ public final class MapLocation implements Serializable {
      *
      * @param location the location to test
      * @return true if the given location is adjacent to this one,
-     * or false if it isn't
+     *         or false if it isn't
      */
     public final boolean isAdjacentTo(MapLocation location) {
 
@@ -160,7 +164,7 @@ public final class MapLocation implements Serializable {
      *
      * @param direction the direction to add to this location
      * @return a MapLocation for the location one square in the given
-     * direction, or this location if the direction is NONE or OMNI
+     *         direction, or this location if the direction is NONE or OMNI
      */
     public final MapLocation add(Direction direction) {
 
@@ -172,9 +176,9 @@ public final class MapLocation implements Serializable {
      * {@code multiple} squares from this one in the given direction.
      *
      * @param direction the direction to add to this location
-     * @param multiple the number of squares to add
+     * @param multiple  the number of squares to add
      * @return a MapLocation for the location one square in the given
-     * direction, or this location if the direction is NONE or OMNI
+     *         direction, or this location if the direction is NONE or OMNI
      */
     public final MapLocation add(Direction direction, int multiple) {
         return new MapLocation(x + multiple * direction.dx, y + multiple * direction.dy);
@@ -183,6 +187,7 @@ public final class MapLocation implements Serializable {
     /**
      * Returns a new MapLocation object translated from this location
      * by a fixed amount
+     *
      * @param dx the amount to translate in the x direction
      * @param dy the amount to translate in the y direction
      */
@@ -190,13 +195,13 @@ public final class MapLocation implements Serializable {
         return new MapLocation(x + dx, y + dy);
     }
 
-    /** 
+    /**
      * Returns a new MapLocation object representing a location
      * one square from this one in the opposite of the given direction.
      *
      * @param direction the direction to subtract from this location
      * @return a MapLocation for the location one square opposite the given
-     * direction, or this location if the direction is NONE or OMNI
+     *         direction, or this location if the direction is NONE or OMNI
      */
     public final MapLocation subtract(Direction direction) {
         return this.add(direction.opposite());

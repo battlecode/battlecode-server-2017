@@ -1,58 +1,47 @@
 package battlecode.world;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-
-import battlecode.common.Direction;
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.Message;
-import battlecode.common.Robot;
-import battlecode.common.Team;
-import battlecode.common.RobotType;
+import battlecode.common.*;
 import battlecode.engine.GenericRobot;
-import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
 import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.TurnOffSignal;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class InternalRobot extends InternalObject implements Robot, GenericRobot {
 
     protected volatile double myEnergonLevel;
-	private volatile double flux;
+    private volatile double flux;
     protected volatile Direction myDirection;
     protected volatile boolean energonChanged = true;
-	private volatile boolean fluxChanged = true;
+    private volatile boolean fluxChanged = true;
     protected volatile long controlBits;
     // is this used ever?
     protected volatile boolean hasBeenAttacked = false;
     private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean("bc.engine.upkeep");
-    /** first index is robot type, second is direction, third is x or y */
+    /**
+     * first index is robot type, second is direction, third is x or y
+     */
     private static final Map<RobotType, int[][][]> offsets = GameMap.computeVisibleOffsets();
-    /** number of bytecodes used in the most recent round */
+    /**
+     * number of bytecodes used in the most recent round
+     */
     private volatile int bytecodesUsed = 0;
     private List<Message> incomingMessageQueue;
     protected GameMap.MapMemory mapMemory;
     public final RobotType type;
 
-	private volatile int turnsUntilMovementIdle;
-	private volatile int turnsUntilAttackIdle;
-	protected volatile boolean regen;
-	private boolean broadcasted;
-	private boolean upkeepPaid;
+    private volatile int turnsUntilMovementIdle;
+    private volatile int turnsUntilAttackIdle;
+    protected volatile boolean regen;
+    private boolean broadcasted;
+    private boolean upkeepPaid;
 
-	private Signal movementSignal;
+    private Signal movementSignal;
 
-	private InternalRobotBuffs buffs;
+    private InternalRobotBuffs buffs;
 
     public InternalRobotBuffs getBuffs() {
         return buffs;
@@ -60,7 +49,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
-            boolean spawnedRobot) {
+                         boolean spawnedRobot) {
         super(gw, loc, type.level, t);
         myDirection = Direction.values()[gw.getRandGen().nextInt(8)];
         this.type = type;
@@ -73,19 +62,19 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         saveMapMemory(null, loc, false);
         controlBits = 0;
 
-		buffs = new InternalRobotBuffs(this);
+        buffs = new InternalRobotBuffs(this);
 
-		if(spawnedRobot) {
-			turnsUntilMovementIdle = GameConstants.WAKE_DELAY;
-			turnsUntilAttackIdle = GameConstants.WAKE_DELAY;
-		}
+        if (spawnedRobot) {
+            turnsUntilMovementIdle = GameConstants.WAKE_DELAY;
+            turnsUntilAttackIdle = GameConstants.WAKE_DELAY;
+        }
 
-		if(type==RobotType.ARCHON)
-			gw.addArchon(this);	
+        if (type == RobotType.ARCHON)
+            gw.addArchon(this);
 
     }
 
-	public void addAction(Signal s) {
+    public void addAction(Signal s) {
         myGameWorld.visitSignal(s);
     }
 
@@ -93,117 +82,115 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void processBeginningOfRound() {
         super.processBeginningOfRound();
         buffs.processBeginningOfRound();
-		// towers don't get a turn, so regenerate them here
-		if(type==RobotType.TOWER) {
-			if(regen) {
-				changeEnergonLevel(GameConstants.REGEN_AMOUNT);
-			}
-			regen = false;
-		}
+        // towers don't get a turn, so regenerate them here
+        if (type == RobotType.TOWER) {
+            if (regen) {
+                changeEnergonLevel(GameConstants.REGEN_AMOUNT);
+            }
+            regen = false;
+        }
     }
 
     public void processBeginningOfTurn() {
-		if(type==RobotType.ARCHON)
-			archonProduction();
-		if(regen) {
-			changeEnergonLevel(GameConstants.REGEN_AMOUNT);
-			regen = false;
-		}
-		if(upkeepEnabled && type!=RobotType.ARCHON) {
-			upkeepPaid = flux>=GameConstants.UNIT_UPKEEP;
-			if(upkeepPaid)
-				adjustFlux(-GameConstants.UNIT_UPKEEP);
-		}
-		else
-			upkeepPaid = true;
+        if (type == RobotType.ARCHON)
+            archonProduction();
+        if (regen) {
+            changeEnergonLevel(GameConstants.REGEN_AMOUNT);
+            regen = false;
+        }
+        if (upkeepEnabled && type != RobotType.ARCHON) {
+            upkeepPaid = flux >= GameConstants.UNIT_UPKEEP;
+            if (upkeepPaid)
+                adjustFlux(-GameConstants.UNIT_UPKEEP);
+        } else
+            upkeepPaid = true;
     }
 
-	public void archonProduction() {
-		int d, dmin = GameConstants.PRODUCTION_PENALTY_R2;
-		for(MapLocation l : myGameWorld.getArchons(getTeam())) {
-			d = getLocation().distanceSquaredTo(l);
-			if(d>0&&d<=dmin)
-				dmin=d;
-		}
-		double prod = GameConstants.MIN_PRODUCTION + (GameConstants.MAX_PRODUCTION - GameConstants.MIN_PRODUCTION)*Math.sqrt(((double)dmin)/GameConstants.PRODUCTION_PENALTY_R2);
-		adjustFlux(prod);
-	}
+    public void archonProduction() {
+        int d, dmin = GameConstants.PRODUCTION_PENALTY_R2;
+        for (MapLocation l : myGameWorld.getArchons(getTeam())) {
+            d = getLocation().distanceSquaredTo(l);
+            if (d > 0 && d <= dmin)
+                dmin = d;
+        }
+        double prod = GameConstants.MIN_PRODUCTION + (GameConstants.MAX_PRODUCTION - GameConstants.MIN_PRODUCTION) * Math.sqrt(((double) dmin) / GameConstants.PRODUCTION_PENALTY_R2);
+        adjustFlux(prod);
+    }
 
     @Override
     public void processEndOfTurn() {
         super.processEndOfTurn();
-		if(movementSignal!=null) {
-			myGameWorld.visitSignal(movementSignal);
-			movementSignal=null;
-		}
-		if(turnsUntilAttackIdle>0)
-			turnsUntilAttackIdle--;
-		if(turnsUntilMovementIdle>0)
-			turnsUntilMovementIdle--;
-		broadcasted = false;
-	}
+        if (movementSignal != null) {
+            myGameWorld.visitSignal(movementSignal);
+            movementSignal = null;
+        }
+        if (turnsUntilAttackIdle > 0)
+            turnsUntilAttackIdle--;
+        if (turnsUntilMovementIdle > 0)
+            turnsUntilMovementIdle--;
+        broadcasted = false;
+    }
 
     @Override
     public void processEndOfRound() {
         super.processEndOfRound();
         buffs.processEndOfRound();
-		if(type==RobotType.TOWER&&!myGameWorld.towerToNode(this).connected(getTeam()))
-			takeDamage(GameConstants.DISCONNECTED_NODE_DAMAGE);
+        if (type == RobotType.TOWER && !myGameWorld.towerToNode(this).connected(getTeam()))
+            takeDamage(GameConstants.DISCONNECTED_NODE_DAMAGE);
     }
 
     public double getEnergonLevel() {
         return myEnergonLevel;
     }
 
-	public double getFlux() {
-		return flux;
-	}
+    public double getFlux() {
+        return flux;
+    }
 
-	public boolean payFlux(double amt) {
-		if(amt<flux)
-			return false;
-		else {
-			flux-=amt;
-			return true;
-		}
-	}
+    public boolean payFlux(double amt) {
+        if (amt < flux)
+            return false;
+        else {
+            flux -= amt;
+            return true;
+        }
+    }
 
-	public void adjustFlux(double amt) {
-		flux+=amt;
-		if(flux>=type.maxFlux)
-			flux=type.maxFlux;
-		fluxChanged = true;
-	}
+    public void adjustFlux(double amt) {
+        flux += amt;
+        if (flux >= type.maxFlux)
+            flux = type.maxFlux;
+        fluxChanged = true;
+    }
 
     public Direction getDirection() {
         return myDirection;
     }
 
-	public void setRegen() {
-		if(type!=RobotType.TOWER||!myGameWorld.timeLimitReached())
-			regen = true;
-	}
+    public void setRegen() {
+        if (type != RobotType.TOWER || !myGameWorld.timeLimitReached())
+            regen = true;
+    }
 
-	public boolean getRegen() {
-		return regen;
-	}
+    public boolean getRegen() {
+        return regen;
+    }
 
     public void takeDamage(double baseAmount) {
         if (baseAmount < 0) {
             changeEnergonLevel(-baseAmount);
-        }
-		else {
+        } else {
             changeEnergonLevelFromAttack(-baseAmount);
         }
     }
 
-	public void takeDamage(double amt, InternalRobot source) {
-		// uncomment this to test immortal base nodes
-		//if(type==RobotType.TOWER&&myGameWorld.towerToNode(this).isPowerCore())
-		//	return;
-		if(type!=RobotType.TOWER||myGameWorld.towerToNode(this).connected(source.getTeam()))
-			takeDamage(amt);
-	}
+    public void takeDamage(double amt, InternalRobot source) {
+        // uncomment this to test immortal base nodes
+        //if(type==RobotType.TOWER&&myGameWorld.towerToNode(this).isPowerCore())
+        //	return;
+        if (type != RobotType.TOWER || myGameWorld.towerToNode(this).connected(source.getTeam()))
+            takeDamage(amt);
+    }
 
     public void changeEnergonLevelFromAttack(double amount) {
         hasBeenAttacked = true;
@@ -218,69 +205,69 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         energonChanged = true;
 
         if (myEnergonLevel <= 0) {
-			processLethalDamage();
+            processLethalDamage();
         }
     }
 
-	public void processLethalDamage() {
+    public void processLethalDamage() {
         myGameWorld.notifyDied(this);
-	}
+    }
 
     public boolean clearEnergonChanged() {
-		boolean wasChanged = energonChanged;
-		energonChanged = false;
-		return wasChanged;
+        boolean wasChanged = energonChanged;
+        energonChanged = false;
+        return wasChanged;
     }
 
     public boolean clearFluxChanged() {
-		boolean wasChanged = fluxChanged;
-		fluxChanged = false;
-		return wasChanged;
+        boolean wasChanged = fluxChanged;
+        fluxChanged = false;
+        return wasChanged;
     }
 
     public double getMaxEnergon() {
         return type.maxEnergon;
     }
 
-	public void activateMovement(Signal s, int delay) {
-		movementSignal = s;
-		turnsUntilMovementIdle = delay;
-	}
+    public void activateMovement(Signal s, int delay) {
+        movementSignal = s;
+        turnsUntilMovementIdle = delay;
+    }
 
-	public void delayAttack(int delay) {
-		turnsUntilAttackIdle += delay;
-	}
+    public void delayAttack(int delay) {
+        turnsUntilAttackIdle += delay;
+    }
 
-	public void activateAttack(Signal s, int delay) {
-		myGameWorld.visitSignal(s);
-		turnsUntilAttackIdle = delay;
-	}
-	
-	public void activateBroadcast(Signal s) {
-		myGameWorld.visitSignal(s);
-		broadcasted = true;
-	}
+    public void activateAttack(Signal s, int delay) {
+        myGameWorld.visitSignal(s);
+        turnsUntilAttackIdle = delay;
+    }
 
-	public int roundsUntilAttackIdle() {
-		return turnsUntilAttackIdle;
-	}
+    public void activateBroadcast(Signal s) {
+        myGameWorld.visitSignal(s);
+        broadcasted = true;
+    }
 
-	public int roundsUntilMovementIdle() {
-		return turnsUntilMovementIdle;
-	}
+    public int roundsUntilAttackIdle() {
+        return turnsUntilAttackIdle;
+    }
 
-	public boolean hasBroadcasted() {
-		return broadcasted;
-	}
+    public int roundsUntilMovementIdle() {
+        return turnsUntilMovementIdle;
+    }
 
-	public void setLocation(MapLocation loc) {
-		super.setLocation(loc);
-		saveMapMemory(loc);
-	}
+    public boolean hasBroadcasted() {
+        return broadcasted;
+    }
+
+    public void setLocation(MapLocation loc) {
+        super.setLocation(loc);
+        saveMapMemory(loc);
+    }
 
     public void setDirection(Direction dir) {
         myDirection = dir;
-		saveMapMemory(getLocation());
+        saveMapMemory(getLocation());
     }
 
     public void suicide() {
@@ -311,7 +298,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void saveMapMemory(MapLocation oldLoc, MapLocation newLoc,
-            boolean fringeOnly) {
+                              boolean fringeOnly) {
         saveMapMemory(newLoc);
     }
 
@@ -337,7 +324,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public int getBytecodeLimit() {
-        return upkeepPaid?GameConstants.BYTECODE_LIMIT:0;
+        return upkeepPaid ? GameConstants.BYTECODE_LIMIT : 0;
     }
 
     public boolean hasBeenAttacked() {
@@ -353,6 +340,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         incomingMessageQueue = null;
         mapMemory = null;
         buffs = null;
-		movementSignal = null;
+        movementSignal = null;
     }
 }

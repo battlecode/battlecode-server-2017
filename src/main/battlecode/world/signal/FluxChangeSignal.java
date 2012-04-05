@@ -11,41 +11,45 @@ import battlecode.world.InternalRobot;
  */
 public class FluxChangeSignal extends Signal {
 
-	/** TheID of the robot whose energon has changed. */
-	public final int[] robotIDs;
-		
-	/** The robot's new energon level */
-	public final double[] flux;
-		
-	/** 
-	 * Creates a signal for a robot whose energon just changed.
-	 *
-	 * @param robot the robot whose energon just changed
-	 */
-	public FluxChangeSignal(InternalRobot[] robots) {
-		robotIDs = new int[robots.length];
-		flux = new double[robots.length];
-		for(int i = 0; i < robots.length; i++) {
-			robotIDs[i] = robots[i].getID();
-			flux[i] = robots[i].getFlux();
-		}
-	}
+    /**
+     * TheID of the robot whose energon has changed.
+     */
+    public final int[] robotIDs;
 
-	/**
-	 * Returns the ID of the robot whose energon just changed.
-	 *
-	 * @return the robot's ID
-	 */
-	public int[] getRobotIDs() {
-		return robotIDs;
-	}
-	
-	/**
-	 * Returns the robot's new energon amount
-	 *
-	 * @return the robot's new energon amount
-	 */
-	public double[] getFlux() {
-		return flux;
-	}
+    /**
+     * The robot's new energon level
+     */
+    public final double[] flux;
+
+    /**
+     * Creates a signal for a robot whose energon just changed.
+     *
+     * @param robot the robot whose energon just changed
+     */
+    public FluxChangeSignal(InternalRobot[] robots) {
+        robotIDs = new int[robots.length];
+        flux = new double[robots.length];
+        for (int i = 0; i < robots.length; i++) {
+            robotIDs[i] = robots[i].getID();
+            flux[i] = robots[i].getFlux();
+        }
+    }
+
+    /**
+     * Returns the ID of the robot whose energon just changed.
+     *
+     * @return the robot's ID
+     */
+    public int[] getRobotIDs() {
+        return robotIDs;
+    }
+
+    /**
+     * Returns the robot's new energon amount
+     *
+     * @return the robot's new energon amount
+     */
+    public double[] getFlux() {
+        return flux;
+    }
 }

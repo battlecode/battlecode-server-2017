@@ -7,14 +7,20 @@ import java.lang.reflect.Field;
  */
 public class Unsafe {
 
-	private Unsafe() {}
+    private Unsafe() {
+    }
 
-	private static Unsafe instance = new Unsafe();
+    private static Unsafe instance = new Unsafe();
 
-	public static Unsafe getUnsafe() { return instance; }
+    public static Unsafe getUnsafe() {
+        return instance;
+    }
 
-	public long objectFieldOffset(Field f) { return 0; }
+    public long objectFieldOffset(Field f) {
+        return 0;
+    }
 
-	public void putObjectVolatile(Object o, long offset, Object x) {}
+    public void putObjectVolatile(Object o, long offset, Object x) {
+    }
 
 }

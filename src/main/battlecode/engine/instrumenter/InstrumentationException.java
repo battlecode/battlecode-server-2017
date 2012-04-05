@@ -8,14 +8,14 @@ package battlecode.engine.instrumenter;
  * @author adamd
  */
 public class InstrumentationException extends RuntimeException {
-	
-	static final long serialVersionUID = 5643406640399347796L;
 
-	public InstrumentationException() {
-		super();
-	}
-	
-	public InstrumentationException(String message) {
-		super(message);
-	}
+    static final long serialVersionUID = 5643406640399347796L;
+
+    public InstrumentationException() {
+        super();
+    }
+
+    public InstrumentationException(String message) {
+        super(message);
+    }
 }

@@ -1,16 +1,17 @@
 package battlecode.server;
 
-import java.util.Observable;
-
 import battlecode.common.GameConstants;
 import battlecode.common.Team;
-import battlecode.engine.*;
-import battlecode.serial.*;
-//import battlecode.tournament.TournamentType;
-//import battlecode.tournament.Match.Type;
-
+import battlecode.engine.Engine;
+import battlecode.engine.GameState;
 import battlecode.engine.GameWorldViewer;
 import battlecode.engine.signal.Signal;
+import battlecode.serial.*;
+
+import java.util.Observable;
+
+//import battlecode.tournament.TournamentType;
+//import battlecode.tournament.Match.Type;
 
 /**
  * Abstracts the game engine for the server. This class is responsible for
@@ -19,19 +20,29 @@ import battlecode.engine.signal.Signal;
  */
 public class Match extends Observable {
 
-    /** The Engine instance to use to run the game. */
+    /**
+     * The Engine instance to use to run the game.
+     */
     private Engine engine;
 
-    /** The GameWorldViewer for getting signals. */
+    /**
+     * The GameWorldViewer for getting signals.
+     */
     private GameWorldViewer gameWorldViewer;
 
-    /** The MatchInfo from which this match was created. */
+    /**
+     * The MatchInfo from which this match was created.
+     */
     private final MatchInfo info;
 
-    /** The map for this match (one of the maps in info). */
+    /**
+     * The map for this match (one of the maps in info).
+     */
     private final String map;
 
-    /** The command-line/config file options to use. */
+    /**
+     * The command-line/config file options to use.
+     */
     private final Config options;
 
     private long[][] state = new long[2][GameConstants.TEAM_MEMORY_LENGTH];
@@ -39,21 +50,19 @@ public class Match extends Observable {
     private int number;
 
     private int count;
-    
+
     private boolean bytecodesUsedEnabled = true;
 
-	private long[][] computedArchonMemory = null;
+    private long[][] computedArchonMemory = null;
 
     /**
      * Creates a new match with the given parameters and options.
-     * 
-     * @param info
-     *            the teams and map to use when running this match
-     * @param options
-     *            options relevant to match creation (i.e., default map path)
+     *
+     * @param info    the teams and map to use when running this match
+     * @param options options relevant to match creation (i.e., default map path)
      */
     public Match(MatchInfo info, String map, Config options, int number,
-            int count) {
+                 int count) {
 
         this.info = info;
         this.map = map;
@@ -72,28 +81,27 @@ public class Match extends Observable {
      * match creation time!
      */
     public void initialize() {
-    	
-		boolean breakpointsEnabled = options.getBoolean("bc.engine.breakpoints");
-        this.bytecodesUsedEnabled = 
-            options.getBoolean("bc.engine.bytecodes-used"); 
-        
-		String mapPath = options.get("bc.game.map-path");
 
-		// Create a new engine.
-		this.engine = new Engine(info.getTeamA(), info.getTeamB(), map,
-				mapPath, this.state);
+        boolean breakpointsEnabled = options.getBoolean("bc.engine.breakpoints");
+        this.bytecodesUsedEnabled =
+                options.getBoolean("bc.engine.bytecodes-used");
 
-		// Get the viewer from the engine.
-		this.gameWorldViewer = engine.getGameWorldViewer();
-		assert this.gameWorldViewer != null;
-	}
+        String mapPath = options.get("bc.game.map-path");
+
+        // Create a new engine.
+        this.engine = new Engine(info.getTeamA(), info.getTeamB(), map,
+                mapPath, this.state);
+
+        // Get the viewer from the engine.
+        this.gameWorldViewer = engine.getGameWorldViewer();
+        assert this.gameWorldViewer != null;
+    }
 
     /**
      * Sends a signal directly to the game engine, possibly altering the match
      * state.
-     * 
-     * @param signal
-     *            the signal to send to the engine
+     *
+     * @param signal the signal to send to the engine
      * @return the signals that represent the effect of the alteration, or an
      *         empty signal array if there was no effect
      */
@@ -106,7 +114,7 @@ public class Match extends Observable {
 
     /**
      * Determines whether or not this match is ready to run.
-     * 
+     *
      * @return true if the match has been initialized, false otherwise
      */
     public boolean isInitialized() {
@@ -117,7 +125,7 @@ public class Match extends Observable {
      * Runs the next round, returning a delta containing all the signals raised
      * during that round. Notifies observers of anything other than a successful
      * delta-producing run.
-     * 
+     *
      * @return the signals generated for the next round of the game, or null if
      *         the engine's result was a breakpoint or completion
      */
@@ -143,7 +151,7 @@ public class Match extends Observable {
 
     /**
      * Queries the engine for stats for the most recent round and returns them.
-     * 
+     *
      * @return round stats from the engine
      */
     public RoundStats getStats() {
@@ -152,26 +160,26 @@ public class Match extends Observable {
 
     /**
      * Queries the engine for stats for the whole match.
-     * 
+     *
      * @return game stats from the engine
      */
     public GameStats getGameStats() {
         return gameWorldViewer.getGameStats();
     }
-    
+
     /**
      * Gets the header data for this match.
-     * 
+     *
      * @return this match's header
      */
     public MatchHeader getHeader() {
         return new MatchHeader(gameWorldViewer.getGameMap(), state, number,
                 count);
     }
-    
+
     /**
      * Gets team and map metadata for this match.
-     * 
+     *
      * @return an ExtensibleMetadata with teams and maps
      */
     public ExtensibleMetadata getHeaderMetadata() {
@@ -185,7 +193,7 @@ public class Match extends Observable {
 
     /**
      * Gets the footer data for this match.
-     * 
+     *
      * @return this match's footer
      */
     public MatchFooter getFooter() {
@@ -195,7 +203,7 @@ public class Match extends Observable {
 
     /**
      * Gets the winner of this match.
-     * 
+     *
      * @return the Team that has won the match, or null if the match has not yet
      *         finished
      */
@@ -207,7 +215,7 @@ public class Match extends Observable {
 
     /**
      * Determines whether or not there are more rounds to be run in this match.
-     * 
+     *
      * @return true if the match has finished running, false otherwise
      */
     public boolean hasMoreRounds() {
@@ -216,7 +224,7 @@ public class Match extends Observable {
 
     /**
      * Produces a string for the winner of the match.
-     * 
+     *
      * @return A string representing the match's winner.
      */
     public String getWinnerString() {
@@ -224,16 +232,16 @@ public class Match extends Observable {
         String teamName;
 
         switch (getWinner()) {
-        case A:
-            teamName = info.getTeamA() + " (A)";
-            break;
+            case A:
+                teamName = info.getTeamA() + " (A)";
+                break;
 
-        case B:
-            teamName = info.getTeamB() + " (B)";
-            break;
+            case B:
+                teamName = info.getTeamB() + " (B)";
+                break;
 
-        default:
-            teamName = "nobody";
+            default:
+                teamName = "nobody";
         }
 
         StringBuilder sb = new StringBuilder();
@@ -241,7 +249,7 @@ public class Match extends Observable {
             sb.append(' ');
         sb.append(teamName);
         sb.append(" wins");
-        
+
         sb.append("\nReason: ");
         GameStats stats = gameWorldViewer.getGameStats();
         DominationFactor dom = stats.getDominationFactor();
@@ -249,13 +257,13 @@ public class Match extends Observable {
         double[] energon = stats.getTotalEnergon();
         int[] archons = stats.getNumArchons();
         if (dom == DominationFactor.DESTROYED)
-        	sb.append("The losing team was destroyed easily.");
+            sb.append("The losing team was destroyed easily.");
         else if (dom == DominationFactor.OWNED || dom == DominationFactor.BEAT)
-        	sb.append("The losing team was destroyed.");
+            sb.append("The losing team was destroyed.");
         else if (dom == DominationFactor.BARELY_BEAT)
-        	sb.append("The winning team won on tiebreakers.");
+            sb.append("The winning team won on tiebreakers.");
         else if (dom == DominationFactor.WON_BY_DUBIOUS_REASONS)
-        	sb.append("Team " + getWinner() + " won by default.");
+            sb.append("Team " + getWinner() + " won by default.");
 
         return sb.toString();
     }
@@ -269,9 +277,9 @@ public class Match extends Observable {
     }
 
     public long[][] getComputedArchonMemory() {
-    	if (computedArchonMemory == null)
-    		return this.engine.getArchonMemory();
-    	else return computedArchonMemory;
+        if (computedArchonMemory == null)
+            return this.engine.getArchonMemory();
+        else return computedArchonMemory;
     }
 
     /**
@@ -281,14 +289,14 @@ public class Match extends Observable {
     public int getRoundNumber() {
         return Engine.getRoundNum() + 1;
     }
-    
+
     /**
      * Cleans up the match so that its resources can be garbage collected.
      */
     public void finish() {
-    	this.computedArchonMemory = this.engine.getArchonMemory();
-    	this.gameWorldViewer = null;
-    	this.engine = null;
+        this.computedArchonMemory = this.engine.getArchonMemory();
+        this.gameWorldViewer = null;
+        this.engine = null;
     }
 
     @Override
@@ -304,7 +312,9 @@ public class Match extends Observable {
         return sb.toString();
     }
 
-	// Match file IO is pretty performance intensive so we want to do it while robots are
-	// running if possible.
-	public void setIOCallback(Runnable callback) { engine.setIOCallback(callback); }
+    // Match file IO is pretty performance intensive so we want to do it while robots are
+    // running if possible.
+    public void setIOCallback(Runnable callback) {
+        engine.setIOCallback(callback);
+    }
 }

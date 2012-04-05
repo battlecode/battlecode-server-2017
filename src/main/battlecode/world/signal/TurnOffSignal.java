@@ -5,12 +5,12 @@ import battlecode.world.InternalRobot;
 
 public class TurnOffSignal extends Signal {
 
-	public final int robotID;
-	public final boolean voluntary;
+    public final int robotID;
+    public final boolean voluntary;
 
-	public TurnOffSignal(InternalRobot r, boolean voluntary) {
-		this.robotID = r.getID();
-		this.voluntary = voluntary;
-	}
+    public TurnOffSignal(InternalRobot r, boolean voluntary) {
+        this.robotID = r.getID();
+        this.voluntary = voluntary;
+    }
 
 }

@@ -1,39 +1,22 @@
 package battlecode.world;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.List;
-import java.util.Set;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.GameActionExceptionType;
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.Message;
-import battlecode.common.RobotLevel;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
-import battlecode.common.TerrainTile;
+import battlecode.common.*;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.GenericWorld;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
-import battlecode.engine.signal.*;
+import battlecode.engine.signal.AutoSignalHandler;
+import battlecode.engine.signal.Signal;
+import battlecode.engine.signal.SignalHandler;
 import battlecode.serial.DominationFactor;
 import battlecode.serial.GameStats;
 import battlecode.serial.RoundStats;
 import battlecode.world.signal.*;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
+import java.util.*;
 
 /**
  * The primary implementation of the GameWorld interface for
@@ -47,8 +30,8 @@ oODO:
 public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld {
 
     private final GameMap gameMap;
-    private RoundStats roundStats = null;	// stats for each round; new object is created for each round
-    private final GameStats gameStats = new GameStats();		// end-of-game stats
+    private RoundStats roundStats = null;    // stats for each round; new object is created for each round
+    private final GameStats gameStats = new GameStats();        // end-of-game stats
     private double[] teamRoundResources = new double[2];
     private double[] lastRoundResources = new double[2];
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
@@ -56,26 +39,26 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     private Map<MapLocation, ArrayList<MapLocation>> powerNodeGraph = new HashMap<MapLocation, ArrayList<MapLocation>>();
     private List<InternalPowerNode> powerNodes = new ArrayList<InternalPowerNode>();
-	private Map<Team,InternalPowerNode> baseNodes = new EnumMap<Team,InternalPowerNode>(Team.class);
-	private Map<Team,List<InternalPowerNode>> connectedNodesByTeam = new EnumMap<Team,List<InternalPowerNode>>(Team.class);
-	private Map<Team,List<InternalPowerNode>> adjacentNodesByTeam = new EnumMap<Team,List<InternalPowerNode>>(Team.class);
+    private Map<Team, InternalPowerNode> baseNodes = new EnumMap<Team, InternalPowerNode>(Team.class);
+    private Map<Team, List<InternalPowerNode>> connectedNodesByTeam = new EnumMap<Team, List<InternalPowerNode>>(Team.class);
+    private Map<Team, List<InternalPowerNode>> adjacentNodesByTeam = new EnumMap<Team, List<InternalPowerNode>>(Team.class);
 
-	// robots to remove from the game at end of turn
-	private List<InternalRobot> deadRobots = new ArrayList<InternalRobot>();
+    // robots to remove from the game at end of turn
+    private List<InternalRobot> deadRobots = new ArrayList<InternalRobot>();
 
-	private Map<Team,List<InternalRobot>> archons;
+    private Map<Team, List<InternalRobot>> archons;
 
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldArchonMemory) {
         super(gm.getSeed(), teamA, teamB, oldArchonMemory);
         gameMap = gm;
-		archons = new EnumMap<Team,List<InternalRobot>>(Team.class);
-		archons.put(Team.A,new ArrayList<InternalRobot>());
-		archons.put(Team.B,new ArrayList<InternalRobot>());
-		connectedNodesByTeam.put(Team.A,new ArrayList<InternalPowerNode>());
-		connectedNodesByTeam.put(Team.B,new ArrayList<InternalPowerNode>());
-		adjacentNodesByTeam.put(Team.A,new ArrayList<InternalPowerNode>());
-		adjacentNodesByTeam.put(Team.B,new ArrayList<InternalPowerNode>());
+        archons = new EnumMap<Team, List<InternalRobot>>(Team.class);
+        archons.put(Team.A, new ArrayList<InternalRobot>());
+        archons.put(Team.B, new ArrayList<InternalRobot>());
+        connectedNodesByTeam.put(Team.A, new ArrayList<InternalPowerNode>());
+        connectedNodesByTeam.put(Team.B, new ArrayList<InternalPowerNode>());
+        adjacentNodesByTeam.put(Team.A, new ArrayList<InternalPowerNode>());
+        adjacentNodesByTeam.put(Team.B, new ArrayList<InternalPowerNode>());
     }
 
     public int getMapSeed() {
@@ -100,26 +83,26 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     }
 
-	public InternalPowerNode towerToNode(InternalRobot tower) {
-		return getPowerNode(tower.getLocation());
-	}
-	
-	public InternalRobot nodeToTower(InternalPowerNode node) {
-		return getTower(node.getLocation());
-	}
+    public InternalPowerNode towerToNode(InternalRobot tower) {
+        return getPowerNode(tower.getLocation());
+    }
 
-	public double getEnergonDifference() {
-		double diff = 0.;
-		for(InternalObject o : gameObjectsByID.values())
-			if(o instanceof InternalRobot) {
-				double energon = ((InternalRobot)o).getEnergonLevel();
-				if(o.getTeam()==Team.A)
-					diff+=energon;
-				else if(o.getTeam()==Team.B)
-					diff-=energon;
-			}
-		return diff;
-	}
+    public InternalRobot nodeToTower(InternalPowerNode node) {
+        return getTower(node.getLocation());
+    }
+
+    public double getEnergonDifference() {
+        double diff = 0.;
+        for (InternalObject o : gameObjectsByID.values())
+            if (o instanceof InternalRobot) {
+                double energon = ((InternalRobot) o).getEnergonLevel();
+                if (o.getTeam() == Team.A)
+                    diff += energon;
+                else if (o.getTeam() == Team.B)
+                    diff -= energon;
+            }
+        return diff;
+    }
 
     public void processEndOfRound() {
         // process all gameobjects
@@ -128,55 +111,54 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         for (int i = 0; i < gameObjects.length; i++) {
             gameObjects[i].processEndOfRound();
         }
-		removeDead();
-		
-		if(timeLimitReached()&&winner==null) {
-			// copy the node lists, because the damage could kill a node and disconnect the graph
-			List<InternalPowerNode> teamANodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.A));
-			List<InternalPowerNode> teamBNodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.B));
-			InternalRobot tower;
-			for(InternalPowerNode n : teamANodes) {
-				tower = nodeToTower(n);
-				if(tower!=null)
-					tower.takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamANodes.size());
-			}
-			for(InternalPowerNode n : teamBNodes) {
-				tower = nodeToTower(n);
-				if(tower!=null)
-					tower.takeDamage(GameConstants.TIME_LIMIT_DAMAGE/teamBNodes.size());
-			}
-			removeDead();
-			// We have tiebreakers in case both power cores die to end-of-round damage in the same round.
-			// (If two power cores are killed by robots in the same round, then the team whose core died
-			// first loses.)
-			if(nodeToTower(baseNodes.get(Team.A))==null&&nodeToTower(baseNodes.get(Team.B))==null) {
-				running=false;
-				int diff=0;
-				for(InternalPowerNode p : powerNodes) {
-					if(p.getControllingTeam()==Team.A)
-						diff++;
-					else if(p.getControllingTeam()==Team.B)
-						diff--;
-				}
-				if(!(setWinnerIfNonzero(diff,DominationFactor.BARELY_BEAT)||
-					setWinnerIfNonzero(archons.get(Team.A).size()-archons.get(Team.B).size(),DominationFactor.BARELY_BEAT)||
-					setWinnerIfNonzero(getEnergonDifference(),DominationFactor.BARELY_BEAT)))
-				{
-					if(teamAName.compareTo(teamBName)<=0)
-						setWinner(Team.A,DominationFactor.WON_BY_DUBIOUS_REASONS);
-					else
-						setWinner(Team.B,DominationFactor.WON_BY_DUBIOUS_REASONS);
-				}
-			}
-		}
+        removeDead();
 
-		if(winner!=null) {
-			running = false;	
-	        for (InternalObject o : gameObjectsByID.values()) {
-    	        if (o instanceof InternalRobot)
-        	        RobotMonitor.killRobot(o.getID());
-			}
-		}
+        if (timeLimitReached() && winner == null) {
+            // copy the node lists, because the damage could kill a node and disconnect the graph
+            List<InternalPowerNode> teamANodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.A));
+            List<InternalPowerNode> teamBNodes = new ArrayList<InternalPowerNode>(connectedNodesByTeam.get(Team.B));
+            InternalRobot tower;
+            for (InternalPowerNode n : teamANodes) {
+                tower = nodeToTower(n);
+                if (tower != null)
+                    tower.takeDamage(GameConstants.TIME_LIMIT_DAMAGE / teamANodes.size());
+            }
+            for (InternalPowerNode n : teamBNodes) {
+                tower = nodeToTower(n);
+                if (tower != null)
+                    tower.takeDamage(GameConstants.TIME_LIMIT_DAMAGE / teamBNodes.size());
+            }
+            removeDead();
+            // We have tiebreakers in case both power cores die to end-of-round damage in the same round.
+            // (If two power cores are killed by robots in the same round, then the team whose core died
+            // first loses.)
+            if (nodeToTower(baseNodes.get(Team.A)) == null && nodeToTower(baseNodes.get(Team.B)) == null) {
+                running = false;
+                int diff = 0;
+                for (InternalPowerNode p : powerNodes) {
+                    if (p.getControllingTeam() == Team.A)
+                        diff++;
+                    else if (p.getControllingTeam() == Team.B)
+                        diff--;
+                }
+                if (!(setWinnerIfNonzero(diff, DominationFactor.BARELY_BEAT) ||
+                        setWinnerIfNonzero(archons.get(Team.A).size() - archons.get(Team.B).size(), DominationFactor.BARELY_BEAT) ||
+                        setWinnerIfNonzero(getEnergonDifference(), DominationFactor.BARELY_BEAT))) {
+                    if (teamAName.compareTo(teamBName) <= 0)
+                        setWinner(Team.A, DominationFactor.WON_BY_DUBIOUS_REASONS);
+                    else
+                        setWinner(Team.B, DominationFactor.WON_BY_DUBIOUS_REASONS);
+                }
+            }
+        }
+
+        if (winner != null) {
+            running = false;
+            for (InternalObject o : gameObjectsByID.values()) {
+                if (o instanceof InternalRobot)
+                    RobotMonitor.killRobot(o.getID());
+            }
+        }
 
         long aPoints = Math.round(teamRoundResources[Team.A.ordinal()] * 100), bPoints = Math.round(teamRoundResources[Team.B.ordinal()] * 100);
 
@@ -186,124 +168,127 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     }
 
-	public boolean setWinnerIfNonzero(double n, DominationFactor d) {
-		if(n>0)
-			setWinner(Team.A,d);
-		else if(n<0)
-			setWinner(Team.B,d);
-		return n!=0;
-	}
+    public boolean setWinnerIfNonzero(double n, DominationFactor d) {
+        if (n > 0)
+            setWinner(Team.A, d);
+        else if (n < 0)
+            setWinner(Team.B, d);
+        return n != 0;
+    }
 
-	public DominationFactor getDominationFactor(Team winner) {
-		if(archons.get(winner).size()>=GameConstants.NUMBER_OF_ARCHONS)
-			return DominationFactor.DESTROYED;
-		else if(!timeLimitReached())
-			return DominationFactor.OWNED;
-		else
-			return DominationFactor.BEAT;
-	}
+    public DominationFactor getDominationFactor(Team winner) {
+        if (archons.get(winner).size() >= GameConstants.NUMBER_OF_ARCHONS)
+            return DominationFactor.DESTROYED;
+        else if (!timeLimitReached())
+            return DominationFactor.OWNED;
+        else
+            return DominationFactor.BEAT;
+    }
 
-	public void setWinner(Team t, DominationFactor d) {
-		winner = t;
-		gameStats.setDominationFactor(d);
+    public void setWinner(Team t, DominationFactor d) {
+        winner = t;
+        gameStats.setDominationFactor(d);
         //running = false;
 
-	}
+    }
 
-	public InternalPowerNode getPowerCore(Team t) {
-		return baseNodes.get(t);
-	}
+    public InternalPowerNode getPowerCore(Team t) {
+        return baseNodes.get(t);
+    }
 
-	public interface Graph {
-		
-		public List<MapLocation> neighbors(MapLocation loc);
-		public MapLocation baseNode(Team t);
-		public Team team(MapLocation loc);
-		public void setConnected(MapLocation loc, Team t);
+    public interface Graph {
 
-	}
+        public List<MapLocation> neighbors(MapLocation loc);
 
-	private Graph graphImpl = new Graph () {
-		
-		public List<MapLocation> neighbors(MapLocation loc) {
-			return powerNodeGraph.get(loc);
-		}
+        public MapLocation baseNode(Team t);
 
-		public MapLocation baseNode(Team t) {
-			return baseNodes.get(t).getLocation();
-		}
+        public Team team(MapLocation loc);
 
-		public Team team(MapLocation loc) {
-			InternalRobot tower = getTower(loc);
-			if(tower==null)
-				return Team.NEUTRAL;
-			else
-				return tower.getTeam();
-		}
+        public void setConnected(MapLocation loc, Team t);
 
-		public void setConnected(MapLocation loc, Team t) {
-			InternalPowerNode p = getPowerNode(loc);
-			p.setConnected(t,true);
-			if(team(loc)==t)
-				connectedNodesByTeam.get(t).add(p);
-			else
-				adjacentNodesByTeam.get(t).add(p);
-		}
-	};
+    }
 
-	public static class Connections {
+    private Graph graphImpl = new Graph() {
 
-		private Set<MapLocation> visited = new HashSet<MapLocation>();
-		private Deque<MapLocation> queue = new ArrayDeque<MapLocation>();
-		private Team team;
-		private Graph graph;
+        public List<MapLocation> neighbors(MapLocation loc) {
+            return powerNodeGraph.get(loc);
+        }
 
-		public Connections(Graph g, Team t) {
-			team = t;
-			graph = g;
-			add(g.baseNode(t));
-		}
+        public MapLocation baseNode(Team t) {
+            return baseNodes.get(t).getLocation();
+        }
 
-		public void add(MapLocation n) {
-			if(!visited.contains(n)) {
-				visited.add(n);
-				graph.setConnected(n,team);
-				if(graph.team(n)==team)
-					queue.push(n);
-			}
-		}
+        public Team team(MapLocation loc) {
+            InternalRobot tower = getTower(loc);
+            if (tower == null)
+                return Team.NEUTRAL;
+            else
+                return tower.getTeam();
+        }
 
-		public void findAll() {
-			while(!queue.isEmpty()) {
-				MapLocation n = queue.pop();
-				for(MapLocation l : graph.neighbors(n)) {
-					add(l);
-				}
-			}
-		}
+        public void setConnected(MapLocation loc, Team t) {
+            InternalPowerNode p = getPowerNode(loc);
+            p.setConnected(t, true);
+            if (team(loc) == t)
+                connectedNodesByTeam.get(t).add(p);
+            else
+                adjacentNodesByTeam.get(t).add(p);
+        }
+    };
 
-	}
+    public static class Connections {
 
-	public void recomputeConnections() {
-		for(InternalPowerNode n: powerNodes) {
-			n.setConnected(Team.A,false);
-			n.setConnected(Team.B,false);
-		}
-		connectedNodesByTeam.get(Team.A).clear();
-		connectedNodesByTeam.get(Team.B).clear();
-		adjacentNodesByTeam.get(Team.A).clear();
-		adjacentNodesByTeam.get(Team.B).clear();
-		new Connections(graphImpl,Team.A).findAll();
-		new Connections(graphImpl,Team.B).findAll();
-	}
+        private Set<MapLocation> visited = new HashSet<MapLocation>();
+        private Deque<MapLocation> queue = new ArrayDeque<MapLocation>();
+        private Team team;
+        private Graph graph;
 
-	public int getConnectedNodeCount(Team t) {
-		return connectedNodesByTeam.get(t).size();
-	}
+        public Connections(Graph g, Team t) {
+            team = t;
+            graph = g;
+            add(g.baseNode(t));
+        }
 
-	public boolean timeLimitReached() {
-		return currentRound >= gameMap.getMaxRounds()-1;
-	}
+        public void add(MapLocation n) {
+            if (!visited.contains(n)) {
+                visited.add(n);
+                graph.setConnected(n, team);
+                if (graph.team(n) == team)
+                    queue.push(n);
+            }
+        }
+
+        public void findAll() {
+            while (!queue.isEmpty()) {
+                MapLocation n = queue.pop();
+                for (MapLocation l : graph.neighbors(n)) {
+                    add(l);
+                }
+            }
+        }
+
+    }
+
+    public void recomputeConnections() {
+        for (InternalPowerNode n : powerNodes) {
+            n.setConnected(Team.A, false);
+            n.setConnected(Team.B, false);
+        }
+        connectedNodesByTeam.get(Team.A).clear();
+        connectedNodesByTeam.get(Team.B).clear();
+        adjacentNodesByTeam.get(Team.A).clear();
+        adjacentNodesByTeam.get(Team.B).clear();
+        new Connections(graphImpl, Team.A).findAll();
+        new Connections(graphImpl, Team.B).findAll();
+    }
+
+    public int getConnectedNodeCount(Team t) {
+        return connectedNodesByTeam.get(t).size();
+    }
+
+    public boolean timeLimitReached() {
+        return currentRound >= gameMap.getMaxRounds() - 1;
+    }
 
     public double[] getLastRoundResources() {
         return lastRoundResources;
@@ -329,17 +314,17 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             return null;
     }
 
-	public InternalPowerNode getPowerNode(MapLocation loc) {
-		return (InternalPowerNode)getObject(loc,RobotLevel.POWER_NODE);
-	}
+    public InternalPowerNode getPowerNode(MapLocation loc) {
+        return (InternalPowerNode) getObject(loc, RobotLevel.POWER_NODE);
+    }
 
-	public InternalRobot getTower(MapLocation loc) {
-		InternalRobot r = getRobot(loc,RobotType.TOWER.level);
-		if(r==null||r.type!=RobotType.TOWER)
-			return null;
-		else
-			return r;
-	}
+    public InternalRobot getTower(MapLocation loc) {
+        InternalRobot r = getRobot(loc, RobotType.TOWER.level);
+        if (r == null || r.type != RobotType.TOWER)
+            return null;
+        else
+            return r;
+    }
 
     // should only be called by the InternalObject constructor
     public void notifyAddingNewObject(InternalObject o) {
@@ -349,19 +334,19 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         if (o.getLocation() != null) {
             gameObjectsByLoc.put(new MapLocation3D(o.getLocation(), o.getRobotLevel()), o);
         }
-		if (o instanceof InternalPowerNode) {
-			addPowerNode((InternalPowerNode)o);
-		}
+        if (o instanceof InternalPowerNode) {
+            addPowerNode((InternalPowerNode) o);
+        }
     }
 
-	public void addPowerNode(InternalPowerNode p) {
-		powerNodes.add(p);
-		powerNodeGraph.put(p.getLocation(),new ArrayList<MapLocation>());
-	}
+    public void addPowerNode(InternalPowerNode p) {
+        powerNodes.add(p);
+        powerNodeGraph.put(p.getLocation(), new ArrayList<MapLocation>());
+    }
 
-	public void addArchon(InternalRobot r) {
-		archons.get(r.getTeam()).add(r);
-	}
+    public void addArchon(InternalRobot r) {
+        archons.get(r.getTeam()).add(r);
+    }
 
     public Collection<InternalObject> allObjects() {
         return gameObjectsByID.values();
@@ -407,7 +392,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     /**
-     *@return the TerrainType at a given MapLocation <tt>loc<tt>
+     * @return the TerrainType at a given MapLocation <tt>loc<tt>
      */
     public TerrainTile getMapTerrain(MapLocation loc) {
         return gameMap.getTerrainTile(loc);
@@ -426,9 +411,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return result;
     }
 
-	public MapLocation [] getArchons(Team team) {
-		return Lists.transform(archons.get(team),Util.objectLocation).toArray(new MapLocation [0]);
-	}
+    public MapLocation[] getArchons(Team team) {
+        return Lists.transform(archons.get(team), Util.objectLocation).toArray(new MapLocation[0]);
+    }
 
     public double getPoints(Team team) {
         return teamRoundResources[team.ordinal()];
@@ -462,7 +447,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public Signal[] getAllSignals(boolean includeBytecodesUsedSignal) {
         ArrayList<InternalRobot> energonChangedRobots = new ArrayList<InternalRobot>();
-		ArrayList<InternalRobot> fluxChangedRobots = new ArrayList<InternalRobot>();
+        ArrayList<InternalRobot> fluxChangedRobots = new ArrayList<InternalRobot>();
         ArrayList<InternalRobot> allRobots = null;
         if (includeBytecodesUsedSignal)
             allRobots = new ArrayList<InternalRobot>();
@@ -475,12 +460,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             if (r.clearEnergonChanged()) {
                 energonChangedRobots.add(r);
             }
-			if (r.clearFluxChanged()) {
-				fluxChangedRobots.add(r);
-			}
+            if (r.clearFluxChanged()) {
+                fluxChangedRobots.add(r);
+            }
         }
         signals.add(new EnergonChangeSignal(energonChangedRobots.toArray(new InternalRobot[]{})));
-		signals.add(new FluxChangeSignal(fluxChangedRobots.toArray(new InternalRobot[]{})));
+        signals.add(new FluxChangeSignal(fluxChangedRobots.toArray(new InternalRobot[]{})));
 
         if (includeBytecodesUsedSignal)
             signals.add(new BytecodesUsedSignal(allRobots.toArray(new InternalRobot[]{})));
@@ -513,50 +498,48 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public void resetStatic() {
     }
 
-    public void createNodeLink(MapLocation id1, MapLocation id2)
-    {
-	createNodeLink(id1, id2, true);
+    public void createNodeLink(MapLocation id1, MapLocation id2) {
+        createNodeLink(id1, id2, true);
     }
 
-    public void createNodeLink(MapLocation id1, MapLocation id2, boolean bidir)
-    {
-		this.powerNodeGraph.get(id1).add(id2);
-		if(bidir)
-			this.powerNodeGraph.get(id2).add(id1);
+    public void createNodeLink(MapLocation id1, MapLocation id2, boolean bidir) {
+        this.powerNodeGraph.get(id1).add(id2);
+        if (bidir)
+            this.powerNodeGraph.get(id2).add(id1);
     }
 
 
-	public ArrayList<MapLocation> getAdjacentNodes(MapLocation loc) {
-		return powerNodeGraph.get(loc);
-	}
+    public ArrayList<MapLocation> getAdjacentNodes(MapLocation loc) {
+        return powerNodeGraph.get(loc);
+    }
 
-	public Iterable<InternalPowerNode> getPowerNodesByTeam(final Team t) {
-		Predicate<InternalPowerNode> pred = new Predicate<InternalPowerNode>() {
-			public boolean apply(InternalPowerNode p) {
-				return p.getControllingTeam()==t;
-			}
-		};
-		return Iterables.filter(powerNodes,pred);
-	}
+    public Iterable<InternalPowerNode> getPowerNodesByTeam(final Team t) {
+        Predicate<InternalPowerNode> pred = new Predicate<InternalPowerNode>() {
+            public boolean apply(InternalPowerNode p) {
+                return p.getControllingTeam() == t;
+            }
+        };
+        return Iterables.filter(powerNodes, pred);
+    }
 
-	public List<InternalPowerNode> getCapturableNodes(Team t) {
-		return adjacentNodesByTeam.get(t);
-	}
-        
-	public void notifyDied(InternalRobot r) {
-		deadRobots.add(r);
-	}
+    public List<InternalPowerNode> getCapturableNodes(Team t) {
+        return adjacentNodesByTeam.get(t);
+    }
 
-	public void removeDead() {
-		boolean current = false;
-		for(InternalRobot r : deadRobots) {
-			if(r.getID() == RobotMonitor.getCurrentRobotID())
-				current = true;
-			visitSignal(new DeathSignal(r));
-		}
-		if(current)
-			throw new RobotDeathException();
-	}
+    public void notifyDied(InternalRobot r) {
+        deadRobots.add(r);
+    }
+
+    public void removeDead() {
+        boolean current = false;
+        for (InternalRobot r : deadRobots) {
+            if (r.getID() == RobotMonitor.getCurrentRobotID())
+                current = true;
+            visitSignal(new DeathSignal(r));
+        }
+        if (current)
+            throw new RobotDeathException();
+    }
 
     // ******************************
     // SIGNAL HANDLER METHODS
@@ -569,39 +552,38 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void visitAttackSignal(AttackSignal s) {
         InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
-		if(attacker.type==RobotType.SCORCHER) {
-			for(InternalObject o : gameObjectsByID.values()) {
-				if(attacker.type.canAttack(o.getRobotLevel())&&canAttackSquare(attacker,o.getLocation())&&(o instanceof InternalRobot)) {
-					InternalRobot target = (InternalRobot)o;
-					target.takeDamage(attacker.type.attackPower,attacker);
-				}
-			}
-		}
-		else {
-        	MapLocation targetLoc = s.getTargetLoc();
-        	RobotLevel level = s.getTargetHeight();
-        	InternalRobot target = getRobot(targetLoc, level);
+        if (attacker.type == RobotType.SCORCHER) {
+            for (InternalObject o : gameObjectsByID.values()) {
+                if (attacker.type.canAttack(o.getRobotLevel()) && canAttackSquare(attacker, o.getLocation()) && (o instanceof InternalRobot)) {
+                    InternalRobot target = (InternalRobot) o;
+                    target.takeDamage(attacker.type.attackPower, attacker);
+                }
+            }
+        } else {
+            MapLocation targetLoc = s.getTargetLoc();
+            RobotLevel level = s.getTargetHeight();
+            InternalRobot target = getRobot(targetLoc, level);
 
-        	if (target != null) {
-				switch(attacker.type) {
-				case SCOUT:
-					double drain = Math.min(attacker.type.attackPower,target.getFlux());
-					target.adjustFlux(-drain);
-					attacker.adjustFlux(drain);
-					break;
-				case DISRUPTER:
-            		target.takeDamage(attacker.type.attackPower,attacker);
-					target.delayAttack(GameConstants.DISRUPTER_DELAY);
-					break;
-				default:
-            		target.takeDamage(attacker.type.attackPower,attacker);
-				}
-        	}
-		}
+            if (target != null) {
+                switch (attacker.type) {
+                    case SCOUT:
+                        double drain = Math.min(attacker.type.attackPower, target.getFlux());
+                        target.adjustFlux(-drain);
+                        attacker.adjustFlux(drain);
+                        break;
+                    case DISRUPTER:
+                        target.takeDamage(attacker.type.attackPower, attacker);
+                        target.delayAttack(GameConstants.DISRUPTER_DELAY);
+                        break;
+                    default:
+                        target.takeDamage(attacker.type.attackPower, attacker);
+                }
+            }
+        }
 
         addSignal(s);
 
-		removeDead();
+        removeDead();
     }
 
     public void visitBroadcastSignal(BroadcastSignal s) {
@@ -638,14 +620,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             if (r.hasBeenAttacked()) {
                 gameStats.setUnitKilled(r.getTeam(), currentRound);
             }
-			if(r.type == RobotType.TOWER) {
-				recomputeConnections();
-				if(towerToNode(r).isPowerCore())
-					setWinner(r.getTeam().opponent(),getDominationFactor(r.getTeam().opponent()));
-			}
-			if(r.type == RobotType.ARCHON) {
-				archons.get(r.getTeam()).remove(r);
-			}
+            if (r.type == RobotType.TOWER) {
+                recomputeConnections();
+                if (towerToNode(r).isPowerCore())
+                    setWinner(r.getTeam().opponent(), getDominationFactor(r.getTeam().opponent()));
+            }
+            if (r.type == RobotType.ARCHON) {
+                archons.get(r.getTeam()).remove(r);
+            }
         }
     }
 
@@ -660,7 +642,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public void visitIndicatorStringSignal(IndicatorStringSignal s) {
-    	addSignal(s);
+        addSignal(s);
     }
 
     public void visitMatchObservationSignal(MatchObservationSignal s) {
@@ -677,7 +659,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public void visitMovementOverrideSignal(MovementOverrideSignal s) {
         InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
         if (!canMove(r.getRobotLevel(), s.getNewLoc()))
-            throw new RuntimeException("GameActionException in MovementOverrideSignal",new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move to location: " + s.getNewLoc()));
+            throw new RuntimeException("GameActionException in MovementOverrideSignal", new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move to location: " + s.getNewLoc()));
         r.setLocation(s.getNewLoc());
         addSignal(s);
     }
@@ -700,11 +682,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         addSignal(s);
     }
 
-	public void setPowerCore(InternalPowerNode p, Team t) {
-		baseNodes.put(t,p);
-	}
+    public void setPowerCore(InternalPowerNode p, Team t) {
+        baseNodes.put(t, p);
+    }
 
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public void visitSpawnSignal(SpawnSignal s) {
         InternalRobot parent;
         int parentID = s.getParentID();
@@ -719,8 +701,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         //note: this also adds the signal
         InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent);
-		if(s.getType()==RobotType.TOWER)
-			recomputeConnections();
+        if (s.getType() == RobotType.TOWER)
+            recomputeConnections();
     }
 
     // *****************************
@@ -728,12 +710,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     // *****************************
     private static MapLocation origin = new MapLocation(0, 0);
 
-	protected static boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
-		MapLocation myLoc = ir.getLocation();
-		int d = myLoc.distanceSquaredTo(loc);
-		return d<=ir.type.attackRadiusMaxSquared && d>= ir.type.attackRadiusMinSquared
-			&& inAngleRange(myLoc,ir.getDirection(),loc,ir.type.attackCosHalfTheta);
-	}
+    protected static boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
+        MapLocation myLoc = ir.getLocation();
+        int d = myLoc.distanceSquaredTo(loc);
+        return d <= ir.type.attackRadiusMaxSquared && d >= ir.type.attackRadiusMinSquared
+                && inAngleRange(myLoc, ir.getDirection(), loc, ir.type.attackCosHalfTheta);
+    }
 
     protected static boolean inAngleRange(MapLocation sensor, Direction dir, MapLocation target, double cosHalfTheta) {
         MapLocation dirVec = origin.add(dir);
