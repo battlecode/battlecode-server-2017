@@ -261,6 +261,15 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
             return;
         }
 
+        if (n.owner.equals("java/lang/String")) {
+            if((n.name.equals("<init>")&&n.desc.equals("([B)V"))
+                ||(n.name.equals("<init>")&&n.desc.equals("([BII)V"))
+                ||(n.name.equals("getBytes")&&n.desc.equals("()[B"))) {
+                instructions.insertBefore(n,new LdcInsnNode("UTF-16"));
+                n.desc = n.desc.replace(")","Ljava/lang/String;)");
+            }
+        }
+
         // check for banned functions
         if (checkDisallowed) {
             // do wait/notify monitoring
