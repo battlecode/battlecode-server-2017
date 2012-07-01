@@ -74,13 +74,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     /**
      * {@inheritDoc}
      */
-    public Direction getDirection() {
-        return robot.getDirection();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public double getEnergon() {
         return robot.getEnergonLevel();
     }
@@ -162,7 +155,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         gameWorld.addSignal(new TransferFluxSignal(robot, ir, amount));
     }
 
-    public void spawn(RobotType type) throws GameActionException {
+    public void spawn(RobotType type, MapLocation loc) throws GameActionException {
         // If we decide to let other robots spawn, then we should make
         // sure that air units can't spawn ground units.
         if (type == RobotType.ARCHON)
@@ -171,8 +164,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new IllegalStateException("Only archons can spawn.");
         assertNotNull(type);
         assertNotMoving();
+		assertWithinRange(loc,2);
         assertHaveFlux(type.spawnCost);
-        MapLocation loc = getLocation().add(getDirection());
         if (!gameWorld.canMove(type.level, loc))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
         if (type == RobotType.TOWER) {
@@ -235,8 +228,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public boolean checkCanSense(MapLocation loc) {
         MapLocation myLoc = getLocation();
-        return myLoc.distanceSquaredTo(loc) <= robot.type.sensorRadiusSquared
-                && gameWorld.inAngleRange(myLoc, getDirection(), loc, robot.type.sensorCosHalfTheta);
+        return myLoc.distanceSquaredTo(loc) <= robot.type.sensorRadiusSquared;
     }
 
     public boolean checkCanSense(InternalObject obj) {
@@ -264,7 +256,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         InternalRobot ir = castInternalRobot(r);
         assertCanSense(ir);
         return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(),
-                ir.getFlux(), ir.getDirection(), ir.type, ir.getTeam(), ir.getRegen(),
+                ir.getFlux(), ir.type, ir.getTeam(), ir.getRegen(),
                 ir.roundsUntilAttackIdle(), ir.roundsUntilMovementIdle());
     }
 
@@ -340,45 +332,23 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(ALREADY_ACTIVE, "This robot is already moving.");
     }
 
-    public void moveForward() throws GameActionException {
-        move(robot.getDirection());
-    }
-
-    public void moveBackward() throws GameActionException {
-        move(robot.getDirection().opposite());
-    }
-
-    private void move(Direction d) throws GameActionException {
+    public void move(MapLocation loc) throws GameActionException {
         assertNotMoving();
         assertHaveFlux(robot.type.moveCost);
-        assertCanMove(d);
-        int delay = d.isDiagonal() ? robot.type.moveDelayDiagonal :
-                robot.type.moveDelayOrthogonal;
-        robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-                d == getDirection(), delay), delay);
+        assertCanMove(loc);
+        int delay = robot.type.moveDelayOrthogonal;
+        robot.activateMovement(new MovementSignal(robot, loc, true, delay), delay);
         robot.adjustFlux(-robot.type.moveCost);
     }
 
-    public void setDirection(Direction d) throws GameActionException {
-        assertNotMoving();
-        assertValidDirection(d);
-        robot.activateMovement(new SetDirectionSignal(robot, d), 1);
+    public boolean canMove(MapLocation loc) throws GameActionException {
+		assertWithinRange(loc, 2);
+		return gameWorld.canMove(robot.getRobotLevel(), loc);
     }
 
-    public boolean canMove(Direction d) {
-        assertValidDirection(d);
-        return gameWorld.canMove(robot.getRobotLevel(), getLocation().add(d));
-    }
-
-    public void assertCanMove(Direction d) throws GameActionException {
-        if (!canMove(d))
-            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move in the given direction: " + d);
-    }
-
-    protected void assertValidDirection(Direction d) {
-        assertNotNull(d);
-        if (d == Direction.NONE || d == Direction.OMNI)
-            throw new IllegalArgumentException("You cannot move in the direction NONE or OMNI.");
+    public void assertCanMove(MapLocation loc) throws GameActionException {
+        if (canMove(loc))
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move to the location: " + loc);
     }
 
     // ***********************************

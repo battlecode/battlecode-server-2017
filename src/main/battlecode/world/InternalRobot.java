@@ -14,7 +14,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     protected volatile double myEnergonLevel;
     private volatile double flux;
-    protected volatile Direction myDirection;
     protected volatile boolean energonChanged = true;
     private volatile boolean fluxChanged = true;
     protected volatile long controlBits;
@@ -24,7 +23,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     /**
      * first index is robot type, second is direction, third is x or y
      */
-    private static final Map<RobotType, int[][][]> offsets = GameMap.computeVisibleOffsets();
+    private static final Map<RobotType, int[][]> offsets = GameMap.computeVisibleOffsets();
     /**
      * number of bytecodes used in the most recent round
      */
@@ -51,7 +50,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
                          boolean spawnedRobot) {
         super(gw, loc, type.level, t);
-        myDirection = Direction.values()[gw.getRandGen().nextInt(8)];
         this.type = type;
 
         myEnergonLevel = getMaxEnergon();
@@ -163,10 +161,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         fluxChanged = true;
     }
 
-    public Direction getDirection() {
-        return myDirection;
-    }
-
     public void setRegen() {
         if (type != RobotType.TOWER || !myGameWorld.timeLimitReached())
             regen = true;
@@ -265,11 +259,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         saveMapMemory(loc);
     }
 
-    public void setDirection(Direction dir) {
-        myDirection = dir;
-        saveMapMemory(getLocation());
-    }
-
     public void suicide() {
         (new DeathSignal(this)).accept(myGameWorld);
     }
@@ -303,7 +292,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void saveMapMemory(MapLocation newLoc) {
-        int[][] myOffsets = offsets.get(type)[myDirection.ordinal()];
+        int[][] myOffsets = offsets.get(type);
         mapMemory.rememberLocations(newLoc, myOffsets[0], myOffsets[1]);
     }
 

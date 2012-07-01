@@ -15,8 +15,6 @@ public abstract class ControllerShared {
 
     protected abstract MapLocation getLocation();
 
-    protected abstract Direction getDirection();
-
     protected ControllerShared(GameWorld gw, InternalRobot r) {
         gameWorld = gw;
         robot = r;

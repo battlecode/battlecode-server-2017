@@ -26,10 +26,6 @@ public class RobotInfo {
      */
     public final double flux;
     /**
-     * The direction this Robot is facing.
-     */
-    public final Direction direction;
-    /**
      * The type of this Robot.
      */
     public final RobotType type;
@@ -46,7 +42,7 @@ public class RobotInfo {
     public final int roundsUntilMovementIdle;
 
     public RobotInfo(Robot robot, MapLocation location,
-                     double hitpoints, double flux, Direction direction,
+                     double hitpoints, double flux,
                      RobotType type, Team team, boolean regen,
                      int roundsUntilAttackIdle, int roundsUntilMovementIdle) {
         super();
@@ -54,7 +50,6 @@ public class RobotInfo {
         this.location = location;
         this.energon = hitpoints;
         this.flux = flux;
-        this.direction = direction;
         this.type = type;
         this.team = team;
         this.regen = regen;

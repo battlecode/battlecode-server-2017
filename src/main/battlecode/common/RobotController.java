@@ -41,13 +41,6 @@ public interface RobotController {
     public MapLocation getLocation();
 
     /**
-     * Gets the direction this robot is currently facing.
-     *
-     * @return this robot's current Direction
-     */
-    public Direction getDirection();
-
-    /**
      * Retrieve the next message waiting in your incoming message queue. Also
      * removes the message from the queue.
      *
@@ -191,10 +184,10 @@ public interface RobotController {
     public boolean isMovementActive();
 
     /**
-     * Queues a forward movement to be performed at the end of this robot's turn.
+     * Queues a movement to be performed at the end of this robot's turn.
      * <p/>
-     * When this action is executed, the robot will attempt to move forward one
-     * square in its current direction. If the move succeeds, this robot's new
+     * When this action is executed, the robot will attempt to move to the given square.
+     * If the move succeeds, this robot's new
      * location will immediately change to the destination square, but this robot
      * motor will not be able to move or change direction again for some number of rounds (<code>type().moveDelayOrthogonal</code> for
      * orthogonal movement and <code>type().moveDelayDiagonal</code> for
@@ -207,24 +200,7 @@ public interface RobotController {
      * @throws GameActionException if the destination is occupied by another {@code GameObject}
      *                             at the same height (CANT_MOVE_THERE)
      */
-    public void moveForward() throws GameActionException;
-
-    /**
-     * Queues a backward movement to be performed at the end of this robot's turn.
-     * Moving backward does not change this robot's direction.
-     *
-     * @see #moveForward()
-     */
-    public void moveBackward() throws GameActionException;
-
-    /**
-     * Queues a direction change to be performed at the end of this robot's turn.
-     * When the action is executed, the robot will change its direction.
-     *
-     * @param dir the direction the robot should face
-     * @throws GameActionException if this robot is already moving (ALREADY_ACTIVE)
-     */
-    public void setDirection(Direction dir) throws GameActionException;
+    public void move(MapLocation loc) throws GameActionException;
 
     /**
      * Tells whether this robot can move in the given direction. Takes into
@@ -235,7 +211,7 @@ public interface RobotController {
      * @return true if there are no robots or walls preventing this robot from
      *         moving in the given direction; false otherwise
      */
-    public boolean canMove(Direction dir);
+    public boolean canMove(MapLocation loc) throws GameActionException;
 
     // ***********************************
     // ****** ATTACK METHODS *******
@@ -319,7 +295,7 @@ public interface RobotController {
      * @throws GameActionException   if this robot does not have enough flux to spawn a robot of type <code>type</code> (NOT_ENOUGH_FLUX)
      * @throws GameActionException   if <code>loc</code> is already occupied (CANT_MOVE_THERE)
      */
-    public void spawn(RobotType type) throws GameActionException;
+    public void spawn(RobotType type, MapLocation loc) throws GameActionException;
 
     /**
      * Transfers the specified amount of flux to the robot at location

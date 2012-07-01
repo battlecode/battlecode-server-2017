@@ -1,6 +1,5 @@
 package battlecode.world.signal;
 
-import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
@@ -42,11 +41,6 @@ public class SpawnSignal extends Signal {
     private final Team team;
 
     /**
-     * The new robot's direction
-     */
-    private final Direction dir;
-
-    /**
      * Creates a signal for a robot that was just spawned
      */
     public SpawnSignal(InternalRobot child, InternalRobot parent) {
@@ -58,7 +52,6 @@ public class SpawnSignal extends Signal {
         loc = child.getLocation();
         type = child.type;
         team = child.getTeam();
-        dir = child.getDirection();
     }
 
     /**
@@ -73,7 +66,6 @@ public class SpawnSignal extends Signal {
             parentID = 0;
         else
             parentID = parent.getID();
-        dir = null;
     }
 
     public int getRobotID() {
@@ -90,10 +82,6 @@ public class SpawnSignal extends Signal {
 
     public Team getTeam() {
         return team;
-    }
-
-    public Direction getDirection() {
-        return dir;
     }
 
     public int getParentID() {
