@@ -14,7 +14,7 @@ import java.util.*;
 
 /**
  * Runs matches. Specifically, this class forms a pipeline connecting match and
- * configuraiton parameters to the game engine and engine output to an abstract
+ * configuration parameters to the game engine and engine output to an abstract
  * match data sink.
  */
 public class Server implements Observer, Runnable {
@@ -222,8 +222,8 @@ public class Server implements Observer, Runnable {
         while (!matches.isEmpty()) {
             Match match = matches.peek();
             if (!finished.isEmpty())
-                match.setInitialArchonMemory(finished.getLast()
-                        .getComputedArchonMemory());
+                match.setInitialTeamMemory(finished.getLast()
+                        .getComputedTeamMemory());
 
             try {
                 debug("running match " + match);

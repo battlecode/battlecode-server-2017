@@ -23,7 +23,7 @@ public class Engine {
     private static Engine theInstance = null;
     private Runnable ioCallback;
 
-    public Engine(String teamA, String teamB, String mapName, String mapPath, long[][] archonMemory) {
+    public Engine(String teamA, String teamB, String mapName, String mapPath, long[][] teamMemory) {
         theInstance = this;
         Config options = Config.getGlobalConfig();
         this.garbageCollectEnabled = options.getBoolean("bc.engine.gc");
@@ -37,7 +37,7 @@ public class Engine {
         PlayerFactory.checkOptions();
         try {
             try {
-                tempGameWorld = GameWorldFactory.createGameWorld(teamA, teamB, mapName, mapPath, archonMemory);
+                tempGameWorld = GameWorldFactory.createGameWorld(teamA, teamB, mapName, mapPath, teamMemory);
             } catch (IllegalArgumentException e) {
                 java.lang.System.out.println("[Engine] Error while loading map '" + mapName + "'");
                 return;
@@ -118,8 +118,8 @@ public class Engine {
         return theInstance.gameWorld.getCurrentRound();
     }
 
-    public long[][] getArchonMemory() {
-        return gameWorld.getArchonMemory();
+    public long[][] getTeamMemory() {
+        return gameWorld.getTeamMemory();
     }
 
     public void setIOCallback(Runnable callback) {

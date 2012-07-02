@@ -4,69 +4,39 @@ import static battlecode.common.RobotLevel.IN_AIR;
 import static battlecode.common.RobotLevel.ON_GROUND;
 
 public enum RobotType {
-    //          LEVEL,    MXE MXF  COS MD MVC SR  SA AR AR  AA AD  AP,AIR  GROUND
-    ARCHON(ON_GROUND, 150, 300, 0, 6, 0, 36, 360, 0, 0, 0, 5, 0, false, false),
-    SOLDIER(ON_GROUND, 40, 100, 120, 6, .4, 10, 180, 0, 5, 90, 5, 6, true, true),
-    SCOUT(IN_AIR, 20, 50, 80, 4, .1, 25, 360, 0, 5, 360, 5, 1.5, true, true),
-    DISRUPTER(ON_GROUND, 70, 100, 180, 9, 1.2, 16, 180, 0, 10, 90, 5, 1.7, true, true),
-    SCORCHER(ON_GROUND, 70, 100, 270, 8, 1.8, 10, 135, 1, 10, 180, 5, 9, false, true),
-    TOWER(ON_GROUND, 250, 0, 200, 0, 0, -1, 0, 0, 0, 0, 0, 0, false, false);
+
+    NEXUS(ON_GROUND, 1000, 0, 0, 0, 0, 0, false, false, 0, 0, 1.0), 
+    TRANSPORTER(IN_AIR, 50, 4, 0, 0, 0, 0, false, false, 40, 0, 1.0),
+    SOLDIER(ON_GROUND, 30, 6, 25, 180, 4, 10, true, true, 0, 10, 1.0);
 
     /**
-     * The robot's level.
+     * The robot's level (air or ground)
      */
     public final RobotLevel level;
 
     /**
-     * The maximum amount of energon the robot can have.
+     * The maximum amount of energon (hit points) the robot can have.
      */
     public final double maxEnergon;
 
     /**
-     * The maximum amount of flux the robot can have.
-     */
-    public final double maxFlux;
-
-    /**
-     * The amount of flux needed to spawn the robot.
-     */
-    public final double spawnCost;
-
-    /**
      * The number of turns it takes the robot to move orthogonally.
      */
-    public final int moveDelayOrthogonal;
+    public final int moveDelay;
+    public final int weakenedMoveDelay;
 
     /**
      * The number of turns it takes the robot to move diagonally.
-     * Equal to <code>(int)Math.round(moveDelayOrthogonal*Math.sqrt(2.))</code>.
+     * Equal to <code>(int)Math.round(moveDelay*Math.sqrt(2.))</code>.
      */
     public final int moveDelayDiagonal;
-
-    /**
-     * The cost in flux to move the robot one square.
-     */
-    public final double moveCost;
-
-    /**
-     * The square of the maximum distance that the robot can sense.
-     */
-    public final int sensorRadiusSquared;
-
-    /**
-     * The range of angles that the robot can sense.
-     */
-    public final double sensorAngle;
+    public final int weakenedMoveDelayDiagonal;
 
     /**
      * The square of the maximum distance that the robot can attack.
      */
-    public final int attackRadiusMaxSquared;
-
-    /**
-     * The square of the minimum distance that the robot can attack.
-     */
-    public final int attackRadiusMinSquared;
+    public final int attackRadiusSquared;
+    public final int weakenedAttackRadiusSquared;
 
     /**
      * The range of angles that this robot can attack.
@@ -77,11 +47,13 @@ public enum RobotType {
      * The number of turns that it takes this robot to attack.
      */
     public final int attackDelay;
+    public final int weakenedAttackDelay;
 
     /**
      * The amount of damage that this robot does when it attacks.
      */
     public final double attackPower;
+    public final int weakenedAttackPower;
 
     /**
      * Whether or not the robot can attack air units.
@@ -93,8 +65,25 @@ public enum RobotType {
      */
     public final boolean canAttackGround;
 
-    public final double sensorCosHalfTheta;
-    public final double attackCosHalfTheta;
+    /**
+     * Returns how much flux the robot can transport around
+     */
+    public final int fluxTransportCapacity; 
+
+    /**
+     * Returns the number of rounds a robot can remain energized after  consuming flux
+     */
+    public final int sustainRounds;
+
+    /**
+    * If a robot has not consumed flux within the past sustainRounds rounds, it is weakened by weakenedFactor 
+    * moveDelay = round(moveDelay * weakenedFactor)
+    * moveDelayDiagonal = round(moveDelayDiagonal * weakenedFactor)
+    * attackDelay = round(attackDelay * weakenedFactor)
+    * attackRadiusSquared = round(attackRadiusSquared / weakenedFactor)
+    * attackPower = round(attackPower / weakenedFactor)
+    */ 
+    public final float weakenedFactor;
 
     /**
      * Returns true if the robot can attack robots at the given level.
@@ -118,39 +107,40 @@ public enum RobotType {
         return level == RobotLevel.IN_AIR;
     }
 
+
     RobotType(RobotLevel level,
               double maxEnergon,
-              double maxFlux,
-              double spawnCost,
-              int moveDelayOrthogonal,
-              double moveCost,
-              int sensorRadiusSquared,
-              double sensorAngle,
-              int attackRadiusMinSquared,
-              int attackRadiusMaxSquared,
+              int moveDelay,
+              int attackRadiusSquared,
               double attackAngle,
               int attackDelay,
               double attackPower,
               boolean canAttackAir,
-              boolean canAttackGround) {
+              boolean canAttackGround,
+              int fluxTransportCapacity, 
+              int sustainRounds, 
+              float weakenedFactor
+              ) {
         this.level = level;
         this.maxEnergon = maxEnergon;
-        this.maxFlux = maxFlux;
-        this.spawnCost = spawnCost;
-        this.moveDelayOrthogonal = moveDelayOrthogonal;
-        this.moveDelayDiagonal = (int) Math.round(moveDelayOrthogonal * Math.sqrt(2.));
-        this.moveCost = moveCost;
-        this.sensorRadiusSquared = sensorRadiusSquared;
-        this.sensorAngle = sensorAngle;
-        this.attackRadiusMaxSquared = attackRadiusMaxSquared;
-        this.attackRadiusMinSquared = attackRadiusMinSquared;
+        this.moveDelay = moveDelay;
+        this.moveDelayDiagonal = (int) Math.round(moveDelay * Math.sqrt(2.0));
+        this.attackRadiusSquared = attackRadiusSquared;
         this.attackAngle = attackAngle;
         this.attackDelay = attackDelay;
         this.attackPower = attackPower;
         this.canAttackAir = canAttackAir;
         this.canAttackGround = canAttackGround;
-        this.sensorCosHalfTheta = Math.cos(sensorAngle * Math.PI / 360.);
-        this.attackCosHalfTheta = Math.cos(attackAngle * Math.PI / 360.);
+        this.fluxTransportCapacity = fluxTransportCapacity;
+        this.sustainRounds = sustainRounds;
+        this.weakenedFactor = weakenedFactor;
+
+        this.weakenedMoveDelay = (int) Math.round(moveDelay * weakenedFactor);
+        this.weakenedMoveDelayDiagonal = (int) Math.round(moveDelay * weakenedFactor * Math.sqrt(2.0));
+        this.weakenedAttackRadiusSquared = (int) Math.round(attackRadiusSquared / weakenedFactor);
+        this.weakenedAttackDelay = (int) Math.round(attackDelay * weakenedFactor);
+        this.weakenedAttackPower = (int) Math.round(attackPower / weakenedFactor);
+        
     }
 
 }
