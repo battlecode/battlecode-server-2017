@@ -16,7 +16,7 @@ public enum TerrainTile {
             case VOID:
                 return height == RobotLevel.IN_AIR;
             case LAND:
-                return height != RobotLevel.POWER_NODE;
+                return true;
             default:
                 return false;
         }

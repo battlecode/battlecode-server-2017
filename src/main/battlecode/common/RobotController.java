@@ -29,11 +29,6 @@ public interface RobotController {
     public double getMaxEnergon();
 
     /**
-     * Returns this robot's current flux level.
-     */
-    public double getFlux();
-
-    /**
      * Gets the current location of this robot.
      *
      * @return this robot's current location
@@ -84,90 +79,33 @@ public interface RobotController {
     // ***********************************
     // ****** SENSOR METHODS ********
     // ***********************************
-
+    
     /**
-     * Returns the object at the given location and height, or <code>null</code>
-     * if there is no object there.
-     *
-     * @throws GameActionException if <code>loc</code> is not within sensor range (CANT_SENSE_THAT)
+     * Returns an array of all Robots within sensor range. Returns a zero-length array if there are no nearby robots. 
      */
-    public GameObject senseObjectAtLocation(MapLocation loc, RobotLevel height) throws GameActionException;
-
-    /**
-     * Sense objects of type <code>type</code> that are within this sensor's range.
-     */
-    public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type);
-
-    /**
-     * Sense the location of the object <code>o</code>.
-     *
-     * @throws GameActionException if <code>o</code> is not within sensor range (CANT_SENSE_THAT)
-     */
-    public MapLocation senseLocationOf(GameObject o) throws GameActionException;
-
+    public Robot[] senseNearbyRobots();
+    
     /**
      * Sense the RobotInfo for the robot <code>r</code>.
      *
      * @throws GameActionException if <code>r</code> is not within sensor range (CANT_SENSE_THAT)
      */
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException;
+    
+    /**
+     * Returns an array of MapLocations of all Rifts within sensor range. Returns a zero-length array if there are no nearby rifts. 
+     */ 
+    public MapLocation[] senseNearbyRifts();
 
     /**
-     * Returns true if <code>o</code> is within sensor range.
+     * Returns true if <code>r</code> is within sensor range.
      */
-    public boolean canSenseObject(GameObject o);
-
+    public boolean canSenseRobot(Robot r);
+    
     /**
-     * Returns true if this robot can sense the location {@code loc}.
+     * Returns the MapLocation of the home base
      */
-    public boolean canSenseSquare(MapLocation loc);
-
-    /**
-     * Returns the locations of all the archons on the calling robot's team. The
-     * length of the returned array is equal to the number of allied archons on
-     * the map. The order of archons in the returned array is the same between
-     * different calls to this method.
-     *
-     * @return the locations of all the allied archons
-     */
-    public MapLocation[] senseAlliedArchons();
-
-    /**
-     * Returns an array containing all of the power nodes owned by this robot's team.
-     */
-    public PowerNode[] senseAlliedPowerNodes();
-
-    /**
-     * Returns an array containing the locations of all of the nodes
-     * that this team can capture.
-     */
-    public MapLocation[] senseCapturablePowerNodes();
-
-    /**
-     * Returns <code>true</code> if the node <code>p</code> is connected to
-     * this robot's team's power core.  Note that <code>p</code> does not need to
-     * be within sensor range.
-     */
-    public boolean senseConnected(PowerNode p);
-
-    /**
-     * Returns <code>true</code> if there is an allied tower at the power node <code>p</code>.
-     * Note that <code>p</code> does not need to be within sensor range.
-     */
-    public boolean senseOwned(PowerNode p);
-
-    /**
-     * Returns <code>true</code> if the node <code>p</code> is connected to
-     * this robot's team's opponent's power core.
-     *
-     * @throws GameActionException if <code>p</code> is not within this robot's sensor range (CANT_SENSE_THAT)
-     */
-    public boolean senseOpponentConnected(PowerNode p) throws GameActionException;
-
-    /**
-     * Returns this robot's team's power core.
-     */
-    public PowerNode sensePowerCore();
+    public MapLocation senseNexusLocation();
 
     // ***********************************
     // ****** MOVEMENT METHODS ********
@@ -211,7 +149,7 @@ public interface RobotController {
      * @return true if there are no robots or walls preventing this robot from
      *         moving in the given direction; false otherwise
      */
-    public boolean canMove(MapLocation loc) throws GameActionException;
+    public boolean canMove(MapLocation loc);
 
     // ***********************************
     // ****** ATTACK METHODS *******
@@ -240,9 +178,34 @@ public interface RobotController {
      * are ignored.
      *
      * @throws GameActionException if this robot's attack cooldown is not zero (ALREADY_ACTIVE)
-     * @throws GameActionException if this robot is not a <code>SCORCHER</code> and it cannot attack the given height or location (OUT_OF_RANGE)
+     * @throws GameActionException if <code>loc</code> is out of range
      */
     public void attackSquare(MapLocation loc, RobotLevel height) throws GameActionException;
+    
+    // ***********************************
+    //  **** FLUX CONSUMPTION METHODS ****
+    // ***********************************
+    
+    /**
+     * Returns the number of rounds until the robot becomes weakened from not consuming flux. 
+     */
+    public int roundsUntilWeakened();
+    
+    /**
+     * Causes the robot to immediately consume one unit of flux from an adjacent MapLocation
+     * @throws IllegalStateException if the robot is not a Soldier
+     * @throws GameActionException if <code>loc</code> is not adjacent to the robot
+     * @throws GameActionException if <code>loc</code> does not contain any flux
+     */
+    public void consumeFlux(MapLocation loc) throws GameActionException
+    
+    /**
+     * Causes the robot to immediately consume one unit of flux from an adjacent allied Transporter
+     * @throws GameActionException if <code>r</code> is not a friendly Transporter
+     * @throws GameActionException if <code>r</code> is not adjacent or on top of the robot that called this method
+     * @throws GameActionException if <code>r</code> does not contain any flux\
+     */
+    public void consumeFlux(Robot r) throws GameActionException
 
     // ***********************************
     // ****** BROADCAST METHODS *******
@@ -261,18 +224,11 @@ public interface RobotController {
      * are thus limited to sending at most one message per round.
      * </p>
      * <p/>
-     * You are charged a small amount of flux for every message that you
-     * broadcast. The cost of sending a message is equal to
-     * <code>(GameConstants.BROADCAST_FIXED_COST +
-     * GameConstants.BROADCAST_COST_PER_BYTE*sizeBytes)</code>
-     * where <code>sizeBytes</code> is the size of the message, in bytes.
-     * <p/>
-     * <p/>
      * Each robot can only broadcast one message per round.
      *
      * @param msg the message you want to broadcast; cannot be <code>null</code>.
      * @throws GameActionException if this robot already has a message queued in the current round (ALREADY_ACTIVE).
-     * @throws GameActionException if this robot does not have enough flux to pay for the broadcast (NOT_ENOUGH_FLUX).
+     * @throws GameActionException if the Message is longer than 256 bytes. 
      */
     public void broadcast(Message msg) throws GameActionException;
 
@@ -282,37 +238,21 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Queues a spawn action to be performed at the end of this robot's turn.
-     * When the action is executed, a new robot will be created at
-     * directly in front of this robot.  The square must not already be occupied.
+     * Queues a spawn action to be performed at the end of this robot's turn. Spawn may only be called by the Nexus. Only one robot may be spawned per turn. When the action is executed, a robot will be created at the MapLocation loc. This MapLocation must not be occupied and must be adjacent (orthogonally or diagonally) to the Nexus. 
      * The new robot is created and starts executing bytecodes immediately, but
      * it will not be able to perform any actions for <code>GameConstants.WAKE_DELAY</code>
      * rounds.
      *
      * @param type the type of robot to spawn; cannot be null.
-     * @throws IllegalStateException if this robot is not an ARCHON
-     * @throws GameActionException   if this robot is currently moving (ALREADY_ACTIVE)
-     * @throws GameActionException   if this robot does not have enough flux to spawn a robot of type <code>type</code> (NOT_ENOUGH_FLUX)
-     * @throws GameActionException   if <code>loc</code> is already occupied (CANT_MOVE_THERE)
+     * @throws GameActionException if this robot is not a Nexus
+     * @throws GameActionException if <code>loc</code> is already occupied (CANT_MOVE_THERE)
      */
     public void spawn(RobotType type, MapLocation loc) throws GameActionException;
-
+    
     /**
-     * Transfers the specified amount of flux to the robot at location
-     * <code>loc</code> and RobotLevel <code>height</code>. The robot
-     * receiving the transfer must be adjacent to or in the same location as the
-     * robot giving the transfer. Robots may not transfer more flux than they
-     * currently have.
-     *
-     * @param amount the amount of flux to transfer to the specified robot
-     * @param loc    the <code>MapLocation</code> of the robot to transfer to
-     * @param height the <code>RobotLevel</code> of the robot to transfer to
-     * @throws IllegalArgumentException if <code>amount</code> is negative, zero, or NaN.
-     * @throws GameActionException      if the robot does not have <code>amount</code> flux (NOT_ENOUGH_FLUX).
-     * @throws GameActionException      if <code>loc</code> is not the same as or adjacent to this robot's location (CANT_SENSE_THAT).
-     * @throws GameActionException      if there is no robot at the given location and height (NO_ROBOT_THERE).
+     * Generates 1 unit of flux at the robot's current location. GenerateFlux may only be called by the Nexus. When this action is executed, the amount of flux at the Nexus's MapLocation is increased by 1. This flux may be consumed by nearby Soldiers, or moved by a Transporter. 
      */
-    public void transferFlux(MapLocation loc, RobotLevel height, double amount) throws GameActionException;
+    public void generateFlux() throws GameActionException ;
 
     /**
      * Ends the current round.  This robot will receive a flux bonus of
@@ -330,18 +270,6 @@ public interface RobotController {
      * Causes your team to lose the game.  Mainly for testing purposes.
      */
     public void resign();
-
-    /**
-     * Causes each allied robot within its attack radius to regenerate
-     * <code>GameConstants.REGEN_AMOUNT</code> energon at the beginning
-     * of its next turn.  Each robot may only regenerate once per turn.
-     * This action can only be activated by scouts and costs
-     * <code>GameConstants.REGEN_COST</code> flux.
-     *
-     * @throws IllegalStateException if this robot is not a scout
-     * @throws GameActionException   if this robot does not have <code>GameConstants.REGEN_COST</code> flux (NOT_ENOUGH_FLUX)
-     */
-    public void regenerate() throws GameActionException;
 
     // ***********************************
     // ******** MISC. METHODS *********

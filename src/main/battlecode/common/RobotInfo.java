@@ -22,10 +22,6 @@ public class RobotInfo {
      */
     public final double energon;
     /**
-     * The flux of this Robot.
-     */
-    public final double flux;
-    /**
      * The type of this Robot.
      */
     public final RobotType type;
@@ -33,26 +29,20 @@ public class RobotInfo {
      * The team of this Robot.
      */
     public final Team team;
-    /**
-     * <code>true</code> if this robot is scheduled to regenerate
-     * at the beginning of its next turn.
-     */
-    public boolean regen;
+    
     public final int roundsUntilAttackIdle;
     public final int roundsUntilMovementIdle;
+    public final int roundsUntilWeakened;
 
     public RobotInfo(Robot robot, MapLocation location,
-                     double hitpoints, double flux,
-                     RobotType type, Team team, boolean regen,
+                     double hitpoints, RobotType type, Team team, 
                      int roundsUntilAttackIdle, int roundsUntilMovementIdle) {
         super();
         this.robot = robot;
         this.location = location;
         this.energon = hitpoints;
-        this.flux = flux;
         this.type = type;
         this.team = team;
-        this.regen = regen;
         this.roundsUntilAttackIdle = roundsUntilAttackIdle;
         this.roundsUntilMovementIdle = roundsUntilMovementIdle;
     }

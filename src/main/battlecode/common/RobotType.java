@@ -5,9 +5,9 @@ import static battlecode.common.RobotLevel.ON_GROUND;
 
 public enum RobotType {
 
-    NEXUS(ON_GROUND, 1000, 0, 0, 0, 0, 0, false, false, 0, 0, 1.0), 
-    TRANSPORTER(IN_AIR, 50, 4, 0, 0, 0, 0, false, false, 40, 0, 1.0),
-    SOLDIER(ON_GROUND, 30, 6, 25, 180, 4, 10, true, true, 0, 10, 1.0);
+    NEXUS(ON_GROUND, 1000, 0, 0, 0, 0, 0, 100, false, false, 0, 0, 1.0), 
+    TRANSPORTER(IN_AIR, 50, 4, 0, 0, 0, 0, 8, false, false, 40, 0, 1.0),
+    SOLDIER(ON_GROUND, 30, 6, 25, 180, 4, 10, 49, true, true, 0, 10, 1.0);
 
     /**
      * The robot's level (air or ground)
@@ -54,6 +54,11 @@ public enum RobotType {
      */
     public final double attackPower;
     public final int weakenedAttackPower;
+
+    /**
+     * The radius at which robots can sense other Robots and GameObjects
+     */
+    public final int sensorRadiusSquared;
 
     /**
      * Whether or not the robot can attack air units.
@@ -115,6 +120,7 @@ public enum RobotType {
               double attackAngle,
               int attackDelay,
               double attackPower,
+              int sensorRadiusSquared,
               boolean canAttackAir,
               boolean canAttackGround,
               int fluxTransportCapacity, 
@@ -129,6 +135,7 @@ public enum RobotType {
         this.attackAngle = attackAngle;
         this.attackDelay = attackDelay;
         this.attackPower = attackPower;
+        this.sensorRadiusSquared = sensorRadiusSquared;
         this.canAttackAir = canAttackAir;
         this.canAttackGround = canAttackGround;
         this.fluxTransportCapacity = fluxTransportCapacity;

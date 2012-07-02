@@ -30,8 +30,7 @@ public final class Message implements Cloneable {
     }
 
     /**
-     * Returns the number of bytes in this message, which can be used
-     * to determine the cost of broadcasting it in energon.
+     * Returns the number of bytes in this message. Messages are limited to 256 bytes. 
      */
     public int getNumBytes() {
         int cost = 0;
@@ -55,13 +54,6 @@ public final class Message implements Cloneable {
             }
         }
         return cost;
-    }
-
-    /**
-     * Returns the cost in flux to broadcast the message.
-     */
-    public double getFluxCost() {
-        return GameConstants.BROADCAST_FIXED_COST + GameConstants.BROADCAST_COST_PER_BYTE * getNumBytes();
     }
 
     /**
