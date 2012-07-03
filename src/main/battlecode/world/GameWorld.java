@@ -49,8 +49,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private Map<Team, List<InternalRobot>> archons;
 
     @SuppressWarnings("unchecked")
-    public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldArchonMemory) {
-        super(gm.getSeed(), teamA, teamB, oldArchonMemory);
+    public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldTeamMemory) {
+        super(gm.getSeed(), teamA, teamB, oldTeamMemory);
         gameMap = gm;
         archons = new EnumMap<Team, List<InternalRobot>>(Team.class);
         archons.put(Team.A, new ArrayList<InternalRobot>());
@@ -671,10 +671,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         r.setLocation(loc);
 
         addSignal(s);
-    }
-
-    public void setPowerCore(InternalPowerNode p, Team t) {
-        baseNodes.put(t, p);
     }
 
     @SuppressWarnings("unchecked")

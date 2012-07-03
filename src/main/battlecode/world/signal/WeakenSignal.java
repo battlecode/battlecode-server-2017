@@ -3,14 +3,12 @@ package battlecode.world.signal;
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
 
-public class TurnOffSignal extends Signal {
+public class WeakenSignal extends Signal {
 
     public final int robotID;
-    public final boolean voluntary;
 
-    public TurnOffSignal(InternalRobot r, boolean voluntary) {
+    public WeakenSignal(InternalRobot r) {
         this.robotID = r.getID();
-        this.voluntary = voluntary;
     }
 
 }

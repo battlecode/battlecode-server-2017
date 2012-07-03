@@ -2,12 +2,13 @@ package battlecode.common;
 
 import static battlecode.common.RobotLevel.IN_AIR;
 import static battlecode.common.RobotLevel.ON_GROUND;
+import static battlecode.common.GameConstants; 
 
 public enum RobotType {
 
-    NEXUS(ON_GROUND, 1000, 0, 0, 0, 0, 0, 100, false, false, 0, 0, 1.0), 
-    TRANSPORTER(IN_AIR, 50, 4, 0, 0, 0, 0, 8, false, false, 40, 0, 1.0),
-    SOLDIER(ON_GROUND, 30, 6, 25, 180, 4, 10, 49, true, true, 0, 10, 1.0);
+    NEXUS(ON_GROUND, 1000, 0, 0, 0, 0, 0, 100, false, false), 
+    TRANSPORTER(IN_AIR, 50, 4, 0, 0, 0, 0, 8, false, false),
+    SOLDIER(ON_GROUND, 30, 6, 25, 180, 4, 10, 49, true, true);
 
     /**
      * The robot's level (air or ground)
@@ -71,26 +72,6 @@ public enum RobotType {
     public final boolean canAttackGround;
 
     /**
-     * Returns how much flux the robot can transport around
-     */
-    public final int fluxTransportCapacity; 
-
-    /**
-     * Returns the number of rounds a robot can remain energized after  consuming flux
-     */
-    public final int sustainRounds;
-
-    /**
-    * If a robot has not consumed flux within the past sustainRounds rounds, it is weakened by weakenedFactor 
-    * moveDelay = round(moveDelay * weakenedFactor)
-    * moveDelayDiagonal = round(moveDelayDiagonal * weakenedFactor)
-    * attackDelay = round(attackDelay * weakenedFactor)
-    * attackRadiusSquared = round(attackRadiusSquared / weakenedFactor)
-    * attackPower = round(attackPower / weakenedFactor)
-    */ 
-    public final float weakenedFactor;
-
-    /**
      * Returns true if the robot can attack robots at the given level.
      */
     public boolean canAttack(RobotLevel level) {
@@ -122,10 +103,7 @@ public enum RobotType {
               double attackPower,
               int sensorRadiusSquared,
               boolean canAttackAir,
-              boolean canAttackGround,
-              int fluxTransportCapacity, 
-              int sustainRounds, 
-              float weakenedFactor
+              boolean canAttackGround
               ) {
         this.level = level;
         this.maxEnergon = maxEnergon;
@@ -138,15 +116,10 @@ public enum RobotType {
         this.sensorRadiusSquared = sensorRadiusSquared;
         this.canAttackAir = canAttackAir;
         this.canAttackGround = canAttackGround;
-        this.fluxTransportCapacity = fluxTransportCapacity;
-        this.sustainRounds = sustainRounds;
-        this.weakenedFactor = weakenedFactor;
 
-        this.weakenedMoveDelay = (int) Math.round(moveDelay * weakenedFactor);
-        this.weakenedMoveDelayDiagonal = (int) Math.round(moveDelay * weakenedFactor * Math.sqrt(2.0));
-        this.weakenedAttackRadiusSquared = (int) Math.round(attackRadiusSquared / weakenedFactor);
-        this.weakenedAttackDelay = (int) Math.round(attackDelay * weakenedFactor);
-        this.weakenedAttackPower = (int) Math.round(attackPower / weakenedFactor);
+        this.weakenedMoveDelay = (int) Math.round(moveDelay * GameConstants.WEAKNESS_FACTOR);
+        this.weakenedMoveDelayDiagonal = (int) Math.round(moveDelay * GameConstants.WEAKNESS_FACTOR * Math.sqrt(2.0));
+        this.weakenedAttackDelay = (int) Math.round(attackDelay * GameConstants.WEAKNESS_FACTOR);
         
     }
 

@@ -25,8 +25,6 @@ public class GameMap implements GenericGameMap {
      * The default game maxiumum number of rounds.
      */
     public static final int GAME_DEFAULT_MAX_ROUNDS = 10000;
-    /** The default game minimum number of points. */
-    //public static final int GAME_DEFAULT_MIN_POINTS = 5000;
     /**
      * The width and height of the map.
      */

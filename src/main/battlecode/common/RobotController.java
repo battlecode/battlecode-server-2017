@@ -84,6 +84,11 @@ public interface RobotController {
      * Returns an array of all Robots within sensor range. Returns a zero-length array if there are no nearby robots. 
      */
     public Robot[] senseNearbyRobots();
+
+    /**
+     * Returns true if <code>r</code> is within sensor range.
+     */
+    public boolean canSenseRobot(Robot r);
     
     /**
      * Sense the RobotInfo for the robot <code>r</code>.
@@ -93,14 +98,25 @@ public interface RobotController {
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException;
     
     /**
+     * Sense the amount of flux at a location
+     * 
+     * @throws GameActionException if <code>loc</code> is not within sensor range
+     */
+    public int senseFluxAt(MapLocation loc) throws GameActionException;
+    
+    /**
+     * Sense the amount of flux carried by a Transporter
+     * 
+     * Returns 0 if the robot is not a Transporter
+     * Returns 0 if the robot is not an ally
+     * @throws GameActionException if <code>r</code> is not within sensor range
+     */
+    public int senseFluxCarriedBy(Robot r) throws GameActionException;
+    
+    /**
      * Returns an array of MapLocations of all Rifts within sensor range. Returns a zero-length array if there are no nearby rifts. 
      */ 
     public MapLocation[] senseNearbyRifts();
-
-    /**
-     * Returns true if <code>r</code> is within sensor range.
-     */
-    public boolean canSenseRobot(Robot r);
     
     /**
      * Returns the MapLocation of the home base
@@ -190,6 +206,7 @@ public interface RobotController {
      * Returns the number of rounds until the robot becomes weakened from not consuming flux. 
      */
     public int roundsUntilWeakened();
+    public boolean isWeakened();
     
     /**
      * Causes the robot to immediately consume one unit of flux from an adjacent MapLocation
@@ -255,8 +272,7 @@ public interface RobotController {
     public void generateFlux() throws GameActionException ;
 
     /**
-     * Ends the current round.  This robot will receive a flux bonus of
-     * <code>GameConstants.YIELD_BONUS * GameConstants.UNIT_UPKEEP * Clock.getBytecodesLeft() / GameConstants.BYTECODE_LIMIT</code>.
+     * Ends the current round.
      * Never fails.
      */
     public void yield();

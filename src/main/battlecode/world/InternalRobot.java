@@ -13,12 +13,8 @@ import java.util.Map;
 public class InternalRobot extends InternalObject implements Robot, GenericRobot {
 
     protected volatile double myEnergonLevel;
-    private volatile double flux;
     protected volatile boolean energonChanged = true;
-    private volatile boolean fluxChanged = true;
     protected volatile long controlBits;
-    // is this used ever?
-    protected volatile boolean hasBeenAttacked = false;
     private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean("bc.engine.upkeep");
     /**
      * first index is robot type, second is direction, third is x or y
@@ -33,18 +29,15 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public final RobotType type;
 
     private volatile int turnsUntilMovementIdle;
+    private volatile int turnsUntilMovementIdleWeakened;
     private volatile int turnsUntilAttackIdle;
-    protected volatile boolean regen;
+    private volatile int turnsuntilAttackIdleWeakened;
+    private volatile int turnsUntilWeakened; 
+    private boolean isWeakened; 
     private boolean broadcasted;
     private boolean upkeepPaid;
 
     private Signal movementSignal;
-
-    private InternalRobotBuffs buffs;
-
-    public InternalRobotBuffs getBuffs() {
-        return buffs;
-    }
 
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
@@ -67,9 +60,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             turnsUntilAttackIdle = GameConstants.WAKE_DELAY;
         }
 
-        if (type == RobotType.ARCHON)
-            gw.addArchon(this);
-
     }
 
     public void addAction(Signal s) {
@@ -79,7 +69,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @Override
     public void processBeginningOfRound() {
         super.processBeginningOfRound();
-        buffs.processBeginningOfRound();
         // towers don't get a turn, so regenerate them here
         if (type == RobotType.TOWER) {
             if (regen) {

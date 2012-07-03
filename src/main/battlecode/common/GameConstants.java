@@ -50,9 +50,23 @@ public interface GameConstants {
      */
     public static final int BROADCAST_RADIUS_SQUARED = 81;
     /**
+     * The number of flux units that a Transporter can carry
+     */ 
+    public static final int FLUX_TRANSPORT_CAPACITY = 40;
+    /**
      * The number of turns before a newly spawned robot can move or attack.
      */
     public static final int WAKE_DELAY = 20;
+    /**
+     * The number of turns a robot can operate without consuming flux before it becomes weakened
+     */
+    public static final int ROUNDS_UNTIL_WEAKENED = 10;
+    /**
+     * If a robot has not consumed flux within the past sustainRounds rounds, it is weakened by weakenedFactor 
+     moveDelay, moveDelayDiagonal, attackDelay are multiplied
+     attackRadiusSquared and attackPower are divided
+     */ 
+    public static final float WEAKENESS_FACTOR = 2.0f;
     /**
      * The minimum possible round at which nodes may begin taking end-of-round damage
      */
