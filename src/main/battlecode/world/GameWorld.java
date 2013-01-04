@@ -201,7 +201,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         
         for (int x=0; x<teamResources.length; x++)
         {
-        	teamResources[x] = teamResources[x]*GameConstants.RESOURCE_DECAY_RATE;
+        	if (hasUpgrade(Team.values()[x], Upgrade.FUSION))
+            	teamResources[x] = teamResources[x]*GameConstants.RESOURCE_DECAY_RATE_FUSION;
+        	else
+        		teamResources[x] = teamResources[x]*GameConstants.RESOURCE_DECAY_RATE;
 //        	System.out.print(teamResources[x]+" ");
         }
 //        System.out.println();
@@ -576,25 +579,45 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
         MapLocation targetLoc = s.getTargetLoc();
         RobotLevel level = s.getTargetHeight();
-
-    	Direction dir = Direction.NORTH;
-    	MapLocation nearby;
-    	InternalRobot nearbyrobot;
-    	ArrayList<InternalRobot> todamage = new ArrayList<InternalRobot>();
-    	do {
-    		nearby = targetLoc.add(dir);
-    		nearbyrobot = getRobot(nearby, level);
-    		if (nearbyrobot != null)
-    			if (nearbyrobot.getTeam() != attacker.getTeam())
-    				todamage.add(nearbyrobot);
-    		dir = dir.rotateLeft();
-    	} while (dir != Direction.NORTH);
-    	if (todamage.size()>0) {
-            double damage = attacker.type.attackPower/todamage.size();
-            for (InternalRobot r : todamage)
-            	r.takeDamage(damage, attacker);
-    	}
         
+        switch (attacker.type) {
+		case SOLDIER:
+			Direction dir = Direction.NORTH;
+	    	MapLocation nearby;
+	    	InternalRobot nearbyrobot;
+	    	ArrayList<InternalRobot> todamage = new ArrayList<InternalRobot>();
+	    	do {
+	    		nearby = targetLoc.add(dir);
+	    		nearbyrobot = getRobot(nearby, level);
+	    		if (nearbyrobot != null)
+	    			if (nearbyrobot.getTeam() != attacker.getTeam())
+	    				todamage.add(nearbyrobot);
+	    		dir = dir.rotateLeft();
+	    	} while (dir != Direction.NORTH);
+	    	if (todamage.size()>0) {
+	            double damage = attacker.type.attackPower/todamage.size();
+	            for (InternalRobot r : todamage)
+	            	r.takeDamage(damage, attacker);
+	    	}
+			break;
+		case ARTILLERY:
+			InternalRobot target;
+			for (int dx = -1; dx <= 1; dx++)
+				for (int dy = -1; dy <= 1; dy++) {
+
+					target = getRobot(targetLoc.add(dx, dy), level);
+
+					if (target != null)
+						if (dx == 0 && dy == 0)
+							target.takeDamage(attacker.type.attackPower, attacker);
+						else
+							target.takeDamage(attacker.type.attackPower/2.0, attacker);
+				}
+
+			break;
+		default:
+			// ERROR, should never happen
+		}
         
         // TODO if we want units to not damange allied units
         // TODO CORY FIX IT
@@ -782,9 +805,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         for (int dx=-dist; dx<=dist; dx++)
         	for (int dy=-dist; dy<=dist; dy++)
         	{
+        		if (dx*dx+dy*dy > medbay.type.attackRadiusMaxSquared) continue;
         		target = getRobot(targetLoc.add(dx, dy), level);
         		if (target != null)
-        			target.takeDamage(-medbay.type.attackPower, medbay);
+        			if (target.getTeam() == medbay.getTeam())
+        				target.takeDamage(-medbay.type.attackPower, medbay);
         	}
         addSignal(s);
     }
@@ -800,9 +825,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         for (int dx=-dist; dx<=dist; dx++)
         	for (int dy=-dist; dy<=dist; dy++)
         	{
+        		if (dx*dx+dy*dy > shields.type.attackRadiusMaxSquared) continue;
         		target = getRobot(targetLoc.add(dx, dy), level);
         		if (target != null)
-        			target.takeShieldedDamage(-shields.type.attackPower);
+        			if (target.getTeam() == shields.getTeam())
+        				target.takeShieldedDamage(-shields.type.attackPower);
         	}
         addSignal(s);
     }

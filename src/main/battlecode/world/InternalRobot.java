@@ -19,6 +19,8 @@ import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.CaptureSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.MineSignal;
+import battlecode.world.signal.RegenSignal;
+import battlecode.world.signal.ShieldSignal;
 import battlecode.world.signal.SpawnSignal;
 
 public class InternalRobot extends InternalObject implements Robot, GenericRobot {
@@ -65,6 +67,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private RobotType capturingType;
 
     private Signal movementSignal;
+    private Signal attackSignal;
 
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
@@ -169,6 +172,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     		Team mines = myGameWorld.getMine(getLocation());
     		if (mines!=null && mines!=getTeam()) {
     			this.takeDamage(GameConstants.MINE_DAMAGE);
+    			myGameWorld.addKnownMineLocation(getTeam(), getLocation());
     		}
     	}
         if (upkeepEnabled && canExecuteCode()) {
@@ -221,6 +225,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         			myGameWorld.visitSignal(new SpawnSignal(getLocation(), capturingType, getTeam(), this));
         			capturingRounds = -1;
         			suicide();
+        			return;
         		}
         	}
         }
@@ -229,6 +234,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         if (movementSignal != null) {
             myGameWorld.visitSignal(movementSignal);
             movementSignal = null;
+        }
+        
+        if (attackSignal != null) {
+        	myGameWorld.visitSignal(attackSignal);
+        	attackSignal = null;
         }
         if (turnsUntilAttackIdle > 0)
             turnsUntilAttackIdle--;
@@ -246,21 +256,34 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             	}
             }
         }
+       
+        boolean nearbyAlly = false;
+        boolean nearbyEnemy = false;
+        
+    	for(int i=0; i<8; i++) {
+    		Robot nearby = myGameWorld.getRobot(this.getLocation().add(Direction.values()[i]),
+    				RobotLevel.ON_GROUND);
+    		if(nearby != null) {
+    			if(nearby.getTeam() == getTeam()) nearbyAlly = true;
+    			else if(nearby.getTeam() == getTeam().opponent()) nearbyEnemy = true;
+        	}
+    	}
         
         // Soldiers Automatically Attack
-        if (type == RobotType.SOLDIER) {
-        	if (this.turnsUntilAttackIdle == 0)
-        	{
-        		myGameWorld.visitSignal(new AttackSignal(this, getLocation(), RobotLevel.ON_GROUND));
-//        		for(int i=0; i<8; i++) {
-//	        		Robot nearby = myGameWorld.getRobot(this.getLocation().add(Direction.values()[i]),
-//	        				RobotLevel.ON_GROUND);
-//	        		if(nearby != null && nearby.getTeam() == getTeam().opponent()) {
-//	        			myGameWorld.visitSignal(new AttackSignal(this, getLocation(), RobotLevel.ON_GROUND));
-//	        			break;
-//	        		}
-//	        	}
-        	}
+        if (type == RobotType.SOLDIER && nearbyEnemy && this.turnsUntilAttackIdle == 0) {
+        	myGameWorld.visitSignal(new AttackSignal(this, getLocation(), RobotLevel.ON_GROUND));
+        } // Medbays Auto Heal
+        else if (type == RobotType.MEDBAY) {
+        	if (nearbyAlly)
+        		myGameWorld.visitSignal(new RegenSignal(this));
+        	else
+        		takeDamage(-this.type.attackPower, this);
+        } // Shields Auto Shield
+        else if (type == RobotType.SHIELDS) {
+        	if (nearbyAlly)
+        		myGameWorld.visitSignal(new ShieldSignal(this));
+        	else
+        		takeShieldedDamage(-this.type.attackPower);
         }
         
         // autosend aggregated broadcast
@@ -288,21 +311,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return flux;
     }
 
-    public boolean payFlux(double amt) {
-        if (amt < flux)
-            return false;
-        else {
-            flux -= amt;
-            return true;
-        }
-    }
-
-    public void adjustFlux(double amt) {
-        flux += amt;
-        if (flux >= type.maxFlux)
-            flux = type.maxFlux;
-        fluxChanged = true;
-    }
 
     public Direction getDirection() {
         return myDirection;
@@ -415,6 +423,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void activateMovement(Signal s, int delay) {
         movementSignal = s;
         turnsUntilMovementIdle = delay;
+    }
+    
+    public void activateAttack(Signal s, int delay) {
+        attackSignal = s;
+        turnsUntilAttackIdle = delay;
     }
 
     public void addBroadcast(int channel, int data) {
@@ -543,5 +556,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 //        incomingMessageQueue = null;
         mapMemory = null;
         movementSignal = null;
+        attackSignal = null;
     }
 }

@@ -19,11 +19,11 @@ public interface RobotController {
      * @return this robot's current energon level
      */
     public double getEnergon();
-
+    
     /**
-     * @return this robot's maximum energon level
+     * @return this robot's shields
      */
-    public double getMaxEnergon();
+    public double getShields();
     
     /**
      * @return total amount of resources remaining
@@ -76,6 +76,18 @@ public interface RobotController {
      */
     public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type);
 
+    /**
+     * Same as <code>senseNearbyGameObjects</code> except objects are returned only if they are
+     * within the given radius
+     */
+    public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type, int radiusSquared);
+    
+    /**
+     * Same as <code>senseNearbyGameObjects</code> excent objects are returned only if
+     * both within the given radius and on the given team
+     */
+    public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type, int radiusSquared, Team team);
+    
     /**
      * Sense the location of the object <code>o</code>.
      *
@@ -134,19 +146,19 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * @return the number of rounds until this robot's movement cooldown reaches zero.
+     * @return the number of rounds until this robot's action cooldown ends, or 0 if it is already active.
      */
-    public int roundsUntilMovementIdle();
+    public int roundsUntilActive();
 
     /**
-     * @return true if this robot's movement cooldown is nonzero.
+     * @return true if this robot is active. If a robot is active, it can move, mine, defuse, capture, and attack.
      */
-    public boolean isMovementActive();
+    public boolean isActive();
 
     /**
-     * Try to move in given direction
+     * Move in the given direction if possible.
      * @param dir
-     * @throws GameActionException 
+     * @throws GameActionException if the robot cannot move in this direction
      */
     public void move(Direction dir) throws GameActionException;
 
@@ -227,14 +239,6 @@ public interface RobotController {
     
     
     /**
-     * MEDBAY and SHIELD only.
-     * Activates an encampment's special ability.
-     * @throws GameActionException
-     */
-    public void activateEncampment() throws GameActionException;
-    
-    
-    /**
      * SOLDIER only
      * Lays a mine underneath a robot. A robot cannot move until the mine is laid
      * 
@@ -249,16 +253,6 @@ public interface RobotController {
      * @throws GameActionException
      */
     public void defuseMine(MapLocation loc) throws GameActionException;
-
-    
-    /**
-     * Captures a given neutral encampement square in the direction, and converts it into given encampment type
-     *
-     * @param dir
-     * @param type
-     * @throws GameActionException
-     */
-    public void captureEncampment(Direction dir, RobotType type) throws GameActionException;
     
     /**
      * Captures the encampment soldier is standing on. 
@@ -307,6 +301,11 @@ public interface RobotController {
     // ***********************************
     // ******** MISC. METHODS *********
     // ***********************************
+    
+    /**
+     * Puts a hat on the robot. To be monetized in a future DLC
+     */
+    public void wearHat();
 
     /**
      * Sets one of this robot's 'indicator strings' for debugging purposes.

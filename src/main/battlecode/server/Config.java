@@ -61,6 +61,7 @@ public class Config {
         defaults.setProperty("bc.client.sound-on", "true");
         defaults.setProperty("bc.client.check-updates", "true");
         defaults.setProperty("bc.client.tournament-multiscreen", "true");
+        defaults.setProperty("bc.client.viewer-delay", "50");
 
         defaults.setProperty("bc.game.team-a", "team000");
         defaults.setProperty("bc.game.team-b", "team000");

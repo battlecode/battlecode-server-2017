@@ -33,7 +33,7 @@ public class ShieldChangeSignal extends Signal {
         shield = new double[robots.length];
         for (int i = 0; i < robots.length; i++) {
             robotIDs[i] = robots[i].getID();
-            shield[i] = robots[i].getEnergonLevel();
+            shield[i] = robots[i].getShieldLevel();
         }
     }
 

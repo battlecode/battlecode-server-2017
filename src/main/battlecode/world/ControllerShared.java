@@ -71,11 +71,6 @@ public abstract class ControllerShared {
         return castInternalObject(o, InternalObject.class);
     }
 
-    protected void payFlux(double amount) throws GameActionException {
-        if (!robot.payFlux(amount))
-            throw new GameActionException(NOT_ENOUGH_FLUX, "You don't have enough flux to do that.");
-    }
-
     protected InternalRobot robotOrException(MapLocation loc, RobotLevel height) throws GameActionException {
         assertNotNull(loc);
         assertNotNull(height);

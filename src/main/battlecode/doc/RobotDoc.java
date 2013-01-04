@@ -63,16 +63,12 @@ public class RobotDoc implements Taglet {
         }
         StringBuilder builder = new StringBuilder();
         try {
-            append(builder, "Level", rt.level.name());
             append(builder, "Max Energon", String.format("%1.0f", rt.maxEnergon));
-            append(builder, "Max Flux", String.format("%1.0f", rt.maxFlux));
             if (rt.spawnCost > 0)
                 append(builder, "Spawn Cost", String.format("%1.0f", rt.spawnCost));
             if (rt.moveDelayOrthogonal > 0) {
                 append(builder, "Move Delay Orthogonal", String.format("%d", rt.moveDelayOrthogonal));
                 append(builder, "Move Delay Diagonal", String.format("%d", rt.moveDelayDiagonal));
-                // display cost for archons even though it's zero
-                append(builder, "Move Cost", String.format("%1.1f", rt.moveCost));
             }
             if (rt.sensorAngle > 0) {
                 append(builder, "Sensor Radius Squared", String.format("%d", rt.sensorRadiusSquared));
@@ -81,7 +77,6 @@ public class RobotDoc implements Taglet {
             if (rt.canAttackAir || rt.canAttackGround) {
                 append(builder, "Min Attack Radius Squared", String.format("%d", rt.attackRadiusMinSquared));
                 append(builder, "Max Attack Radius Squared", String.format("%d", rt.attackRadiusMaxSquared));
-                append(builder, "Attack Angle", String.format("%1.0f", rt.attackAngle));
                 append(builder, "Attack Power", String.format("%1.1f", rt.attackPower));
                 append(builder, "Attack Delay", String.format("%d", rt.attackDelay));
                 String attacks;
