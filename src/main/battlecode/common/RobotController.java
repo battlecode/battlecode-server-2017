@@ -1,5 +1,6 @@
 package battlecode.common;
 
+
 /**
  * A RobotController allows contestants to make their robot sense and interact
  * with the game world. When a contestant's <code>RobotPlayer</code> is
@@ -15,43 +16,25 @@ public interface RobotController {
     // *********************************
 
     /**
-     * Gets the current energon of this robot.
-     *
      * @return this robot's current energon level
      */
     public double getEnergon();
 
     /**
-     * Gets the maximum energon of this robot.
-     *
      * @return this robot's maximum energon level
      */
     public double getMaxEnergon();
+    
+    /**
+     * @return total amount of resources remaining
+     */
+    public double getTeamResources();
 
     /**
-     * Gets the current location of this robot.
-     *
      * @return this robot's current location
      */
     public MapLocation getLocation();
-
-    /**
-     * Retrieve the next message waiting in your incoming message queue. Also
-     * removes the message from the queue.
-     *
-     * @return next Message object in your queue, or null if your queue is
-     *         empty.
-     */
-    public Message getNextMessage();
-
-    /**
-     * Retrieves an array of all the messages in your incoming message queue.
-     * All messages will be removed from the queue. If there are no messages in
-     * the queue, this method returns a zero-length array.
-     *
-     * @return all the Messages in your message queue
-     */
-    public Message[] getAllMessages();
+    
 
     /**
      * Gets the Team of this robot. Equivalent to
@@ -70,7 +53,7 @@ public interface RobotController {
     public Robot getRobot();
 
     /**
-     * Gets this robot's type.
+     * Gets this robot's type (SOLDIER, HQ, etc.)
      *
      * @return this robot's type.
      */
@@ -79,82 +62,93 @@ public interface RobotController {
     // ***********************************
     // ****** SENSOR METHODS ********
     // ***********************************
-    
-    /**
-     * Returns an array of all Robots within sensor range. Returns a zero-length array if there are no nearby robots. 
-     */
-    public Robot[] senseNearbyRobots();
 
     /**
-     * Returns true if <code>r</code> is within sensor range.
+     * Returns the object at the given location and height, or <code>null</code>
+     * if there is no object there.
+     *
+     * @throws GameActionException if <code>loc</code> is not within sensor range (CANT_SENSE_THAT)
      */
-    public boolean canSenseRobot(Robot r);
-    
+    public GameObject senseObjectAtLocation(MapLocation loc, RobotLevel height) throws GameActionException;
+
+    /**
+     * Sense objects of type <code>type</code> that are within this sensor's range.
+     */
+    public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type);
+
+    /**
+     * Sense the location of the object <code>o</code>.
+     *
+     * @throws GameActionException if <code>o</code> is not within sensor range (CANT_SENSE_THAT)
+     */
+    public MapLocation senseLocationOf(GameObject o) throws GameActionException;
+
     /**
      * Sense the RobotInfo for the robot <code>r</code>.
      *
      * @throws GameActionException if <code>r</code> is not within sensor range (CANT_SENSE_THAT)
      */
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException;
-    
+
     /**
-     * Sense the amount of flux at a location
-     * 
-     * @throws GameActionException if <code>loc</code> is not within sensor range
+     * @return true if GameObject <code>o</code> is within a robot's personal sensor range
      */
-    public int senseFluxAt(MapLocation loc) throws GameActionException;
-    
+    public boolean canSenseObject(GameObject o);
+
     /**
-     * Sense the amount of flux carried by a Transporter
-     * 
-     * Returns 0 if the robot is not a Transporter
-     * Returns 0 if the robot is not an ally
-     * @throws GameActionException if <code>r</code> is not within sensor range
+     * Returns true if this robot can sense the location {@code loc}.
      */
-    public int senseFluxCarriedBy(Robot r) throws GameActionException;
-    
+    public boolean canSenseSquare(MapLocation loc);
+
+    public MapLocation[] senseAllEncampments();
+    public MapLocation[] senseAlliedEncampments();
+
     /**
-     * Returns an array of MapLocations of all Rifts within sensor range. Returns a zero-length array if there are no nearby rifts. 
-     */ 
-    public MapLocation[] senseNearbyRifts();
-    
-    /**
-     * Returns the MapLocation of the home base
+     * Sense whether a mine exists at a given location
+     * Returns either the TEAM of the mine or null if there is no mine
+     * @param location to scan
+     * @return
      */
-    public MapLocation senseNexusLocation();
+    public Team senseMine(MapLocation location);
+   
+    
+    /**
+     * @return An array of MapLocations containing all known enemy mine locations
+     */
+    public MapLocation[] senseAllEnemyMineLocations();
+    
+
+    /**
+     * @return location of this robot's HQ
+     */
+    public MapLocation senseHQLocation();
+
+    /**
+     * @return location of the enemy team's HQ
+     */
+    public MapLocation senseEnemyHQLocation();
+    
 
     // ***********************************
     // ****** MOVEMENT METHODS ********
     // ***********************************
 
     /**
-     * Returns the number of rounds until this robot's movement cooldown reaches zero.
+     * @return the number of rounds until this robot's movement cooldown reaches zero.
      */
     public int roundsUntilMovementIdle();
 
     /**
-     * Returns true if this robot's movement cooldown is nonzero.
+     * @return true if this robot's movement cooldown is nonzero.
      */
     public boolean isMovementActive();
 
     /**
-     * Queues a movement to be performed at the end of this robot's turn.
-     * <p/>
-     * When this action is executed, the robot will attempt to move to the given square.
-     * If the move succeeds, this robot's new
-     * location will immediately change to the destination square, but this robot
-     * motor will not be able to move or change direction again for some number of rounds (<code>type().moveDelayOrthogonal</code> for
-     * orthogonal movement and <code>type().moveDelayDiagonal</code> for
-     * diagonal movement).
-     *
-     * @throws GameActionException if this robot is already moving (ALREADY_ACTIVE)
-     * @throws GameActionException if this robot does not have enough flux to move (NOT_ENOUGH_FLUX)
-     * @throws GameActionException if the destination terrain is not traversable by
-     *                             this robot (CANT_MOVE_THERE)
-     * @throws GameActionException if the destination is occupied by another {@code GameObject}
-     *                             at the same height (CANT_MOVE_THERE)
+     * Try to move in given direction
+     * @param dir
+     * @throws GameActionException 
      */
-    public void move(MapLocation loc) throws GameActionException;
+    public void move(Direction dir) throws GameActionException;
 
     /**
      * Tells whether this robot can move in the given direction. Takes into
@@ -165,114 +159,137 @@ public interface RobotController {
      * @return true if there are no robots or walls preventing this robot from
      *         moving in the given direction; false otherwise
      */
-    public boolean canMove(MapLocation loc);
+    public boolean canMove(Direction dir);
 
     // ***********************************
     // ****** ATTACK METHODS *******
     // ***********************************
 
     /**
-     * Returns the number of rounds until this robot's attack cooldown reaches zero.
-     */
-    public int roundsUntilAttackIdle();
-
-    /**
-     * Returns true if this robot's attack cooldown is nonzero.
-     */
-    public boolean isAttackActive();
-
-    /**
-     * Returns true if the given location is within this robot's attack range.
-     * Does not take into account whether the robot is currently attacking.
+     * ARTILLERY only
+     * @return true if the given location is within this robot's attack range.
+     * Does not take into account whether the robot is currently attacking
      */
     public boolean canAttackSquare(MapLocation loc);
 
     /**
+     * ARTILLERY only
      * Attacks the given location and height.
-     * If this robot is a <code>SCORCHER</code>, attacks every square in the robot's
-     * attack range at ground level instead; <code>loc</code> and <code>height</code>
-     * are ignored.
-     *
-     * @throws GameActionException if this robot's attack cooldown is not zero (ALREADY_ACTIVE)
-     * @throws GameActionException if <code>loc</code> is out of range
      */
-    public void attackSquare(MapLocation loc, RobotLevel height) throws GameActionException;
-    
-    // ***********************************
-    //  **** FLUX CONSUMPTION METHODS ****
-    // ***********************************
-    
-    /**
-     * Returns the number of rounds until the robot becomes weakened from not consuming flux. 
-     */
-    public int roundsUntilWeakened();
-    public boolean isWeakened();
-    
-    /**
-     * Causes the robot to immediately consume one unit of flux from an adjacent MapLocation
-     * @throws IllegalStateException if the robot is not a Soldier
-     * @throws GameActionException if <code>loc</code> is not adjacent to the robot
-     * @throws GameActionException if <code>loc</code> does not contain any flux
-     */
-    public void consumeFlux(MapLocation loc) throws GameActionException
-    
-    /**
-     * Causes the robot to immediately consume one unit of flux from an adjacent allied Transporter
-     * @throws GameActionException if <code>r</code> is not a friendly Transporter
-     * @throws GameActionException if <code>r</code> is not adjacent or on top of the robot that called this method
-     * @throws GameActionException if <code>r</code> does not contain any flux\
-     */
-    public void consumeFlux(Robot r) throws GameActionException
+    public void attackSquare(MapLocation loc) throws GameActionException;
 
     // ***********************************
     // ****** BROADCAST METHODS *******
     // ***********************************
+    
+    /**
+     * Broadcasts a message to the global message board.
+     * The data is not written until the end of the robot's turn
+     * @param channel - the channel to write to, from 0 to <code>MAX_RADIO_CHANNELS</code>
+     * @param data - one int's worth of data to write
+     * @throws GameActionException
+     */
+    public void broadcast(int channel, int data) throws GameActionException;
 
     /**
-     * Returns true if this robot has already broadcasted this turn.
+     * Retrieves the message stored at the given radio channel
+     * @param channel - radio channel to query, from 0 to <code>MAX_RADIO_CHANNELS</code>
+     * @return data currently stored on the channel
+     * @throws GameActionException 
      */
-    public boolean hasBroadcasted();
-
-    /**
-     * Adds a message for your robot to broadcast. At the end of your
-     * robot's execution block, if a broadcast has been set, the message is removed
-     * and immediately added to the incoming message queues of all robots in
-     * your broadcast range (except for the sending robot). Note that robots
-     * are thus limited to sending at most one message per round.
-     * </p>
-     * <p/>
-     * Each robot can only broadcast one message per round.
-     *
-     * @param msg the message you want to broadcast; cannot be <code>null</code>.
-     * @throws GameActionException if this robot already has a message queued in the current round (ALREADY_ACTIVE).
-     * @throws GameActionException if the Message is longer than 256 bytes. 
-     */
-    public void broadcast(Message msg) throws GameActionException;
-
+    public int readBroadcast(int channel) throws GameActionException;
 
     // ***********************************
     // ****** OTHER ACTION METHODS *******
     // ***********************************
 
     /**
-     * Queues a spawn action to be performed at the end of this robot's turn. Spawn may only be called by the Nexus. Only one robot may be spawned per turn. When the action is executed, a robot will be created at the MapLocation loc. This MapLocation must not be occupied and must be adjacent (orthogonally or diagonally) to the Nexus. 
-     * The new robot is created and starts executing bytecodes immediately, but
-     * it will not be able to perform any actions for <code>GameConstants.WAKE_DELAY</code>
-     * rounds.
+     *
+     * Queues a spawn action to be performed at the end of this robot's turn.
+     * When the action is executed, a new robot will be created at
+     * directly in front of this robot.  The square must not already be occupied.
+     * The new robot is created and starts executing bytecodes immediately
      *
      * @param type the type of robot to spawn; cannot be null.
-     * @throws GameActionException if this robot is not a Nexus
-     * @throws GameActionException if <code>loc</code> is already occupied (CANT_MOVE_THERE)
+     * @throws IllegalStateException if this robot is not an ARCHON
+     * @throws GameActionException   if this robot is currently moving (ALREADY_ACTIVE)
+     * @throws GameActionException   if this robot does not have enough flux to spawn a robot of type <code>type</code> (NOT_ENOUGH_FLUX)
+     * @throws GameActionException   if <code>loc</code> is already occupied (CANT_MOVE_THERE)
      */
-    public void spawn(RobotType type, MapLocation loc) throws GameActionException;
+    public void spawn(Direction dir) throws GameActionException;
+   
     
     /**
-     * Generates 1 unit of flux at the robot's current location. GenerateFlux may only be called by the Nexus. When this action is executed, the amount of flux at the Nexus's MapLocation is increased by 1. This flux may be consumed by nearby Soldiers, or moved by a Transporter. 
+     * Checks whether a given upgrade has been researched and is available.
+     * @param upgrade
      */
-    public void generateFlux() throws GameActionException ;
-
+    public boolean hasUpgrade(Upgrade upgrade);
+    
+    
     /**
-     * Ends the current round.
+     * MEDBAY and SHIELD only.
+     * Activates an encampment's special ability.
+     * @throws GameActionException
+     */
+    public void activateEncampment() throws GameActionException;
+    
+    
+    /**
+     * SOLDIER only
+     * Lays a mine underneath a robot. A robot cannot move until the mine is laid
+     * 
+     * @throws GameActionException
+     */
+    public void layMine() throws GameActionException;
+    
+    /**
+     * SOLDIER only
+     * Defuses a mine on the target square. A robot cannot move until the defusion is complete.
+     * 
+     * @throws GameActionException
+     */
+    public void defuseMine(MapLocation loc) throws GameActionException;
+
+    
+    /**
+     * Captures a given neutral encampement square in the direction, and converts it into given encampment type
+     *
+     * @param dir
+     * @param type
+     * @throws GameActionException
+     */
+    public void captureEncampment(Direction dir, RobotType type) throws GameActionException;
+    
+    /**
+     * Captures the encampment soldier is standing on. 
+     * Immediately kills the soldier and encampment, and spawns an encampment robot of the given type
+     * @param dir
+     * @param type
+     * @throws GameActionException
+     */
+    public void captureEncampment(RobotType type) throws GameActionException;
+   
+    /**
+     * Researches the given upgrade for a turn.
+     * Will only work if the robot is an HQ
+     * @param upgrade
+     * @throws GameActionException
+     */
+    public void researchUpgrade(Upgrade upgrade) throws GameActionException;
+    
+    /**
+     * Checks the total number of rounds a given research has been researched
+     * Will only work if the robot is an HQ
+     * @param upgrade
+     * @return
+     * @throws GameActionException
+     */
+    public int checkResearchProgress(Upgrade upgrade) throws GameActionException;
+    
+    
+    /**
+     * Ends the current round.  This robot will receive a flux bonus of
+     * <code>GameConstants.YIELD_BONUS * GameConstants.UNIT_UPKEEP * Clock.getBytecodesLeft() / GameConstants.BYTECODE_LIMIT</code>.
      * Never fails.
      */
     public void yield();
@@ -283,7 +300,7 @@ public interface RobotController {
     public void suicide();
 
     /**
-     * Causes your team to lose the game.  Mainly for testing purposes.
+     * Causes your team to lose the game. It's like typing "gg."
      */
     public void resign();
 

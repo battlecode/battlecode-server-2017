@@ -123,8 +123,6 @@ public final class MapLocation implements Serializable {
      * @param location The location to which the Direction will be calculated
      * @return The Direction to <code>location</code> from this MapLocation.
      */
-	// Maybe modify this to return an adjacent MapLocation?
-	/*
     public final Direction directionTo(MapLocation location) {
         double dx = location.x - this.x;
         double dy = location.y - this.y;
@@ -159,7 +157,32 @@ public final class MapLocation implements Serializable {
             }
         }
     }
-	*/
+
+    /**
+     * Returns a new MapLocation object representing a location
+     * one square from this one in the given direction.
+     *
+     * @param direction the direction to add to this location
+     * @return a MapLocation for the location one square in the given
+     *         direction, or this location if the direction is NONE or OMNI
+     */
+    public final MapLocation add(Direction direction) {
+
+        return new MapLocation(x + direction.dx, y + direction.dy);
+    }
+
+    /**
+     * Returns a new MapLocation object representing a location
+     * {@code multiple} squares from this one in the given direction.
+     *
+     * @param direction the direction to add to this location
+     * @param multiple  the number of squares to add
+     * @return a MapLocation for the location one square in the given
+     *         direction, or this location if the direction is NONE or OMNI
+     */
+    public final MapLocation add(Direction direction, int multiple) {
+        return new MapLocation(x + multiple * direction.dx, y + multiple * direction.dy);
+    }
 
     /**
      * Returns a new MapLocation object translated from this location
@@ -172,4 +195,15 @@ public final class MapLocation implements Serializable {
         return new MapLocation(x + dx, y + dy);
     }
 
+    /**
+     * Returns a new MapLocation object representing a location
+     * one square from this one in the opposite of the given direction.
+     *
+     * @param direction the direction to subtract from this location
+     * @return a MapLocation for the location one square opposite the given
+     *         direction, or this location if the direction is NONE or OMNI
+     */
+    public final MapLocation subtract(Direction direction) {
+        return this.add(direction.opposite());
+    }
 }

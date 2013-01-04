@@ -1,6 +1,7 @@
 package battlecode.world.signal;
 
-import battlecode.common.Message;
+import java.util.HashMap;
+
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
 
@@ -17,22 +18,16 @@ public class BroadcastSignal extends Signal {
      * TheID of the robot that broadcasted the message.
      */
     public final int robotID;
-    public final int range;
-    public transient Message message;
+    public transient HashMap<Integer, Integer> broadcastMap;
 
     /**
      * Creates a signal for a robot broadcast.
      *
      * @param robot the robot that broadcast the message
      */
-    public BroadcastSignal(InternalRobot robot, int range) {
+    public BroadcastSignal(InternalRobot robot, HashMap<Integer, Integer> broadcastMap) {
         this.robotID = robot.getID();
-        this.range = range;
-    }
-
-    public BroadcastSignal(InternalRobot robot, int range, Message message) {
-        this(robot, range);
-        this.message = message;
+        this.broadcastMap = broadcastMap;
     }
 
     /**

@@ -45,7 +45,7 @@ public abstract class ControllerShared {
 
     protected static void assertRobotHeight(RobotLevel h) {
         assertNotNull(h);
-        if (h == RobotLevel.POWER_NODE)
+        if (h == RobotLevel.ENCAMPMENT_LEVEL)
             throw new IllegalArgumentException("There are no robots at that height.");
     }
 
@@ -61,10 +61,6 @@ public abstract class ControllerShared {
 
     protected static void outOfRange() throws GameActionException {
         throw new GameActionException(CANT_SENSE_THAT, "That is not within range.");
-    }
-
-    protected static InternalPowerNode castInternalPowerNode(PowerNode r) {
-        return castInternalObject(r, InternalPowerNode.class);
     }
 
     protected static InternalRobot castInternalRobot(Robot r) {

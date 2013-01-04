@@ -1,5 +1,7 @@
 package battlecode.world;
 
+import battlecode.common.Direction;
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.TerrainTile;
@@ -25,6 +27,8 @@ public class GameMap implements GenericGameMap {
      * The default game maxiumum number of rounds.
      */
     public static final int GAME_DEFAULT_MAX_ROUNDS = 10000;
+    /** The default game minimum number of points. */
+    //public static final int GAME_DEFAULT_MIN_POINTS = 5000;
     /**
      * The width and height of the map.
      */
@@ -242,7 +246,7 @@ public class GameMap implements GenericGameMap {
                 if (t.sensorRadiusSquared > buf)
                     buf = t.sensorRadiusSquared;
             }
-            BUFFER = buf;
+            BUFFER = buf + GameConstants.VISION_UPGRADE_BONUS;
         }
 
         private final boolean data[][];
@@ -311,16 +315,45 @@ public class GameMap implements GenericGameMap {
         return new int[][]{Arrays.copyOf(XOffsets, nOffsets), Arrays.copyOf(YOffsets, nOffsets)};
     }
 
-    public static Map<RobotType, int[][]> computeVisibleOffsets() {
+    public static Map<RobotType, int[][][]> computeVisibleOffsets() {
         int MAX_RANGE;
         final MapLocation CENTER = new MapLocation(0, 0);
-        Map<RobotType, int[][]> offsets = new EnumMap<RobotType, int[][]>(RobotType.class);
-        int[][] offsetsForType;
+        Map<RobotType, int[][][]> offsets = new EnumMap<RobotType, int[][][]>(RobotType.class);
+        int[][][] offsetsForType;
         int[] XOffsets = new int[169];
         int[] YOffsets = new int[169];
         int nOffsets;
         for (RobotType type : RobotType.values()) {
-            offsets.put(type, computeOffsets360(type.sensorRadiusSquared));
+            offsetsForType = new int[9][][];
+            offsets.put(type, offsetsForType);
+            if ((type.sensorAngle >= 360.0)) {
+                // Same range of vision independent of direction;
+                // save memory by using the same array each time
+                int[][] tmpOffsets = computeOffsets360(type.sensorRadiusSquared);
+                for (int i = 0; i < 8; i++) {
+                    offsetsForType[i] = tmpOffsets;
+                }
+            } else {
+                for (int i = 0; i < 8; i++) {
+                    Direction dir = Direction.values()[i];
+                    nOffsets = 0;
+                    MAX_RANGE = (int) Math.sqrt(type.sensorRadiusSquared);
+                    for (int y = -MAX_RANGE; y <= MAX_RANGE; y++) {
+                        for (int x = -MAX_RANGE; x <= MAX_RANGE; x++) {
+                            MapLocation loc = new MapLocation(x, y);
+                            if (CENTER.distanceSquaredTo(loc) <= type.sensorRadiusSquared
+                                    && GameWorld.inAngleRange(CENTER, dir, loc, type.sensorCosHalfTheta)) {
+                                XOffsets[nOffsets] = x;
+                                YOffsets[nOffsets] = y;
+                                nOffsets++;
+                            }
+                        }
+                    }
+
+                    offsetsForType[i] = new int[][]{Arrays.copyOf(XOffsets, nOffsets), Arrays.copyOf(YOffsets, nOffsets)};
+
+                }
+            }
         }
         return offsets;
     }

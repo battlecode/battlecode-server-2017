@@ -1,43 +1,74 @@
 package battlecode.common;
 
-import static battlecode.common.RobotLevel.IN_AIR;
 import static battlecode.common.RobotLevel.ON_GROUND;
-import static battlecode.common.GameConstants; 
 
 public enum RobotType {
-
-    NEXUS(ON_GROUND, 1000, 0, 0, 0, 0, 0, 100, false, false), 
-    TRANSPORTER(IN_AIR, 50, 4, 0, 0, 0, 0, 8, false, false),
-    SOLDIER(ON_GROUND, 30, 6, 25, 180, 4, 10, 49, true, true);
+    //          LEVEL,    	MXE 	MXF	COS MD MVC 	SR  SA 		AR AR 	AA 		AD  AP		AIR  	GROUND	ENCMP
+    HQ			(ON_GROUND, 500, 	0, 	0, 	0, 0, 	10, 360, 	0, 0, 	0, 		5, 	0, 		true, 	true,	false),
+    SOLDIER		(ON_GROUND, 40, 	0, 	0,	0, 0, 	10, 360, 	0, 5, 	360, 	5, 	8, 		true, 	true,	false),
+    ENCAMPMENT	(ON_GROUND, 100, 	0, 	0, 	0, 0, 	10, 360, 	0, 5, 	360, 	5, 	0, 		true, 	true,	false),
+    MEDBAY		(ON_GROUND, 100, 	0,	0, 	0, 0, 	10, 360, 	0, 10, 	90, 	5, 	0, 		true, 	true,	true),
+    SHIELDS		(ON_GROUND, 100, 	0,	0, 	0, 0, 	10, 360, 	1, 10, 	360, 	5, 	0, 		true,	true,	true),
+    ARTILLERY	(ON_GROUND, 100, 	0, 	0, 	0, 0, 	10, 360, 	0, 0, 	0, 		0, 	40, 	true, 	true,	true),
+    GENERATOR	(ON_GROUND, 100, 	0, 	0, 	0, 0, 	10, 360, 	0, 0, 	0, 		0, 	0, 		true, 	true,	true),
+    SUPPLIER    (ON_GROUND, 100, 	0, 	0, 	0, 0, 	10, 360, 	0, 0, 	0, 		0, 	0, 		true, 	true,	true),
+    ;
 
     /**
-     * The robot's level (air or ground)
+     * The robot's level.
      */
     public final RobotLevel level;
 
     /**
-     * The maximum amount of energon (hit points) the robot can have.
+     * The maximum amount of energon the robot can have.
      */
     public final double maxEnergon;
 
     /**
+     * The maximum amount of flux the robot can have.
+     */
+    public final double maxFlux;
+
+    /**
+     * The amount of flux needed to spawn the robot.
+     */
+    public final double spawnCost;
+
+    /**
      * The number of turns it takes the robot to move orthogonally.
      */
-    public final int moveDelay;
-    public final int weakenedMoveDelay;
+    public final int moveDelayOrthogonal;
 
     /**
      * The number of turns it takes the robot to move diagonally.
-     * Equal to <code>(int)Math.round(moveDelay*Math.sqrt(2.))</code>.
+     * Equal to <code>(int)Math.round(moveDelayOrthogonal*Math.sqrt(2.))</code>.
      */
     public final int moveDelayDiagonal;
-    public final int weakenedMoveDelayDiagonal;
+
+    /**
+     * The cost in flux to move the robot one square.
+     */
+    public final double moveCost;
+
+    /**
+     * The square of the maximum distance that the robot can sense.
+     */
+    public final int sensorRadiusSquared;
+
+    /**
+     * The range of angles that the robot can sense.
+     */
+    public final double sensorAngle;
 
     /**
      * The square of the maximum distance that the robot can attack.
      */
-    public final int attackRadiusSquared;
-    public final int weakenedAttackRadiusSquared;
+    public final int attackRadiusMaxSquared;
+
+    /**
+     * The square of the minimum distance that the robot can attack.
+     */
+    public final int attackRadiusMinSquared;
 
     /**
      * The range of angles that this robot can attack.
@@ -48,18 +79,11 @@ public enum RobotType {
      * The number of turns that it takes this robot to attack.
      */
     public final int attackDelay;
-    public final int weakenedAttackDelay;
 
     /**
      * The amount of damage that this robot does when it attacks.
      */
     public final double attackPower;
-    public final int weakenedAttackPower;
-
-    /**
-     * The radius at which robots can sense other Robots and GameObjects
-     */
-    public final int sensorRadiusSquared;
 
     /**
      * Whether or not the robot can attack air units.
@@ -70,6 +94,11 @@ public enum RobotType {
      * Whether or not the robot can attack ground units.
      */
     public final boolean canAttackGround;
+
+    public final double sensorCosHalfTheta;
+    public final double attackCosHalfTheta;
+    
+    public final boolean isEncampment;
 
     /**
      * Returns true if the robot can attack robots at the given level.
@@ -93,34 +122,41 @@ public enum RobotType {
         return level == RobotLevel.IN_AIR;
     }
 
-
     RobotType(RobotLevel level,
               double maxEnergon,
-              int moveDelay,
-              int attackRadiusSquared,
+              double maxFlux,
+              double spawnCost,
+              int moveDelayOrthogonal,
+              double moveCost,
+              int sensorRadiusSquared,
+              double sensorAngle,
+              int attackRadiusMinSquared,
+              int attackRadiusMaxSquared,
               double attackAngle,
               int attackDelay,
               double attackPower,
-              int sensorRadiusSquared,
               boolean canAttackAir,
-              boolean canAttackGround
-              ) {
+              boolean canAttackGround,
+              boolean isEncampment) {
         this.level = level;
         this.maxEnergon = maxEnergon;
-        this.moveDelay = moveDelay;
-        this.moveDelayDiagonal = (int) Math.round(moveDelay * Math.sqrt(2.0));
-        this.attackRadiusSquared = attackRadiusSquared;
+        this.maxFlux = maxFlux;
+        this.spawnCost = spawnCost;
+        this.moveDelayOrthogonal = moveDelayOrthogonal;
+        this.moveDelayDiagonal = (int) Math.round(moveDelayOrthogonal * Math.sqrt(2.));
+        this.moveCost = moveCost;
+        this.sensorRadiusSquared = sensorRadiusSquared;
+        this.sensorAngle = sensorAngle;
+        this.attackRadiusMaxSquared = attackRadiusMaxSquared;
+        this.attackRadiusMinSquared = attackRadiusMinSquared;
         this.attackAngle = attackAngle;
         this.attackDelay = attackDelay;
         this.attackPower = attackPower;
-        this.sensorRadiusSquared = sensorRadiusSquared;
         this.canAttackAir = canAttackAir;
         this.canAttackGround = canAttackGround;
-
-        this.weakenedMoveDelay = (int) Math.round(moveDelay * GameConstants.WEAKNESS_FACTOR);
-        this.weakenedMoveDelayDiagonal = (int) Math.round(moveDelay * GameConstants.WEAKNESS_FACTOR * Math.sqrt(2.0));
-        this.weakenedAttackDelay = (int) Math.round(attackDelay * GameConstants.WEAKNESS_FACTOR);
-        
+        this.sensorCosHalfTheta = Math.cos(sensorAngle * Math.PI / 360.);
+        this.attackCosHalfTheta = Math.cos(attackAngle * Math.PI / 360.);
+        this.isEncampment = isEncampment;
     }
 
 }

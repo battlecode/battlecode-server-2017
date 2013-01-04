@@ -17,12 +17,12 @@ public class BaseWorld<WorldObject extends BaseObject> {
     protected final Random randGen;
     protected int nextID;
     protected final ArrayList<Signal> signals;
-    protected final long[][] teamMemory;
-    protected final long[][] oldTeamMemory;
+    protected final long[][] archonMemory;
+    protected final long[][] oldArchonMemory;
     protected final Map<Integer, WorldObject> gameObjectsByID;
     protected final ArrayList<Integer> randomIDs = new ArrayList<Integer>();
 
-    public BaseWorld(int seed, String teamA, String teamB, long[][] oldTeamMemory) {
+    public BaseWorld(int seed, String teamA, String teamB, long[][] oldArchonMemory) {
         currentRound = -1;
         teamAName = teamA;
         teamBName = teamB;
@@ -30,8 +30,8 @@ public class BaseWorld<WorldObject extends BaseObject> {
         signals = new ArrayList<Signal>();
         randGen = new Random(seed);
         nextID = 1;
-        teamMemory = new long[2][oldTeamMemory[0].length];
-        this.oldTeamMemory = oldTeamMemory;
+        archonMemory = new long[2][oldArchonMemory[0].length];
+        this.oldArchonMemory = oldArchonMemory;
     }
 
     public void reserveRandomIDs(int num) {
@@ -106,22 +106,22 @@ public class BaseWorld<WorldObject extends BaseObject> {
         return wasBreakpointHit;
     }
 
-    public long[][] getTeamMemory() {
-        return teamMemory;
+    public long[][] getArchonMemory() {
+        return archonMemory;
     }
 
-    public long[][] getOldTeamMemory() {
-        return oldTeamMemory;
+    public long[][] getOldArchonMemory() {
+        return oldArchonMemory;
     }
 
-    public void setTeamMemory(Team t, int ID, long state) {
-        teamMemory[t.ordinal()][ID] = state;
+    public void setArchonMemory(Team t, int archonID, long state) {
+        archonMemory[t.ordinal()][archonID] = state;
     }
 
-    public void setTeamMemory(Team t, int ID, long state, long mask) {
-        long n = teamMemory[t.ordinal()][ID];
+    public void setArchonMemory(Team t, int archonID, long state, long mask) {
+        long n = archonMemory[t.ordinal()][archonID];
         n &= ~mask;
         n |= (state & mask);
-        teamMemory[t.ordinal()][ID] = n;
+        archonMemory[t.ordinal()][archonID] = n;
     }
 }

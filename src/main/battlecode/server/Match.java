@@ -53,7 +53,7 @@ public class Match extends Observable {
 
     private boolean bytecodesUsedEnabled = true;
 
-    private long[][] computedTeamMemory = null;
+    private long[][] computedArchonMemory = null;
 
     /**
      * Creates a new match with the given parameters and options.
@@ -268,18 +268,18 @@ public class Match extends Observable {
         return sb.toString();
     }
 
-    public void setInitialTeamMemory(long[][] state) {
+    public void setInitialArchonMemory(long[][] state) {
         this.state = state;
     }
 
-    public long[][] getInitialTeamMemory() {
+    public long[][] getInitialArchonMemory() {
         return this.state;
     }
 
-    public long[][] getComputedTeamMemory() {
-        if (computedTeamMemory == null)
-            return this.engine.getTeamMemory();
-        else return computedTeamMemory;
+    public long[][] getComputedArchonMemory() {
+        if (computedArchonMemory == null)
+            return this.engine.getArchonMemory();
+        else return computedArchonMemory;
     }
 
     /**
@@ -294,7 +294,7 @@ public class Match extends Observable {
      * Cleans up the match so that its resources can be garbage collected.
      */
     public void finish() {
-        this.computedTeamMemory = this.engine.getTeamMemory();
+        this.computedArchonMemory = this.engine.getArchonMemory();
         this.gameWorldViewer = null;
         this.engine = null;
     }

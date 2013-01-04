@@ -1,6 +1,5 @@
 package battlecode.world.signal;
 
-import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
@@ -8,15 +7,19 @@ import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
 
 /**
- * Signifies that a robot was just spawned
+ * Signifies that a robot is capturing
  *
- * @author adamd
+ * @author yp
  */
-public class SpawnSignal extends Signal {
+public class CaptureSignal extends Signal {
 
-    private static final long serialVersionUID = -5655877873179815892L;
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = -1724238075125375688L;
+
+	/**
      * The new robot's ID
      */
     private final int robotID;
@@ -40,31 +43,17 @@ public class SpawnSignal extends Signal {
      * The new robot's team
      */
     private final Team team;
+    
+    /**
+     * If the robot has handling
+     */
+    private final boolean hasHandling;
 
-//    /**
-//     * The new robot's direction
-//     */
-//    private final Direction dir;
 
     /**
-     * Creates a signal for a robot that was just spawned
+     * Creates a capture signal for capture which is starting
      */
-    public SpawnSignal(InternalRobot child, InternalRobot parent) {
-        robotID = child.getID();
-        if (parent == null)
-            parentID = 0;
-        else
-            parentID = parent.getID();
-        loc = child.getLocation();
-        type = child.type;
-        team = child.getTeam();
-//        dir = child.getDirection();
-    }
-
-    /**
-     * Creates a spawn signal for a robot that hasn't been spawned yet
-     */
-    public SpawnSignal(MapLocation loc, RobotType type, Team team, InternalRobot parent) {
+    public CaptureSignal(MapLocation loc, RobotType type, Team team, boolean handling, InternalRobot parent) {
         this.loc = loc;
         this.type = type;
         this.team = team;
@@ -74,6 +63,7 @@ public class SpawnSignal extends Signal {
         else
             parentID = parent.getID();
 //        dir = null;
+        hasHandling = handling;
     }
 
     public int getRobotID() {
@@ -92,11 +82,11 @@ public class SpawnSignal extends Signal {
         return team;
     }
 
-//    public Direction getDirection() {
-//        return dir;
-//    }
-
     public int getParentID() {
         return parentID;
+    }
+    
+    public boolean getHandling() {
+    	return hasHandling;
     }
 }

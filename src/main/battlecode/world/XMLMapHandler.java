@@ -4,6 +4,8 @@ import battlecode.common.*;
 import battlecode.engine.ErrorReporter;
 import battlecode.server.Config;
 import battlecode.world.GameMap.MapProperties;
+import battlecode.world.signal.MineSignal;
+import battlecode.world.signal.NodeBirthSignal;
 import battlecode.world.signal.NodeConnectionSignal;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
@@ -75,6 +77,38 @@ class XMLMapHandler extends DefaultHandler {
             return d.tile == tile;
         }
     }
+    
+    private static class MineData implements SymbolData {
+
+        public static final SymbolDataFactory factory = new SymbolDataFactory() {
+
+            public MineData create(Attributes att) {
+                String type = getRequired(att, "team");
+                return new MineData(Team.valueOf(type));
+            }
+        };
+        private Team team;
+
+        public MineData(Team t) {
+            this.team = t;
+        }
+
+        public TerrainTile tile() {
+            return TerrainTile.LAND;
+        }
+
+        public void createGameObject(GameWorld world, MapLocation loc) {
+        	world.addMine(team, loc);
+        	world.addSignal(new MineSignal(loc, team, true));
+        }
+
+        public boolean equalsMirror(SymbolData data) {
+            if (!(data instanceof MineData))
+                return false;
+            MineData d = (MineData) data;
+            return d.team == team;
+        }
+    }
 
     private static class RobotData implements SymbolData {
 
@@ -137,12 +171,13 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         public void createGameObject(GameWorld world, MapLocation loc) {
-            if (team == Team.NEUTRAL)
-                new InternalPowerNode(world, loc, false);
-            else {
-                InternalPowerNode p = new InternalPowerNode(world, loc, true);
-                GameWorldFactory.createPlayer(world, RobotType.TOWER, loc, team, null, false);
-                world.setPowerCore(p, team);
+            if (team == Team.NEUTRAL) {
+//            	new InternalRobot(world, RobotType.ENCAMPMENT, loc, Team.NEUTRAL, false);
+            	new InternalEncampment(world, loc);
+            	world.addSignal(new NodeBirthSignal(loc));
+            } else {
+            	InternalRobot r = GameWorldFactory.createPlayer(world, RobotType.HQ, loc, team, null, false);
+                world.setHQ(r, team);
             }
         }
 
@@ -176,8 +211,9 @@ class XMLMapHandler extends DefaultHandler {
         for (RobotType ch : RobotType.values()) {
             factories.put(ch.name(), RobotData.factory);
         }
-        factories.put("POWER_NODE", NodeData.factory);
-        factories.put("NODE", NodeData.factory);
+        factories.put("ENCAMPMENT", NodeData.factory);
+        factories.put("HQ", NodeData.factory);
+        factories.put("MINE", MineData.factory);
     }
 
     /**
@@ -443,22 +479,8 @@ class XMLMapHandler extends DefaultHandler {
             for (int j = 0; j < map[i].length; j++)
                 map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
         }
-        MapLocation[][] links = new MapLocation[nodeLinks.size()][];
-        int i = 0;
-        for (MapLocation[] link : nodeLinks) {
-            checkNodeLink(link[0]);
-            checkNodeLink(link[1]);
-            MapLocation t1 = origin.add(link[0].x, link[0].y);
-            MapLocation t2 = origin.add(link[1].x, link[1].y);
-            if (link.length == 3)
-                gw.createNodeLink(t1, t2, false);
-            gw.createNodeLink(t1, t2, true);
-            links[i++] = new MapLocation[]{t1, t2};
-        }
+        
         gw.endRandomIDs();
-
-        gw.recomputeConnections();
-        gw.addSignal(new NodeConnectionSignal(links));
 
         return gw;
     }
@@ -541,6 +563,8 @@ class XMLMapHandler extends DefaultHandler {
 
     }
 
+    // TODO this needs to be recoded
+    // TODO CORY FIX IT
     public boolean isTournamentLegal() {
         LegalityWarning warn = new LegalityWarning();
         int x, y, mx, my;
@@ -561,13 +585,13 @@ class XMLMapHandler extends DefaultHandler {
                 if (d instanceof RobotData) {
                     RobotData rd = (RobotData) d;
                     switch (rd.type) {
-                        case ARCHON:
-                            if (rd.team == Team.NEUTRAL) {
-                                warn.warnUnit(rd);
-                            }
-                            if (rd.team == Team.A)
-                                archonsA++;
-                            break;
+//                        case ARCHON:
+//                            if (rd.team == Team.NEUTRAL) {
+//                                warn.warnUnit(rd);
+//                            }
+//                            if (rd.team == Team.A)
+//                                archonsA++;
+//                            break;
                         default:
                             warn.warnUnit(rd);
                     }
@@ -596,26 +620,21 @@ class XMLMapHandler extends DefaultHandler {
             warn.warn("Team A does not have a power core.");
         }
 
-        if (archonsA != GameConstants.NUMBER_OF_ARCHONS) {
-            archonsBad = true;
-            warn.warn("Team A does not have the correct number of archons.");
-        }
-
-        if (!(baseBad || archonsBad)) {
-            for (y = baseAy - 1; y <= baseAy + 1; y++)
-                for (x = baseAx - 1; x <= baseAx + 1; x++) {
-                    if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
-                        d = map[x][y];
-                        if (d instanceof RobotData) {
-                            RobotData rd = (RobotData) d;
-                            if (rd.type == RobotType.ARCHON && rd.team == Team.A)
-                                archonsA--;
-                        }
-                    }
-                }
-            if (archonsA != 0)
-                warn.warn("Team A has an archon that is not next to its power core.");
-        }
+//        if (!(baseBad || archonsBad)) {
+//            for (y = baseAy - 1; y <= baseAy + 1; y++)
+//                for (x = baseAx - 1; x <= baseAx + 1; x++) {
+//                    if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
+//                        d = map[x][y];
+//                        if (d instanceof RobotData) {
+//                            RobotData rd = (RobotData) d;
+//                            if (rd.type == RobotType.ARCHON && rd.team == Team.A)
+//                                archonsA--;
+//                        }
+//                    }
+//                }
+//            if (archonsA != 0)
+//                warn.warn("Team A has an archon that is not next to its power core.");
+//        }
 
         // check that the ground squares are connected
         if (grounds == 0) {
@@ -639,10 +658,6 @@ class XMLMapHandler extends DefaultHandler {
                 if (ul == TerrainTile.LAND && dr == TerrainTile.LAND && ur == TerrainTile.VOID && dl == TerrainTile.VOID)
                     System.err.format("Warning: diagonal passageway at %d, %d\n", x, y);
             }
-        // check that the number of power nodes conforms to the spec
-        if (nodes < GameConstants.MIN_POWER_NODES || nodes > GameConstants.MAX_POWER_NODES) {
-            warn.warn("Illegal number of power nodes: " + nodes);
-        }
         int rounds = mapProperties.get(MapProperties.MAX_ROUNDS);
         if (rounds < GameConstants.MIN_ROUND_LIMIT)
             warn.warn("The round limit is too small.");

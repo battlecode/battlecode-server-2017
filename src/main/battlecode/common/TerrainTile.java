@@ -16,6 +16,7 @@ public enum TerrainTile {
             case VOID:
                 return height == RobotLevel.IN_AIR;
             case LAND:
+            	// TODO might need recode if we enable underground robots
                 return true;
             default:
                 return false;

@@ -1,17 +1,54 @@
 package battlecode.world;
 
-import battlecode.common.*;
+import static battlecode.common.GameActionExceptionType.ALREADY_ACTIVE;
+import static battlecode.common.GameActionExceptionType.CANT_DO_THAT_BRO;
+import static battlecode.common.GameActionExceptionType.CANT_SENSE_THAT;
+import static battlecode.common.GameActionExceptionType.MISSING_UPGRADE;
+import static battlecode.common.GameActionExceptionType.NOT_ENOUGH_FLUX;
+import static battlecode.common.GameActionExceptionType.NOT_ENOUGH_RESOURCE;
+import static battlecode.common.GameActionExceptionType.NO_ROBOT_THERE;
+import static battlecode.common.GameActionExceptionType.OUT_OF_RANGE;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import battlecode.common.Direction;
+import battlecode.common.GameActionException;
+import battlecode.common.GameActionExceptionType;
+import battlecode.common.GameConstants;
+import battlecode.common.GameObject;
+import battlecode.common.MapLocation;
+import battlecode.common.Robot;
+import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
+import battlecode.common.RobotLevel;
+import battlecode.common.RobotType;
+import battlecode.common.Team;
+import battlecode.common.TerrainTile;
+import battlecode.common.Upgrade;
 import battlecode.engine.GenericController;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
-import battlecode.world.signal.*;
+import battlecode.world.signal.CaptureSignal;
+import battlecode.world.signal.IndicatorStringSignal;
+import battlecode.world.signal.MatchObservationSignal;
+import battlecode.world.signal.MinelayerSignal;
+import battlecode.world.signal.MovementSignal;
+import battlecode.world.signal.RegenSignal;
+import battlecode.world.signal.ResearchSignal;
+import battlecode.world.signal.SpawnSignal;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
-import java.util.Arrays;
 
-import static battlecode.common.GameActionExceptionType.*;
+/*
+ * YP's EPIC TODO LIST:
+ * costs on messaging need to be figured out
+ * 
+ */
+
 
 /*
 TODO:
@@ -66,6 +103,22 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (amount > robot.getFlux())
             throw new GameActionException(NOT_ENOUGH_FLUX, "You do not have enough flux to do that.");
     }
+    
+    public void assertHaveResource(double amount) throws GameActionException {
+    	if (amount > gameWorld.resources(getTeam()))
+    		throw new GameActionException(NOT_ENOUGH_RESOURCE, "You do not have enough Energy to do that.");
+    }
+    
+    public void assertHaveUpgrade(Upgrade upgrade) throws GameActionException {
+    	if (!gameWorld.hasUpgrade(getTeam(), upgrade))
+    		throw new GameActionException(MISSING_UPGRADE, "You need the following upgrade: "+upgrade);
+    }
+    
+    public void assertIsEncampment(MapLocation loc) throws GameActionException {
+    	if (!gameWorld.isEncampment(loc))
+    		throw new GameActionException(NO_ROBOT_THERE, "That location is not an Encampment");
+    }
+    
 
     //*********************************
     //****** QUERY METHODS ********
@@ -89,10 +142,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getMaxEnergon();
     }
 
-    public double getFlux() {
-        return robot.getFlux();
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -100,19 +149,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getLocation();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Message getNextMessage() {
-        return robot.dequeueIncomingMessage();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Message[] getAllMessages() {
-        return robot.dequeueIncomingMessages();
-    }
 
     /**
      * {@inheritDoc}
@@ -125,7 +161,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getBytecodeLimit();
     }
 
-
     public RobotType getType() {
         return robot.type;
     }
@@ -134,61 +169,127 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //****** ACTION METHODS *************
     //***********************************
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public void yield() {
         int bytecodesBelowBase = GameConstants.BYTECODE_LIMIT - RobotMonitor.getBytecodesUsed();
-        if (bytecodesBelowBase > 0 && robot.type != RobotType.ARCHON)
-            robot.adjustFlux(GameConstants.YIELD_BONUS * bytecodesBelowBase / GameConstants.BYTECODE_LIMIT * GameConstants.UNIT_UPKEEP);
+        if (bytecodesBelowBase > 0)
+            gameWorld.adjustResources(getTeam(), GameConstants.ENERGY_COST_PER_BYTECODE * bytecodesBelowBase);
         RobotMonitor.endRunner();
     }
 
-    public void transferFlux(MapLocation loc, RobotLevel height, double amount) throws GameActionException {
-        if (amount <= 0 || Double.isNaN(amount))
-            throw new IllegalArgumentException("The amount of flux transferred must be positive.");
-        assertHaveFlux(amount);
-        assertWithinRange(loc, 2);
-        InternalRobot ir = robotOrException(loc, height);
-        robot.adjustFlux(-amount);
-        ir.adjustFlux(amount);
-        gameWorld.addSignal(new TransferFluxSignal(robot, ir, amount));
-    }
-
-    public void spawn(RobotType type, MapLocation loc) throws GameActionException {
+    public void spawn(Direction dir) throws GameActionException {
         // If we decide to let other robots spawn, then we should make
         // sure that air units can't spawn ground units.
-        if (type == RobotType.ARCHON)
-            throw new IllegalArgumentException("Archons may not be spawned.");
-        if (robot.type != RobotType.ARCHON)
-            throw new IllegalStateException("Only archons can spawn.");
-        assertNotNull(type);
+//    	only possible for HQ to spawn soldiers
+    	RobotType type = RobotType.SOLDIER;
+        if (robot.type != RobotType.HQ)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can spawn.");
         assertNotMoving();
-		assertWithinRange(loc,2);
-        assertHaveFlux(type.spawnCost);
+        assertHaveResource(type.spawnCost);
+        MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(type.level, loc))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
-        if (type == RobotType.TOWER) {
-            InternalPowerNode node = gameWorld.getPowerNode(loc);
-            if (node == null)
-                throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "A tower may only be built on top of a power node.");
-            if (!node.connected(robot.getTeam()))
-                throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That node is not connected to your power core.");
-        }
-        robot.adjustFlux(-type.spawnCost);
-        robot.activateMovement(new SpawnSignal(loc, type, robot.getTeam(), robot), 1);
-    }
 
-    public void regenerate() throws GameActionException {
-        if (robot.type != RobotType.SCOUT)
-            throw new IllegalStateException("Only scouts can regenerate.");
-        assertHaveFlux(GameConstants.REGEN_COST);
-        robot.adjustFlux(-GameConstants.REGEN_COST);
-        for (InternalRobot ir : gameWorld.getAllRobotsWithinRadiusDonutSq(getLocation(), RobotType.SCOUT.attackRadiusMaxSquared, RobotType.SCOUT.attackRadiusMinSquared - 1)) {
-            if (ir.getTeam() == robot.getTeam())
-                ir.setRegen();
-        }
-        gameWorld.addSignal(new RegenSignal(robot));
+        gameWorld.adjustResources(getTeam(), -type.spawnCost);
+        robot.activateMovement(
+        		new SpawnSignal(loc, type, robot.getTeam(), robot),
+        		(int)Math.round(gameWorld.getSpawnRate(robot.getTeam()))
+        		);
+    }
+    
+    public void captureEncampment(Direction dir, RobotType type) throws GameActionException {
+    	if (robot.type != RobotType.SOLDIER)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can capture encampments.");
+    	if (!type.isEncampment)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Can only capture as encampments");
+    	assertNotMoving();
+    	MapLocation loc = getLocation().add(dir);
+        if (!gameWorld.canMove(type.level, loc))
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
+        assertIsEncampment(loc);
+    	assertHaveResource(GameConstants.CAPTURE_COST);
+    	gameWorld.adjustResources(getTeam(), -GameConstants.CAPTURE_COST);
+        robot.activateMovement(new SpawnSignal(loc, type, robot.getTeam(), robot), GameConstants.CAPTURE_DELAY);
+    }
+    
+    public void captureEncampment(RobotType type) throws GameActionException {
+    	if (robot.type != RobotType.SOLDIER)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can capture encampments.");
+    	if (!type.isEncampment)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Can only capture encampment robot types");
+    	assertNotMoving();
+    	MapLocation loc = getLocation();
+        
+        assertIsEncampment(loc);
+        capture(type);
+    }
+    
+    public void researchUpgrade(Upgrade upgrade) throws GameActionException {
+    	if (robot.type != RobotType.HQ)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can research.");
+    	assertNotMoving();
+        robot.activateMovement(new ResearchSignal(robot, upgrade), 1);
+    }
+    
+    public int checkResearchProgress(Upgrade upgrade) throws GameActionException {
+    	if (robot.type != RobotType.HQ)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can research.");
+    	return gameWorld.getUpgradeProgress(getTeam(), upgrade);
+    }
+    
+    
+    public void layMine() throws GameActionException {
+    	if (robot.type != RobotType.SOLDIER)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
+    	assertNotMoving();
+    	robot.activateMinelayer(new MinelayerSignal(robot, true), GameConstants.ROUNDS_TO_MINE);
+    }
+    
+    public void defuseMine(MapLocation loc) throws GameActionException {
+    	if (robot.type != RobotType.SOLDIER)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
+    	assertNotMoving();
+    	if (hasUpgrade(Upgrade.DIFFUSION)) {
+    		if (!checkCanSense(loc))
+    			throw new GameActionException(OUT_OF_RANGE, "You can only diffuse in sight rang.e");
+    	} else {
+    		if (loc.distanceSquaredTo(getLocation()) > 2)
+    			throw new GameActionException(OUT_OF_RANGE, "You can only diffuse adjacent squares.");
+    	}
+    			
+    	robot.activateDefuser(new MinelayerSignal(robot, false), GameConstants.ROUNDS_TO_DEFUSE, loc);
+    }
+    
+    public void capture(RobotType type) throws GameActionException {
+    	if (robot.type != RobotType.SOLDIER)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can capture.");
+    	assertNotMoving();
+    	assertHaveResource(GameConstants.CAPTURE_COST);
+    	gameWorld.adjustResources(getTeam(), -GameConstants.CAPTURE_COST);
+        robot.activateCapturing(new CaptureSignal(getLocation(), type, robot.getTeam(), false, robot), GameConstants.CAPTURE_DELAY);
+    }
+    
+//    public boolean scanMines() throws GameActionException {
+//    	if (robot.type != RobotType.SOLDIER)
+//            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can scan for mines.");
+//    	assertHaveResource(GameConstants.SCAN_COST);
+//        assertHaveUpgrade(Upgrade.MINEDETECTOR);
+//        
+//        return robot.scanForMines();
+//    }
+    
+    public void activateEncampment() throws GameActionException {
+    	if (isAttackActive())
+    		throw new GameActionException(ALREADY_ACTIVE, "This encampment is still in cooldown.");
+    	
+    	// TODO add additional energy costs for these if necessary
+    	// TODO CORY FIX IT
+    	if (robot.type == RobotType.MEDBAY)
+    		gameWorld.visitSignal(new RegenSignal(robot));
+    	else if (robot.type == RobotType.SHIELDS)
+    		gameWorld.visitSignal(new RegenSignal(robot));
+    	else // should never reach this, but just to be safe...
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only MEDBAYs and SHIELDSes can use encampment abilities.");
     }
 
     public void resign() {
@@ -228,7 +329,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public boolean checkCanSense(MapLocation loc) {
         MapLocation myLoc = getLocation();
-        return myLoc.distanceSquaredTo(loc) <= robot.type.sensorRadiusSquared;
+        int sensorRadius = robot.type.sensorRadiusSquared + (hasUpgrade(Upgrade.VISION) ? GameConstants.VISION_UPGRADE_BONUS : 0);
+        return myLoc.distanceSquaredTo(loc) <= sensorRadius;
+//                && gameWorld.inAngleRange(myLoc, getDirection(), loc, robot.type.sensorCosHalfTheta);
     }
 
     public boolean checkCanSense(InternalObject obj) {
@@ -256,7 +359,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         InternalRobot ir = castInternalRobot(r);
         assertCanSense(ir);
         return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(),
-                ir.getFlux(), ir.type, ir.getTeam(), ir.getRegen(),
+                ir.getFlux(), ir.getDirection(), ir.type, ir.getTeam(), ir.getRegen(),
                 ir.roundsUntilAttackIdle(), ir.roundsUntilMovementIdle());
     }
 
@@ -274,36 +377,12 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return checkCanSense(loc);
     }
 
-    public MapLocation[] senseAlliedArchons() {
-        return gameWorld.getArchons(robot.getTeam());
+    public MapLocation senseHQLocation() {
+        return gameWorld.getBaseHQ(getTeam()).getLocation();
     }
-
-    public PowerNode[] senseAlliedPowerNodes() {
-        return Iterables.toArray(gameWorld.getPowerNodesByTeam(robot.getTeam()), PowerNode.class);
-    }
-
-    public MapLocation[] senseCapturablePowerNodes() {
-        return Lists.transform(gameWorld.getCapturableNodes(robot.getTeam()), Util.objectLocation).toArray(new MapLocation[0]);
-    }
-
-    public boolean senseConnected(PowerNode p) {
-        InternalPowerNode ip = castInternalPowerNode(p);
-        return ip.connected(robot.getTeam());
-    }
-
-    public boolean senseOwned(PowerNode p) {
-        InternalPowerNode ip = castInternalPowerNode(p);
-        return ip.getControllingTeam() == robot.getTeam();
-    }
-
-    public boolean senseOpponentConnected(PowerNode p) throws GameActionException {
-        InternalPowerNode ip = castInternalPowerNode(p);
-        assertCanSense(ip);
-        return ip.connected(robot.getTeam().opponent());
-    }
-
-    public PowerNode sensePowerCore() {
-        return gameWorld.getPowerCore(robot.getTeam());
+    
+    public MapLocation senseEnemyHQLocation() {
+    	return gameWorld.getBaseHQ(getTeam().opponent()).getLocation();
     }
 
     /**
@@ -313,11 +392,46 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotNull(loc);
         return robot.getMapMemory().recallTerrain(loc);
     }
+    
+    public MapLocation[] senseAllEncampments() {
+    	List<InternalEncampment> camps = gameWorld.getAllEncampments();
+    	MapLocation[] locs = new MapLocation[camps.size()];
+    	int x=0;
+    	for (InternalEncampment r : camps)
+    		locs[x++] = r.getLocation();
+    	return locs;
+    }
+    
+    public MapLocation[] senseAlliedEncampments() {
+    	Iterable<InternalEncampment> camps = gameWorld.getEncampmentsByTeam(getTeam());
+    	ArrayList<MapLocation> locs = new ArrayList<MapLocation>();
+    	for (InternalEncampment r : camps)
+    		locs.add(r.getLocation());
+    	return locs.toArray(new MapLocation[]{});
+    }
+    
+    public Team senseMine(MapLocation loc) {
+    	Team mt = gameWorld.getMine(loc);
+    	if((mt == getTeam().opponent()) && !(gameWorld.isKnownMineLocation(getTeam(), loc)))
+    		return null;
+    	return mt;
+    }
+    
+//    public int senseAlliedMines(MapLocation loc) {
+//    	return gameWorld.getMineCount(getTeam(), loc);
+//    }
+//    
+//    public int senseEnemyMines(MapLocation loc) {
+//    	return gameWorld.isKnownMineLocation(getTeam(), loc) ? gameWorld.getMineCount(getTeam().opponent(), loc) : 0;
+//    }
+    
+    public MapLocation[] senseAllEnemyMineLocations() {
+    	return gameWorld.getKnownMines(getTeam());
+    }
 
     // ***********************************
     // ****** MOVEMENT METHODS ********
     // ***********************************
-
 
     public int roundsUntilMovementIdle() {
         return robot.roundsUntilMovementIdle();
@@ -332,23 +446,32 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(ALREADY_ACTIVE, "This robot is already moving.");
     }
 
-    public void move(MapLocation loc) throws GameActionException {
-        assertNotMoving();
-        assertHaveFlux(robot.type.moveCost);
-        assertCanMove(loc);
-        int delay = robot.type.moveDelayOrthogonal;
-        robot.activateMovement(new MovementSignal(robot, loc, true, delay), delay);
-        robot.adjustFlux(-robot.type.moveCost);
+    public void move(Direction d) throws GameActionException {
+        if (robot.type != RobotType.SOLDIER)
+        	throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can move.");
+    	assertNotMoving();
+//        assertHaveFlux(robot.type.moveCost);
+        assertCanMove(d);
+        int delay = d.isDiagonal() ? robot.type.moveDelayDiagonal :
+                robot.type.moveDelayOrthogonal;
+        robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
+                true, delay), delay);
     }
 
-    public boolean canMove(MapLocation loc) throws GameActionException {
-		assertWithinRange(loc, 2);
-		return gameWorld.canMove(robot.getRobotLevel(), loc);
+    public boolean canMove(Direction d) {
+        assertValidDirection(d);
+        return gameWorld.canMove(robot.getRobotLevel(), getLocation().add(d));
     }
 
-    public void assertCanMove(MapLocation loc) throws GameActionException {
-        if (canMove(loc))
-            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move to the location: " + loc);
+    public void assertCanMove(Direction d) throws GameActionException {
+        if (!canMove(d))
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move in the given direction: " + d);
+    }
+
+    protected void assertValidDirection(Direction d) {
+        assertNotNull(d);
+        if (d == Direction.NONE || d == Direction.OMNI)
+            throw new IllegalArgumentException("You cannot move in the direction NONE or OMNI.");
     }
 
     // ***********************************
@@ -379,18 +502,22 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotNull(loc);
         return GameWorld.canAttackSquare(robot, loc);
     }
+    
+//    public void attack() throws GameActionException {
+//        if (robot.type != RobotType.SOLDIER)
+//        	throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIER make melee attacks.");
+//    	assertNotAttacking();
+//    	
+//    	robot.activateAttack(new AttackSignal(robot, robot.getLocation(), RobotLevel.ON_GROUND), robot.type.attackDelay);
+//    }
 
-    public void attackSquare(MapLocation loc, RobotLevel height) throws GameActionException {
+    public void attackSquare(MapLocation loc) throws GameActionException {
+        if (robot.type != RobotType.ARTILLERY)
+        	throw new GameActionException(CANT_DO_THAT_BRO, "Only ARTILLERY can attack a targeted square.");
         assertNotAttacking();
-        if (robot.type == RobotType.SCORCHER) {
-            loc = null;
-            height = null;
-        } else {
-            assertNotNull(loc);
-            assertNotNull(height);
-            assertCanAttack(loc, height);
-        }
-        robot.activateAttack(new AttackSignal(robot, loc, height), robot.type.attackDelay);
+        assertNotNull(loc);
+        assertCanAttack(loc, RobotLevel.ON_GROUND);
+//        robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND), robot.type.attackDelay);
     }
 
     //************************************
@@ -400,21 +527,39 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public boolean hasBroadcasted() {
         return robot.hasBroadcasted();
     }
-
-    public void broadcast(Message m) throws GameActionException {
-        if (hasBroadcasted())
-            throw new GameActionException(ALREADY_ACTIVE, "This robot has already broadcasted this turn.");
-        assertNotNull(m);
-        double cost = m.getFluxCost();
-        assertHaveFlux(cost);
-        robot.activateBroadcast(new BroadcastSignal(robot, GameConstants.BROADCAST_RADIUS_SQUARED, m));
-        robot.adjustFlux(-cost);
+    
+    public void broadcast(int channel, int data) throws GameActionException {
+    	double cost = GameConstants.BROADCAST_MESSAGE_COST;
+    	assertHaveResource(cost);
+    	
+    	robot.addBroadcast(channel, data);
+    	gameWorld.adjustResources(getTeam(), -cost);
+    	
+    }
+    
+    @Override
+    public int readBroadcast(int channel) throws GameActionException {
+    	if (channel<0 || channel>GameConstants.MAX_RADIO_CHANNEL)
+    		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.MAX_RADIO_CHANNEL);
+    	double cost = GameConstants.READ_MESSAGE_COST;
+    	assertHaveResource(cost);
+    	int m = gameWorld.getMessage(channel);
+    	gameWorld.adjustResources(getTeam(), -cost);
+    	return m;
     }
 
     //************************************
     //******** MISC. METHODS **********
     //************************************
-
+   
+    
+    /**
+     * {@inheritDock}
+     */
+    public boolean hasUpgrade(Upgrade upgrade) {
+    	return gameWorld.hasUpgrade(getTeam(), upgrade);
+    }
+    
     /**
      * {@inheritDoc}
      */

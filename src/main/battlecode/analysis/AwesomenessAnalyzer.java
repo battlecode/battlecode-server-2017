@@ -77,13 +77,15 @@ public class AwesomenessAnalyzer {
             transform(type);
         }
 
+        // TODO this needs to be recoded
+        // TODO CORY FIX IT
         public void transform(RobotType type) {
             this.type = type;
-            if (type.equals(RobotType.ARCHON))
-                robotAwesomeness = ARCHON_AWESOMENESS_MULTIPLIER;
-                //else if(type.equals(RobotType.WOUT))
-                //	robotAwesomeness=WOUT_AWESOMENESS_MULTIPLIER;
-            else
+//            if (type.equals(RobotType.ARCHON))
+//                robotAwesomeness = ARCHON_AWESOMENESS_MULTIPLIER;
+//                //else if(type.equals(RobotType.WOUT))
+//                //	robotAwesomeness=WOUT_AWESOMENESS_MULTIPLIER;
+//            else
                 robotAwesomeness = 1.f;
         }
 
