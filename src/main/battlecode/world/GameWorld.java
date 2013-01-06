@@ -47,6 +47,7 @@ import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.NodeBirthSignal;
 import battlecode.world.signal.RegenSignal;
 import battlecode.world.signal.ResearchSignal;
+import battlecode.world.signal.ResearchChangeSignal;
 import battlecode.world.signal.ScanSignal;
 import battlecode.world.signal.SetDirectionSignal;
 import battlecode.world.signal.ShieldChangeSignal;
@@ -157,6 +158,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         removeDead();
         
         addSignal(new FluxChangeSignal(teamResources));
+				addSignal(new ResearchChangeSignal(research));
 
         if (timeLimitReached() && winner == null) {
             
