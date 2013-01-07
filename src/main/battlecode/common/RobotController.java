@@ -157,6 +157,12 @@ public interface RobotController {
      */
     public int senseEnemyNukeProgress() throws GameActionException;
     
+    /**
+     * Checks if the given map location is an encampment square.
+     * Returns true if an encampement can be built on the square regardless of whether
+     * there already exists an encampment on the square
+     */
+    public boolean senseEncampmentSquare(MapLocation loc);
 
     // ***********************************
     // ****** MOVEMENT METHODS ********
@@ -279,6 +285,11 @@ public interface RobotController {
      * @throws GameActionException
      */
     public void captureEncampment(RobotType type) throws GameActionException;
+    
+    /**
+     * Checks how much it costs to start a capture
+     */
+    public double senseCaptureCost();
    
     /**
      * Researches the given upgrade for a turn.

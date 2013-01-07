@@ -204,11 +204,15 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Must specify a valid encampment type to create");
     	assertNotMoving();
         assertIsEncampment(getLocation());
-        double cost = GameConstants.CAPTURE_POWER_COST * (gameWorld.getNumCapturing(getTeam()) + 1);
+        double cost = GameConstants.CAPTURE_POWER_COST * (gameWorld.getNumCapturing(getTeam()) + gameWorld.getEncampmentsByTeam(getTeam()).size() + 1);
         assertHaveResource(cost);
     	gameWorld.adjustResources(getTeam(), -cost);
         robot.activateCapturing(new CaptureSignal(getLocation(), type, robot.getTeam(), false, robot), GameConstants.CAPTURE_ROUND_DELAY);
     
+    }
+    
+    public double senseCaptureCost() {
+    	return GameConstants.CAPTURE_POWER_COST * (gameWorld.getNumCapturing(getTeam()) + gameWorld.getEncampmentsByTeam(getTeam()).size() + 1);
     }
     
     public void researchUpgrade(Upgrade upgrade) throws GameActionException {
@@ -437,6 +441,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	if((mt == getTeam().opponent()) && !(gameWorld.isKnownMineLocation(getTeam(), loc)))
     		return null;
     	return mt;
+    }
+    
+    public boolean senseEncampmentSquare(MapLocation loc) {
+    	return gameWorld.getEncampment(loc) != null;
     }
     
 //    public int senseAlliedMines(MapLocation loc) {

@@ -460,8 +460,7 @@ Also, note that you are allowed to drop 6.370 without penalty very **late** into
 Getting Help
 -------------
 
-We have both a forum and an IRC Channel (#battlecode on irc.freenode.net).
-
+We have both a forum and an IRC Channel (#battlecode on irc.freenode.net). Hang out and check with us -- we're friendly!
 
 
 Disclaimers
@@ -487,3 +486,7 @@ We also have a handy unit reference chart.
 
 Energon intake is not for everyone. Please consult a physician before use. 6.370 Battlecode Corporation is not responsible in the event of injury due to energon use. Energon's side-effects include loss of limb, death, unbearable pain, tendencies to procrastinate and an unnatural senseless rage. Handle with care. Energon consumption has not been approved by any health agency and you USE IT AT YOUR OWN RISK. For this reason, please be careful when scrimmaging.
 
+Changelog
+-------------
+* **1.0.0** (1/7/2013) - Initial specs released
+* **1.0.1** (1/7/2013) - Bug hotfix. Example players no longer throw exceptions, encampment capture cost is made obvious in the spec. Misc. spec typos fixed.

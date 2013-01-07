@@ -364,6 +364,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	encampmentMap.put(camp, team);
     }
     
+    public Team getEncampment(MapLocation loc) {
+    	return encampmentMap.get(loc);
+    }
+    
     public List<MapLocation> getAllEncampments() {
     	return encampments;
     }
