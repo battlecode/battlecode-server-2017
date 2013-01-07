@@ -507,7 +507,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
     
     public int getMessage(int channel) {
-    	return radio.get(channel);
+    	Integer val = radio.get(channel);
+    	return val == null ? 0 : val;
     }
     
     public boolean hasUpgrade(Team t, Upgrade upgrade) {

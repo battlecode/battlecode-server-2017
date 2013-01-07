@@ -211,7 +211,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         			myGameWorld.visitSignal(new MineSignal(getLocation(), getTeam(), MineSignal.ADD));
         			if(myGameWorld.hasUpgrade(getTeam(), Upgrade.PICKAXE)) {
         				for(Direction d: new Direction[]{Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH}) {
-        					myGameWorld.visitSignal(new MineSignal(getLocation().add(d), getTeam(), MineSignal.REMOVE));
+        					myGameWorld.visitSignal(new MineSignal(getLocation().add(d), getTeam(), MineSignal.ADD));
         				}
         			}
         		}
