@@ -490,3 +490,4 @@ Changelog
 -------------
 * **1.0.0** (1/7/2013) - Initial specs released
 * **1.0.1** (1/7/2013) - Bug hotfix. Example players no longer throw exceptions, encampment capture cost is made obvious in the spec. Misc. spec typos fixed.
+* **1.0.2** (1/7/2013) - Fixed installer for Mac
