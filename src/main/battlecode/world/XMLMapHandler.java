@@ -659,9 +659,9 @@ class XMLMapHandler extends DefaultHandler {
                     System.err.format("Warning: diagonal passageway at %d, %d\n", x, y);
             }
         int rounds = mapProperties.get(MapProperties.MAX_ROUNDS);
-        if (rounds < GameConstants.MIN_ROUND_LIMIT)
+        if (rounds < GameConstants.ROUND_MIN_LIMIT)
             warn.warn("The round limit is too small.");
-        else if (rounds > GameConstants.MAX_ROUND_LIMIT)
+        else if (rounds > GameConstants.ROUND_MAX_LIMIT)
             warn.warn("The round limit is too large.");
 
         connected:

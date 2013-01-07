@@ -69,7 +69,7 @@ public interface RobotController {
      *
      * @throws GameActionException if <code>loc</code> is not within sensor range (CANT_SENSE_THAT)
      */
-    public GameObject senseObjectAtLocation(MapLocation loc, RobotLevel height) throws GameActionException;
+    public GameObject senseObjectAtLocation(MapLocation loc) throws GameActionException;
 
     /**
      * Sense objects of type <code>type</code> that are within this sensor's range.
@@ -139,6 +139,13 @@ public interface RobotController {
      * @return location of the enemy team's HQ
      */
     public MapLocation senseEnemyHQLocation();
+    
+    /**
+     * Check the enemy team's NUKE research progress - only HQ can do this
+     * @return enemy NUKE research progress
+     * @throws GameActionException if not HQ
+     */
+    public int senseEnemyNukeProgress() throws GameActionException;
     
 
     // ***********************************

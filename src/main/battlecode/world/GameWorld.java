@@ -124,7 +124,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         wasBreakpointHit = false;
 
         // reset necessary game constants
-        teamSpawnRate = new double[]{GameConstants.SPAWN_DELAY, GameConstants.SPAWN_DELAY};
+        teamSpawnRate = new double[]{GameConstants.HQ_SPAWN_DELAY, GameConstants.HQ_SPAWN_DELAY};
         
         // process all gameobjects
         InternalObject[] gameObjects = new InternalObject[gameObjectsByID.size()];
@@ -204,9 +204,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         for (int x=0; x<teamResources.length; x++)
         {
         	if (hasUpgrade(Team.values()[x], Upgrade.FUSION))
-            	teamResources[x] = teamResources[x]*GameConstants.RESOURCE_DECAY_RATE_FUSION;
+            	teamResources[x] = teamResources[x]*GameConstants.POWER_DECAY_RATE_FUSION;
         	else
-        		teamResources[x] = teamResources[x]*GameConstants.RESOURCE_DECAY_RATE;
+        		teamResources[x] = teamResources[x]*GameConstants.POWER_DECAY_RATE;
 //        	System.out.print(teamResources[x]+" ");
         }
 //        System.out.println();

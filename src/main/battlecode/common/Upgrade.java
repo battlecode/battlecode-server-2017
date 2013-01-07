@@ -1,11 +1,11 @@
 package battlecode.common;
 
 public enum Upgrade {
-	FUSION    (100),
-	VISION    (100),
-	DIFFUSION (200),
-	PICKAXE   (200),
-	NUKE      (1000),
+	FUSION    (50),
+	VISION    (50),
+	DIFFUSION (50),
+	PICKAXE   (80),
+	NUKE      (400),
 	;
 	
 	public final int numRounds;

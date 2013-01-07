@@ -24,7 +24,7 @@ public class GameWorldFactory {
 
         // first, make the robot
         InternalRobot robot;
-        if (type != RobotType.ENCAMPMENT && type != RobotType.GENERATOR) {
+        if (type != RobotType.GENERATOR) {
             robot = new InternalRobot(gw, type, loc, t, wakeDelay);
             loadPlayer(gw, robot, t, parent);
         } else {

@@ -4,14 +4,13 @@ import static battlecode.common.RobotLevel.ON_GROUND;
 
 public enum RobotType {
     //          LEVEL,      MXE         MXF     COS     MD MVC  SR  SA          AR AR   AA      AD      AP      AIR     GROUND  ENCMP
-    HQ          (ON_GROUND, 500,        0,      0,      0, 0,   10, 360,        0, 0 ,  0,      0,      0,      true,   true,   false),
-    SOLDIER     (ON_GROUND, 40,         0,      0,      0, 0,   10, 360,        0, 2 ,  360,    1,      8,      true,   true,   false),
-    ENCAMPMENT  (ON_GROUND, 100,        0,      0,      0, 0,   10, 360,        0, 0 ,  360,    0,      0,      true,   true,   false),
-    MEDBAY      (ON_GROUND, 100,        0,      0,      0, 0,   10, 360,        0, 2 ,  360,    1,      2,      true,   true,   true),
-    SHIELDS     (ON_GROUND, 100,        0,      0,      0, 0,   10, 360,        0, 2 ,  360,    1,      5,      true,   true,   true),
-    ARTILLERY   (ON_GROUND, 100,        0,      0,      0, 0,   10, 360,        0, 63,  360,    20,     40,     true,   true,   true),
-    GENERATOR   (ON_GROUND, 100,        0,      0,      0, 0,   10, 360,        0, 0 ,  0,      0,      0,      true,   true,   true),
-    SUPPLIER    (ON_GROUND, 100,        0,      0,      0, 0,   10, 360,        0, 0 ,  0,      0,      0,      true,   true,   true),
+	HQ          (ON_GROUND, 500,        0,      0,      0, 0,   14, 360,        0, 0 ,  0,      0,      0,      true,   true,   false),
+    SOLDIER     (ON_GROUND, 40,         0,      0,      0, 0,   14, 360,        0, 2 ,  360,    1,      8,      true,   true,   false),
+    MEDBAY      (ON_GROUND, 100,        0,      0,      0, 0,   14, 360,        0, 2 ,  360,    1,      2,      true,   true,   true),
+    SHIELDS     (ON_GROUND, 100,        0,      0,      0, 0,   14, 360,        0, 2 ,  360,    1,      5,      true,   true,   true),
+    ARTILLERY   (ON_GROUND, 100,        0,      0,      0, 0,   14, 360,        0, 63,  360,    20,     40,     true,   true,   true),
+    GENERATOR   (ON_GROUND, 100,        0,      0,      0, 0,   14, 360,        0, 0 ,  0,      0,      0,      true,   true,   true),
+    SUPPLIER    (ON_GROUND, 100,        0,      0,      0, 0,   14, 360,        0, 0 ,  0,      0,      0,      true,   true,   true),
     ;
 
     /**

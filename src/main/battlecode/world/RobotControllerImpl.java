@@ -165,7 +165,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public void yield() {
         int bytecodesBelowBase = GameConstants.BYTECODE_LIMIT - RobotMonitor.getBytecodesUsed();
         if (bytecodesBelowBase > 0)
-            gameWorld.adjustResources(getTeam(), GameConstants.ENERGY_COST_PER_BYTECODE * bytecodesBelowBase);
+            gameWorld.adjustResources(getTeam(), GameConstants.POWER_COST_PER_BYTECODE * bytecodesBelowBase);
         RobotMonitor.endRunner();
     }
 
@@ -189,21 +189,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         		);
     }
     
-    public void captureEncampment(Direction dir, RobotType type) throws GameActionException {
-    	if (robot.type != RobotType.SOLDIER)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can capture encampments.");
-    	if (!type.isEncampment)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Can only capture as encampments");
-    	assertNotMoving();
-    	MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(type.level, loc))
-            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
-        assertIsEncampment(loc);
-    	assertHaveResource(GameConstants.CAPTURE_COST);
-    	gameWorld.adjustResources(getTeam(), -GameConstants.CAPTURE_COST);
-        robot.activateMovement(new SpawnSignal(loc, type, robot.getTeam(), robot), GameConstants.CAPTURE_DELAY);
-    }
-    
     public void captureEncampment(RobotType type) throws GameActionException {
     	if (robot.type != RobotType.SOLDIER)
             throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can capture encampments.");
@@ -211,15 +196,17 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Must specify a valid encampment type to create");
     	assertNotMoving();
         assertIsEncampment(getLocation());
-        assertHaveResource(GameConstants.CAPTURE_COST);
-    	gameWorld.adjustResources(getTeam(), -GameConstants.CAPTURE_COST);
-        robot.activateCapturing(new CaptureSignal(getLocation(), type, robot.getTeam(), false, robot), GameConstants.CAPTURE_DELAY);
+        assertHaveResource(GameConstants.CAPTURE_POWER_COST);
+    	gameWorld.adjustResources(getTeam(), -GameConstants.CAPTURE_POWER_COST);
+        robot.activateCapturing(new CaptureSignal(getLocation(), type, robot.getTeam(), false, robot), GameConstants.CAPTURE_ROUND_DELAY);
     
     }
     
     public void researchUpgrade(Upgrade upgrade) throws GameActionException {
     	if (robot.type != RobotType.HQ)
             throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can research.");
+    	if (gameWorld.hasUpgrade(getTeam(), upgrade))
+    		throw new GameActionException(CANT_DO_THAT_BRO, "You already have that upgrade. ("+upgrade+")");
     	assertNotMoving();
         robot.activateMovement(new ResearchSignal(robot, upgrade), 1);
     }
@@ -235,7 +222,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	if (robot.type != RobotType.SOLDIER)
             throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
     	assertNotMoving();
-    	robot.activateMinelayer(new MinelayerSignal(robot, true), GameConstants.ROUNDS_TO_MINE);
+    	robot.activateMinelayer(new MinelayerSignal(robot, true), GameConstants.MINE_LAY_DELAY);
     }
     
     public void defuseMine(MapLocation loc) throws GameActionException {
@@ -250,7 +237,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	if (loc.distanceSquaredTo(getLocation()) > defuseRadius)
     		throw new GameActionException(OUT_OF_RANGE, "You can't defuse that far");
     	
-    	robot.activateDefuser(new MinelayerSignal(robot, false), GameConstants.ROUNDS_TO_DEFUSE, loc);
+    	robot.activateDefuser(new MinelayerSignal(robot, false), GameConstants.MINE_DEFUSE_DELAY, loc);
     }
     
 //    public boolean scanMines() throws GameActionException {
@@ -326,11 +313,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return obj.exists() && checkCanSense(obj.getLocation());
     }
 
-    public GameObject senseObjectAtLocation(MapLocation loc, RobotLevel height) throws GameActionException {
+    public GameObject senseObjectAtLocation(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
-        assertNotNull(height);
         assertCanSense(loc);
-        return gameWorld.getObject(loc, height);
+        return gameWorld.getObject(loc, RobotLevel.ON_GROUND);
     }
 
     @SuppressWarnings("unchecked")
@@ -385,9 +371,15 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException {
         InternalRobot ir = castInternalRobot(r);
         assertCanSense(ir);
-        return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(),
+        return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getShieldLevel(),
                 ir.getFlux(), ir.getDirection(), ir.type, ir.getTeam(), ir.getRegen(),
                 ir.roundsUntilAttackIdle(), ir.roundsUntilMovementIdle());
+    }
+    
+    public int senseEnemyNukeProgress() throws GameActionException {
+    	if (getRobot().type != RobotType.HQ)
+    		throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can sense NUKE progress");
+    	return gameWorld.getUpgradeProgress(getTeam().opponent(), Upgrade.NUKE);
     }
 
     public MapLocation senseLocationOf(GameObject o) throws GameActionException {
@@ -554,7 +546,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public void broadcast(int channel, int data) throws GameActionException {
-    	double cost = GameConstants.BROADCAST_MESSAGE_COST;
+    	double cost = GameConstants.BROADCAST_SEND_COST;
     	assertHaveResource(cost);
     	
     	robot.addBroadcast(channel, data);
@@ -564,9 +556,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     
     @Override
     public int readBroadcast(int channel) throws GameActionException {
-    	if (channel<0 || channel>GameConstants.MAX_RADIO_CHANNEL)
-    		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.MAX_RADIO_CHANNEL);
-    	double cost = GameConstants.READ_MESSAGE_COST;
+    	if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
+    		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS);
+    	double cost = GameConstants.BROADCAST_READ_COST;
     	assertHaveResource(cost);
     	int m = gameWorld.getMessage(channel);
     	gameWorld.adjustResources(getTeam(), -cost);

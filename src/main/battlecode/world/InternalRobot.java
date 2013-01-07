@@ -135,9 +135,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
     
     public boolean canExecuteCode() {
-    	if (type == RobotType.GENERATOR) return false;
-    	if (type == RobotType.SUPPLIER) return false;
-    	else if (type == RobotType.ENCAMPMENT) return false;
     	if (getEnergonLevel() <= 0.0) return false;
     	return true;
     }
@@ -150,9 +147,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	// TODO also, resoruce generation is done here
         // TODO CORY FIX IT
         if (type == RobotType.HQ)
-        	myGameWorld.adjustResources(getTeam(), GameConstants.HQ_RESOURCE_PRODUCTION);
+        	myGameWorld.adjustResources(getTeam(), GameConstants.HQ_POWER_PRODUCTION);
         else if (type == RobotType.GENERATOR)
-        	myGameWorld.adjustResources(getTeam(), GameConstants.GENERATOR_RESOURCE_PRODUCTION);
+        	myGameWorld.adjustResources(getTeam(), GameConstants.GENERATOR_POWER_PRODUCTION);
         else if (type == RobotType.SUPPLIER)
         	myGameWorld.adjustSpawnRate(getTeam(), GameConstants.SUPPLIER_SPAWN_REDUCTION);
     }
@@ -167,18 +164,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 //            changeEnergonLevel(GameConstants.REGEN_AMOUNT);
 //            regen = false;
 //        }
-    	if (type != RobotType.ENCAMPMENT)
-    	{
-    		Team mines = myGameWorld.getMine(getLocation());
-    		if (mines!=null && mines!=getTeam()) {
-    			this.takeDamage(GameConstants.MINE_DAMAGE);
-    			myGameWorld.addKnownMineLocation(getTeam(), getLocation());
-    		}
-    	}
+    	
         if (upkeepEnabled && canExecuteCode()) {
-            upkeepPaid = myGameWorld.resources(getTeam()) > GameConstants.BYTECODE_LIMIT*GameConstants.ENERGY_COST_PER_BYTECODE + GameConstants.UNIT_UPKEEP;
+            upkeepPaid = myGameWorld.resources(getTeam()) > GameConstants.BYTECODE_LIMIT*GameConstants.POWER_COST_PER_BYTECODE + GameConstants.UNIT_POWER_UPKEEP;
             if (upkeepPaid)
-                myGameWorld.adjustResources(getTeam(), -(GameConstants.BYTECODE_LIMIT*GameConstants.ENERGY_COST_PER_BYTECODE + GameConstants.UNIT_UPKEEP));
+                myGameWorld.adjustResources(getTeam(), -(GameConstants.BYTECODE_LIMIT*GameConstants.POWER_COST_PER_BYTECODE + GameConstants.UNIT_POWER_UPKEEP));
             else // we need to subtract energon
             {
             	this.takeDamage(GameConstants.UNIT_ENERGON_UPKEEP);
@@ -236,6 +226,17 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             movementSignal = null;
         }
         
+        if (!type.isEncampment)
+    	{
+    		Team mines = myGameWorld.getMine(getLocation());
+    		if (mines!=null && mines!=getTeam()) {
+    			this.takeDamage(GameConstants.MINE_DAMAGE);
+    			myGameWorld.addKnownMineLocation(getTeam(), getLocation());
+    			if (myEnergonLevel <= 0.0)
+    				return;
+    		}
+    	}
+        
         if (attackSignal != null) {
         	myGameWorld.visitSignal(attackSignal);
         	attackSignal = null;
@@ -291,7 +292,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         
     	broadcastMap = new HashMap<Integer, Integer>();
         broadcasted = false;
-
+        
+        // shield decay
+        if (myShieldLevel > 0.0)
+        {
+        	shieldChanged = true;
+        	myShieldLevel = Math.max(0.0, myShieldLevel-GameConstants.SHIELD_DECAY_RATE);
+        }
     }
 
     @Override
@@ -348,7 +355,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         //if(type==RobotType.TOWER&&myGameWorld.towerToNode(this).isPowerCore())
         //	return;
     	// make sure encampments don't take damage
-        if (!(type == RobotType.ENCAMPMENT || getTeam() == Team.NEUTRAL))
+        if (!(getTeam() == Team.NEUTRAL))
         {
         	if (source.type == RobotType.ARTILLERY)
         		takeShieldedDamage(amt);
