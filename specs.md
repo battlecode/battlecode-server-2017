@@ -1,4 +1,4 @@
-Battlecode 2013 Gamplay Specs
+Battlecode 2013 Gameplay Specs
 ==============================
 
 Plot
@@ -7,7 +7,7 @@ Plot
 After being foiled yet another year by the power of fun gamers, the evil Professor Mordemort was captured and placed in the most secured cell in the Galactic Hold.
 Now, it is one year after those terrible events, and peace reigns supreme in the galaxy, new and faster methods of reaching far off planets being provided by 
 Vanqeri Technologies, and the Interuniverse Defense League is stronger than ever. However, there are rumors of an unknown force that is attacking planets on the
-outer rim of the galaxy, an enemy that is rumored to be using ancient technology and trench warfare to gain the upperhand. The IDL is calling on Coders throughout
+outer rim of the galaxy, an enemy that is rumored to be using ancient technology and trench warfare to gain the upper-hand. The IDL is calling on Coders throughout
 the galaxy to help combat this unknown enemy before the devastation they are causing reaches the more populated worlds. 
 
 
@@ -16,7 +16,7 @@ Objective
 
 The objective this year is simple. Violently eliminate the opponent's HQ through a constant barrage of soldiers.
 
-There are many encampments across the map that may aid in this endevour, allowing you to fortify positions and take map control.
+There are many encampments across the map that may aid in this endeavor, allowing you to fortify positions and take map control.
 
 Should you need them, you may also research a number of upgrades that provide you with a large tactical advantage on the battlefield.
 
@@ -26,17 +26,17 @@ Good luck!
 Changes from 2012
 ------------------
 
-There are a number of large changes from previous battlecode years, so even if you're a veteran you may want to read this section. In approximate order of how huge a change it is:
+There are a number of large changes from previous Battlecode years, so even if you're a veteran you may want to read this section. In approximate order of how huge a change it is:
 
 - Robots no longer face a direction. There is no turning, and no concept of forwards and backwards. Instead, robots can just move to any adjacent square.
-- There are no longer voids on the map. Every square on the map is traversible, and there is no longer any distinction between ground and air units.
+- There are no longer voids on the map. Every square on the map is traversable, and there is no longer any distinction between ground and air units.
 - Both teams start off knowing exactly what the map looks like. They know where all the map edges are and know where the enemy spawns. 
-- There are no movement or attack delays(though some actions do still incur a cooldown). Soldiers move and attack once every turn.
+- There are no movement or attack delays(though some actions do still incur a cool-down). Soldiers move and attack once every turn.
 - Units always have shared vision and can sense anything within the vision radius of any allied unit.
 - Flux has been renamed to power; now it is globally shared among all of a team's units, so flux transfer has been removed.
 - Broadcasting has been completely altered. Both teams now write to a global array of integers. Broadcasting no longer relies on robots being within a broadcast radius.
 
-NOTE: Numbers in the doc are provided for readability and are actually goverened by game constants that may change. Check the API for full details.
+NOTE: Numbers in the doc are provided for readability and are actually governed by game constants that may change. Check the API for full details.
 
 
 Robot Overview
@@ -48,19 +48,19 @@ Robots are the central part of the Battlecode world. There are two types of basi
 Each team starts the game off with one HQ. The game is over when one of the team's HQ is destroyed. The HQ can either spawn SOLDIERs or research TECH upgrades. The game ends when one team loses their HQ.  If the game reaches the round limit, HQs will also begin taking end-of-round damage to break ties.
 
 ### SOLDIER
-SOLDIERs form the core of your army. Use them to fight your way to victory. They autoattack all units around them and can also capture encampments to give their army a strategic bonus.
+SOLDIERs form the core of your army. Use them to fight your way to victory. They auto-attack all units around them and can also capture encampments to give their army a strategic bonus.
 
 
 Encampments
 ------------
 
-In addition to the two basic units, there are special units called ENCAMPMENTS that can be created on top of unoccupied encampement squares.
+In addition to the two basic units, there are special units called ENCAMPMENTS that can be created on top of unoccupied encampment squares.
 
-If a soldier is located on an encampement square, it has the option to capture the square (after `GameConstants.CAPTURE_DELAY`) and turn it into one of the following encampments:
+If a soldier is located on an encampment square, it has the option to capture the square (after `GameConstants.CAPTURE_DELAY`) and turn it into one of the following encampments:
 
 1. **MEDBAY**: Adjacent allied units are healed for `MEDBAY.attackPower` health per turn
 
-2. **SHIELDS**: The shield encampement automatically provides a bonus of `SHIELDS.attackPower` shields to a given unit. This shield absorbs damage from artillery fire only. Shields decay at a constant rate of `GameConstants.SHIELD_DECAY_RATE`.
+2. **SHIELDS**: The shield encampment automatically provides a bonus of `SHIELDS.attackPower` shields to a given unit. This shield absorbs damage from artillery fire only. Shields decay at a constant rate of `GameConstants.SHIELD_DECAY_RATE`.
 
 3. **ARTILLERY**: The artillery encampment allows a unit to attack a position on a map, causing `ARTILLERY.attackPower` damage to the attacked square, and `ARTILLERY.attackPower/2` splash damage to the adjacent squares. The splash damage can damage friendly units, so watch where you fire.
 
@@ -68,7 +68,7 @@ If a soldier is located on an encampement square, it has the option to capture t
 
 5. **SUPPLIER**: Each supplier decreases your spawn delay.
 
-The other team may retake an encampement square if the existing encampement on it is destroyed.
+The other team may retake an encampment square if the existing encampment on it is destroyed.
 
 
 Robot Resources
@@ -89,15 +89,15 @@ At the end of a robot's turn, if the bot did not use its full bytecode allocatio
 
 ### Shields
 
-Shields are generated from the SHIELD encampement and provide protection only from artillery fire damage. Shields decay at a constant rate of `GameConstants.SHIELD_DECAY_RATE` per turn.
+Shields are generated from the SHIELD encampment and provide protection only from artillery fire damage. Shields decay at a constant rate of `GameConstants.SHIELD_DECAY_RATE` per turn.
 
 
 Upgrades
 --------
 
-Upgrades are researchable from your HQ. The following upgrades are available:
+Upgrades are research-able from your HQ. The following upgrades are available:
 
-1. **Pickaxe**: In addition to mining the square underneith a SOLDIER, the 4 orthogonally adjacent squares are also mined.
+1. **Pickaxe**: In addition to mining the square underneath a SOLDIER, the 4 orthogonally adjacent squares are also mined.
 2. **Diffusion**: Robots can defuse not only adjacent tiles, but any mines in its personal sight radius.
 3. **Vision**: Increases the sight radius on all robots and the base from 10 to 32 radius squared
 4. **Fusion**: The team's decay rate is adjusted from `RESOURCE_DECAY_RATE` to `RESOURCE_DECAY_RATE_FUSION`.
@@ -121,7 +121,7 @@ A team wins by destroying the enemy's HQ, or by researching the nuke upgrade. We
 Robot Actions
 --------------
 
-Robots are eqiupped with a variety of high tech equipments and can perform the following actions during their turn.
+Robots are equipped with a variety of high tech equipments and can perform the following actions during their turn.
 
 ### Sensors
 
@@ -167,7 +167,7 @@ Battlecode maps consist of a grid of squares, each with a pair of integer coordi
 
 ### Layout
 
-Map coordinates are represented similarly to the pixels on a computer screen: x-coordinates increase moving to the right (East), and y-coordinates increase moving down (South).  The top left corner of the map is guarenteed this year to be coordinate (0,0)
+Map coordinates are represented similarly to the pixels on a computer screen: x-coordinates increase moving to the right (East), and y-coordinates increase moving down (South).  The top left corner of the map is guaranteed this year to be coordinate (0,0)
 
 ### Map Files
 
@@ -176,7 +176,7 @@ Maps are specified by XML files, and can be found in the maps folder of the rele
 ### Map Constraints
 
 - Maps are completely traversable symmetric terrain either by reflection or rotation.
-- The size of the map is guarenteed between `MAP_MIN_WIDTH` to `MAP_MAX_WIDTH` dimensions.
+- The size of the map is guaranteed between `MAP_MIN_WIDTH` to `MAP_MAX_WIDTH` dimensions.
 - The map can have neutral mines except for the 4 orthogonally adjacent squares to your HQ.
 - The map will have neutral encampments scattered across the map. There will be a minimum of `5` (`GameConstants.MAP_MINIMUM_ENCAMPMENTS`) encampments. There will be no encampments orthogonally adjacent to your base
 
@@ -280,7 +280,7 @@ The following is a detailed map of a robot's execution order to remove ambiguiti
 5. Mine damage is applied (SOLIDER Only)
 6. Attacks are performed
 
-    a. Robot autoattacks adjacent enemies (SOLIDER Only)
+    a. Robot auto-attacks adjacent enemies (SOLIDER Only)
     
     b. Adjacent units are healed (MEDBAY Only).
     
