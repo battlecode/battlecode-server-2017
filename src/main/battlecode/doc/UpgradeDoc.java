@@ -1,18 +1,18 @@
 package battlecode.doc;
 
-import battlecode.common.RobotType;
+import battlecode.common.Upgrade;
 import com.sun.javadoc.*;
 import com.sun.tools.doclets.Taglet;
 
 import java.util.Map;
 
-public class RobotDoc implements Taglet {
+public class UpgradeDoc implements Taglet {
     public static void register(Map<String, Taglet> map) {
-        map.put("robot", new RobotDoc());
+        map.put("upgrade", new UpgradeDoc());
     }
 
     public String getName() {
-        return "robot";
+        return "upgrade";
     }
 
     public boolean inConstructor() {
@@ -55,31 +55,15 @@ public class RobotDoc implements Taglet {
     }
 
     public String toString(String comp) {
-        RobotType rt;
+        Upgrade ug;
         try {
-            rt = RobotType.valueOf(comp);
+            ug = Upgrade.valueOf(comp);
         } catch (IllegalArgumentException e) {
             return null;
         }
         StringBuilder builder = new StringBuilder();
         try {
-						if (rt.isEncampment)
-								append(builder, "Type", "Encampment Upgrade"); 
-						else if (rt == RobotType.HQ)
-								append(builder, "Type", "HQ");
-						else
-								append(builder, "Type", "Soldier");
-
-            append(builder, "Max Energon", String.format("%1.0f", rt.maxEnergon));
-            if (rt.sensorAngle > 0) {
-                append(builder, "Sensor Radius Squared", String.format("%d", rt.sensorRadiusSquared));
-            }
-            if (rt.canAttackAir || rt.canAttackGround) {
-                append(builder, "Min Attack Radius Squared", String.format("%d", rt.attackRadiusMinSquared));
-                append(builder, "Max Attack Radius Squared", String.format("%d", rt.attackRadiusMaxSquared));
-                append(builder, "Attack Power", String.format("%1.1f", rt.attackPower));
-                append(builder, "Attack Delay", String.format("%d", rt.attackDelay));
-            }
+						append(builder, "Rounds", String.format("%d", ug.numRounds));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -93,7 +77,7 @@ public class RobotDoc implements Taglet {
             member = members[n++].split("\\.");
         else
             return null;
-        if ("RobotType".equals(member[0]))
+        if ("Upgrade".equals(member[0]))
             return toString(member[1]);
         else
             return null;
