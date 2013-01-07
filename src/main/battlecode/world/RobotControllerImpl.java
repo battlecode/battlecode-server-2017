@@ -126,7 +126,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getEnergonLevel();
     }
 
-    public double getTeamResources() {
+    public double getTeamPower() {
         return gameWorld.resources(getTeam());
     }
     
@@ -155,6 +155,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public RobotType getType() {
         return robot.type;
+    }
+    
+    public int getMapWidth() {
+    	return robot.myGameWorld.getGameMap().getWidth();
+    }
+
+    public int getMapHeight() {
+    	return robot.myGameWorld.getGameMap().getHeight();
     }
 
     //***********************************
@@ -196,8 +204,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Must specify a valid encampment type to create");
     	assertNotMoving();
         assertIsEncampment(getLocation());
-        assertHaveResource(GameConstants.CAPTURE_POWER_COST);
-    	gameWorld.adjustResources(getTeam(), -GameConstants.CAPTURE_POWER_COST);
+        double cost = GameConstants.CAPTURE_POWER_COST * (gameWorld.getNumCapturing(getTeam()) + 1);
+        assertHaveResource(cost);
+    	gameWorld.adjustResources(getTeam(), -cost);
         robot.activateCapturing(new CaptureSignal(getLocation(), type, robot.getTeam(), false, robot), GameConstants.CAPTURE_ROUND_DELAY);
     
     }
@@ -237,7 +246,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	if (loc.distanceSquaredTo(getLocation()) > defuseRadius)
     		throw new GameActionException(OUT_OF_RANGE, "You can't defuse that far");
     	
-    	robot.activateDefuser(new MinelayerSignal(robot, false), GameConstants.MINE_DEFUSE_DELAY, loc);
+    	if (hasUpgrade(Upgrade.DIFFUSION))
+    		robot.activateDefuser(new MinelayerSignal(robot, false), GameConstants.MINE_DEFUSE_DIFFUSION_DELAY, loc);
+    	else
+    		robot.activateDefuser(new MinelayerSignal(robot, false), GameConstants.MINE_DEFUSE_DELAY, loc);
     }
     
 //    public boolean scanMines() throws GameActionException {
@@ -413,20 +425,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public MapLocation[] senseAllEncampments() {
-    	List<InternalEncampment> camps = gameWorld.getAllEncampments();
-    	MapLocation[] locs = new MapLocation[camps.size()];
-    	int x=0;
-    	for (InternalEncampment r : camps)
-    		locs[x++] = r.getLocation();
-    	return locs;
+    	return gameWorld.getAllEncampments().toArray(new MapLocation[0]);
     }
     
     public MapLocation[] senseAlliedEncampments() {
-    	Iterable<InternalEncampment> camps = gameWorld.getEncampmentsByTeam(getTeam());
-    	ArrayList<MapLocation> locs = new ArrayList<MapLocation>();
-    	for (InternalEncampment r : camps)
-    		locs.add(r.getLocation());
-    	return locs.toArray(new MapLocation[]{});
+    	return gameWorld.getEncampmentsByTeam(getTeam()).toArray(new MapLocation[]{});
     }
     
     public Team senseMine(MapLocation loc) {

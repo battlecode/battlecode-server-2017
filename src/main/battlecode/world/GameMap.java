@@ -116,10 +116,15 @@ public class GameMap implements GenericGameMap {
         //	this.minPoints = mapProperties.get(MapProperties.MIN_POINTS);
         //else this.minPoints = GAME_DEFAULT_MIN_POINTS;
 
-        Random rand = new Random(this.seed);
-        this.mapOriginX = rand.nextInt(32000);
-        this.mapOriginY = rand.nextInt(32000);
+//        Random rand = new Random(this.seed);
+//        this.mapOriginX = rand.nextInt(32000);
+//        this.mapOriginY = rand.nextInt(32000);
 
+
+        // Maps are normalized to 0,0 (2013 change)
+        this.mapOriginX = 0;
+        this.mapOriginY = 0;
+        
         this.mapTiles = mapTiles;
 
     }

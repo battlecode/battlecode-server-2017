@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import battlecode.common.Direction;
@@ -76,9 +77,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
     private double[] teamResources = new double[2];
     private double[] teamSpawnRate = new double[2];
+    private int[] teamCapturingNumber = new int[2];
 
-    private List<InternalEncampment> encampments = new ArrayList<InternalEncampment>();
-    private Map<MapLocation, InternalEncampment> encampmentMap = new HashMap<MapLocation, InternalEncampment>();
+    private List<MapLocation> encampments = new ArrayList<MapLocation>();
+    private Map<MapLocation, Team> encampmentMap = new HashMap<MapLocation, Team>();
     private Map<Team, InternalRobot> baseHQs = new EnumMap<Team, InternalRobot>(Team.class);
     private Map<MapLocation, Team> mineLocations = new HashMap<MapLocation, Team>();
     private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<Team, GameMap.MapMemory>(Team.class);
@@ -146,6 +148,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                     diff -= energon;
             }
         return diff;
+    }
+    
+    public int getNumCapturing(Team team) {
+    	return teamCapturingNumber[team.ordinal()];
     }
 
     public void processEndOfRound() {
@@ -226,8 +232,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     
     public int countEncampments(Team t) {
     	int total = 0;
-    	Iterable<InternalEncampment> camps = getEncampmentsByTeam(t);
-    	for (InternalEncampment camp : camps)
+    	Iterable<MapLocation> camps = getEncampmentsByTeam(t);
+    	for (MapLocation camp : camps)
     		total++;
     	return total;
     }
@@ -343,32 +349,31 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         if (o.getLocation() != null) {
             gameObjectsByLoc.put(new MapLocation3D(o.getLocation(), o.getRobotLevel()), o);
         }
-        if (o instanceof InternalEncampment)
-        {
-        	addEncampment((InternalEncampment)o);
-        }
+//        if (o instanceof InternalEncampment)
+//        {
+//        	addEncampment((InternalEncampment)o);
+//        }
     }
     
     public boolean isEncampment(MapLocation loc) {
     	return encampmentMap.containsKey(loc);
     }
     
-    public void addEncampment(InternalEncampment camp) {
+    public void addEncampment(MapLocation camp, Team team) {
     	encampments.add(camp);
-    	encampmentMap.put(camp.getLocation(), camp);
+    	encampmentMap.put(camp, team);
     }
     
-    public List<InternalEncampment> getAllEncampments() {
+    public List<MapLocation> getAllEncampments() {
     	return encampments;
     }
     
-    public Iterable<InternalEncampment> getEncampmentsByTeam(final Team t) {
-    	Predicate<InternalEncampment> pred = new Predicate<InternalEncampment>() {
-             public boolean apply(InternalEncampment r) {
-                 return r.getTeam() == t;
-             }
-         };
-         return Iterables.filter(encampments, pred);
+    public List<MapLocation> getEncampmentsByTeam(final Team t) {
+    	ArrayList<MapLocation> camps = new ArrayList<MapLocation>();
+    	for (Entry<MapLocation, Team> entry : encampmentMap.entrySet())
+    		if (entry.getValue() == t)
+    			camps.add(entry.getKey());
+        return camps;
     }
 
     public Collection<InternalObject> allObjects() {
@@ -399,6 +404,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             else
             	if (o instanceof InternalRobot) {
             		InternalRobot ir = (InternalRobot) o;
+            		if (ir.type == RobotType.SOLDIER && (ir.getCapturingRounds() == -1 || ir.getCapturingRounds()>0))
+            			teamCapturingNumber[ir.getTeam().ordinal()]--;
             		if (ir.type == RobotType.SOLDIER && ir.getCapturingRounds() == -1)
             			; // don't do anything
             		else
@@ -614,7 +621,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 						if (dx == 0 && dy == 0)
 							target.takeDamage(attacker.type.attackPower, attacker);
 						else
-							target.takeDamage(attacker.type.attackPower/2.0, attacker);
+							target.takeDamage(attacker.type.attackPower*GameConstants.ARTILLERY_SPLASH_RATIO, attacker);
 				}
 
 			break;
@@ -678,7 +685,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             	setWinner(r.getTeam().opponent(), getDominationFactor(r.getTeam().opponent()));
             } else if (r.type.isEncampment)
             {
-            	encampmentMap.get(r.getLocation()).setTeam(Team.NEUTRAL);
+            	encampmentMap.put(r.getLocation(), Team.NEUTRAL);
             }
         }
     }
@@ -759,7 +766,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         
         if (s.getType().isEncampment)
         {
-        	encampmentMap.get(s.getLoc()).setTeam(s.getTeam());
+        	encampmentMap.put(s.getLoc(), s.getTeam());
         }
 
         //note: this also adds the signal
@@ -782,6 +789,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     
     public void visitCaptureSignal(CaptureSignal s) {
     	// noop
+    	teamCapturingNumber[s.getTeam().ordinal()]++;
     	addSignal(s);
     }
     
@@ -843,7 +851,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
     
     public void visitNodeBirthSignal(NodeBirthSignal s) {
-    	// do nothing
+    	addEncampment(s.location, Team.NEUTRAL);
     	addSignal(s);
     }
     
@@ -937,6 +945,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
     
     protected void adjustSpawnRate(Team t, double factor) {
-    	teamSpawnRate[t.ordinal()] *= (1.0 - factor);
+    	teamSpawnRate[t.ordinal()] = 10*GameConstants.HQ_SPAWN_DELAY/(10*GameConstants.HQ_SPAWN_DELAY/teamSpawnRate[t.ordinal()]+1);
     }
 }

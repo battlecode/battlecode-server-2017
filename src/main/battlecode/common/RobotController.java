@@ -28,12 +28,22 @@ public interface RobotController {
     /**
      * @return total amount of resources remaining
      */
-    public double getTeamResources();
+    public double getTeamPower();
 
     /**
      * @return this robot's current location
      */
     public MapLocation getLocation();
+
+    /**
+     * @return the current map's width
+     */
+    public int getMapWidth();
+   
+    /**
+     * @return the current map's height
+     */
+    public int getMapHeight();
     
 
     /**
@@ -399,4 +409,5 @@ public interface RobotController {
      * resume execution.
      */
     public void breakpoint();
+   
 }

@@ -58,6 +58,7 @@ public interface GameConstants {
     
     /** Radius of artillery splash damage */
     public static final int ARTILLERY_SPLASH_RADIUS_SQUARED = 2;
+    public static final double ARTILLERY_SPLASH_RATIO = 0.5;
    
     /** Rate at which SHIELDS decay every round */
     public static final double SHIELD_DECAY_RATE = 1.0;
@@ -90,10 +91,13 @@ public interface GameConstants {
     public static final int MINE_LAY_DELAY = 25;
     
     /** The number of rounds required by a soldier to defuse a mine */
-    public static final int MINE_DEFUSE_DELAY = 5;
+    public static final int MINE_DEFUSE_DELAY = 12;
+
+    /** The number of rounds required by a soldier to defuse a mine if they have DIFFUSION upgrade */
+    public static final int MINE_DEFUSE_DIFFUSION_DELAY = 5;
    
     /** The power cost required to begin an encampement capture */
-    public static final double CAPTURE_POWER_COST = 20;
+    public static final double CAPTURE_POWER_COST = 10;
     
     /** The number of rounds required by a SOLDIER to capture an encampment */
     public static final int CAPTURE_ROUND_DELAY = 50;
@@ -107,9 +111,12 @@ public interface GameConstants {
     /** The rate at which stockpiled energy decays with the FUSION upgrade */
     public static final double POWER_DECAY_RATE_FUSION = 0.99;
     
-    /** Rounds required to spawn a unit */
+    /** Rounds required to spawn a unit at the start of the game */
     public static final int HQ_SPAWN_DELAY = 10;
 
-    /** Multiplicative reduction in HQ spawn delay for each SUPPLIER */
-    public static final double SUPPLIER_SPAWN_REDUCTION = 0.05;
+    /** Constant used to calculate how suppliers factor into the HQ spawn delay */
+    public static final double HQ_SPAWN_DELAY_CONSTANT = 10;
+    
+    /** A valid map must have at least this many encampment locations. */
+    public static final int MAP_MINIMUM_ENCAMPMENTS = 5;
 }

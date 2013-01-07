@@ -173,8 +173,8 @@ class XMLMapHandler extends DefaultHandler {
         public void createGameObject(GameWorld world, MapLocation loc) {
             if (team == Team.NEUTRAL) {
 //            	new InternalRobot(world, RobotType.ENCAMPMENT, loc, Team.NEUTRAL, false);
-            	new InternalEncampment(world, loc);
-            	world.addSignal(new NodeBirthSignal(loc));
+//            	new InternalEncampment(world, loc);
+            	world.visitSignal(new NodeBirthSignal(loc));
             } else {
             	InternalRobot r = GameWorldFactory.createPlayer(world, RobotType.HQ, loc, team, null, false);
                 world.setHQ(r, team);
