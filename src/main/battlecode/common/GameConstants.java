@@ -111,5 +111,5 @@ public interface GameConstants {
     public static final int HQ_SPAWN_DELAY = 10;
 
     /** Multiplicative reduction in HQ spawn delay for each SUPPLIER */
-    public static final double SUPPLIER_SPAWN_REDUCTION = 0.1;
+    public static final double SUPPLIER_SPAWN_REDUCTION = 0.05;
 }

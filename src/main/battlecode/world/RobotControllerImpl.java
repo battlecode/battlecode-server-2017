@@ -185,7 +185,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         gameWorld.adjustResources(getTeam(), -type.spawnCost);
         robot.activateMovement(
         		new SpawnSignal(loc, type, robot.getTeam(), robot),
-        		(int)Math.round(gameWorld.getSpawnRate(robot.getTeam()))
+        		Math.max(1, (int)Math.round(gameWorld.getSpawnRate(robot.getTeam())))
         		);
     }
     
