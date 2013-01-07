@@ -4,8 +4,12 @@ Battlecode 2013 Gamplay Specs
 Plot
 --------
 
-After being foiled yet again a year ago by fun gamers, the evil Professor Mordemort retreated into his caverns of despair to hatch a new plot.
-A whole year of watching history channel WWI reruns however gave him some newfound tactical insights. He has littered the world with trenches and minefiles, planning to use them for his final assault on the Coders.
+After being foiled yet another year by the power of fun gamers, the evil Professor Mordemort was captured and placed in the most secured cell in the Galactic Hold.
+Now, it is one year after those terrible events, and peace reigns supreme in the galaxy, new and faster methods of reaching far off planets being provided by 
+Vanqeri Technologies, and the Interuniverse Defense League is stronger than ever. However, there are rumors of an unknown force that is attacking planets on the
+outer rim of the galaxy, an enemy that is rumored to be using ancient technology and trench warfare to gain the upperhand. The IDL is calling on Coders throughout
+the galaxy to help combat this unknown enemy before the devastation they are causing reaches the more populated worlds. 
+
 
 Objective
 ----------------
