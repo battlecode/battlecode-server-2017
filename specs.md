@@ -265,22 +265,22 @@ The following is a detailed map of a robot's execution order to remove ambiguiti
 3. Power is refunded based on remaining bytecodes by a factor of `GameConstants.ENERGY_COST_PER_BYTECODE`, even if it paid its upkeep with energon.
 4. Robots perform actions.
 
-    a. If the robot is on the last turn of mining, the mines are placed on the map (SOLIDER Only)
+    a. If the robot is on the last turn of mining, the mines are placed on the map (SOLDIER Only)
 
-    b. If the robot is on the last turn of defusing, the mines are removed from the map (SOLIDER Only)
+    b. If the robot is on the last turn of defusing, the mines are removed from the map (SOLDIER Only)
 
-    c. If the robot is on the last turn of capturing, then the encampment is created, and the robot is destroyed (SOLIDER Only)
+    c. If the robot is on the last turn of capturing, then the encampment is created, and the robot is destroyed (SOLDIER Only)
 
-    d. The robot moves (SOLIDER Only)
+    d. The robot moves (SOLDIER Only)
 
     e. Targeted attacks happen (ARTILLERY Only)
 
     f. Research is updated OR a unit is spawned (HQ Only)
 
-5. Mine damage is applied (SOLIDER Only)
+5. Mine damage is applied (SOLDIER Only)
 6. Attacks are performed
 
-    a. Robot auto-attacks adjacent enemies (SOLIDER Only)
+    a. Robot auto-attacks adjacent enemies (SOLDIER Only)
     
     b. Adjacent units are healed (MEDBAY Only).
     
