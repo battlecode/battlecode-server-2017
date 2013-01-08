@@ -129,7 +129,7 @@ public interface RobotController {
      * Sense whether a mine exists at a given location
      * Returns either the TEAM of the mine or null if there is no mine
      * @param location to scan
-     * @return
+     * @return team the mine belongs to or null if there is no mine there
      */
     public Team senseMine(MapLocation location);
    
@@ -245,7 +245,7 @@ public interface RobotController {
      * directly in front of this robot.  The square must not already be occupied.
      * The new robot is created and starts executing bytecodes immediately
      *
-     * @param type the type of robot to spawn; cannot be null.
+     * @param dir the direction to spawn robot in; cannot be null.
      * @throws IllegalStateException if this robot is not an ARCHON
      * @throws GameActionException   if this robot is currently moving (ALREADY_ACTIVE)
      * @throws GameActionException   if <code>loc</code> is already occupied (CANT_MOVE_THERE)
@@ -279,7 +279,6 @@ public interface RobotController {
     /**
      * Captures the encampment soldier is standing on. 
      * Immediately kills the soldier and encampment, and spawns an encampment robot of the given type
-     * @param dir
      * @param type
      * @throws GameActionException
      */
@@ -302,7 +301,7 @@ public interface RobotController {
      * Checks the total number of rounds a given research has been researched
      * Will only work if the robot is an HQ
      * @param upgrade
-     * @return
+     * @return the number of rounds that have been spent upgrading
      * @throws GameActionException
      */
     public int checkResearchProgress(Upgrade upgrade) throws GameActionException;
