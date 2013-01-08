@@ -13,14 +13,16 @@ You have to build the server before the client. This process builds both. You ne
 5. ant download-ivy
 6. ant retrieve
 7. ant jar
-8. cp battlecode-server.jar battlecode_distro/
-9. cd ..
-10. git clone https://github.com/battlecode/battlecode-client.git
-11. ant retrieve
-12. cp ../battlecode-server/battlecode-server.jar lib/
-13. cp battlecode_distro/jogl.jar lib/
-14. ant jar
-15. cp battlecode-client.jar battlecode_distro/
+8. mkdir battlecode_distro
+9. cp battlecode-server.jar battlecode_distro/
+10. cd ..
+11. git clone https://github.com/battlecode/battlecode-client.git
+12. cd battlecode-client
+13. ant retrieve
+14. cp ../battlecode-server/battlecode-server.jar lib/
+15. cp ../battlecode-server/battlecode_distro/jogl.jar lib/
+16. ant jar
+17. cp battlecode-client.jar battlecode_distro/
 
 Enjoy your new build!
 
