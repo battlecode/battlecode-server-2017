@@ -248,7 +248,6 @@ public interface RobotController {
      * @param type the type of robot to spawn; cannot be null.
      * @throws IllegalStateException if this robot is not an ARCHON
      * @throws GameActionException   if this robot is currently moving (ALREADY_ACTIVE)
-     * @throws GameActionException   if this robot does not have enough flux to spawn a robot of type <code>type</code> (NOT_ENOUGH_FLUX)
      * @throws GameActionException   if <code>loc</code> is already occupied (CANT_MOVE_THERE)
      */
     public void spawn(Direction dir) throws GameActionException;
@@ -310,8 +309,9 @@ public interface RobotController {
     
     
     /**
-     * Ends the current round.  This robot will receive a flux bonus of
-     * <code>GameConstants.YIELD_BONUS * GameConstants.UNIT_UPKEEP * Clock.getBytecodesLeft() / GameConstants.BYTECODE_LIMIT</code>.
+     * Ends the current round.  This robot will receive a power bonus of
+     * <code>GameConstants.POWER_COST_PER_BYTECODE * (GameConstants.BYTECODE_LIMIT
+		 * - RobotMonitor.getBytecodesUsed())</code>.
      * Never fails.
      */
     public void yield();

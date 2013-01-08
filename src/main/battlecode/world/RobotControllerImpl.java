@@ -4,7 +4,6 @@ import static battlecode.common.GameActionExceptionType.ALREADY_ACTIVE;
 import static battlecode.common.GameActionExceptionType.CANT_DO_THAT_BRO;
 import static battlecode.common.GameActionExceptionType.CANT_SENSE_THAT;
 import static battlecode.common.GameActionExceptionType.MISSING_UPGRADE;
-import static battlecode.common.GameActionExceptionType.NOT_ENOUGH_FLUX;
 import static battlecode.common.GameActionExceptionType.NOT_ENOUGH_RESOURCE;
 import static battlecode.common.GameActionExceptionType.NO_ROBOT_THERE;
 import static battlecode.common.GameActionExceptionType.OUT_OF_RANGE;
@@ -183,12 +182,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (robot.type != RobotType.HQ)
             throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can spawn.");
         assertNotMoving();
-        assertHaveResource(type.spawnCost);
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(type.level, loc))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
-        gameWorld.adjustResources(getTeam(), -type.spawnCost);
         robot.activateMovement(
         		new SpawnSignal(loc, type, robot.getTeam(), robot),
         		Math.max(1, (int)Math.round(gameWorld.getSpawnRate(robot.getTeam())))
@@ -386,7 +383,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         InternalRobot ir = castInternalRobot(r);
         assertCanSense(ir);
         return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getShieldLevel(),
-                ir.getFlux(), ir.getDirection(), ir.type, ir.getTeam(), ir.getRegen(),
+                ir.getDirection(), ir.type, ir.getTeam(), ir.getRegen(),
                 ir.roundsUntilAttackIdle(), ir.roundsUntilMovementIdle());
     }
     
@@ -478,10 +475,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (robot.type != RobotType.SOLDIER)
         	throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can move.");
     	assertNotMoving();
-//        assertHaveFlux(robot.type.moveCost);
         assertCanMove(d);
-        int delay = d.isDiagonal() ? robot.type.moveDelayDiagonal :
-                robot.type.moveDelayOrthogonal;
+        int delay = 0;
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
                 true, delay), delay);
     }

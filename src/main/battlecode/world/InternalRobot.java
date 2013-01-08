@@ -27,11 +27,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     protected volatile double myEnergonLevel;
     protected volatile double myShieldLevel;
-    private volatile double flux;
     protected volatile Direction myDirection;
     protected volatile boolean energonChanged = true;
     protected volatile boolean shieldChanged = true;
-    private volatile boolean fluxChanged = true;
     protected volatile long controlBits;
     // is this used ever?
     protected volatile boolean hasBeenAttacked = false;
@@ -186,7 +184,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 //                dmin = d;
 //        }
 //        double prod = GameConstants.MIN_PRODUCTION + (GameConstants.MAX_PRODUCTION - GameConstants.MIN_PRODUCTION) * Math.sqrt(((double) dmin) / GameConstants.PRODUCTION_PENALTY_R2);
-//        adjustFlux(prod);
 //        
 //    }
 
@@ -314,11 +311,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	return myShieldLevel;
     }
 
-    public double getFlux() {
-        return flux;
-    }
-
-
     public Direction getDirection() {
         return myDirection;
     }
@@ -414,12 +406,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public boolean clearShieldChanged() {
         boolean wasChanged = shieldChanged;
         shieldChanged = false;
-        return wasChanged;
-    }
-
-    public boolean clearFluxChanged() {
-        boolean wasChanged = fluxChanged;
-        fluxChanged = false;
         return wasChanged;
     }
 

@@ -487,7 +487,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public Signal[] getAllSignals(boolean includeBytecodesUsedSignal) {
         ArrayList<InternalRobot> energonChangedRobots = new ArrayList<InternalRobot>();
-        ArrayList<InternalRobot> fluxChangedRobots = new ArrayList<InternalRobot>();
         ArrayList<InternalRobot> shieldChangedRobots = new ArrayList<InternalRobot>();
         ArrayList<InternalRobot> allRobots = null;
         if (includeBytecodesUsedSignal)
@@ -501,15 +500,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             if (r.clearEnergonChanged()) {
                 energonChangedRobots.add(r);
             }
-            if (r.clearFluxChanged()) {
-                fluxChangedRobots.add(r);
-            }
             if (r.clearShieldChanged()) {
             	shieldChangedRobots.add(r);
             }
         }
         signals.add(new EnergonChangeSignal(energonChangedRobots.toArray(new InternalRobot[]{})));
-//        signals.add(new FluxChangeSignal(fluxChangedRobots.toArray(new InternalRobot[]{})));
         signals.add(new ShieldChangeSignal(shieldChangedRobots.toArray(new InternalRobot[]{})));
 
         if (includeBytecodesUsedSignal)

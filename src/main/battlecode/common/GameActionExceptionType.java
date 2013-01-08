@@ -10,11 +10,7 @@ public enum GameActionExceptionType {
      */
     INTERNAL_ERROR,
     /**
-     * Indicates when a robot tries to perform an action (e.g. transfer flux, spawn) for which it does not have enough flux
-     */
-    NOT_ENOUGH_FLUX,
-    /**
-     * Indicates when a robot tries to perform an action (e.g. transfer flux, spawn) for which it does not have enough Resource (team resource)
+     * Indicates when a robot tries to perform an action (e.g. upgrade, spawn) for which it does not have enough power (team resource)
      */
     NOT_ENOUGH_RESOURCE,
     /**

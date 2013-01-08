@@ -23,20 +23,6 @@ public class FluxChangeSignal extends Signal {
      */
     public final double[] flux;
 
-    /**
-     * Creates a signal for a robot whose energon just changed.
-     *
-     * @param robot the robot whose energon just changed
-     */
-    public FluxChangeSignal(InternalRobot[] robots) {
-        robotIDs = new int[robots.length];
-        flux = new double[robots.length];
-        for (int i = 0; i < robots.length; i++) {
-            robotIDs[i] = robots[i].getID();
-            flux[i] = robots[i].getFlux();
-        }
-    }
-    
     public FluxChangeSignal(double[] flux) {
     	this.robotIDs = null;
     	this.flux = Arrays.copyOf(flux, flux.length);
