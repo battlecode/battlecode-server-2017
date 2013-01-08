@@ -532,6 +532,7 @@ Changelog
     * Map max size reduced to 70, and constraints made tighter (200 max rush distance). Lots of new maps added.
     * Nuke sensing rebalanced, only 50% detectable
     * Spec document mostly rewritten to include detailed information regarding mines, broadcasting, etc.
+* **1.1.1** (1/8/2013) - Fixing typos
 
 
 Appendices
