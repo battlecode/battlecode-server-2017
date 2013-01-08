@@ -2,7 +2,7 @@ package battlecode.common;
 
 /**
  * This enumeration distinguishes objects that are on the ground, or in
- * the air at a given location.
+ * the encampment level at a given location.
  * <p/>
  * Since RobotLevel is a Java 1.5 enum, you can use it in <code>switch</code>
  * statements, it has all the standard enum methods (<code>valueOf</code>,
@@ -18,11 +18,7 @@ public enum RobotLevel {
     /**
      * The vertical location of ground robots.
      */
-    ON_GROUND(1),
-    /**
-     * The vertical location of air robots.
-     */
-    IN_AIR(2);
+		ON_GROUND(1);
     /**
      * An integer representation of the height.
      */

@@ -14,7 +14,7 @@ public enum TerrainTile {
     public boolean isTraversableAtHeight(RobotLevel height) {
         switch (this) {
             case VOID:
-                return height == RobotLevel.IN_AIR;
+                return false;
             case LAND:
             	// TODO might need recode if we enable underground robots
                 return true;

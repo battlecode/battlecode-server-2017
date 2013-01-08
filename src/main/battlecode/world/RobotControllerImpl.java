@@ -178,8 +178,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void spawn(Direction dir) throws GameActionException {
-        // If we decide to let other robots spawn, then we should make
-        // sure that air units can't spawn ground units.
     	// only possible for HQ to spawn soldiers
     	RobotType type = RobotType.SOLDIER;
         if (robot.type != RobotType.HQ)

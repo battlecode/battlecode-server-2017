@@ -74,7 +74,7 @@ public class RobotDoc implements Taglet {
             if (rt.sensorAngle > 0) {
                 append(builder, "Sensor Radius Squared", String.format("%d", rt.sensorRadiusSquared));
             }
-            if (rt.canAttackAir || rt.canAttackGround) {
+            if (rt.canAttack) {
                 append(builder, "Min Attack Radius Squared", String.format("%d", rt.attackRadiusMinSquared));
                 append(builder, "Max Attack Radius Squared", String.format("%d", rt.attackRadiusMaxSquared));
                 append(builder, "Attack Power", String.format("%1.1f", rt.attackPower));
