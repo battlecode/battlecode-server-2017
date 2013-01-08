@@ -93,8 +93,8 @@ public interface GameConstants {
     /** The number of rounds required by a soldier to defuse a mine */
     public static final int MINE_DEFUSE_DELAY = 12;
 
-    /** The number of rounds required by a soldier to defuse a mine if they have DIFFUSION upgrade */
-    public static final int MINE_DEFUSE_DIFFUSION_DELAY = 5;
+    /** The number of rounds required by a soldier to defuse a mine if they have DEFUSION upgrade */
+    public static final int MINE_DEFUSE_DEFUSION_DELAY = 5;
    
     /** The power cost required to begin an encampement capture */
     public static final double CAPTURE_POWER_COST = 10;

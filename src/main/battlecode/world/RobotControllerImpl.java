@@ -241,14 +241,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	assertNotMoving();
     	
     	int defuseRadius = 2;
-    	if (hasUpgrade(Upgrade.DIFFUSION))
+    	if (hasUpgrade(Upgrade.DEFUSION))
     		defuseRadius = robot.type.sensorRadiusSquared + (hasUpgrade(Upgrade.VISION) ? GameConstants.VISION_UPGRADE_BONUS : 0);
     		
     	if (loc.distanceSquaredTo(getLocation()) > defuseRadius)
     		throw new GameActionException(OUT_OF_RANGE, "You can't defuse that far");
     	
-    	if (hasUpgrade(Upgrade.DIFFUSION))
-    		robot.activateDefuser(new MinelayerSignal(robot, false), GameConstants.MINE_DEFUSE_DIFFUSION_DELAY, loc);
+    	if (hasUpgrade(Upgrade.DEFUSION))
+    		robot.activateDefuser(new MinelayerSignal(robot, false), GameConstants.MINE_DEFUSE_DEFUSION_DELAY, loc);
     	else
     		robot.activateDefuser(new MinelayerSignal(robot, false), GameConstants.MINE_DEFUSE_DELAY, loc);
     }

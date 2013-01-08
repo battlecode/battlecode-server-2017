@@ -3,7 +3,7 @@ package battlecode.common;
 public enum Upgrade {
 	FUSION    (30),
 	VISION    (50),
-	DIFFUSION (50),
+	DEFUSION (50),
 	PICKAXE   (80),
 	NUKE      (400),
 	;

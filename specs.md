@@ -1,4 +1,4 @@
-Battlecode 2013 Gamplay Specs
+Battlecode 2013 Gameplay Specs
 ==============================
 
 Plot
@@ -12,7 +12,7 @@ Objective
 
 The objective this year is simple. Violently eliminate the opponent's HQ through a constant barrage of soldiers.
 
-There are many encampments across the map that may aid in this endevour, allowing you to fortify positions and take map control.
+There are many encampments across the map that may aid in this endeavor, allowing you to fortify positions and take map control.
 
 Should you need them, you may also research a number of upgrades that provide you with a large tactical advantage on the battlefield.
 
@@ -26,7 +26,7 @@ There are a number of large changes from previous battlecode years, so veterans 
 
 - Archons are out. There is one HQ that acts as the archon replacement.
 - Robots no longer face a direction. There is no turning, and no concept of forwards and backwards. Instead, robots can just move to any adjacent square.
-- There are no longer voids on the map. Every square on the map is traversible, and there is no longer any distinction between ground and air units.
+- There are no longer voids on the map. Every square on the map is traversable, and there is no longer any distinction between ground and air units.
 - Both teams start off knowing exactly what the map looks like. They know where all the map edges are and know where the enemy spawns. 
 - There are no movement or attack delays(though some actions do still incur a cooldown). Soldiers move and attack once every turn.
 - Units always have shared vision and can sense anything within the vision radius of any allied unit.
@@ -92,7 +92,7 @@ Shields are generated from the SHIELD encampment. They protect soldiers from art
 Mines
 -----
 
-Soldiers can lay mines throughout the map to help defend territory and catch enemy robots off guard. All soldiers have the ability to lay a mine on their current square, taking 25 (`GameConstants.MINE_LAY_DELAY`) turns to do so. During this time, it cannot perform any other actions (defuse, capture, move) and does not autoattack. If it is killed during this time, the mine does not get planted. Mines belong to a team, and will only damage robots of that team.
+Soldiers can lay mines throughout the map to help defend territory and catch enemy robots off guard. All soldiers have the ability to lay a mine on their current square, taking 25 (`GameConstants.MINE_LAY_DELAY`) turns to do so. During this time, it cannot perform any other actions (defuse, capture, move) and does not auto-attack. If it is killed during this time, the mine does not get planted. Mines belong to a team, and will only damage robots of that team.
 
 Once a mine is planted, they stay there until they are defused. Mines do not "blow up" when they do damage. Enemy robots on the mined square will take 10 (`GameConstants.MINE_DAMAGE`) damage per turn, every turn they end on the mine. Only one mine can be in one square at a time; they cannot be stacked. You can try to mine squares that are already mined (either by you or the enemy), but it will just be a waste. Encampment squares can be mined.
 
@@ -104,7 +104,7 @@ Mines cannot be planted on the HQ square, or any encampment square. Soldiers can
 
 ### Defusion
 
-A mine must be defused to be removed from the map. To defuse a mine, a soldier must be adjacent to the mine. It must take 12 (`GameConstants.MINE_DEFUSE_DELAY`) turns to defuse the mine, during which it cannot perform other actions and cannot autoattack. If the soldier is killed during this time, the mine is not defused. Soldiers can only defuse one mine at a time, and two soldiers trying to defuse the same mine won't defuse it any faster. Once the diffusion upgrade is researched, the time it takes to defuse the mine is reduced to 5 (`GameConstants.MINE_DEFUSE_DIFFUSION_DELAY`), and the soldier can defuse any mine within its sensor range.
+A mine must be defused to be removed from the map. To defuse a mine, a soldier must be adjacent to the mine. It must take 12 (`GameConstants.MINE_DEFUSE_DELAY`) turns to defuse the mine, during which it cannot perform other actions and cannot auto-attack. If the soldier is killed during this time, the mine is not defused. Soldiers can only defuse one mine at a time, and two soldiers trying to defuse the same mine won't defuse it any faster. Once the defusion upgrade is researched, the time it takes to defuse the mine is reduced to 5 (`GameConstants.MINE_DEFUSE_DEFUSION_DELAY`), and the soldier can defuse any mine within its sensor range.
 
 How defusion actually works is that soldiers target a square to defuse. They do not have to know there is a mine there to defuse. After the defusion time, any enemy or neutral mine in that location will be removed, even if they aren't able to sense it, and even if the mine was not there when the soldier started defusing. 
 
@@ -120,7 +120,7 @@ Upgrades
 Upgrades are researchable from your HQ. The following upgrades are available:
 
 1. **Pickaxe**: When a soldier mines, in addition to mining the square it is on, it also mines each of the four orthogonally adjacent squares.
-2. **Diffusion**: Soldiers can defuse mines not only in adjacent tiles, but in all tiles in its personal sight radius. They also defuse mines significantly faster. They still must defuse one mine at a time.
+2. **Defusion**: Soldiers can defuse mines not only in adjacent tiles, but in all tiles in its personal sight radius. They also defuse mines significantly faster. They still must defuse one mine at a time.
 3. **Vision**: Increases the personal sensor radius on all robots from 14 to 33 units squared.
 4. **Fusion**: The team's power decay rate is adjusted from 20% `RESOURCE_DECAY_RATE` to 1% `RESOURCE_DECAY_RATE_FUSION`.
 5. **Nuke**: You immediately win.
@@ -143,7 +143,7 @@ A team wins by destroying the enemy's HQ, or by researching the nuke upgrade. We
 Robot Actions
 --------------
 
-Robots are eqiupped with a variety of high tech equipments and can perform the following actions during their turn.
+Robots are equipped with a variety of high tech equipments and can perform the following actions during their turn.
 
 ### Sensors
 
@@ -159,7 +159,7 @@ All robots are equipped with personal sensors. These sensors have a sensor range
 
 ### Messaging
 
-This year, there is a global message board acccessible to all robots that supports read/write operations. It works as follows:
+This year, there is a global message board accessible to all robots that supports read/write operations. It works as follows:
 
 * There exist 0-10,000 channels inclusive (`BROADCAST_MAX_CHANNELS`).
 * During a robot's turn, a robot may read/write as many messages as it desires to the board (via `rc.broadcast` and `rc.readBroadcast`)
@@ -175,7 +175,7 @@ This message board is globally accessible by _any_ robot and is used for communi
 
 Only the soldier has the ability to move. Moving has no power cost.
 
-Every turn, soldiers may move to any unoccupied adjacent tile, provided they are not in delay from performing any other action (mining, defusing, capturing). Soldiers can autoattack on the same turn they move.
+Every turn, soldiers may move to any unoccupied adjacent tile, provided they are not in delay from performing any other action (mining, defusing, capturing). Soldiers can auto-attack on the same turn they move.
 
 Soldiers can move diagonally at the same speed as they can move orthogonally.
 
@@ -183,7 +183,7 @@ Soldiers can move diagonally at the same speed as they can move orthogonally.
 
 The HQ has the ability to continuously spawn SOLDIERs. The action of spawning soldiers does not cost power by itself, but the spawned soldiers will start to consume power via upkeep. 
 
-SOLDIERs can be spawned in any adjacent tile that does not already have a robot on it. In the beginning, the HQ may spawn one SOLDIER per 10 (`GameConstants.HQ_SPAWN_DELAY`) rounds. This spawn rate is reduced by SUPPLIERS according to the formula a=r(`GameConstants.HQ_SPAWN_DELAY`*`GameConstants.HQ_SPAWN_DELAY_CONSTANT`/(`GameConstants.HQ_SPAWN_DELAY_CONSTANT`+b)), where a is the number of turns it takes to spawn one unit, b is the number of suppliers you have alive, and r() rounds a number to the nearest positive integer.  Units that are spawned are immediately placed on the field and may perform actions like any other robot. The HQ cannot spawn or research while it is in spawning cooldown.
+SOLDIERs can be spawned in any adjacent tile that does not already have a robot on it. In the beginning, the HQ may spawn one SOLDIER per 10 (`GameConstants.HQ_SPAWN_DELAY`) rounds. This spawn rate is reduced by SUPPLIERS according to the formula a=r(`GameConstants.HQ_SPAWN_DELAY`*`GameConstants.HQ_SPAWN_DELAY_CONSTANT`/(`GameConstants.HQ_SPAWN_DELAY_CONSTANT`+b)), where a is the number of turns it takes to spawn one unit, b is the number of suppliers you have alive, and r() rounds a number to the nearest positive integer.  Units that are spawned are immediately placed on the field and may perform actions like any other robot. The HQ cannot spawn or research while it is in spawning cool-down.
 
 ### Suicide
 
@@ -222,7 +222,7 @@ Official maps used in scrimmages and tournaments must all satisfy the following 
 
 - Maps are completely symmetric either by reflection or 180 degree rotation, except for the two starting HQs.
 - The width and height of the map are guaranteed to be between 20 and 70, inclusive.
-- The map cannot have neutral mines on the 4 squares orthgonally adjacent to either HQ.
+- The map cannot have neutral mines on the 4 squares orthogonally adjacent to either HQ.
 - There will be a minimum of 5 encampment squares on the map. 
 - It will be possible for a soldier to get adjacent to the enemy HQ by turn 200, even if you only make one soldier and research/capture nothing, and the opposing team does nothing.
 
@@ -232,7 +232,7 @@ Writing a Player
 
 ### Introduction
 
-Your player program must reside in a Java package named `teamXXX`, where `XXX` is your three-digit team number, with leading zeros included. You may have whatever subpackages you like. You must define `teamXXX.RobotPlayer`, which must have a public static `run` method that takes one argument of type `battlecode.common.RobotController`. Whenever a new robot is created, the game calls the run method with the robots RobotController as its argument. If this method ever finishes, either because it returned or because of an uncaught exception, the robot dies and is removed from the game. You are encouraged to wrap your code in loops and exception handlers so that this does not happen.
+Your player program must reside in a Java package named `teamXXX`, where `XXX` is your three-digit team number, with leading zeros included. You may have whatever sub-packages you like. You must define `teamXXX.RobotPlayer`, which must have a public static `run` method that takes one argument of type `battlecode.common.RobotController`. Whenever a new robot is created, the game calls the run method with the robots RobotController as its argument. If this method ever finishes, either because it returned or because of an uncaught exception, the robot dies and is removed from the game. You are encouraged to wrap your code in loops and exception handlers so that this does not happen.
 
 ###. RobotController
 
@@ -329,7 +329,7 @@ The following is a detailed list of a robot's execution order within a single tu
 6. Mine damage is applied
 7. Automatic attacks are performed
 
-    a. Robot autoattacks adjacent enemies (SOLIDER Only)
+    a. Robot auto-attacks adjacent enemies (SOLIDER Only)
     
     b. Robot heals itself and adjacent allies (MEDBAY Only).
     
@@ -379,7 +379,7 @@ The Clock class provides a way to identify the current round ( `Clock.getRoundNu
 
 ### GameActionExceptions
 
-GameActionExceptions are thrown when an ability cannot be performed. It is often the result of uncertainty about the gameworld, or an unexpected round change in your code. Thus, you must write your player defensively and handle GameActionExceptions judiciously. Each GameActionException has a GameActionExceptionType, which tells roughly what went wrong. You should also be prepared for any ability to fail and make sure that this has as little effect as possible on the control flow of your program.
+GameActionExceptions are thrown when an ability cannot be performed. It is often the result of uncertainty about the game world, or an unexpected round change in your code. Thus, you must write your player defensively and handle GameActionExceptions judiciously. Each GameActionException has a GameActionExceptionType, which tells roughly what went wrong. You should also be prepared for any ability to fail and make sure that this has as little effect as possible on the control flow of your program.
 
 Exceptions cause a bytecode penalty of `GameConstants.EXCEPTION_BYTECODE_PENALTY`.
 
@@ -516,7 +516,7 @@ We have both a forum (https://www.battlecode.org/contestants/forum/) and an IRC 
 Disclaimers
 -------------
 
-We have done our best to test and balance the properties of the Battlecode world. Inevitably, however, we will need to make adjustments in the interest of having a fair competition that allows a variety of creative strategies. We will endeavor to keep these changes to a minimum, and release them as early as possible. All changes will be carefully documented in the ChangeLog.
+We have done our best to test and balance the properties of the Battlecode world. Inevitably, however, we will need to make adjustments in the interest of having a fair competition that allows a variety of creative strategies. We will endeavor to keep these changes to a minimum, and release them as early as possible. All changes will be carefully documented in the Changelog.
 
 Despite our best efforts, there may be bugs or exploits that allow players to operate outside the spirit of the competition. Using such exploits for the tournament or scrimmage will result in immediate disqualification, at the discretion of the directors. Such exploits might include, but are not limited to, robot communication without messages, bypassing the bytecode limit, or terminating the game engine. If you are not sure what qualifies as "in the spirit of the competition", ask the devs before submitting your code.
 
