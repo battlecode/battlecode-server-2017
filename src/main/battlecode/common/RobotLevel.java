@@ -12,10 +12,6 @@ package battlecode.common;
 public enum RobotLevel {
 
     /**
-     * The vertical location of encampmentss.
-     */
-    ENCAMPMENT_LEVEL(0),
-    /**
      * The vertical location of ground robots.
      */
 		ON_GROUND(1);

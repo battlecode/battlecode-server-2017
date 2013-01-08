@@ -11,6 +11,8 @@ import static battlecode.common.GameActionExceptionType.OUT_OF_RANGE;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -353,9 +355,33 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     @SuppressWarnings("unchecked")
 	public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type, final int radiusSquared, final Team team) {
+    	if (team == null)
+    		return senseNearbyGameObjects(type, radiusSquared);
         Predicate<InternalObject> p = new Predicate<InternalObject>() {
             public boolean apply(InternalObject o) {
                 return o.myLocation.distanceSquaredTo(robot.myLocation) <= radiusSquared
+                		&& o.getTeam() == team
+                		&& checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
+            }
+        };
+        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type, final MapLocation center, final int radiusSquared, final Team team) {
+    	if (team == null)
+    	{
+    		Predicate<InternalObject> p = new Predicate<InternalObject>() {
+                public boolean apply(InternalObject o) {
+                    return o.myLocation.distanceSquaredTo(center) <= radiusSquared
+                    		&& checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
+                }
+            };
+            return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
+    	}
+        Predicate<InternalObject> p = new Predicate<InternalObject>() {
+            public boolean apply(InternalObject o) {
+                return o.myLocation.distanceSquaredTo(center) <= radiusSquared
                 		&& o.getTeam() == team
                 		&& checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
             }
@@ -387,10 +413,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
                 ir.roundsUntilAttackIdle(), ir.roundsUntilMovementIdle());
     }
     
-    public int senseEnemyNukeProgress() throws GameActionException {
+    public boolean senseEnemyNukeHalfDone() throws GameActionException {
     	if (getRobot().type != RobotType.HQ)
     		throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can sense NUKE progress");
-    	return gameWorld.getUpgradeProgress(getTeam().opponent(), Upgrade.NUKE);
+    	return gameWorld.getUpgradeProgress(getTeam().opponent(), Upgrade.NUKE) >= Upgrade.NUKE.numRounds/2;
     }
 
     public MapLocation senseLocationOf(GameObject o) throws GameActionException {
@@ -423,12 +449,28 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getMapMemory().recallTerrain(loc);
     }
     
-    public MapLocation[] senseAllEncampments() {
+    public MapLocation[] senseAllEncampmentSquares() {
     	return gameWorld.getAllEncampments().toArray(new MapLocation[0]);
     }
     
-    public MapLocation[] senseAlliedEncampments() {
+    public MapLocation[] senseAlliedEncampmentSquares() {
     	return gameWorld.getEncampmentsByTeam(getTeam()).toArray(new MapLocation[]{});
+    }
+    
+    public MapLocation[] senseEncampmentSquares(final MapLocation center, final int radiusSquared, final Team team) throws GameActionException {
+    	if (team == getTeam().opponent())
+    		throw new GameActionException(CANT_DO_THAT_BRO, "can't sense enemy encampments");
+    	ArrayList<MapLocation> camps = new ArrayList<MapLocation>();
+    	Map<MapLocation, Team> campmap = gameWorld.getEncampmentMap();
+    	for (Entry<MapLocation, Team> entry : campmap.entrySet())
+    	{
+    		if ( ( team == null 
+    				|| (team == getTeam() && entry.getValue() == team)
+    				|| (team == Team.NEUTRAL && entry.getValue() != getTeam()) )
+    				&& center.distanceSquaredTo(entry.getKey()) <= radiusSquared)
+    			camps.add(entry.getKey());
+    	}
+        return camps.toArray(new MapLocation[]{});
     }
     
     public Team senseMine(MapLocation loc) {
@@ -450,8 +492,34 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 //    	return gameWorld.isKnownMineLocation(getTeam(), loc) ? gameWorld.getMineCount(getTeam().opponent(), loc) : 0;
 //    }
     
-    public MapLocation[] senseAllEnemyMineLocations() {
-    	return gameWorld.getKnownMines(getTeam());
+    public MapLocation[] senseMineLocations(final MapLocation center, final int radiusSquared, final Team team) {
+    	if (team == null)
+    	{
+    		if (radiusSquared >= 100000)
+    			return gameWorld.getMineMaps().keySet().toArray(new MapLocation[]{});
+    		Predicate<MapLocation> p = new Predicate<MapLocation>() {
+        		public boolean apply(MapLocation o) {
+        			return center.distanceSquaredTo(o) <= radiusSquared;
+        		}
+        	};
+        	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
+    	}
+    	if (radiusSquared >= 100000)
+    	{
+    		Predicate<MapLocation> p = new Predicate<MapLocation>() {
+        		public boolean apply(MapLocation o) {
+        			return gameWorld.getMine(o) == team;
+        		}
+        	};
+        	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
+    	}
+    	Predicate<MapLocation> p = new Predicate<MapLocation>() {
+    		public boolean apply(MapLocation o) {
+    			return center.distanceSquaredTo(o) <= radiusSquared
+		        		 && gameWorld.getMine(o) == team;
+    		}
+    	};
+    	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
     }
 
     // ***********************************
@@ -476,7 +544,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         	throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can move.");
     	assertNotMoving();
         assertCanMove(d);
-        int delay = 0;
+        int delay = 1;
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
                 true, delay), delay);
     }

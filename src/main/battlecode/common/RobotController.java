@@ -81,22 +81,35 @@ public interface RobotController {
      */
     public GameObject senseObjectAtLocation(MapLocation loc) throws GameActionException;
 
-    /**
-     * Sense objects of type <code>type</code> that are within this sensor's range.
+    /** 
+     * Returns an array of _all_ visible game objects
+     * @see #senseNearbyGameObjects(Class, MapLocation, int, Team)
      */
     public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type);
 
     /**
-     * Same as <code>senseNearbyGameObjects</code> except objects are returned only if they are
-     * within the given radius
+     * Returns all game objects of a given type nearby the robot
+     * @see #senseNearbyGameObjects(Class, MapLocation, int, Team)
      */
     public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type, int radiusSquared);
     
     /**
-     * Same as <code>senseNearbyGameObjects</code> excent objects are returned only if
-     * both within the given radius and on the given team
+     * Returns all game objects of a given type nearby the robot of a given team
+     * @see #senseNearbyGameObjects(Class, MapLocation, int, Team)
      */
     public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type, int radiusSquared, Team team);
+    
+    
+    /**
+     * Senses all game objects of a given type within a given search area specified by the parameters
+     * @param type - type of game object to sense, eg: Robot.class
+     * @param center - center of the given search radius
+     * @param radiusSquared - return objects this distance away from the center
+     * @param team - filter game objects by the given team. If null is passed, objects from all teams are returned
+     * @return array of class type of game objects
+     */
+    public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type, MapLocation center, int radiusSquared, Team team);
+    
     
     /**
      * Sense the location of the object <code>o</code>.
@@ -122,8 +135,36 @@ public interface RobotController {
      */
     public boolean canSenseSquare(MapLocation loc);
 
-    public MapLocation[] senseAllEncampments();
-    public MapLocation[] senseAlliedEncampments();
+    /**
+     * @return array of map location containing all encampment squares on the map
+     * @see #senseEncampmentSquares(MapLocation, int, Team)
+     */
+    public MapLocation[] senseAllEncampmentSquares();
+    
+    /**
+     * @return array of all encampment squares owned by the allied team
+     * @see #senseEncampmentSquares(MapLocation, int, Team)
+     */
+    public MapLocation[] senseAlliedEncampmentSquares();
+    
+    /**
+     * Returns all encampment squares filtered on the given search area
+     * 
+     * Allows a team-based filter which can be one of the following parameters:
+     * <ul>
+     * <li>Null - Senses _all_ encampments on the map
+     * <li>Neutral - Senses all encampments that not owned by the sensing robot's team
+     * <li>Allied Team - Senses all encampments owned by the allied team
+     * </ui>
+     * Note that you cannot sense all enemy-owned encampments
+     * 
+     * @param center - location to search for encampment squares
+     * @param radiusSquared - radius around the center to search for encampment squares
+     * @param team - team filter (null, allied team, or neutral team, see usage above)
+     * @return Array of map locations containing found encampment squares satisfying the criteria
+     * @throws GameActionException - attempting to search all enemy encampment squares
+     */
+    public MapLocation[] senseEncampmentSquares(MapLocation center, int radiusSquared, Team team) throws GameActionException;
 
     /**
      * Sense whether a mine exists at a given location
@@ -133,12 +174,14 @@ public interface RobotController {
      */
     public Team senseMine(MapLocation location);
    
-    
     /**
-     * @return An array of MapLocations containing all known enemy mine locations
+     * Returns all mines within a given search radius specified by the parameters
+     * @param center - center of the search area
+     * @param radiusSquared - radius around the center to include mines
+     * @param team - only return mines of this team. If null is passed, all team's mines are returned
+     * @return An array of MapLocations containing mine locations
      */
-    public MapLocation[] senseAllEnemyMineLocations();
-    
+    public MapLocation[] senseMineLocations(MapLocation center, int radiusSquared, Team team) throws GameActionException;
 
     /**
      * @return location of this robot's HQ
@@ -151,11 +194,11 @@ public interface RobotController {
     public MapLocation senseEnemyHQLocation();
     
     /**
-     * Check the enemy team's NUKE research progress - only HQ can do this
-     * @return enemy NUKE research progress
+     * Senses the enemy team's NUKE research progress - only HQ can do this
+     * @return true if the enemy team's NUKE is halfways researched.
      * @throws GameActionException if not HQ
      */
-    public int senseEnemyNukeProgress() throws GameActionException;
+    public boolean senseEnemyNukeHalfDone() throws GameActionException;
     
     /**
      * Checks if the given map location is an encampment square.

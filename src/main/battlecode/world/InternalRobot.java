@@ -191,6 +191,12 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void processEndOfTurn() {
         super.processEndOfTurn();
         
+        // autosend aggregated broadcast
+        if (broadcasted) myGameWorld.visitSignal(new BroadcastSignal(this, broadcastMap));
+        
+    	broadcastMap = new HashMap<Integer, Integer>();
+        broadcasted = false;
+        
       	// quick hack to make mining work. move me out later
         if (type == RobotType.SOLDIER) {
         	if (miningRounds > 0) {
@@ -283,12 +289,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         	else
         		takeShieldedDamage(-this.type.attackPower);
         }
-        
-        // autosend aggregated broadcast
-        if (broadcasted) myGameWorld.visitSignal(new BroadcastSignal(this, broadcastMap));
-        
-    	broadcastMap = new HashMap<Integer, Integer>();
-        broadcasted = false;
         
         // shield decay
         if (myShieldLevel > 0.0)
@@ -499,6 +499,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     
     public int getCapturingRounds() {
     	return capturingRounds;
+    }
+    
+    public RobotType getCapturingType() {
+    	return capturingType;
     }
 
     public GameMap.MapMemory getMapMemory() {

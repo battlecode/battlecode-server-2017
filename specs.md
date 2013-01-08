@@ -1,14 +1,10 @@
-Battlecode 2013 Gameplay Specs
+Battlecode 2013 Gamplay Specs
 ==============================
 
 Plot
 --------
 
-After being foiled yet another year by the power of fun gamers, the evil Professor Mordemort was captured and placed in the most secured cell in the Galactic Hold.
-Now, it is one year after those terrible events, and peace reigns supreme in the galaxy, new and faster methods of reaching far off planets being provided by 
-Vanqeri Technologies, and the Interuniverse Defense League is stronger than ever. However, there are rumors of an unknown force that is attacking planets on the
-outer rim of the galaxy, an enemy that is rumored to be using ancient technology and trench warfare to gain the upper-hand. The IDL is calling on Coders throughout
-the galaxy to help combat this unknown enemy before the devastation they are causing reaches the more populated worlds. 
+After being foiled yet another year by the power of fun gamers, the evil Professor Mordemort was captured and placed in the most secured cell in the Galactic Hold. Now, it is one year after those terrible events, and peace reigns supreme in the galaxy, new and faster methods of reaching far off planets being provided by Vanqeri Technologies, and the Interuniverse Defense League is stronger than ever. However, there are rumors of an unknown force that is attacking planets on the outer rim of the galaxy, an enemy that is rumored to be using ancient technology and trench warfare to gain the upper-hand. The IDL is calling on Coders throughout the galaxy to help combat this unknown enemy before the devastation they are causing reaches the more populated worlds.
 
 
 Objective
@@ -16,7 +12,7 @@ Objective
 
 The objective this year is simple. Violently eliminate the opponent's HQ through a constant barrage of soldiers.
 
-There are many encampments across the map that may aid in this endeavor, allowing you to fortify positions and take map control.
+There are many encampments across the map that may aid in this endevour, allowing you to fortify positions and take map control.
 
 Should you need them, you may also research a number of upgrades that provide you with a large tactical advantage on the battlefield.
 
@@ -26,138 +22,184 @@ Good luck!
 Changes from 2012
 ------------------
 
-There are a number of large changes from previous Battlecode years, so even if you're a veteran you may want to read this section. In approximate order of how huge a change it is:
+There are a number of large changes from previous battlecode years, so veterans should bear these in mind:
 
+- Archons are out. There is one HQ that acts as the archon replacement.
 - Robots no longer face a direction. There is no turning, and no concept of forwards and backwards. Instead, robots can just move to any adjacent square.
-- There are no longer voids on the map. Every square on the map is traversable, and there is no longer any distinction between ground and air units.
+- There are no longer voids on the map. Every square on the map is traversible, and there is no longer any distinction between ground and air units.
 - Both teams start off knowing exactly what the map looks like. They know where all the map edges are and know where the enemy spawns. 
-- There are no movement or attack delays(though some actions do still incur a cool-down). Soldiers move and attack once every turn.
+- There are no movement or attack delays(though some actions do still incur a cooldown). Soldiers move and attack once every turn.
 - Units always have shared vision and can sense anything within the vision radius of any allied unit.
 - Flux has been renamed to power; now it is globally shared among all of a team's units, so flux transfer has been removed.
 - Broadcasting has been completely altered. Both teams now write to a global array of integers. Broadcasting no longer relies on robots being within a broadcast radius.
 
-NOTE: Numbers in the doc are provided for readability and are actually governed by game constants that may change. Check the API for full details.
+NOTE: Numbers in these specs are provided mainly for readability and are subject to change in future patches. Check the API for details.
 
 
 Robot Overview
 -----------------
 
-Robots are the central part of the Battlecode world. There are two types of basic units, specified by the `RobotType` enum.
+Robots are the central part of the Battlecode world. There are two types of basic robots. Note that we use the terms 'robot' and 'unit' interchangeably.
 
 ### HQ
-Each team starts the game off with one HQ. The game is over when one of the team's HQ is destroyed. The HQ can either spawn SOLDIERs or research TECH upgrades. The game ends when one team loses their HQ.  If the game reaches the round limit, HQs will also begin taking end-of-round damage to break ties.
+The HQ is your main base, and by far the most important unit you have. Each team starts the game off with one HQ. You lose the game if your HQ is destroyed. The HQ can spawn SOLDIERs and research TECH upgrades. If the game reaches the round limit, the HQs will also begin taking end-of-round damage to break ties. The HQ can never regain energon, and there is no way to build additional HQs.
 
 ### SOLDIER
-SOLDIERs form the core of your army. Use them to fight your way to victory. They auto-attack all units around them and can also capture encampments to give their army a strategic bonus.
-
+SOLDIERs form the core of your army. They are the only mobile unit, and are created by the HQ. They allow you to expand your map control by capturing additional encampments. They can also lay mines and defuse mines. They automatically attack enemies adjacent to them every turn.
 
 Encampments
 ------------
 
-In addition to the two basic units, there are special units called ENCAMPMENTS that can be created on top of unoccupied encampment squares.
+In addition to the two basic units, there are units called ENCAMPMENTS that soldiers can create on top of unoccupied encampment squares.
 
-If a soldier is located on an encampment square, it has the option to capture the square (after `GameConstants.CAPTURE_DELAY`) and turn it into one of the following encampments:
+If a soldier is located on an encampment square, it has the option to capture the square. If it does so, it sits still for `GameConstants.CAPTURE_DELAY` turns and then turns into one of the following encampments (it must choose which encampment to create before the delay):
 
-1. **MEDBAY**: Adjacent allied units are healed for `MEDBAY.attackPower` health per turn
+1. **MEDBAY**: Heals itself and all adjacent allied units for 2 (`MEDBAY.attackPower`) health per turn. It cannot heal the HQ.
 
-2. **SHIELDS**: The shield encampment automatically provides a bonus of `SHIELDS.attackPower` shields to a given unit. This shield absorbs damage from artillery fire only. Shields decay at a constant rate of `GameConstants.SHIELD_DECAY_RATE`.
+2. **SHIELDS**: The shield encampment gives 5 (`SHIELDS.attackPower`) shields per turn to itself and all adjacent allied units. This shield absorbs damage from artillery fire.
 
-3. **ARTILLERY**: The artillery encampment allows a unit to attack a position on a map, causing `ARTILLERY.attackPower` damage to the attacked square, and `ARTILLERY.attackPower/2` splash damage to the adjacent squares. The splash damage can damage friendly units, so watch where you fire.
+3. **ARTILLERY**: The artillery encampment allows a unit to attack any location within its attack range `ARTILLERY.attackRadiusMaxSquared`, causing 40 (`ARTILLERY.attackPower`) damage to the attacked square, and 20 (`ARTILLERY.attackPower*GameConstants.ARTILLERY_SPLASH_RATIO`) splash damage to the adjacent squares. The artillery can damage friendly units, so watch where you fire. It can fire once every 20 (`ARTILLERY.attackDelay`) turns.
 
-4. **GENERATOR**: Generators provide you with `GameConstants.GENERATOR_RESOURCE_PRODUCTION` extra power per turn.
+4. **GENERATOR**: Each generator provides the team with 10 (`GameConstants.GENERATOR_RESOURCE_PRODUCTION`) extra power per turn.
 
-5. **SUPPLIER**: Each supplier decreases your spawn delay.
+5. **SUPPLIER**: Each supplier allows the HQ to spawn soldiers at a faster rate. See the spawning section for details.
 
-The other team may retake an encampment square if the existing encampment on it is destroyed.
+The other team may retake an encampment square if the existing encampment on it is destroyed. Capturing has a cost, however. The first capture costs `GameConstants.CAPTURE_POWER_COST` to start, and each new capture costs `GameConstants.CAPTURE_POWER_COST` per encampment owned or in the process of capturing. Starting a capture costs `GameConstants.CAPTURE_POWER_COST*( 1 + ENCAMPMENTS_OWNED + ENCAMPMENTS_BEING_CAPTURED)`.
 
 
 Robot Resources
 ------------------
 
-There are three basic type of unit resources, POWER and ENERGON, and SHIELDS.
+There are three types of resources, POWER and ENERGON, and SHIELDS.
 
 ### Energon
-Energon is health. When a robot's energon hits zero, it is immediately removed from the game. Energon can only be regained by healing at a MEDBAY.
+Energon is a robot's health. When a robot's energon hits zero, it is immediately removed from the game. Energon can only be regained by healing at a MEDBAY.
 
 ### Power
 
-Power is shared globally across the team and is generated by the HQ at 40 power per round (`GameConstants.HQ_RESOURCE_PRODUCTION`).  4 Additional power can be generated by GENERATOR encampments (`GENERATOR_RESOURCE_PRODUCTION`).
+Power is shared globally across the team and is generated by the HQ at 40 power per round (`GameConstants.HQ_RESOURCE_PRODUCTION`).  10 Additional power can be generated by GENERATOR encampments (`GENERATOR_RESOURCE_PRODUCTION`).
 
-Units require a fixed amount of power at the beginning of its turn to perform action. If enough power is not available, then the unit will still execute, but will lose energon instead.
+Units pay 2 power every turn for upkeep. If enough power is not available, the unit must pay its upkeep using 5 (`GameConstants.UNIT_ENERGON_UPKEEP`) energon. If it doesn't have this much energon, it dies instantly.
 
-At the end of a robot's turn, if the bot did not use its full bytecode allocation, a fraction of the energy is refunded based on bytecodes used. An unlimited amount of energy can be stockpiled.
+At the end of a robot's turn, if the bot did not use its full bytecode allocation, a fraction of the power is refunded based on bytecodes used, according to the formula `POWER_REFUND = (GameConstants.POWER_COST_PER_BYTECODE)*(GameConstants.BYTECODE_LIMIT-BYTECODES_SPENT)`. If the robot uses no bytecodes, it will only spend 1 power in upkeep this turn. If it uses 2000 bytecodes, it will spend 1.2 power in upkeep. If it uses 7500 bytecodes, it will spend 1.75 power in upkeep.
+
+Unused power is stockpiled and carried over into future rounds. However, at the end of each round, 20% (or 1% if fusion has been upgraded) of each team's power stockpile is removed due to power decay. 
 
 ### Shields
 
-Shields are generated from the SHIELD encampment and provide protection only from artillery fire damage. Shields decay at a constant rate of `GameConstants.SHIELD_DECAY_RATE` per turn.
+Shields are generated from the SHIELD encampment. They protect soldiers from artillery shots, and not from any other source of damage. One shield point blocks one damage from an artillery shot, either direct damage or splash damage. Shields decay at a constant rate of `GameConstants.SHIELD_DECAY_RATE` per turn. A soldier's shield pool is bound between 0 and 100000000 (`GameConstants.SHIELD_CAP`).
 
+Mines
+-----
+
+Soldiers can lay mines throughout the map to help defend territory and catch enemy robots off guard. All soldiers have the ability to lay a mine on their current square, taking 25 (`GameConstants.MINE_LAY_DELAY`) turns to do so. During this time, it cannot perform any other actions (defuse, capture, move) and does not autoattack. If it is killed during this time, the mine does not get planted. Mines belong to a team, and will only damage robots of that team.
+
+Once a mine is planted, they stay there until they are defused. Mines do not "blow up" when they do damage. Enemy robots on the mined square will take 10 (`GameConstants.MINE_DAMAGE`) damage per turn, every turn they end on the mine. Only one mine can be in one square at a time; they cannot be stacked. You can try to mine squares that are already mined (either by you or the enemy), but it will just be a waste. Encampment squares can be mined.
+
+Enemy mines are not visible until they are stepped on. Once you enter the square with any soldier, all your soldiers can sense that an enemy mine is there. 
+
+With the PICKAXE upgrade, mining is upgraded to simultaneously mining on the soldier's current square as well as the four squares orthogonally adjacent to it. This can even allow you to mine squares containing enemy robots (even their HQ).
+
+Mines cannot be planted on the HQ square, or any encampment square. Soldiers can still try to mine when they are on encampment squares, and they will still go into the 25 turns of mine delay, but the mine will not be planted on the encampment square. However, it might be worth mining while on an encampment square if you have PICKAXE researched.
+
+### Defusion
+
+A mine must be defused to be removed from the map. To defuse a mine, a soldier must be adjacent to the mine. It must take 12 (`GameConstants.MINE_DEFUSE_DELAY`) turns to defuse the mine, during which it cannot perform other actions and cannot autoattack. If the soldier is killed during this time, the mine is not defused. Soldiers can only defuse one mine at a time, and two soldiers trying to defuse the same mine won't defuse it any faster. Once the diffusion upgrade is researched, the time it takes to defuse the mine is reduced to 5 (`GameConstants.MINE_DEFUSE_DIFFUSION_DELAY`), and the soldier can defuse any mine within its sensor range.
+
+How defusion actually works is that soldiers target a square to defuse. They do not have to know there is a mine there to defuse. After the defusion time, any enemy or neutral mine in that location will be removed, even if they aren't able to sense it, and even if the mine was not there when the soldier started defusing. 
+
+You cannot defuse your own team's mines. 
+
+### Neutral mines
+
+The map often starts off with lots of neutral mines. These are just like mines planted by either team in terms of damaging robots that move across. They can be defused just like any other mine. Both teams start off knowing the locations of all neutral mines on the map, and do not need to enter the square to be able to sense them.
 
 Upgrades
 --------
 
-Upgrades are research-able from your HQ. The following upgrades are available:
+Upgrades are researchable from your HQ. The following upgrades are available:
 
-1. **Pickaxe**: In addition to mining the square underneath a SOLDIER, the 4 orthogonally adjacent squares are also mined.
-2. **Diffusion**: Robots can defuse not only adjacent tiles, but any mines in its personal sight radius.
-3. **Vision**: Increases the sight radius on all robots and the base from 10 to 32 radius squared
-4. **Fusion**: The team's decay rate is adjusted from `RESOURCE_DECAY_RATE` to `RESOURCE_DECAY_RATE_FUSION`.
-5. **Nuke**: The enemy team's HQ immediately suicides.
+1. **Pickaxe**: When a soldier mines, in addition to mining the square it is on, it also mines each of the four orthogonally adjacent squares.
+2. **Diffusion**: Soldiers can defuse mines not only in adjacent tiles, but in all tiles in its personal sight radius. They also defuse mines significantly faster. They still must defuse one mine at a time.
+3. **Vision**: Increases the personal sensor radius on all robots from 14 to 33 units squared.
+4. **Fusion**: The team's power decay rate is adjusted from 20% `RESOURCE_DECAY_RATE` to 1% `RESOURCE_DECAY_RATE_FUSION`.
+5. **Nuke**: You immediately win.
 
-An upgrade must be fully researched before its abilities kick in. An HQ can put one point into an upgrade per turn (unless it recently spawned, see below), and the upgrade is considered completed when `numRounds` of points have been put into it.
+An upgrade must be fully researched before its abilities kick in. The HQ can put one point into an upgrade per turn (unless it is spawning soldiers), and the upgrade is considered completed when `numRounds` of points have been put into it.
 
 
 Victory Conditions
 ------------------
 
-A team wins by destroying the enemy's HQ, or by researching the nuke upgrade. We expect most games to end by HQ destruction. The nuke upgrade is intended to be used in extreme stalemate situations. After 2000 rounds (`GameConstants.ROUND_LIMIT`), the HQ starts taking damage. If both teams lose their HQs from end of round damage on the same turn, then the following tiebreakers are applied in order to determine the winner:
+A team wins by destroying the enemy's HQ, or by researching the nuke upgrade. We expect most games to end by HQ destruction. The nuke upgrade is intended to be used in extreme stalemate situations. After exactly 2000 rounds (`GameConstants.ROUND_LIMIT`), the HQ starts taking damage at a rate of 1 (`GameConstants.TIME_LIMIT_DAMAGE`) energon per turn. This means the game must be over after 2500 rounds. If both teams lose their HQs from end of round damage on the same turn, then the following tiebreakers are applied in order to determine the winner:
 
 - Most encampments
 - Most soldiers
 - Most mines
-- Most energy stockpiled
-- Lowest team ID
+- Most power stockpiled
+- Red wins (in tourneys, the lower seeded player is red)
 
 
 Robot Actions
 --------------
 
-Robots are equipped with a variety of high tech equipments and can perform the following actions during their turn.
+Robots are eqiupped with a variety of high tech equipments and can perform the following actions during their turn.
 
 ### Sensors
 
-All robots are equipped with sensors.
+All robots are equipped with personal sensors. These sensors have a sensor range of 14 units squared, which is the same for all robots, and which can be upgraded with the VISION upgrade to 33 units squared. Other than hidden enemy mines, robots can sense everything in their personal sensor range, as well the personal sensor range of every other robot on its team.
 
-- The position of visible enemy robots are shared between all units.
-- The position of known enemy mine locations are shared between all units. Mines are detectable only if an allied unit has previously stepped on it.
-- The location of the enemy HQ is automatically known at game start.
+- The info on all allied robots can be sensed.
+- The info on visible enemy robots can be sensed.
+- The positions of detected enemy mines can be sensed. Mines are detected after an allied unit has stepped on it. These mines do not have to be in sensing range after they have been detected.
+- The positions of neutral mines on the map are automatically known at game start, and can be sensed.
+- The locations of the both HQs can be sensed.
+- Your own team's upgrade progress can be sensed, but only by the HQ.
+- Robots can sense whether the enemy's nuke progress has reached the halfway mark.
 
 ### Messaging
 
-There is an "open radio" message board which works as follows: each unit can broadcast or read from a message board on a frequency (between 0 to `MAX_RADIO_CHANNEL` inclusive).  This message board is globally accessible by any robot and is used for communicating whatever the AIs wish to communicate.  Outside of this message board, there is no other way to share arbitrary information (sensor vision information however is still automatically shared).
+This year, there is a global message board acccessible to all robots that supports read/write operations. It works as follows:
+
+* There exist 0-10,000 channels inclusive (`BROADCAST_MAX_CHANNELS`).
+* During a robot's turn, a robot may read/write as many messages as it desires to the board (via `rc.broadcast` and `rc.readBroadcast`)
+* There is only _one_ global message board and both teams access the same one
+* There is a power cost associated with both reading (`BROADCAST_SEND_COST`) and writing (`BROADCAST_READ_COST`) to the board
+* Once a message is written to the board, it persists until it is overwritten, or until the end of the game.
+* At the beginning of a new game, all channels are initialized to 0.
+
+This message board is globally accessible by _any_ robot and is used for communicating whatever the AIs wish to communicate. It can be used to coordinate your army, distribute computation, or calling for reinforcements. Since both teams use the same message board, robots' broadcasts may interfere with each other, either by accident or on purpose. Because of this, it is not guaranteed that a broadcast will be able to reach other robots, as the data in a channel may be overwritten before the intended recipient robot gets a turn to read the channel.
+
 
 ### Movement
 
-Robots may move up to one round per turn, provided they are not performing any other action (mining, defusing, capturing). Movement is specified by the `rc.move(direction)` command and happens at the end of the robot's turn`
+Only the soldier has the ability to move. Moving has no power cost.
+
+Every turn, soldiers may move to any unoccupied adjacent tile, provided they are not in delay from performing any other action (mining, defusing, capturing). Soldiers can autoattack on the same turn they move.
+
+Soldiers can move diagonally at the same speed as they can move orthogonally.
 
 ### Spawning
 
-The HQ may spawn one unit per 10 (`GameConstants.HQ_SPAWN_DELAY`) rounds. The spawn rate is reduced for active SUPPLIERS according to the formula a=`GameConstants.HQ_SPAWN_DELAY`*`GameConstants.HQ_SPAWN_DELAY_CONSTANT`/(`GameConstants.HQ_SPAWN_DELAY_CONSTANT`+b), where a is the number of turns it takes to spawn one unit, and b is the number of suppliers you have.  Units that are spawned are immediately placed on the field and may perform actions like any other robot. The HQ cannot do other actions such as research while it is in spawning cooldown.
+The HQ has the ability to continuously spawn SOLDIERs. The action of spawning soldiers does not cost power by itself, but the spawned soldiers will start to consume power via upkeep. 
+
+SOLDIERs can be spawned in any adjacent tile that does not already have a robot on it. In the beginning, the HQ may spawn one SOLDIER per 10 (`GameConstants.HQ_SPAWN_DELAY`) rounds. This spawn rate is reduced by SUPPLIERS according to the formula a=r(`GameConstants.HQ_SPAWN_DELAY`*`GameConstants.HQ_SPAWN_DELAY_CONSTANT`/(`GameConstants.HQ_SPAWN_DELAY_CONSTANT`+b)), where a is the number of turns it takes to spawn one unit, b is the number of suppliers you have alive, and r() rounds a number to the nearest positive integer.  Units that are spawned are immediately placed on the field and may perform actions like any other robot. The HQ cannot spawn or research while it is in spawning cooldown.
 
 ### Suicide
 
-Calling suicide() immediately kills the calling robot and removes it from the game.
+Calling suicide() immediately kills the robot and removes it from the game. It will no longer consume upkeep in future rounds. If an encampment suicides, then the square is freed up for a potentially different encampment to be created there.
 
 ### Team Memory
 
-Each team can save a small amount of information for the next game using the function `setTeamMemory()`. This information may be retrieved using `getTeamMemory()`. If there was no previous game in the match, or no information was saved, the memory will be filled with zeros..
+Official matches will usually be sets of multiple games. Each team can save a small amount of information (`GameConstants.TEAM_MEMORY_LENGTH` longs) for the next game using the function `setTeamMemory()`. This information may be retrieved using `getTeamMemory()`. If there was no previous game in the match, or no information was saved, then the memory will be filled with zeros.
 
 ### Control Bits, Indicator Strings, and Breakpoints
 
-There are several ways that the user can interact with robots. First, any robot can use `setIndicatorString(int,String)` to set a string that is visible to the user when mousing over the robot. Second, the user can manually set a long for each robot, which the robot can query using `getControlBits()`. Finally, a robot can call `breakpoint()`, which flags the game engine to pause computation at the end of the round. These methods are for debug purposes only. During tournaments and scrimmages, the user will not be able to interact with the robots. For more information on these debugging interfaces, check out Debugging below.
+There are several ways that the user can interact with robots. First, any robot can use `setIndicatorString(int,String)` to set a string that is visible to the user when selecting the robot. Second, the user can manually set a long for each robot, which the robot can query using `getControlBits()`. Finally, a robot can call `breakpoint()`, which flags the game engine to pause computation at the end of the round. These methods are for debug purposes only. During tournaments and scrimmages, the user will not be able to interact with the robots. For more information on these debugging interfaces, check out Debugging below.
 
 ### Ending turn
 
-Only `yield()` and `suicide()` end the turn of a robot. Otherwise a turn ends naturally when the bytecode limit is hit. Other actions may be performed as many times as attack/movement/broadcast timeouts allow.
+Only `yield()` and `suicide()` end the turn of a robot. Otherwise a turn ends naturally when the bytecode limit is hit. Every turn a robot gets 10000 bytecodes to run code. At the end of a robot's turn, unused bytecodes will return power back into the team's global power pool. 
 
 
 Maps
@@ -165,20 +207,24 @@ Maps
 
 Battlecode maps consist of a grid of squares, each with a pair of integer coordinates. Locations on the map are represented as instances of `MapLocation` objects. 
 
-### Layout
+Maps are always rectangular. All of the squares in the map have the same terrain type, while squares out of bounds will have a different terrain type.
+Map coordinates are represented similarly to the pixels on a computer screen: x-coordinates increase moving to the right (East), and y-coordinates increase moving down (South).  The most NORTHWEST square of the map is guaranteed to be coordinate (0,0), and the most SOUTHEAST square will be (WIDTH-1, HEIGHT-1).
 
-Map coordinates are represented similarly to the pixels on a computer screen: x-coordinates increase moving to the right (East), and y-coordinates increase moving down (South).  The top left corner of the map is guaranteed this year to be coordinate (0,0)
+Maps specify the spawn points of both teams, as well as where all the encampment squares are. They also specify the locations of all the neutral mines.
 
 ### Map Files
 
-Maps are specified by XML files, and can be found in the maps folder of the release archive. The schema for the files should be fairly intuitive, so if you'd like to add your own maps you can use the provided maps as a basis.
+Maps are specified by XML files, and can be found in the maps folder of the release archive. The schema for the files should be fairly intuitive, so if you'd like to add your own maps you can use the provided maps as a basis. Each map has an associated random number seed, which the RNG uses to generate random numbers in games played on that map.
 
 ### Map Constraints
 
-- Maps are completely traversable symmetric terrain either by reflection or rotation.
-- The size of the map is guaranteed between `MAP_MIN_WIDTH` to `MAP_MAX_WIDTH` dimensions.
-- The map can have neutral mines except for the 4 orthogonally adjacent squares to your HQ.
-- The map will have neutral encampments scattered across the map. There will be a minimum of `5` (`GameConstants.MAP_MINIMUM_ENCAMPMENTS`) encampments. There will be no encampments orthogonally adjacent to your base
+Official maps used in scrimmages and tournaments must all satisfy the following conditions.
+
+- Maps are completely symmetric either by reflection or 180 degree rotation, except for the two starting HQs.
+- The width and height of the map are guaranteed to be between 20 and 70, inclusive.
+- The map cannot have neutral mines on the 4 squares orthgonally adjacent to either HQ.
+- There will be a minimum of 5 encampment squares on the map. 
+- It will be possible for a soldier to get adjacent to the enemy HQ by turn 200, even if you only make one soldier and research/capture nothing, and the opposing team does nothing.
 
 
 Writing a Player
@@ -258,36 +304,38 @@ Notice the while(true) loop, which prevents the run method from returning. While
 Execution Order
 ------------------
 
-The following is a detailed map of a robot's execution order to remove ambiguities:
+The game is comprised of a number of rounds. During each round, all robots get a turn in order of their IDs. Robots that were created earlier have lower IDs. Newly spawned robots will have a turn on the same round they were created.
 
-1. Robot's upkeep cost, `GameConstants.UNIT_UPKEEP` is subtracted from the power pool, or if there is insufficient power in the pool, 'GameConstants.UNIT_ENERGON_UPKEEP' is paid in energon (if robot dies, it does not get a turn, and no power is refunded).
-2. Robot executes up to `GameConstants.BYTECODE_LIMIT` of code.
-3. Power is refunded based on remaining bytecodes by a factor of `GameConstants.ENERGY_COST_PER_BYTECODE`, even if it paid its upkeep with energon.
-4. Robots perform actions.
+The following is a detailed list of a robot's execution order within a single turn. If it dies halfway through, the remainder of the list does not get executed. In particular, note that changes to a robot's state do not happen while player code is being executed. All actions instead get sent to an action queue, and they are executed after the player code is run. For example, if a SOLDIER calls move() and then getLocation(), it will not reflect the location of the robot yet.
 
-    a. If the robot is on the last turn of mining, the mines are placed on the map (SOLDIER Only)
+1. Robot's upkeep cost, is subtracted from the power pool, or if there is insufficient power in the pool, 'GameConstants.UNIT_ENERGON_UPKEEP' is paid in energon (if robot dies, it does not get a turn, and no power is refunded).
+2. Robot executes up to `GameConstants.BYTECODE_LIMIT` of player code. Power costs for action calls in the player code are checked based on the available power at this point.
+3. Power is refunded based on remaining bytecodes by a factor of `GameConstants.POWER_COST_PER_BYTECODE`, even if it paid its upkeep with energon.
+4. Channels are updated with new broadcasts
+5. Actions are performed
 
-    b. If the robot is on the last turn of defusing, the mines are removed from the map (SOLDIER Only)
+    a. If the robot is on the last turn of mining, the mines are placed on the map (SOLIDER Only)
 
-    c. If the robot is on the last turn of capturing, then the encampment is created, and the robot is destroyed (SOLDIER Only)
+    b. If the robot is on the last turn of defusing, the mines are removed from the map (SOLIDER Only)
 
-    d. The robot moves (SOLDIER Only)
+    c. If the robot is on the last turn of capturing, then the encampment is created, and the robot is destroyed (SOLIDER Only)
+
+    d. The robot moves (SOLIDER Only)
 
     e. Targeted attacks happen (ARTILLERY Only)
 
     f. Research is updated OR a unit is spawned (HQ Only)
 
-5. Mine damage is applied (SOLDIER Only)
-6. Attacks are performed
+6. Mine damage is applied
+7. Automatic attacks are performed
 
-    a. Robot auto-attacks adjacent enemies (SOLDIER Only)
+    a. Robot autoattacks adjacent enemies (SOLIDER Only)
     
-    b. Adjacent units are healed (MEDBAY Only).
+    b. Robot heals itself and adjacent allies (MEDBAY Only).
     
-    c. Adjacent units are shielded (SHIELDS Only).
+    c. Robot adds shields to itself and adjacent allies (SHIELDS Only).
 
-7. Channels are updated with new broadcasts
-8. Shield decay is applied `GameConstants.SHIELD_DECAY_RATE`
+8. Shield decay is applied
 
 
 
@@ -311,7 +359,7 @@ However, there are ways of dealing with this, as we'll see in the next section.
 
 One way to deal with timing complexities is to use `yield()` judiciously. Calling `RobotController.yield()` ends the robot's computation for the current round. This has two advantages.
 
-First, robots receive a significant flux bonus for yielding computation. The bonus is given by `GameConstants.YIELD_BONUS` * `GameConstants.UNIT_UPKEEP` * (fraction of unused bytecodes in the round).
+First, robots consume power based on how many bytecodes they use every turn. A player that uses fewer bytecodes in a turn will be able to support more robots.
 
 Second, after a call to `RobotController.yield()`, subsequent code is executed at the beginning of a new round. Then, you have the full amount of bytecodes for your robot to do computations before the round changes. For instance, let's modify the example above to be:
 
@@ -387,8 +435,6 @@ Our scrimmage and tournament servers will be running Java 6 and Scala 2.9. The B
 
 
 
-
-
 Debugging
 -------------------
 
@@ -397,6 +443,12 @@ This section describes some of the features of the game engine intended to make 
 ### System.out
 
 Any output that your robots print to System.out is directed to the output stream of the Battlecode engine, prefixed with information about the robot.
+
+### Setting Indicator Strings
+
+You'll find that your primary source of debugging is setting one of 3 indicator strings that are viewable in the client.  Unlike System.out which is not synchronized to match execution (as the engine precomputes the game faster than the client views it), Indicator strings are synchronized to the round number and can be used for debugging complex robot behaviors. 
+
+Use `setIndicatorString(int,String)` to change a robot's indicator string. The are viewable in the top right corner of the client when the robot is selected. Indicator strings maintain value until they are changed.
 
 ### Debug Methods
 
@@ -412,7 +464,7 @@ bc.testing.team-a-strategy=experimental
 
 You can check the value of the property like this:
 
-```
+```java
 String strategy = System.getProperty("bc.testing.team-a-strategy");
 ```
 
@@ -421,7 +473,6 @@ String strategy = System.getProperty("bc.testing.team-a-strategy");
 Breakpoints allow you to pause the game engine's calculations. If breakpoints are enabled (see the software page), and a robot calls RobotController.breakpoint(), the game engine will stop computing at the end of the round. This gives you a chance to see exactly what's going on in the game when your robot hits a certain point in its code. You can resume the game engine's computation in the client, by hitting the "resume" button. If the match is being dumped straight to a file (i.e., there is no client to resume the game), breakpoints are ignored.
 
 Note that when a robot calls breakpoint(), computation will be stopped at the end of the round, not immediately when breakpoint() is called. Depending on the circumstances, you might want to use breakpoint(); yield(); instead.
-
 
 
 Tournaments & Course Credit
@@ -453,14 +504,13 @@ If your submission does not beat the reference player, then you can get credit a
 
 We give prizes for the best strategy reports, so we encourage you to submit a report even if you defeat the reference player.
 
-Also, note that you are allowed to drop 6.370 without penalty very **late** into IAP.
-
+Also, note that you are allowed to drop 6.370 without penalty very late into IAP.
 
 
 Getting Help
 -------------
 
-We have both a forum and an IRC Channel (#battlecode on irc.freenode.net). Hang out and check with us -- we're friendly!
+We have both a forum (https://www.battlecode.org/contestants/forum/) and an IRC Channel (#battlecode on irc.freenode.net). Hang out and chat with us -- we're friendly!
 
 
 Disclaimers
@@ -469,6 +519,19 @@ Disclaimers
 We have done our best to test and balance the properties of the Battlecode world. Inevitably, however, we will need to make adjustments in the interest of having a fair competition that allows a variety of creative strategies. We will endeavor to keep these changes to a minimum, and release them as early as possible. All changes will be carefully documented in the ChangeLog.
 
 Despite our best efforts, there may be bugs or exploits that allow players to operate outside the spirit of the competition. Using such exploits for the tournament or scrimmage will result in immediate disqualification, at the discretion of the directors. Such exploits might include, but are not limited to, robot communication without messages, bypassing the bytecode limit, or terminating the game engine. If you are not sure what qualifies as "in the spirit of the competition", ask the devs before submitting your code.
+
+
+Changelog
+-------------
+* **1.0.0** (1/7/2013) - Initial specs released
+* **1.0.1** (1/7/2013) - Bug hotfix. Example players no longer throw exceptions, encampment capture cost is made obvious in the spec. Misc. spec typos fixed.
+* **1.1.0** (1/8/2013) - Note Backwards Incompatible **API CHANGES**
+    * Most RobotLevel stuff removed
+    * Capture cost calculation made robust.
+    * Sensing of mines, robots, encampments made easier, API refactored and intentionally broken to make this obvious.
+    * Map max size reduced to 70, and constraints made tighter (200 max rush distance). Lots of new maps added.
+    * Nuke sensing rebalanced, only 50% detectable
+    * Spec document mostly rewritten to include detailed information regarding mines, broadcasting, etc.
 
 
 Appendices
@@ -480,14 +543,7 @@ Javadocs can be found here, and they are also included in the software distribut
 
 The javadocs include the values of the game constants and robot attributes.
 
-We also have a handy unit reference chart.
-
 ### Appendix B: Energon Health Warning
 
-Energon intake is not for everyone. Please consult a physician before use. 6.370 Battlecode Corporation is not responsible in the event of injury due to energon use. Energon's side-effects include loss of limb, death, unbearable pain, tendencies to procrastinate and an unnatural senseless rage. Handle with care. Energon consumption has not been approved by any health agency and you USE IT AT YOUR OWN RISK. For this reason, please be careful when scrimmaging.
+Energon intake is not for everyone. Please consult a physician before use. 6.370 Battlecode Corporation is not responsible in the event of injury due to energon use. Energon's side-effects include loss of limb, death, unbearable pain, tendencies to procrastinate and an unnatural senseless rage. Handle with care. Energon consumption has not been approved by any health agency and you USE IT AT YOUR OWN RISK. For this reason, please be careful when scrimmaging. Energon is the same thing as health.
 
-Changelog
--------------
-* **1.0.0** (1/7/2013) - Initial specs released
-* **1.0.1** (1/7/2013) - Bug hotfix. Example players no longer throw exceptions, encampment capture cost is made obvious in the spec. Misc. spec typos fixed.
-* **1.0.2** (1/7/2013) - Fixed installer for Mac

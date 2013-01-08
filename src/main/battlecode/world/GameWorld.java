@@ -288,6 +288,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             return null;
     }
     
+    public Map<MapLocation, Team> getMineMaps() {
+    	return mineLocations;
+    }
+    
     public MapLocation[] getKnownMines(Team t) {
     	ArrayList<MapLocation> locs = new ArrayList<MapLocation>();
     	for (MapLocation m : knownMineLocations.get(t)) {
@@ -379,6 +383,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     			camps.add(entry.getKey());
         return camps;
     }
+    
+    public Map<MapLocation, Team> getEncampmentMap() {
+    	return encampmentMap;
+    }
 
     public Collection<InternalObject> allObjects() {
         return gameObjectsByID.values();
@@ -408,7 +416,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             else
             	if (o instanceof InternalRobot) {
             		InternalRobot ir = (InternalRobot) o;
-            		if (ir.type == RobotType.SOLDIER && (ir.getCapturingRounds() == -1 || ir.getCapturingRounds()>0))
+            		if (ir.type == RobotType.SOLDIER && (ir.getCapturingType() != null))
             			teamCapturingNumber[ir.getTeam().ordinal()]--;
             		if (ir.type == RobotType.SOLDIER && ir.getCapturingRounds() == -1)
             			; // don't do anything
@@ -799,7 +807,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         		addMine(s.getMineTeam(), loc);
         	}
     	} else {
-    		removeMines(s.getMineTeam(), loc);
+    		if (s.getMineTeam() != getMine(s.getMineLoc()))
+    			removeMines(s.getMineTeam(), loc);
     	}
     	addSignal(s);
     }
@@ -818,7 +827,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         		if (dx*dx+dy*dy > medbay.type.attackRadiusMaxSquared) continue;
         		target = getRobot(targetLoc.add(dx, dy), level);
         		if (target != null)
-        			if (target.getTeam() == medbay.getTeam())
+        			if (target.getTeam() == medbay.getTeam() && target.type != RobotType.HQ)
         				target.takeDamage(-medbay.type.attackPower, medbay);
         	}
         addSignal(s);

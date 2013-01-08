@@ -45,8 +45,8 @@ public abstract class ControllerShared {
 
     protected static void assertRobotHeight(RobotLevel h) {
         assertNotNull(h);
-        if (h == RobotLevel.ENCAMPMENT_LEVEL)
-            throw new IllegalArgumentException("There are no robots at that height.");
+//        if (h == RobotLevel.ENCAMPMENT_LEVEL)
+//            throw new IllegalArgumentException("There are no robots at that height.");
     }
 
     protected static void assertNotNull(Object o) {
