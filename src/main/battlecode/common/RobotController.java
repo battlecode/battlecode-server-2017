@@ -181,7 +181,18 @@ public interface RobotController {
      * @param team - only return mines of this team. If null is passed, all team's mines are returned
      * @return An array of MapLocations containing mine locations
      */
-    public MapLocation[] senseMineLocations(MapLocation center, int radiusSquared, Team team) throws GameActionException;
+    public MapLocation[] senseMineLocations(MapLocation center, int radiusSquared, Team team);
+   
+    /**
+     * Similar to {@link #senseMineLocations(MapLocation, int, Team)} except the team is "non-allied"
+     * which includes both known enemy and neutral mines.
+     * 
+     * @param center - center of the search area
+     * @param radiusSquared - radius around the center to include
+     * @see #senseMineLocations(MapLocation, int, Team)
+     * @return Array of MapLocations containing non-allied mines
+     */
+    public MapLocation[] senseNonAlliedMineLocations(MapLocation center, int radiusSquared);
 
     /**
      * @return location of this robot's HQ

@@ -150,6 +150,16 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return diff;
     }
     
+    public int getMineDifference() {
+        int diff = 0;
+        for (Entry<MapLocation, Team> o : mineLocations.entrySet())
+            if (o.getValue() == Team.A)
+            	diff++;
+            else if (o.getValue() == Team.B)
+            	diff--;
+        return diff;
+    }
+    
     public int getNumCapturing(Team team) {
     	return teamCapturingNumber[team.ordinal()];
     }
@@ -181,9 +191,18 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             	InternalRobot HQB = baseHQs.get(Team.B);
             	double diff = HQA.getEnergonLevel() - HQB.getEnergonLevel();
             	
-            	if (!(setWinnerIfNonzero(diff, DominationFactor.BARELY_BEAT) ||
-                        setWinnerIfNonzero(getEnergonDifference(), DominationFactor.BARELY_BEAT)))
+            	double campdiff = getEncampmentsByTeam(Team.A).size() - getEncampmentsByTeam(Team.B).size();
+            	
+            	if (!(
+            			// first tie breaker - encampment count
+            		       setWinnerIfNonzero(campdiff, DominationFactor.BARELY_BEAT)
+            		    // second tie breaker - total energon difference
+            			|| setWinnerIfNonzero(getEnergonDifference(), DominationFactor.BARELY_BEAT)
+            			// third tie breaker - mine count
+            			|| setWinnerIfNonzero(getMineDifference(), DominationFactor.BARELY_BEAT)
+            		 ))
             	{
+            			// fourth tie breaker - power difference
             		if (!(setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.BARELY_BEAT)))
             		{
 	            		if (HQA.getID() < HQB.getID())
@@ -290,6 +309,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     
     public Map<MapLocation, Team> getMineMaps() {
     	return mineLocations;
+    }
+    
+    public Set<MapLocation> getKnownMineMap(Team t) {
+    	return knownMineLocations.get(t);
     }
     
     public MapLocation[] getKnownMines(Team t) {
