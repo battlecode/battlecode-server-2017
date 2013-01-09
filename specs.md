@@ -545,6 +545,7 @@ Changelog
     * Specs updated to describe autoattacks better
     * Map constraints tightened
     * new `senseNonAlliedMineLocations` added as convenience function
+* **1.1.3** (1/9/2013) - Fixed neutral mine detection
 
 Appendices
 ------------
