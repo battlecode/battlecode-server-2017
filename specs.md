@@ -10,11 +10,7 @@ After being foiled yet another year by the power of fun gamers, the evil Profess
 Objective
 ----------------
 
-The objective this year is simple. Violently eliminate the opponent's HQ through a constant barrage of soldiers.
-
-There are many encampments across the map that may aid in this endeavor, allowing you to fortify positions and take map control.
-
-Should you need them, you may also research a number of upgrades that provide you with a large tactical advantage on the battlefield.
+The objective this year is simple. Violently eliminate the opponent's HQ through a constant barrage of soldiers. There are many encampments across the map that may aid in this endeavor, allowing you to fortify positions and take map control. Should you need them, you may also research a number of upgrades that provide you with a large tactical advantage on the battlefield.
 
 Good luck!
 
@@ -92,15 +88,13 @@ Shields are generated from the SHIELD encampment. They protect soldiers from art
 Mines
 -----
 
-Soldiers can lay mines throughout the map to help defend territory and catch enemy robots off guard. All soldiers have the ability to lay a mine on their current square, taking 25 (`GameConstants.MINE_LAY_DELAY`) turns to do so. During this time, it cannot perform any other actions (defuse, capture, move) and does not auto-attack. If it is killed during this time, the mine does not get planted. Mines belong to a team, and will only damage robots of that team.
+Soldiers can lay mines throughout the map to help defend territory and catch enemy robots off guard. All soldiers have the ability to lay a mine on their current square, taking 25 (`GameConstants.MINE_LAY_DELAY`) turns to do so. During this time, it cannot perform any other actions (defuse, capture, move) and does not auto-attack. If it is killed during this time, the mine does not get planted. Mines belong to a team, and will not damage robots of that team.
 
-Once a mine is planted, they stay there until they are defused. Mines do not "blow up" when they do damage. Enemy robots on the mined square will take 10 (`GameConstants.MINE_DAMAGE`) damage per turn, every turn they end on the mine. Only one mine can be in one square at a time; they cannot be stacked. You can try to mine squares that are already mined (either by you or the enemy), but it will just be a waste. Encampment squares can be mined.
+Once a mine is planted, they stay there until they are defused. Mines do not "blow up" when they do damage. Enemy robots on the mined square will take 10 (`GameConstants.MINE_DAMAGE`) damage per turn, every turn they end on the mine. Only one mine can be in one square at a time; they cannot be stacked. You can try to mine squares that are already mined (either by you or the enemy), but it will just be a waste. Both encampment and HQ squares can also be mined.
 
-Enemy mines are not visible until they are stepped on. Once you enter the square with any soldier, all your soldiers can sense that an enemy mine is there. 
+Enemy mines are not visible until they are stepped on. Once you enter the square with any soldier, all your soldiers can sense that an enemy mine is there. Allied mines are always visible. They do not provide any sight, but you always know which squares you have mines on, and you can tell when they get defused.
 
 With the PICKAXE upgrade, mining is upgraded to simultaneously mining on the soldier's current square as well as the four squares orthogonally adjacent to it. This can even allow you to mine squares containing enemy robots (even their HQ).
-
-Mines cannot be planted on the HQ square, or any encampment square. Soldiers can still try to mine when they are on encampment squares, and they will still go into the 25 turns of mine delay, but the mine will not be planted on the encampment square. However, it might be worth mining while on an encampment square if you have PICKAXE researched.
 
 ### Defusion
 
@@ -112,7 +106,9 @@ You cannot defuse your own team's mines.
 
 ### Neutral mines
 
-The map often starts off with lots of neutral mines. These are just like mines planted by either team in terms of damaging robots that move across. They can be defused just like any other mine. Both teams start off knowing the locations of all neutral mines on the map, and do not need to enter the square to be able to sense them.
+The map often starts off with lots of neutral mines. These belong to the neutral team. These are just like mines planted by either team in terms of damaging robots that move across. They can be defused just like any other mine. Both teams start off knowing the locations of all neutral mines on the map, and do not need to enter the square to be able to sense them. 
+
+Note that you can sense exactly where the neutral mines on the map are. This means when the enemy defuses neutral mines, you can tell, although this is fairly expensive in bytecodes.
 
 Upgrades
 --------
@@ -133,11 +129,11 @@ Victory Conditions
 
 A team wins by destroying the enemy's HQ, or by researching the nuke upgrade. We expect most games to end by HQ destruction. The nuke upgrade is intended to be used in extreme stalemate situations. After exactly 2000 rounds (`GameConstants.ROUND_LIMIT`), the HQ starts taking damage at a rate of 1 (`GameConstants.TIME_LIMIT_DAMAGE`) energon per turn. This means the game must be over after 2500 rounds. If both teams lose their HQs from end of round damage on the same turn, then the following tiebreakers are applied in order to determine the winner:
 
-- Most encampments
-- Most soldiers
-- Most mines
-- Most power stockpiled
-- Red wins (in tourneys, the lower seeded player is red)
+- Total # Encampments
+- Total # Energon across all robots
+- Total # Mines
+- Total Team Power
+- Lowest ID
 
 
 Robot Actions
@@ -170,14 +166,23 @@ This year, there is a global message board accessible to all robots that support
 
 This message board is globally accessible by _any_ robot and is used for communicating whatever the AIs wish to communicate. It can be used to coordinate your army, distribute computation, or calling for reinforcements. Since both teams use the same message board, robots' broadcasts may interfere with each other, either by accident or on purpose. Because of this, it is not guaranteed that a broadcast will be able to reach other robots, as the data in a channel may be overwritten before the intended recipient robot gets a turn to read the channel.
 
+### Autoattack
+
+SOLDIERs, SHIELDs, and MEDBAYs autoattack. This attacking cannot be disabled by the player; it will happen at the end of the turn if a robot is still alive.
+
+SOLDIERs will deal 6 (`SOLDIER.attackPower`) damage to enemies per turn automatically, if it ends the turn adjacent to any enemies. This damage is split evenly between all the adjacent enemies, so if it is adjacent to four enemies, it will deal 1.5 damage to each. Any enemies whose energon gets reduced to 0 or below after this are immediately removed from the game. Overkill damage is wasted, so if a soldier is adjacent to two enemy robots with 1 energon and 40 energon left, one robot will die and the other will be reduced to 37 energon.
+
+SHIELDs automatically add 5 (`SHIELD.attackPower`) shields to adjacent allies and itself every turn. This is 5 per robot, so it can potentially shield multiple robots for a total of 45 shields added. Shield decay still happens while a robot is next to a SHIELD, so a SHIELD will add 5 shields to itself and then lose 1 (`GameConstants.SHIELD_DECAY_RATE`) shield to decay every turn, ending with a net gain of 4. SHIELDs can shield each other, and multiple SHIELDs can add shields to the same robot on the same round.
+
+MEDBAYs automatically replenish 2 (`MEDBAY.attackPower`) energon to adjacent allies and itself every turn. This is 2 energon per robot, so it can potentially heal multiple robots for a total of 18 energon healed. This healing does not affect the HQ. Energon cannot exceed maximum energon. MEDBAYs can heal each other, and multiple MEDBAYs can heal the same robot on the same round.
 
 ### Movement
 
-Only the soldier has the ability to move. Moving has no power cost.
+Only the SOLDIER has the ability to move. Moving has no power cost.
 
-Every turn, soldiers may move to any unoccupied adjacent tile, provided they are not in delay from performing any other action (mining, defusing, capturing). Soldiers can auto-attack on the same turn they move.
+Every turn, SOLDIERs may move to any unoccupied adjacent tile, provided they are not in delay from performing any other action (mining, defusing, capturing). Soldiers can auto-attack on the same turn they move. They cannot mine, defuse, or capture on the same turn they move.
 
-Soldiers can move diagonally at the same speed as they can move orthogonally.
+SOLDIERs can move diagonally at the same speed as they can move orthogonally.
 
 ### Spawning
 
@@ -225,6 +230,7 @@ Official maps used in scrimmages and tournaments must all satisfy the following 
 - The map cannot have neutral mines on the 4 squares orthogonally adjacent to either HQ.
 - There will be a minimum of 5 encampment squares on the map. 
 - It will be possible for a soldier to get adjacent to the enemy HQ by turn 200, even if you only make one soldier and research/capture nothing, and the opposing team does nothing.
+- The distance between the spawn points will be at least 10 units. 
 
 
 Writing a Player
@@ -533,7 +539,12 @@ Changelog
     * Nuke sensing rebalanced, only 50% detectable
     * Spec document mostly rewritten to include detailed information regarding mines, broadcasting, etc.
 * **1.1.1** (1/8/2013) - Fixing typos
-
+* **1.1.2** (1/9/2013) - Minor Bugfix
+    * Fixing bug in mine sensing.
+    * Tiebreaker conditions reordered to match spec.
+    * Specs updated to describe autoattacks better
+    * Map constraints tightened
+    * new `senseNonAlliedMineLocations` added as convenience function
 
 Appendices
 ------------
@@ -547,4 +558,3 @@ The javadocs include the values of the game constants and robot attributes.
 ### Appendix B: Energon Health Warning
 
 Energon intake is not for everyone. Please consult a physician before use. 6.370 Battlecode Corporation is not responsible in the event of injury due to energon use. Energon's side-effects include loss of limb, death, unbearable pain, tendencies to procrastinate and an unnatural senseless rage. Handle with care. Energon consumption has not been approved by any health agency and you USE IT AT YOUR OWN RISK. For this reason, please be careful when scrimmaging. Energon is the same thing as health.
-
