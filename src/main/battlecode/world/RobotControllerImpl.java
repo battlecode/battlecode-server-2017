@@ -1,6 +1,6 @@
 package battlecode.world;
 
-import static battlecode.common.GameActionExceptionType.ALREADY_ACTIVE;
+import static battlecode.common.GameActionExceptionType.NOT_ACTIVE;
 import static battlecode.common.GameActionExceptionType.CANT_DO_THAT_BRO;
 import static battlecode.common.GameActionExceptionType.CANT_SENSE_THAT;
 import static battlecode.common.GameActionExceptionType.MISSING_UPGRADE;
@@ -121,9 +121,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //****** QUERY METHODS ********
     //*********************************
 
-    /**
-     * {@inheritDoc}
-     */
     public double getEnergon() {
         return robot.getEnergonLevel();
     }
@@ -136,17 +133,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	return robot.getShieldLevel();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public MapLocation getLocation() {
         return robot.getLocation();
     }
 
 
-    /**
-     * {@inheritDoc}
-     */
     public Team getTeam() {
         return robot.getTeam();
     }
@@ -171,7 +162,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //****** ACTION METHODS *************
     //***********************************
 
-    /** {@inheritDoc} */
     public void yield() {
         int bytecodesBelowBase = GameConstants.BYTECODE_LIMIT - RobotMonitor.getBytecodesUsed();
         if (bytecodesBelowBase > 0)
@@ -270,16 +260,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         gameWorld.removeDead();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void suicide() {
         throw new RobotDeathException();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void breakpoint() {
         gameWorld.notifyBreakpoint();
     }
@@ -442,12 +426,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	return gameWorld.getBaseHQ(getTeam().opponent()).getLocation();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public TerrainTile senseTerrainTile(MapLocation loc) {
         assertNotNull(loc);
-        return robot.getMapMemory().recallTerrain(loc);
+        return gameWorld.getMapTerrain(loc);
     }
     
     public MapLocation[] senseAllEncampmentSquares() {
@@ -593,7 +574,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public void assertNotMoving() throws GameActionException {
         if (!isActive())
-            throw new GameActionException(ALREADY_ACTIVE, "This robot is already moving.");
+            throw new GameActionException(NOT_ACTIVE, "This robot is already moving.");
     }
 
     public void move(Direction d) throws GameActionException {
@@ -636,7 +617,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     protected void assertNotAttacking() throws GameActionException {
         if (isAttackActive())
-            throw new GameActionException(ALREADY_ACTIVE, "This robot is already attacking.");
+            throw new GameActionException(NOT_ACTIVE, "This robot is already attacking.");
     }
 
     protected void assertCanAttack(MapLocation loc, RobotLevel height) throws GameActionException {
@@ -698,24 +679,15 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //******** MISC. METHODS **********
     //************************************
     
-    /**
-     * {@inheritDoc}
-     */
     public void wearHat() {
     	// noop.... for now.
     }
    
-    
-    /**
-     * {@inheritDoc}
-     */
     public boolean hasUpgrade(Upgrade upgrade) {
+    	assertNotNull(upgrade);
     	return gameWorld.hasUpgrade(getTeam(), upgrade);
     }
     
-    /**
-     * {@inheritDoc}
-     */
     public void setIndicatorString(int stringIndex, String newString) {
         if (stringIndex >= 0 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS)
             (new IndicatorStringSignal(robot, stringIndex, newString)).accept(gameWorld);
@@ -725,23 +697,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         setIndicatorString(stringIndex, String.format(format, args));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public long getControlBits() {
         return robot.getControlBits();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void addMatchObservation(String observation) {
         (new MatchObservationSignal(robot, observation)).accept(gameWorld);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void setTeamMemory(int index, long value) {
         gameWorld.setArchonMemory(robot.getTeam(), index, value);
     }

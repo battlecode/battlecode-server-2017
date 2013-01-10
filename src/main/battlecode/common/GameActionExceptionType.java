@@ -24,7 +24,7 @@ public enum GameActionExceptionType {
     /**
      * Indicates when a robot tries to execute an action, but is not currently idle
      */
-    ALREADY_ACTIVE,
+    NOT_ACTIVE,
     /**
      * Indicates when a robot tries to sense a <code>GameObject</code> that is no longer existant or no longer
      * in this robot's sensor range

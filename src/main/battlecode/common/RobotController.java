@@ -21,12 +21,12 @@ public interface RobotController {
     public double getEnergon();
     
     /**
-     * @return this robot's shields
+     * @return this robot's current shield level
      */
     public double getShields();
     
     /**
-     * @return total amount of resources remaining
+     * @return total amount of power in the team's power stockpile
      */
     public double getTeamPower();
 
@@ -74,7 +74,7 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Returns the object at the given location and height, or <code>null</code>
+     * Returns the object at the given location, or <code>null</code>
      * if there is no object there.
      *
      * @throws GameActionException if <code>loc</code> is not within sensor range (CANT_SENSE_THAT)
@@ -82,7 +82,7 @@ public interface RobotController {
     public GameObject senseObjectAtLocation(MapLocation loc) throws GameActionException;
 
     /** 
-     * Returns an array of _all_ visible game objects
+     * Returns all game objects of a given type nearby the robot
      * @see #senseNearbyGameObjects(Class, MapLocation, int, Team)
      */
     public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type);
@@ -112,26 +112,26 @@ public interface RobotController {
     
     
     /**
-     * Sense the location of the object <code>o</code>.
+     * Sense the location of the given object.
      *
-     * @throws GameActionException if <code>o</code> is not within sensor range (CANT_SENSE_THAT)
+     * @throws GameActionException if object is not within sensor range (CANT_SENSE_THAT)
      */
     public MapLocation senseLocationOf(GameObject o) throws GameActionException;
 
     /**
-     * Sense the RobotInfo for the robot <code>r</code>.
+     * Sense the RobotInfo for the given robot.
      *
-     * @throws GameActionException if <code>r</code> is not within sensor range (CANT_SENSE_THAT)
+     * @throws GameActionException if robot is not within sensor range (CANT_SENSE_THAT)
      */
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException;
 
     /**
-     * @return true if GameObject <code>o</code> is within a robot's personal sensor range
+     * @return true if the given object is within the team's shared sensor range
      */
     public boolean canSenseObject(GameObject o);
 
     /**
-     * Returns true if this robot can sense the location {@code loc}.
+     * Returns true if the given location is within the team's shared sensor range
      */
     public boolean canSenseSquare(MapLocation loc);
 
@@ -148,29 +148,28 @@ public interface RobotController {
     public MapLocation[] senseAlliedEncampmentSquares();
     
     /**
-     * Returns all encampment squares filtered on the given search area
+     * Senses all encampment squares owned by the given team within the given circular area
      * 
      * Allows a team-based filter which can be one of the following parameters:
      * <ul>
      * <li>Null - Senses _all_ encampments on the map
-     * <li>Neutral - Senses all encampments that not owned by the sensing robot's team
+     * <li>Neutral - Senses all encampments not owned by the allied team, so neutral or enemy
      * <li>Allied Team - Senses all encampments owned by the allied team
      * </ui>
      * Note that you cannot sense all enemy-owned encampments
      * 
-     * @param center - location to search for encampment squares
+     * @param center - center location of circle to search for encampment squares
      * @param radiusSquared - radius around the center to search for encampment squares
      * @param team - team filter (null, allied team, or neutral team, see usage above)
-     * @return Array of map locations containing found encampment squares satisfying the criteria
+     * @return Array of map locations containing encampment squares satisfying the criteria
      * @throws GameActionException - attempting to search all enemy encampment squares
      */
     public MapLocation[] senseEncampmentSquares(MapLocation center, int radiusSquared, Team team) throws GameActionException;
 
     /**
-     * Sense whether a mine exists at a given location
-     * Returns either the TEAM of the mine or null if there is no mine
+     * Senses whether a mine exists at a given location
      * @param location to scan
-     * @return team the mine belongs to or null if there is no mine there
+     * @return either the TEAM of the mine at the given location or null if sensors think there is no mine 
      */
     public Team senseMine(MapLocation location);
    
@@ -195,7 +194,7 @@ public interface RobotController {
     public MapLocation[] senseNonAlliedMineLocations(MapLocation center, int radiusSquared);
 
     /**
-     * @return location of this robot's HQ
+     * @return location of the allied team's HQ
      */
     public MapLocation senseHQLocation();
 
@@ -206,14 +205,14 @@ public interface RobotController {
     
     /**
      * Senses the enemy team's NUKE research progress - only HQ can do this
-     * @return true if the enemy team's NUKE is halfways researched.
+     * @return true if the enemy team's NUKE is at least halfway researched.
      * @throws GameActionException if not HQ
      */
     public boolean senseEnemyNukeHalfDone() throws GameActionException;
     
     /**
      * Checks if the given map location is an encampment square.
-     * Returns true if an encampement can be built on the square regardless of whether
+     * Returns true if an encampment can be built on the square regardless of whether
      * there already exists an encampment on the square
      */
     public boolean senseEncampmentSquare(MapLocation loc);
@@ -242,8 +241,7 @@ public interface RobotController {
     /**
      * Tells whether this robot can move in the given direction. Takes into
      * account only the map terrain and positions of other robots. Does not take
-     * into account whether this robot is currently active or otherwise
-     * incapable of moving.
+     * into account this robot's type or whether this robot is currently active.
      *
      * @return true if there are no robots or walls preventing this robot from
      *         moving in the given direction; false otherwise
@@ -273,7 +271,7 @@ public interface RobotController {
     
     /**
      * Broadcasts a message to the global message board.
-     * The data is not written until the end of the robot's turn
+     * The data is not written until the end of the robot's turn.
      * @param channel - the channel to write to, from 0 to <code>MAX_RADIO_CHANNELS</code>
      * @param data - one int's worth of data to write
      * @throws GameActionException
@@ -281,7 +279,7 @@ public interface RobotController {
     public void broadcast(int channel, int data) throws GameActionException;
 
     /**
-     * Retrieves the message stored at the given radio channel
+     * Retrieves the message stored at the given radio channel.
      * @param channel - radio channel to query, from 0 to <code>MAX_RADIO_CHANNELS</code>
      * @return data currently stored on the channel
      * @throws GameActionException 
@@ -293,30 +291,30 @@ public interface RobotController {
     // ***********************************
 
     /**
-     *
+     * HQ ONLY.
      * Queues a spawn action to be performed at the end of this robot's turn.
-     * When the action is executed, a new robot will be created at
-     * directly in front of this robot.  The square must not already be occupied.
+     * When the action is executed, a new robot will be created adjacent to the HQ
+     * in the given direction.  The square must not already be occupied.
      * The new robot is created and starts executing bytecodes immediately
      *
-     * @param dir the direction to spawn robot in; cannot be null.
-     * @throws IllegalStateException if this robot is not an ARCHON
-     * @throws GameActionException   if this robot is currently moving (ALREADY_ACTIVE)
-     * @throws GameActionException   if <code>loc</code> is already occupied (CANT_MOVE_THERE)
+     * @param dir the direction to spawn robot in
+     * @throws IllegalStateException if this robot is not the HQ
+     * @throws GameActionException   if this robot is currently inactive (NOT_ACTIVE)
+     * @throws GameActionException   if location is already occupied (CANT_MOVE_THERE)
      */
     public void spawn(Direction dir) throws GameActionException;
    
     
     /**
      * Checks whether a given upgrade has been researched and is available.
-     * @param upgrade
+     * @param upgrade cannot be null
      */
     public boolean hasUpgrade(Upgrade upgrade);
     
     
     /**
      * SOLDIER only
-     * Lays a mine underneath a robot. A robot cannot move until the mine is laid
+     * Lays mines. A robot cannot move until the mine is laid
      * 
      * @throws GameActionException
      */
@@ -332,28 +330,28 @@ public interface RobotController {
     
     /**
      * Captures the encampment soldier is standing on. 
-     * Immediately kills the soldier and encampment, and spawns an encampment robot of the given type
+     * After a capture delay, kills the soldier and spawns a robot of the given encampment type
      * @param type
      * @throws GameActionException
      */
     public void captureEncampment(RobotType type) throws GameActionException;
     
     /**
-     * Checks how much it costs to start a capture
+     * Checks how much power it costs to start a capture an encampment on this turn
      */
     public double senseCaptureCost();
    
     /**
+     * HQ ONLY.
      * Researches the given upgrade for a turn.
-     * Will only work if the robot is an HQ
      * @param upgrade
      * @throws GameActionException
      */
     public void researchUpgrade(Upgrade upgrade) throws GameActionException;
     
     /**
+     * HQ ONLY.
      * Checks the total number of rounds a given research has been researched
-     * Will only work if the robot is an HQ
      * @param upgrade
      * @return the number of rounds that have been spent upgrading
      * @throws GameActionException
@@ -362,7 +360,7 @@ public interface RobotController {
     
     
     /**
-     * Ends the current round.  This robot will receive a power bonus of
+     * Ends the current round.  The team will receive a power refund of
      * <code>GameConstants.POWER_COST_PER_BYTECODE * (GameConstants.BYTECODE_LIMIT
 		 * - RobotMonitor.getBytecodesUsed())</code>.
      * Never fails.
@@ -401,8 +399,7 @@ public interface RobotController {
     public void setIndicatorString(int stringIndex, String newString);
 
     /**
-     * Senses the terrain at <code>loc</code>, if <code>loc</code> was ever
-     * within this robot's sensor range.  Otherwise, returns <code>null</code>.
+     * Senses the terrain at the given location.
      */
     public TerrainTile senseTerrainTile(MapLocation loc);
 
