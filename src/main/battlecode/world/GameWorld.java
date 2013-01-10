@@ -338,10 +338,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     		mineLocations.put(loc, t);
     		if(t==Team.A || t==Team.B)
     			addKnownMineLocation(t, loc);
-				else {
-						addKnownMineLocation(Team.A, loc);
-						addKnownMineLocation(Team.B, loc);
-				}
     	}
     }
     
