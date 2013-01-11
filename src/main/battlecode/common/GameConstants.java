@@ -77,8 +77,8 @@ public interface GameConstants {
     /** The energy to bytecode converstion rate */
     public static final double POWER_COST_PER_BYTECODE = 0.0001;
     
-    /** The total number of radio channels that are read/writeable */
-    public static final int BROADCAST_MAX_CHANNELS = 10000;
+    /** The maximum read/write-able of radio channel number */
+    public static final int BROADCAST_MAX_CHANNELS = 65535;
     
     /** The power cost required to broadcast a message to a single radio channel */
     public static final double BROADCAST_SEND_COST = 0.05;

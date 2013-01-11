@@ -656,6 +656,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public void broadcast(int channel, int data) throws GameActionException {
+    	if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
+    		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
     	double cost = GameConstants.BROADCAST_SEND_COST;
     	assertHaveResource(cost);
     	
@@ -667,7 +669,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     @Override
     public int readBroadcast(int channel) throws GameActionException {
     	if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
-    		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS);
+    		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
     	double cost = GameConstants.BROADCAST_READ_COST;
     	assertHaveResource(cost);
     	int m = gameWorld.getMessage(channel);

@@ -160,7 +160,7 @@ In Battlecode, robots do not have the ability to access each others' internal me
 
 This year, there is a global message board accessible to all robots that supports read/write operations. It works as follows:
 
-* The message board is essentially an array of ints. Each position in this array is called a 'channel'. The channels are numbered from 0 to 10000 (`GameConstants.BROADCAST_MAX_CHANNELS`), inclusive. Robots can 'broadcast' to these channels, which is essentially just storing an int in a specified position of this array.
+* The message board is essentially an array of ints. Each position in this array is called a 'channel'. The channels are numbered from 0 to 65536 (`GameConstants.BROADCAST_MAX_CHANNELS`), inclusive. Robots can 'broadcast' to these channels, which is essentially just storing an int in a specified position of this array.
 * There is only _one_ global message board and all robots from both teams access the same one
 * During each robot's turn, it may write to any channel via `rc.broadcast(channel)` and read what has last been broadcasted on any channel via `rc.readBroadcast(channel)`.
 * There is a power cost associated with both reading (`GameConstants.BROADCAST_SEND_COST`) and writing (`GameConstants.BROADCAST_READ_COST`) to the board. A robot can read and write to the message board as many times as it wants in one turn, as long as the team can pay this power cost. 
