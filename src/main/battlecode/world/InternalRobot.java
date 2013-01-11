@@ -233,7 +233,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	{
     		Team mines = myGameWorld.getMine(getLocation());
     		if (mines!=null && mines!=getTeam()) {
-    			this.takeDamage(GameConstants.MINE_DAMAGE);
+    			
+    			this.takeShieldedDamage(GameConstants.MINE_DAMAGE*GameConstants.MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD);
+    			this.takeDamage(GameConstants.MINE_DAMAGE*(1.0-GameConstants.MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD));
+    			
     			myGameWorld.addKnownMineLocation(getTeam(), getLocation());
     			if (myEnergonLevel <= 0.0)
     				return;

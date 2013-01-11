@@ -83,16 +83,18 @@ Unused power is stockpiled and carried over into future rounds. However, at the 
 
 ### Shields
 
-Shields are generated from the SHIELD encampment. They protect soldiers from artillery shots, and not from any other source of damage. One shield point blocks one damage from an artillery shot, either direct damage or splash damage. Shields decay at a constant rate of `GameConstants.SHIELD_DECAY_RATE` per turn. A soldier's shield pool is bound between 0 and 100000000 (`GameConstants.SHIELD_CAP`).
+Shields are generated from the SHIELD encampment. They protect soldiers from artillery shots and mine damage. One shield point blocks one damage from an artillery shot, either direct damage or splash damage. Shields also block up to 75% (`GameConstants.MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD`) of mine damage. When a soldier takes mine damage, up to 75% of the damage taken will be reduced from shields, and the remaining mine damage will be reduced from energon.
+
+Shields decay at a constant rate of 0.5 (`GameConstants.SHIELD_DECAY_RATE`) per turn. A soldier's shield pool is bound between 0 and 100000000 (`GameConstants.SHIELD_CAP`).
 
 Mines
 -----
 
 Soldiers can lay mines throughout the map to help defend territory and catch enemy robots off guard. All soldiers have the ability to lay a mine on their current square, taking 25 (`GameConstants.MINE_LAY_DELAY`) turns to do so. During this time, it cannot perform any other actions (defuse, capture, move) and does not auto-attack. If it is killed during this time, the mine does not get planted. Mines belong to a team, and will not damage robots of that team.
 
-Once a mine is planted, they stay there until they are defused. Mines do not "blow up" when they do damage. Enemy robots on the mined square will take 10 (`GameConstants.MINE_DAMAGE`) damage per turn, every turn they end on the mine. Only one mine can be in one square at a time; they cannot be stacked. You can try to mine squares that are already mined (either by you or the enemy), but it will just be a waste. Both encampment and HQ squares can also be mined.
+Once a mine is planted, they stay there until they are defused. Mines do not "blow up" when they do damage. Enemy robots on the mined square will take 10 (`GameConstants.MINE_DAMAGE`) damage per turn, every turn they end on the mine. Only one mine can be in one square at a time; they cannot be stacked. You can try to mine squares that are already mined (either by you or the enemy), but it will just be a waste. Encampment squares can be mined, and the HQ squares can be mined also. However, only SOLDIERs take damage from mines.
 
-Enemy mines are not visible until they are stepped on. Once you enter the square with any soldier, all your soldiers can sense that an enemy mine is there. Allied mines are always visible. They do not provide any sight, but you always know which squares you have mines on, and you can tell when they get defused.
+Enemy mines are not visible until they are stepped on. If you try to sense a mine your opponent just laid, they will sense that there is no mine there. Once you enter the square with any soldier, all your soldiers will be able to sense that an enemy mine is there. Allied mines are always visible. Mines do not provide any sight, but you always know which squares you have mines on, and you can tell when they get defused by repeatedly sensing that square for mines.
 
 With the PICKAXE upgrade, mining is upgraded to simultaneously mining on the soldier's current square as well as the four squares orthogonally adjacent to it. This can even allow you to mine squares containing enemy robots (even their HQ).
 
@@ -100,9 +102,7 @@ With the PICKAXE upgrade, mining is upgraded to simultaneously mining on the sol
 
 A mine must be defused to be removed from the map. To defuse a mine, a soldier must be adjacent to the mine. It must take 12 (`GameConstants.MINE_DEFUSE_DELAY`) turns to defuse the mine, during which it cannot perform other actions and cannot auto-attack. If the soldier is killed during this time, the mine is not defused. Soldiers can only defuse one mine at a time, and two soldiers trying to defuse the same mine won't defuse it any faster. Once the defusion upgrade is researched, the time it takes to defuse the mine is reduced to 5 (`GameConstants.MINE_DEFUSE_DEFUSION_DELAY`), and the soldier can defuse any mine within its sensor range.
 
-How defusion actually works is that soldiers target a square to defuse. They do not have to know there is a mine there to defuse. After the defusion time, any enemy or neutral mine in that location will be removed, even if they aren't able to sense it, and even if the mine was not there when the soldier started defusing. 
-
-You cannot defuse your own team's mines. 
+How defusion actually works is that soldiers target a square to defuse. They do not have to know there is a mine there to defuse. After the defusion time, any mine in that location will be removed, even if they aren't able to sense it, and even if the mine was not there when the soldier started defusing. You can accidentally defuse your own mines. If you defuse any mine, your opponent will be able to sense that there is no longer any mine there. 
 
 ### Neutral mines
 
@@ -116,7 +116,7 @@ Upgrades
 Upgrades are researchable from your HQ. The following upgrades are available:
 
 1. **Pickaxe**: When a soldier mines, in addition to mining the square it is on, it also mines each of the four orthogonally adjacent squares.
-2. **Defusion**: Soldiers can defuse mines not only in adjacent tiles, but in all tiles in its personal sight radius. They also defuse mines significantly faster. They still must defuse one mine at a time.
+2. **Defusion**: Soldiers can defuse mines not only in adjacent squares, but in all squares in its personal sight radius. They also defuse mines significantly faster. They still must defuse one mine at a time.
 3. **Vision**: Increases the personal sensor radius on all robots from 14 to 33 units squared.
 4. **Fusion**: The team's power decay rate is adjusted from 20% `RESOURCE_DECAY_RATE` to 1% `RESOURCE_DECAY_RATE_FUSION`.
 5. **Nuke**: You immediately win.
@@ -148,27 +148,30 @@ All robots are equipped with personal sensors. These sensors have a sensor range
 - The info on all allied robots can be sensed.
 - The info on visible enemy robots can be sensed.
 - The positions of detected enemy mines can be sensed. Mines are detected after an allied unit has stepped on it. These mines do not have to be in sensing range after they have been detected.
-- The positions of neutral mines on the map are automatically known at game start, and can be sensed.
+- The positions of all neutral mines on the map are automatically known at game start, and can be accurately sensed at any time, even if they are out of the range of all of the sensor range of all allied robots.
+- The positions of allied mines can be accurately sensed, even if they are out of the range of all of the sensor range of all allied robots.
 - The locations of the both HQs can be sensed.
 - Your own team's upgrade progress can be sensed, but only by the HQ.
-- Robots can sense whether the enemy's nuke progress has reached the halfway mark.
+- The HQ can sense whether the enemy's nuke progress has reached the halfway mark.
 
 ### Messaging
 
+In Battlecode, robots do not have the ability to access each others' internal memory. Each robot runs on its own thread and cannot access the other robot objects directly. How different robots on a team communicate is by messaging.
+
 This year, there is a global message board accessible to all robots that supports read/write operations. It works as follows:
 
-* There exist 0-10,000 channels inclusive (`BROADCAST_MAX_CHANNELS`).
-* During a robot's turn, a robot may read/write as many messages as it desires to the board (via `rc.broadcast` and `rc.readBroadcast`)
-* There is only _one_ global message board and both teams access the same one
-* There is a power cost associated with both reading (`BROADCAST_SEND_COST`) and writing (`BROADCAST_READ_COST`) to the board
+* The message board is essentially an array of ints. Each position in this array is called a 'channel'. The channels are numbered from 0 to 10000 (`GameConstants.BROADCAST_MAX_CHANNELS`), inclusive. Robots can 'broadcast' to these channels, which is essentially just storing an int in a specified position of this array.
+* There is only _one_ global message board and all robots from both teams access the same one
+* During each robot's turn, it may write to any channel via `rc.broadcast(channel)` and read what has last been broadcasted on any channel via `rc.readBroadcast(channel)`.
+* There is a power cost associated with both reading (`GameConstants.BROADCAST_SEND_COST`) and writing (`GameConstants.BROADCAST_READ_COST`) to the board. A robot can read and write to the message board as many times as it wants in one turn, as long as the team can pay this power cost. 
 * Once a message is written to the board, it persists until it is overwritten, or until the end of the game.
-* At the beginning of a new game, all channels are initialized to 0.
+* At the beginning of a game, all channels are initialized to 0.
 
-This message board is globally accessible by _any_ robot and is used for communicating whatever the AIs wish to communicate. It can be used to coordinate your army, distribute computation, or calling for reinforcements. Since both teams use the same message board, robots' broadcasts may interfere with each other, either by accident or on purpose. Because of this, it is not guaranteed that a broadcast will be able to reach other robots, as the data in a channel may be overwritten before the intended recipient robot gets a turn to read the channel.
+This message board is globally accessible by _any_ robot and is used for communicating whatever the AIs wish to communicate. It can be used to coordinate your army, distribute computation, or call for reinforcements. Since both teams use the same message board, robots' broadcasts may interfere with each other, either by accident or on purpose. Because of this, it is not guaranteed that a broadcast will be able to reach other robots, as the data in a channel may be overwritten before the intended recipient robot gets a turn to read the channel.
 
 ### Autoattack
 
-SOLDIERs, SHIELDs, and MEDBAYs autoattack. This attacking cannot be disabled by the player; it will happen at the end of the turn if a robot is still alive.
+SOLDIERs, SHIELDs, and MEDBAYs autoattack. This attacking cannot be disabled by the player; it will happen at the end of the turn if a robot is still alive and not in the middle of performing an action (mining, defusing, capturing). 
 
 SOLDIERs will deal 6 (`SOLDIER.attackPower`) damage to enemies per turn automatically, if it ends the turn adjacent to any enemies. This damage is split evenly between all the adjacent enemies, so if it is adjacent to four enemies, it will deal 1.5 damage to each. Any enemies whose energon gets reduced to 0 or below after this are immediately removed from the game. Overkill damage is wasted, so if a soldier is adjacent to two enemy robots with 1 energon and 40 energon left, one robot will die and the other will be reduced to 37 energon.
 
@@ -180,19 +183,19 @@ MEDBAYs automatically replenish 2 (`MEDBAY.attackPower`) energon to adjacent all
 
 Only the SOLDIER has the ability to move. Moving has no power cost.
 
-Every turn, SOLDIERs may move to any unoccupied adjacent tile, provided they are not in delay from performing any other action (mining, defusing, capturing). Soldiers can auto-attack on the same turn they move. They cannot mine, defuse, or capture on the same turn they move.
+Every turn, SOLDIERs may move to any unoccupied adjacent square, provided they are not in delay from performing any other action (mining, defusing, capturing). Soldiers can auto-attack on the same turn they move. They cannot mine, defuse, or capture on the same turn they move.
 
 SOLDIERs can move diagonally at the same speed as they can move orthogonally.
 
 ### Spawning
 
-The HQ has the ability to continuously spawn SOLDIERs. The action of spawning soldiers does not cost power by itself, but the spawned soldiers will start to consume power via upkeep. 
+The HQ has the ability to continuously spawn SOLDIERs. The action of spawning soldiers does not cost power by itself, but the spawned soldiers will start to consume power via upkeep. After the HQ spawns a SOLDIER, the HQ is unable to do any other actions (spawning or researching) for a brief time, determined by how many SUPPLIERs the team currently has alive.
 
-SOLDIERs can be spawned in any adjacent tile that does not already have a robot on it. In the beginning, the HQ may spawn one SOLDIER per 10 (`GameConstants.HQ_SPAWN_DELAY`) rounds. This spawn rate is reduced by SUPPLIERS according to the formula a=r(`GameConstants.HQ_SPAWN_DELAY`*`GameConstants.HQ_SPAWN_DELAY_CONSTANT`/(`GameConstants.HQ_SPAWN_DELAY_CONSTANT`+b)), where a is the number of turns it takes to spawn one unit, b is the number of suppliers you have alive, and r() rounds a number to the nearest positive integer.  Units that are spawned are immediately placed on the field and may perform actions like any other robot. The HQ cannot spawn or research while it is in spawning cool-down.
+SOLDIERs can be spawned in any adjacent square that does not already have a robot on it. In the beginning, the HQ may spawn one SOLDIER per 10 (`GameConstants.HQ_SPAWN_DELAY`) rounds. This spawn rate is reduced by SUPPLIERS according to the formula a=r(`GameConstants.HQ_SPAWN_DELAY`*`GameConstants.HQ_SPAWN_DELAY_CONSTANT`/(`GameConstants.HQ_SPAWN_DELAY_CONSTANT`+b)), where a is the number of turns it takes to spawn one unit, b is the number of suppliers you have alive, and r() rounds a number to the nearest positive integer.  Units that are spawned are immediately placed on the field and may perform actions like any other robot. The HQ cannot spawn or research while it is in spawning cool-down.
 
 ### Suicide
 
-Calling suicide() immediately kills the robot and removes it from the game. It will no longer consume upkeep in future rounds. If an encampment suicides, then the square is freed up for a potentially different encampment to be created there.
+Calling suicide() immediately kills the robot and removes it from the game. It will no longer consume upkeep in future rounds. If an encampment suicides, then the square is freed up for a potentially different encampment to be created there. If a robot suicides, no power is refunded to the team.
 
 ### Team Memory
 
@@ -204,7 +207,7 @@ There are several ways that the user can interact with robots. First, any robot 
 
 ### Ending turn
 
-Only `yield()` and `suicide()` end the turn of a robot. Otherwise a turn ends naturally when the bytecode limit is hit. Every turn a robot gets 10000 bytecodes to run code. At the end of a robot's turn, unused bytecodes will return power back into the team's global power pool. 
+Calling `yield()` and `suicide()` instantly end the turn of a robot. Otherwise a turn ends naturally when the bytecode limit is hit. Every turn a robot gets 10000 bytecodes to run code. At the end of a robot's turn, if the robot yielded, unused bytecodes will return power back into the team's global power pool. 
 
 
 Maps
@@ -225,12 +228,12 @@ Maps are specified by XML files, and can be found in the maps folder of the rele
 
 Official maps used in scrimmages and tournaments must all satisfy the following conditions.
 
-- Maps are completely symmetric either by reflection or 180 degree rotation, except for the two starting HQs.
+- Maps are completely symmetric either by reflection or 180 degree rotation.
 - The width and height of the map are guaranteed to be between 20 and 70, inclusive.
 - The map cannot have neutral mines on the 4 squares orthogonally adjacent to either HQ.
 - There will be a minimum of 5 encampment squares on the map. 
 - It will be possible for a soldier to get adjacent to the enemy HQ by turn 200, even if you only make one soldier and research/capture nothing, and the opposing team does nothing.
-- The distance between the spawn points will be at least 10 units. 
+- The distance between the spawn points will be at least 10 units (Euclidean distance). 
 
 
 Writing a Player
@@ -332,7 +335,7 @@ The following is a detailed list of a robot's execution order within a single tu
 
     f. Research is updated OR a unit is spawned (HQ Only)
 
-6. Mine damage is applied
+6. Mine damage is applied (SOLDIER Only)
 7. Automatic attacks are performed
 
     a. Robot auto-attacks adjacent enemies (SOLIDER Only)
@@ -539,13 +542,9 @@ Changelog
     * Nuke sensing rebalanced, only 50% detectable
     * Spec document mostly rewritten to include detailed information regarding mines, broadcasting, etc.
 * **1.1.1** (1/8/2013) - Fixing typos
-* **1.1.2** (1/9/2013) - Minor Bugfix
-    * Fixing bug in mine sensing.
-    * Tiebreaker conditions reordered to match spec.
-    * Specs updated to describe autoattacks better
-    * Map constraints tightened
-    * new `senseNonAlliedMineLocations` added as convenience function
+* **1.1.2** (1/9/2013) - Fixing bug in mine sensing. Tiebreaker conditions fixed. Specs updated to describe autoattacks better
 * **1.1.3** (1/9/2013) - Fixed neutral mine detection
+* **1.1.4** (1/11/2013) - Broadcast read cost reduced. Correct ranges displayed. Shields improved. Fixed specs.
 
 Appendices
 ------------

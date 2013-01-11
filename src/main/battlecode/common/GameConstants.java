@@ -15,13 +15,16 @@ public interface GameConstants {
     public static final int MAP_MIN_HEIGHT = 20;
     
     /** The maximum possible map height. */
-    public static final int MAP_MAX_HEIGHT = 100;
+    public static final int MAP_MAX_HEIGHT = 70;
 
     /** The minumum possible map width. */
     public static final int MAP_MIN_WIDTH = 20;
     
     /** The maxiumum possible map width. */
-    public static final int MAP_MAX_WIDTH = 100;
+    public static final int MAP_MAX_WIDTH = 70;
+    
+    /** A valid map must have at least this many encampment locations. */
+    public static final int MAP_MINIMUM_ENCAMPMENTS = 5;
     
     /** The bytecode penalty that is imposed each time an exception is thrown */
     public static final int EXCEPTION_BYTECODE_PENALTY = 500;
@@ -35,19 +38,13 @@ public interface GameConstants {
     /** The number of longs that your team can remember between games. */
     public static final int TEAM_MEMORY_LENGTH = 32;
 
-    /**
-     * The total amount of damage to be applied to a team's HQ
-     * once the round limit is reached
-     */
+    /** The total amount of damage to be applied to a team's HQ once the round limit is reached */
     public static final double TIME_LIMIT_DAMAGE = 1.0;
  
-    /** The upkeep cost of a unit per round. */
+    /** The upkeep cost of a unit per round. Note that units pay even more than this base cost to execute bytecodes */
     public static final double UNIT_POWER_UPKEEP = 1.0;
     
-    /** 
-     * If a team cannot pay a unit's upkeep in power,
-     * it pays this cost in energon instead.
-     */
+    /** If a team cannot pay a unit's upkeep in power, it pays this cost in energon instead. */
     public static final double UNIT_ENERGON_UPKEEP = 5.0;
     
     /** The minimum possible round at which nodes may begin taking end-of-round damage */
@@ -56,12 +53,14 @@ public interface GameConstants {
     /** The maximum possible round at which nodes may begin taking end-of-round damage */
     public static final int ROUND_MAX_LIMIT = 2000;
     
-    /** Radius of artillery splash damage */
+    /** Radius of artillery splash damage in units squared */
     public static final int ARTILLERY_SPLASH_RADIUS_SQUARED = 2;
+    
+    /** Percantage of direct artillery damage that the splash damage does */
     public static final double ARTILLERY_SPLASH_RATIO = 0.5;
    
     /** Rate at which SHIELDS decay every round */
-    public static final double SHIELD_DECAY_RATE = 1.0;
+    public static final double SHIELD_DECAY_RATE = 0.5;
    
     /** Extra sight radius bonus to unit vision when VISION is researched */
     public static final int VISION_UPGRADE_BONUS = 19;
@@ -85,7 +84,7 @@ public interface GameConstants {
     public static final double BROADCAST_SEND_COST = 0.05;
     
     /** The power cost erquired to read a message from a single radio channel */
-    public static final double BROADCAST_READ_COST = 0.01;
+    public static final double BROADCAST_READ_COST = 0.003;
    
     /** The number of rounds required by a soldier to lay a mind */
     public static final int MINE_LAY_DELAY = 25;
@@ -105,7 +104,10 @@ public interface GameConstants {
     /** The amount of damage that a mine deals to a robot standing on it per round */
     public static final double MINE_DAMAGE = 10;
     
-    /** The rate at which stockpiled power decays */
+    /** The percentage of mine damage that shields can absorb */
+    public static final double MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD = 0.75;
+    
+    /** The rate at which stockpiled power decays without the FUSION upgrade */
     public static final double POWER_DECAY_RATE = 0.80;
     
     /** The rate at which stockpiled energy decays with the FUSION upgrade */
@@ -117,6 +119,4 @@ public interface GameConstants {
     /** Constant used to calculate how suppliers factor into the HQ spawn delay */
     public static final double HQ_SPAWN_DELAY_CONSTANT = 10;
     
-    /** A valid map must have at least this many encampment locations. */
-    public static final int MAP_MINIMUM_ENCAMPMENTS = 5;
 }

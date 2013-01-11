@@ -174,7 +174,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         removeDead();
         
         addSignal(new FluxChangeSignal(teamResources));
-				addSignal(new ResearchChangeSignal(research));
+		addSignal(new ResearchChangeSignal(research));
 
         if (timeLimitReached() && winner == null) {
             

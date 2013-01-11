@@ -288,16 +288,24 @@ class XMLMapHandler extends DefaultHandler {
             // Ensure that the <map> element is the document root.
             if (xmlStack.size() > 0)
                 fail("<map> must be the root element of the map document", "Check that <map> is the root node.\nCheck that <map> occurs nowhere else in the map file.\n");
+            
+            if ("false".equals(getOptional(attributes, "constraints")))
+            {
+//            	special map, don't check size constraints
+                mapHeight = Integer.parseInt(getRequired(attributes, "height"));
+                mapWidth = Integer.parseInt(getRequired(attributes, "width"));
+            } else
+            {
+            	// Check the bounds of the map height.
+                mapHeight = Integer.parseInt(getRequired(attributes, "height"));
+                if (mapHeight < GameConstants.MAP_MIN_HEIGHT || mapHeight > GameConstants.MAP_MAX_HEIGHT)
+                    fail("map height '" + mapHeight + "' exceeds limits", "Check that the map file defines a height that is consistent with GameConstants.MAP_MAX_HEIGHT and GameConstants.MAP_MIN_HEIGHT.\n");
 
-            // Check the bounds of the map height.
-            mapHeight = Integer.parseInt(getRequired(attributes, "height"));
-            if (mapHeight < GameConstants.MAP_MIN_HEIGHT || mapHeight > GameConstants.MAP_MAX_HEIGHT)
-                fail("map height '" + mapHeight + "' exceeds limits", "Check that the map file defines a height that is consistent with GameConstants.MAP_MAX_HEIGHT and GameConstants.MAP_MIN_HEIGHT.\n");
-
-            // Check the bounds of the map width.
-            mapWidth = Integer.parseInt(getRequired(attributes, "width"));
-            if (mapWidth < GameConstants.MAP_MIN_WIDTH || mapWidth > GameConstants.MAP_MAX_WIDTH)
-                fail("map width '" + mapWidth + "' exceeds limits", "Check that the map file defines a width that is consistent with GameConstants.MAP_MAX_WIDTH and GameConstants.MAP_MIN_WIDTH.\n");
+                // Check the bounds of the map width.
+                mapWidth = Integer.parseInt(getRequired(attributes, "width"));
+                if (mapWidth < GameConstants.MAP_MIN_WIDTH || mapWidth > GameConstants.MAP_MAX_WIDTH)
+                    fail("map width '" + mapWidth + "' exceeds limits", "Check that the map file defines a width that is consistent with GameConstants.MAP_MAX_WIDTH and GameConstants.MAP_MIN_WIDTH.\n");
+            }
 
             /* String result;
             result = getOptional(attributes,"theme");
