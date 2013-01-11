@@ -544,7 +544,8 @@ Changelog
 * **1.1.1** (1/8/2013) - Fixing typos
 * **1.1.2** (1/9/2013) - Fixing bug in mine sensing. Tiebreaker conditions fixed. Specs updated to describe autoattacks better
 * **1.1.3** (1/9/2013) - Fixed neutral mine detection
-* **1.1.4** (1/11/2013) - Broadcast read cost reduced. Correct ranges displayed. Shields improved. Fixed specs.
+* **1.1.4** (1/10/2013) - Added runmatch to automate replays.
+* **1.1.5** (1/11/2013) - Broadcast read cost reduced. Correct ranges displayed. Shields improved. Fixed specs.
 
 Appendices
 ------------
