@@ -37,6 +37,7 @@ import battlecode.world.signal.CaptureSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MinelayerSignal;
+import battlecode.world.signal.MinelayerSignal.MineAction;
 import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.SpawnSignal;
@@ -223,7 +224,21 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	if (robot.type != RobotType.SOLDIER)
             throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
     	assertNotMoving();
-    	robot.activateMinelayer(new MinelayerSignal(robot, true), GameConstants.MINE_LAY_DELAY);
+    	robot.activateMinelayer(new MinelayerSignal(robot, MineAction.LAYING, getLocation()), GameConstants.MINE_LAY_DELAY);
+    }
+    
+    public void stopMine() throws GameActionException {
+    	if (robot.type != RobotType.SOLDIER)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
+    	if (robot.getMiningRounds() == 0)
+    		throw new GameActionException(CANT_DO_THAT_BRO, "You are not mining currently");
+    	robot.activateMinelayer(new MinelayerSignal(robot,  MineAction.LAYINGSTOP, getLocation()), GameConstants.MINE_LAY_DELAY);
+    }
+    
+    public int senseMineRoundsLeft() throws GameActionException {
+    	if (robot.type != RobotType.SOLDIER)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
+    	return robot.getMiningRounds();
     }
     
     public void defuseMine(MapLocation loc) throws GameActionException {
@@ -239,9 +254,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     		throw new GameActionException(OUT_OF_RANGE, "You can't defuse that far");
     	
     	if (hasUpgrade(Upgrade.DEFUSION))
-    		robot.activateDefuser(new MinelayerSignal(robot, false), GameConstants.MINE_DEFUSE_DEFUSION_DELAY, loc);
+    		robot.activateDefuser(new MinelayerSignal(robot, MineAction.DEFUSING, loc), GameConstants.MINE_DEFUSE_DEFUSION_DELAY, loc);
     	else
-    		robot.activateDefuser(new MinelayerSignal(robot, false), GameConstants.MINE_DEFUSE_DELAY, loc);
+    		robot.activateDefuser(new MinelayerSignal(robot, MineAction.DEFUSING, loc), GameConstants.MINE_DEFUSE_DELAY, loc);
     }
     
 //    public boolean scanMines() throws GameActionException {

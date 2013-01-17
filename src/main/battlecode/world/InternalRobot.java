@@ -438,6 +438,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	miningRounds = delay;
     }
     
+    public void activateMinestop(Signal s, int delay) {
+    	myGameWorld.visitSignal(s);
+    	turnsUntilAttackIdle = delay;
+    	turnsUntilMovementIdle = delay;
+    	miningRounds = 0;
+    }
+    
     public void activateDefuser(Signal s, int delay, MapLocation target) {
     	myGameWorld.visitSignal(s);
     	turnsUntilAttackIdle = delay;
@@ -452,6 +459,14 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	turnsUntilMovementIdle = delay;
     	capturingRounds = delay;
     	capturingType = s.getType();
+    }
+    
+    public int getMiningRounds() {
+    	return miningRounds;
+    }
+    
+    public int getDefusingRounds() { 
+    	return defusingRounds;
     }
     
     public int roundsUntilAttackIdle() {

@@ -86,8 +86,11 @@ public interface GameConstants {
     /** The power cost erquired to read a message from a single radio channel */
     public static final double BROADCAST_READ_COST = 0.003;
    
-    /** The number of rounds required by a soldier to lay a mind */
+    /** The number of rounds required by a soldier to lay a mine */
     public static final int MINE_LAY_DELAY = 25;
+    
+    /** The number of rounds required by a soldier to stop laying a mine */
+    public static final int MINE_LAY_STOP_DELAY = 3;
     
     /** The number of rounds required by a soldier to defuse a mine */
     public static final int MINE_DEFUSE_DELAY = 12;
