@@ -439,8 +439,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             else
             	if (o instanceof InternalRobot) {
             		InternalRobot ir = (InternalRobot) o;
-            		if (ir.type == RobotType.SOLDIER && (ir.getCapturingType() != null))
-            			teamCapturingNumber[ir.getTeam().ordinal()]--;
             		if (ir.type == RobotType.SOLDIER && ir.getCapturingRounds() == -1)
             			; // don't do anything
             		else
@@ -708,6 +706,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         if (obj instanceof InternalRobot) {
             InternalRobot r = (InternalRobot) obj;
             RobotMonitor.killRobot(ID);
+						if (ir.type == RobotType.SOLDIER && (ir.getCapturingType() != null))
+            			teamCapturingNumber[ir.getTeam().ordinal()]--;
             if (r.hasBeenAttacked()) {
                 gameStats.setUnitKilled(r.getTeam(), currentRound);
             }
