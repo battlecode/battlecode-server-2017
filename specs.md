@@ -546,6 +546,7 @@ Changelog
 * **1.1.3** (1/9/2013) - Fixed neutral mine detection
 * **1.1.4** (1/10/2013) - Added runmatch to automate replays.
 * **1.1.5** (1/11/2013) - Broadcast read cost reduced. Correct ranges displayed. Shields improved. Fixed specs. Increased number of channels.
+* **1.2.0** (1/17/2013) - Post-sprint release. Updates to the sprites. Added new maps. Additional Client options.
 
 Appendices
 ------------
