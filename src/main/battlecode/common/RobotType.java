@@ -7,8 +7,8 @@ public enum RobotType {
   	HQ          (ON_GROUND, 500,   14, 360,        0, 0 ,  0,      0,      0,      true,   false),
     SOLDIER     (ON_GROUND, 40,    14, 360,        0, 2 ,  360,    1,      6,      true,   false),
     MEDBAY      (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      2,      true,   true),
-    SHIELDS     (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      5,      true,   true),
-    ARTILLERY   (ON_GROUND, 100,   14, 360,        0, 63,  360,    20,     40,     true,   true),
+    SHIELDS     (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      10,      true,   true),
+    ARTILLERY   (ON_GROUND, 100,   14, 360,        0, 63,  360,    20,     60,     true,   true),
     GENERATOR   (ON_GROUND, 100,   14, 360,        0, 0 ,  0,      0,      0,      true,   true),
     SUPPLIER    (ON_GROUND, 100,   14, 360,        0, 0 ,  0,      0,      0,      true,   true),
     ;

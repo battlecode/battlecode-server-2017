@@ -39,6 +39,7 @@ import battlecode.world.signal.ControlBitsSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.EnergonChangeSignal;
 import battlecode.world.signal.FluxChangeSignal;
+import battlecode.world.signal.HatSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
@@ -122,6 +123,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void processBeginningOfRound() {
         currentRound++;
+        
+        nextID += randGen.nextInt(10);
 
         wasBreakpointHit = false;
 
@@ -359,6 +362,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	research.get(t).put(u, i);
     	if (i == u.numRounds)
     		addUpgrade(t, u);
+    	
+    	nextID += (randGen.nextDouble()<0.3) ? 1 : 0;
     }
     
     public int getUpgradeProgress(Team t, Upgrade u) {
@@ -706,8 +711,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         if (obj instanceof InternalRobot) {
             InternalRobot r = (InternalRobot) obj;
             RobotMonitor.killRobot(ID);
-						if (r.type == RobotType.SOLDIER && (r.getCapturingType() != null))
-            			teamCapturingNumber[r.getTeam().ordinal()]--;
+    		if (r.type == RobotType.SOLDIER && (r.getCapturingType() != null))
+    			teamCapturingNumber[r.getTeam().ordinal()]--;
             if (r.hasBeenAttacked()) {
                 gameStats.setUnitKilled(r.getTeam(), currentRound);
             }
@@ -746,6 +751,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void visitMatchObservationSignal(MatchObservationSignal s) {
         addSignal(s);
+    }
+    
+    public void visitHatSignal(HatSignal s) {
+    	addSignal(s);
     }
 
     public void visitControlBitsSignal(ControlBitsSignal s) {

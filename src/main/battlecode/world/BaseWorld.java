@@ -48,8 +48,11 @@ public class BaseWorld<WorldObject extends BaseObject> {
 
     public int nextID() {
         if (randomIDs.isEmpty())
-            return nextID++;
-        else
+        {
+        	int ret = nextID;
+        	nextID += randGen.nextInt(3)+1;
+            return ret;
+        } else
             return randomIDs.remove(randomIDs.size() - 1);
     }
 

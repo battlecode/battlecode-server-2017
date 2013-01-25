@@ -491,7 +491,7 @@ There are five tournaments: the Sprint, Seeding, Qualifying, Final, and Newbie t
 
 The Sprint Tournament is a single elimination tournament. Contestants are seeded based on scrimmage ranking, and play continues until there is only one undefeated team.
 
-The Seeding Tournament is a single elimination tournament. Contestants are seeded based on scrimmage ranking, and play continues until there is only one undefeated team. The results of this tournament are used to determine seeds for the Qualifying and Newbie tournaments. Teams are ranked by the following criteria, in order:
+The Seeding Tournament is a double elimination tournament. Contestants are seeded based on scrimmage ranking, and play continues until there is only one undefeated team. The results of this tournament are used to determine seeds for the Qualifying and Newbie tournaments. Teams are ranked by the following criteria, in order:
 
 - Furthest round achieved
 - Bayesian Elo rating for the tournament (computed on a per-game basis, not a per-match basis)
@@ -547,6 +547,14 @@ Changelog
 * **1.1.4** (1/10/2013) - Added runmatch to automate replays.
 * **1.1.5** (1/11/2013) - Broadcast read cost reduced. Correct ranges displayed. Shields improved. Fixed specs. Increased number of channels.
 * **1.2.0** (1/17/2013) - Post-sprint release. Updates to the sprites. Added new maps. Additional Client options.
+* **1.3.0** (1/25/2013) - Final Release Candidate. Added new maps. Additional client fixes. Balance changes:
+    * Artillery does 60 damage
+    * Artillery ratio 0.25
+    * Shield increased to 10/turn
+    * Shield decay increased to 1/turn
+    * Shields absorb 90% of mine damage
+    * Broadcast send power cost reduced to 0.03
+
 
 Appendices
 ------------

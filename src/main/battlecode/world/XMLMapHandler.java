@@ -119,15 +119,19 @@ class XMLMapHandler extends DefaultHandler {
                 RobotType chassis;
                 chassis = RobotType.valueOf(stype);
                 Team team = Team.valueOf(getRequired(att, "team"));
-                return new RobotData(chassis, team);
+                String smine = getOptional(att, "mine");
+                Team mine = smine==null ? null : Team.valueOf(smine);
+                return new RobotData(chassis, team, mine);
             }
         };
         public final RobotType type;
         public final Team team;
+        public final Team mine;
 
-        public RobotData(RobotType type, Team team) {
+        public RobotData(RobotType type, Team team, Team mine) {
             this.type = type;
             this.team = team;
+            this.mine = mine;
         }
 
         public TerrainTile tile() {
@@ -136,17 +140,22 @@ class XMLMapHandler extends DefaultHandler {
 
         public void createGameObject(GameWorld world, MapLocation loc) {
             InternalRobot robot = GameWorldFactory.createPlayer(world, type, loc, team, null, false);
+            if (mine!=null)
+            {
+            	world.addMine(mine, loc);
+            	world.addSignal(new MineSignal(loc, mine, true));
+            }
         }
 
         public boolean equalsMirror(SymbolData data) {
             if (!(data instanceof RobotData))
                 return false;
             RobotData d = (RobotData) data;
-            return type == d.type && team == d.team.opponent();
+            return type == d.type && team == d.team.opponent() && mine == d.mine;
         }
 
         public String toString() {
-            return String.format("%s:%s", type, team);
+            return String.format("%s:%s:%s", type, team, mine);
         }
     }
 
@@ -156,14 +165,18 @@ class XMLMapHandler extends DefaultHandler {
 
             public NodeData create(Attributes att) {
                 Team team = Team.valueOf(getRequired(att, "team"));
-                return new NodeData(team);
+                String smine = getOptional(att, "mine");
+                Team mine = smine==null ? null : Team.valueOf(smine);
+                return new NodeData(team, mine);
             }
         };
 
         public final Team team;
+        public final Team mine;
 
-        public NodeData(Team t) {
+        public NodeData(Team t, Team mine) {
             team = t;
+            this.mine = mine;
         }
 
         public TerrainTile tile() {
@@ -179,10 +192,15 @@ class XMLMapHandler extends DefaultHandler {
             	InternalRobot r = GameWorldFactory.createPlayer(world, RobotType.HQ, loc, team, null, false);
                 world.setHQ(r, team);
             }
+            if (mine!=null)
+            {
+            	world.addMine(mine, loc);
+            	world.addSignal(new MineSignal(loc, mine, true));
+            }
         }
 
         public boolean equalsMirror(SymbolData data) {
-            return data instanceof NodeData;
+            return data instanceof NodeData && mine == ((NodeData)data).mine;
         }
     }
 

@@ -34,6 +34,7 @@ import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.CaptureSignal;
+import battlecode.world.signal.HatSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MinelayerSignal;
@@ -104,7 +105,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     
     public void assertHaveResource(double amount) throws GameActionException {
     	if (amount > gameWorld.resources(getTeam()))
-    		throw new GameActionException(NOT_ENOUGH_RESOURCE, "You do not have enough Energy to do that.");
+    		throw new GameActionException(NOT_ENOUGH_RESOURCE, "You do not have enough POWER to do that.");
     }
     
     public void assertHaveUpgrade(Upgrade upgrade) throws GameActionException {
@@ -696,8 +697,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //******** MISC. METHODS **********
     //************************************
     
-    public void wearHat() {
-    	// noop.... for now.
+    public void wearHat() throws GameActionException {
+    	if (getType() != RobotType.SOLDIER)
+    		throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERS can wear hats.");
+    	assertHaveResource(GameConstants.HAT_POWER_COST);
+    	assertNotMoving();
+    	gameWorld.adjustResources(getTeam(), -GameConstants.HAT_POWER_COST);
+    	robot.activateMovement(new HatSignal(robot, gameWorld.randGen.nextInt()), 1);
     }
    
     public boolean hasUpgrade(Upgrade upgrade) {

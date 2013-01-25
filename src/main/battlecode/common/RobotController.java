@@ -320,14 +320,15 @@ public interface RobotController {
      */
     public void layMine() throws GameActionException;
     
-    /**
+
+		/**
      * SOLDIER only
      * Checks how many rounds are left for the current mine being laid, if any.
      * 
      * @throws GameActionException
      */
     public int senseMineRoundsLeft() throws GameActionException;
-    
+
     /**
      * SOLDIER only
      * Defuses a mine on the target square. A robot cannot move until the defusion is complete.
@@ -390,9 +391,10 @@ public interface RobotController {
     // ***********************************
     
     /**
-     * Puts a hat on the robot. To be monetized in a future DLC
+     * Puts a hat on the robot. You require the BATTLECODE-HATS DLC, which charges you 
+     * GameConstants.HAT_POWER_COST per hat. You also cannot be moving while putting on your hat.
      */
-    public void wearHat();
+    public void wearHat() throws GameActionException;
 
     /**
      * Sets one of this robot's 'indicator strings' for debugging purposes.

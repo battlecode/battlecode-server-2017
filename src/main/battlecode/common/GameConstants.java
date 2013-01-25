@@ -57,10 +57,10 @@ public interface GameConstants {
     public static final int ARTILLERY_SPLASH_RADIUS_SQUARED = 2;
     
     /** Percantage of direct artillery damage that the splash damage does */
-    public static final double ARTILLERY_SPLASH_RATIO = 0.5;
+    public static final double ARTILLERY_SPLASH_RATIO = 0.3;
    
-    /** Rate at which SHIELDS decay every round */
-    public static final double SHIELD_DECAY_RATE = 0.5;
+    /** Rate at which SHIELDS decay. This number will be subtracted from each unit's shield pool after its turn. */
+    public static final double SHIELD_DECAY_RATE = 1.0;
    
     /** Extra sight radius bonus to unit vision when VISION is researched */
     public static final int VISION_UPGRADE_BONUS = 19;
@@ -81,16 +81,13 @@ public interface GameConstants {
     public static final int BROADCAST_MAX_CHANNELS = 65535;
     
     /** The power cost required to broadcast a message to a single radio channel */
-    public static final double BROADCAST_SEND_COST = 0.05;
+    public static final double BROADCAST_SEND_COST = 0.03;
     
-    /** The power cost erquired to read a message from a single radio channel */
+    /** The power cost required to read a message from a single radio channel */
     public static final double BROADCAST_READ_COST = 0.003;
    
     /** The number of rounds required by a soldier to lay a mine */
     public static final int MINE_LAY_DELAY = 25;
-    
-    /** The number of rounds required by a soldier to stop laying a mine */
-    public static final int MINE_LAY_STOP_DELAY = 3;
     
     /** The number of rounds required by a soldier to defuse a mine */
     public static final int MINE_DEFUSE_DELAY = 12;
@@ -108,7 +105,7 @@ public interface GameConstants {
     public static final double MINE_DAMAGE = 10;
     
     /** The percentage of mine damage that shields can absorb */
-    public static final double MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD = 0.75;
+    public static final double MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD = 0.9;
     
     /** The rate at which stockpiled power decays without the FUSION upgrade */
     public static final double POWER_DECAY_RATE = 0.80;
@@ -121,5 +118,8 @@ public interface GameConstants {
 
     /** Constant used to calculate how suppliers factor into the HQ spawn delay */
     public static final double HQ_SPAWN_DELAY_CONSTANT = 10;
+    
+    /** Amount of power required to wear a hat */
+    public static final double HAT_POWER_COST = 40.0;
     
 }
