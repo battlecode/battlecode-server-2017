@@ -548,12 +548,17 @@ Changelog
 * **1.1.5** (1/11/2013) - Broadcast read cost reduced. Correct ranges displayed. Shields improved. Fixed specs. Increased number of channels.
 * **1.2.0** (1/17/2013) - Post-sprint release. Updates to the sprites. Added new maps. Additional Client options.
 * **1.3.0** (1/25/2013) - Final Release Candidate. Added new maps. Additional client fixes. Balance changes:
-    * Artillery does 60 damage
-    * Artillery ratio 0.25
-    * Shield increased to 10/turn
+    * Artillery base damage increased to 60 (from 40)
+    * Artillery splash ratio decreased to 0.25 (splash damage dropped from 20 to 15)
+    * Shield charge rate increased to 10/turn
     * Shield decay increased to 1/turn
-    * Shields absorb 90% of mine damage
+    * Shields mine damage absorption increased to 90% (from 75%)
     * Broadcast send power cost reduced to 0.03
+    * Robot IDs more randomized
+    * Hats DLC expansion pack added -- now accepting orders
+* **1.3.1** (1/25/2013) - Bug Hotfix
+    * Hotfix for HUD crashes on case-sensitive filesystems
+    * Nuke research time increased to 404 rounds (from 400)
 
 
 Appendices

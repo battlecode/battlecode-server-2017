@@ -5,7 +5,7 @@ public enum Upgrade {
 	VISION    (25),
 	DEFUSION  (25),
 	PICKAXE   (25),
-	NUKE      (400),
+	NUKE      (404),
 	;
 	
 	public final int numRounds;
