@@ -177,6 +177,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (robot.type != RobotType.HQ)
             throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can spawn.");
         assertNotMoving();
+        // check robot limit
+        if (gameWorld.countRobots(getTeam()) >= GameConstants.MAX_ROBOTS) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Maximum robot limit reached.");
+        }
+
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(type.level, loc))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");

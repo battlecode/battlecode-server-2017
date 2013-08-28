@@ -253,6 +253,16 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             setWinner(Team.B, d);
         return n != 0;
     }
+
+    public int countRobots(Team t) {
+        int total = 0;
+        for (InternalObject obj : allObjects()) {
+            if (obj.getTeam() == t) {
+                total++;
+            }
+        }
+        return total;
+    }
     
     public int countEncampments(Team t) {
     	int total = 0;
