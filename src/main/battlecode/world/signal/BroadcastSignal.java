@@ -2,6 +2,7 @@ package battlecode.world.signal;
 
 import java.util.HashMap;
 
+import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
 
@@ -15,9 +16,13 @@ public class BroadcastSignal extends Signal {
     private static final long serialVersionUID = 8603786984259160822L;
 
     /**
-     * TheID of the robot that broadcasted the message.
+     * The ID of the robot that broadcasted the message.
      */
     public final int robotID;
+    /**
+     * The team of the robot that broadcasted the message.
+     */
+    public final Team robotTeam;
     public transient HashMap<Integer, Integer> broadcastMap;
 
     /**
@@ -27,15 +32,25 @@ public class BroadcastSignal extends Signal {
      */
     public BroadcastSignal(InternalRobot robot, HashMap<Integer, Integer> broadcastMap) {
         this.robotID = robot.getID();
+        this.robotTeam = robot.getTeam();
         this.broadcastMap = broadcastMap;
     }
 
     /**
-     * Returns the ID of the robot that just broadcast.
+     * Returns the ID of the robot that just broadcasted.
      *
      * @return the messaging robot's ID
      */
     public int getRobotID() {
         return robotID;
+    }
+
+    /**
+     * Returns the team of the robot that just broadcasted.
+     *
+     * @return the messaging robot's Team
+     */
+    public Team getRobotTeam() {
+        return robotTeam;
     }
 }

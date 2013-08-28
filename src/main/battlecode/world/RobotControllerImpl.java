@@ -688,7 +688,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
     	double cost = GameConstants.BROADCAST_READ_COST;
     	assertHaveResource(cost);
-    	int m = gameWorld.getMessage(channel);
+    	int m = gameWorld.getMessage(robot.getTeam(), channel);
     	gameWorld.adjustResources(getTeam(), -cost);
     	return m;
     }
