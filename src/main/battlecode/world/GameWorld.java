@@ -89,7 +89,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private Map<Team, Map<Upgrade, Integer>> research = new EnumMap<Team, Map<Upgrade, Integer>>(Team.class);
     
     private Map<Team, Set<Upgrade>> upgrades = new EnumMap<Team, Set<Upgrade>>(Team.class);
-    private Map<Team, Map<Integer, Integer>> radio = new EnumMap<Team, Map<Integer, Integer>>(Team.class);
+    private Map<Integer, Integer> radio = new HashMap<Integer, Integer>();
 
     // robots to remove from the game at end of turn
     private List<InternalRobot> deadRobots = new ArrayList<InternalRobot>();
@@ -107,8 +107,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         knownMineLocations.put(Team.B, new HashSet<MapLocation>());
         research.put(Team.A, new EnumMap<Upgrade, Integer>(Upgrade.class));
         research.put(Team.B, new EnumMap<Upgrade, Integer>(Upgrade.class));
-        radio.put(Team.A, new HashMap<Integer, Integer>());
-        radio.put(Team.B, new HashMap<Integer, Integer>());
     }
     
     public GameMap.MapMemory getMapMemory(Team t) {
@@ -252,16 +250,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         else if (n < 0)
             setWinner(Team.B, d);
         return n != 0;
-    }
-
-    public int countRobots(Team t) {
-        int total = 0;
-        for (InternalObject obj : allObjects()) {
-            if (obj.getTeam() == t) {
-                total++;
-            }
-        }
-        return total;
     }
     
     public int countEncampments(Team t) {
@@ -558,8 +546,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return signals.toArray(new Signal[signals.size()]);
     }
     
-    public int getMessage(Team t, int channel) {
-    	Integer val = radio.get(t).get(channel);
+    public int getMessage(int channel) {
+    	Integer val = radio.get(channel);
     	return val == null ? 0 : val;
     }
     
@@ -701,7 +689,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public void visitBroadcastSignal(BroadcastSignal s) {        
-    	radio.get(s.getRobotTeam()).putAll(s.broadcastMap);
+    	radio.putAll(s.broadcastMap);
     	s.broadcastMap = null;
         addSignal(s);
     }
