@@ -22,9 +22,12 @@ public interface GameConstants {
     
     /** The maxiumum possible map width. */
     public static final int MAP_MAX_WIDTH = 70;
-    
+
     /** A valid map must have at least this many encampment locations. */
     public static final int MAP_MINIMUM_ENCAMPMENTS = 5;
+
+    /** The minimum distance between spawn points on the map. */
+    public static final int MIN_DISTANCE_BETWEEN_SPAWN_POINTS = 10;
     
     /** The bytecode penalty that is imposed each time an exception is thrown */
     public static final int EXCEPTION_BYTECODE_PENALTY = 500;
@@ -37,6 +40,9 @@ public interface GameConstants {
     
     /** The number of longs that your team can remember between games. */
     public static final int TEAM_MEMORY_LENGTH = 32;
+
+    /** The maximum number of robots you are allowed. */
+    public static final int MAX_ROBOTS = 100; // TODO(axc): decide this number
 
     /** The total amount of damage to be applied to a team's HQ once the round limit is reached */
     public static final double TIME_LIMIT_DAMAGE = 1.0;

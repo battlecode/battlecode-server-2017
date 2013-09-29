@@ -177,6 +177,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (robot.type != RobotType.HQ)
             throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can spawn.");
         assertNotMoving();
+        // check robot limit
+        if (gameWorld.countRobots(getTeam()) >= GameConstants.MAX_ROBOTS) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Maximum robot limit reached.");
+        }
+
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(type.level, loc))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
@@ -688,7 +693,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
     	double cost = GameConstants.BROADCAST_READ_COST;
     	assertHaveResource(cost);
-    	int m = gameWorld.getMessage(channel);
+    	int m = gameWorld.getMessage(robot.getTeam(), channel);
     	gameWorld.adjustResources(getTeam(), -cost);
     	return m;
     }
