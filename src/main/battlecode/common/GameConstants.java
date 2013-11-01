@@ -12,13 +12,13 @@ public interface GameConstants {
 	
 	
     /** The minimum possible map height. */
-    public static final int MAP_MIN_HEIGHT = 20;
+    public static final int MAP_MIN_HEIGHT = 10; // TODO(axc): update this later
     
     /** The maximum possible map height. */
     public static final int MAP_MAX_HEIGHT = 70;
 
     /** The minumum possible map width. */
-    public static final int MAP_MIN_WIDTH = 20;
+    public static final int MAP_MIN_WIDTH = 10; // TODO(axc): update this later
     
     /** The maxiumum possible map width. */
     public static final int MAP_MAX_WIDTH = 70;

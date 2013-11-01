@@ -5,7 +5,7 @@ package battlecode.common;
  */
 public enum TerrainTile {
 
-    LAND, VOID, OFF_MAP;
+    NORMAL, ROAD, VOID, OFF_MAP;
 
     /**
      * Returns <code>true</code> if robots at the given
@@ -15,8 +15,10 @@ public enum TerrainTile {
         switch (this) {
             case VOID:
                 return false;
-            case LAND:
+            case ROAD:
             	// TODO might need recode if we enable underground robots
+                return true;
+            case NORMAL:
                 return true;
             default:
                 return false;

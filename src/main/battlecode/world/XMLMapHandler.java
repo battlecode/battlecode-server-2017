@@ -35,6 +35,10 @@ class XMLMapHandler extends DefaultHandler {
 
     private interface SymbolData {
 
+        public void setValue(double value);
+
+        public double floatData();
+
         public TerrainTile tile();
         /* Returns {@code true} if createGameObject() does anything. */
 
@@ -58,13 +62,23 @@ class XMLMapHandler extends DefaultHandler {
             }
         };
         private TerrainTile tile;
+        private double value;
 
         public TerrainData(TerrainTile tile) {
             this.tile = tile;
+            this.value = -1;
+        }
+
+        public void setValue(double value) {
+            this.value = value;
         }
 
         public TerrainTile tile() {
             return tile;
+        }
+
+        public double floatData() {
+            return this.value;
         }
 
         public void createGameObject(GameWorld world, MapLocation loc) {
@@ -77,7 +91,8 @@ class XMLMapHandler extends DefaultHandler {
             return d.tile == tile;
         }
     }
-    
+
+    // TODO(axc): remove Mine    
     private static class MineData implements SymbolData {
 
         public static final SymbolDataFactory factory = new SymbolDataFactory() {
@@ -88,13 +103,23 @@ class XMLMapHandler extends DefaultHandler {
             }
         };
         private Team team;
+        private double value;
 
         public MineData(Team t) {
             this.team = t;
+            this.value = -1;
+        }
+
+        public void setValue(double value) {
+            this.value = value;
         }
 
         public TerrainTile tile() {
-            return TerrainTile.LAND;
+            return TerrainTile.NORMAL; // TODO(axc): temp
+        }
+
+        public double floatData() {
+            return this.value;
         }
 
         public void createGameObject(GameWorld world, MapLocation loc) {
@@ -110,6 +135,7 @@ class XMLMapHandler extends DefaultHandler {
         }
     }
 
+    // TODO(axc): we should allow different tiles other than normal
     private static class RobotData implements SymbolData {
 
         public static final SymbolDataFactory factory = new SymbolDataFactory() {
@@ -127,15 +153,25 @@ class XMLMapHandler extends DefaultHandler {
         public final RobotType type;
         public final Team team;
         public final Team mine;
+        public double value;
 
         public RobotData(RobotType type, Team team, Team mine) {
             this.type = type;
             this.team = team;
             this.mine = mine;
+            this.value = -1;
+        }
+
+        public void setValue(double value) {
+            this.value = value;
+        }
+
+        public double floatData() {
+            return this.value;
         }
 
         public TerrainTile tile() {
-            return TerrainTile.LAND;
+            return TerrainTile.NORMAL;
         }
 
         public void createGameObject(GameWorld world, MapLocation loc) {
@@ -173,14 +209,24 @@ class XMLMapHandler extends DefaultHandler {
 
         public final Team team;
         public final Team mine;
+        public double value;
 
         public NodeData(Team t, Team mine) {
             team = t;
             this.mine = mine;
+            this.value = -1;
+        }
+
+        public void setValue(double value) {
+            this.value = value;
+        }
+
+        public double floatData() {
+            return this.value;
         }
 
         public TerrainTile tile() {
-            return TerrainTile.LAND;
+            return TerrainTile.NORMAL;
         }
 
         public void createGameObject(GameWorld world, MapLocation loc) {
@@ -231,7 +277,6 @@ class XMLMapHandler extends DefaultHandler {
         }
         factories.put("ENCAMPMENT", NodeData.factory);
         factories.put("HQ", NodeData.factory);
-        factories.put("MINE", MineData.factory);
     }
 
     /**
@@ -317,7 +362,7 @@ class XMLMapHandler extends DefaultHandler {
             	// Check the bounds of the map height.
                 mapHeight = Integer.parseInt(getRequired(attributes, "height"));
                 if (mapHeight < GameConstants.MAP_MIN_HEIGHT || mapHeight > GameConstants.MAP_MAX_HEIGHT)
-                    fail("map height '" + mapHeight + "' exceeds limits", "Check that the map file defines a height that is consistent with GameConstants.MAP_MAX_HEIGHT and GameConstants.MAP_MIN_HEIGHT.\n");
+                    fail("map height '" + mapHeight + "' exceeds limits", "Check that the map file defines a height that is consistent with GameConstants.MAP_MAX_HEIGHT (" + GameConstants.MAP_MAX_HEIGHT + ") and GameConstants.MAP_MIN_HEIGHT (" + GameConstants.MAP_MIN_HEIGHT + ").\n");
 
                 // Check the bounds of the map width.
                 mapWidth = Integer.parseInt(getRequired(attributes, "width"));
@@ -435,12 +480,27 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         // Parse each character into TerrainTypes.
+        String dataSoFar = "";
         for (int i = start; i < length; i++) {
             char c = ch[i];
             // ignore tabs
             if (c == '\t')
                 continue;
-            // if its a newline, update currentRow and currentCol
+            // if it's whitespace, check dataSoFar
+            if ((c == '\n' || c == ' ') && dataSoFar.length() > 0) {
+                if (!symbolMap.containsKey(dataSoFar.charAt(0)))
+                    fail("unrecognized symbol in map: '" + c + "'", "Check that '" + c + "' is defined as one of the symbols in the map file. DEBUG: '" + dataSoFar + "'\n");
+
+                map[currentCol][currentRow] = symbolMap.get(dataSoFar.charAt(0));
+                map[currentCol][currentRow].setValue(Double.parseDouble(dataSoFar.substring(1)));
+
+                currentCol++;
+                dataSoFar = "";
+            } else {
+                dataSoFar += c;
+            }
+
+            // if it's a newline, update currentRow and currentCol
             if (c == '\n') {
                 if (currentRow != -1) {
                     if (currentCol < mapWidth)
@@ -448,17 +508,13 @@ class XMLMapHandler extends DefaultHandler {
                 }
                 currentRow++;
                 currentCol = 0;
+                dataSoFar = "";
                 continue;
             }
             if (currentRow < 0)
                 fail("spurious character in <data> node", "Check that the first row of map characters starts on the line after <data><![CDATA[ (see example maps).\n");
             if (currentCol >= mapWidth)
                 fail("row " + currentRow + " in <data> has too many characters", "Check that the number of characters in each row is consistent with the 'width' attribute of <map>.\n");
-            if (!symbolMap.containsKey(c))
-                fail("unrecognized symbol in map: '" + c + "'", "Check that '" + c + "' is defined as one of the symbols in the map file.\n");
-
-            map[currentCol][currentRow] = symbolMap.get(c);
-            currentCol++;
         }
 
         typesHaveBeenSet = true;
@@ -493,7 +549,16 @@ class XMLMapHandler extends DefaultHandler {
                 mapTiles[i][j] = map[i][j].tile();
         }
 
-        GameMap gm = new GameMap(mapProperties, mapTiles);
+        double[][] floatData = new double[map.length][];
+        for (int i = 0; i < map.length; i++) {
+            floatData[i] = new double[map[i].length];
+            for (int j = 0; j < map[i].length; j++) {
+                floatData[i][j] = map[i][j].floatData();
+            }
+        }
+        NeutralsMap nm = new NeutralsMap(floatData);
+
+        GameMap gm = new GameMap(mapProperties, mapTiles, nm);
         //gm.setTheme(theme);
         GameWorld gw = new GameWorld(gm, teamA, teamB, archonMemory);
 
@@ -558,7 +623,7 @@ class XMLMapHandler extends DefaultHandler {
         public void add(int x, int y) {
             if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight)
                 return;
-            if (map[x][y].tile() != TerrainTile.LAND)
+            if (map[x][y].tile() != TerrainTile.NORMAL) // TODO(axc): line is wrong
                 return;
             MapLocation loc = new MapLocation(x, y);
             if (marked.contains(loc))
@@ -633,7 +698,7 @@ class XMLMapHandler extends DefaultHandler {
                         }
                     }
                 }
-                if (d.tile() == TerrainTile.LAND) {
+                if (d.tile() == TerrainTile.NORMAL) { // TODO(axc): line is wrong
                     grounds++;
                     gx = x;
                     gy = y;
@@ -679,9 +744,9 @@ class XMLMapHandler extends DefaultHandler {
                 TerrainTile ur = map[x][y - 1].tile();
                 TerrainTile dl = map[x - 1][y].tile();
                 TerrainTile dr = map[x][y].tile();
-                if (ul == TerrainTile.VOID && dr == TerrainTile.VOID && ur == TerrainTile.LAND && dl == TerrainTile.LAND)
+                if (ul == TerrainTile.VOID && dr == TerrainTile.VOID && ur == TerrainTile.NORMAL && dl == TerrainTile.NORMAL) // TODO(axc): line is wrong
                     System.err.format("Warning: diagonal passageway at %d, %d\n", x - 1, y);
-                if (ul == TerrainTile.LAND && dr == TerrainTile.LAND && ur == TerrainTile.VOID && dl == TerrainTile.VOID)
+                if (ul == TerrainTile.NORMAL && dr == TerrainTile.NORMAL && ur == TerrainTile.VOID && dl == TerrainTile.VOID) // TODO(axc): this line is wrong temporarily
                     System.err.format("Warning: diagonal passageway at %d, %d\n", x, y);
             }
         int rounds = mapProperties.get(MapProperties.MAX_ROUNDS);

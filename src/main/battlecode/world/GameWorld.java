@@ -847,7 +847,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public void visitMineSignal(MineSignal s) {
     	MapLocation loc = s.getMineLoc();
     	if (s.shouldAdd()) {
-        	if (gameMap.getTerrainTile(loc) == TerrainTile.LAND) {
+        	if (gameMap.getTerrainTile(loc) == TerrainTile.NORMAL) { // TODO(axc): NORMAL and ROAD?
         		addMine(s.getMineTeam(), loc);
         	}
     	} else {

@@ -212,8 +212,15 @@ public class XStreamProxy extends Proxy {
             StringBuilder builder = new StringBuilder();
             for (int y = 0; y < tiles[0].length; y++) {
                 builder.append('\n');
-                for (int x = 0; x < tiles.length; x++)
-                    builder.append((tiles[x][y] == TerrainTile.LAND) ? '.' : '#');
+                for (int x = 0; x < tiles.length; x++) {
+                    if (tiles[x][y] == TerrainTile.NORMAL) {
+                        builder.append('.');
+                    } else if (tiles[x][y] == TerrainTile.ROAD) {
+                        builder.append('!');
+                    } else { // VOID
+                        builder.append('#');
+                    }
+                }
             }
             writer.setValue(builder.toString());
         }
@@ -230,7 +237,10 @@ public class XStreamProxy extends Proxy {
                             tiles[x][y] = TerrainTile.VOID;
                             break;
                         case '.':
-                            tiles[x][y] = TerrainTile.LAND;
+                            tiles[x][y] = TerrainTile.NORMAL;
+                            break;
+                        case '!':
+                            tiles[x][y] = TerrainTile.ROAD;
                             break;
                         default:
                             throw new ConversionException("Illegal character in InternalTerrainTile [][].");

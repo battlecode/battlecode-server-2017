@@ -38,6 +38,10 @@ public class GameMap implements GenericGameMap {
      */
     private final TerrainTile[][] mapTiles;
     /**
+     * The scalar field of neutral characters on the map.
+     */
+    private final NeutralsMap neutralsMap;
+    /**
      * The coordinates of the origin.
      */
     private final int mapOriginX, mapOriginY;
@@ -70,6 +74,7 @@ public class GameMap implements GenericGameMap {
         this.mapWidth = gm.mapWidth;
         this.mapHeight = gm.mapHeight;
         this.mapTiles = new TerrainTile[this.mapWidth][this.mapHeight];
+        this.neutralsMap = new NeutralsMap(gm.neutralsMap);
         for (int i = 0; i < this.mapWidth; i++) {
             System.arraycopy(gm.mapTiles[i], 0, this.mapTiles[i], 0, this.mapHeight);
         }
@@ -88,9 +93,9 @@ public class GameMap implements GenericGameMap {
      *
      * @param mapProperties      a map of MapProperties to their integer values containing dimensions, etc.
      * @param mapTiles           a matrix of TerrainTypes representing the map
-     * @param territoryLocations an array of the MapLocations of the territories
+     * @param neutralsMap        a NeutralsMap to copy
      */
-    GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles) {
+    GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, NeutralsMap neutralsMap) {
 
         if (mapProperties.containsKey(MapProperties.WIDTH))
             this.mapWidth = mapProperties.get(MapProperties.WIDTH);
@@ -127,6 +132,7 @@ public class GameMap implements GenericGameMap {
         
         this.mapTiles = mapTiles;
 
+        this.neutralsMap = neutralsMap;
     }
 
     public void setTheme(String theme) {
