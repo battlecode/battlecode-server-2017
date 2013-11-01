@@ -177,6 +177,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             gameObjects[i].processEndOfRound();
         }
         removeDead();
+
+        // update neutrals
+        gameMap.updateNeutralsMap();
         
         addSignal(new FluxChangeSignal(teamResources));
 		addSignal(new ResearchChangeSignal(research));

@@ -127,5 +127,8 @@ public interface GameConstants {
     
     /** Amount of power required to wear a hat */
     public static final double HAT_POWER_COST = 40.0;
+
+    /** Cow value decay per turn */
+    public static final double NEUTRALS_TURN_DECAY = 0.995;
     
 }

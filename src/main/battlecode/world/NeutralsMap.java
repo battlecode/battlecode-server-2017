@@ -1,5 +1,7 @@
 package battlecode.world;
 
+import battlecode.common.GameConstants;
+
 /**
  * Represents a map (scalar field) of a neutral AI.
  */
@@ -43,5 +45,25 @@ public class NeutralsMap {
             System.arraycopy(nm.growthFactor[i], 0, this.growthFactor[i], 0,
                 this.mapHeight);
         }
+    }
+
+    public void print() {
+        System.out.println("Neutrals Map!");
+        for (int j = 0; j < this.mapHeight; j++) {
+            for (int i = 0; i < this.mapWidth; i++) {
+                System.out.print(this.currentAmount[i][j] + " (" + this.growthFactor[i][j] + ")\t");
+            }
+            System.out.println();
+        }
+        System.out.println("END Neutrals Map");
+    }
+
+    public void next() {
+        for (int i = 0; i < this.mapWidth; i++) {
+            for (int j = 0; j < this.mapHeight; j++) {
+                this.currentAmount[i][j] = GameConstants.NEUTRALS_TURN_DECAY * this.currentAmount[i][j] + this.growthFactor[i][j];
+            }
+        }
+        this.print();
     }
 }
