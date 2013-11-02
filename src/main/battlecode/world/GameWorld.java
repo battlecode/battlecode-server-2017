@@ -260,8 +260,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public int countRobots(Team t) {
         int total = 0;
         for (InternalObject obj : allObjects()) {
+            InternalRobot ir = (InternalRobot) obj;
             if (obj.getTeam() == t) {
-                total++;
+                total += ir.type.count;
             }
         }
         return total;

@@ -42,7 +42,7 @@ public interface GameConstants {
     public static final int TEAM_MEMORY_LENGTH = 32;
 
     /** The maximum number of robots you are allowed. */
-    public static final int MAX_ROBOTS = 100; // TODO(axc): decide this number
+    public static final int MAX_ROBOTS = 25; // TODO(axc): decide this number
 
     /** The total amount of damage to be applied to a team's HQ once the round limit is reached */
     public static final double TIME_LIMIT_DAMAGE = 1.0;

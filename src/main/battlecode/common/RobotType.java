@@ -3,15 +3,18 @@ package battlecode.common;
 import static battlecode.common.RobotLevel.ON_GROUND;
 
 public enum RobotType {
-    //          LEVEL,      MXE    SR  SA          AR AR   AA      AD      AP      ATTACK  ENCMP    SPLASH
+    //          LEVEL,      MXE    SR  SA          AR AR   AA      AD      AP      ATTACK  ENCMP    SPLASH  COUNT
   	HQ          (ON_GROUND, Integer.MAX_VALUE,
-                                   24, 360,        0, 16,  0,      0,     50,      true,   false,   25),
-    SOLDIER     (ON_GROUND, 100,   24, 360,        0, 16,  360,    1,     10,      true,   false,   0),
-    MEDBAY      (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      2,      true,   true,    0),
-    SHIELDS     (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      10,     true,   true,    0),
-    ARTILLERY   (ON_GROUND, 100,   14, 360,        0, 63,  360,    20,     60,     true,   true,    0),
-    GENERATOR   (ON_GROUND, 100,   14, 360,        0, 0 ,  0,      0,      0,      true,   true,    0),
-    SUPPLIER    (ON_GROUND, 100,   14, 360,        0, 0 ,  0,      0,      0,      true,   true,    0),
+                                   24, 360,        0, 16,  360,    0,     50,      true,   false,   25,     0),
+    SOLDIER     (ON_GROUND, 100,   24, 360,        0, 16,  360,    1,     10,      true,   false,   0,      1),
+    WALL        (ON_GROUND, 200,    0,   0,        0,  0,    0,    0,      0,     false,   true,    0,      0),
+    NOISETOWER  (ON_GROUND, 100,    0,   0,        0,400,  360,    0,      0,      true,   true,    0,      5),
+    PASTR       (ON_GROUND,  50,    0,   0,        0,  0,  360,    0,      0,     false,   true,    0,      1),
+    MEDBAY      (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      2,      true,   true,    0,      1),
+    SHIELDS     (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      10,     true,   true,    0,      1),
+    ARTILLERY   (ON_GROUND, 100,   14, 360,        0, 63,  360,    20,     60,     true,   true,    0,      1),
+    GENERATOR   (ON_GROUND, 100,   14, 360,        0, 0 ,  0,      0,      0,      true,   true,    0,      1),
+    SUPPLIER    (ON_GROUND, 100,   14, 360,        0, 0 ,  0,      0,      0,      true,   true,    0,      1),
     ;
 
     /**
@@ -71,6 +74,8 @@ public enum RobotType {
 
     public final double splashPower;
 
+    public final int count;
+
     /**
      * Returns true if the robot can attack robots at the given level.
      */
@@ -89,7 +94,8 @@ public enum RobotType {
               double attackPower,
               boolean canAttack,
               boolean isEncampment,
-              double splashPower) {
+              double splashPower,
+              int count) {
         this.level = level;
         this.maxEnergon = maxEnergon;
         this.sensorRadiusSquared = sensorRadiusSquared;
@@ -104,6 +110,7 @@ public enum RobotType {
         this.attackCosHalfTheta = Math.cos(attackAngle * Math.PI / 360.);
         this.isEncampment = isEncampment;
         this.splashPower = splashPower;
+        this.count = count;
     }
 
 }
