@@ -137,4 +137,6 @@ public interface GameConstants {
 
     public static final int SOLDIER_HEAL_TURN_DELAY = 30;
     public static final double SOLDIER_HEAL_RATE = 0.25;
+
+    public static final int PASTR_RANGE = 5;
 }

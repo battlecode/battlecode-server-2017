@@ -636,8 +636,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void visitAttackSignal(AttackSignal s) {
 
-        gameMap.getNeutralsMap().updateWithAttack(s);
-    	
         InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
         MapLocation targetLoc = s.getTargetLoc();
         RobotLevel level = s.getTargetHeight();
@@ -658,7 +656,15 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 							target.takeDamage(attacker.type.splashPower, attacker);
 				}
 
+            gameMap.getNeutralsMap().updateWithAttack(s);
+            
 			break;
+        case NOISETOWER:
+            if (s.getAttackType() == 0) {
+                gameMap.getNeutralsMap().updateWithNoiseSource(targetLoc, GameConstants.NOISE_SCARE_RANGE_LARGE);
+            } else {
+                gameMap.getNeutralsMap().updateWithNoiseSource(targetLoc, GameConstants.NOISE_SCARE_RANGE_SMALL);
+            }
 		default:
 			// ERROR, should never happen
 		}

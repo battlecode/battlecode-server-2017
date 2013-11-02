@@ -29,6 +29,8 @@ public class AttackSignal extends Signal {
      */
     public final RobotLevel targetHeight;
 
+    public final int attackType;
+
     /**
      * Creates a signal for a robot broadcast.
      *
@@ -39,6 +41,14 @@ public class AttackSignal extends Signal {
         this.robotID = robot.getID();
         this.targetLoc = targetLoc;
         this.targetHeight = targetHeight;
+        this.attackType = 0;
+    }
+
+    public AttackSignal(InternalRobot robot, MapLocation targetLoc, RobotLevel targetHeight, int attackType) {
+        this.robotID = robot.getID();
+        this.targetLoc = targetLoc;
+        this.targetHeight = targetHeight;
+        this.attackType = 1;
     }
 
     /**
@@ -66,5 +76,9 @@ public class AttackSignal extends Signal {
      */
     public RobotLevel getTargetHeight() {
         return targetHeight;
+    }
+
+    public int getAttackType() {
+        return attackType;
     }
 }

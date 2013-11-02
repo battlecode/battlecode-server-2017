@@ -267,6 +267,8 @@ public interface RobotController {
      */
     public void attackSquare(MapLocation loc) throws GameActionException;
 
+    public void attackSquareLight(MapLocation loc) throws GameActionException;
+
     // ***********************************
     // ****** BROADCAST METHODS *******
     // ***********************************

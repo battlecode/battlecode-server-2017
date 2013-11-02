@@ -199,16 +199,18 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	if (!type.isEncampment)
             throw new GameActionException(CANT_DO_THAT_BRO, "Must specify a valid encampment type to create");
     	assertNotMoving();
-        assertIsEncampment(getLocation());
-        double cost = GameConstants.CAPTURE_POWER_COST * (gameWorld.getNumCapturing(getTeam()) + gameWorld.getEncampmentsByTeam(getTeam()).size() + 1);
-        assertHaveResource(cost);
-    	gameWorld.adjustResources(getTeam(), -cost);
-        robot.activateCapturing(new CaptureSignal(getLocation(), type, robot.getTeam(), false, robot), GameConstants.CAPTURE_ROUND_DELAY);
+        //assertIsEncampment(getLocation());
+        //double cost = GameConstants.CAPTURE_POWER_COST * (gameWorld.getNumCapturing(getTeam()) + gameWorld.getEncampmentsByTeam(getTeam()).size() + 1);
+        
+        //assertHaveResource(cost);
+    	//gameWorld.adjustResources(getTeam(), -cost);
+        robot.activateCapturing(new CaptureSignal(getLocation(), type, robot.getTeam(), false, robot), robot.type.captureTurns);
     
     }
     
     public double senseCaptureCost() {
-    	return GameConstants.CAPTURE_POWER_COST * (gameWorld.getNumCapturing(getTeam()) + gameWorld.getEncampmentsByTeam(getTeam()).size() + 1);
+        return 0;
+    	//return GameConstants.CAPTURE_POWER_COST * (gameWorld.getNumCapturing(getTeam()) + gameWorld.getEncampmentsByTeam(getTeam()).size() + 1);
     }
     
     public void researchUpgrade(Upgrade upgrade) throws GameActionException {
@@ -677,6 +679,16 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotNull(loc);
         assertCanAttack(loc, RobotLevel.ON_GROUND);
         robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND), robot.type.attackDelay);
+    }
+
+    public void attackSquareLight(MapLocation loc) throws GameActionException {
+        if (getType() != RobotType.NOISETOWER) {
+            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT_BRO, "Only Noise Towers can use a light attack");
+        }
+        assertNotAttacking();
+        assertNotNull(loc);
+        assertCanAttack(loc, RobotLevel.ON_GROUND);
+        robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND, 1), robot.type.attackDelay);
     }
 
     //************************************
