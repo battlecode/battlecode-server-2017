@@ -162,7 +162,7 @@ public class NeutralsMap {
             }
         }
 
-        this.print();
+        //this.print();
         this.resetAfterTurn();
     }
 

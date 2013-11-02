@@ -153,7 +153,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         //else if (type == RobotType.GENERATOR)
         //	myGameWorld.adjustResources(getTeam(), GameConstants.GENERATOR_POWER_PRODUCTION);
         //else if (type == RobotType.SUPPLIER)
-        //	myGameWorld.adjustSpawnRate(getTeam(), GameConstants.HQ_SPAWN_DELAY_CONSTANT);
+        myGameWorld.adjustSpawnRate(getTeam());
     }
 
     public void processBeginningOfTurn() {

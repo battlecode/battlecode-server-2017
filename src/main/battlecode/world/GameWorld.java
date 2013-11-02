@@ -131,7 +131,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         wasBreakpointHit = false;
 
         // reset necessary game constants
-        teamSpawnRate = new double[]{GameConstants.HQ_SPAWN_DELAY, GameConstants.HQ_SPAWN_DELAY};
+        teamSpawnRate = new double[]{GameConstants.HQ_SPAWN_DELAY_CONSTANT_1 + GameConstants.HQ_SPAWN_DELAY_CONSTANT_2,
+                                     GameConstants.HQ_SPAWN_DELAY_CONSTANT_1 + GameConstants.HQ_SPAWN_DELAY_CONSTANT_2};
         
         // process all gameobjects
         InternalObject[] gameObjects = new InternalObject[gameObjectsByID.size()];
@@ -986,7 +987,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         teamResources[t.ordinal()] += amount;
     }
     
-    protected void adjustSpawnRate(Team t, double factor) {
-    	teamSpawnRate[t.ordinal()] = 10*GameConstants.HQ_SPAWN_DELAY/(10*GameConstants.HQ_SPAWN_DELAY/teamSpawnRate[t.ordinal()]+1);
+    protected void adjustSpawnRate(Team t) {
+    	teamSpawnRate[t.ordinal()] = GameConstants.HQ_SPAWN_DELAY_CONSTANT_1 + Math.pow(countRobots(t), GameConstants.HQ_SPAWN_DELAY_CONSTANT_2);//10*GameConstants.HQ_SPAWN_DELAY/(10*GameConstants.HQ_SPAWN_DELAY/teamSpawnRate[t.ordinal()]+1);
     }
 }

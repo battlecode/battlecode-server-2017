@@ -118,12 +118,10 @@ public interface GameConstants {
     
     /** The rate at which stockpiled energy decays with the FUSION upgrade */
     public static final double POWER_DECAY_RATE_FUSION = 0.99;
-    
-    /** Rounds required to spawn a unit at the start of the game */
-    public static final int HQ_SPAWN_DELAY = 10;
 
     /** Constant used to calculate how suppliers factor into the HQ spawn delay */
-    public static final double HQ_SPAWN_DELAY_CONSTANT = 10;
+    public static final double HQ_SPAWN_DELAY_CONSTANT_1 = 30; // a
+    public static final double HQ_SPAWN_DELAY_CONSTANT_2 = 1.5; // b -> a + N^b, where N is num robots
     
     /** Amount of power required to wear a hat */
     public static final double HAT_POWER_COST = 40.0;
