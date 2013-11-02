@@ -311,7 +311,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	
         if (robot.myLocation.distanceSquaredTo(loc) <= sensorRadius)
         	return true;
-        
+       
+        /* 
         for (InternalObject o : gameWorld.allObjects())
         {
         	if  ((Robot.class.isInstance(o)) 
@@ -320,6 +321,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         		return true;
         		
         }
+        */
         return false;
     	// make global vision work on this.
     	// MAKE SURE YOU CANT GLOBL DEFUSE SHIT OTHERWISE YOURE GUNNA GET G'D
