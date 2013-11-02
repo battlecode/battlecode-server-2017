@@ -3,14 +3,14 @@ package battlecode.common;
 import static battlecode.common.RobotLevel.ON_GROUND;
 
 public enum RobotType {
-    //          LEVEL,      MXE    SR  SA          AR AR   AA      AD      AP      ATTACK  ENCMP
-  	HQ          (ON_GROUND, 500,   14, 360,        0, 0 ,  0,      0,      0,      true,   false),
-    SOLDIER     (ON_GROUND, 40,    14, 360,        0, 2 ,  360,    1,      6,      true,   false),
-    MEDBAY      (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      2,      true,   true),
-    SHIELDS     (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      10,      true,   true),
-    ARTILLERY   (ON_GROUND, 100,   14, 360,        0, 63,  360,    20,     60,     true,   true),
-    GENERATOR   (ON_GROUND, 100,   14, 360,        0, 0 ,  0,      0,      0,      true,   true),
-    SUPPLIER    (ON_GROUND, 100,   14, 360,        0, 0 ,  0,      0,      0,      true,   true),
+    //          LEVEL,      MXE    SR  SA          AR AR   AA      AD      AP      ATTACK  ENCMP    SPLASH
+  	HQ          (ON_GROUND, Integer.MAX_VALUE,     24, 360,        0, 16,  0,      0,      0,      true,   false,   25),
+    SOLDIER     (ON_GROUND, 100,   24, 360,        0, 16,  360,    1,     10,      true,   false,   0),
+    MEDBAY      (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      2,      true,   true,    0),
+    SHIELDS     (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      10,     true,   true,    0),
+    ARTILLERY   (ON_GROUND, 100,   14, 360,        0, 63,  360,    20,     60,     true,   true,    0),
+    GENERATOR   (ON_GROUND, 100,   14, 360,        0, 0 ,  0,      0,      0,      true,   true,    0),
+    SUPPLIER    (ON_GROUND, 100,   14, 360,        0, 0 ,  0,      0,      0,      true,   true,    0),
     ;
 
     /**
@@ -68,6 +68,8 @@ public enum RobotType {
     
     public final boolean isEncampment;
 
+    public final double splashPower;
+
     /**
      * Returns true if the robot can attack robots at the given level.
      */
@@ -85,7 +87,8 @@ public enum RobotType {
               int attackDelay,
               double attackPower,
               boolean canAttack,
-              boolean isEncampment) {
+              boolean isEncampment,
+              double splashPower) {
         this.level = level;
         this.maxEnergon = maxEnergon;
         this.sensorRadiusSquared = sensorRadiusSquared;
@@ -99,6 +102,7 @@ public enum RobotType {
         this.sensorCosHalfTheta = Math.cos(sensorAngle * Math.PI / 360.);
         this.attackCosHalfTheta = Math.cos(attackAngle * Math.PI / 360.);
         this.isEncampment = isEncampment;
+        this.splashPower = splashPower;
     }
 
 }

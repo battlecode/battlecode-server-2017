@@ -671,8 +671,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 //    }
 
     public void attackSquare(MapLocation loc) throws GameActionException {
-        if (robot.type != RobotType.ARTILLERY)
-        	throw new GameActionException(CANT_DO_THAT_BRO, "Only ARTILLERY can attack a targeted square.");
         assertNotAttacking();
         assertNotNull(loc);
         assertCanAttack(loc, RobotLevel.ON_GROUND);

@@ -67,6 +67,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private Signal movementSignal;
     private Signal attackSignal;
 
+    private int roundsSinceLastDamage;
+
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
                          boolean spawnedRobot) {
@@ -84,6 +86,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         defusingRounds = 0;
         capturingRounds = 0;
         capturingType = null;;
+
+        roundsSinceLastDamage = 0;
 
 //        incomingMessageQueue = new LinkedList<Message>();
 
@@ -146,10 +150,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         // TODO CORY FIX IT
         if (type == RobotType.HQ)
         	myGameWorld.adjustResources(getTeam(), GameConstants.HQ_POWER_PRODUCTION);
-        else if (type == RobotType.GENERATOR)
-        	myGameWorld.adjustResources(getTeam(), GameConstants.GENERATOR_POWER_PRODUCTION);
-        else if (type == RobotType.SUPPLIER)
-        	myGameWorld.adjustSpawnRate(getTeam(), GameConstants.HQ_SPAWN_DELAY_CONSTANT);
+        //else if (type == RobotType.GENERATOR)
+        //	myGameWorld.adjustResources(getTeam(), GameConstants.GENERATOR_POWER_PRODUCTION);
+        //else if (type == RobotType.SUPPLIER)
+        //	myGameWorld.adjustSpawnRate(getTeam(), GameConstants.HQ_SPAWN_DELAY_CONSTANT);
     }
 
     public void processBeginningOfTurn() {
@@ -199,6 +203,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         
       	// quick hack to make mining work. move me out later
         if (type == RobotType.SOLDIER) {
+
+            roundsSinceLastDamage++;
+            // Maybe heal
+            if (roundsSinceLastDamage >= GameConstants.SOLDIER_HEAL_TURN_DELAY) {
+                takeDamage(-GameConstants.SOLDIER_HEAL_RATE);
+            }
+
         	if (miningRounds > 0) {
         		if (--miningRounds==0) {
         			myGameWorld.visitSignal(new MineSignal(getLocation(), getTeam(), MineSignal.ADD));
@@ -275,7 +286,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     			else if(nearby.getTeam() == getTeam().opponent()) nearbyEnemy = true;
         	}
     	}
-        
+       
+        /* 
         // Soldiers Automatically Attack
         if (type == RobotType.SOLDIER && nearbyEnemy && this.turnsUntilAttackIdle == 0) {
         	myGameWorld.visitSignal(new AttackSignal(this, getLocation(), RobotLevel.ON_GROUND));
@@ -291,7 +303,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         		myGameWorld.visitSignal(new ShieldSignal(this));
         	else
         		takeShieldedDamage(-this.type.attackPower);
-        }
+        }*/
         
         // shield decay
         if (myShieldLevel > 0.0)
@@ -332,6 +344,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         if (baseAmount < 0) {
             changeEnergonLevel(-baseAmount);
         } else {
+            if (baseAmount > 0) {
+                roundsSinceLastDamage = 0;
+            }
             changeEnergonLevelFromAttack(-baseAmount);
         }
     }
@@ -352,9 +367,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	// make sure encampments don't take damage
         if (!(getTeam() == Team.NEUTRAL))
         {
-        	if (source.type == RobotType.ARTILLERY)
-        		takeShieldedDamage(amt);
-        	else
+        	//if (source.type == RobotType.ARTILLERY)
+        	//	takeShieldedDamage(amt);
+        	//else
                 takeDamage(amt);
         }
     }
@@ -391,7 +406,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
         energonChanged = true;
 
-        if (myEnergonLevel <= 0) {
+        if (myEnergonLevel <= 0 && getMaxEnergon() != Integer.MAX_VALUE) {
             processLethalDamage();
         }
     }

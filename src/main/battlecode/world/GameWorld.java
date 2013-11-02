@@ -642,25 +642,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         
         switch (attacker.type) {
 		case SOLDIER:
-			Direction dir = Direction.NORTH;
-	    	MapLocation nearby;
-	    	InternalRobot nearbyrobot;
-	    	ArrayList<InternalRobot> todamage = new ArrayList<InternalRobot>();
-	    	do {
-	    		nearby = targetLoc.add(dir);
-	    		nearbyrobot = getRobot(nearby, level);
-	    		if (nearbyrobot != null)
-	    			if (nearbyrobot.getTeam() != attacker.getTeam())
-	    				todamage.add(nearbyrobot);
-	    		dir = dir.rotateLeft();
-	    	} while (dir != Direction.NORTH);
-	    	if (todamage.size()>0) {
-	            double damage = attacker.type.attackPower/todamage.size();
-	            for (InternalRobot r : todamage)
-	            	r.takeDamage(damage, attacker);
-	    	}
-			break;
-		case ARTILLERY:
+		case HQ:
 			InternalRobot target;
 			for (int dx = -1; dx <= 1; dx++)
 				for (int dy = -1; dy <= 1; dy++) {
@@ -671,7 +653,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 						if (dx == 0 && dy == 0)
 							target.takeDamage(attacker.type.attackPower, attacker);
 						else
-							target.takeDamage(attacker.type.attackPower*GameConstants.ARTILLERY_SPLASH_RATIO, attacker);
+							target.takeDamage(attacker.type.splashPower, attacker);
 				}
 
 			break;

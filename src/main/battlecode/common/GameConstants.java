@@ -136,4 +136,7 @@ public interface GameConstants {
     public static final int ATTACK_SCARE_RANGE = 36;
     public static final int NOISE_SCARE_RANGE_SMALL = 9;
     public static final int NOISE_SCARE_RANGE_LARGE = 36;
+
+    public static final int SOLDIER_HEAL_TURN_DELAY = 30;
+    public static final double SOLDIER_HEAL_RATE = 0.25;
 }
