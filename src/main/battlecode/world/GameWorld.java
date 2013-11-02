@@ -180,7 +180,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         removeDead();
 
         // update neutrals
-        gameMap.getNeutralsMap().next();
+        gameMap.getNeutralsMap().next(gameObjects);
         
         addSignal(new FluxChangeSignal(teamResources));
 		addSignal(new ResearchChangeSignal(research));

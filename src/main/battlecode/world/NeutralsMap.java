@@ -1,14 +1,19 @@
 package battlecode.world;
 
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeSet;
 
 import battlecode.common.GameActionException;
 import battlecode.common.GameActionExceptionType;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.MovementType;
+import battlecode.common.RobotType;
 import battlecode.common.TerrainTile;
 import battlecode.world.signal.AttackSignal;
+import battlecode.world.InternalObject;
+import battlecode.world.InternalRobot;
 import battlecode.world.signal.MovementSignal;
 
 /**
@@ -27,6 +32,7 @@ public class NeutralsMap {
     private double[][] growthFactor;
     private double[][] dX, dY;
     private ArrayList<MapLocation> attacks;
+    private Set[][] ids;
 
     public NeutralsMap(double[][] growthFactor, TerrainTile[][] mapTiles) {
         attacks = new ArrayList<MapLocation>();
@@ -51,6 +57,12 @@ public class NeutralsMap {
         for (int i = 0; i < this.mapWidth; i++) {
             for (int j = 0; j < this.mapHeight; j++) {
                 passable[i][j] = mapTiles[i][j] != TerrainTile.VOID;
+            }
+        }
+        ids = new Set[this.mapWidth][this.mapHeight];
+        for (int i = 0; i < this.mapWidth; i++) {
+            for (int j = 0; j < this.mapHeight; j++) {
+                ids[i][j] = new TreeSet<Integer>();
             }
         }
     }
@@ -80,6 +92,11 @@ public class NeutralsMap {
         return x >= 0 && x < this.mapWidth && y >= 0 && y < this.mapHeight && passable[x][y];
     }
 
+    public boolean isValid(int x, int y, int fromX, int fromY) {
+        if (!isValid(x, y)) return false;
+        return ids[x][y].equals(ids[fromX][fromY]);
+    }
+
     public void print() {
         System.out.println("Neutrals Map!");
         for (int j = 0; j < this.mapHeight; j++) {
@@ -91,10 +108,27 @@ public class NeutralsMap {
         System.out.println("END Neutrals Map");
     }
 
+    @SuppressWarnings("unchecked")
+    public void updateIds(InternalObject obj) {
+        InternalRobot ir = (InternalRobot) obj;
+        int captureRange = 0;
+        if (ir.type == RobotType.PASTR) captureRange = 5;
+        MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
+        for (MapLocation ml : affected) {
+            if (isValid(ml.x, ml.y)) {
+                this.ids[ml.x][ml.y].add(ir.getID());
+            }
+        }
+    }
+
     final double PI4 = Math.PI / 4;
     final int[][] dirs = {{-1, 0}, {-1, -1}, {0, -1}, {1, -1},
                              {1, 0}, {1, 1}, {0, 1}, {-1, 1}};
-    public void next() {
+    public void next(InternalObject[] objs) {
+        for (InternalObject obj : objs) {
+            updateIds(obj);
+        }
+
         // Current order:
         // 1) cows are destroyed due to attack
         // 2) cows move
@@ -118,12 +152,12 @@ public class NeutralsMap {
                             double frac1 = 1 - (theta - k * PI4) / PI4;
                             int x1 = i + dirs[k + 4][0];
                             int y1 = j + dirs[k + 4][1];
-                            boolean valid1 = isValid(x1, y1);
+                            boolean valid1 = isValid(x1, y1, i, j);
 
                             double frac2 = 1 - frac1;
                             int x2 = i + dirs[(k + 5) % 8][0];
                             int y2 = j + dirs[(k + 5) % 8][1];
-                            boolean valid2 = isValid(x2, y2);
+                            boolean valid2 = isValid(x2, y2, i, j);
 
                             if (valid1 && valid2) {
                                 temp[x1][y1] += frac1 * this.currentAmount[i][j];
@@ -200,6 +234,7 @@ public class NeutralsMap {
             for (int j = 0; j < this.mapHeight; j++) {
                 this.dX[i][j] = 0;
                 this.dY[i][j] = 0;
+                this.ids[i][j].clear();
             }
         }
         attacks.clear();
