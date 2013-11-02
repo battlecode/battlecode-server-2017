@@ -1,6 +1,15 @@
 package battlecode.world;
 
+import java.util.ArrayList;
+
+import battlecode.common.GameActionException;
+import battlecode.common.GameActionExceptionType;
 import battlecode.common.GameConstants;
+import battlecode.common.MapLocation;
+import battlecode.common.MovementType;
+import battlecode.common.TerrainTile;
+import battlecode.world.signal.AttackSignal;
+import battlecode.world.signal.MovementSignal;
 
 /**
  * Represents a map (scalar field) of a neutral AI.
@@ -13,10 +22,15 @@ public class NeutralsMap {
     /**
      * The integer scalar field showing the distribution of the neutral AI.
      */
+    private boolean[][] passable;
     private double[][] currentAmount;
     private double[][] growthFactor;
+    private double[][] dX, dY;
+    private ArrayList<MapLocation> attacks;
 
-    public NeutralsMap(double[][] growthFactor) {
+    public NeutralsMap(double[][] growthFactor, TerrainTile[][] mapTiles) {
+        attacks = new ArrayList<MapLocation>();
+
         this.mapWidth = growthFactor.length;
         int tempMapHeight = 0;
         for (int i = 0; i < this.mapWidth; i++) {
@@ -29,6 +43,15 @@ public class NeutralsMap {
         for (int i = 0; i < this.mapWidth; i++) {
             System.arraycopy(growthFactor[i], 0, this.growthFactor[i], 0,
                 this.mapHeight);
+        }
+
+        dX = new double[this.mapWidth][this.mapHeight];
+        dY = new double[this.mapWidth][this.mapHeight];
+        passable = new boolean[this.mapWidth][this.mapHeight];
+        for (int i = 0; i < this.mapWidth; i++) {
+            for (int j = 0; j < this.mapHeight; j++) {
+                passable[i][j] = mapTiles[i][j] != TerrainTile.VOID;
+            }
         }
     }
 
@@ -45,25 +68,140 @@ public class NeutralsMap {
             System.arraycopy(nm.growthFactor[i], 0, this.growthFactor[i], 0,
                 this.mapHeight);
         }
+        this.dX = new double[this.mapWidth][this.mapHeight];
+        this.dY = new double[this.mapWidth][this.mapHeight];
+        this.passable = new boolean[this.mapWidth][this.mapHeight];
+        for (int i = 0; i < this.mapWidth; i++) {
+            System.arraycopy(nm.passable[i], 0, this.passable[i], 0, this.mapHeight);
+        }
+    }
+
+    public boolean isValid(int x, int y) {
+        return x >= 0 && x < this.mapWidth && y >= 0 && y < this.mapHeight && passable[x][y];
     }
 
     public void print() {
         System.out.println("Neutrals Map!");
         for (int j = 0; j < this.mapHeight; j++) {
             for (int i = 0; i < this.mapWidth; i++) {
-                System.out.print(this.currentAmount[i][j] + " (" + this.growthFactor[i][j] + ")\t");
+                System.out.print(Double.toString(this.currentAmount[i][j]).substring(0, 3) + " (" + this.growthFactor[i][j] + ")\t");
             }
             System.out.println();
         }
         System.out.println("END Neutrals Map");
     }
 
+    final double PI4 = Math.PI / 4;
+    final int[][] dirs = {{-1, 0}, {-1, -1}, {0, -1}, {1, -1},
+                             {1, 0}, {1, 1}, {0, 1}, {-1, 1}};
     public void next() {
-        for (int i = 0; i < this.mapWidth; i++) {
-            for (int j = 0; j < this.mapHeight; j++) {
-                this.currentAmount[i][j] = GameConstants.NEUTRALS_TURN_DECAY * this.currentAmount[i][j] + this.growthFactor[i][j];
+        // Current order:
+        // 1) cows are destroyed due to attack
+        // 2) cows move
+        // 3) cow growth and decay happens
+        for (int i = 0; i < attacks.size(); i++) {
+            MapLocation target = attacks.get(i);
+            if (target.x >= 0 && target.x < this.mapWidth &&
+                target.y >= 0 && target.y < this.mapHeight) {
+                this.currentAmount[target.x][target.y] = 0;
             }
         }
+
+        double[][] temp = new double[this.mapWidth][this.mapHeight];
+        for (int i = 0; i < this.mapWidth; i++) {
+            for (int j = 0; j < this.mapHeight; j++) {
+                if (this.dX[i][j] != 0 || this.dY[i][j] != 0) {
+                    double theta = Math.atan2(this.dY[i][j], this.dX[i][j]);
+                    boolean moved = false;
+                    for (int k = -4; k < 4; k++) {
+                        if (theta >= k * PI4 && theta <= (k + 1) * PI4) {
+                            double frac1 = 1 - (theta - k * PI4) / PI4;
+                            int x1 = i + dirs[k + 4][0];
+                            int y1 = j + dirs[k + 4][1];
+                            boolean valid1 = isValid(x1, y1);
+
+                            double frac2 = 1 - frac1;
+                            int x2 = i + dirs[(k + 5) % 8][0];
+                            int y2 = j + dirs[(k + 5) % 8][1];
+                            boolean valid2 = isValid(x2, y2);
+
+                            if (valid1 && valid2) {
+                                temp[x1][y1] += frac1 * this.currentAmount[i][j];
+                                temp[x2][y2] += frac2 * this.currentAmount[i][j];
+                            } else if (valid1) {
+                                temp[x1][y1] += this.currentAmount[i][j];
+                            } else if (valid2) {
+                                temp[x2][y2] += this.currentAmount[i][j];
+                            } else {
+                                temp[i][j] += this.currentAmount[i][j];
+                            }
+
+                            moved = true;
+                            break;
+                        }
+                    }
+                    if (!moved) {
+                        throw new RuntimeException("GameActionException thrown", new GameActionException(GameActionExceptionType.INTERNAL_ERROR, "Failed to move cows away from noise."));
+                    }
+                } else {
+                    temp[i][j] += this.currentAmount[i][j];
+                }
+            }
+        }
+        for (int i = 0; i < this.mapWidth; i++) {
+            for (int j = 0; j < this.mapHeight; j++) {
+                this.currentAmount[i][j] = temp[i][j];
+            }
+        }
+
+        for (int i = 0; i < this.mapWidth; i++) {
+            for (int j = 0; j < this.mapHeight; j++) {
+                if (this.isValid(i, j)) {
+                    this.currentAmount[i][j] = GameConstants.NEUTRALS_TURN_DECAY * this.currentAmount[i][j] + this.growthFactor[i][j];
+                }
+            }
+        }
+
         this.print();
+        this.resetAfterTurn();
+    }
+
+    public void updateWithNoiseSource(MapLocation source, int radiusSquared) {
+        MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(source, radiusSquared);
+        for (int i = 0; i < affected.length; i++) {
+            if (affected[i].equals(source)) {
+                // nothing
+            } else if (isValid(affected[i].x, affected[i].y)) {
+                double curdX = affected[i].x - source.x;
+                double curdY = affected[i].y - source.y;
+                double mag = Math.sqrt(curdX * curdX + curdY * curdY);
+                curdX /= mag;
+                curdY /= mag;
+                dX[affected[i].x][affected[i].y] += curdX;
+                dY[affected[i].x][affected[i].y] += curdY;
+            }
+        }
+    }
+
+    public void updateWithMovement(MovementSignal movement) {
+        if (movement.getMovementType() != MovementType.SNEAK) {
+            MapLocation source = movement.getNewLoc();
+            updateWithNoiseSource(source, GameConstants.MOVEMENT_SCARE_RANGE);
+        }
+    }
+
+    public void updateWithAttack(AttackSignal attack) {
+        attacks.add(attack.getTargetLoc());
+        updateWithNoiseSource(attack.getTargetLoc(), GameConstants.ATTACK_SCARE_RANGE);
+    }
+
+    public void resetAfterTurn() {
+        for (int i = 0; i < this.mapWidth; i++) {
+            for (int j = 0; j < this.mapHeight; j++) {
+                this.dX[i][j] = 0;
+                this.dY[i][j] = 0;
+            }
+        }
+        attacks.clear();
     }
 }

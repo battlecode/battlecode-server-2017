@@ -179,7 +179,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         removeDead();
 
         // update neutrals
-        gameMap.updateNeutralsMap();
+        gameMap.getNeutralsMap().next();
         
         addSignal(new FluxChangeSignal(teamResources));
 		addSignal(new ResearchChangeSignal(research));
@@ -633,6 +633,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public void visitAttackSignal(AttackSignal s) {
+
+        gameMap.getNeutralsMap().updateWithAttack(s);
     	
         InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
         MapLocation targetLoc = s.getTargetLoc();
@@ -790,6 +792,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public void visitMovementSignal(MovementSignal s) {
         InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
         MapLocation loc = s.getNewLoc();//(s.isMovingForward() ? r.getLocation().add(r.getDirection()) : r.getLocation().add(r.getDirection().opposite()));
+
+        gameMap.getNeutralsMap().updateWithMovement(s);
 
         r.setLocation(loc);
 

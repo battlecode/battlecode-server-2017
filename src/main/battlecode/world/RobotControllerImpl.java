@@ -21,6 +21,7 @@ import battlecode.common.GameActionExceptionType;
 import battlecode.common.GameConstants;
 import battlecode.common.GameObject;
 import battlecode.common.MapLocation;
+import battlecode.common.MovementType;
 import battlecode.common.Robot;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -605,7 +606,17 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertCanMove(d);
         int delay = 1;
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-                true, delay), delay);
+                true, delay, MovementType.RUN), delay);
+    }
+
+    public void sneak(Direction d) throws GameActionException {
+        if (robot.type != RobotType.SOLDIER)
+        	throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can move.");
+    	assertNotMoving();
+        assertCanMove(d);
+        int delay = 1;
+        robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
+                true, delay, MovementType.SNEAK), delay);
     }
 
     public boolean canMove(Direction d) {

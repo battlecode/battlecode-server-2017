@@ -556,7 +556,7 @@ class XMLMapHandler extends DefaultHandler {
                 floatData[i][j] = map[i][j].floatData();
             }
         }
-        NeutralsMap nm = new NeutralsMap(floatData);
+        NeutralsMap nm = new NeutralsMap(floatData, mapTiles);
 
         GameMap gm = new GameMap(mapProperties, mapTiles, nm);
         //gm.setTheme(theme);

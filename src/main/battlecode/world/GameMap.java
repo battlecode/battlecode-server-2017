@@ -240,8 +240,8 @@ public class GameMap implements GenericGameMap {
     /**
      * Updates the neutrals map for the next turn.
      */
-    public void updateNeutralsMap() {
-        this.neutralsMap.next();
+    public NeutralsMap getNeutralsMap() {
+        return neutralsMap;
     }
 
     /**

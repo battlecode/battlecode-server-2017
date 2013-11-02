@@ -238,6 +238,8 @@ public interface RobotController {
      */
     public void move(Direction dir) throws GameActionException;
 
+    public void sneak(Direction dir) throws GameActionException;
+
     /**
      * Tells whether this robot can move in the given direction. Takes into
      * account only the map terrain and positions of other robots. Does not take

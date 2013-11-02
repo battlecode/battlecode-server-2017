@@ -3,6 +3,7 @@ package battlecode.common;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 // We don't want contestants to be able to subclass MapLocation because
 // that would allow them to pass arbitrary data structures in messages
@@ -205,5 +206,27 @@ public final class MapLocation implements Serializable {
      */
     public final MapLocation subtract(Direction direction) {
         return this.add(direction.opposite());
+    }
+
+    // TODO(axc): clean, since this is copied from GameWorld
+    public static MapLocation[] getAllMapLocationsWithinRadiusSq(MapLocation center, int radiusSquared) {
+        ArrayList<MapLocation> locations = new ArrayList<MapLocation>();
+
+        int radius = (int) Math.sqrt(radiusSquared);
+
+        int minXPos = center.x - radius;
+        int maxXPos = center.x + radius;
+        int minYPos = center.y - radius;
+        int maxYPos = center.y + radius;
+
+        for (int x = minXPos; x <= maxXPos; x++) {
+            for (int y = minYPos; y <= maxYPos; y++) {
+                MapLocation loc = new MapLocation(x, y);
+                if (loc.distanceSquaredTo(center) <= radiusSquared) // TODO(axc): this is DIFFERENT from other variant
+                    locations.add(loc);
+            }
+        }
+
+        return locations.toArray(new MapLocation[locations.size()]);
     }
 }
