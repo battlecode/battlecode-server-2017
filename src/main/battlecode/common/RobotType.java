@@ -4,7 +4,8 @@ import static battlecode.common.RobotLevel.ON_GROUND;
 
 public enum RobotType {
     //          LEVEL,      MXE    SR  SA          AR AR   AA      AD      AP      ATTACK  ENCMP    SPLASH
-  	HQ          (ON_GROUND, Integer.MAX_VALUE,     24, 360,        0, 16,  0,      0,      0,      true,   false,   25),
+  	HQ          (ON_GROUND, Integer.MAX_VALUE,
+                                   24, 360,        0, 16,  0,      0,     50,      true,   false,   25),
     SOLDIER     (ON_GROUND, 100,   24, 360,        0, 16,  360,    1,     10,      true,   false,   0),
     MEDBAY      (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      2,      true,   true,    0),
     SHIELDS     (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      10,     true,   true,    0),
