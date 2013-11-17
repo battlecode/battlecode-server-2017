@@ -101,7 +101,6 @@ public class GameMap implements GenericGameMap {
             }
             System.out.println();
         }
-        this.neutralsMap.print();
     }
 
     /**
