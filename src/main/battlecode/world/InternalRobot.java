@@ -225,7 +225,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         			defusingLocation = null;
         		}
         	} else if (capturingRounds > 0) {
+                System.out.println("capture rounds left: " + capturingRounds);
         		if (--capturingRounds==0) {
+                    System.out.println("CAPTURED!");
         			myGameWorld.visitSignal(new SpawnSignal(getLocation(), capturingType, getTeam(), this));
         			capturingRounds = -1;
         			suicide();
@@ -469,6 +471,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
     
     public void activateCapturing(CaptureSignal s, int delay) {
+        System.out.println("ACTIVATE CAPTURING! with delay " + delay);
     	myGameWorld.visitSignal(s);
     	turnsUntilAttackIdle = delay;
     	turnsUntilMovementIdle = delay;

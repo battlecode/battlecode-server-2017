@@ -45,7 +45,7 @@ public interface GameConstants {
     public static final int MAX_ROBOTS = 25; // TODO(axc): decide this number
 
     /** The total amount of damage to be applied to a team's HQ once the round limit is reached */
-    public static final double TIME_LIMIT_DAMAGE = 1.0;
+    public static final double TIME_LIMIT_DAMAGE = Integer.MAX_VALUE;
  
     /** The upkeep cost of a unit per round. Note that units pay even more than this base cost to execute bytecodes */
     public static final double UNIT_POWER_UPKEEP = 1.0;

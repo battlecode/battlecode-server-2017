@@ -204,7 +204,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         
         //assertHaveResource(cost);
     	//gameWorld.adjustResources(getTeam(), -cost);
-        robot.activateCapturing(new CaptureSignal(getLocation(), type, robot.getTeam(), false, robot), robot.type.captureTurns);
+        robot.activateCapturing(new CaptureSignal(getLocation(), type, robot.getTeam(), false, robot), type.captureTurns);
     
     }
     

@@ -198,7 +198,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         	removeDead();
         	
 //        	if both are killed by time limit damage in the same round, then more tie breakers
-        	if (baseHQs.get(Team.A).getEnergonLevel() <= 0.0 && baseHQs.get(Team.B).getEnergonLevel() <= 0.0) {
+        	if (baseHQs.get(Team.A).getEnergonLevel() <= 0.0 && baseHQs.get(Team.B).getEnergonLevel() <= 0.0 || true) {
         		// TODO more TIE BREAKHERS HERE
             	InternalRobot HQA = baseHQs.get(Team.A);
             	InternalRobot HQB = baseHQs.get(Team.B);
