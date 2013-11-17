@@ -84,23 +84,6 @@ public class GameMap implements GenericGameMap {
         this.seed = gm.seed;
         this.maxRounds = gm.maxRounds;
         //this.minPoints = gm.minPoints;
-
-        // TODO(axc): debug code
-        System.out.println("Initializing Game Map");
-        for (int i = 0; i < this.mapWidth; i++) {
-            for (int j = 0; j < this.mapHeight; j++) {
-                char c;
-                if (this.mapTiles[i][j] == TerrainTile.NORMAL) {
-                    c = '.';
-                } else if (this.mapTiles[i][j] == TerrainTile.ROAD) {
-                    c = '!';
-                } else {
-                    c = '#';
-                }
-                System.out.print(c);
-            }
-            System.out.println();
-        }
     }
 
     /**
