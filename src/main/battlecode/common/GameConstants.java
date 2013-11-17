@@ -139,4 +139,6 @@ public interface GameConstants {
     public static final double SOLDIER_HEAL_RATE = 0.25;
 
     public static final int PASTR_RANGE = 5;
+
+    public static final double WIN_QTY = 1000000.0;
 }
