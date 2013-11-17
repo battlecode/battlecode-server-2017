@@ -126,11 +126,15 @@ public class NeutralsMap {
                 continue;
             }
             int captureRange = 0;
-            if (ir.type == RobotType.PASTR) captureRange = 5;
+            double capturePercentage = GameConstants.ROBOT_MILK_PERCENTAGE;
+            if (ir.type == RobotType.PASTR) {
+                captureRange = 5;
+                capturePercentage = 1.0;
+            }
             MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
             for (MapLocation ml : affected) {
                 if (isValid(ml.x, ml.y)) {
-                    delta += this.currentAmount[ml.x][ml.y];
+                    delta += this.currentAmount[ml.x][ml.y] * capturePercentage;
                 }
             }
         }
