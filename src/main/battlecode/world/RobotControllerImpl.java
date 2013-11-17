@@ -707,7 +707,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
     		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
     	double cost = GameConstants.BROADCAST_SEND_COST;
-    	assertHaveResource(cost);
+    	//assertHaveResource(cost);
     	
     	robot.addBroadcast(channel, data);
     	//gameWorld.adjustResources(getTeam(), -cost);
@@ -719,7 +719,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
     		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
     	double cost = GameConstants.BROADCAST_READ_COST;
-    	assertHaveResource(cost);
+    	//assertHaveResource(cost);
     	int m = gameWorld.getMessage(robot.getTeam(), channel);
     	//gameWorld.adjustResources(getTeam(), -cost);
     	return m;
@@ -732,7 +732,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public void wearHat() throws GameActionException {
     	if (getType() != RobotType.SOLDIER)
     		throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERS can wear hats.");
-    	assertHaveResource(GameConstants.HAT_POWER_COST);
+    	//assertHaveResource(GameConstants.HAT_POWER_COST);
     	assertNotMoving();
     	//gameWorld.adjustResources(getTeam(), -GameConstants.HAT_POWER_COST);
     	robot.activateMovement(new HatSignal(robot, gameWorld.randGen.nextInt()), 1);
