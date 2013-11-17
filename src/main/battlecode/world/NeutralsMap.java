@@ -91,7 +91,7 @@ public class NeutralsMap {
     public double[][] copyOfData() {
         double[][] cowsCopy = new double[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
-            System.arraycopy(this.currentAmount[i], 0, cowsCopy[i], 0,
+            System.arraycopy(this.growthFactor[i], 0, cowsCopy[i], 0,
                 this.mapHeight);
         }
         return cowsCopy;
