@@ -217,6 +217,8 @@ public interface RobotController {
      */
     public boolean senseEncampmentSquare(MapLocation loc);
 
+    public double[][] senseCows();
+
     // ***********************************
     // ****** MOVEMENT METHODS ********
     // ***********************************

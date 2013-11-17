@@ -586,6 +586,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
     }
 
+    public double[][] senseCows() {
+        return gameWorld.getCowsCopy();
+    }
+
     // ***********************************
     // ****** MOVEMENT METHODS ********
     // ***********************************

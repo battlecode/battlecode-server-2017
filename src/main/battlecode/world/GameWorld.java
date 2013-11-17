@@ -123,6 +123,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return gameMap;
     }
 
+    public double[][] getCowsCopy() {
+        return gameMap.getNeutralsMap().copyOfData();
+    }
+
     public void processBeginningOfRound() {
         currentRound++;
         

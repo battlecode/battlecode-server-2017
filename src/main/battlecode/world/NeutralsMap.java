@@ -88,6 +88,15 @@ public class NeutralsMap {
         }
     }
 
+    public double[][] copyOfData() {
+        double[][] cowsCopy = new double[this.mapWidth][this.mapHeight];
+        for (int i = 0; i < this.mapWidth; i++) {
+            System.arraycopy(this.currentAmount[i], 0, cowsCopy[i], 0,
+                this.mapHeight);
+        }
+        return cowsCopy;
+    }
+
     public boolean isValid(int x, int y) {
         return x >= 0 && x < this.mapWidth && y >= 0 && y < this.mapHeight && passable[x][y];
     }
