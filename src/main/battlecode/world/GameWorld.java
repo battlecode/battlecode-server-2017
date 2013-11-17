@@ -199,9 +199,18 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         	
 //        	if both are killed by time limit damage in the same round, then more tie breakers
         	if (baseHQs.get(Team.A).getEnergonLevel() <= 0.0 && baseHQs.get(Team.B).getEnergonLevel() <= 0.0 || true) {
-        		// TODO more TIE BREAKHERS HERE
+                // main tie breaker = milk
             	InternalRobot HQA = baseHQs.get(Team.A);
             	InternalRobot HQB = baseHQs.get(Team.B);
+                if (!(setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.BARELY_BEAT)))
+                {
+                    if (HQA.getID() < HQB.getID())
+                        setWinner(Team.B, DominationFactor.WON_BY_DUBIOUS_REASONS);
+                    else
+                        setWinner(Team.A, DominationFactor.WON_BY_DUBIOUS_REASONS);
+                }
+        
+        		// TODO more TIE BREAKHERS HERE (these are not real tiebreakers here yet)
             	double diff = HQA.getEnergonLevel() - HQB.getEnergonLevel();
             	
             	double campdiff = getEncampmentsByTeam(Team.A).size() - getEncampmentsByTeam(Team.B).size();
@@ -239,15 +248,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         roundStats = new RoundStats(teamResources[0] * 100, teamResources[1] * 100, teamRoundResources[0] * 100, teamRoundResources[1] * 100);
         
-        for (int x=0; x<teamResources.length; x++)
-        {
-        	if (hasUpgrade(Team.values()[x], Upgrade.FUSION))
-            	teamResources[x] = teamResources[x]*GameConstants.POWER_DECAY_RATE_FUSION;
-        	else
-        		teamResources[x] = teamResources[x]*GameConstants.POWER_DECAY_RATE;
-//        	System.out.print(teamResources[x]+" ");
-        }
-//        System.out.println();
+        // MILK
+        teamResources[Team.A.ordinal()] += gameMap.getNeutralsMap().getScoreChange(Team.A, gameObjects);
+        teamResources[Team.B.ordinal()] += gameMap.getNeutralsMap().getScoreChange(Team.B, gameObjects);
         
         lastRoundResources = teamRoundResources;
         teamRoundResources = new double[2];

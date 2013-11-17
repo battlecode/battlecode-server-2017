@@ -10,6 +10,7 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.MovementType;
 import battlecode.common.RobotType;
+import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.InternalObject;
@@ -115,6 +116,25 @@ public class NeutralsMap {
             System.out.println();
         }
         System.out.println("END Neutrals Map");
+    }
+
+    public double getScoreChange(Team t, InternalObject[] objs) {
+        double delta = 0.0;
+        for (InternalObject obj : objs) {
+            InternalRobot ir = (InternalRobot) obj;
+            if (ir.getTeam() != t) {
+                continue;
+            }
+            int captureRange = 0;
+            if (ir.type == RobotType.PASTR) captureRange = 5;
+            MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
+            for (MapLocation ml : affected) {
+                if (isValid(ml.x, ml.y)) {
+                    delta += this.currentAmount[ml.x][ml.y];
+                }
+            }
+        }
+        return delta;
     }
 
     @SuppressWarnings("unchecked")

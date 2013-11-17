@@ -167,8 +167,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public void yield() {
         int bytecodesBelowBase = GameConstants.BYTECODE_LIMIT - RobotMonitor.getBytecodesUsed();
-        if (bytecodesBelowBase > 0)
-            gameWorld.adjustResources(getTeam(), GameConstants.POWER_COST_PER_BYTECODE * bytecodesBelowBase);
+        //if (bytecodesBelowBase > 0)
+            //gameWorld.adjustResources(getTeam(), GameConstants.POWER_COST_PER_BYTECODE * bytecodesBelowBase);
         RobotMonitor.endRunner();
     }
 
@@ -710,7 +710,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	assertHaveResource(cost);
     	
     	robot.addBroadcast(channel, data);
-    	gameWorld.adjustResources(getTeam(), -cost);
+    	//gameWorld.adjustResources(getTeam(), -cost);
     	
     }
     
@@ -721,7 +721,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	double cost = GameConstants.BROADCAST_READ_COST;
     	assertHaveResource(cost);
     	int m = gameWorld.getMessage(robot.getTeam(), channel);
-    	gameWorld.adjustResources(getTeam(), -cost);
+    	//gameWorld.adjustResources(getTeam(), -cost);
     	return m;
     }
 
@@ -734,7 +734,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     		throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERS can wear hats.");
     	assertHaveResource(GameConstants.HAT_POWER_COST);
     	assertNotMoving();
-    	gameWorld.adjustResources(getTeam(), -GameConstants.HAT_POWER_COST);
+    	//gameWorld.adjustResources(getTeam(), -GameConstants.HAT_POWER_COST);
     	robot.activateMovement(new HatSignal(robot, gameWorld.randGen.nextInt()), 1);
     }
    

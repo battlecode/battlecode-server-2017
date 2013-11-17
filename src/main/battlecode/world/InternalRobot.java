@@ -148,8 +148,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         // TODO we can do beginning of round damage/healing/etc here
     	// TODO also, resoruce generation is done here
         // TODO CORY FIX IT
-        if (type == RobotType.HQ)
-        	myGameWorld.adjustResources(getTeam(), GameConstants.HQ_POWER_PRODUCTION);
+        //if (type == RobotType.HQ)
+        	//myGameWorld.adjustResources(getTeam(), GameConstants.HQ_POWER_PRODUCTION);
         //else if (type == RobotType.GENERATOR)
         //	myGameWorld.adjustResources(getTeam(), GameConstants.GENERATOR_POWER_PRODUCTION);
         //else if (type == RobotType.SUPPLIER)
@@ -168,14 +168,14 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 //        }
     	
         if (upkeepEnabled && canExecuteCode()) {
-            upkeepPaid = myGameWorld.resources(getTeam()) > GameConstants.BYTECODE_LIMIT*GameConstants.POWER_COST_PER_BYTECODE + GameConstants.UNIT_POWER_UPKEEP;
-            if (upkeepPaid)
-                myGameWorld.adjustResources(getTeam(), -(GameConstants.BYTECODE_LIMIT*GameConstants.POWER_COST_PER_BYTECODE + GameConstants.UNIT_POWER_UPKEEP));
-            else // we need to subtract energon
-            {
-            	this.takeDamage(GameConstants.UNIT_ENERGON_UPKEEP);
+            //upkeepPaid = myGameWorld.resources(getTeam()) > GameConstants.BYTECODE_LIMIT*GameConstants.POWER_COST_PER_BYTECODE + GameConstants.UNIT_POWER_UPKEEP;
+            //if (upkeepPaid)
+            //    myGameWorld.adjustResources(getTeam(), -(GameConstants.BYTECODE_LIMIT*GameConstants.POWER_COST_PER_BYTECODE + GameConstants.UNIT_POWER_UPKEEP));
+            //else // we need to subtract energon
+            //{
+            //	this.takeDamage(GameConstants.UNIT_ENERGON_UPKEEP);
             	upkeepPaid = true;
-            }
+            //}
         } else
             upkeepPaid = true;
     }
@@ -226,7 +226,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         		}
         	} else if (capturingRounds > 0) {
         		if (--capturingRounds==0) {
-                    System.out.println("CAPTURED!");
         			myGameWorld.visitSignal(new SpawnSignal(getLocation(), capturingType, getTeam(), this));
         			capturingRounds = -1;
         			suicide();
@@ -470,7 +469,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
     
     public void activateCapturing(CaptureSignal s, int delay) {
-        System.out.println("ACTIVATE CAPTURING! with delay " + delay);
     	myGameWorld.visitSignal(s);
     	turnsUntilAttackIdle = delay;
     	turnsUntilMovementIdle = delay;
