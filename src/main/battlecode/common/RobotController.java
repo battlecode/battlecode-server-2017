@@ -387,6 +387,8 @@ public interface RobotController {
      */
     public void suicide();
 
+    public void selfDestruct();
+
     /**
      * Causes your team to lose the game. It's like typing "gg."
      */

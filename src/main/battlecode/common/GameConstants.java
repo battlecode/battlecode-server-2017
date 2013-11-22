@@ -142,4 +142,7 @@ public interface GameConstants {
 
     public static final double WIN_QTY = 1000000.0;
     public static final double ROBOT_MILK_PERCENTAGE = 0.05;
+
+    public static final double SELF_DESTRUCT_BASE_DAMAGE = 10.0; // a
+    public static final double SELF_DESTRUCT_DAMAGE_FACTOR = 0.5; // b -> a + health / b = damage
 }

@@ -52,6 +52,7 @@ import battlecode.world.signal.RegenSignal;
 import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.ResearchChangeSignal;
 import battlecode.world.signal.ScanSignal;
+import battlecode.world.signal.SelfDestructSignal;
 import battlecode.world.signal.SetDirectionSignal;
 import battlecode.world.signal.ShieldChangeSignal;
 import battlecode.world.signal.ShieldSignal;
@@ -644,6 +645,28 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void visitSignal(Signal s) {
         signalHandler.visitSignal(s);
+    }
+
+    public void visitSelfDestructSignal(SelfDestructSignal s) {
+        InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
+        MapLocation targetLoc = s.getLoc();
+        RobotLevel level = RobotLevel.ON_GROUND;
+
+
+        double damage = GameConstants.SELF_DESTRUCT_BASE_DAMAGE;
+        damage += attacker.getEnergonLevel() * GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR;
+        InternalRobot target;
+        for (int dx = -1; dx <= 1; dx++)
+            for (int dy = -1; dy <= 1; dy++) {
+
+                target = getRobot(targetLoc.add(dx, dy), level);
+
+                if (target != null)
+                    if (!(dx == 0 && dy == 0))
+                        target.takeDamage(damage, attacker);
+            }
+
+        gameMap.getNeutralsMap().updateWithNoiseSource(targetLoc, GameConstants.ATTACK_SCARE_RANGE);
     }
 
     public void visitAttackSignal(AttackSignal s) {

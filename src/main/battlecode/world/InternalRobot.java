@@ -20,6 +20,7 @@ import battlecode.world.signal.CaptureSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.RegenSignal;
+import battlecode.world.signal.SelfDestructSignal;
 import battlecode.world.signal.ShieldSignal;
 import battlecode.world.signal.SpawnSignal;
 
@@ -69,6 +70,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     private int roundsSinceLastDamage;
 
+    private boolean didSelfDestruct;
+
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
                          boolean spawnedRobot) {
@@ -99,6 +102,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 //            turnsUntilMovementIdle = GameConstants.WAKE_DELAY;
 //            turnsUntilAttackIdle = GameConstants.WAKE_DELAY;
 //        }
+
+        didSelfDestruct = false;
         
     }
     
@@ -507,7 +512,14 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 //        saveMapMemory(getLocation());
     }
 
+    public void setSelfDestruct() {
+        didSelfDestruct = true;
+    }
+
     public void suicide() {
+        if (didSelfDestruct) {
+            (new SelfDestructSignal(this, getLocation())).accept(myGameWorld);
+        }
         (new DeathSignal(this)).accept(myGameWorld);
     }
 

@@ -284,6 +284,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         gameWorld.removeDead();
     }
 
+    public void selfDestruct() {
+        robot.setSelfDestruct();
+        throw new RobotDeathException();
+    }
+
     public void suicide() {
         throw new RobotDeathException();
     }
