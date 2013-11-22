@@ -349,7 +349,7 @@ public interface RobotController {
      * @param type
      * @throws GameActionException
      */
-    public void captureEncampment(RobotType type) throws GameActionException;
+    public void construct(RobotType type) throws GameActionException;
     
     /**
      * Checks how much power it costs to start a capture an encampment on this turn

@@ -193,7 +193,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         		);
     }
     
-    public void captureEncampment(RobotType type) throws GameActionException {
+    public void construct(RobotType type) throws GameActionException {
     	if (robot.type != RobotType.SOLDIER)
             throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can capture encampments.");
     	if (!type.isEncampment)
