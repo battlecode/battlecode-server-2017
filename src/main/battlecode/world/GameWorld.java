@@ -95,6 +95,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     // robots to remove from the game at end of turn
     private List<InternalRobot> deadRobots = new ArrayList<InternalRobot>();
+    private List<InternalRobot> revealedRobots = new ArrayList<InternalRobot>();
+    private List<InternalRobot> nextRevealedRobots = new ArrayList<InternalRobot>();
 
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldArchonMemory) {
@@ -184,6 +186,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             gameObjects[i].processEndOfRound();
         }
         removeDead();
+
+        updateRevealedRobots();
 
         // update neutrals
         gameMap.getNeutralsMap().next(gameObjects);
@@ -633,6 +637,17 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         if (current)
             throw new RobotDeathException();
     }
+
+    public void updateRevealedRobots() {
+        revealedRobots.clear();
+        revealedRobots.addAll(nextRevealedRobots);
+        nextRevealedRobots.clear();
+    }
+
+    // TODO(axc): maybe we should return a copy
+    public List<InternalRobot> getRevealedRobots() {
+        return revealedRobots;
+    }
     
     public void setHQ(InternalRobot r, Team t) {
         baseHQs.put(t, r);
@@ -731,6 +746,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public void visitBroadcastSignal(BroadcastSignal s) {        
+        nextRevealedRobots.add((InternalRobot) getObjectByID(s.getRobotID()));
     	radio.get(s.getRobotTeam()).putAll(s.broadcastMap);
     	s.broadcastMap = null;
         addSignal(s);

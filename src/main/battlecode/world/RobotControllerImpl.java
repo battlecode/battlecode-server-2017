@@ -404,6 +404,19 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         };
         return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
     }
+
+    public Robot[] senseBroadcastingRobots() {
+        return robot.myGameWorld.getRevealedRobots().toArray(new Robot[0]);
+    }
+
+    public Robot[] senseBroadcastingRobots(final Team t) {
+        Predicate<Robot> p = new Predicate<Robot>() {
+            public boolean apply(Robot r) {
+                return r.getTeam() == t;
+            }
+        };
+        return Iterables.toArray(Iterables.filter(robot.myGameWorld.getRevealedRobots(), p), Robot.class);
+    }
    
     
     /**

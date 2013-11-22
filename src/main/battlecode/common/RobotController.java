@@ -109,6 +109,9 @@ public interface RobotController {
      * @return array of class type of game objects
      */
     public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type, MapLocation center, int radiusSquared, Team team);
+
+    public Robot[] senseBroadcastingRobots();
+    public Robot[] senseBroadcastingRobots(Team t);
     
     
     /**
