@@ -127,7 +127,7 @@ public interface GameConstants {
     public static final double HAT_POWER_COST = 40.0;
 
     /** Cow value decay per turn */
-    public static final double NEUTRALS_TURN_DECAY = 1.0; // TODO(axc): .995
+    public static final double NEUTRALS_TURN_DECAY = 0.995; // TODO(axc): .995
 
     /** Radius squared */
     public static final int MOVEMENT_SCARE_RANGE = 9;
