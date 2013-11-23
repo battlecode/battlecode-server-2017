@@ -16,6 +16,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.GameActionExceptionType;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
+import battlecode.common.MovementType;
 import battlecode.common.RobotLevel;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
@@ -653,6 +654,48 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         baseHQs.put(t, r);
     }
 
+    public double calculateMovementActionDelay(MapLocation from, MapLocation to, TerrainTile terrain, MovementType mt) {
+        double base = 1.0;
+        if (from.distanceSquaredTo(to) <= 1) {
+            switch (mt) {
+                case RUN:
+                    base = 3;
+                    break;
+                case SNEAK:
+                    base = 5;
+                    break;
+                default:
+                    base = 1000;
+                    break;
+            }
+        } else {
+            switch (mt) {
+                case RUN:
+                    base = 4.2;
+                    break;
+                case SNEAK:
+                    base = 7;
+                    break;
+                default:
+                    base = 1000;
+                    break;
+            }
+        }
+
+        if (terrain == TerrainTile.ROAD) {
+            base *= GameConstants.ROAD_ACTION_DELAY_FACTOR;
+        }
+        return base;
+    }
+
+    public double calculateAttackActionDelay(RobotType r) {
+        if (r == RobotType.SOLDIER) {
+            return GameConstants.SOLDIER_ATTACK_ACTION_DELAY;
+        } else {
+            return 1.0;
+        }
+    }
+
     // ******************************
     // SIGNAL HANDLER METHODS
     // ******************************
@@ -687,6 +730,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public void visitAttackSignal(AttackSignal s) {
 
         InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
+
+        attacker.addActionDelay(calculateAttackActionDelay(attacker.type));
+
         MapLocation targetLoc = s.getTargetLoc();
         RobotLevel level = s.getTargetHeight();
         
@@ -835,6 +881,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         MapLocation loc = s.getNewLoc();//(s.isMovingForward() ? r.getLocation().add(r.getDirection()) : r.getLocation().add(r.getDirection().opposite()));
 
         gameMap.getNeutralsMap().updateWithMovement(s);
+
+        r.addActionDelay(calculateMovementActionDelay(r.getLocation(), loc, gameMap.getTerrainTile(r.getLocation()), s.getMovementType()));
 
         r.setLocation(loc);
 

@@ -656,7 +656,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public boolean canMove(Direction d) {
         assertValidDirection(d);
-        return gameWorld.canMove(robot.getRobotLevel(), getLocation().add(d));
+        return gameWorld.canMove(robot.getRobotLevel(), getLocation().add(d)) && robot.getActionDelay() < 1.0;
     }
 
     public void assertCanMove(Direction d) throws GameActionException {
@@ -694,7 +694,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public boolean canAttackSquare(MapLocation loc) {
         assertNotNull(loc);
-        return GameWorld.canAttackSquare(robot, loc);
+        return GameWorld.canAttackSquare(robot, loc) && robot.getActionDelay() < 1.0;
     }
     
 //    public void attack() throws GameActionException {

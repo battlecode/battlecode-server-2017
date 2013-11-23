@@ -72,6 +72,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     private boolean didSelfDestruct;
 
+    private double actionDelay;
+
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
                          boolean spawnedRobot) {
@@ -105,6 +107,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
         didSelfDestruct = false;
         
+        actionDelay = 0.0;
     }
     
     public void clearResearching() {
@@ -136,6 +139,21 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void addAction(Signal s) {
         myGameWorld.visitSignal(s);
     }
+
+    public void addActionDelay(double ad) {
+        actionDelay += ad;
+    }
+
+    public void decrementActionDelay() {
+        actionDelay--;
+        if (actionDelay < 0.0) {
+            actionDelay = 0.0;
+        }
+    }
+
+    public double getActionDelay() {
+        return actionDelay;
+    }
     
     public Upgrade getResearchingUpgrade() {
     	return researchUpgrade;
@@ -162,6 +180,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void processBeginningOfTurn() {
+        decrementActionDelay();
     	
     	// TODO we can do beginning of turn damage/healing/etc here
         // TODO CORY FIX IT
@@ -205,6 +224,12 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         
     	broadcastMap = new HashMap<Integer, Integer>();
         broadcasted = false;
+
+        int bytecodesPenalty = getBytecodesUsed() - GameConstants.FREE_BYTECODES;
+        if (bytecodesPenalty < 0) {
+            bytecodesPenalty = 0;
+        }
+        addActionDelay(bytecodesPenalty * GameConstants.BYTECODE_PENALTY);
         
       	// quick hack to make mining work. move me out later
         if (type == RobotType.SOLDIER) {
