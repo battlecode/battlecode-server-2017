@@ -140,7 +140,7 @@ public interface GameConstants {
 
     public static final int PASTR_RANGE = 5;
 
-    public static final double WIN_QTY = 1000000.0;
+    public static final double WIN_QTY = 10000000.0;
     public static final double ROBOT_MILK_PERCENTAGE = 0.05;
 
     public static final double SELF_DESTRUCT_BASE_DAMAGE = 10.0; // a
