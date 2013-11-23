@@ -225,11 +225,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	broadcastMap = new HashMap<Integer, Integer>();
         broadcasted = false;
 
-        int bytecodesPenalty = getBytecodesUsed() - GameConstants.FREE_BYTECODES;
-        if (bytecodesPenalty < 0) {
-            bytecodesPenalty = 0;
+        if (type != RobotType.HQ) {
+            int bytecodesPenalty = getBytecodesUsed() - GameConstants.FREE_BYTECODES;
+            if (bytecodesPenalty < 0) {
+                bytecodesPenalty = 0;
+            }
+            addActionDelay(bytecodesPenalty * GameConstants.BYTECODE_PENALTY);
         }
-        addActionDelay(bytecodesPenalty * GameConstants.BYTECODE_PENALTY);
         
       	// quick hack to make mining work. move me out later
         if (type == RobotType.SOLDIER) {
