@@ -301,6 +301,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //****** SENSING METHODS *******
     //***********************************
 
+    public int senseRobotCount() {
+        return gameWorld.countRobots(getTeam());
+    }
+
     public void assertCanSense(MapLocation loc) throws GameActionException {
         if (!checkCanSense(loc))
             throw new GameActionException(CANT_SENSE_THAT, "That location is not within the robot's sensor range.");
@@ -604,8 +608,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
     }
 
-    public double[][] senseCows() {
+    public double[][] senseCowGrowth() {
         return gameWorld.getCowsCopy();
+    }
+
+    public double senseCowsAtLocation(MapLocation m) throws GameActionException {
+        assertCanSense(m);
+        return gameWorld.getGameMap().getNeutralsMap().get(m);
     }
 
     // ***********************************

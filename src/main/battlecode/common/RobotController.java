@@ -73,6 +73,8 @@ public interface RobotController {
     // ****** SENSOR METHODS ********
     // ***********************************
 
+    public int senseRobotCount();
+
     /**
      * Returns the object at the given location, or <code>null</code>
      * if there is no object there.
@@ -220,7 +222,9 @@ public interface RobotController {
      */
     public boolean senseEncampmentSquare(MapLocation loc);
 
-    public double[][] senseCows();
+    public double[][] senseCowGrowth();
+
+    public double senseCowsAtLocation(MapLocation loc) throws GameActionException;
 
     // ***********************************
     // ****** MOVEMENT METHODS ********

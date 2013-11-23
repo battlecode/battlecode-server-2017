@@ -89,6 +89,14 @@ public class NeutralsMap {
         }
     }
 
+    public double get(MapLocation m) {
+        if (isValid(m.x, m.y)) {
+            return currentAmount[m.x][m.y];
+        } else {
+            return 0;
+        }
+    }
+
     public double[][] copyOfData() {
         double[][] cowsCopy = new double[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
