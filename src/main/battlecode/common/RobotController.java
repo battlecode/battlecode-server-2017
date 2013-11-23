@@ -15,6 +15,8 @@ public interface RobotController {
     // ****** QUERY METHODS ********
     // *********************************
 
+    public double getActionDelay();
+
     /**
      * @return this robot's current energon level
      */
