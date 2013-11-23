@@ -288,7 +288,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         gameWorld.removeDead();
     }
 
-    public void selfDestruct() {
+    public void selfDestruct() throws GameActionException {
+        if (robot.type != RobotType.SOLDIER) {
+            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT_BRO, "only soldiers can self destruct");
+        }
         robot.setSelfDestruct();
         throw new RobotDeathException();
     }

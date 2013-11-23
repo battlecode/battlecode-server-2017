@@ -152,4 +152,6 @@ public interface GameConstants {
     public static final double SOLDIER_ATTACK_ACTION_DELAY = 3.0;
 
     public static final double ROAD_ACTION_DELAY_FACTOR = 0.7;
+
+    public static final double MILK_GAIN_FACTOR = 0.1; // get this * WIN_QTY after destroying pastr
 }

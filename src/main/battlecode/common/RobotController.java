@@ -396,7 +396,7 @@ public interface RobotController {
      */
     public void suicide();
 
-    public void selfDestruct();
+    public void selfDestruct() throws GameActionException;
 
     /**
      * Causes your team to lose the game. It's like typing "gg."

@@ -745,11 +745,17 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
 					target = getRobot(targetLoc.add(dx, dy), level);
 
-					if (target != null)
+					if (target != null) {
 						if (dx == 0 && dy == 0)
 							target.takeDamage(attacker.type.attackPower, attacker);
 						else
 							target.takeDamage(attacker.type.splashPower, attacker);
+
+                        // kill enemy pastr --> we gain milk
+                        if (target.getEnergonLevel() <= 0.0 && target.getTeam() != attacker.getTeam()) {
+                            adjustResources(attacker.getTeam(), GameConstants.WIN_QTY * GameConstants.MILK_GAIN_FACTOR);
+                        }
+                    }
 				}
 
             gameMap.getNeutralsMap().updateWithAttack(s);
