@@ -224,6 +224,8 @@ public interface RobotController {
      */
     public boolean senseEncampmentSquare(MapLocation loc);
 
+    public MapLocation[] sensePastrLocations(Team t);
+
     public double[][] senseCowGrowth();
 
     public double senseCowsAtLocation(MapLocation loc) throws GameActionException;

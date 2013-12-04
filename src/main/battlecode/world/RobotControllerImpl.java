@@ -428,7 +428,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         };
         return Iterables.toArray(Iterables.filter(robot.myGameWorld.getRevealedRobots(), p), Robot.class);
     }
-   
+
     
     /**
      * Private version used for engine checks to see if there is a robot w/ a given characteristic
@@ -614,6 +614,19 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	};
     	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
     }
+
+    // TODO(axc): write this more cleanly
+    public MapLocation[] sensePastrLocations(final Team t) {
+        ArrayList<MapLocation> res = new ArrayList<MapLocation>();
+        for (InternalObject obj : gameWorld.allObjects()) {
+            InternalRobot ir = (InternalRobot) obj;
+            if (obj.getTeam() == t && ir.type == RobotType.PASTR) {
+                res.add(ir.getLocation());
+            }
+        }
+        return res.toArray(new MapLocation[0]);
+    }
+   
 
     public double[][] senseCowGrowth() {
         return gameWorld.getCowsCopy();
