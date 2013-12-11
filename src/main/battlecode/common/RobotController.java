@@ -26,11 +26,6 @@ public interface RobotController {
      * @return this robot's current shield level
      */
     public double getShields();
-    
-    /**
-     * @return total amount of power in the team's power stockpile
-     */
-    public double getTeamPower();
 
     /**
      * @return this robot's current location
@@ -141,65 +136,7 @@ public interface RobotController {
      * Returns true if the given location is within the team's shared sensor range
      */
     public boolean canSenseSquare(MapLocation loc);
-
-    /**
-     * @return array of map location containing all encampment squares on the map
-     * @see #senseEncampmentSquares(MapLocation, int, Team)
-     */
-    public MapLocation[] senseAllEncampmentSquares();
     
-    /**
-     * @return array of all encampment squares owned by the allied team
-     * @see #senseEncampmentSquares(MapLocation, int, Team)
-     */
-    public MapLocation[] senseAlliedEncampmentSquares();
-    
-    /**
-     * Senses all encampment squares owned by the given team within the given circular area
-     * 
-     * Allows a team-based filter which can be one of the following parameters:
-     * <ul>
-     * <li>Null - Senses _all_ encampments on the map
-     * <li>Neutral - Senses all encampments not owned by the allied team, so neutral or enemy
-     * <li>Allied Team - Senses all encampments owned by the allied team
-     * </ui>
-     * Note that you cannot sense all enemy-owned encampments
-     * 
-     * @param center - center location of circle to search for encampment squares
-     * @param radiusSquared - radius around the center to search for encampment squares
-     * @param team - team filter (null, allied team, or neutral team, see usage above)
-     * @return Array of map locations containing encampment squares satisfying the criteria
-     * @throws GameActionException - attempting to search all enemy encampment squares
-     */
-    public MapLocation[] senseEncampmentSquares(MapLocation center, int radiusSquared, Team team) throws GameActionException;
-
-    /**
-     * Senses whether a mine exists at a given location
-     * @param location to scan
-     * @return either the TEAM of the mine at the given location or null if sensors think there is no mine 
-     */
-    public Team senseMine(MapLocation location);
-   
-    /**
-     * Returns all mines within a given search radius specified by the parameters
-     * @param center - center of the search area
-     * @param radiusSquared - radius around the center to include mines
-     * @param team - only return mines of this team. If null is passed, all team's mines are returned
-     * @return An array of MapLocations containing mine locations
-     */
-    public MapLocation[] senseMineLocations(MapLocation center, int radiusSquared, Team team);
-   
-    /**
-     * Similar to {@link #senseMineLocations(MapLocation, int, Team)} except the team is "non-allied"
-     * which includes both known enemy and neutral mines.
-     * 
-     * @param center - center of the search area
-     * @param radiusSquared - radius around the center to include
-     * @see #senseMineLocations(MapLocation, int, Team)
-     * @return Array of MapLocations containing non-allied mines
-     */
-    public MapLocation[] senseNonAlliedMineLocations(MapLocation center, int radiusSquared);
-
     /**
      * @return location of the allied team's HQ
      */
@@ -210,20 +147,6 @@ public interface RobotController {
      */
     public MapLocation senseEnemyHQLocation();
     
-    /**
-     * Senses the enemy team's NUKE research progress - only HQ can do this
-     * @return true if the enemy team's NUKE is at least halfway researched.
-     * @throws GameActionException if not HQ
-     */
-    public boolean senseEnemyNukeHalfDone() throws GameActionException;
-    
-    /**
-     * Checks if the given map location is an encampment square.
-     * Returns true if an encampment can be built on the square regardless of whether
-     * there already exists an encampment on the square
-     */
-    public boolean senseEncampmentSquare(MapLocation loc);
-
     public MapLocation[] sensePastrLocations(Team t);
 
     public double[][] senseCowGrowth();
@@ -326,34 +249,8 @@ public interface RobotController {
      * Checks whether a given upgrade has been researched and is available.
      * @param upgrade cannot be null
      */
-    public boolean hasUpgrade(Upgrade upgrade);
-    
-    
-    /**
-     * SOLDIER only
-     * Lays mines. A robot cannot move until the mine is laid
-     * 
-     * @throws GameActionException
-     */
-    public void layMine() throws GameActionException;
-    
+    //public boolean hasUpgrade(Upgrade upgrade);
 
-		/**
-     * SOLDIER only
-     * Checks how many rounds are left for the current mine being laid, if any.
-     * 
-     * @throws GameActionException
-     */
-    public int senseMineRoundsLeft() throws GameActionException;
-
-    /**
-     * SOLDIER only
-     * Defuses a mine on the target square. A robot cannot move until the defusion is complete.
-     * 
-     * @throws GameActionException
-     */
-    public void defuseMine(MapLocation loc) throws GameActionException;
-    
     /**
      * Captures the encampment soldier is standing on. 
      * After a capture delay, kills the soldier and spawns a robot of the given encampment type
@@ -363,17 +260,12 @@ public interface RobotController {
     public void construct(RobotType type) throws GameActionException;
     
     /**
-     * Checks how much power it costs to start a capture an encampment on this turn
-     */
-    public double senseCaptureCost();
-   
-    /**
      * HQ ONLY.
      * Researches the given upgrade for a turn.
      * @param upgrade
      * @throws GameActionException
      */
-    public void researchUpgrade(Upgrade upgrade) throws GameActionException;
+    //public void researchUpgrade(Upgrade upgrade) throws GameActionException;
     
     /**
      * HQ ONLY.
@@ -382,7 +274,7 @@ public interface RobotController {
      * @return the number of rounds that have been spent upgrading
      * @throws GameActionException
      */
-    public int checkResearchProgress(Upgrade upgrade) throws GameActionException;
+    //public int checkResearchProgress(Upgrade upgrade) throws GameActionException;
     
     
     /**
