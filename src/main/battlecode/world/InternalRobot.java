@@ -507,7 +507,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	capturingRounds = delay;
     	capturingType = s.getType();
     }
-    
+
     public int getMiningRounds() {
     	return miningRounds;
     }

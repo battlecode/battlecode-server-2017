@@ -165,6 +165,18 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	return robot.myGameWorld.getGameMap().getHeight();
     }
 
+    public boolean isConstructing() {
+        return getConstructingType() != null;
+    }
+
+    public RobotType getConstructingType() {
+        return robot.getCapturingType();
+    }
+
+    public int getConstructingRounds() {
+        return robot.getCapturingRounds();
+    }
+
     //***********************************
     //****** ACTION METHODS *************
     //***********************************

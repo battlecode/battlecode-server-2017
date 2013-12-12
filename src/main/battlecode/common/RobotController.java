@@ -66,6 +66,10 @@ public interface RobotController {
      */
     public RobotType getType();
 
+    public boolean isConstructing();
+    public RobotType getConstructingType();
+    public int getConstructingRounds();
+
     // ***********************************
     // ****** SENSOR METHODS ********
     // ***********************************
