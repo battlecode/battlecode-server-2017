@@ -147,6 +147,8 @@ public class NeutralsMap {
             if (ir.type == RobotType.PASTR) {
                 captureRange = 5;
                 capturePercentage = 1.0;
+            } else if (ir.type == RobotType.WALL) {
+                capturePercentage = 0.0;
             }
             MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
             for (MapLocation ml : affected) {
