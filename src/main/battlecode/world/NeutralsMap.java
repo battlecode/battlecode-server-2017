@@ -148,7 +148,7 @@ public class NeutralsMap {
                 captureRange = 5;
                 capturePercentage = 1.0;
             } else if (ir.type == RobotType.WALL) {
-                capturePercentage = 0.0;
+                continue;
             }
             MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
             for (MapLocation ml : affected) {
@@ -165,6 +165,7 @@ public class NeutralsMap {
         InternalRobot ir = (InternalRobot) obj;
         int captureRange = 0;
         if (ir.type == RobotType.PASTR) captureRange = 5;
+        else if (ir.type == RobotType.WALL) return;
         MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
         for (MapLocation ml : affected) {
             if (isValid(ml.x, ml.y)) {
@@ -249,7 +250,6 @@ public class NeutralsMap {
         }
 
         //this.print();
-        this.resetAfterTurn();
     }
 
     public void updateWithNoiseSource(MapLocation source, int radiusSquared) {

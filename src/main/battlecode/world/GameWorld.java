@@ -266,6 +266,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         lastRoundResources = teamRoundResources;
         teamRoundResources = new double[2];
 
+        gameMap.getNeutralsMap().resetAfterTurn();
     }
 
     public boolean setWinnerIfNonzero(double n, DominationFactor d) {
