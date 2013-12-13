@@ -153,7 +153,7 @@ public class NeutralsMap {
             MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
             for (MapLocation ml : affected) {
                 if (isValid(ml.x, ml.y)) {
-                    delta += this.currentAmount[ml.x][ml.y] * capturePercentage;
+                    delta += this.currentAmount[ml.x][ml.y] * capturePercentage / ids[ml.x][ml.y].size();
                 }
             }
         }

@@ -128,7 +128,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getActionDelay();
     }
 
-    public double getEnergon() {
+    public double getHealth() {
         return robot.getEnergonLevel();
     }
 

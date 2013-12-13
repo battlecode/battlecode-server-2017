@@ -20,7 +20,7 @@ public interface RobotController {
     /**
      * @return this robot's current energon level
      */
-    public double getEnergon();
+    public double getHealth();
     
     /**
      * @return this robot's current shield level

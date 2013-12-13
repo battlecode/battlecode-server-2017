@@ -20,7 +20,7 @@ public class RobotInfo {
     /**
      * The energon of this Robot.
      */
-    public final double energon;
+    public final double health;
     /**
      * The shields of this Robot.
      */
@@ -52,7 +52,7 @@ public class RobotInfo {
         super();
         this.robot = robot;
         this.location = location;
-        this.energon = hitpoints;
+        this.health = hitpoints;
         this.shields = shields;
         this.direction = direction;
         this.type = type;
