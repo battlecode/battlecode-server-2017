@@ -121,7 +121,7 @@ public class NeutralsMap {
 
     public boolean isValid(int x, int y, int fromX, int fromY) {
         if (!isValid(x, y)) return false;
-        return ids[x][y].equals(ids[fromX][fromY]);
+        return ids[x][y].equals(ids[fromX][fromY]) || ids[fromX][fromY].size() == 0;
     }
 
     public void print() {
