@@ -45,10 +45,15 @@ public class RobotInfo {
     public final int roundsUntilAttackIdle;
     public final int roundsUntilMovementIdle;
 
+    public final boolean isConstructing;
+    public final RobotType constructingType;
+    public final int constructingRounds;
+
     public RobotInfo(Robot robot, MapLocation location,
                      double hitpoints, double shields, Direction direction,
                      RobotType type, Team team, boolean regen,
-                     int roundsUntilAttackIdle, int roundsUntilMovementIdle) {
+                     int roundsUntilAttackIdle, int roundsUntilMovementIdle,
+                     boolean isConstructing, RobotType constructingType, int constructingRounds) {
         super();
         this.robot = robot;
         this.location = location;
@@ -60,6 +65,10 @@ public class RobotInfo {
         this.regen = regen;
         this.roundsUntilAttackIdle = roundsUntilAttackIdle;
         this.roundsUntilMovementIdle = roundsUntilMovementIdle;
+
+        this.isConstructing = isConstructing;
+        this.constructingType = constructingType;
+        this.constructingRounds = constructingRounds;
     }
 
     public int hashCode() {

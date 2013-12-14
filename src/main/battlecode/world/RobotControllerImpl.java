@@ -462,7 +462,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertCanSense(ir);
         return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getShieldLevel(),
                 ir.getDirection(), ir.type, ir.getTeam(), ir.getRegen(),
-                ir.roundsUntilAttackIdle(), ir.roundsUntilMovementIdle());
+                ir.roundsUntilAttackIdle(), ir.roundsUntilMovementIdle(),
+                ir.getCapturingType() != null, ir.getCapturingType(), ir.getCapturingRounds());
     }
     
     public boolean senseEnemyNukeHalfDone() throws GameActionException {
