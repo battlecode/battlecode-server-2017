@@ -8,9 +8,10 @@ public enum RobotType {
                                    35, 360,        0, 15,  360,    0,     50,      true,   false,   25,     0,    0),
     SOLDIER     (ON_GROUND, 100,   35, 360,        0, 10,  360,    1,     10,      true,   false,   0,      1,    0),
     WALL        (ON_GROUND, 200,    0,   0,        0,  0,    0,    0,      0,     false,   true,    0,      0,   30),
-    NOISETOWER  (ON_GROUND, 100,    0,   0,        0,400,  360,    0,      0,      true,   true,    0,      5,  100),
-    PASTR       (ON_GROUND, 200,    0,   0,        0,  0,  360,    0,      0,     false,   true,    0,      1,   50),
-    MEDBAY      (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      2,      true,   true,    0,      1,   50),
+    NOISETOWER  (ON_GROUND, 100,   35,   0,        0,400,  360,    0,      0,      true,   true,    0,      3,  100),
+    PASTR       (ON_GROUND, 200,    5,   0,        0,  0,  360,    0,      0,     false,   true,    0,      2,   50),
+    
+	MEDBAY      (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      2,      true,   true,    0,      1,   50),
     SHIELDS     (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      10,     true,   true,    0,      1,   50),
     ARTILLERY   (ON_GROUND, 100,   14, 360,        0, 63,  360,    20,     60,     true,   true,    0,      1,   50),
     GENERATOR   (ON_GROUND, 100,   14, 360,        0, 0 ,  0,      0,      0,      true,   true,    0,      1,   50),
