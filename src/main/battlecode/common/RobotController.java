@@ -66,14 +66,28 @@ public interface RobotController {
      */
     public RobotType getType();
 
+	/**
+     * @return whether this robot is currently constructing a structure.
+     */
     public boolean isConstructing();
+	
+	/**
+     * @return the RobotType of the structure this robot is constructing.
+     */
     public RobotType getConstructingType();
+	
+	/**
+     * @return the number of turns left in the current construction.
+     */
     public int getConstructingRounds();
 
     // ***********************************
     // ****** SENSOR METHODS ********
     // ***********************************
 
+	/**
+     * @return the total number of robots controlled (with weighting).
+     */
     public int senseRobotCount();
 
     /**
@@ -113,7 +127,15 @@ public interface RobotController {
      */
     public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type, MapLocation center, int radiusSquared, Team team);
 
+	/**
+     * @return an array of all robots that have broadcasted in the last round.
+     */
     public Robot[] senseBroadcastingRobots();
+	
+	/**
+	 * @param t - filter robots by the given team.
+     * @return whether this robot is currently constructing a structure.
+     */
     public Robot[] senseBroadcastingRobots(Team t);
     
     
@@ -132,29 +154,45 @@ public interface RobotController {
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException;
 
     /**
-     * @return true if the given object is within the team's shared sensor range
+	 * Returns true if the given object is within the robot's sensor range
      */
     public boolean canSenseObject(GameObject o);
 
     /**
-     * Returns true if the given location is within the team's shared sensor range
+     * Returns true if the given location is within the robot's sensor range
      */
     public boolean canSenseSquare(MapLocation loc);
     
     /**
-     * @return location of the allied team's HQ
+     * Returns location of the allied team's HQ
      */
     public MapLocation senseHQLocation();
 
     /**
-     * @return location of the enemy team's HQ
+     * Returns location of the enemy team's HQ
      */
     public MapLocation senseEnemyHQLocation();
     
+	/**
+	 * Returns the locations of PASTRS filtered by a team
+	 * @param t - filter PASTR locations by the given team
+     * @return an array of all MapLocations of PASTR locations
+     */
     public MapLocation[] sensePastrLocations(Team t);
 
+	/**
+	 * Gives a representation of the cow growths of each location of the map
+	 *
+     * @return an array of arrays of doubles, where element [a][b] is the natural cow growth at MapLocation (a,b)
+     */
     public double[][] senseCowGrowth();
 
+	/**
+     * Returns the number of cows currently at a given location
+	 *
+	 * @param loc - location to sense at (must be within sensor range)
+	 * @return a double equal to how many cows are currently at the location
+     */
     public double senseCowsAtLocation(MapLocation loc) throws GameActionException;
 
     // ***********************************
@@ -178,6 +216,11 @@ public interface RobotController {
      */
     public void move(Direction dir) throws GameActionException;
 
+	/**
+     * Sneak in the given direction if possible.
+     * @param dir
+     * @throws GameActionException if the robot cannot move in this direction
+     */
     public void sneak(Direction dir) throws GameActionException;
 
     /**
@@ -195,18 +238,21 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * ARTILLERY only
      * @return true if the given location is within this robot's attack range.
      * Does not take into account whether the robot is currently attacking
      */
     public boolean canAttackSquare(MapLocation loc);
 
-    /**
-     * ARTILLERY only
-     * Attacks the given location and height.
+    /**   
+     * Attacks the given location. 
+	 * Also applies to NOISETOWER, but does not deal damage in that case.
      */
     public void attackSquare(MapLocation loc) throws GameActionException;
 
+	/**
+     * NOISETOWER only
+     * 'Attacks' the given location. Does not deal damage.
+     */
     public void attackSquareLight(MapLocation loc) throws GameActionException;
 
     // ***********************************
@@ -294,6 +340,9 @@ public interface RobotController {
      */
     public void suicide();
 
+	/**
+     * Kills your robot and deals area damage within distanceSquared 2 equal to <code>GameConstants.SELF_DESTRUCT_BASE_DAMAGE</code> plus the robot's current hp multiplied by <code>GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR</code>.
+     */
     public void selfDestruct() throws GameActionException;
 
     /**

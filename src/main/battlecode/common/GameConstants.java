@@ -24,7 +24,7 @@ public interface GameConstants {
     public static final int MAP_MAX_WIDTH = 70;
 
     /** A valid map must have at least this many encampment locations. */
-    public static final int MAP_MINIMUM_ENCAMPMENTS = 5;
+    //public static final int MAP_MINIMUM_ENCAMPMENTS = 5;
 
     /** The minimum distance between spawn points on the map. */
     public static final int MIN_DISTANCE_BETWEEN_SPAWN_POINTS = 10;
@@ -45,13 +45,13 @@ public interface GameConstants {
     public static final int MAX_ROBOTS = 25; // TODO(axc): decide this number
 
     /** The total amount of damage to be applied to a team's HQ once the round limit is reached */
-    public static final double TIME_LIMIT_DAMAGE = Integer.MAX_VALUE;
+    //public static final double TIME_LIMIT_DAMAGE = Integer.MAX_VALUE;
  
     /** The upkeep cost of a unit per round. Note that units pay even more than this base cost to execute bytecodes */
-    public static final double UNIT_POWER_UPKEEP = 1.0;
+    //public static final double UNIT_POWER_UPKEEP = 1.0;
     
     /** If a team cannot pay a unit's upkeep in power, it pays this cost in energon instead. */
-    public static final double UNIT_ENERGON_UPKEEP = 5.0;
+    //public static final double UNIT_ENERGON_UPKEEP = 5.0;
     
     /** The minimum possible round at which nodes may begin taking end-of-round damage */
     public static final int ROUND_MIN_LIMIT = 2000;
@@ -60,28 +60,28 @@ public interface GameConstants {
     public static final int ROUND_MAX_LIMIT = 2000;
     
     /** Radius of artillery splash damage in units squared */
-    public static final int ARTILLERY_SPLASH_RADIUS_SQUARED = 2;
+    //public static final int ARTILLERY_SPLASH_RADIUS_SQUARED = 2;
     
     /** Percantage of direct artillery damage that the splash damage does */
-    public static final double ARTILLERY_SPLASH_RATIO = 0.3;
+    //public static final double ARTILLERY_SPLASH_RATIO = 0.3;
    
     /** Rate at which SHIELDS decay. This number will be subtracted from each unit's shield pool after its turn. */
-    public static final double SHIELD_DECAY_RATE = 1.0;
+    //public static final double SHIELD_DECAY_RATE = 1.0;
    
     /** Extra sight radius bonus to unit vision when VISION is researched */
-    public static final int VISION_UPGRADE_BONUS = 19;
+    //public static final int VISION_UPGRADE_BONUS = 19;
    
     /** Base power production per HQ */
-    public static final double HQ_POWER_PRODUCTION = 40;
+    //public static final double HQ_POWER_PRODUCTION = 40;
     
     /** Additiona power provided by each generator */
-    public static final double GENERATOR_POWER_PRODUCTION = 10;
+    //public static final double GENERATOR_POWER_PRODUCTION = 10;
     
     /** Maximum amount of shields a single robot can carry */
-    public static final double SHIELD_CAP = 100000000.0;
+    //public static final double SHIELD_CAP = 100000000.0;
     
     /** The energy to bytecode converstion rate */
-    public static final double POWER_COST_PER_BYTECODE = 0.0001;
+    //public static final double POWER_COST_PER_BYTECODE = 0.0001;
     
     /** The maximum read/write-able of radio channel number */
     public static final int BROADCAST_MAX_CHANNELS = 65535;
@@ -93,35 +93,37 @@ public interface GameConstants {
     public static final double BROADCAST_READ_COST = 0.003;
    
     /** The number of rounds required by a soldier to lay a mine */
-    public static final int MINE_LAY_DELAY = 25;
+    //public static final int MINE_LAY_DELAY = 25;
     
     /** The number of rounds required by a soldier to defuse a mine */
-    public static final int MINE_DEFUSE_DELAY = 12;
+    //public static final int MINE_DEFUSE_DELAY = 12;
 
     /** The number of rounds required by a soldier to defuse a mine if they have DEFUSION upgrade */
-    public static final int MINE_DEFUSE_DEFUSION_DELAY = 5;
+    //public static final int MINE_DEFUSE_DEFUSION_DELAY = 5;
    
     /** The power cost required to begin an encampement capture */
-    public static final double CAPTURE_POWER_COST = 10;
+    //public static final double CAPTURE_POWER_COST = 10;
     
     /** The number of rounds required by a SOLDIER to capture an encampment */
-    public static final int CAPTURE_ROUND_DELAY = 50;
+    //public static final int CAPTURE_ROUND_DELAY = 50;
    
     /** The amount of damage that a mine deals to a robot standing on it per round */
-    public static final double MINE_DAMAGE = 10;
+    //public static final double MINE_DAMAGE = 10;
     
     /** The percentage of mine damage that shields can absorb */
-    public static final double MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD = 0.9;
+    //public static final double MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD = 0.9;
     
     /** The rate at which stockpiled power decays without the FUSION upgrade */
-    public static final double POWER_DECAY_RATE = 0.80;
+    //public static final double POWER_DECAY_RATE = 0.80;
     
     /** The rate at which stockpiled energy decays with the FUSION upgrade */
-    public static final double POWER_DECAY_RATE_FUSION = 0.99;
+    //public static final double POWER_DECAY_RATE_FUSION = 0.99;
 
     /** Constant used to calculate how suppliers factor into the HQ spawn delay */
     public static final double HQ_SPAWN_DELAY_CONSTANT_1 = 30; // a
-    public static final double HQ_SPAWN_DELAY_CONSTANT_2 = 1.5; // b -> a + N^b, where N is num robots
+    
+	/** Constant used to calculate how suppliers factor into the HQ spawn delay */
+	public static final double HQ_SPAWN_DELAY_CONSTANT_2 = 1.5; // b -> a + N^b, where N is num robots
     
     /** Amount of power required to wear a hat */
     public static final double HAT_POWER_COST = 40.0;
@@ -129,29 +131,51 @@ public interface GameConstants {
     /** Cow value decay per turn */
     public static final double NEUTRALS_TURN_DECAY = 0.995; // TODO(axc): .995
 
-    /** Radius squared */
+    /** Range in which non-sneaking movement scares cows (from the destination location of the movement) */
     public static final int MOVEMENT_SCARE_RANGE = 9;
+	
+	/** Range in which attacking scares cows (from the target location of the attack) */
     public static final int ATTACK_SCARE_RANGE = 36;
+	
+	/** Range in which NOISETOWER light attacks scare cows */
     public static final int NOISE_SCARE_RANGE_SMALL = 9;
+	
+	/** Range in which NOISETOWER normal attacks scare cows */
     public static final int NOISE_SCARE_RANGE_LARGE = 36;
 
+	/** Number of turns after taking damage before a SOLDIER begins regenerating*/
     public static final int SOLDIER_HEAL_TURN_DELAY = 30;
+	
+	/** Amount of health a regenerating soldier heals per turn */
     public static final double SOLDIER_HEAL_RATE = 0.25;
 
+	/** Range in which a PASTR contains and milks cows */
     public static final int PASTR_RANGE = 5;
-
+	
+	/** Amount of milk necessary for victory */
     public static final double WIN_QTY = 10000000.0;
+	
+	/** Factor at which SOLDIERs herd milk */
     public static final double ROBOT_MILK_PERCENTAGE = 0.05;
-
-    public static final double SELF_DESTRUCT_BASE_DAMAGE = 10.0; // a
+	
+	/** Flat damage dealt by a self destruct */
+    public static final double SELF_DESTRUCT_BASE_DAMAGE = 30.0; // a
+	
+	/** Factor at which robot's health is converted to damage*/
     public static final double SELF_DESTRUCT_DAMAGE_FACTOR = 0.5; // b -> a + health / b = damage
 
+	/** Number of bytecodes per turn that are not converted into actiondelay */
     public static final int FREE_BYTECODES = 2000;
+	
+	/** Actiondelay per extra bytecode */
     public static final double BYTECODE_PENALTY = 0.0001;
 
+	/** Actiondelay gained every time a SOLDIER attacks */
     public static final double SOLDIER_ATTACK_ACTION_DELAY = 2.0;
-
+	
+	/** Factor at which movement-related and sneaking-related actiondelay is discounted on a road */
     public static final double ROAD_ACTION_DELAY_FACTOR = 0.7;
 
+	/** Factor of WIN_QTY milk that is gained after destroying an enemy PASTR */
     public static final double MILK_GAIN_FACTOR = 0.1; // get this * WIN_QTY after destroying pastr
 }
