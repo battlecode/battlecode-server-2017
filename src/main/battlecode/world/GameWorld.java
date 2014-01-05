@@ -660,10 +660,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         if (from.distanceSquaredTo(to) <= 1) {
             switch (mt) {
                 case RUN:
-                    base = 3;
+                    base = 2;
                     break;
                 case SNEAK:
-                    base = 5;
+                    base = 3;
                     break;
                 default:
                     base = 1000;
@@ -672,10 +672,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         } else {
             switch (mt) {
                 case RUN:
-                    base = 4.2;
+                    base = 2.8;
                     break;
                 case SNEAK:
-                    base = 7;
+                    base = 4.2;
                     break;
                 default:
                     base = 1000;

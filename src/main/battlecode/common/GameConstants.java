@@ -149,7 +149,7 @@ public interface GameConstants {
     public static final int FREE_BYTECODES = 2000;
     public static final double BYTECODE_PENALTY = 0.0001;
 
-    public static final double SOLDIER_ATTACK_ACTION_DELAY = 3.0;
+    public static final double SOLDIER_ATTACK_ACTION_DELAY = 2.0;
 
     public static final double ROAD_ACTION_DELAY_FACTOR = 0.7;
 
