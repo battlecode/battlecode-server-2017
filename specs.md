@@ -1,4 +1,4 @@
-Battlecode 2013 Gameplay Specs
+Battlecode 2014 Gameplay Specs
 ==============================
 
 Plot
