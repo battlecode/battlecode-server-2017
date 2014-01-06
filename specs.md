@@ -47,7 +47,7 @@ Each robot has hitpoints (100). When the hitpoints reach zero, the robot is imme
 
 In the past, robots used a resource to fuel their movement and computation. This year, the resource is action delay. A robot that does more computation will move more slowly (longer move/attack delay). Because move and attack delay are combined this year, this will also mean less damage per second for computationally intensive robots.
 
-The HQ can produce a robot every few rounds until the number of allied robots (including structures) equals `GameConstants.MAX_ROBOTS`. This production delay increases depending on the number of robots currently controlled. Structures such as PAstRs also count as 'robots'.
+The HQ can produce a robot every few rounds until the number of allied robots (including structures) equals `GameConstants.MAX_ROBOTS`. This production delay increases depending on the number of robots currently controlled. Structures such as PASTRs also count as 'robots'.
 
 Victory Conditions
 ------------------
@@ -120,7 +120,7 @@ There are several ways that the user can interact with robots. First, any robot 
 
 ### Ending turn
 
-Calling `yield()` and `selfdestruct()` instantly end the turn of a robot, potentially saving bytecodse. Otherwise a turn ends naturally when the bytecode limit is hit. Every turn a robot gets 10000 bytecodes to run code.
+Calling `yield()` and `selfdestruct()` instantly end the turn of a robot, potentially saving bytecodes. Otherwise a turn ends naturally when the bytecode limit is hit. Every turn a robot gets 10000 bytecodes to run code.
 
 ### Cows
 Cows are a scalar field. Each location on the map has a certain natural cow growth. During each turn, each location gains a number of cows equal to the natural cow growth, and then 0.5% of the cows on that location die a natural death.
@@ -138,7 +138,7 @@ Maps
 -----
 Battlecode maps are a rectangular grid of squares, each with a pair of integer coordinates. Each tile is an instance of `MapLocation`. Squares outside the map have TerrainType.OFF_MAP. The northwest map square is the origin (0,0). Maps specify the spawn points of the teams.
 
-There are three types of terrain: GROUND, VOID, and ROAD. VOID terrain is untraversable and do not have cows. ROAD terrain discounts movement-related and sneaking-related actiondelays by a factor of 0.7 for robots on the terrain.
+There are three types of terrain: GROUND, VOID, and ROAD. VOID terrain is not traversable and do not have cows. ROAD terrain discounts movement-related and sneaking-related actiondelays by a factor of 0.7 for robots on the terrain.
 
 ### Map Files
 
