@@ -446,7 +446,7 @@ Changelog
 * **1.0.1** (1/?/2014) - Basic improvements and fixes
 -   * Improve game finish message so that it does not always say the game ends on tiebreaks.
 -   * Removing references to mining and capturing in RobotController documentation.
-
+-   * Changing bytecode penalty to 0.00005.
 
 Appendices
 ------------
