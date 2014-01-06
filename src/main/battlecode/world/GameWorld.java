@@ -200,10 +200,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         if (timeLimitReached() && winner == null) {
             
 //        	time limit damage to HQs
-        	for (InternalRobot r : baseHQs.values()) {
-        		r.takeDamage(GameConstants.TIME_LIMIT_DAMAGE);
-        	}
-        	removeDead();
+        	//for (InternalRobot r : baseHQs.values()) {
+        		//r.takeDamage(GameConstants.TIME_LIMIT_DAMAGE);
+        	//}
+        	//removeDead();
         	
 //        	if both are killed by time limit damage in the same round, then more tie breakers
         	if (baseHQs.get(Team.A).getEnergonLevel() <= 0.0 && baseHQs.get(Team.B).getEnergonLevel() <= 0.0 || true) {
