@@ -263,7 +263,7 @@ public class GameMap implements GenericGameMap {
                 if (t.sensorRadiusSquared > buf)
                     buf = t.sensorRadiusSquared;
             }
-            BUFFER = buf + GameConstants.VISION_UPGRADE_BONUS;
+            BUFFER = buf;// + GameConstants.VISION_UPGRADE_BONUS;
         }
 
         private final boolean data[][];

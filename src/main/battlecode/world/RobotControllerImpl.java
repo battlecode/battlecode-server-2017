@@ -49,13 +49,6 @@ import com.google.common.collect.Iterables;
 
 
 /*
- * YP's EPIC TODO LIST:
- * costs on messaging need to be figured out
- * 
- */
-
-
-/*
 TODO:
 - tweak player
 -specs & software page?
@@ -249,7 +242,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	if (robot.type != RobotType.SOLDIER)
             throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
     	assertNotMoving();
-    	robot.activateMinelayer(new MinelayerSignal(robot, MineAction.LAYING, getLocation()), GameConstants.MINE_LAY_DELAY);
+    	//robot.activateMinelayer(new MinelayerSignal(robot, MineAction.LAYING, getLocation()), GameConstants.MINE_LAY_DELAY);
     }
     
     private void stopMine() throws GameActionException {
@@ -257,7 +250,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
     	if (robot.getMiningRounds() == 0)
     		throw new GameActionException(CANT_DO_THAT_BRO, "You are not mining currently");
-    	robot.activateMinelayer(new MinelayerSignal(robot,  MineAction.LAYINGSTOP, getLocation()), GameConstants.MINE_LAY_DELAY);
+    	//robot.activateMinelayer(new MinelayerSignal(robot,  MineAction.LAYINGSTOP, getLocation()), GameConstants.MINE_LAY_DELAY);
     }
     
     public int senseMineRoundsLeft() throws GameActionException {
@@ -267,21 +260,22 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public void defuseMine(MapLocation loc) throws GameActionException {
-    	if (robot.type != RobotType.SOLDIER)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
-    	assertNotMoving();
+      
+    	// if (robot.type != RobotType.SOLDIER)
+      //       throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
+    	// assertNotMoving();
     	
-    	int defuseRadius = 2;
-    	if (hasUpgrade(Upgrade.DEFUSION))
-    		defuseRadius = robot.type.sensorRadiusSquared + (hasUpgrade(Upgrade.VISION) ? GameConstants.VISION_UPGRADE_BONUS : 0);
+    	// int defuseRadius = 2;
+    	// if (hasUpgrade(Upgrade.DEFUSION))
+    	// 	defuseRadius = robot.type.sensorRadiusSquared;// + (hasUpgrade(Upgrade.VISION) ? GameConstants.VISION_UPGRADE_BONUS : 0);
     		
-    	if (loc.distanceSquaredTo(getLocation()) > defuseRadius)
-    		throw new GameActionException(OUT_OF_RANGE, "You can't defuse that far");
-    	
-    	if (hasUpgrade(Upgrade.DEFUSION))
-    		robot.activateDefuser(new MinelayerSignal(robot, MineAction.DEFUSING, loc), GameConstants.MINE_DEFUSE_DEFUSION_DELAY, loc);
-    	else
-    		robot.activateDefuser(new MinelayerSignal(robot, MineAction.DEFUSING, loc), GameConstants.MINE_DEFUSE_DELAY, loc);
+    	// if (loc.distanceSquaredTo(getLocation()) > defuseRadius)
+    	// 	throw new GameActionException(OUT_OF_RANGE, "You can't defuse that far");
+      // /
+    	// if (hasUpgrade(Upgrade.DEFUSION))
+    	// 	robot.activateDefuser(new MinelayerSignal(robot, MineAction.DEFUSING, loc), GameConstants.MINE_DEFUSE_DEFUSION_DELAY, loc);
+    	// else
+    	// 	robot.activateDefuser(new MinelayerSignal(robot, MineAction.DEFUSING, loc), GameConstants.MINE_DEFUSE_DELAY, loc);
     }
     
 //    public boolean scanMines() throws GameActionException {
@@ -336,10 +330,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public boolean checkCanSense(MapLocation loc) {
     	
-        int sensorRadius = robot.type.sensorRadiusSquared + (hasUpgrade(Upgrade.VISION) ? GameConstants.VISION_UPGRADE_BONUS : 0);
+      int sensorRadius = robot.type.sensorRadiusSquared; // + (hasUpgrade(Upgrade.VISION) ? GameConstants.VISION_UPGRADE_BONUS : 0);
 //    	return getGameObjectsNearLocation(Robot.class, loc, sensorRadius, robot.getTeam()).length > 0;
     	
-        if (robot.myLocation.distanceSquaredTo(loc) <= sensorRadius)
+      if (robot.myLocation.distanceSquaredTo(loc) <= sensorRadius)
         	return true;
        
         /* 

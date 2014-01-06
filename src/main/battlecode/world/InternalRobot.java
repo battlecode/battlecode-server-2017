@@ -277,8 +277,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     		Team mines = myGameWorld.getMine(getLocation());
     		if (mines!=null && mines!=getTeam()) {
     			
-    			this.takeShieldedDamage(GameConstants.MINE_DAMAGE*GameConstants.MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD);
+    			/*this.takeShieldedDamage(GameConstants.MINE_DAMAGE*GameConstants.MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD);
     			this.takeDamage(GameConstants.MINE_DAMAGE*(1.0-GameConstants.MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD));
+          */
     			
     			myGameWorld.addKnownMineLocation(getTeam(), getLocation());
     			if (myEnergonLevel <= 0.0)
@@ -341,7 +342,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         if (myShieldLevel > 0.0)
         {
         	shieldChanged = true;
-        	myShieldLevel = Math.max(0.0, myShieldLevel-GameConstants.SHIELD_DECAY_RATE);
+        	//myShieldLevel = Math.max(0.0, myShieldLevel-GameConstants.SHIELD_DECAY_RATE);
         }
     }
 
@@ -418,9 +419,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     
     public double changeShieldLevel(double amount) {
         myShieldLevel += amount;
-        if (myShieldLevel > GameConstants.SHIELD_CAP) {
+        /*if (myShieldLevel > GameConstants.SHIELD_CAP) {
         	myShieldLevel = GameConstants.SHIELD_CAP;
-        }
+          }*/
         shieldChanged = true;
 
         if (myShieldLevel <= 0) {
