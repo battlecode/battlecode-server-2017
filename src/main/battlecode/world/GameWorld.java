@@ -260,7 +260,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         teamResources[Team.A.ordinal()] += gameMap.getNeutralsMap().getScoreChange(Team.A, gameObjects);
         teamResources[Team.B.ordinal()] += gameMap.getNeutralsMap().getScoreChange(Team.B, gameObjects);
         if (teamResources[Team.A.ordinal()] >= GameConstants.WIN_QTY || teamResources[Team.B.ordinal()] >= GameConstants.WIN_QTY) {
-            setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.BARELY_BEAT);
+            setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.OWNED);
         }
         
         lastRoundResources = teamRoundResources;
