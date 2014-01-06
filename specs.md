@@ -442,7 +442,9 @@ Despite our best efforts, there may be bugs or exploits that allow players to op
 
 Changelog
 -------------
-* **1.0.0** (1/7/2013) - Initial specs released
+* **1.0.0** (1/7/2014) - Initial specs released
+* **1.0.1** (1/?/2014) - Basic improvements and fixes
+-   * Improve game finish message so that it does not always say the game ends on tiebreaks.
 
 
 Appendices
