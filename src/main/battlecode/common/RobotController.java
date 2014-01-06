@@ -205,7 +205,7 @@ public interface RobotController {
     public int roundsUntilActive();
 
     /**
-     * @return true if this robot is active. If a robot is active, it can move, mine, defuse, capture, and attack.
+     * @return true if this robot is active. If a robot is active, it can move, construct, and attack.
      */
     public boolean isActive();
 
@@ -303,7 +303,7 @@ public interface RobotController {
 
     /**
      * Captures the encampment soldier is standing on. 
-     * After a capture delay, kills the soldier and spawns a robot of the given encampment type
+     * After a delay, kills the soldier and spawns a robot of the given building type
      * @param type
      * @throws GameActionException
      */
