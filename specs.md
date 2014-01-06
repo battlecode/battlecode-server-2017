@@ -4,32 +4,26 @@ Battlecode 2013 Gameplay Specs
 Plot
 --------
 
-After being foiled yet another year by the power of fun gamers, the evil Professor Mordemort was captured and placed in the most secured cell in the Galactic Hold. Now, it is one year after those terrible events, and peace reigns supreme in the galaxy, new and faster methods of reaching far off planets being provided by Vanqeri Technologies, and the Interuniverse Defense League is stronger than ever. However, there are rumors of an unknown force that is attacking planets on the outer rim of the galaxy, an enemy that is rumored to be using ancient technology and trench warfare to gain the upper-hand. The IDL is calling on Coders throughout the galaxy to help combat this unknown enemy before the devastation they are causing reaches the more populated worlds.
-
+After Teh Nubs were victorious against the unknown forces at the outer rim, the galaxy felt a little lifeless. The numerous victorious melee robots juked back and forth in triumph, but at what cost! The terrain was strewn with mines and military structures, unfit for industry or agriculture. With the old military government, nothing would be done. But now the Interplanetary Development Committee has ascended to the golden toilet and proclaimed a new interplanetary initiative. Military forces will now be repurposed for herding cattle to produce milk for the galaxy's young and infirm. Two "companies" will be placed on each planet in the spirit of capitalist competition.
 
 Objective
 ----------------
 
-The objective this year is simple. Violently eliminate the opponent's HQ through a constant barrage of soldiers. There are many encampments across the map that may aid in this endeavor, allowing you to fortify positions and take map control. Should you need them, you may also research a number of upgrades that provide you with a large tactical advantage on the battlefield.
+Transport milk to space. First build PASTRs (Projected Animal Security and Treatment Region) and herd cows into them. The PASTRs automatically send your milk to space. Remember, you can also shoot your competitor's cowboys, destroy his PASTRs, and disperse and steal his cows.
 
 Good luck!
 
-
-Changes from 2012
-------------------
-
-There are a number of large changes from previous battlecode years, so veterans should bear these in mind:
-
-- Archons are out. There is one HQ that acts as the archon replacement.
-- Robots no longer face a direction. There is no turning, and no concept of forwards and backwards. Instead, robots can just move to any adjacent square.
-- There are no longer voids on the map. Every square on the map is traversable, and there is no longer any distinction between ground and air units.
-- Both teams start off knowing exactly what the map looks like. They know where all the map edges are and know where the enemy spawns. 
-- There are no movement or attack delays(though some actions do still incur a cooldown). Soldiers move and attack once every turn.
-- Units always have shared vision and can sense anything within the vision radius of any allied unit.
-- Flux has been renamed to power; now it is globally shared among all of a team's units, so flux transfer has been removed.
-- Broadcasting has been completely altered. Both teams now write to a global array of integers. Broadcasting no longer relies on robots being within a broadcast radius.
-
-NOTE: Numbers in these specs are provided mainly for readability and are subject to change in future patches. Check the API for details.
+Major Mechanics for 2014
+-----------------
+- Your company HQ produces the robot cowboys that can herd cows.
+- Robots can move to any adjacent square without needing to turn.
+- The map is known, though vision is not shared between robots. 
+- Movement and attack commands share a delay timer.
+- There's more than one way to move: there's running and sneaking. 
+- Attacks are ranged and manually targeted.
+- To communicate messages among your robots, you can post and read integers to and from a team-shared array. This means message hacking and jamming are no longer possible.  However, broadcasting robots' positions are revealed to all players during the round that they are broadcasting.
+- Cows are a scalar field. Sneaking does not disturb the scalar field, but running and shooting cause cows to run away from the source of noise. In the case of several sources of noise, the cows run away from the center of mass of the noise.
+- A robot may convert itself into a PASTR, which projects a circular containment field and gathers milk from cows inside the field. Cows that run into a PASTR cannot run out of the pasture unless the PASTR is destroyed. In addition, individual robots gather a smaller quantity of milk from cows on their square.
 
 
 Robot Overview
@@ -38,201 +32,122 @@ Robot Overview
 Robots are the central part of the Battlecode world. There are two types of basic robots. Note that we use the terms 'robot' and 'unit' interchangeably.
 
 ### HQ
-The HQ is your main base, and by far the most important unit you have. Each team starts the game off with one HQ. You lose the game if your HQ is destroyed. The HQ can spawn SOLDIERs and research TECH upgrades. If the game reaches the round limit, the HQs will also begin taking end-of-round damage to break ties. The HQ can never regain energon, and there is no way to build additional HQs.
+The HQ is your main base, and by far the most important unit you have. Each team starts the game off with one HQ. The HQ is invincible, and can't be destroyed. Your company HQ produces the robot COWBOYs that can herd cows.
 
-### SOLDIER
-SOLDIERs form the core of your army. They are the only mobile unit, and are created by the HQ. They allow you to expand your map control by capturing additional encampments. They can also lay mines and defuse mines. They automatically attack enemies adjacent to them every turn.
+### COWBOY
+COWBOYs form the core of your army. They are the only mobile unit, and are created by the HQ. They allow you to expand your map control and herd cows.
 
-Encampments
-------------
-
-In addition to the two basic units, there are units called ENCAMPMENTS that soldiers can create on top of unoccupied encampment squares.
-
-If a soldier is located on an encampment square, it has the option to capture the square. If it does so, it sits still for `GameConstants.CAPTURE_DELAY` turns and then turns into one of the following encampments (it must choose which encampment to create before the delay):
-
-1. **MEDBAY**: Heals itself and all adjacent allied units for 2 (`MEDBAY.attackPower`) health per turn. It cannot heal the HQ.
-
-2. **SHIELDS**: The shield encampment gives 5 (`SHIELDS.attackPower`) shields per turn to itself and all adjacent allied units. This shield absorbs damage from artillery fire.
-
-3. **ARTILLERY**: The artillery encampment allows a unit to attack any location within its attack range `ARTILLERY.attackRadiusMaxSquared`, causing 40 (`ARTILLERY.attackPower`) damage to the attacked square, and 20 (`ARTILLERY.attackPower*GameConstants.ARTILLERY_SPLASH_RATIO`) splash damage to the adjacent squares. The artillery can damage friendly units, so watch where you fire. It can fire once every 20 (`ARTILLERY.attackDelay`) turns.
-
-4. **GENERATOR**: Each generator provides the team with 10 (`GameConstants.GENERATOR_RESOURCE_PRODUCTION`) extra power per turn.
-
-5. **SUPPLIER**: Each supplier allows the HQ to spawn soldiers at a faster rate. See the spawning section for details.
-
-The other team may retake an encampment square if the existing encampment on it is destroyed. Capturing has a cost, however. The first capture costs `GameConstants.CAPTURE_POWER_COST` to start, and each new capture costs `GameConstants.CAPTURE_POWER_COST` per encampment owned or in the process of capturing. Starting a capture costs `GameConstants.CAPTURE_POWER_COST*( 1 + ENCAMPMENTS_OWNED + ENCAMPMENTS_BEING_CAPTURED)`.
-
+### PASTR
+Generates a field to get milk from cows inside the field, and keep cows within the field as long as it remains up.
 
 Robot Resources
 ------------------
 
-There are three types of resources, POWER and ENERGON, and SHIELDS.
+Each robot has hitpoints (100). When the hitpoints reach zero, the robot is immediately removed from the game. Hitpoints regenerate slowly over time (.25 per turn when it hasn't been damaged in the last 30 turns). 
 
-### Energon
-Energon is a robot's health. When a robot's energon hits zero, it is immediately removed from the game. Energon can only be regained by healing at a MEDBAY.
+In the past, robots used a resource to fuel their movement and computation. This year, the resource is action delay. A robot that does more computation will move more slowly (longer move/attack delay). Because move and attack delay are combined this year, this will also mean less damage per second for computationally intensive robots.
 
-### Power
-
-Power is shared globally across the team and is generated by the HQ at 40 power per round (`GameConstants.HQ_RESOURCE_PRODUCTION`).  10 Additional power can be generated by GENERATOR encampments (`GENERATOR_RESOURCE_PRODUCTION`).
-
-Units pay 2 power every turn for upkeep. If enough power is not available, the unit must pay its upkeep using 5 (`GameConstants.UNIT_ENERGON_UPKEEP`) energon. If it doesn't have this much energon, it dies instantly.
-
-At the end of a robot's turn, if the bot did not use its full bytecode allocation, a fraction of the power is refunded based on bytecodes used, according to the formula `POWER_REFUND = (GameConstants.POWER_COST_PER_BYTECODE)*(GameConstants.BYTECODE_LIMIT-BYTECODES_SPENT)`. If the robot uses no bytecodes, it will only spend 1 power in upkeep this turn. If it uses 2000 bytecodes, it will spend 1.2 power in upkeep. If it uses 7500 bytecodes, it will spend 1.75 power in upkeep.
-
-Unused power is stockpiled and carried over into future rounds. However, at the end of each round, 20% (or 1% if fusion has been upgraded) of each team's power stockpile is removed due to power decay. 
-
-### Shields
-
-Shields are generated from the SHIELD encampment. They protect soldiers from artillery shots and mine damage. One shield point blocks one damage from an artillery shot, either direct damage or splash damage. Shields also block up to 75% (`GameConstants.MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD`) of mine damage. When a soldier takes mine damage, up to 75% of the damage taken will be reduced from shields, and the remaining mine damage will be reduced from energon.
-
-Shields decay at a constant rate of 0.5 (`GameConstants.SHIELD_DECAY_RATE`) per turn. A soldier's shield pool is bound between 0 and 100000000 (`GameConstants.SHIELD_CAP`).
-
-Mines
------
-
-Soldiers can lay mines throughout the map to help defend territory and catch enemy robots off guard. All soldiers have the ability to lay a mine on their current square, taking 25 (`GameConstants.MINE_LAY_DELAY`) turns to do so. During this time, it cannot perform any other actions (defuse, capture, move) and does not auto-attack. If it is killed during this time, the mine does not get planted. Mines belong to a team, and will not damage robots of that team.
-
-Once a mine is planted, they stay there until they are defused. Mines do not "blow up" when they do damage. Enemy robots on the mined square will take 10 (`GameConstants.MINE_DAMAGE`) damage per turn, every turn they end on the mine. Only one mine can be in one square at a time; they cannot be stacked. You can try to mine squares that are already mined (either by you or the enemy), but it will just be a waste. Encampment squares can be mined, and the HQ squares can be mined also. However, only SOLDIERs take damage from mines.
-
-Enemy mines are not visible until they are stepped on. If you try to sense a mine your opponent just laid, they will sense that there is no mine there. Once you enter the square with any soldier, all your soldiers will be able to sense that an enemy mine is there. Allied mines are always visible. Mines do not provide any sight, but you always know which squares you have mines on, and you can tell when they get defused by repeatedly sensing that square for mines.
-
-With the PICKAXE upgrade, mining is upgraded to simultaneously mining on the soldier's current square as well as the four squares orthogonally adjacent to it. This can even allow you to mine squares containing enemy robots (even their HQ).
-
-### Defusion
-
-A mine must be defused to be removed from the map. To defuse a mine, a soldier must be adjacent to the mine. It must take 12 (`GameConstants.MINE_DEFUSE_DELAY`) turns to defuse the mine, during which it cannot perform other actions and cannot auto-attack. If the soldier is killed during this time, the mine is not defused. Soldiers can only defuse one mine at a time, and two soldiers trying to defuse the same mine won't defuse it any faster. Once the defusion upgrade is researched, the time it takes to defuse the mine is reduced to 5 (`GameConstants.MINE_DEFUSE_DEFUSION_DELAY`), and the soldier can defuse any mine within its sensor range.
-
-How defusion actually works is that soldiers target a square to defuse. They do not have to know there is a mine there to defuse. After the defusion time, any mine in that location will be removed, even if they aren't able to sense it, and even if the mine was not there when the soldier started defusing. You can accidentally defuse your own mines. If you defuse any mine, your opponent will be able to sense that there is no longer any mine there. 
-
-### Neutral mines
-
-The map often starts off with lots of neutral mines. These belong to the neutral team. These are just like mines planted by either team in terms of damaging robots that move across. They can be defused just like any other mine. Both teams start off knowing the locations of all neutral mines on the map, and do not need to enter the square to be able to sense them. 
-
-Note that you can sense exactly where the neutral mines on the map are. This means when the enemy defuses neutral mines, you can tell, although this is fairly expensive in bytecodes.
-
-Upgrades
---------
-
-Upgrades are researchable from your HQ. The following upgrades are available:
-
-1. **Pickaxe**: When a soldier mines, in addition to mining the square it is on, it also mines each of the four orthogonally adjacent squares.
-2. **Defusion**: Soldiers can defuse mines not only in adjacent squares, but in all squares in its personal sight radius. They also defuse mines significantly faster. They still must defuse one mine at a time.
-3. **Vision**: Increases the personal sensor radius on all robots from 14 to 33 units squared.
-4. **Fusion**: The team's power decay rate is adjusted from 20% `RESOURCE_DECAY_RATE` to 1% `RESOURCE_DECAY_RATE_FUSION`.
-5. **Nuke**: You immediately win.
-
-An upgrade must be fully researched before its abilities kick in. The HQ can put one point into an upgrade per turn (unless it is spawning soldiers), and the upgrade is considered completed when `numRounds` of points have been put into it.
-
+The HQ can produce a robot every few rounds until the number of allied robots (including structures) equals `GameConstants.MAX_ROBOTS`. This production delay increases depending on the number of robots currently controlled. Structures such as PAstRs also count as 'robots'.
 
 Victory Conditions
 ------------------
 
-A team wins by destroying the enemy's HQ, or by researching the nuke upgrade. We expect most games to end by HQ destruction. The nuke upgrade is intended to be used in extreme stalemate situations. After exactly 2000 rounds (`GameConstants.ROUND_LIMIT`), the HQ starts taking damage at a rate of 1 (`GameConstants.TIME_LIMIT_DAMAGE`) energon per turn. This means the game must be over after 2500 rounds. If both teams lose their HQs from end of round damage on the same turn, then the following tiebreakers are applied in order to determine the winner:
+A team wins by transporting `GameConstants.WIN_QTY` GigaGallons (GG) to space. If neither team has done so by `GameConstants.ROUND_LIMIT`, the following tiebreakers apply:
 
-- Total # Encampments
-- Total # Energon across all robots
-- Total # Mines
-- Total Team Power
+- Quantity of milk transported
+- Total # cows in PASTRs
+- Total # enemy robots killed
 - Lowest ID
-
 
 Robot Actions
 --------------
 
 Robots are equipped with a variety of high tech equipments and can perform the following actions during their turn.
 
+### Action Delay and Bytecode
+Each robot has an `actiondelay` counter that decrements by 1 every turn. Movement and attacking cannot be performed unless `actiondelay` is less than 1, and they also give a certain amount of `actiondelay`.
+
+Running code uses bytecodes. Each turn, a robot can spend up to 10000 bytecodes on computation. If this limit is reached, the robot's turn is immediately ended and the computation is continued on the next turn. Using `yield()` and `selfdestruct()` can end a turn early, saving bytecodes and ending computation. The former is generally preferred.
+For cowboy robots, each bytecode above 2000 gives 0.0005 `actiondelay`.
+
+
 ### Sensors
 
-All robots are equipped with personal sensors. These sensors have a sensor range of 14 units squared, which is the same for all robots, and which can be upgraded with the VISION upgrade to 33 units squared. Other than hidden enemy mines, robots can sense everything in their personal sensor range, as well the personal sensor range of every other robot on its team.
+Info on robots in sight range can be sensed. Vision is not shared between robots. The locations of starting HQs and other map objects are known. 
 
 - The info on all allied robots can be sensed.
 - The info on visible enemy robots can be sensed.
-- The positions of detected enemy mines can be sensed. Mines are detected after an allied unit has stepped on it. These mines do not have to be in sensing range after they have been detected.
-- The positions of all neutral mines on the map are automatically known at game start, and can be accurately sensed at any time, even if they are out of the range of all of the sensor range of all allied robots.
-- The positions of allied mines can be accurately sensed, even if they are out of the range of all of the sensor range of all allied robots.
 - The locations of the both HQs can be sensed.
-- Your own team's upgrade progress can be sensed, but only by the HQ.
-- The HQ can sense whether the enemy's nuke progress has reached the halfway mark.
 
-### Messaging
+### Broadcasting
+Radio Sensors: When a robot broadcasts to radio, all robots are made aware of the location of the broadcasting robot for for one turn. They can access the positions with a method call like `rc.senseNearbyBroadcastingRobots(Team t)`.
 
-In Battlecode, robots do not have the ability to access each others' internal memory. Each robot runs on its own thread and cannot access the other robot objects directly. How different robots on a team communicate is by messaging.
+Messages written to the team-shared integer list persist until overwritten. You can't read or write integers from or to the enemy team's shared integer list. 
 
-This year, there is a global message board accessible to all robots that supports read/write operations. It works as follows:
+The cost of transmitting and receiving are in bytecodes, which, as mentioned earlier, affect movement and attack speeds.
 
-* The message board is essentially an array of ints. Each position in this array is called a 'channel'. The channels are numbered from 0 to 65535 (`GameConstants.BROADCAST_MAX_CHANNELS`), inclusive. Robots can 'broadcast' to these channels, which is essentially just storing an int in a specified position of this array.
-* There is only _one_ global message board and all robots from both teams access the same one
-* During each robot's turn, it may write to any channel via `rc.broadcast(channel)` and read what has last been broadcasted on any channel via `rc.readBroadcast(channel)`.
-* There is a power cost associated with both reading (`GameConstants.BROADCAST_SEND_COST`) and writing (`GameConstants.BROADCAST_READ_COST`) to the board. A robot can read and write to the message board as many times as it wants in one turn, as long as the team can pay this power cost. 
-* Once a message is written to the board, it persists until it is overwritten, or until the end of the game.
-* At the beginning of a game, all channels are initialized to 0.
 
-This message board is globally accessible by _any_ robot and is used for communicating whatever the AIs wish to communicate. It can be used to coordinate your army, distribute computation, or call for reinforcements. Since both teams use the same message board, robots' broadcasts may interfere with each other, either by accident or on purpose. Because of this, it is not guaranteed that a broadcast will be able to reach other robots, as the data in a channel may be overwritten before the intended recipient robot gets a turn to read the channel.
+### Attack
+Cowboy robots can attack any tile within attack range (square range of 10). Attacking and moving share the same cooldown (action delay). Attacking deals 10 damage and gives 2 `actiondelay`.
 
-### Autoattack
+An attack destroys all cows at the targeted location. In addition, it makes noise that scares cows at long range at the targeted location.
 
-SOLDIERs, SHIELDs, and MEDBAYs autoattack. This attacking cannot be disabled by the player; it will happen at the end of the turn if a robot is still alive and not in the middle of performing an action (mining, defusing, capturing). 
+Your HQ shoots depleted uranium girders out of a railgun, dealing overkill area damage to the target (50 and 25 splash in a square range of 2). HQ has square range of 16. Watch out for friendly fire.
 
-SOLDIERs will deal 6 (`SOLDIER.attackPower`) damage to enemies per turn automatically, if it ends the turn adjacent to any enemies. This damage is split evenly between all the adjacent enemies, so if it is adjacent to four enemies, it will deal 1.5 damage to each. Any enemies whose energon gets reduced to 0 or below after this are immediately removed from the game. Overkill damage is wasted, so if a soldier is adjacent to two enemy robots with 1 energon and 40 energon left, one robot will die and the other will be reduced to 37 energon.
-
-SHIELDs automatically add 5 (`SHIELD.attackPower`) shields to adjacent allies and itself every turn. This is 5 per robot, so it can potentially shield multiple robots for a total of 45 shields added. Shield decay still happens while a robot is next to a SHIELD, so a SHIELD will add 5 shields to itself and then lose 1 (`GameConstants.SHIELD_DECAY_RATE`) shield to decay every turn, ending with a net gain of 4. SHIELDs can shield each other, and multiple SHIELDs can add shields to the same robot on the same round.
-
-MEDBAYs automatically replenish 2 (`MEDBAY.attackPower`) energon to adjacent allies and itself every turn. This is 2 energon per robot, so it can potentially heal multiple robots for a total of 18 energon healed. This healing does not affect the HQ. Energon cannot exceed maximum energon. MEDBAYs can heal each other, and multiple MEDBAYs can heal the same robot on the same round.
+Noise Towers can also 'attack' in their attack range. Their attacks create noise (can choose to create noise in square range of 9 or square range of 36) but deal no damage.
 
 ### Movement
+Cowboy robots can move to any unoccupied adjacent square if their delay is less than one. Using bytecodes adds small fractions to the delay that eventually add up to one, requiring a momentary pause in movement or attack, representing careful thought.
 
-Only the SOLDIER has the ability to move. Moving has no power cost.
+Running is faster (shorter move delay), but creates noise, scaring cows at short range. Sneaking is slower but creates no noise. By sneaking, you can actually move among cows.
 
-Every turn, SOLDIERs may move to any unoccupied adjacent square, provided they are not in delay from performing any other action (mining, defusing, capturing). Soldiers can auto-attack on the same turn they move. They cannot mine, defuse, or capture on the same turn they move.
+Running gives 2 actiondelay and sneaking gives 3 actiondelay for lateral movement. Diagonal movement gives 1.4 times the actiondelay of lateral movement.
 
-SOLDIERs can move diagonally at the same speed as they can move orthogonally.
-
-### Spawning
-
-The HQ has the ability to continuously spawn SOLDIERs. The action of spawning soldiers does not cost power by itself, but the spawned soldiers will start to consume power via upkeep. After the HQ spawns a SOLDIER, the HQ is unable to do any other actions (spawning or researching) for a brief time, determined by how many SUPPLIERs the team currently has alive.
-
-SOLDIERs can be spawned in any adjacent square that does not already have a robot on it. In the beginning, the HQ may spawn one SOLDIER per 10 (`GameConstants.HQ_SPAWN_DELAY`) rounds. This spawn rate is reduced by SUPPLIERS according to the formula a=r(`GameConstants.HQ_SPAWN_DELAY`*`GameConstants.HQ_SPAWN_DELAY_CONSTANT`/(`GameConstants.HQ_SPAWN_DELAY_CONSTANT`+b)), where a is the number of turns it takes to spawn one unit, b is the number of suppliers you have alive, and r() rounds a number to the nearest positive integer.  Units that are spawned are immediately placed on the field and may perform actions like any other robot. The HQ cannot spawn or research while it is in spawning cool-down.
+### Spawning, Construction, and Robot Count
+The HQ can spawn soldiers, subject to a production delay (30 turns plus total number of robots^1.5) and a maximum robot number (25). Cowboys count for one robot, PASTRs count for two robots, and Noise Towers count for three robots.
+Cowboy robots can construct structures on the square they are currently on. The robot will become unable to take any action for a certain number of turns (50 for PASTRs, 100 for Noise Towers) and then will be removed and replaced with the constructed structure.
 
 ### Suicide
-
-Calling suicide() immediately kills the robot and removes it from the game. It will no longer consume upkeep in future rounds. If an encampment suicides, then the square is freed up for a potentially different encampment to be created there. If a robot suicides, no power is refunded to the team.
+Calling `selfdestruct()` immediately removes the calling robot from the game and deals area damage (30+half of remaining hp to square range of 2). This replaces the `suicide()` method. Structures cannot selfdestruct.
 
 ### Team Memory
-
 Official matches will usually be sets of multiple games. Each team can save a small amount of information (`GameConstants.TEAM_MEMORY_LENGTH` longs) for the next game using the function `setTeamMemory()`. This information may be retrieved using `getTeamMemory()`. If there was no previous game in the match, or no information was saved, then the memory will be filled with zeros.
 
 ### Control Bits, Indicator Strings, and Breakpoints
+Each robot can set strings that are visible when viewing the client, as a debugging tool. 
 
 There are several ways that the user can interact with robots. First, any robot can use `setIndicatorString(int,String)` to set a string that is visible to the user when selecting the robot. Second, the user can manually set a long for each robot, which the robot can query using `getControlBits()`. Finally, a robot can call `breakpoint()`, which flags the game engine to pause computation at the end of the round. These methods are for debug purposes only. During tournaments and scrimmages, the user will not be able to interact with the robots. For more information on these debugging interfaces, check out Debugging below.
 
 ### Ending turn
 
-Calling `yield()` and `suicide()` instantly end the turn of a robot. Otherwise a turn ends naturally when the bytecode limit is hit. Every turn a robot gets 10000 bytecodes to run code. At the end of a robot's turn, if the robot yielded, unused bytecodes will return power back into the team's global power pool. 
+Calling `yield()` and `selfdestruct()` instantly end the turn of a robot, potentially saving bytecodse. Otherwise a turn ends naturally when the bytecode limit is hit. Every turn a robot gets 10000 bytecodes to run code.
+
+### Cows
+Cows are a scalar field. Each location on the map has a certain natural cow growth. During each turn, each location gains a number of cows equal to the natural cow growth, and then 0.5% of the cows on that location die a natural death.
+
+Cows can be influenced by noise and attacks. After each turn, cows will run away from the averaged location of all the noises they heard that turn. Short-range noises (running, Noise Tower light attacks) scare cows in range^2 9, and long-range noises (shooting, Noise Tower normal attacks) scare cows in range^2 36. If the direction away from this averaged location points between two locations, the cows will split evenly between those locations.
+
+Cows in a PASTR containment field cannot leave the field, and cows on the same square as a robot will not leave that square due to noise until the robot moves.
+In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square. All weapons used are certified humane.
+
+### Milk
+Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). Robots only give 5% of the milk that a PASTR would generate. Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk.
 
 
 Maps
 -----
+Battlecode maps are a rectangular grid of squares, each with a pair of integer coordinates. Each tile is an instance of `MapLocation`. Squares outside the map have TerrainType.OFF_MAP. The northwest map square is the origin (0,0). Maps specify the spawn points of the teams.
 
-Battlecode maps consist of a grid of squares, each with a pair of integer coordinates. Locations on the map are represented as instances of `MapLocation` objects. 
-
-Maps are always rectangular. All of the squares in the map have the same terrain type, while squares out of bounds will have a different terrain type.
-Map coordinates are represented similarly to the pixels on a computer screen: x-coordinates increase moving to the right (East), and y-coordinates increase moving down (South).  The most NORTHWEST square of the map is guaranteed to be coordinate (0,0), and the most SOUTHEAST square will be (WIDTH-1, HEIGHT-1).
-
-Maps specify the spawn points of both teams, as well as where all the encampment squares are. They also specify the locations of all the neutral mines.
+There are three types of terrain: GROUND, VOID, and ROAD. VOID terrain is untraversable and do not have cows. ROAD terrain discounts movement-related and sneaking-related actiondelays by a factor of 0.7 for robots on the terrain.
 
 ### Map Files
 
 Maps are specified by XML files, and can be found in the maps folder of the release archive. The schema for the files should be fairly intuitive, so if you'd like to add your own maps you can use the provided maps as a basis. Each map has an associated random number seed, which the RNG uses to generate random numbers in games played on that map.
 
 ### Map Constraints
-
 Official maps used in scrimmages and tournaments must all satisfy the following conditions.
-
 - Maps are completely symmetric either by reflection or 180 degree rotation.
-- The width and height of the map are guaranteed to be between 20 and 70, inclusive.
-- The map cannot have neutral mines on the 4 squares orthogonally adjacent to either HQ.
-- There will be a minimum of 5 encampment squares on the map. 
-- It will be possible for a soldier to get adjacent to the enemy HQ by turn 200, even if you only make one soldier and research/capture nothing, and the opposing team does nothing.
+- The width and height of the map are guaranteed to be between 20 and 100, inclusive.
 - The distance between the spawn points will be at least 10 units (Euclidean distance). 
 
 
@@ -251,57 +166,74 @@ The RobotController argument to the RobotPlayer constructor is very important --
 
 
 ```java
+package examplefuncsplayer;
+
 import battlecode.common.Direction;
 import battlecode.common.GameConstants;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
+import battlecode.common.*;
+import java.util.*;
 
-/** The example funcs player is a player meant to demonstrate basic usage of the most common commands.
- * Robots will move around randomly, occasionally mining and writing useless messages.
- * The HQ will spawn soldiers continuously. 
- */
 public class RobotPlayer {
-    public static void run(RobotController rc) {
-    while (true) {
-      try {
-        if (rc.getType() == RobotType.HQ) {
-          if (rc.isActive()) {
-            // Spawn a soldier
-            Direction dir = rc.getLocation().directionTo(rc.senseEnemyHQLocation());
-            if (rc.canMove(dir))
-              rc.spawn(dir);
-          }
-        } else if (rc.getType() == RobotType.SOLDIER) {
-          if (rc.isActive()) {
-            if (Math.random()<0.005) {
-              // Lay a mine 
-              if(rc.senseMine(rc.getLocation())==null)
-                rc.layMine();
-            } else { 
-              // Choose a random direction, and move that way if possible
-              Direction dir = Direction.values()[(int)(Math.random()*8)];
-              if(rc.canMove(dir)) {
-                rc.move(dir);
-                rc.setIndicatorString(0, "Last direction moved: "+dir.toString());
-              }
-            }
-          }
-          
-          if (Math.random()<0.01 && rc.getTeamPower()>5) {
-            // Write the number 5 to a position on the message board corresponding to the robot's ID
-            rc.broadcast(rc.getRobot().getID()%GameConstants.BROADCAST_MAX_CHANNELS, 5);
-          }
-        }
-
-        // End turn
-        rc.yield();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
+	static Random rand;
+	
+	public static void run(RobotController rc) {
+		rand = new Random();
+		Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
+		
+		while(true) {
+			if (rc.getType() == RobotType.HQ) {
+				try {					
+					//Check if a robot is spawnable and spawn one if it is
+					if (rc.isActive() && rc.senseRobotCount() <= 25) {
+						Direction toEnemy = rc.getLocation().directionTo(rc.senseEnemyHQLocation());
+						if (rc.senseObjectAtLocation(rc.getLocation().add(toEnemy)) == null) {
+							rc.spawn(toEnemy);
+						}
+					}
+				} catch (Exception e) {
+					System.out.println("HQ Exception");
+				}
+			}
+			
+			if (rc.getType() == RobotType.SOLDIER) {
+				try {
+					if (rc.isActive()) {
+						int action = (rc.getRobot().getID()*rand.nextInt(101) + 50)%101;
+						//Construct a PASTR
+						if (action < 1 && rc.getLocation().distanceSquaredTo(rc.senseHQLocation()) > 2) {
+							rc.construct(RobotType.PASTR);
+						//Attack a random nearby enemy
+						} else if (action < 30) {
+							Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class,10,rc.getTeam().opponent());
+							if (nearbyEnemies.length > 0) {
+								RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[0]);
+								rc.attackSquare(robotInfo.location);
+							}
+						//Move in a random direction
+						} else if (action < 80) {
+							Direction moveDirection = directions[rand.nextInt(8)];
+							if (rc.canMove(moveDirection)) {
+								rc.move(moveDirection);
+							}
+						//Sneak towards the enemy
+						} else {
+							Direction toEnemy = rc.getLocation().directionTo(rc.senseEnemyHQLocation());
+							if (rc.canMove(toEnemy)) {
+								rc.sneak(toEnemy);
+							}
+						}
+					}
+				} catch (Exception e) {
+					System.out.println("Soldier Exception");
+				}
+			}
+			
+			rc.yield();
+		}
+	}
 }
-
 ```
 
 
@@ -317,35 +249,13 @@ The game is comprised of a number of rounds. During each round, all robots get a
 
 The following is a detailed list of a robot's execution order within a single turn. If it dies halfway through, the remainder of the list does not get executed. In particular, note that changes to a robot's state do not happen while player code is being executed. All actions instead get sent to an action queue, and they are executed after the player code is run. For example, if a SOLDIER calls move() and then getLocation(), it will not reflect the location of the robot yet.
 
-1. Robot's upkeep cost, is subtracted from the power pool, or if there is insufficient power in the pool, 'GameConstants.UNIT_ENERGON_UPKEEP' is paid in energon (if robot dies, it does not get a turn, and no power is refunded).
-2. Robot executes up to `GameConstants.BYTECODE_LIMIT` of player code. Power costs for action calls in the player code are checked based on the available power at this point.
-3. Power is refunded based on remaining bytecodes by a factor of `GameConstants.POWER_COST_PER_BYTECODE`, even if it paid its upkeep with energon.
-4. Channels are updated with new broadcasts
-5. Actions are performed
+1. Robot executes up to `GameConstants.BYTECODE_LIMIT` of player code. Power costs for action calls in the player code are checked based on the available power at this point.
+2. Channels are updated with new broadcasts
+3. Actions are performed
 
-    a. If the robot is on the last turn of mining, the mines are placed on the map (SOLIDER Only)
+    a. The robot moves
 
-    b. If the robot is on the last turn of defusing, the mines are removed from the map (SOLIDER Only)
-
-    c. If the robot is on the last turn of capturing, then the encampment is created, and the robot is destroyed (SOLIDER Only)
-
-    d. The robot moves (SOLIDER Only)
-
-    e. Targeted attacks happen (ARTILLERY Only)
-
-    f. Research is updated OR a unit is spawned (HQ Only)
-
-6. Mine damage is applied (SOLDIER Only)
-7. Automatic attacks are performed
-
-    a. Robot auto-attacks adjacent enemies (SOLIDER Only)
-    
-    b. Robot heals itself and adjacent allies (MEDBAY Only).
-    
-    c. Robot adds shields to itself and adjacent allies (SHIELDS Only).
-
-8. Shield decay is applied
-
+    b. Attacks happen
 
 
 Timing
@@ -533,32 +443,6 @@ Despite our best efforts, there may be bugs or exploits that allow players to op
 Changelog
 -------------
 * **1.0.0** (1/7/2013) - Initial specs released
-* **1.0.1** (1/7/2013) - Bug hotfix. Example players no longer throw exceptions, encampment capture cost is made obvious in the spec. Misc. spec typos fixed.
-* **1.1.0** (1/8/2013) - Note Backwards Incompatible **API CHANGES**
-    * Most RobotLevel stuff removed
-    * Capture cost calculation made robust.
-    * Sensing of mines, robots, encampments made easier, API refactored and intentionally broken to make this obvious.
-    * Map max size reduced to 70, and constraints made tighter (200 max rush distance). Lots of new maps added.
-    * Nuke sensing rebalanced, only 50% detectable
-    * Spec document mostly rewritten to include detailed information regarding mines, broadcasting, etc.
-* **1.1.1** (1/8/2013) - Fixing typos
-* **1.1.2** (1/9/2013) - Fixing bug in mine sensing. Tiebreaker conditions fixed. Specs updated to describe autoattacks better
-* **1.1.3** (1/9/2013) - Fixed neutral mine detection
-* **1.1.4** (1/10/2013) - Added runmatch to automate replays.
-* **1.1.5** (1/11/2013) - Broadcast read cost reduced. Correct ranges displayed. Shields improved. Fixed specs. Increased number of channels.
-* **1.2.0** (1/17/2013) - Post-sprint release. Updates to the sprites. Added new maps. Additional Client options.
-* **1.3.0** (1/25/2013) - Final Release Candidate. Added new maps. Additional client fixes. Balance changes:
-    * Artillery base damage increased to 60 (from 40)
-    * Artillery splash ratio decreased to 0.25 (splash damage dropped from 20 to 15)
-    * Shield charge rate increased to 10/turn
-    * Shield decay increased to 1/turn
-    * Shields mine damage absorption increased to 90% (from 75%)
-    * Broadcast send power cost reduced to 0.03
-    * Robot IDs more randomized
-    * Hats DLC expansion pack added -- now accepting orders
-* **1.3.1** (1/25/2013) - Bug Hotfix
-    * Hotfix for HUD crashes on case-sensitive filesystems
-    * Nuke research time increased to 404 rounds (from 400)
 
 
 Appendices
@@ -569,7 +453,3 @@ Appendices
 Javadocs can be found here, and they are also included in the software distribution.
 
 The javadocs include the values of the game constants and robot attributes.
-
-### Appendix B: Energon Health Warning
-
-Energon intake is not for everyone. Please consult a physician before use. 6.370 Battlecode Corporation is not responsible in the event of injury due to energon use. Energon's side-effects include loss of limb, death, unbearable pain, tendencies to procrastinate and an unnatural senseless rage. Handle with care. Energon consumption has not been approved by any health agency and you USE IT AT YOUR OWN RISK. For this reason, please be careful when scrimmaging. Energon is the same thing as health.
