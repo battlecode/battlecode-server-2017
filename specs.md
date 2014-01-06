@@ -68,7 +68,7 @@ Robots are equipped with a variety of high tech equipments and can perform the f
 Each robot has an `actiondelay` counter that decrements by 1 every turn. Movement and attacking cannot be performed unless `actiondelay` is less than 1, and they also give a certain amount of `actiondelay`.
 
 Running code uses bytecodes. Each turn, a robot can spend up to 10000 bytecodes on computation. If this limit is reached, the robot's turn is immediately ended and the computation is continued on the next turn. Using `yield()` and `selfdestruct()` can end a turn early, saving bytecodes and ending computation. The former is generally preferred.
-For cowboy robots, each bytecode above 2000 gives 0.0005 `actiondelay`.
+For cowboy robots, each bytecode above 2000 gives 0.00005 `actiondelay`.
 
 
 ### Sensors
