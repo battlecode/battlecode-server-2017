@@ -147,8 +147,6 @@ public class NeutralsMap {
             if (ir.type == RobotType.PASTR) {
                 captureRange = 5;
                 capturePercentage = 1.0;
-            } else if (ir.type == RobotType.WALL) {
-                continue;
             }
             MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
             for (MapLocation ml : affected) {
@@ -165,7 +163,6 @@ public class NeutralsMap {
         InternalRobot ir = (InternalRobot) obj;
         int captureRange = 0;
         if (ir.type == RobotType.PASTR) captureRange = 5;
-        else if (ir.type == RobotType.WALL) return;
         MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
         for (MapLocation ml : affected) {
             if (isValid(ml.x, ml.y)) {
