@@ -45,6 +45,8 @@ class XMLMapHandler extends DefaultHandler {
         public void createGameObject(GameWorld world, MapLocation loc);
 
         public boolean equalsMirror(SymbolData data);
+
+        public SymbolData copy();
     }
 
     private interface SymbolDataFactory {
@@ -90,6 +92,12 @@ class XMLMapHandler extends DefaultHandler {
             TerrainData d = (TerrainData) data;
             return d.tile == tile;
         }
+
+        public SymbolData copy() {
+            TerrainData t = new TerrainData(this.tile);
+            t.setValue(this.value);
+            return t;
+        }
     }
 
     // TODO(axc): remove Mine    
@@ -132,6 +140,12 @@ class XMLMapHandler extends DefaultHandler {
                 return false;
             MineData d = (MineData) data;
             return d.team == team;
+        }
+
+        public SymbolData copy() {
+            MineData m = new MineData(this.team);
+            m.setValue(this.value);
+            return m;
         }
     }
 
@@ -193,6 +207,12 @@ class XMLMapHandler extends DefaultHandler {
         public String toString() {
             return String.format("%s:%s:%s", type, team, mine);
         }
+
+        public SymbolData copy() {
+            RobotData r = new RobotData(this.type, this.team, this.mine);
+            r.setValue(this.value);
+            return r;
+        }
     }
 
     private static class NodeData implements SymbolData {
@@ -247,6 +267,12 @@ class XMLMapHandler extends DefaultHandler {
 
         public boolean equalsMirror(SymbolData data) {
             return data instanceof NodeData && mine == ((NodeData)data).mine;
+        }
+
+        public SymbolData copy() {
+            NodeData n = new NodeData(this.team, this.mine);
+            n.setValue(this.value);
+            return n;
         }
     }
 
@@ -491,7 +517,7 @@ class XMLMapHandler extends DefaultHandler {
                 if (!symbolMap.containsKey(dataSoFar.charAt(0)))
                     fail("unrecognized symbol in map: '" + c + "'", "Check that '" + c + "' is defined as one of the symbols in the map file. DEBUG: '" + dataSoFar + "'\n");
 
-                map[currentCol][currentRow] = symbolMap.get(dataSoFar.charAt(0));
+                map[currentCol][currentRow] = symbolMap.get(dataSoFar.charAt(0)).copy();
                 map[currentCol][currentRow].setValue(Double.parseDouble(dataSoFar.substring(1)));
 
                 currentCol++;
