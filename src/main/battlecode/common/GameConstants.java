@@ -12,16 +12,16 @@ public interface GameConstants {
 	
 	
     /** The minimum possible map height. */
-    public static final int MAP_MIN_HEIGHT = 10; // TODO(axc): update this later
+    public static final int MAP_MIN_HEIGHT = 30; // TODO(axc): update this later
     
     /** The maximum possible map height. */
-    public static final int MAP_MAX_HEIGHT = 70;
+    public static final int MAP_MAX_HEIGHT = 100;
 
     /** The minumum possible map width. */
-    public static final int MAP_MIN_WIDTH = 10; // TODO(axc): update this later
+    public static final int MAP_MIN_WIDTH = 30; // TODO(axc): update this later
     
     /** The maxiumum possible map width. */
-    public static final int MAP_MAX_WIDTH = 70;
+    public static final int MAP_MAX_WIDTH = 100;
 
     /** A valid map must have at least this many encampment locations. */
     //public static final int MAP_MINIMUM_ENCAMPMENTS = 5;
@@ -141,7 +141,7 @@ public interface GameConstants {
     public static final int FREE_BYTECODES = 2000;
 	
 	/** Actiondelay per extra bytecode */
-    public static final double BYTECODE_PENALTY = 0.0001;
+    public static final double BYTECODE_PENALTY = 0.0005;
 
 	/** Actiondelay gained every time a SOLDIER attacks */
     public static final double SOLDIER_ATTACK_ACTION_DELAY = 2.0;
