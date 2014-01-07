@@ -5,6 +5,7 @@ import battlecode.server.Server;
 
 import java.io.*;
 import java.util.zip.GZIPOutputStream;
+import org.apache.commons.io.FileUtils;
 
 /**
  * This class represents a "connection" to a file. It provides a method for
@@ -99,16 +100,13 @@ public class FileProxy extends Proxy {
             // Move the file to its desired location.
             if (file.exists())
                 file.delete();
-            boolean result = renameTo(temp, file);
-            if (!result)
+            try {
+                FileUtils.moveFile(temp, file);
+            } catch(IOError e) {
                 Server.warn("unable to rename match file");
+            }
         }
     }
-
-    public boolean renameTo(File temp, File file) {
-        return temp.renameTo(file);
-    }
-
 
     public void writeObject(Object o) throws IOException {
         if (o instanceof Notification)
