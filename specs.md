@@ -13,7 +13,7 @@ Transport milk to space. First build PASTRs (Projected Animal Security and Treat
 
 Good luck!
 
-Major Mechanics for 2014
+ajor Mechanics for 2014
 -----------------
 - Your company HQ produces the robot cowboys that can herd cows.
 - Robots can move to any adjacent square without needing to turn.
@@ -104,7 +104,7 @@ Info on robots in sight range can be sensed. Vision is not shared between robots
 ### Broadcasting
 Radio Sensors: When a robot broadcasts to radio, all robots are made aware of the location of the broadcasting robot for for one turn. They can access the positions with a method call like `rc.senseNearbyBroadcastingRobots(Team t)`.
 
-Messages written to the team-shared integer list persist until overwritten. You can't read or write integers from or to the enemy team's shared integer list. 
+essages written to the team-shared integer list persist until overwritten. You can't read or write integers from or to the enemy team's shared integer list. 
 
 The cost of transmitting and receiving are in bytecodes, which, as mentioned earlier, affect movement and attack speeds.
 
@@ -153,10 +153,10 @@ Cows in a PASTR containment field cannot leave the field, and cows on the same s
 In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square. All weapons used are certified humane.
 
 ### Milk
-Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). Robots only give 5% of the milk that a PASTR would generate. Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk.
+ilk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). Robots only give 5% of the milk that a PASTR would generate. Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk.
 
 
-Maps
+aps
 -----
 Battlecode maps are a rectangular grid of squares, each with a pair of integer coordinates. Each tile is an instance of `MapLocation`. Squares outside the map have TerrainType.OFF_MAP. The northwest map square is the origin (0,0). Maps specify the spawn points of the teams.
 
@@ -164,7 +164,7 @@ There are three types of terrain: GROUND, VOID, and ROAD. VOID terrain is not tr
 
 ### Map Files
 
-Maps are specified by XML files, and can be found in the maps folder of the release archive. The schema for the files should be fairly intuitive, so if you'd like to add your own maps you can use the provided maps as a basis. Each map has an associated random number seed, which the RNG uses to generate random numbers in games played on that map.
+aps are specified by XML files, and can be found in the maps folder of the release archive. The schema for the files should be fairly intuitive, so if you'd like to add your own maps you can use the provided maps as a basis. Each map has an associated random number seed, which the RNG uses to generate random numbers in games played on that map.
 
 ### Map Constraints
 Official maps used in scrimmages and tournaments must all satisfy the following conditions.
@@ -289,7 +289,7 @@ Because the round can change at the end of any bytecode, unexpected things can h
 
 ```java
 Robot[] nearbyRobots = myRC.senseNearbyGameObjects(Robot.class);
-MapLocation loc = myRC.senseRobotInfo(nearbyRobots[0]);
+apLocation loc = myRC.senseRobotInfo(nearbyRobots[0]);
 ```
 
 In the first line, the robot gets a list of all other robots in its sensor range. In the second line, the robot senses the RobotInfo of the first robot in the list. However, what happens if the round changes between the first and second line? A robot that was in sensor range when line 1 was executed might be out of sensor range when line 2 is executed, resulting in an exception. Because of this, your code should be written defensively. Think of this as a "real-world" robot, where things can fail at any time, and you have to be prepared to handle it.
@@ -307,7 +307,7 @@ Second, after a call to `RobotController.yield()`, subsequent code is executed a
 ```java
 myRC.yield();
 Robot[] nearbyRobots = myRC.senseNearbyGameObjects(Robot.class);
-MapLocation loc = myRC.senseRobotInfo(nearbyRobots[0]);
+apLocation loc = myRC.senseRobotInfo(nearbyRobots[0]);
 ```
 
 Since yield is called in line 1, line 2 will be executed at the beginning of a new round. Since `senseNearbyGameObjects()` does not take very many bytecodes, it is pretty much guaranteed that there won't be a round change between lines 2 and 3.
@@ -325,7 +325,7 @@ GameActionExceptions are thrown when an ability cannot be performed. It is often
 Exceptions cause a bytecode penalty of `GameConstants.EXCEPTION_BYTECODE_PENALTY`.
 
 
-Mechanics
+echanics
 --------------------
 
 This section deals with some of the mechanics of how your players are run in the game engine, including bytecode-counting, library restrictions, etc.
@@ -348,7 +348,7 @@ Note that violating any of the above restrictions will cause the robots to self-
 Classes in `java.util`, `java.math`, and scala and their subpackages are bytecode counted as if they were your own code. The following functions in `java.lang` are also bytecode counted as if they were your own code.
 
 ```
-Math.random
+ath.random
 StrictMath.random
 String.matches
 String.replaceAll
@@ -470,10 +470,10 @@ Changelog
 -   * Removing references to mining and capturing in RobotController documentation.
 -   * Changing bytecode penalty to 0.00005.
 * **1.0.2** (1/?/2014) - API CHANGES (minor)
--   * Removing references to old things.
+-   * Removing references to old things. maxEnergon and isEncampment in RobotType are now maxHealth and isBuilding.
 -   * Fix non-milk tiebreaker code so that tiebreaks are functional.
-* **1.0.3** (1/7/2014) - Spec improvement
--   * Added more detailed unit descriptions
+-   * HQ and Noise towers no longer herd or farm milk (update engine to comply with specs).
+-   * Added more detailed unit descriptions in specs.
 
 Appendices
 ------------
