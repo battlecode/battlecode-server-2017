@@ -35,6 +35,20 @@ public class NeutralsMap {
     private ArrayList<MapLocation> attacks;
     private Set[][] ids;
 
+    public NeutralsMap() {
+	attacks = new ArrayList<MapLocation>();
+
+        this.mapWidth = 0;
+        this.mapHeight = 0;
+
+        this.growthFactor = new double[0][0];
+        this.currentAmount = new double[0][0];
+        dX = new double[0][0];
+        dY = new double[0][0];
+        passable = new boolean[0][0];
+        ids = new Set[0][0];
+    }
+
     public NeutralsMap(double[][] growthFactor, TerrainTile[][] mapTiles) {
         attacks = new ArrayList<MapLocation>();
 
