@@ -16,16 +16,19 @@ public interface RobotController {
     // *********************************
 
     /**
+     * Gets the robot's current action delay.
      * @return this robot's current action delay
      */
     public double getActionDelay();
 
     /**
-     * @return this robot's current energon level
+     * Gets the robot's current health (hitpoints).
+     * @return this robot's current health / hitpoints
      */
     public double getHealth();
     
     /**
+     * Gets the robot's current location.
      * @return this robot's current location
      */
     public MapLocation getLocation();
@@ -64,16 +67,19 @@ public interface RobotController {
     public RobotType getType();
 
 	/**
+     * Returns whether the robot is currently constructing a structure.
      * @return whether this robot is currently constructing a structure.
      */
     public boolean isConstructing();
 	
 	/**
+     * Returns the RobotType of the structure the robot is constructing.
      * @return the RobotType of the structure this robot is constructing.
      */
     public RobotType getConstructingType();
 	
 	/**
+     * Returns the number of turns left in the current construction.
      * @return the number of turns left in the current construction.
      */
     public int getConstructingRounds();
@@ -83,6 +89,7 @@ public interface RobotController {
     // ***********************************
 
 	/**
+     * Gets the team's current robot count (with weighting).
      * @return the total number of robots controlled (with weighting).
      */
     public int senseRobotCount();
@@ -125,11 +132,13 @@ public interface RobotController {
     public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type, MapLocation center, int radiusSquared, Team team);
 
 	/**
+     * Returns an array of all the robots that have broadcasted in the last round.
      * @return an array of all robots that have broadcasted in the last round.
      */
     public Robot[] senseBroadcastingRobots();
 	
 	/**
+     * Returns an array of all the robots that have broadcasted in the last round, filtered by team.
 	 * @param t - filter robots by the given team.
      * @return an array of all robots of the given team that have broadcasted in the last round.
      */
@@ -203,11 +212,13 @@ public interface RobotController {
     // ***********************************
 
     /**
+     * Returns the number of rounds until the robot is active again.
      * @return the number of rounds until this robot's action cooldown ends, or 0 if it is already active.
      */
     public int roundsUntilActive();
 
     /**
+     * Returns if the robot is active (able to move, construct, and attack).
      * @return true if this robot is active. If a robot is active, it can move, construct, and attack.
      */
     public boolean isActive();
@@ -241,6 +252,7 @@ public interface RobotController {
     // ***********************************
 
     /**
+     * Returns whether the given location is within the robot's attack range. Does not take into account whether the robot is currently attacking.
      * @return true if the given location is within this robot's attack range.
      * Does not take into account whether the robot is currently attacking
      */
