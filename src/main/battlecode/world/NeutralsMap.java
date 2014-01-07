@@ -142,6 +142,8 @@ public class NeutralsMap {
             if (ir.getTeam() != t) {
                 continue;
             }
+            if (ir.type != RobotType.PASTR && ir.type != RobotType.SOLDIER) continue;
+
             int captureRange = 0;
             double capturePercentage = GameConstants.ROBOT_MILK_PERCENTAGE;
             if (ir.type == RobotType.PASTR) {
@@ -161,6 +163,8 @@ public class NeutralsMap {
     @SuppressWarnings("unchecked")
     public void updateIds(InternalObject obj) {
         InternalRobot ir = (InternalRobot) obj;
+        if (ir.type != RobotType.PASTR && ir.type != RobotType.SOLDIER) return;
+
         int captureRange = 0;
         if (ir.type == RobotType.PASTR) captureRange = 5;
         MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);

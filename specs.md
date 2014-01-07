@@ -450,6 +450,7 @@ Changelog
 * **1.0.2** (1/?/2014) - API CHANGES (minor)
 -   * Removing references to old things.
 -   * Fix non-milk tiebreaker code so that tiebreaks are functional.
+-   * HQ and Noise towers no longer herd or farm milk (update engine to comply with specs).
 
 Appendices
 ------------
