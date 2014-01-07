@@ -105,7 +105,7 @@ Info on robots in sight range can be sensed. Vision is not shared between robots
 - The locations of all PASTRs on the map can be sensed.
 
 ### Broadcasting
-Radio Sensors: When a robot broadcasts to radio, all robots are made aware of the location of the broadcasting robot for for one turn. They can access the positions with a method call like `rc.senseBroadcastingRobots(Team t)`.
+Radio Sensors: When a robot broadcasts to radio, all robots are made aware of the location of the broadcasting robot for for one turn. They can access the positions with a method call like `rc.senseBroadcastingRobots(Team t)` or `rc.senseBroadcastingRobotLocations(Team t)`.
 
 Messages written to the team-shared integer list persist until overwritten. You can't read or write integers from or to the enemy team's shared integer list. 
 
@@ -479,6 +479,7 @@ Changelog
 -   * Added more detailed unit descriptions in specs as well as fixing typographical errors.
 -   * Improve Java documentation.
 -   * Added an example for action delay in the specs.
+-   * You can now sense the locations of the broadcasting robots instead of just the robots.
 
 Appendices
 ------------

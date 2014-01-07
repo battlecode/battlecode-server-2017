@@ -144,6 +144,18 @@ public interface RobotController {
      */
     public Robot[] senseBroadcastingRobots(Team t);
     
+	/**
+     * Returns an array of all the locations of the robots that have broadcasted in the last round.
+     * @return an array of all the locations of the robots that have broadcasted in the last round.
+     */
+    public MapLocation[] senseBroadcastingRobotLocations();
+	
+	/**
+     * Returns an array of all the locations of the robots that have broadcasted in the last round, filtered by team.
+	 * @param t - filter robots by the given team.
+     * @return an array of all the locations of the robots of the given team that have broadcasted in the last round.
+     */
+    public MapLocation[] senseBroadcastingRobotLocations(Team t);
     
     /**
      * Sense the location of the given object.

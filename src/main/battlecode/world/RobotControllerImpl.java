@@ -435,6 +435,29 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return Iterables.toArray(Iterables.filter(robot.myGameWorld.getRevealedRobots(), p), Robot.class);
     }
 
+    public MapLocation[] senseBroadcastingRobotLocations() {
+        InternalRobot[] bots = robot.myGameWorld.getRevealedRobots().toArray(new InternalRobot[0]);
+        MapLocation[] locs = new MapLocation[bots.length];
+        for (int i = 0; i < bots.length; i++) {
+            locs[i] = bots[i].getLocation();
+        }
+        return locs;
+    }
+
+    public MapLocation[] senseBroadcastingRobotLocations(final Team t) {
+        Predicate<Robot> p = new Predicate<Robot>() {
+            public boolean apply(Robot r) {
+                return r.getTeam() == t;
+            }
+        };
+        InternalRobot[] bots = Iterables.toArray(Iterables.filter(robot.myGameWorld.getRevealedRobots(), p), InternalRobot.class);
+        MapLocation[] locs = new MapLocation[bots.length];
+        for (int i = 0; i < bots.length; i++) {
+            locs[i] = bots[i].getLocation();
+        }
+        return locs;
+    }
+
     
     /**
      * Private version used for engine checks to see if there is a robot w/ a given characteristic
