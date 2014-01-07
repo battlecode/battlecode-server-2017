@@ -262,7 +262,7 @@ public interface RobotController {
     /**
      * Broadcasts a message to the global message board.
      * The data is not written until the end of the robot's turn.
-     * @param channel - the channel to write to, from 0 to <code>MAX_RADIO_CHANNELS</code>
+     * @param channel - the channel to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
      * @param data - one int's worth of data to write
      * @throws GameActionException
      */
@@ -270,7 +270,7 @@ public interface RobotController {
 
     /**
      * Retrieves the message stored at the given radio channel.
-     * @param channel - radio channel to query, from 0 to <code>MAX_RADIO_CHANNELS</code>
+     * @param channel - radio channel to query, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
      * @return data currently stored on the channel
      * @throws GameActionException 
      */
