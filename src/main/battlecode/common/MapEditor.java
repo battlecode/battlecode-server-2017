@@ -1,5 +1,7 @@
 package battlecode.common;
 
+/** Not valid for Battlecode 2014. Visit the website for a different map editor. */
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
