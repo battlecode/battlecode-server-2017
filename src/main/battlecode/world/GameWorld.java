@@ -202,7 +202,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             // main tie breaker = milk
             InternalRobot HQA = baseHQs.get(Team.A);
             InternalRobot HQB = baseHQs.get(Team.B);
-            //if (!(setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.BARELY_BEAT)))
+            if (!(setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.BARELY_BEAT)))
             {
                 // first tie breaker - total # of cows in pastrs
                 // second tie breaker - total # of enemy robots killed 
