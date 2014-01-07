@@ -78,6 +78,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final GameStats gameStats = new GameStats();        // end-of-game stats
     private double[] teamRoundResources = new double[2];
     private double[] lastRoundResources = new double[2];
+    private int[] teamKills = new int[2];
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
     private double[] teamResources = new double[2];
     private double[] teamSpawnRate = new double[2];
@@ -198,50 +199,26 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         addSignal(new NeutralsDensitySignal(gameMap.getNeutralsMap()));
 
         if (timeLimitReached() && winner == null) {
-            
-//        	time limit damage to HQs
-        	//for (InternalRobot r : baseHQs.values()) {
-        		//r.takeDamage(GameConstants.TIME_LIMIT_DAMAGE);
-        	//}
-        	//removeDead();
-        	
-//        	if both are killed by time limit damage in the same round, then more tie breakers
-        	if (baseHQs.get(Team.A).getEnergonLevel() <= 0.0 && baseHQs.get(Team.B).getEnergonLevel() <= 0.0 || true) {
-                // main tie breaker = milk
-            	InternalRobot HQA = baseHQs.get(Team.A);
-            	InternalRobot HQB = baseHQs.get(Team.B);
-                if (!(setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.BARELY_BEAT)))
+            // main tie breaker = milk
+            InternalRobot HQA = baseHQs.get(Team.A);
+            InternalRobot HQB = baseHQs.get(Team.B);
+            //if (!(setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.BARELY_BEAT)))
+            {
+                // first tie breaker - total # of cows in pastrs
+                // second tie breaker - total # of enemy robots killed 
+                double cowsDiff = gameMap.getNeutralsMap().getScoreChange(Team.A, gameObjects) - gameMap.getNeutralsMap().getScoreChange(Team.B, gameObjects);
+                double killDiff = teamKills[Team.A.ordinal()] - teamKills[Team.B.ordinal()];
+                
+                if (!(setWinnerIfNonzero(cowsDiff, DominationFactor.BARELY_BEAT) ||
+                      setWinnerIfNonzero(killDiff, DominationFactor.BARELY_BEAT) ))
                 {
+                    // just tiebreak by ID
                     if (HQA.getID() < HQB.getID())
-                        setWinner(Team.B, DominationFactor.WON_BY_DUBIOUS_REASONS);
-                    else
                         setWinner(Team.A, DominationFactor.WON_BY_DUBIOUS_REASONS);
+                    else
+                        setWinner(Team.B, DominationFactor.WON_BY_DUBIOUS_REASONS);
                 }
-        
-        		// TODO more TIE BREAKHERS HERE (these are not real tiebreakers here yet)
-            	double diff = HQA.getEnergonLevel() - HQB.getEnergonLevel();
-            	
-            	double campdiff = getEncampmentsByTeam(Team.A).size() - getEncampmentsByTeam(Team.B).size();
-            	
-            	if (!(
-            			// first tie breaker - encampment count
-            		       setWinnerIfNonzero(campdiff, DominationFactor.BARELY_BEAT)
-            		    // second tie breaker - total energon difference
-            			|| setWinnerIfNonzero(getEnergonDifference(), DominationFactor.BARELY_BEAT)
-            			// third tie breaker - mine count
-            			|| setWinnerIfNonzero(getMineDifference(), DominationFactor.BARELY_BEAT)
-            		 ))
-            	{
-            			// fourth tie breaker - power difference
-            		if (!(setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.BARELY_BEAT)))
-            		{
-	            		if (HQA.getID() < HQB.getID())
-	                        setWinner(Team.B, DominationFactor.WON_BY_DUBIOUS_REASONS);
-	                    else
-	                        setWinner(Team.A, DominationFactor.WON_BY_DUBIOUS_REASONS);
-            		}
-            	}
-        	}
+            }
         }
 
         if (winner != null) {
@@ -755,6 +732,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                         // kill enemy pastr --> we gain milk
                         if (target.getEnergonLevel() <= 0.0 && target.type == RobotType.PASTR && target.getTeam() != attacker.getTeam()) {
                             adjustResources(attacker.getTeam(), GameConstants.WIN_QTY * GameConstants.MILK_GAIN_FACTOR);
+                        }
+                        if (target.getEnergonLevel() <= 0.0 && target.getTeam() != attacker.getTeam()) {
+                            teamKills[attacker.getTeam().ordinal()]++;
                         }
                     }
 				}
