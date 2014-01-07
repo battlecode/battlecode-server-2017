@@ -90,7 +90,7 @@ Robots are equipped with a variety of high tech equipments and can perform the f
 Each robot has an `actiondelay` counter that decrements by 1 every turn. Movement and attacking cannot be performed unless `actiondelay` is less than 1, and they also give a certain amount of `actiondelay`.
 
 Running code uses bytecodes. Each turn, a robot can spend up to 10000 bytecodes on computation. If this limit is reached, the robot's turn is immediately ended and the computation is continued on the next turn. Using `yield()` and `selfdestruct()` can end a turn early, saving bytecodes and ending computation. The former is generally preferred.
-For cowboy robots, each bytecode above 2000 gives 0.00005 `actiondelay`.
+For cowboy robots and for noise towers, each bytecode above 2000 gives 0.00005 `actiondelay`.
 
 Example: if a SOLDIER (cowboy) currently has 0 `actiondelay`, then it can attack. After attacking, the SOLDIER will have 2 `attackdelay`. At the end of the turn, this counter decrements to 1. At the end of the next turn, this counter decrements to 0. That means that two turns after the initial attack, the SOLDIER can attack again. In the case of fractional `actiondelay`, a robot is only unable to move or attack if its `actiondelay` is greater than or equal to 1.
 
@@ -482,7 +482,7 @@ Changelog
 -   * You can now sense the locations of the broadcasting robots instead of just the robots.
 -   * You can now sense your own and your opponent's milk quantity.
 * **1.1.1** (1/?/2014) - 
--   * Fix typographical errors in specs.
+-   * Fix typographical errors in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes.
 
 Appendices
 ------------
