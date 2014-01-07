@@ -69,7 +69,7 @@ public class FileProxy extends Proxy {
                 file.getParentFile().mkdirs();
 
             temp = File.createTempFile("battlecode", ".tmp", new File(System
-                    .getProperty("user.dir")));
+                    .getProperty("java.io.tmpdir")));
             temp.deleteOnExit();
 
             fileWriter = new FileOutputStream(temp);
