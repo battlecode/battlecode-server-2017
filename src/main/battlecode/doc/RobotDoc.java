@@ -63,14 +63,14 @@ public class RobotDoc implements Taglet {
         }
         StringBuilder builder = new StringBuilder();
         try {
-						if (rt.isEncampment)
+						if (rt.isBuilding)
 								append(builder, "Type", "Encampment Upgrade"); 
 						else if (rt == RobotType.HQ)
 								append(builder, "Type", "HQ");
 						else
 								append(builder, "Type", "Soldier");
 
-            append(builder, "Max Energon", String.format("%1.0f", rt.maxEnergon));
+            append(builder, "Max Energon", String.format("%1.0f", rt.maxHealth));
             if (rt.sensorAngle > 0) {
                 append(builder, "Sensor Radius Squared", String.format("%d", rt.sensorRadiusSquared));
             }

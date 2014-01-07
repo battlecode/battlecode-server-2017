@@ -272,7 +272,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             movementSignal = null;
         }
         
-        if (!type.isEncampment)
+        if (!type.isBuilding)
     	{
     		Team mines = myGameWorld.getMine(getLocation());
     		if (mines!=null && mines!=getTeam()) {
@@ -461,7 +461,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public double getMaxEnergon() {
-        return type.maxEnergon;
+        return type.maxHealth;
     }
 
     public void activateMovement(Signal s, int delay) {

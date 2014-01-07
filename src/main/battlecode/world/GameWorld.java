@@ -829,7 +829,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             }
             if (r.type == RobotType.HQ) {
             	setWinner(r.getTeam().opponent(), getDominationFactor(r.getTeam().opponent()));
-            } else if (r.type.isEncampment)
+            } else if (r.type.isBuilding)
             {
             	encampmentMap.put(r.getLocation(), Team.NEUTRAL);
             }
@@ -918,7 +918,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             loc = s.getLoc();
         }
         
-        if (s.getType().isEncampment)
+        if (s.getType().isBuilding)
         {
         	encampmentMap.put(s.getLoc(), s.getTeam());
         }

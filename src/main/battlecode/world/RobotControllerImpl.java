@@ -205,7 +205,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public void construct(RobotType type) throws GameActionException {
     	if (robot.type != RobotType.SOLDIER)
             throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can capture encampments.");
-    	if (!type.isEncampment)
+    	if (!type.isBuilding)
             throw new GameActionException(CANT_DO_THAT_BRO, "Must specify a valid encampment type to create");
     	assertNotMoving();
         //assertIsEncampment(getLocation());

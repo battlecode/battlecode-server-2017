@@ -26,7 +26,7 @@ public enum RobotType {
     /**
      * The maximum amount of energon the robot can have.
      */
-    public final double maxEnergon;
+    public final double maxHealth;
 
     /**
      * The square of the maximum distance that the robot can sense.
@@ -71,7 +71,7 @@ public enum RobotType {
     public final double sensorCosHalfTheta;
     public final double attackCosHalfTheta;
     
-    public final boolean isEncampment;
+    public final boolean isBuilding;
 
     public final double splashPower;
 
@@ -86,7 +86,7 @@ public enum RobotType {
     }
 
     RobotType(RobotLevel level,
-              double maxEnergon,
+              double maxHealth,
               int sensorRadiusSquared,
               double sensorAngle,
               int attackRadiusMinSquared,
@@ -95,12 +95,12 @@ public enum RobotType {
               int attackDelay,
               double attackPower,
               boolean canAttack,
-              boolean isEncampment,
+              boolean isBuilding,
               double splashPower,
               int count,
               int captureTurns) {
         this.level = level;
-        this.maxEnergon = maxEnergon;
+        this.maxHealth = maxHealth;
         this.sensorRadiusSquared = sensorRadiusSquared;
         this.sensorAngle = sensorAngle;
         this.attackRadiusMaxSquared = attackRadiusMaxSquared;
@@ -111,7 +111,7 @@ public enum RobotType {
         this.canAttack = canAttack;
         this.sensorCosHalfTheta = Math.cos(sensorAngle * Math.PI / 360.);
         this.attackCosHalfTheta = Math.cos(attackAngle * Math.PI / 360.);
-        this.isEncampment = isEncampment;
+        this.isBuilding = isBuilding;
         this.splashPower = splashPower;
         this.count = count;
         this.captureTurns = captureTurns;
