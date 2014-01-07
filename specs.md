@@ -117,7 +117,7 @@ Cowboy robots can attack any tile within attack range (square range of 10). Atta
 
 An attack destroys all cows at the targeted location. In addition, it makes noise that scares cows at long range at the targeted location.
 
-Your HQ shoots depleted uranium girders out of a railgun, dealing overkill area damage to the target (50 and 25 splash in a square range of 2). HQ has square range of 16. Watch out for friendly fire.
+Your HQ shoots depleted uranium girders out of a railgun, dealing overkill area damage to the target (50 and 25 splash in a square range of 2). HQ has square range of 15. Watch out for friendly fire.
 
 Noise Towers can also 'attack' in their attack range. Their attacks create noise (can choose to create noise in square range of 9 or square range of 36) but deal no damage.
 
@@ -481,6 +481,8 @@ Changelog
 -   * Added an example for action delay in the specs.
 -   * You can now sense the locations of the broadcasting robots instead of just the robots.
 -   * You can now sense your own and your opponent's milk quantity.
+* **1.1.1** (1/?/2014) - 
+-   * Fix typographical errors in specs.
 
 Appendices
 ------------
