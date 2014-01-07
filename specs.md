@@ -449,6 +449,7 @@ Changelog
 -   * Changing bytecode penalty to 0.00005.
 * **1.0.2** (1/?/2014) - API CHANGES (minor)
 -   * Removing references to old things.
+-   * Fix non-milk tiebreaker code so that tiebreaks are functional.
 
 Appendices
 ------------
