@@ -33,12 +33,34 @@ Robots are the central part of the Battlecode world. There are two types of basi
 
 ### HQ
 The HQ is your main base, and by far the most important unit you have. Each team starts the game off with one HQ. The HQ is invincible, and can't be destroyed. Your company HQ produces the robot COWBOYs that can herd cows.
+- Robot count: 0
+- Sight range: 35
+- Attack range: 16
+- Health: Tons
 
 ### COWBOY
-COWBOYs form the core of your army. They are the only mobile unit, and are created by the HQ. They allow you to expand your map control and herd cows.
+COWBOYs form the core of your army. They are the only mobile unit, and are created by the HQ. They allow you to expand your map control and herd cows. These are also called SOLDIERs.
+- Robot count: 1
+- Sight range: 35
+- Attack range: 10
+- Health: 100
 
 ### PASTR
 Generates a field to get milk from cows inside the field, and keep cows within the field as long as it remains up.
+- Robot count: 2
+- Sight range: 5
+- Attack range: nope
+- Health: 200
+- Takes 50 turns to construct
+
+### NOISE TOWER
+NOISE TOWERs are immobile structures can 'attack' (but for no damage) to create noise in a large range.
+- Robot count: 3
+- Sight range: 35
+- Attack range: 400
+- Health: 100
+- Takes 100 turns to construct
+
 
 Robot Resources
 ------------------
@@ -450,6 +472,8 @@ Changelog
 * **1.0.2** (1/?/2014) - API CHANGES (minor)
 -   * Removing references to old things.
 -   * Fix non-milk tiebreaker code so that tiebreaks are functional.
+* **1.0.3** (1/7/2014) - Spec improvement
+-   * Added more detailed unit descriptions
 
 Appendices
 ------------
