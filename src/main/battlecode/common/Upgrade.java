@@ -1,6 +1,8 @@
 package battlecode.common;
 
-/** Not used for Battlecode 2014 **/
+/**
+ * Not used for Battlecode 2014
+ */
 public enum Upgrade {
 	FUSION    (25),
 	VISION    (25),

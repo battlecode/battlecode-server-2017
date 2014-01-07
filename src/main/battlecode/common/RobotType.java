@@ -2,6 +2,9 @@ package battlecode.common;
 
 import static battlecode.common.RobotLevel.ON_GROUND;
 
+/**
+ * Contains details on various attributes of the different robots.
+ */
 public enum RobotType {
     //          LEVEL,      MXE    SR  SA          AR AR   AA      AD      AP      ATTACK  BLDNG    SPLASH  COUNT CAPTURNS
   	HQ          (ON_GROUND, Integer.MAX_VALUE,
