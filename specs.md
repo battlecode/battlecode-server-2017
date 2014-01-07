@@ -89,7 +89,7 @@ Robots are equipped with a variety of high tech equipments and can perform the f
 ### Action Delay and Bytecode
 Each robot has an `actiondelay` counter that decrements by 1 every turn. Movement and attacking cannot be performed unless `actiondelay` is less than 1, and they also give a certain amount of `actiondelay`.
 
-Running code uses bytecodes. Each turn, a robot can spend up to 10000 bytecodes on computation. If this limit is reached, the robot's turn is immediately ended and the computation is continued on the next turn. Using `yield()` and `selfdestruct()` can end a turn early, saving bytecodes and ending computation. The former is generally preferred.
+Running code uses bytecodes. Each turn, a robot can spend up to 10000 bytecodes on computation. If this limit is reached, the robot's turn is immediately ended and the computation is continued on the next turn. Using `yield()` and `selfDestruct()` can end a turn early, saving bytecodes and ending computation. The former is generally preferred.
 For cowboy robots and for noise towers, each bytecode above 2000 gives 0.00005 `actiondelay`.
 
 Example: if a SOLDIER (cowboy) currently has 0 `actiondelay`, then it can attack. After attacking, the SOLDIER will have 2 `attackdelay`. At the end of the turn, this counter decrements to 1. At the end of the next turn, this counter decrements to 0. That means that two turns after the initial attack, the SOLDIER can attack again. In the case of fractional `actiondelay`, a robot is only unable to move or attack if its `actiondelay` is greater than or equal to 1.
@@ -133,7 +133,7 @@ The HQ can spawn soldiers, subject to a production delay (30 turns plus total nu
 Cowboy robots can construct structures on the square they are currently on. The robot will become unable to take any action for a certain number of turns (50 for PASTRs, 100 for Noise Towers) and then will be removed and replaced with the constructed structure.
 
 ### Suicide
-Calling `selfdestruct()` immediately removes the calling robot from the game and deals area damage (30+half of remaining hp to square range of 2). This replaces the `suicide()` method. Structures cannot selfdestruct.
+Calling `selfDestruct()` immediately removes the calling robot from the game and deals area damage (30+half of remaining hp to square range of 2). This scares cows in square range 36 and destroys all cows on affected squares (square range 2). This replaces the `suicide()` method. Structures cannot self destruct.
 
 ### Team Memory
 Official matches will usually be sets of multiple games. Each team can save a small amount of information (`GameConstants.TEAM_MEMORY_LENGTH` longs) for the next game using the function `setTeamMemory()`. This information may be retrieved using `getTeamMemory()`. If there was no previous game in the match, or no information was saved, then the memory will be filled with zeros.
@@ -145,15 +145,15 @@ There are several ways that the user can interact with robots. First, any robot 
 
 ### Ending turn
 
-Calling `yield()` and `selfdestruct()` instantly end the turn of a robot, potentially saving bytecodes. Otherwise a turn ends naturally when the bytecode limit is hit. Every turn a robot gets 10000 bytecodes to run code.
+Calling `yield()` and `selfDestruct()` instantly end the turn of a robot, potentially saving bytecodes. Otherwise a turn ends naturally when the bytecode limit is hit. Every turn a robot gets 10000 bytecodes to run code.
 
 ### Cows
 Cows are a scalar field. Each location on the map has a certain natural cow growth. During each turn, each location gains a number of cows equal to the natural cow growth, and then 0.5% of the cows on that location die a natural death.
 
-Cows can be influenced by noise and attacks. After each turn, cows will run away from the averaged location of all the noises they heard that turn. Short-range noises (running, Noise Tower light attacks) scare cows in range^2 9, and long-range noises (shooting, Noise Tower normal attacks) scare cows in range^2 36. If the direction away from this averaged location points between two locations, the cows will split evenly between those locations.
+Cows can be influenced by noise and attacks. After each turn, cows will run away from the averaged location of all the noises they heard that turn. Short-range noises (running, Noise Tower light attacks) scare cows in range^2 9, and long-range noises (shooting, Noise Tower normal attacks, and self destructs) scare cows in range^2 36. If the direction away from this averaged location points between two locations, the cows will split evenly between those locations.
 
 Cows in a PASTR containment field cannot leave the field, and cows on the same square as a robot will not leave that square due to noise until the robot moves.
-In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square. All weapons used are certified humane.
+In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square and self destructs will destroy all cows within range. All weapons used are certified humane.
 
 ### Milk
 Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). Robots only give 5% of the milk that a PASTR would generate. Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk.
@@ -482,7 +482,7 @@ Changelog
 -   * You can now sense the locations of the broadcasting robots instead of just the robots.
 -   * You can now sense your own and your opponent's milk quantity.
 * **1.1.1** (1/?/2014) - 
--   * Fix typographical errors in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes.
+-   * Fix typographical errors and add clarifications in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes.
 
 Appendices
 ------------

@@ -267,6 +267,10 @@ public class NeutralsMap {
         //this.print();
     }
 
+    public void updateWithQuietAttack(MapLocation source) {
+        attacks.add(source);
+    }
+
     public void updateWithNoiseSource(MapLocation source, int radiusSquared) {
         MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(source, radiusSquared);
         for (int i = 0; i < affected.length; i++) {

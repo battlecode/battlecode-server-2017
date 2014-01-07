@@ -700,6 +700,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 if (target != null)
                     if (!(dx == 0 && dy == 0))
                         target.takeDamage(damage, attacker);
+
+                gameMap.getNeutralsMap().updateWithQuietAttack(targetLoc.add(dx, dy));
             }
 
         gameMap.getNeutralsMap().updateWithNoiseSource(targetLoc, GameConstants.ATTACK_SCARE_RANGE);
