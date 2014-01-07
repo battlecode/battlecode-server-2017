@@ -314,6 +314,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //****** SENSING METHODS *******
     //***********************************
 
+    public double senseTeamMilkQuantity(Team t) {
+        if (t == getTeam()) {
+            return gameWorld.resources(t);
+        } else {
+            return ((int) (gameWorld.resources(t) / GameConstants.OPPONENT_MILK_SENSE_ACCURACY)) * GameConstants.OPPONENT_MILK_SENSE_ACCURACY;
+        }
+    }
+
     public int senseRobotCount() {
         return gameWorld.countRobots(getTeam());
     }

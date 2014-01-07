@@ -88,6 +88,12 @@ public interface RobotController {
     // ****** SENSOR METHODS ********
     // ***********************************
 
+    /**
+     * Sense the milk level for a given team. If the team is not your team, then it gets rounded down to the nearest multiple of GameConstants.OPPONENT_MILK_SENSE_ACCURACY.
+     * @return the current milk total of the team (rounded if it's the opponent team).
+     */
+    public double senseTeamMilkQuantity(Team t);
+
 	/**
      * Gets the team's current robot count (with weighting).
      * @return the total number of robots controlled (with weighting).

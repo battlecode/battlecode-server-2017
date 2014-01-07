@@ -103,4 +103,7 @@ public interface GameConstants {
 
 	/** Factor of WIN_QTY milk that is gained after destroying an enemy PASTR */
     public static final double MILK_GAIN_FACTOR = 0.1; // get this * WIN_QTY after destroying pastr
+
+    /** Accuracy of milk quantity of your opponent when sensing. The quantity is rounded down to the nearest multiple of this value. */
+    public static final double OPPONENT_MILK_SENSE_ACCURACY = 2500000.0;
 }

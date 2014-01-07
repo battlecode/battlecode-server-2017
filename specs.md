@@ -480,6 +480,7 @@ Changelog
 -   * Improve Java documentation.
 -   * Added an example for action delay in the specs.
 -   * You can now sense the locations of the broadcasting robots instead of just the robots.
+-   * You can now sense your own and your opponent's milk quantity.
 
 Appendices
 ------------
