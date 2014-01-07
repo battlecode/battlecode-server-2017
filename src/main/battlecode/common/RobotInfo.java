@@ -22,10 +22,6 @@ public class RobotInfo {
      */
     public final double health;
     /**
-     * The shields of this Robot.
-     */
-    public final double shields;
-    /**
      * The direction this Robot is facing.
      */
     public final Direction direction;
@@ -38,33 +34,34 @@ public class RobotInfo {
      */
     public final Team team;
     /**
-     * <code>true</code> if this robot is scheduled to regenerate
-     * at the beginning of its next turn.
+     * Action delay of the robot.
      */
-    public boolean regen;
-    public final int roundsUntilAttackIdle;
-    public final int roundsUntilMovementIdle;
-
+    public final double actionDelay;
+    /**
+     * Whether the robot is constructing anything.
+     */
     public final boolean isConstructing;
+    /**
+     * The type of building being constructed.
+     */
     public final RobotType constructingType;
+    /**
+     * The number of constructing rounds remaining.
+     */
     public final int constructingRounds;
 
     public RobotInfo(Robot robot, MapLocation location,
-                     double hitpoints, double shields, Direction direction,
-                     RobotType type, Team team, boolean regen,
-                     int roundsUntilAttackIdle, int roundsUntilMovementIdle,
+                     double hitpoints, Direction direction,
+                     RobotType type, Team team, double actionDelay,
                      boolean isConstructing, RobotType constructingType, int constructingRounds) {
         super();
         this.robot = robot;
         this.location = location;
         this.health = hitpoints;
-        this.shields = shields;
         this.direction = direction;
         this.type = type;
         this.team = team;
-        this.regen = regen;
-        this.roundsUntilAttackIdle = roundsUntilAttackIdle;
-        this.roundsUntilMovementIdle = roundsUntilMovementIdle;
+        this.actionDelay = actionDelay;
 
         this.isConstructing = isConstructing;
         this.constructingType = constructingType;

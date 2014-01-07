@@ -16,7 +16,6 @@ public enum TerrainTile {
             case VOID:
                 return false;
             case ROAD:
-            	// TODO might need recode if we enable underground robots
                 return true;
             case NORMAL:
                 return true;

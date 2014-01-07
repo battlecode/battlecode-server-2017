@@ -10,33 +10,33 @@ public enum GameActionExceptionType {
      */
     INTERNAL_ERROR,
     /**
-     * Indicates when a robot tries to perform an action (e.g. upgrade, spawn) for which it does not have enough power (team resource)
+     * Indicates when a robot tries to perform an action for which it does not have enough resource. Not used in 2014.
      */
     NOT_ENOUGH_RESOURCE,
     /**
-     * Indicates when a robot tries to perform an action for which it does not have the required upgrade
+     * Indicates when a robot tries to perform an action for which it does not have the required upgrade.
      */
     MISSING_UPGRADE,
     /**
-     * Indicates when a robot tries to move into non-empty square
+     * Indicates when a robot tries to move into non-empty square.
      */
     CANT_MOVE_THERE,
     /**
-     * Indicates when a robot tries to execute an action, but is not currently idle
+     * Indicates when a robot tries to execute an action, but is not currently idle.
      */
     NOT_ACTIVE,
     /**
      * Indicates when a robot tries to sense a <code>GameObject</code> that is no longer existant or no longer
-     * in this robot's sensor range
+     * in this robot's sensor range.
      */
     CANT_SENSE_THAT,
     /**
      * Indicates when a robot tries to perform an action on a location that is outside
-     * its range.
+     * its range..
      */
     OUT_OF_RANGE,
     /**
-     * Indicates when a robot tries to perform an action it can't
+     * Indicates when a robot tries to perform an action it can't.
      */
     CANT_DO_THAT_BRO,
     /**

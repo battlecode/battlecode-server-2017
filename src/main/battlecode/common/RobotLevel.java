@@ -1,13 +1,7 @@
 package battlecode.common;
 
 /**
- * This enumeration distinguishes objects that are on the ground, or in
- * the encampment level at a given location.
- * <p/>
- * Since RobotLevel is a Java 1.5 enum, you can use it in <code>switch</code>
- * statements, it has all the standard enum methods (<code>valueOf</code>,
- * <code>values</code>, etc.), and you can safely use <code>==</code> for
- * equality tests.
+ * Not used in 2014 because all robots are at the same level.
  */
 public enum RobotLevel {
 

@@ -356,7 +356,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public boolean checkCanSense(InternalObject obj) {
-        return obj.exists() && checkCanSense(obj.getLocation());
+        return obj.exists() && (obj.getTeam() == getTeam() || checkCanSense(obj.getLocation()));
     }
 
     public GameObject senseObjectAtLocation(MapLocation loc) throws GameActionException {
@@ -454,9 +454,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException {
         InternalRobot ir = castInternalRobot(r);
         assertCanSense(ir);
-        return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getShieldLevel(),
-                ir.getDirection(), ir.type, ir.getTeam(), ir.getRegen(),
-                ir.roundsUntilAttackIdle(), ir.roundsUntilMovementIdle(),
+        return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(),
+                ir.getDirection(), ir.type, ir.getTeam(), ir.getActionDelay(),
                 ir.getCapturingType() != null, ir.getCapturingType(), ir.getCapturingRounds());
     }
     
@@ -655,11 +654,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
 
     public int roundsUntilActive() {
-        return Math.max(robot.roundsUntilMovementIdle(), robot.roundsUntilAttackIdle());
+        return Math.max(Math.max(robot.roundsUntilMovementIdle(), robot.roundsUntilAttackIdle()), (int) robot.getActionDelay());
     }
 
     public boolean isActive() {
-        return roundsUntilActive() == 0 && robot.getActionDelay() < 1.0;
+        return Math.max(robot.roundsUntilMovementIdle(), robot.roundsUntilAttackIdle()) == 0 && robot.getActionDelay() < 1.0;
     }
 
     public void assertNotMoving() throws GameActionException {
@@ -769,8 +768,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public void broadcast(int channel, int data) throws GameActionException {
     	if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
     		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
-    	double cost = GameConstants.BROADCAST_SEND_COST;
-    	//assertHaveResource(cost);
     	
     	robot.addBroadcast(channel, data);
     	//gameWorld.adjustResources(getTeam(), -cost);
@@ -781,8 +778,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public int readBroadcast(int channel) throws GameActionException {
     	if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
     		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
-    	double cost = GameConstants.BROADCAST_READ_COST;
-    	//assertHaveResource(cost);
     	int m = gameWorld.getMessage(robot.getTeam(), channel);
     	//gameWorld.adjustResources(getTeam(), -cost);
     	return m;

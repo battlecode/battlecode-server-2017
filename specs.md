@@ -13,7 +13,7 @@ Transport milk to space. First build PASTRs (Projected Animal Security and Treat
 
 Good luck!
 
-ajor Mechanics for 2014
+Major Mechanics for 2014
 -----------------
 - Your company HQ produces the robot cowboys that can herd cows.
 - Robots can move to any adjacent square without needing to turn.
@@ -35,7 +35,7 @@ Robots are the central part of the Battlecode world. There are two types of basi
 The HQ is your main base, and by far the most important unit you have. Each team starts the game off with one HQ. The HQ is invincible, and can't be destroyed. Your company HQ produces the robot COWBOYs that can herd cows.
 - Robot count: 0
 - Sight range: 35
-- Attack range: 16
+- Attack range: 15
 - Health: Tons
 
 ### COWBOY
@@ -65,7 +65,7 @@ NOISE TOWERs are immobile structures can 'attack' (but for no damage) to create 
 Robot Resources
 ------------------
 
-Each robot has hitpoints (100). When the hitpoints reach zero, the robot is immediately removed from the game. Hitpoints regenerate slowly over time (.25 per turn when it hasn't been damaged in the last 30 turns). 
+Each robot has hitpoints (100, also known as health). When the hitpoints reach zero, the robot is immediately removed from the game. Hitpoints regenerate slowly over time (.25 per turn when it hasn't been damaged in the last 30 turns). 
 
 In the past, robots used a resource to fuel their movement and computation. This year, the resource is action delay. A robot that does more computation will move more slowly (longer move/attack delay). Because move and attack delay are combined this year, this will also mean less damage per second for computationally intensive robots.
 
@@ -74,7 +74,7 @@ The HQ can produce a robot every few rounds until the number of allied robots (i
 Victory Conditions
 ------------------
 
-A team wins by transporting `GameConstants.WIN_QTY` GigaGallons (GG) to space. If neither team has done so by `GameConstants.ROUND_LIMIT`, the following tiebreakers apply:
+A team wins by transporting `GameConstants.WIN_QTY` GigaGallons (GG) to space. If neither team has done so by `GameConstants.ROUND_MAX_LIMIT`, the following tiebreakers apply:
 
 - Quantity of milk transported
 - Total # cows in PASTRs
@@ -102,9 +102,9 @@ Info on robots in sight range can be sensed. Vision is not shared between robots
 - The locations of the both HQs can be sensed.
 
 ### Broadcasting
-Radio Sensors: When a robot broadcasts to radio, all robots are made aware of the location of the broadcasting robot for for one turn. They can access the positions with a method call like `rc.senseNearbyBroadcastingRobots(Team t)`.
+Radio Sensors: When a robot broadcasts to radio, all robots are made aware of the location of the broadcasting robot for for one turn. They can access the positions with a method call like `rc.senseBroadcastingRobots(Team t)`.
 
-essages written to the team-shared integer list persist until overwritten. You can't read or write integers from or to the enemy team's shared integer list. 
+Messages written to the team-shared integer list persist until overwritten. You can't read or write integers from or to the enemy team's shared integer list. 
 
 The cost of transmitting and receiving are in bytecodes, which, as mentioned earlier, affect movement and attack speeds.
 
@@ -153,10 +153,10 @@ Cows in a PASTR containment field cannot leave the field, and cows on the same s
 In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square. All weapons used are certified humane.
 
 ### Milk
-ilk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). Robots only give 5% of the milk that a PASTR would generate. Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk.
+Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). Robots only give 5% of the milk that a PASTR would generate. Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk.
 
 
-aps
+Maps
 -----
 Battlecode maps are a rectangular grid of squares, each with a pair of integer coordinates. Each tile is an instance of `MapLocation`. Squares outside the map have TerrainType.OFF_MAP. The northwest map square is the origin (0,0). Maps specify the spawn points of the teams.
 
@@ -164,7 +164,7 @@ There are three types of terrain: GROUND, VOID, and ROAD. VOID terrain is not tr
 
 ### Map Files
 
-aps are specified by XML files, and can be found in the maps folder of the release archive. The schema for the files should be fairly intuitive, so if you'd like to add your own maps you can use the provided maps as a basis. Each map has an associated random number seed, which the RNG uses to generate random numbers in games played on that map.
+Maps are specified by XML files, and can be found in the maps folder of the release archive. The schema for the files should be fairly intuitive, so if you'd like to add your own maps you can use the provided maps as a basis. Each map has an associated random number seed, which the RNG uses to generate random numbers in games played on that map.
 
 ### Map Constraints
 Official maps used in scrimmages and tournaments must all satisfy the following conditions.
@@ -180,7 +180,7 @@ Writing a Player
 
 Your player program must reside in a Java package named `teamXXX`, where `XXX` is your three-digit team number, with leading zeros included. You may have whatever sub-packages you like. You must define `teamXXX.RobotPlayer`, which must have a public static `run` method that takes one argument of type `battlecode.common.RobotController`. Whenever a new robot is created, the game calls the run method with the robots RobotController as its argument. If this method ever finishes, either because it returned or because of an uncaught exception, the robot dies and is removed from the game. You are encouraged to wrap your code in loops and exception handlers so that this does not happen.
 
-###. RobotController
+### RobotController
 
 The RobotController argument to the RobotPlayer constructor is very important -- this is how you will control your robot. RobotController has methods for sensing (e.g. `senseRobotInfo(Robot)`) and performing actions (e.g., `move()`). If you're not sure how to get your robot to do something, the Javadocs for RobotController are a good place to start.
 
@@ -271,7 +271,7 @@ The game is comprised of a number of rounds. During each round, all robots get a
 
 The following is a detailed list of a robot's execution order within a single turn. If it dies halfway through, the remainder of the list does not get executed. In particular, note that changes to a robot's state do not happen while player code is being executed. All actions instead get sent to an action queue, and they are executed after the player code is run. For example, if a SOLDIER calls move() and then getLocation(), it will not reflect the location of the robot yet.
 
-1. Robot executes up to `GameConstants.BYTECODE_LIMIT` of player code. Power costs for action calls in the player code are checked based on the available power at this point.
+1. Robot executes up to `GameConstants.BYTECODE_LIMIT` of player code.
 2. Channels are updated with new broadcasts
 3. Actions are performed
 
@@ -289,7 +289,7 @@ Because the round can change at the end of any bytecode, unexpected things can h
 
 ```java
 Robot[] nearbyRobots = myRC.senseNearbyGameObjects(Robot.class);
-apLocation loc = myRC.senseRobotInfo(nearbyRobots[0]);
+MapLocation loc = myRC.senseRobotInfo(nearbyRobots[0]);
 ```
 
 In the first line, the robot gets a list of all other robots in its sensor range. In the second line, the robot senses the RobotInfo of the first robot in the list. However, what happens if the round changes between the first and second line? A robot that was in sensor range when line 1 was executed might be out of sensor range when line 2 is executed, resulting in an exception. Because of this, your code should be written defensively. Think of this as a "real-world" robot, where things can fail at any time, and you have to be prepared to handle it.
@@ -300,7 +300,7 @@ However, there are ways of dealing with this, as we'll see in the next section.
 
 One way to deal with timing complexities is to use `yield()` judiciously. Calling `RobotController.yield()` ends the robot's computation for the current round. This has two advantages.
 
-First, robots consume power based on how many bytecodes they use every turn. A player that uses fewer bytecodes in a turn will be able to support more robots.
+First, robots gain action delay based on how many bytecodes they use every turn. A player that uses fewer bytecodes in a turn will be able to move and attack more frequently.
 
 Second, after a call to `RobotController.yield()`, subsequent code is executed at the beginning of a new round. Then, you have the full amount of bytecodes for your robot to do computations before the round changes. For instance, let's modify the example above to be:
 
@@ -325,7 +325,7 @@ GameActionExceptions are thrown when an ability cannot be performed. It is often
 Exceptions cause a bytecode penalty of `GameConstants.EXCEPTION_BYTECODE_PENALTY`.
 
 
-echanics
+Mechanics
 --------------------
 
 This section deals with some of the mechanics of how your players are run in the game engine, including bytecode-counting, library restrictions, etc.
@@ -348,7 +348,7 @@ Note that violating any of the above restrictions will cause the robots to self-
 Classes in `java.util`, `java.math`, and scala and their subpackages are bytecode counted as if they were your own code. The following functions in `java.lang` are also bytecode counted as if they were your own code.
 
 ```
-ath.random
+Math.random
 StrictMath.random
 String.matches
 String.replaceAll
@@ -445,7 +445,7 @@ If your submission does not beat the reference player, then you can get credit a
 
 We give prizes for the best strategy reports, so we encourage you to submit a report even if you defeat the reference player.
 
-Also, note that you are allowed to drop 6.370 without penalty very late into IAP.
+Also, note that you are allowed to drop 6.370 (6.147) without penalty very late into IAP.
 
 
 Getting Help
@@ -470,10 +470,10 @@ Changelog
 -   * Removing references to mining and capturing in RobotController documentation.
 -   * Changing bytecode penalty to 0.00005.
 * **1.0.2** (1/?/2014) - API CHANGES (minor)
--   * Removing references to old things. maxEnergon and isEncampment in RobotType are now maxHealth and isBuilding.
+-   * Removing references to old things. maxEnergon and isEncampment in RobotType are now maxHealth and isBuilding. RobotInfo now tells action delay.
 -   * Fix non-milk tiebreaker code so that tiebreaks are functional.
 -   * HQ and Noise towers no longer herd or farm milk (update engine to comply with specs).
--   * Added more detailed unit descriptions in specs.
+-   * Added more detailed unit descriptions in specs as well as fixing typographical errors.
 
 Appendices
 ------------

@@ -15,6 +15,9 @@ public interface RobotController {
     // ****** QUERY METHODS ********
     // *********************************
 
+    /**
+     * @return this robot's current action delay
+     */
     public double getActionDelay();
 
     /**
@@ -22,11 +25,6 @@ public interface RobotController {
      */
     public double getHealth();
     
-    /**
-     * @return this robot's current shield level
-     */
-    public double getShields();
-
     /**
      * @return this robot's current location
      */
@@ -41,7 +39,6 @@ public interface RobotController {
      * @return the current map's height
      */
     public int getMapHeight();
-    
 
     /**
      * Gets the Team of this robot. Equivalent to
@@ -134,7 +131,7 @@ public interface RobotController {
 	
 	/**
 	 * @param t - filter robots by the given team.
-     * @return whether this robot is currently constructing a structure.
+     * @return an array of all robots of the given team that have broadcasted in the last round.
      */
     public Robot[] senseBroadcastingRobots(Team t);
     
@@ -142,6 +139,7 @@ public interface RobotController {
     /**
      * Sense the location of the given object.
      *
+     * @return the location of the given object.
      * @throws GameActionException if object is not within sensor range (CANT_SENSE_THAT)
      */
     public MapLocation senseLocationOf(GameObject o) throws GameActionException;
@@ -149,27 +147,32 @@ public interface RobotController {
     /**
      * Sense the RobotInfo for the given robot.
      *
+     * @return the RobotInfo for the given robot.
      * @throws GameActionException if robot is not within sensor range (CANT_SENSE_THAT)
      */
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException;
 
     /**
 	 * Returns true if the given object is within the robot's sensor range
+     * @return whether the given object is within the robot's sensor range
      */
     public boolean canSenseObject(GameObject o);
 
     /**
      * Returns true if the given location is within the robot's sensor range
+     * @return whether the given location is within the robot's sensor range
      */
     public boolean canSenseSquare(MapLocation loc);
     
     /**
      * Returns location of the allied team's HQ
+     * @return the team's HQ location
      */
     public MapLocation senseHQLocation();
 
     /**
      * Returns location of the enemy team's HQ
+     * @return the enemy team's HQ location
      */
     public MapLocation senseEnemyHQLocation();
     
@@ -245,13 +248,13 @@ public interface RobotController {
 
     /**   
      * Attacks the given location. 
-	 * Also applies to NOISETOWER, but does not deal damage in that case.
+	 * Also applies to NOISETOWER, but does not deal damage in that case. This attack has the larger of the two possible noise radii for a NOISETOWER attack.
      */
     public void attackSquare(MapLocation loc) throws GameActionException;
 
 	/**
      * NOISETOWER only
-     * 'Attacks' the given location. Does not deal damage.
+     * 'Attacks' the given location. Does not deal damage. The attack has a smaller noise radius a normal NOISETOWER attack.
      */
     public void attackSquareLight(MapLocation loc) throws GameActionException;
 
@@ -294,15 +297,7 @@ public interface RobotController {
      */
     public void spawn(Direction dir) throws GameActionException;
    
-    
     /**
-     * Checks whether a given upgrade has been researched and is available.
-     * @param upgrade cannot be null
-     */
-    //public boolean hasUpgrade(Upgrade upgrade);
-
-    /**
-     * Captures the encampment soldier is standing on. 
      * After a delay, kills the soldier and spawns a robot of the given building type
      * @param type
      * @throws GameActionException
@@ -310,27 +305,7 @@ public interface RobotController {
     public void construct(RobotType type) throws GameActionException;
     
     /**
-     * HQ ONLY.
-     * Researches the given upgrade for a turn.
-     * @param upgrade
-     * @throws GameActionException
-     */
-    //public void researchUpgrade(Upgrade upgrade) throws GameActionException;
-    
-    /**
-     * HQ ONLY.
-     * Checks the total number of rounds a given research has been researched
-     * @param upgrade
-     * @return the number of rounds that have been spent upgrading
-     * @throws GameActionException
-     */
-    //public int checkResearchProgress(Upgrade upgrade) throws GameActionException;
-    
-    
-    /**
-     * Ends the current round.  The team will receive a power refund of
-     * <code>GameConstants.POWER_COST_PER_BYTECODE * (GameConstants.BYTECODE_LIMIT
-		 * - RobotMonitor.getBytecodesUsed())</code>.
+     * Ends the current round.
      * Never fails.
      */
     public void yield();
@@ -338,7 +313,7 @@ public interface RobotController {
     /**
      * Kills your robot and ends the current round. Never fails.
      */
-    public void suicide();
+    //public void suicide();
 
 	/**
      * Kills your robot and deals area damage within distanceSquared 2 equal to <code>GameConstants.SELF_DESTRUCT_BASE_DAMAGE</code> plus the robot's current hp multiplied by <code>GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR</code>.
@@ -355,8 +330,7 @@ public interface RobotController {
     // ***********************************
     
     /**
-     * Puts a hat on the robot. You require the BATTLECODE-HATS DLC, which charges you 
-     * GameConstants.HAT_POWER_COST per hat. You also cannot be moving while putting on your hat.
+     * Puts a hat on the robot. You require the BATTLECODE-HATS DLC. You also cannot be moving while putting on your hat.
      */
     public void wearHat() throws GameActionException;
 
