@@ -472,7 +472,7 @@ Changelog
 -   * Improve game finish message so that it does not always say the game ends on tiebreaks.
 -   * Removing references to mining and capturing in RobotController documentation.
 -   * Changing bytecode penalty to 0.00005.
-* **1.0.2** (1/?/2014) - API CHANGES (minor)
+* **1.1.0** (1/8/2014) - Minor API Changes
 -   * Removing references to old things. maxEnergon and isEncampment in RobotType are now maxHealth and isBuilding. RobotInfo now tells action delay.
 -   * Fix non-milk tiebreaker code so that tiebreaks are functional.
 -   * HQ and Noise towers no longer herd or farm milk (update engine to comply with specs).
