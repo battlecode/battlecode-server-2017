@@ -11,12 +11,18 @@ import battlecode.world.NeutralsMap;
  * @author axc
  */
 public class NeutralsDensitySignal extends Signal {
-    private final double[][] amounts;
+    private final int[][] amounts;
     public NeutralsDensitySignal(NeutralsMap nm) {
-        amounts = nm.copyOfCurrentAmounts();
+        double[][] temp = nm.copyOfCurrentAmounts();
+        amounts = new int[temp.length][temp[0].length];
+        for (int i = 0; i < temp.length; i++) {
+            for (int j = 0; j < temp[i].length; j++) {
+                amounts[i][j] = (int) Math.round(temp[i][j]);
+            }
+        }
     }
 
-    public double[][] getAmounts() {
+    public int[][] getAmounts() {
         return amounts;
     }
 }
