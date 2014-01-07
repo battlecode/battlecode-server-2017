@@ -92,6 +92,8 @@ Each robot has an `actiondelay` counter that decrements by 1 every turn. Movemen
 Running code uses bytecodes. Each turn, a robot can spend up to 10000 bytecodes on computation. If this limit is reached, the robot's turn is immediately ended and the computation is continued on the next turn. Using `yield()` and `selfdestruct()` can end a turn early, saving bytecodes and ending computation. The former is generally preferred.
 For cowboy robots, each bytecode above 2000 gives 0.00005 `actiondelay`.
 
+Example: if a SOLDIER (cowboy) currently has 0 `actiondelay`, then it can attack. After attacking, the SOLDIER will have 2 `attackdelay`. At the end of the turn, this counter decrements to 1. At the end of the next turn, this counter decrements to 0. That means that two turns after the initial attack, the SOLDIER can attack again. In the case of fractional `actiondelay`, a robot is only unable to move or attack if its `actiondelay` is greater than or equal to 1.
+
 
 ### Sensors
 
@@ -100,6 +102,7 @@ Info on robots in sight range can be sensed. Vision is not shared between robots
 - The info on all allied robots can be sensed.
 - The info on visible enemy robots can be sensed.
 - The locations of the both HQs can be sensed.
+- The locations of all PASTRs on the map can be sensed.
 
 ### Broadcasting
 Radio Sensors: When a robot broadcasts to radio, all robots are made aware of the location of the broadcasting robot for for one turn. They can access the positions with a method call like `rc.senseBroadcastingRobots(Team t)`.
@@ -307,7 +310,7 @@ Second, after a call to `RobotController.yield()`, subsequent code is executed a
 ```java
 myRC.yield();
 Robot[] nearbyRobots = myRC.senseNearbyGameObjects(Robot.class);
-apLocation loc = myRC.senseRobotInfo(nearbyRobots[0]);
+MapLocation loc = myRC.senseRobotInfo(nearbyRobots[0]);
 ```
 
 Since yield is called in line 1, line 2 will be executed at the beginning of a new round. Since `senseNearbyGameObjects()` does not take very many bytecodes, it is pretty much guaranteed that there won't be a round change between lines 2 and 3.
@@ -474,6 +477,7 @@ Changelog
 -   * Fix non-milk tiebreaker code so that tiebreaks are functional.
 -   * HQ and Noise towers no longer herd or farm milk (update engine to comply with specs).
 -   * Added more detailed unit descriptions in specs as well as fixing typographical errors.
+-   * Added an example for action delay in the specs.
 
 Appendices
 ------------
