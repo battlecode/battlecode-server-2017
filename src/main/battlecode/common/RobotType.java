@@ -57,7 +57,7 @@ public enum RobotType {
     public final double attackAngle;
 
     /**
-     * Not used for 2014.
+     * Not used for 2014. Everything has attack delay 1, except for SOLDIERs, which have an attack delay specified as a game constant.
      */
     public final int attackDelay;
 

@@ -64,21 +64,19 @@ public class RobotDoc implements Taglet {
         StringBuilder builder = new StringBuilder();
         try {
 						if (rt.isBuilding)
-								append(builder, "Type", "Encampment Upgrade"); 
+								append(builder, "Type", "Structure"); 
 						else if (rt == RobotType.HQ)
 								append(builder, "Type", "HQ");
 						else
 								append(builder, "Type", "Soldier");
 
-            append(builder, "Max Energon", String.format("%1.0f", rt.maxHealth));
+            append(builder, "Max Health", String.format("%1.0f", rt.maxHealth));
             if (rt.sensorAngle > 0) {
                 append(builder, "Sensor Radius Squared", String.format("%d", rt.sensorRadiusSquared));
             }
             if (rt.canAttack) {
-                append(builder, "Min Attack Radius Squared", String.format("%d", rt.attackRadiusMinSquared));
-                append(builder, "Max Attack Radius Squared", String.format("%d", rt.attackRadiusMaxSquared));
+                append(builder, "Attack Radius Squared", String.format("%d", rt.attackRadiusMaxSquared));
                 append(builder, "Attack Power", String.format("%1.1f", rt.attackPower));
-                append(builder, "Attack Delay", String.format("%d", rt.attackDelay));
             }
         } catch (Exception e) {
             e.printStackTrace();
