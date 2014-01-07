@@ -477,6 +477,7 @@ Changelog
 -   * Fix non-milk tiebreaker code so that tiebreaks are functional.
 -   * HQ and Noise towers no longer herd or farm milk (update engine to comply with specs).
 -   * Added more detailed unit descriptions in specs as well as fixing typographical errors.
+-   * Improve Java documentation.
 -   * Added an example for action delay in the specs.
 
 Appendices
