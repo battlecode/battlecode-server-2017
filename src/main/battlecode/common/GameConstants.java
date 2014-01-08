@@ -50,8 +50,8 @@ public interface GameConstants {
 	/** Constant used to calculate how suppliers factor into the HQ spawn delay */
 	public static final double HQ_SPAWN_DELAY_CONSTANT_2 = 1.5; // b -> a + N^b, where N is num robots
     
-    /** Amount of power required to wear a hat */
-    public static final double HAT_POWER_COST = 40.0;
+    /** Amount of milk required to wear a hat */
+    public static final double HAT_MILK_COST = 2000000.0;
 
     /** Cow value decay per turn */
     public static final double NEUTRALS_TURN_DECAY = 0.995;

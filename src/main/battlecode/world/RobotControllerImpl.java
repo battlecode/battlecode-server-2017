@@ -99,7 +99,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     
     public void assertHaveResource(double amount) throws GameActionException {
     	if (amount > gameWorld.resources(getTeam()))
-    		throw new GameActionException(NOT_ENOUGH_RESOURCE, "You do not have enough POWER to do that.");
+    		throw new GameActionException(NOT_ENOUGH_RESOURCE, "You do not have enough MILK to do that.");
     }
     
     public void assertHaveUpgrade(Upgrade upgrade) throws GameActionException {
@@ -821,9 +821,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public void wearHat() throws GameActionException {
     	if (getType() != RobotType.SOLDIER)
     		throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERS can wear hats.");
-    	//assertHaveResource(GameConstants.HAT_POWER_COST);
+    	assertHaveResource(GameConstants.HAT_MILK_COST);
     	assertNotMoving();
-    	//gameWorld.adjustResources(getTeam(), -GameConstants.HAT_POWER_COST);
+    	gameWorld.adjustResources(getTeam(), -GameConstants.HAT_MILK_COST);
     	robot.activateMovement(new HatSignal(robot, gameWorld.randGen.nextInt()), 1);
     }
    

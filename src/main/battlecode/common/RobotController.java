@@ -360,7 +360,7 @@ public interface RobotController {
     // ***********************************
     
     /**
-     * Puts a hat on the robot. You require the BATTLECODE-HATS DLC. You also cannot be moving while putting on your hat.
+     * Puts a hat on the robot. You require the BATTLECODE-HATS DLC. You also cannot be moving while putting on your hat. This costs milk (GameConstants.HAT_MILK_COST).
      */
     public void wearHat() throws GameActionException;
 
