@@ -48,6 +48,7 @@ import battlecode.world.signal.MinelayerSignal;
 import battlecode.world.signal.MovementOverrideSignal;
 import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.NeutralsDensitySignal;
+import battlecode.world.signal.NeutralsTeamSignal;
 import battlecode.world.signal.NodeBirthSignal;
 import battlecode.world.signal.RegenSignal;
 import battlecode.world.signal.ResearchSignal;
@@ -197,6 +198,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         addSignal(new FluxChangeSignal(teamResources));
 		addSignal(new ResearchChangeSignal(research));
         addSignal(new NeutralsDensitySignal(gameMap.getNeutralsMap()));
+        addSignal(new NeutralsTeamSignal(gameObjects, gameMap.getWidth(), gameMap.getHeight()));
 
         if (timeLimitReached() && winner == null) {
             // main tie breaker = milk

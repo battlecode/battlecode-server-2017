@@ -485,6 +485,7 @@ Changelog
 -   * Fix typographical errors and add clarifications in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes. The amount of milk farmed is exactly equal to the total quantity of cows in range. Pastrs share milk in the case of overlap.
 -   * Minor bug fixes. MethodCosts.txt boolean values updated.
 -   * Hats are no longer free to wear.
+-   * Client changes and optimizations: The "U" key now cycles between "important cows", "all cows", "no cows".
 
 Appendices
 ------------
