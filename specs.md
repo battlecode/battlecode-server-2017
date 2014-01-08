@@ -29,7 +29,7 @@ Major Mechanics for 2014
 Robot Overview
 -----------------
 
-Robots are the central part of the Battlecode world. There are two types of basic robots. Note that we use the terms 'robot' and 'unit' interchangeably.
+Robots are the central part of the Battlecode world. There are two types of basic robots. Note that we use the terms 'robot' and 'unit' interchangeably. All ranges below are specified as square distances (that is, the square of the Euclidean distance between two points).
 
 ### HQ
 The HQ is your main base, and by far the most important unit you have. Each team starts the game off with one HQ. The HQ is invincible, and can't be destroyed. Your company HQ produces the robot COWBOYs that can herd cows.
@@ -46,7 +46,7 @@ COWBOYs form the core of your army. They are the only mobile unit, and are creat
 - Health: 100
 
 ### PASTR
-Generates a field to get milk from cows inside the field, and keep cows within the field as long as it remains up.
+Generates a field to get milk from cows inside the field, and keep cows within the field as long as it remains up. The milking range of the PASTR is specified by `GameConstants.PASTR_RANGE`.
 - Robot count: 2
 - Sight range: 5
 - Attack range: nope
@@ -54,7 +54,7 @@ Generates a field to get milk from cows inside the field, and keep cows within t
 - Takes 50 turns to construct
 
 ### NOISE TOWER
-NOISE TOWERs are immobile structures can 'attack' (but for no damage) to create noise in a large range.
+NOISE TOWERs are immobile structures can 'attack' (but for no damage) to create noise in a large range. There are two types of attacks that a NOISE TOWER can use. There is a normal attack (`rc.attackSquare`) and a light attack (`rc.attackSquareLight`). The former generates a noise source scaring all cows in square range 36, while a light attack only scares cows in square range 9.
 - Robot count: 3
 - Sight range: 35
 - Attack range: 400
@@ -156,7 +156,7 @@ Cows in a PASTR containment field cannot leave the field, and cows on the same s
 In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square and self destructs will destroy all cows within range. All weapons used are certified humane.
 
 ### Milk
-Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). Robots only give 5% of the milk that a PASTR would generate. Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk.
+Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). Robots only give 5% of the milk that a PASTR would generate. Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk. The amount of milk gained from a square is exactly equal to the quantity of cows on that square. When more than one PASTR controls a square, the milk from that square is shared equally.
 
 
 Maps
@@ -482,7 +482,7 @@ Changelog
 -   * You can now sense the locations of the broadcasting robots instead of just the robots.
 -   * You can now sense your own and your opponent's milk quantity.
 * **1.1.1** (1/?/2014) - 
--   * Fix typographical errors and add clarifications in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes.
+-   * Fix typographical errors and add clarifications in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes. The amount of milk farmed is exactly equal to the total quantity of cows in range.
 -   * Minor bug fixes. MethodCosts.txt boolean values updated.
 
 Appendices
