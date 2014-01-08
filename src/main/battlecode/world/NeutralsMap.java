@@ -129,6 +129,16 @@ public class NeutralsMap {
         return cowsCopy;
     }
 
+    public int[][] copyOfCurrentAmountsAsInt() {
+        int[][] cowsCopy = new int[this.mapWidth][this.mapHeight];
+        for (int i = 0; i < this.mapWidth; i++) {
+            for (int j = 0; j < this.mapHeight; j++) {
+                cowsCopy[i][j] = (int) Math.round(this.currentAmount[i][j]);
+            }
+        }
+        return cowsCopy;
+    }
+
     public boolean isValid(int x, int y) {
         return x >= 0 && x < this.mapWidth && y >= 0 && y < this.mapHeight && passable[x][y];
     }

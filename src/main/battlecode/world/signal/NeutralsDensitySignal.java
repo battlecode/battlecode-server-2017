@@ -13,13 +13,7 @@ import battlecode.world.NeutralsMap;
 public class NeutralsDensitySignal extends Signal {
     private final int[][] amounts;
     public NeutralsDensitySignal(NeutralsMap nm) {
-        double[][] temp = nm.copyOfCurrentAmounts();
-        amounts = new int[temp.length][temp[0].length];
-        for (int i = 0; i < temp.length; i++) {
-            for (int j = 0; j < temp[i].length; j++) {
-                amounts[i][j] = (int) Math.round(temp[i][j]);
-            }
-        }
+        this.amounts = nm.copyOfCurrentAmountsAsInt();
     }
 
     public int[][] getAmounts() {

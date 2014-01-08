@@ -483,6 +483,7 @@ Changelog
 -   * You can now sense your own and your opponent's milk quantity.
 * **1.1.1** (1/?/2014) - 
 -   * Fix typographical errors and add clarifications in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes.
+-   * Minor bug fixes. MethodCosts.txt boolean values updated.
 
 Appendices
 ------------
