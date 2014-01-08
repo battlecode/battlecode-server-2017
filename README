@@ -4,6 +4,8 @@ Battlecode Server
 
 BUILDING
 
+NOTE: If you are a competitor, you can download the installer that does all these steps for you. See http://www.battlecode.org/contestants/releases/.
+
 You have to build the server before the client. This process builds both. You need an existing battlecode distribution for the updated jogl.jar file, and everything else.
 
 1. cd into your workspace
