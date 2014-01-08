@@ -98,9 +98,17 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                 try {
                     classBytes = instrument(name, true, teamPackageName);
                     //dumpToFile(name,classBytes);
-                } catch (InstrumentationException ie) {
-                    teamsWithErrors.add(teamPackageName);
-                    throw ie;
+                } catch (InstrumentationException ie2) {
+		    try {
+			try {
+			    Thread.sleep(10000);
+			} catch(Exception e) {}
+			classBytes = instrument(name, true, teamPackageName);
+			//dumpToFile(name,classBytes);
+		    } catch (InstrumentationException ie) {
+			teamsWithErrors.add(teamPackageName);
+			throw ie;
+		    }
                 }
 
                 finishedClass = saveAndDefineClass(name, classBytes);
