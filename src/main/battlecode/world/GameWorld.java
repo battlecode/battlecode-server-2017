@@ -690,18 +690,28 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         MapLocation targetLoc = s.getLoc();
         RobotLevel level = RobotLevel.ON_GROUND;
 
+        teamKills[attacker.getTeam().opponent().ordinal()]++;
 
         double damage = GameConstants.SELF_DESTRUCT_BASE_DAMAGE;
         damage += attacker.getEnergonLevel() * GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR;
         InternalRobot target;
         for (int dx = -1; dx <= 1; dx++)
             for (int dy = -1; dy <= 1; dy++) {
-
                 target = getRobot(targetLoc.add(dx, dy), level);
 
-                if (target != null)
-                    if (!(dx == 0 && dy == 0))
+                if (target != null) {
+                    if (!(dx == 0 && dy == 0)) {
                         target.takeDamage(damage, attacker);
+
+                        // kill enemy pastr --> we gain milk
+                        if (target.getEnergonLevel() <= 0.0 && target.type == RobotType.PASTR && target.getTeam() != attacker.getTeam()) {
+                            adjustResources(attacker.getTeam(), GameConstants.WIN_QTY * GameConstants.MILK_GAIN_FACTOR);
+                        }
+                        if (target.getEnergonLevel() <= 0.0 && target.getTeam() != attacker.getTeam()) {
+                            teamKills[attacker.getTeam().ordinal()]++;
+                        }
+                    }
+                }
 
                 gameMap.getNeutralsMap().updateWithQuietAttack(targetLoc.add(dx, dy));
             }

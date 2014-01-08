@@ -486,6 +486,7 @@ Changelog
 -   * Minor bug fixes. MethodCosts.txt boolean values updated.
 -   * Hats are no longer free to wear.
 -   * Client changes and optimizations: The "U" key now cycles between "important cows", "all cows", "no cows".
+-   * Self destructing to destroy an opponent PASTR correctly rewards milk now.
 
 Appendices
 ------------
