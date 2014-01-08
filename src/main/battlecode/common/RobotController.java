@@ -89,8 +89,8 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Sense the milk level for a given team. If the team is not your team, then it gets rounded down to the nearest multiple of GameConstants.OPPONENT_MILK_SENSE_ACCURACY.
-     * @return the current milk total of the team (rounded if it's the opponent team).
+     * Sense the milk level for a given team. If the team is not your team, then it gets rounded down to the nearest multiple of GameConstants.OPPONENT_MILK_SENSE_ACCURACY
+     * @return the current milk total of the team (rounded if it's the opponent team)
      */
     public double senseTeamMilkQuantity(Team t);
 
@@ -138,26 +138,26 @@ public interface RobotController {
     public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type, MapLocation center, int radiusSquared, Team team);
 
 	/**
-     * Returns an array of all the robots that have broadcasted in the last round.
+     * Returns an array of all the robots that have broadcasted in the last round (unconstrained by sensor range or distance)
      * @return an array of all robots that have broadcasted in the last round.
      */
     public Robot[] senseBroadcastingRobots();
 	
 	/**
-     * Returns an array of all the robots that have broadcasted in the last round, filtered by team.
+     * Returns an array of all the robots that have broadcasted in the last round, filtered by team (unconstrained by sensor range or distance)
 	 * @param t - filter robots by the given team.
      * @return an array of all robots of the given team that have broadcasted in the last round.
      */
     public Robot[] senseBroadcastingRobots(Team t);
     
 	/**
-     * Returns an array of all the locations of the robots that have broadcasted in the last round.
+     * Returns an array of all the locations of the robots that have broadcasted in the last round (unconstrained by sensor range or distance)
      * @return an array of all the locations of the robots that have broadcasted in the last round.
      */
     public MapLocation[] senseBroadcastingRobotLocations();
 	
 	/**
-     * Returns an array of all the locations of the robots that have broadcasted in the last round, filtered by team.
+     * Returns an array of all the locations of the robots that have broadcasted in the last round, filtered by team (unconstrained by sensor range or distance)
 	 * @param t - filter robots by the given team.
      * @return an array of all the locations of the robots of the given team that have broadcasted in the last round.
      */
@@ -192,26 +192,26 @@ public interface RobotController {
     public boolean canSenseSquare(MapLocation loc);
     
     /**
-     * Returns location of the allied team's HQ
+     * Returns location of the allied team's HQ (unconstrained by sensor range or distance)
      * @return the team's HQ location
      */
     public MapLocation senseHQLocation();
 
     /**
-     * Returns location of the enemy team's HQ
+     * Returns location of the enemy team's HQ (unconstrained by sensor range or distance)
      * @return the enemy team's HQ location
      */
     public MapLocation senseEnemyHQLocation();
     
 	/**
-	 * Returns the locations of PASTRS filtered by a team
+	 * Returns the locations of PASTRS filtered by a team (unconstrained by sensor range or distance)
 	 * @param t - filter PASTR locations by the given team
      * @return an array of all MapLocations of PASTR locations
      */
     public MapLocation[] sensePastrLocations(Team t);
 
 	/**
-	 * Gives a representation of the cow growths of each location of the map
+	 * Gives a representation of the cow growths of each location of the map (unconstrained by sensor range or distance)
 	 *
      * @return an array of arrays of doubles, where element [a][b] is the natural cow growth at MapLocation (a,b)
      */
@@ -230,26 +230,27 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Returns the number of rounds until the robot is active again.
-     * @return the number of rounds until this robot's action cooldown ends, or 0 if it is already active.
+     * Returns the number of rounds until the robot is active again
+     * @return the number of rounds until this robot's action cooldown ends, or 0 if it is already active
      */
     public int roundsUntilActive();
 
     /**
-     * Returns if the robot is active (able to move, construct, and attack).
-     * @return true if this robot is active. If a robot is active, it can move, construct, and attack.
+     * Returns if the robot is active (able to move, construct, and attack)
+     * @return true if this robot is active. If a robot is active, it can move, construct, and attack
      */
     public boolean isActive();
 
     /**
-     * Move in the given direction if possible.
+     * Move in the given direction if possible
+	 * Creates a short-range noise at the destination location
      * @param dir
      * @throws GameActionException if the robot cannot move in this direction
      */
     public void move(Direction dir) throws GameActionException;
 
 	/**
-     * Sneak in the given direction if possible.
+     * Sneak in the given direction if possible
      * @param dir
      * @throws GameActionException if the robot cannot move in this direction
      */
@@ -277,14 +278,16 @@ public interface RobotController {
     public boolean canAttackSquare(MapLocation loc);
 
     /**   
-     * Attacks the given location. 
-	 * Also applies to NOISETOWER, but does not deal damage in that case. This attack has the larger of the two possible noise radii for a NOISETOWER attack.
+     * Attacks the given location
+	 * Also applies to NOISETOWER, but does not deal damage in that case
+	 * Creates a long-range noise at the targeted location
      */
     public void attackSquare(MapLocation loc) throws GameActionException;
 
 	/**
      * NOISETOWER only
-     * 'Attacks' the given location. Does not deal damage. The attack has a smaller noise radius a normal NOISETOWER attack.
+     * 'Attacks' the given location
+     * Does not deal damage, but creates a short-range noise at the targeted location
      */
     public void attackSquareLight(MapLocation loc) throws GameActionException;
 
@@ -347,6 +350,7 @@ public interface RobotController {
 
 	/**
      * Kills your robot and deals area damage within distanceSquared 2 equal to <code>GameConstants.SELF_DESTRUCT_BASE_DAMAGE</code> plus the robot's current hp multiplied by <code>GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR</code>.
+	 * Destroys all cows in all effected squares and creates a long-range noise at the robot's former location
      */
     public void selfDestruct() throws GameActionException;
 
