@@ -9,6 +9,7 @@
   <dependencies>
     <dependency org="commons-lang" name="commons-lang" rev="2.5" />
     <dependency org="commons-cli" name="commons-cli" rev="1.2" />
+    <dependency org="commons-io" name="commons-io" rev="2.4" />
     <dependency org="com.google.guava" name="guava" rev="r07"/>
     <dependency org="asm" name="asm" rev="3.2" />
     <dependency org="asm" name="asm-tree" rev="3.2" />
