@@ -114,7 +114,7 @@ The cost of transmitting and receiving are in bytecodes, which, as mentioned ear
 
 
 ### Attack
-Cowboy robots can attack any tile within attack range (square range of 10). Attacking and moving share the same cooldown (action delay). Attacking deals 10 damage (`RobotType.SOLDIER.attackPower`)and gives 2 `actiondelay` (`GameConstants.SOLDIER_ATTACK_ACTION_DELAY`).
+Cowboy robots can attack any tile within attack range (square range of 10). Attacking and moving share the same cooldown (action delay). Attacking deals 10 damage (`RobotType.SOLDIER.attackPower`) and gives 2 `actiondelay` (`GameConstants.SOLDIER_ATTACK_ACTION_DELAY`).
 
 An attack destroys all cows at the targeted location. In addition, it makes noise that scares cows at long range at the targeted location.
 
@@ -159,7 +159,7 @@ In addition, attacking a square (except for Noise Tower attacks) destroys all co
 The cow field is processed only at the end of the turn. First, all cows that were attacked are destroyed. Next, cows move based on all the noise they heard that turn. Finally, cows decay and then grow, in that order.
 
 ### Milk
-Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). SOLDIER robots only give 5% of the milk that a PASTR would generate (`GameConstants.ROBOT_MILK_PERCENTAGE`). Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk (`GameConstants.MILK_GAIN_FACTOR`). The amount of milk gained from a square is exactly equal to the quantity of cows on that square. When more than one PASTR controls a square, the milk from that square is shared equally. In addition, if a robot SOLDIER is located on a square within PASTR range, then the SOLDIER and PASTR will evenly split the cows, but the SOLDIER will only be able to milk 5% of the cows it has.
+Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). SOLDIER robots only give 5% of the milk that a PASTR would generate (`GameConstants.ROBOT_MILK_PERCENTAGE`). Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk (`GameConstants.MILK_GAIN_FACTOR`). The amount of milk gained from a square is exactly equal to the quantity of cows on that square. When more than one PASTR controls a square, the milk from that square is shared equally (they all take a fraction of the milk). In addition, if a robot SOLDIER is located on a square within PASTR range, then the SOLDIER and PASTR will evenly split the cows, but the SOLDIER will only be able to milk 5% of the cows it has.
 
 Since PASTRs cannot self destruct, any PASTR that explodes for any reason other than being attacked will spill milk, resulting in milk being awarded to the opposing team as if it had been destroyed by them.
 
