@@ -30,7 +30,7 @@ public class NeutralsTeamSignal extends Signal {
             MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
             for (MapLocation ml : affected) {
                 if (ml.x >= 0 && ml.x < width && ml.y >= 0 && ml.y < height) {
-                    teams[ml.x][ml.y] &= (1 << ir.getTeam().ordinal());
+                    teams[ml.x][ml.y] |= (1 << ir.getTeam().ordinal());
                 }
             }
         }
