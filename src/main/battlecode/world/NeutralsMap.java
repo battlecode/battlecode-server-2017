@@ -33,6 +33,7 @@ public class NeutralsMap {
     private double[][] growthFactor;
     private double[][] dX, dY;
     private boolean[][] hasNoise;
+    private int[][] nPastrs;
     private ArrayList<MapLocation> attacks;
     private Set[][] ids;
 
@@ -71,6 +72,7 @@ public class NeutralsMap {
         dX = new double[this.mapWidth][this.mapHeight];
         dY = new double[this.mapWidth][this.mapHeight];
         hasNoise = new boolean[this.mapWidth][this.mapHeight];
+        nPastrs = new int[this.mapWidth][this.mapHeight];
         passable = new boolean[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
             for (int j = 0; j < this.mapHeight; j++) {
@@ -101,6 +103,7 @@ public class NeutralsMap {
         this.dX = new double[this.mapWidth][this.mapHeight];
         this.dY = new double[this.mapWidth][this.mapHeight];
         this.hasNoise = new boolean[this.mapWidth][this.mapHeight];
+        this.nPastrs = new int[this.mapWidth][this.mapHeight];
         this.passable = new boolean[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
             System.arraycopy(nm.passable[i], 0, this.passable[i], 0, this.mapHeight);
@@ -173,6 +176,7 @@ public class NeutralsMap {
                 continue;
             }
             if (ir.type != RobotType.PASTR && ir.type != RobotType.SOLDIER) continue;
+            if (ir.type == RobotType.SOLDIER && nPastrs[ir.getLocation().x][ir.getLocation().y] > 0) continue; // soldiers do not milk when in pastr range
 
             int captureRange = 0;
             double capturePercentage = GameConstants.ROBOT_MILK_PERCENTAGE;
@@ -183,7 +187,11 @@ public class NeutralsMap {
             MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
             for (MapLocation ml : affected) {
                 if (isValid(ml.x, ml.y)) {
-                    delta += this.currentAmount[ml.x][ml.y] * capturePercentage / ids[ml.x][ml.y].size();
+                    if (ir.type == RobotType.PASTR) {
+                        delta += this.currentAmount[ml.x][ml.y] * capturePercentage / nPastrs[ml.x][ml.y];
+                    } else {
+                        delta += this.currentAmount[ml.x][ml.y] * capturePercentage;
+                    }
                 }
             }
         }
@@ -201,6 +209,9 @@ public class NeutralsMap {
         for (MapLocation ml : affected) {
             if (isValid(ml.x, ml.y)) {
                 this.ids[ml.x][ml.y].add(ir.getID());
+                if (ir.type == RobotType.PASTR) {
+                    nPastrs[ml.x][ml.y]++;
+                }
             }
         }
     }
@@ -348,6 +359,7 @@ public class NeutralsMap {
                 this.dY[i][j] = 0;
                 this.ids[i][j].clear();
                 this.hasNoise[i][j] = false;
+                this.nPastrs[i][j] = 0;
             }
         }
         attacks.clear();
