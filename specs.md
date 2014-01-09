@@ -31,6 +31,8 @@ Robot Overview
 
 Robots are the central part of the Battlecode world. There are two types of basic robots. Note that we use the terms 'robot' and 'unit' interchangeably. All ranges below are specified as square distances (that is, the square of the Euclidean distance between two points). All these values can be seen in `RobotType.java` under the values `count`, `sensorRadiusSquared`, `attackRadiusMaxSquared`, and `maxHealth`. For example, the SOLDIER max health value is `RobotType.SOLDIER.maxHealth`. Construction turns is under the variable `captureTurns`.
 
+Hitpoints regenerate slowly over time (.25 per turn when it hasn't been damaged in the last 30 turns, based on `GameConstants.HEAL_TURN_DELAY` and `GameConstants.HEAL_RATE`). The HQ does not regenerate.
+
 ### HQ
 The HQ is your main base, and by far the most important unit you have. Each team starts the game off with one HQ. The HQ is invincible, and can't be destroyed. Your company HQ produces the robot COWBOYs that can herd cows.
 - Robot count: 0
@@ -65,7 +67,7 @@ NOISE TOWERs are immobile structures can 'attack' (but for no damage) to create 
 Robot Resources
 ------------------
 
-Each robot has hitpoints (100, also known as health). When the hitpoints reach zero, the robot is immediately removed from the game. Hitpoints regenerate slowly over time (.25 per turn when it hasn't been damaged in the last 30 turns, based on `GameConstants.SOLDIER_HEAL_TURN_DELAY` and `GameConstants.SOLDIER_HEAL_RATE`). 
+Each robot has hitpoints (100, also known as health). When the hitpoints reach zero, the robot is immediately removed from the game.
 
 In the past, robots used a resource to fuel their movement and computation. This year, the resource is action delay. A robot that does more computation will move more slowly (longer move/attack delay). Because move and attack delay are combined this year, this will also mean less damage per second for computationally intensive robots.
 
@@ -151,7 +153,7 @@ Calling `yield()` and `selfDestruct()` instantly end the turn of a robot, potent
 ### Cows
 Cows are a scalar field. Each location on the map has a certain natural cow growth. During each turn, each location gains a number of cows equal to the natural cow growth, and then 0.5% of the cows (`GameConstants.NEUTRALS_TURN_DECAY`) on that location die a natural death.
 
-Cows can be influenced by noise and attacks. After each turn, cows will run away from the averaged location of all the noises they heard that turn. Short-range noises (running, Noise Tower light attacks) scare cows in range^2 9 (`GameConstants.MOVEMENT_SCARE_RANGE` and `GameConstants.NOISE_SCARE_RANGE_SMALL`), and long-range noises (shooting, Noise Tower normal attacks, and self destructs) scare cows in range^2 36 (`GameConstants.ATTACK_SCARE_RANGE` and `GameConstants.NOISE_SCARE_RANGE_LARGE`). If the direction away from this averaged location points between two locations, the cows will split evenly between those locations. If the cows cannot move away from the average noise source, they will not move at all. If the average noise source is the current square of the cows, then the cows will scatter, dividing themselves equally amongst valid neighboring locations.
+Cows can be influenced by noise and attacks. After each turn, cows will run away from the averaged location of all the noises they heard that turn. Short-range noises (running, Noise Tower light attacks) scare cows in range^2 9 (`GameConstants.MOVEMENT_SCARE_RANGE` and `GameConstants.NOISE_SCARE_RANGE_SMALL`), and long-range noises (shooting, Noise Tower normal attacks, and self destructs) scare cows in range^2 36 (`GameConstants.ATTACK_SCARE_RANGE` and `GameConstants.NOISE_SCARE_RANGE_LARGE`). If the direction away from this averaged location points between two locations, the cows will split evenly between those locations. If the cows cannot move away from the average noise source, they will not move at all. If the average noise source is the current square of the cows, then the cows will scatter, dividing themselves equally amongst valid neighboring locations (including diagonals).
 
 Cows in a PASTR containment field cannot leave the field, and cows on the same square as a robot will not leave that square due to noise until the robot moves. If a cow is in two PASTR containments, then it will stay within both PASTR containments.
 In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square and self destructs will destroy all cows within range. All weapons used are certified humane.
@@ -159,7 +161,7 @@ In addition, attacking a square (except for Noise Tower attacks) destroys all co
 The cow field is processed only at the end of the turn. First, all cows that were attacked are destroyed. Next, cows move based on all the noise they heard that turn. Finally, cows decay and then grow, in that order.
 
 ### Milk
-Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). SOLDIER robots only give 5% of the milk that a PASTR would generate (`GameConstants.ROBOT_MILK_PERCENTAGE`). Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk (`GameConstants.MILK_GAIN_FACTOR`). The amount of milk gained from a square is exactly equal to the quantity of cows on that square. When more than one PASTR controls a square, the milk from that square is split equally (they all take a fraction of the milk). In addition, if a robot SOLDIER is located on a square within PASTR range, then the SOLDIER and PASTR will evenly split the cows, but the SOLDIER will only be able to milk 5% of the cows it has.
+Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). SOLDIER robots only give 5% of the milk that a PASTR would generate (`GameConstants.ROBOT_MILK_PERCENTAGE`). Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk (`GameConstants.MILK_GAIN_FACTOR`). The amount of milk gained from a square is exactly equal to the quantity of cows on that square. When more than one PASTR controls a square, the milk from that square is split equally (they all take a fraction of the milk). In addition, if a robot SOLDIER is located on a square within PASTR range, then the SOLDIER will not get any milk.
 
 Since PASTRs cannot self destruct, any PASTR that explodes for any reason other than being attacked will spill milk, resulting in milk being awarded to the opposing team as if it had been destroyed by them.
 
