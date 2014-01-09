@@ -474,12 +474,12 @@ Despite our best efforts, there may be bugs or exploits that allow players to op
 
 Changelog
 -------------
-* **1.0.0** (1/7/2014) - Initial specs released
-* **1.0.1** (1/7/2014) - Basic improvements and fixes
+* **1.0.0** (1/6/2014) - Initial specs released
+* **1.0.1** (1/6/2014) - Basic improvements and fixes
 -   * Improve game finish message so that it does not always say the game ends on tiebreaks.
 -   * Removing references to mining and capturing in RobotController documentation.
 -   * Changing bytecode penalty to 0.00005.
-* **1.1.0** (1/8/2014) - Minor API Changes
+* **1.1.0** (1/7/2014) - Minor API Changes
 -   * Removing references to old things. maxEnergon and isEncampment in RobotType are now maxHealth and isBuilding. RobotInfo now tells action delay.
 -   * Fix non-milk tiebreaker code so that tiebreaks are functional.
 -   * HQ and Noise towers no longer herd or farm milk (update engine to comply with specs).
@@ -488,13 +488,14 @@ Changelog
 -   * Added an example for action delay in the specs.
 -   * You can now sense the locations of the broadcasting robots instead of just the robots.
 -   * You can now sense your own and your opponent's milk quantity.
-* **1.1.1** (1/?/2014) - 
+* **1.1.1** (1/9/2014) - Various fixes and updates
 -   * Fix typographical errors and add clarifications in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes. PASTRs split milk in the case of overlap. RobotType attackDelay values now are consistent with game constants.
 -   * Minor bug fixes. MethodCosts.txt boolean values updated. If a PASTR dies because its run method returned, the opponent will be rewarded milk.
 -   * Hats are no longer free to wear.
 -   * Client changes and optimizations: The "U" key now cycles between "important cows", "all cows", "no cows".
 -   * Self destructing to destroy an opponent PASTR correctly rewards milk now.
 -   * Fixed bug with cow movement algorithm to comply with specs (behavior of cows on a noise tower's attack square, and no longer splitting cows proportionally based on angle).
+-   * Everything but the HQ regenerates health now.
 
 Appendices
 ------------
