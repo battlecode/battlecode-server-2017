@@ -159,7 +159,7 @@ In addition, attacking a square (except for Noise Tower attacks) destroys all co
 The cow field is processed only at the end of the turn. First, all cows that were attacked are destroyed. Next, cows move based on all the noise they heard that turn. Finally, cows decay and then grow, in that order.
 
 ### Milk
-Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). SOLDIER robots only give 5% of the milk that a PASTR would generate (`GameConstants.ROBOT_MILK_PERCENTAGE`). Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk (`GameConstants.MILK_GAIN_FACTOR`). The amount of milk gained from a square is exactly equal to the quantity of cows on that square. When more than one PASTR controls a square, the milk from that square is shared equally (they all take a fraction of the milk). In addition, if a robot SOLDIER is located on a square within PASTR range, then the SOLDIER and PASTR will evenly split the cows, but the SOLDIER will only be able to milk 5% of the cows it has.
+Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). SOLDIER robots only give 5% of the milk that a PASTR would generate (`GameConstants.ROBOT_MILK_PERCENTAGE`). Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk (`GameConstants.MILK_GAIN_FACTOR`). The amount of milk gained from a square is exactly equal to the quantity of cows on that square. When more than one PASTR controls a square, the milk from that square is split equally (they all take a fraction of the milk). In addition, if a robot SOLDIER is located on a square within PASTR range, then the SOLDIER and PASTR will evenly split the cows, but the SOLDIER will only be able to milk 5% of the cows it has.
 
 Since PASTRs cannot self destruct, any PASTR that explodes for any reason other than being attacked will spill milk, resulting in milk being awarded to the opposing team as if it had been destroyed by them.
 
@@ -487,7 +487,7 @@ Changelog
 -   * You can now sense the locations of the broadcasting robots instead of just the robots.
 -   * You can now sense your own and your opponent's milk quantity.
 * **1.1.1** (1/?/2014) - 
--   * Fix typographical errors and add clarifications in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes. The amount of milk farmed is exactly equal to the total quantity of cows in range. PASTRs share milk in the case of overlap. RobotType attackDelay values fixed.
+-   * Fix typographical errors and add clarifications in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes. PASTRs split milk in the case of overlap. RobotType attackDelay values now are consistent with game constants.
 -   * Minor bug fixes. MethodCosts.txt boolean values updated. If a PASTR dies because its run method returned, the opponent will be rewarded milk.
 -   * Hats are no longer free to wear.
 -   * Client changes and optimizations: The "U" key now cycles between "important cows", "all cows", "no cows".
