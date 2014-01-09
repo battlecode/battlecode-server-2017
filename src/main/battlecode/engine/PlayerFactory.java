@@ -27,7 +27,7 @@ public class PlayerFactory {
         Class playerClass;
         try {
             // The classloaders ignore silenced now - RobotMonitor takes care of it
-            ClassLoader icl = new IndividualClassLoader(teamName, _debugMethodsEnabled, false);
+            ClassLoader icl = new IndividualClassLoader(teamName, _debugMethodsEnabled, false, true);
             playerClass = icl.loadClass(teamName + ".RobotPlayer");
             //~ System.out.println("PF done loading");
         } catch (InstrumentationException ie) {

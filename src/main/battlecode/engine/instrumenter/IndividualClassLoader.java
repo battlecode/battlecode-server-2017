@@ -10,7 +10,7 @@ import java.util.*;
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 
 public class IndividualClassLoader extends InstrumentingClassLoader {
-
+    private boolean retryLoad;
     private final static String[] disallowedPlayerPackages = {"java/", "battlecode/", "sun/"};
 
     // caches the binary format of classes that have been instrumented
@@ -32,9 +32,9 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 
     static SingletonClassLoader singletonLoader = new SingletonClassLoader();
 
-    public IndividualClassLoader(String teamPackageName, boolean debugMethodsEnabled, boolean silenced) throws InstrumentationException {
+    public IndividualClassLoader(String teamPackageName, boolean debugMethodsEnabled, boolean silenced, boolean retry) throws InstrumentationException {
         super(silenced, debugMethodsEnabled, singletonLoader);
-
+	retryLoad = retry;
         checkSettings();
 
         // check that the package we're trying to load isn't contained in a disallowed package
@@ -95,16 +95,24 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                 finishedClass = saveAndDefineClass(name, cw.toByteArray());
             } else if (name.startsWith(teamPackageName)) {
                 byte[] classBytes = null;
-		boolean working = false;
-		while(!working) {
+		int retry = 10;
+		while(retry > 0) {
+		    if(!retryLoad)
+			retry = 0;
 		    try {
 			classBytes = instrument(name, true, teamPackageName);
 			//dumpToFile(name,classBytes);
-			working = true;
-		    } catch (InstrumentationException ie2) {			
-			try {
-			    Thread.sleep(10000);
-			} catch(Exception e) {}
+			retry = 0;
+		    } catch (InstrumentationException ie) {			
+			if(!retryLoad) {
+			    teamsWithErrors.add(teamPackageName);
+			    throw ie;
+			} else {
+			    retry -= 1;
+			    try {
+				Thread.sleep(10000);
+			    } catch(Exception e) {}
+			}
 		    }
                 }
 
