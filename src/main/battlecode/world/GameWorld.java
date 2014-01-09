@@ -639,10 +639,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         if (from.distanceSquaredTo(to) <= 1) {
             switch (mt) {
                 case RUN:
-                    base = 2;
+                    base = GameConstants.SOLDIER_MOVE_ACTION_DELAY;
                     break;
                 case SNEAK:
-                    base = 3;
+                    base = GameConstants.SOLDIER_SNEAK_ACTION_DELAY;
                     break;
                 default:
                     base = 1000;
@@ -651,10 +651,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         } else {
             switch (mt) {
                 case RUN:
-                    base = 2.8;
+                    base = GameConstants.SOLDIER_MOVE_ACTION_DELAY * GameConstants.SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR;
                     break;
                 case SNEAK:
-                    base = 4.2;
+                    base = GameConstants.SOLDIER_SNEAK_ACTION_DELAY * GameConstants.SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR;
                     break;
                 default:
                     base = 1000;

@@ -29,7 +29,7 @@ Major Mechanics for 2014
 Robot Overview
 -----------------
 
-Robots are the central part of the Battlecode world. There are two types of basic robots. Note that we use the terms 'robot' and 'unit' interchangeably. All ranges below are specified as square distances (that is, the square of the Euclidean distance between two points).
+Robots are the central part of the Battlecode world. There are two types of basic robots. Note that we use the terms 'robot' and 'unit' interchangeably. All ranges below are specified as square distances (that is, the square of the Euclidean distance between two points). All these values can be seen in `RobotType.java` under the values `count`, `sensorRadiusSquared`, `attackRadiusMaxSquared`, and `maxHealth`. For example, the SOLDIER max health value is `RobotType.SOLDIER.maxHealth`. Construction turns is under the variable `captureTurns`.
 
 ### HQ
 The HQ is your main base, and by far the most important unit you have. Each team starts the game off with one HQ. The HQ is invincible, and can't be destroyed. Your company HQ produces the robot COWBOYs that can herd cows.
@@ -54,7 +54,7 @@ Generates a field to get milk from cows inside the field, and keep cows within t
 - Takes 50 turns to construct
 
 ### NOISE TOWER
-NOISE TOWERs are immobile structures can 'attack' (but for no damage) to create noise in a large range. There are two types of attacks that a NOISE TOWER can use. There is a normal attack (`rc.attackSquare`) and a light attack (`rc.attackSquareLight`). The former generates a noise source scaring all cows in square range 36, while a light attack only scares cows in square range 9.
+NOISE TOWERs are immobile structures can 'attack' (but for no damage) to create noise in a large range. There are two types of attacks that a NOISE TOWER can use. There is a normal attack (`rc.attackSquare`) and a light attack (`rc.attackSquareLight`). The former generates a noise source scaring all cows in square range 36 (`GameConstants.NOISE_SCARE_RANGE_LARGE`), while a light attack only scares cows in square range 9 (`GameConstants.NOISE_SCARE_RANGE_SMALL`).
 - Robot count: 3
 - Sight range: 35
 - Attack range: 400
@@ -65,7 +65,7 @@ NOISE TOWERs are immobile structures can 'attack' (but for no damage) to create 
 Robot Resources
 ------------------
 
-Each robot has hitpoints (100, also known as health). When the hitpoints reach zero, the robot is immediately removed from the game. Hitpoints regenerate slowly over time (.25 per turn when it hasn't been damaged in the last 30 turns). 
+Each robot has hitpoints (100, also known as health). When the hitpoints reach zero, the robot is immediately removed from the game. Hitpoints regenerate slowly over time (.25 per turn when it hasn't been damaged in the last 30 turns, based on `GameConstants.SOLDIER_HEAL_TURN_DELAY` and `GameConstants.SOLDIER_HEAL_RATE`). 
 
 In the past, robots used a resource to fuel their movement and computation. This year, the resource is action delay. A robot that does more computation will move more slowly (longer move/attack delay). Because move and attack delay are combined this year, this will also mean less damage per second for computationally intensive robots.
 
@@ -103,6 +103,7 @@ Info on robots in sight range can be sensed. Vision is not shared between robots
 - The info on visible enemy robots can be sensed.
 - The locations of the both HQs can be sensed.
 - The locations of all PASTRs on the map can be sensed.
+- The amount of milk you have and the amount of milk the opponent has. For sensing opponent milk, decreased accuracy causes the value to be rounded down to a multiple of `GameConstants.OPPONENT_MILK_SENSE_ACCURACY`.
 
 ### Broadcasting
 Radio Sensors: When a robot broadcasts to radio, all robots are made aware of the location of the broadcasting robot for for one turn. They can access the positions with a method call like `rc.senseBroadcastingRobots(Team t)` or `rc.senseBroadcastingRobotLocations(Team t)`.
@@ -113,11 +114,11 @@ The cost of transmitting and receiving are in bytecodes, which, as mentioned ear
 
 
 ### Attack
-Cowboy robots can attack any tile within attack range (square range of 10). Attacking and moving share the same cooldown (action delay). Attacking deals 10 damage and gives 2 `actiondelay`.
+Cowboy robots can attack any tile within attack range (square range of 10). Attacking and moving share the same cooldown (action delay). Attacking deals 10 damage (`RobotType.SOLDIER.attackPower`)and gives 2 `actiondelay` (`GameConstants.SOLDIER_ATTACK_ACTION_DELAY`).
 
 An attack destroys all cows at the targeted location. In addition, it makes noise that scares cows at long range at the targeted location.
 
-Your HQ shoots depleted uranium girders out of a railgun, dealing overkill area damage to the target (50 and 25 splash in a square range of 2). HQ has square range of 15. Watch out for friendly fire.
+Your HQ shoots depleted uranium girders out of a railgun, dealing overkill area damage to the target (50 and 25 splash in a square range of 2, based on `RobotType.HQ.attackPower` and `RobotType.HQ.splashPower`). HQ has square range of 15. Watch out for friendly fire.
 
 Noise Towers can also 'attack' in their attack range. Their attacks create noise (can choose to create noise in square range of 9 or square range of 36) but deal no damage.
 
@@ -126,14 +127,14 @@ Cowboy robots can move to any unoccupied adjacent square if their delay is less 
 
 Running is faster (shorter move delay), but creates noise, scaring cows at short range. Sneaking is slower but creates no noise. By sneaking, you can actually move among cows.
 
-Running gives 2 actiondelay and sneaking gives 3 actiondelay for lateral movement. Diagonal movement gives 1.4 times the actiondelay of lateral movement.
+Running gives 2 actiondelay (`GameConstants.SOLDIER_MOVE_ACTION_DELAY`) and sneaking gives 3 actiondelay (`GameConstants.SOLDIER_SNEAK_ACTION_DELAY`) for lateral movement. Diagonal movement gives 1.4 times the actiondelay of lateral movement (`GameConstants.SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR`).
 
 ### Spawning, Construction, and Robot Count
-The HQ can spawn soldiers, subject to a production delay (30 turns plus total number of robots^1.5) and a maximum robot number (25). Cowboys count for one robot, PASTRs count for two robots, and Noise Towers count for three robots.
+The HQ can spawn soldiers, subject to a production delay (30 turns plus total number of robots^1.5) and a maximum robot number (25, `GameConstants.MAX_ROBOTS`). Cowboys count for one robot, PASTRs count for two robots, and Noise Towers count for three robots.
 Cowboy robots can construct structures on the square they are currently on. The robot will become unable to take any action for a certain number of turns (50 for PASTRs, 100 for Noise Towers) and then will be removed and replaced with the constructed structure.
 
 ### Suicide
-Calling `selfDestruct()` immediately removes the calling robot from the game and deals area damage (30+half of remaining hp to square range of 2). This scares cows in square range 36 and destroys all cows on affected squares (square range 2). This replaces the `suicide()` method. Structures cannot self destruct.
+Calling `selfDestruct()` immediately removes the calling robot from the game and deals area damage (30+half of remaining hp to square range of 2, based on `GameConstants.SELF_DESTRUCT_BASE_DAMAGE` and `GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR`). This scares cows in square range 36 and destroys all cows on affected squares (square range 2). This replaces the `suicide()` method. Structures cannot self destruct.
 
 ### Team Memory
 Official matches will usually be sets of multiple games. Each team can save a small amount of information (`GameConstants.TEAM_MEMORY_LENGTH` longs) for the next game using the function `setTeamMemory()`. This information may be retrieved using `getTeamMemory()`. If there was no previous game in the match, or no information was saved, then the memory will be filled with zeros.
@@ -148,9 +149,9 @@ There are several ways that the user can interact with robots. First, any robot 
 Calling `yield()` and `selfDestruct()` instantly end the turn of a robot, potentially saving bytecodes. Otherwise a turn ends naturally when the bytecode limit is hit. Every turn a robot gets 10000 bytecodes to run code.
 
 ### Cows
-Cows are a scalar field. Each location on the map has a certain natural cow growth. During each turn, each location gains a number of cows equal to the natural cow growth, and then 0.5% of the cows on that location die a natural death.
+Cows are a scalar field. Each location on the map has a certain natural cow growth. During each turn, each location gains a number of cows equal to the natural cow growth, and then 0.5% of the cows (`GameConstants.NEUTRALS_TURN_DECAY`) on that location die a natural death.
 
-Cows can be influenced by noise and attacks. After each turn, cows will run away from the averaged location of all the noises they heard that turn. Short-range noises (running, Noise Tower light attacks) scare cows in range^2 9, and long-range noises (shooting, Noise Tower normal attacks, and self destructs) scare cows in range^2 36. If the direction away from this averaged location points between two locations, the cows will split evenly between those locations. If the cows cannot move away from the average noise source, they will not move at all. If the average noise source is the current square of the cows, then the cows will scatter, dividing themselves equally amongst valid neighboring locations.
+Cows can be influenced by noise and attacks. After each turn, cows will run away from the averaged location of all the noises they heard that turn. Short-range noises (running, Noise Tower light attacks) scare cows in range^2 9 (`GameConstants.MOVEMENT_SCARE_RANGE` and `GameConstants.NOISE_SCARE_RANGE_SMALL`), and long-range noises (shooting, Noise Tower normal attacks, and self destructs) scare cows in range^2 36 (`GameConstants.ATTACK_SCARE_RANGE` and `GameConstants.NOISE_SCARE_RANGE_LARGE`). If the direction away from this averaged location points between two locations, the cows will split evenly between those locations. If the cows cannot move away from the average noise source, they will not move at all. If the average noise source is the current square of the cows, then the cows will scatter, dividing themselves equally amongst valid neighboring locations.
 
 Cows in a PASTR containment field cannot leave the field, and cows on the same square as a robot will not leave that square due to noise until the robot moves. If a cow is in two PASTR containments, then it will stay within both PASTR containments.
 In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square and self destructs will destroy all cows within range. All weapons used are certified humane.
@@ -158,7 +159,7 @@ In addition, attacking a square (except for Noise Tower attacks) destroys all co
 The cow field is processed only at the end of the turn. First, all cows that were attacked are destroyed. Next, cows move based on all the noise they heard that turn. Finally, cows decay and then grow, in that order.
 
 ### Milk
-Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). SOLDIER robots only give 5% of the milk that a PASTR would generate. Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk. The amount of milk gained from a square is exactly equal to the quantity of cows on that square. When more than one PASTR controls a square, the milk from that square is shared equally. In addition, if a robot SOLDIER is located on a square within PASTR range, then the SOLDIER and PASTR will evenly split the cows, but the SOLDIER will only be able to milk 5% of the cows it has.
+Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). SOLDIER robots only give 5% of the milk that a PASTR would generate (`GameConstants.ROBOT_MILK_PERCENTAGE`). Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk (`GameConstants.MILK_GAIN_FACTOR`). The amount of milk gained from a square is exactly equal to the quantity of cows on that square. When more than one PASTR controls a square, the milk from that square is shared equally. In addition, if a robot SOLDIER is located on a square within PASTR range, then the SOLDIER and PASTR will evenly split the cows, but the SOLDIER will only be able to milk 5% of the cows it has.
 
 Since PASTRs cannot self destruct, any PASTR that explodes for any reason other than being attacked will spill milk, resulting in milk being awarded to the opposing team as if it had been destroyed by them.
 
@@ -167,14 +168,14 @@ Maps
 -----
 Battlecode maps are a rectangular grid of squares, each with a pair of integer coordinates. Each tile is an instance of `MapLocation`. Squares outside the map have TerrainType.OFF_MAP. The northwest map square is the origin (0,0). Maps specify the spawn points of the teams.
 
-There are three types of terrain: GROUND, VOID, and ROAD. VOID terrain is not traversable and do not have cows. ROAD terrain discounts movement-related and sneaking-related actiondelays by a factor of 0.7 for robots on the terrain.
+There are three types of terrain: GROUND, VOID, and ROAD. VOID terrain is not traversable and do not have cows. ROAD terrain discounts movement-related and sneaking-related actiondelays by a factor of 0.7 for robots on the terrain (`GameConstants.ROAD_ACTION_DELAY_FACTOR`).
 
 ### Map Files
 
 Maps are specified by XML files, and can be found in the maps folder of the release archive. The schema for the files should be fairly intuitive, so if you'd like to add your own maps you can use the provided maps as a basis. Each map has an associated random number seed, which the RNG uses to generate random numbers in games played on that map.
 
 ### Map Constraints
-Official maps used in scrimmages and tournaments must all satisfy the following conditions.
+Official maps used in scrimmages and tournaments must all satisfy the following conditions (see relevant game constants).
 - Maps are completely symmetric either by reflection or 180 degree rotation.
 - The width and height of the map are guaranteed to be between 20 and 100, inclusive.
 - The distance between the spawn points will be at least 10 units (Euclidean distance). 

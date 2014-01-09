@@ -51,7 +51,7 @@ public interface GameConstants {
 	public static final double HQ_SPAWN_DELAY_CONSTANT_2 = 1.5; // b -> a + N^b, where N is num robots
     
     /** Amount of milk required to wear a hat */
-    public static final double HAT_MILK_COST = 2000000.0;
+    public static final double HAT_MILK_COST = 500000.0;
 
     /** Cow value decay per turn */
     public static final double NEUTRALS_TURN_DECAY = 0.995;
@@ -95,8 +95,17 @@ public interface GameConstants {
 	/** Actiondelay per extra bytecode */
     public static final double BYTECODE_PENALTY = 0.00005;
 
-	/** Actiondelay gained every time a SOLDIER attacks */
+	/** Actiondelay gained every time a SOLDIER attacks. Consistent with RobotType.SOLDIER.attackDelay */
     public static final double SOLDIER_ATTACK_ACTION_DELAY = 2.0;
+
+    /** Actiondelay gained every time a SOLDIER moves (runs) */
+    public static final double SOLDIER_MOVE_ACTION_DELAY = 2.0;
+    
+    /** Actiondelay gained every time a SOLDIER sneaks */
+    public static final double SOLDIER_SNEAK_ACTION_DELAY = 3.0;
+
+    /** Factor of increase for actiondelay for diagonal movement */
+    public static final double SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR = 1.4;
 	
 	/** Factor at which movement-related and sneaking-related actiondelay is discounted on a road */
     public static final double ROAD_ACTION_DELAY_FACTOR = 0.7;
