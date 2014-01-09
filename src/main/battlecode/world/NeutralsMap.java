@@ -243,7 +243,7 @@ public class NeutralsMap {
                 if (this.hasNoise[i][j]) {
                     if (this.dX[i][j] != 0 || this.dY[i][j] != 0) {
                         double theta = Math.atan2(this.dY[i][j], this.dX[i][j]); // angle the cows want to move in
-                        double closestThetaDiff = Math.PI / 2 - EPSILON;
+                        double closestThetaDiff = Math.PI / 2;
                         int movesCount = 0;
                         for (int k = -4; k < 4; k++) {
                             double theta0 = k * PI4;
