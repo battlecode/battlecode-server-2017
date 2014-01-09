@@ -824,7 +824,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             }
             if (r.type == RobotType.PASTR && r.getEnergonLevel() > 0.0) {
                 // oops, should reward other team
-                adjustResources(r.getTeam().opponent(), GameConstants.WIN_QTY * GameConstants.MILK_GAIN_FACTOR);
+                adjustResources(r.getTeam().opponent(), GameConstants.WIN_QTY * GameConstants.MILK_PENALTY_FACTOR);
             }
             if (r.type == RobotType.HQ) {
             	setWinner(r.getTeam().opponent(), getDominationFactor(r.getTeam().opponent()));

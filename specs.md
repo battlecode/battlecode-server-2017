@@ -163,7 +163,7 @@ The cow field is processed only at the end of the turn. First, all cows that wer
 ### Milk
 Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). SOLDIER robots only give 5% of the milk that a PASTR would generate (`GameConstants.ROBOT_MILK_PERCENTAGE`). Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk (`GameConstants.MILK_GAIN_FACTOR`). The amount of milk gained from a square is exactly equal to the quantity of cows on that square. When more than one PASTR controls a square, the milk from that square is split equally (they all take a fraction of the milk). In addition, if a robot SOLDIER is located on a square within PASTR range, then the SOLDIER will not get any milk.
 
-Since PASTRs cannot self destruct, any PASTR that explodes for any reason other than being attacked will spill milk, resulting in milk being awarded to the opposing team as if it had been destroyed by them.
+Since PASTRs cannot self destruct, any PASTR that explodes for any reason other than being attacked will spill milk, resulting in milk being awarded to the opposing team as if it had been destroyed by them (an amount equal to `GameConstants.MILK_PENALTY_FACTOR` times the win quantity).
 
 
 Maps
