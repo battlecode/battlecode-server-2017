@@ -363,7 +363,7 @@ String.replaceFirst
 String.split
 ```
 
-The function `System.arraycopy` costs one bytecode for each element copied. All other functions have a fixed bytecode cost. These costs are listed in the `MethodCosts.txt` file. Functions not listed in `MethodCosts.txt` are free. The bytecode costs of battlecode.common functions are also listed in the javadoc. `hashCode` functions listed in `MethodCosts.txt` may have a different bytecode cost than what is listed because Battlecode uses its own deterministic version and measures bytecode usage based on that.
+The function `System.arraycopy` costs one bytecode for each element copied. All other functions have a fixed bytecode cost. These costs are listed in the `MethodCosts.txt` file. Functions not listed in `MethodCosts.txt` are free. The bytecode costs of battlecode.common functions are also listed in the javadoc.
 
 ### Memory Usage
 
