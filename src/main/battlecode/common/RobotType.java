@@ -9,7 +9,7 @@ public enum RobotType {
     //          LEVEL,      MXE    SR  SA          AR AR   AA      AD      AP      ATTACK  BLDNG    SPLASH  COUNT CAPTURNS
   	HQ          (ON_GROUND, Integer.MAX_VALUE,
                                    35, 360,        0, 15,  360,    1,     50,      true,   false,   25,     0,    0),
-    SOLDIER     (ON_GROUND, 100,   35, 360,        0, 10,  360,    1,     10,      true,   false,   0,      1,    0),
+    SOLDIER     (ON_GROUND, 100,   35, 360,        0, 10,  360,    2,     10,      true,   false,   0,      1,    0),
     NOISETOWER  (ON_GROUND, 100,   35, 360,        0,400,  360,    1,      0,      true,   true,    0,      3,  100),
     PASTR       (ON_GROUND, 200,    5, 360,        0,  0,  360,    0,      0,     false,   true,    0,      2,   50),
     
