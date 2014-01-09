@@ -232,15 +232,17 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             }
             addActionDelay(bytecodesPenalty * GameConstants.BYTECODE_PENALTY);
         }
-        
-      	// quick hack to make mining work. move me out later
-        if (type == RobotType.SOLDIER) {
-
+       
+        if (type != RobotType.HQ) { 
             roundsSinceLastDamage++;
             // Maybe heal
-            if (roundsSinceLastDamage >= GameConstants.SOLDIER_HEAL_TURN_DELAY) {
-                takeDamage(-GameConstants.SOLDIER_HEAL_RATE);
+            if (roundsSinceLastDamage >= GameConstants.HEAL_TURN_DELAY) {
+                takeDamage(-GameConstants.HEAL_RATE);
             }
+        }
+
+      	// quick hack to make mining work. move me out later
+        if (type == RobotType.SOLDIER) {
 
         	if (miningRounds > 0) {
         		if (--miningRounds==0) {

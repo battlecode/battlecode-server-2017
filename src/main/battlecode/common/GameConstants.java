@@ -68,11 +68,17 @@ public interface GameConstants {
 	/** Range in which NOISETOWER normal attacks scare cows */
     public static final int NOISE_SCARE_RANGE_LARGE = 36;
 
-	/** Number of turns after taking damage before a SOLDIER begins regenerating*/
+	/** DEPRECATED. Number of turns after taking damage before a SOLDIER begins regenerating. Will be equal to HEAL_TURN_DELAY. */
     public static final int SOLDIER_HEAL_TURN_DELAY = 30;
 	
-	/** Amount of health a regenerating soldier heals per turn */
+	/** DEPRECATED. Amount of health a regenerating soldier heals per turn. Will be equal to HEAL_RATE.  */
     public static final double SOLDIER_HEAL_RATE = 0.25;
+
+	/** Number of turns after taking damage before a robot or structure begins regenerating*/
+    public static final int HEAL_TURN_DELAY = 30;
+	
+	/** Amount of health a regenerating robot or structure heals per turn */
+    public static final double HEAL_RATE = 0.25;
 
 	/** Range in which a PASTR contains and milks cows */
     public static final int PASTR_RANGE = 5;
