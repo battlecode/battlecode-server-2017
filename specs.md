@@ -122,7 +122,7 @@ Your HQ shoots depleted uranium girders out of a railgun, dealing overkill area 
 Noise Towers can also 'attack' in their attack range. Their attacks create noise (can choose to create noise in square range of 9 or square range of 36) but deal no damage.
 
 ### Movement
-Cowboy robots can move to any unoccupied adjacent square if their delay is less than one. Using bytecodes adds small fractions to the delay that eventually add up to one, requiring a momentary pause in movement or attack, representing careful thought.
+Cowboy robots can move to any unoccupied adjacent square if their delay is less than one. Using bytecodes adds small fractions to the delay that eventually add up to one, requiring a momentary pause in movement or attack, representing careful thought. When a robot moves, its destination square is the source of noise.
 
 Running is faster (shorter move delay), but creates noise, scaring cows at short range. Sneaking is slower but creates no noise. By sneaking, you can actually move among cows.
 
@@ -150,13 +150,17 @@ Calling `yield()` and `selfDestruct()` instantly end the turn of a robot, potent
 ### Cows
 Cows are a scalar field. Each location on the map has a certain natural cow growth. During each turn, each location gains a number of cows equal to the natural cow growth, and then 0.5% of the cows on that location die a natural death.
 
-Cows can be influenced by noise and attacks. After each turn, cows will run away from the averaged location of all the noises they heard that turn. Short-range noises (running, Noise Tower light attacks) scare cows in range^2 9, and long-range noises (shooting, Noise Tower normal attacks, and self destructs) scare cows in range^2 36. If the direction away from this averaged location points between two locations, the cows will split evenly between those locations.
+Cows can be influenced by noise and attacks. After each turn, cows will run away from the averaged location of all the noises they heard that turn. Short-range noises (running, Noise Tower light attacks) scare cows in range^2 9, and long-range noises (shooting, Noise Tower normal attacks, and self destructs) scare cows in range^2 36. If the direction away from this averaged location points between two locations, the cows will split evenly between those locations. If the average noise source is the current square of the cows, then the cows will scatter, dividing themselves equally amongst valid neighboring locations.
 
 Cows in a PASTR containment field cannot leave the field, and cows on the same square as a robot will not leave that square due to noise until the robot moves.
 In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square and self destructs will destroy all cows within range. All weapons used are certified humane.
 
+The cow field is processed only at the end of the turn. First, all cows that were attacked are destroyed. Next, cows move based on all the noise they heard that turn. Finally, cows decay and then grow, in that order.
+
 ### Milk
 Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). Robots only give 5% of the milk that a PASTR would generate. Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk. The amount of milk gained from a square is exactly equal to the quantity of cows on that square. When more than one PASTR controls a square, the milk from that square is shared equally.
+
+Since PASTRs cannot self destruct, any PASTR that explodes for any reason other than being attacked will spill milk, resulting in milk being awarded to the opposing team as if it had been destroyed by them.
 
 
 Maps
@@ -482,8 +486,8 @@ Changelog
 -   * You can now sense the locations of the broadcasting robots instead of just the robots.
 -   * You can now sense your own and your opponent's milk quantity.
 * **1.1.1** (1/?/2014) - 
--   * Fix typographical errors and add clarifications in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes. The amount of milk farmed is exactly equal to the total quantity of cows in range. Pastrs share milk in the case of overlap.
--   * Minor bug fixes. MethodCosts.txt boolean values updated.
+-   * Fix typographical errors and add clarifications in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes. The amount of milk farmed is exactly equal to the total quantity of cows in range. Pastrs share milk in the case of overlap. RobotType attackDelay values fixed.
+-   * Minor bug fixes. MethodCosts.txt boolean values updated. If a PASTR dies because its run method returned, the opponent will be rewarded milk.
 -   * Hats are no longer free to wear.
 -   * Client changes and optimizations: The "U" key now cycles between "important cows", "all cows", "no cows".
 -   * Self destructing to destroy an opponent PASTR correctly rewards milk now.
