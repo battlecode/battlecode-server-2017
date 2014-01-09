@@ -650,11 +650,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             }
         } else {
             switch (mt) {
+                // TODO(axc): make these not hard-coded. right now they're this way because 4.2 becomes 4.19999999 due to precision issues, and this makes a difference
                 case RUN:
-                    base = GameConstants.SOLDIER_MOVE_ACTION_DELAY * GameConstants.SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR;
+                    base = 2.8; //GameConstants.SOLDIER_MOVE_ACTION_DELAY * GameConstants.SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR;
                     break;
                 case SNEAK:
-                    base = GameConstants.SOLDIER_SNEAK_ACTION_DELAY * GameConstants.SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR;
+                    base = 4.2; //GameConstants.SOLDIER_SNEAK_ACTION_DELAY * GameConstants.SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR;
                     break;
                 default:
                     base = 1000;

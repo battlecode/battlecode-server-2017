@@ -288,7 +288,6 @@ public class NeutralsMap {
                                 }
                             }
                         }
-                        System.out.println("scatter of " + nScatter + " at " + i + ", " + j);
                     }
                 } else {
                     temp[i][j] += this.currentAmount[i][j];
