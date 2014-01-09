@@ -35,10 +35,10 @@ public interface GameConstants {
     /** The maximum number of robots you are allowed. */
     public static final int MAX_ROBOTS = 25;
 
-    /** The minimum possible round at which nodes may begin taking end-of-round damage */
+    /** The minimum possible round at which the game may be forced to end  */
     public static final int ROUND_MIN_LIMIT = 2000;
     
-    /** The maximum possible round at which nodes may begin taking end-of-round damage */
+    /** The maximum possible round at which the game may be forced to end */
     public static final int ROUND_MAX_LIMIT = 2000;
     
     /** The maximum read/write-able of radio channel number */
@@ -86,7 +86,7 @@ public interface GameConstants {
 	/** Flat damage dealt by a self destruct */
     public static final double SELF_DESTRUCT_BASE_DAMAGE = 30.0; // a
 	
-	/** Factor at which robot's health is converted to damage*/
+	/** Factor at which robot's health is converted to damage */
     public static final double SELF_DESTRUCT_DAMAGE_FACTOR = 0.5; // b -> a + health / b = damage
 
 	/** Number of bytecodes per turn that are not converted into actiondelay */
