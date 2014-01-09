@@ -32,11 +32,12 @@ public class NeutralsMap {
     private double[][] currentAmount;
     private double[][] growthFactor;
     private double[][] dX, dY;
+    private boolean[][] hasNoise;
     private ArrayList<MapLocation> attacks;
     private Set[][] ids;
 
     public NeutralsMap() {
-	attacks = new ArrayList<MapLocation>();
+	    attacks = new ArrayList<MapLocation>();
 
         this.mapWidth = 0;
         this.mapHeight = 0;
@@ -45,6 +46,7 @@ public class NeutralsMap {
         this.currentAmount = new double[0][0];
         dX = new double[0][0];
         dY = new double[0][0];
+        hasNoise = new boolean[0][0];
         passable = new boolean[0][0];
         ids = new Set[0][0];
     }
@@ -68,6 +70,7 @@ public class NeutralsMap {
 
         dX = new double[this.mapWidth][this.mapHeight];
         dY = new double[this.mapWidth][this.mapHeight];
+        hasNoise = new boolean[this.mapWidth][this.mapHeight];
         passable = new boolean[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
             for (int j = 0; j < this.mapHeight; j++) {
@@ -97,6 +100,7 @@ public class NeutralsMap {
         }
         this.dX = new double[this.mapWidth][this.mapHeight];
         this.dY = new double[this.mapWidth][this.mapHeight];
+        this.hasNoise = new boolean[this.mapWidth][this.mapHeight];
         this.passable = new boolean[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
             System.arraycopy(nm.passable[i], 0, this.passable[i], 0, this.mapHeight);
@@ -143,9 +147,11 @@ public class NeutralsMap {
         return x >= 0 && x < this.mapWidth && y >= 0 && y < this.mapHeight && passable[x][y];
     }
 
+    @SuppressWarnings("unchecked")
     public boolean isValid(int x, int y, int fromX, int fromY) {
+        // valid if ids of from is a subset of ids of to
         if (!isValid(x, y)) return false;
-        return ids[x][y].equals(ids[fromX][fromY]) || ids[fromX][fromY].size() == 0;
+        return ids[x][y].containsAll(ids[fromX][fromY]);
     }
 
     public void print() {
@@ -200,6 +206,7 @@ public class NeutralsMap {
     }
 
     final double PI4 = Math.PI / 4;
+    final double EPSILON = 1.0e-6;
     final int[][] dirs = {{-1, 0}, {-1, -1}, {0, -1}, {1, -1},
                              {1, 0}, {1, 1}, {0, 1}, {-1, 1}};
     public void next(InternalObject[] objs) {
@@ -222,38 +229,66 @@ public class NeutralsMap {
         double[][] temp = new double[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
             for (int j = 0; j < this.mapHeight; j++) {
-                if (this.dX[i][j] != 0 || this.dY[i][j] != 0) {
-                    double theta = Math.atan2(this.dY[i][j], this.dX[i][j]);
-                    boolean moved = false;
-                    for (int k = -4; k < 4; k++) {
-                        if (theta >= k * PI4 && theta <= (k + 1) * PI4) {
-                            double frac1 = 1 - (theta - k * PI4) / PI4;
-                            int x1 = i + dirs[k + 4][0];
-                            int y1 = j + dirs[k + 4][1];
-                            boolean valid1 = isValid(x1, y1, i, j);
+                if (this.hasNoise[i][j]) {
+                    if (this.dX[i][j] != 0 || this.dY[i][j] != 0) {
+                        double theta = Math.atan2(this.dY[i][j], this.dX[i][j]); // angle the cows want to move in
+                        double closestThetaDiff = Math.PI / 2 - EPSILON;
+                        int movesCount = 0;
+                        for (int k = -4; k < 4; k++) {
+                            double theta0 = k * PI4;
+                            int x = i + dirs[k + 4][0];
+                            int y = j + dirs[k + 4][1];
+                            boolean valid = isValid(x, y, i, j);
 
-                            double frac2 = 1 - frac1;
-                            int x2 = i + dirs[(k + 5) % 8][0];
-                            int y2 = j + dirs[(k + 5) % 8][1];
-                            boolean valid2 = isValid(x2, y2, i, j);
-
-                            if (valid1 && valid2) {
-                                temp[x1][y1] += frac1 * this.currentAmount[i][j];
-                                temp[x2][y2] += frac2 * this.currentAmount[i][j];
-                            } else if (valid1) {
-                                temp[x1][y1] += this.currentAmount[i][j];
-                            } else if (valid2) {
-                                temp[x2][y2] += this.currentAmount[i][j];
-                            } else {
-                                temp[i][j] += this.currentAmount[i][j];
+                            if (valid) {
+                                double diff = Math.min(Math.abs(theta - theta0), 2 * Math.PI - Math.abs(theta - theta0));
+                                if (diff < closestThetaDiff - EPSILON) {
+                                    closestThetaDiff = diff;
+                                    movesCount = 1;
+                                } else if (diff <= closestThetaDiff + EPSILON) {
+                                    movesCount++;
+                                }
                             }
-
-                            moved = true;
-                            break;
                         }
-                    }
-                    if (!moved) {
-                        throw new RuntimeException("GameActionException thrown", new GameActionException(GameActionExceptionType.INTERNAL_ERROR, "Failed to move cows away from noise."));
+                        if (movesCount > 0) {
+                            for (int k = -4; k < 4; k++) {
+                                double theta0 = k * PI4;
+                                int x = i + dirs[k + 4][0];
+                                int y = j + dirs[k + 4][1];
+                                boolean valid = isValid(x, y, i, j);
+
+                                if (valid) {
+                                    double diff = Math.min(Math.abs(theta - theta0), 2 * Math.PI - Math.abs(theta - theta0));
+                                    if (diff <= closestThetaDiff + EPSILON) {
+                                        temp[x][y] += this.currentAmount[i][j] / movesCount;
+                                    }
+                                }
+                            }
+                        } else {
+                            temp[i][j] += this.currentAmount[i][j];
+                        }
+                    } else {
+                        // scatter
+                        int nScatter = 0;
+                        for (int di = -1; di <= 1; di++) {
+                            for (int dj = -1; dj <= 1; dj++) {
+                                if (!(di == 0 && dj == 0) && isValid(i + di, j + dj, i, j)) {
+                                    nScatter++;
+                                }
+                            }
+                        }
+                        if (nScatter == 0) {
+                            temp[i][j] += this.currentAmount[i][j];
+                        } else {
+                            for (int di = -1; di <= 1; di++) {
+                                for (int dj = -1; dj <= 1; dj++) {
+                                    if (!(di == 0 && dj == 0) && isValid(i + di, j + dj, i, j)) {
+                                        temp[i + di][j + dj] += this.currentAmount[i][j] / nScatter;
+                                    }
+                                }
+                            }
+                        }
+                        System.out.println("scatter of " + nScatter + " at " + i + ", " + j);
                     }
                 } else {
                     temp[i][j] += this.currentAmount[i][j];
@@ -277,6 +312,7 @@ public class NeutralsMap {
         //this.print();
     }
 
+    // for when an attack doesn't generate noise
     public void updateWithQuietAttack(MapLocation source) {
         attacks.add(source);
     }
@@ -284,14 +320,10 @@ public class NeutralsMap {
     public void updateWithNoiseSource(MapLocation source, int radiusSquared) {
         MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(source, radiusSquared);
         for (int i = 0; i < affected.length; i++) {
-            if (affected[i].equals(source)) {
-                // nothing
-            } else if (isValid(affected[i].x, affected[i].y)) {
-                double curdX = affected[i].x - source.x;
-                double curdY = affected[i].y - source.y;
-                double mag = Math.sqrt(curdX * curdX + curdY * curdY);
-                curdX /= mag;
-                curdY /= mag;
+            if (isValid(affected[i].x, affected[i].y)) {
+                hasNoise[affected[i].x][affected[i].y] = true;
+                int curdX = affected[i].x - source.x;
+                int curdY = affected[i].y - source.y;
                 dX[affected[i].x][affected[i].y] += curdX;
                 dY[affected[i].x][affected[i].y] += curdY;
             }
@@ -316,6 +348,7 @@ public class NeutralsMap {
                 this.dX[i][j] = 0;
                 this.dY[i][j] = 0;
                 this.ids[i][j].clear();
+                this.hasNoise[i][j] = false;
             }
         }
         attacks.clear();
