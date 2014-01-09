@@ -95,20 +95,19 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                 finishedClass = saveAndDefineClass(name, cw.toByteArray());
             } else if (name.startsWith(teamPackageName)) {
                 byte[] classBytes = null;
-		int retry = 10;
-		while(retry > 0) {
+		boolean retry = true;
+		while(retry) {
 		    if(!retryLoad)
-			retry = 0;
+			retry = false;
 		    try {
 			classBytes = instrument(name, true, teamPackageName);
 			//dumpToFile(name,classBytes);
-			retry = 0;
+			retry = false;
 		    } catch (InstrumentationException ie) {			
 			if(!retryLoad) {
 			    teamsWithErrors.add(teamPackageName);
 			    throw ie;
 			} else {
-			    retry -= 1;
 			    try {
 				Thread.sleep(10000);
 			    } catch(Exception e) {}
