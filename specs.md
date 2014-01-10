@@ -159,7 +159,7 @@ Cows can be influenced by noise and attacks. After each turn, cows will run away
 Cows in a PASTR containment field cannot leave the field, and cows on the same square as a robot will not leave that square due to noise until the robot moves. If a cow is in two PASTR containments, then it will stay within both PASTR containments.
 In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square and self destructs will destroy all cows within range. All weapons used are certified humane.
 
-Cows are incredibly scared of the headquarters. For this reason, cows will not move onto any locations within a Manhattan distance of 3 (`GameConstants.HQ_COW_SCARE_MANHATTAN_RANGE`) of any HQ.
+Cows are incredibly scared of the headquarters. For this reason, cows will not move onto any locations within 3 movements (`GameConstants.HQ_COW_SCARE_MANHATTAN_RANGE`) of any HQ. This produces a 7x7 square around the HQ.
 
 The cow field is processed only at the end of the turn. First, all cows that were attacked are destroyed. Next, cows move based on all the noise they heard that turn. Finally, cows decay and then grow, in that order.
 

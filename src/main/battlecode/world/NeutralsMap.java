@@ -110,9 +110,9 @@ public class NeutralsMap {
         }
     }
 
-    public void createVoid(MapLocation center, int manhattanRange) {
-        for (int x = center.x - manhattanRange; x <= center.x + manhattanRange; x++) {
-            for (int y = center.y - manhattanRange; y <= center.y + manhattanRange; y++) {
+    public void createVoid(MapLocation center, int distance) {
+        for (int x = center.x - distance; x <= center.x + distance; x++) {
+            for (int y = center.y - distance; y <= center.y + distance; y++) {
                 if (isValid(x, y)) {
                     passable[x][y] = false;
                 }
