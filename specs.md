@@ -492,7 +492,7 @@ Changelog
 -   * Fix typographical errors and add clarifications in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes. PASTRs split milk in the case of overlap. RobotType attackDelay values now are consistent with game constants.
 -   * Minor bug fixes. MethodCosts.txt boolean values updated. If a PASTR dies because its run method returned, the opponent will be rewarded milk.
 -   * Hats are no longer free to wear.
--   * Client changes and optimizations: The "U" key now cycles between "important cows", "all cows", "no cows". In addition, you can remove maps from the client by just clicking "-".
+-   * Client changes and optimizations: The "U" key now cycles between "important cows", "all cows", "no cows". In addition, you can remove maps from the client launcher without clicking one first.
 -   * Self destructing to destroy an opponent PASTR correctly rewards milk now.
 -   * Fixed bug with cow movement algorithm to comply with specs (behavior of cows on a noise tower's attack square, and no longer splitting cows proportionally based on angle).
 -   * Everything but the HQ regenerates health now.
