@@ -132,7 +132,8 @@ Running is faster (shorter move delay), but creates noise, scaring cows at short
 Running gives 2 actiondelay (`GameConstants.SOLDIER_MOVE_ACTION_DELAY`) and sneaking gives 3 actiondelay (`GameConstants.SOLDIER_SNEAK_ACTION_DELAY`) for lateral movement. Diagonal movement gives 1.4 times the actiondelay of lateral movement (`GameConstants.SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR`).
 
 ### Spawning, Construction, and Robot Count
-The HQ can spawn soldiers, subject to a production delay (30 turns plus total number of robots^1.5) and a maximum robot number (25, `GameConstants.MAX_ROBOTS`). Cowboys count for one robot, PASTRs count for two robots, and Noise Towers count for three robots.
+The HQ can spawn soldiers, subject to a production delay (20 turns plus total number of robots^1.5, see `GameConstants.HQ_SPAWN_DELAY_CONSTANT_1` and `GameConstants.HQ_SPAWN_DELAY_CONSTANT_2`) and a maximum robot number (25, `GameConstants.MAX_ROBOTS`). Cowboys count for one robot, PASTRs count for two robots, and Noise Towers count for three robots. The HQ cannot attack during this production delay amount.
+
 Cowboy robots can construct structures on the square they are currently on. The robot will become unable to take any action for a certain number of turns (50 for PASTRs, 100 for Noise Towers) and then will be removed and replaced with the constructed structure.
 
 ### Suicide
@@ -157,6 +158,8 @@ Cows can be influenced by noise and attacks. After each turn, cows will run away
 
 Cows in a PASTR containment field cannot leave the field, and cows on the same square as a robot will not leave that square due to noise until the robot moves. If a cow is in two PASTR containments, then it will stay within both PASTR containments.
 In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square and self destructs will destroy all cows within range. All weapons used are certified humane.
+
+Cows are incredibly scared of the headquarters. For this reason, cows will not move onto any locations within a Manhattan distance of 3 (`GameConstants.HQ_COW_SCARE_MANHATTAN_RANGE`) of any HQ.
 
 The cow field is processed only at the end of the turn. First, all cows that were attacked are destroyed. Next, cows move based on all the noise they heard that turn. Finally, cows decay and then grow, in that order.
 
@@ -476,27 +479,28 @@ Changelog
 -------------
 * **1.0.0** (1/6/2014) - Initial specs released
 * **1.0.1** (1/6/2014) - Basic improvements and fixes
--   * Improve game finish message so that it does not always say the game ends on tiebreaks.
--   * Removing references to mining and capturing in RobotController documentation.
--   * Changing bytecode penalty to 0.00005.
+    * Improve game finish message so that it does not always say the game ends on tiebreaks.
+    * Removing references to mining and capturing in RobotController documentation.
+    * Changing bytecode penalty to 0.00005.
 * **1.1.0** (1/7/2014) - Minor API Changes
--   * Removing references to old things. maxEnergon and isEncampment in RobotType are now maxHealth and isBuilding. RobotInfo now tells action delay.
--   * Fix non-milk tiebreaker code so that tiebreaks are functional.
--   * HQ and Noise towers no longer herd or farm milk (update engine to comply with specs).
--   * Added more detailed unit descriptions in specs as well as fixing typographical errors.
--   * Improve Java documentation.
--   * Added an example for action delay in the specs.
--   * You can now sense the locations of the broadcasting robots instead of just the robots.
--   * You can now sense your own and your opponent's milk quantity.
+    * Removing references to old things. maxEnergon and isEncampment in RobotType are now maxHealth and isBuilding. RobotInfo now tells action delay.
+    * Fix non-milk tiebreaker code so that tiebreaks are functional.
+    * HQ and Noise towers no longer herd or farm milk (update engine to comply with specs).
+    * Added more detailed unit descriptions in specs as well as fixing typographical errors.
+    * Improve Java documentation.
+    * Added an example for action delay in the specs.
+    * You can now sense the locations of the broadcasting robots instead of just the robots.
+    * You can now sense your own and your opponent's milk quantity.
 * **1.1.1** (1/9/2014) - Various fixes and updates + client speed-up
--   * Fix typographical errors and add clarifications in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes. PASTRs split milk in the case of overlap. RobotType attackDelay values now are consistent with game constants.
--   * Minor bug fixes. MethodCosts.txt boolean values updated. If a PASTR dies because its run method returned, the opponent will be rewarded milk.
--   * Hats are no longer free to wear.
--   * Client changes and optimizations: The "U" key now cycles between "important cows", "all cows", "no cows". In addition, you can remove maps from the client launcher without clicking one first.
--   * Self destructing to destroy an opponent PASTR correctly rewards milk now.
--   * Fixed bug with cow movement algorithm to comply with specs (behavior of cows on a noise tower's attack square, and no longer splitting cows proportionally based on angle).
--   * Everything but the HQ regenerates health now.
--   * You can now save match files outside of your home directory.
+    * Fix typographical errors and add clarifications in specs. Note that noise towers and cowboys (soldiers) both have an actiondelay penalty related to bytecodes. PASTRs split milk in the case of overlap. RobotType attackDelay values now are consistent with game constants.
+    * Minor bug fixes. MethodCosts.txt boolean values updated. If a PASTR dies because its run method returned, the opponent will be rewarded milk.
+    * Hats are no longer free to wear.
+    * Client changes and optimizations: The "U" key now cycles between "important cows", "all cows", "no cows". In addition, you can remove maps from the client launcher without clicking one first.
+    * Self destructing to destroy an opponent PASTR correctly rewards milk now.
+    * Fixed bug with cow movement algorithm to comply with specs (behavior of cows on a noise tower's attack square, and no longer splitting cows proportionally based on angle).
+    * Everything but the HQ regenerates health now.
+    * You can now save match files outside of your home directory.
+* **1.1.2** (1/9/2014) - Cows are now too scared to be close to any HQ (see Cows section). Spawn rate increased, but HQ can no longer attack during spawn delay.
 
 Appendices
 ------------

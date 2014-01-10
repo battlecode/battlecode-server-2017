@@ -110,6 +110,16 @@ public class NeutralsMap {
         }
     }
 
+    public void createVoid(MapLocation center, int manhattanRange) {
+        for (int x = center.x - manhattanRange; x <= center.x + manhattanRange; x++) {
+            for (int y = center.y - manhattanRange; y <= center.y + manhattanRange; y++) {
+                if (isValid(x, y)) {
+                    passable[x][y] = false;
+                }
+            }
+        }
+    }
+
     public double get(MapLocation m) {
         if (isValid(m.x, m.y)) {
             return currentAmount[m.x][m.y];

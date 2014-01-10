@@ -197,9 +197,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         robot.activateMovement(
-        		new SpawnSignal(loc, type, robot.getTeam(), robot),
-        		Math.max(1, (int)Math.round(gameWorld.getSpawnRate(robot.getTeam())))
+        		new SpawnSignal(loc, type, robot.getTeam(), robot), 0
         		);
+        robot.resetSpawnCounter();
     }
     
     public void construct(RobotType type) throws GameActionException {
@@ -685,11 +685,21 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
 
     public int roundsUntilActive() {
-        return Math.max(Math.max(robot.roundsUntilMovementIdle(), robot.roundsUntilAttackIdle()), (int) robot.getActionDelay());
+        int spawnRounds = 0;
+        if (robot.type == RobotType.HQ) {
+            gameWorld.adjustSpawnRate(getTeam());
+            spawnRounds = robot.roundsUntilCanSpawn(gameWorld.getSpawnRate(getTeam()));
+        }
+        return Math.max(Math.max(Math.max(robot.roundsUntilMovementIdle(), robot.roundsUntilAttackIdle()), (int) robot.getActionDelay()), spawnRounds);
     }
 
     public boolean isActive() {
-        return Math.max(robot.roundsUntilMovementIdle(), robot.roundsUntilAttackIdle()) == 0 && robot.getActionDelay() < 1.0;
+        boolean canSpawn = true;
+        if (robot.type == RobotType.HQ) {
+            gameWorld.adjustSpawnRate(getTeam());
+            canSpawn = robot.canSpawn(gameWorld.getSpawnRate(getTeam()));
+        }
+        return Math.max(robot.roundsUntilMovementIdle(), robot.roundsUntilAttackIdle()) == 0 && robot.getActionDelay() < 1.0 && canSpawn;
     }
 
     public void assertNotMoving() throws GameActionException {
@@ -771,6 +781,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public void attackSquare(MapLocation loc) throws GameActionException {
         assertNotAttacking();
+        assertNotMoving();
         assertNotNull(loc);
         assertCanAttack(loc, RobotLevel.ON_GROUND);
         assertNoActionDelay();
@@ -782,6 +793,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(GameActionExceptionType.CANT_DO_THAT_BRO, "Only Noise Towers can use a light attack");
         }
         assertNotAttacking();
+        assertNotMoving();
         assertNotNull(loc);
         assertCanAttack(loc, RobotLevel.ON_GROUND);
         assertNoActionDelay();

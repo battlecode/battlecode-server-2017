@@ -69,6 +69,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private Signal attackSignal;
 
     private int roundsSinceLastDamage;
+    private int roundsSinceLastSpawn;
 
     private boolean didSelfDestruct;
 
@@ -93,6 +94,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         capturingType = null;;
 
         roundsSinceLastDamage = 0;
+        roundsSinceLastSpawn = Integer.MAX_VALUE / 2;
 
 //        incomingMessageQueue = new LinkedList<Message>();
 
@@ -164,6 +166,18 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	return true;
     }
 
+    public void resetSpawnCounter() {
+        roundsSinceLastSpawn = 0;
+    }
+
+    public boolean canSpawn(double spawnRate) {
+        return roundsSinceLastSpawn >= spawnRate;
+    }
+
+    public int roundsUntilCanSpawn(double spawnRate) {
+        return Math.max(0, (int) Math.ceil(spawnRate - roundsSinceLastSpawn));
+    }
+
     @Override
     public void processBeginningOfRound() {
         super.processBeginningOfRound();
@@ -176,7 +190,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         //else if (type == RobotType.GENERATOR)
         //	myGameWorld.adjustResources(getTeam(), GameConstants.GENERATOR_POWER_PRODUCTION);
         //else if (type == RobotType.SUPPLIER)
-        myGameWorld.adjustSpawnRate(getTeam());
+        //myGameWorld.adjustSpawnRate(getTeam());
     }
 
     public void processBeginningOfTurn() {
@@ -239,6 +253,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             if (roundsSinceLastDamage >= GameConstants.HEAL_TURN_DELAY) {
                 takeDamage(-GameConstants.HEAL_RATE);
             }
+        } else {
+            roundsSinceLastSpawn++;
         }
 
       	// quick hack to make mining work. move me out later
