@@ -6,12 +6,10 @@ import java.util.Map;
 import battlecode.common.Direction;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
-import battlecode.common.MovementType;
 import battlecode.common.Robot;
 import battlecode.common.RobotLevel;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import battlecode.common.TerrainTile;
 import battlecode.common.Upgrade;
 import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
@@ -50,6 +48,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     protected GameMap.MapMemory mapMemory;
     public final RobotType type;
 
+    private volatile int turnsUntilMovementIdle;
+    private volatile int turnsUntilAttackIdle;
     private volatile HashMap<Integer, Integer> broadcastMap = new HashMap<Integer, Integer>();
     private boolean broadcasted = false;
     
@@ -69,7 +69,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private Signal attackSignal;
 
     private int roundsSinceLastDamage;
-    private int roundsSinceLastSpawn;
 
     private boolean didSelfDestruct;
 
@@ -94,13 +93,17 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         capturingType = null;;
 
         roundsSinceLastDamage = 0;
-        roundsSinceLastSpawn = Integer.MAX_VALUE / 2;
 
 //        incomingMessageQueue = new LinkedList<Message>();
 
         mapMemory = gw.getMapMemory(getTeam());
         saveMapMemory(null, loc, false);
         controlBits = 0;
+
+//        if (spawnedRobot) {
+//            turnsUntilMovementIdle = GameConstants.WAKE_DELAY;
+//            turnsUntilAttackIdle = GameConstants.WAKE_DELAY;
+//        }
 
         didSelfDestruct = false;
         
@@ -161,18 +164,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	return true;
     }
 
-    public void resetSpawnCounter() {
-        roundsSinceLastSpawn = 0;
-    }
-
-    public boolean canSpawn(double spawnRate) {
-        return roundsSinceLastSpawn >= spawnRate;
-    }
-
-    public int roundsUntilCanSpawn(double spawnRate) {
-        return Math.max(0, (int) Math.ceil(spawnRate - roundsSinceLastSpawn));
-    }
-
     @Override
     public void processBeginningOfRound() {
         super.processBeginningOfRound();
@@ -185,7 +176,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         //else if (type == RobotType.GENERATOR)
         //	myGameWorld.adjustResources(getTeam(), GameConstants.GENERATOR_POWER_PRODUCTION);
         //else if (type == RobotType.SUPPLIER)
-        //myGameWorld.adjustSpawnRate(getTeam());
+        myGameWorld.adjustSpawnRate(getTeam());
     }
 
     public void processBeginningOfTurn() {
@@ -248,8 +239,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             if (roundsSinceLastDamage >= GameConstants.HEAL_TURN_DELAY) {
                 takeDamage(-GameConstants.HEAL_RATE);
             }
-        } else {
-            roundsSinceLastSpawn++;
         }
 
       	// quick hack to make mining work. move me out later
@@ -304,6 +293,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         	myGameWorld.visitSignal(attackSignal);
         	attackSignal = null;
         }
+        if (turnsUntilAttackIdle > 0)
+            turnsUntilAttackIdle--;
+        if (turnsUntilMovementIdle > 0)
+            turnsUntilMovementIdle--;
         if (type == RobotType.HQ)
         {
         	if (researchRounds > 0)
@@ -473,57 +466,14 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return type.maxHealth;
     }
 
-    public double calculateMovementActionDelay(MapLocation from, MapLocation to, TerrainTile terrain, MovementType mt) {
-        double base = 1.0;
-        if (from.distanceSquaredTo(to) <= 1) {
-            switch (mt) {
-                case RUN:
-                    base = GameConstants.SOLDIER_MOVE_ACTION_DELAY;
-                    break;
-                case SNEAK:
-                    base = GameConstants.SOLDIER_SNEAK_ACTION_DELAY;
-                    break;
-                default:
-                    base = 1000;
-                    break;
-            }
-        } else {
-            switch (mt) {
-                // TODO(axc): make these not hard-coded. right now they're this way because 4.2 becomes 4.19999999 due to precision issues, and this makes a difference
-                case RUN:
-                    base = 2.8; //GameConstants.SOLDIER_MOVE_ACTION_DELAY * GameConstants.SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR;
-                    break;
-                case SNEAK:
-                    base = 4.2; //GameConstants.SOLDIER_SNEAK_ACTION_DELAY * GameConstants.SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR;
-                    break;
-                default:
-                    base = 1000;
-                    break;
-            }
-        }
-
-        if (terrain == TerrainTile.ROAD) {
-            base *= GameConstants.ROAD_ACTION_DELAY_FACTOR;
-        }
-        return base;
-    }
-
-    public double calculateAttackActionDelay(RobotType r) {
-        if (r == RobotType.SOLDIER) {
-            return GameConstants.SOLDIER_ATTACK_ACTION_DELAY;
-        } else {
-            return 1.0;
-        }
-    }
-
-    public void activateMovement(Signal s, double delay) {
+    public void activateMovement(Signal s, int delay) {
         movementSignal = s;
-        addActionDelay(delay);
+        turnsUntilMovementIdle = delay;
     }
     
-    public void activateAttack(Signal s, double delay) {
+    public void activateAttack(Signal s, int delay) {
         attackSignal = s;
-        addActionDelay(delay);
+        turnsUntilAttackIdle = delay;
     }
 
     public void addBroadcast(int channel, int data) {
@@ -533,24 +483,31 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     
     public void activateMinelayer(Signal s, int delay) {
     	myGameWorld.visitSignal(s);
+    	turnsUntilAttackIdle = delay;
+    	turnsUntilMovementIdle = delay;
     	miningRounds = delay;
     }
     
     public void activateMinestop(Signal s, int delay) {
     	myGameWorld.visitSignal(s);
+    	turnsUntilAttackIdle = delay;
+    	turnsUntilMovementIdle = delay;
     	miningRounds = 0;
     }
     
     public void activateDefuser(Signal s, int delay, MapLocation target) {
     	myGameWorld.visitSignal(s);
+    	turnsUntilAttackIdle = delay;
+    	turnsUntilMovementIdle = delay;
     	defusingRounds = delay;
     	defusingLocation = target;
     }
     
     public void activateCapturing(CaptureSignal s, int delay) {
     	myGameWorld.visitSignal(s);
+    	turnsUntilAttackIdle = delay;
+    	turnsUntilMovementIdle = delay;
     	capturingRounds = delay;
-        addActionDelay(delay);
     	capturingType = s.getType();
     }
 
@@ -560,6 +517,14 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     
     public int getDefusingRounds() { 
     	return defusingRounds;
+    }
+    
+    public int roundsUntilAttackIdle() {
+        return turnsUntilAttackIdle;
+    }
+
+    public int roundsUntilMovementIdle() {
+        return turnsUntilMovementIdle;
     }
 
     public boolean hasBroadcasted() {

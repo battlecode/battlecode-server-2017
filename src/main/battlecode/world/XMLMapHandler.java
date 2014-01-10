@@ -596,9 +596,6 @@ class XMLMapHandler extends DefaultHandler {
             for (int j = 0; j < map[i].length; j++)
                 map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
         }
-
-        nm.createVoid(gw.getBaseHQ(Team.A).getLocation(), GameConstants.HQ_COW_SCARE_DISTANCE);
-        nm.createVoid(gw.getBaseHQ(Team.B).getLocation(), GameConstants.HQ_COW_SCARE_DISTANCE);
         
         gw.endRandomIDs();
 
