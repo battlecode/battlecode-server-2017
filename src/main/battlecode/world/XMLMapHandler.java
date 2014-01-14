@@ -90,7 +90,7 @@ class XMLMapHandler extends DefaultHandler {
             if (!(data instanceof TerrainData))
                 return false;
             TerrainData d = (TerrainData) data;
-            return d.tile == tile;
+            return d.tile == tile && d.value == value;
         }
 
         public SymbolData copy() {
@@ -139,7 +139,7 @@ class XMLMapHandler extends DefaultHandler {
             if (!(data instanceof MineData))
                 return false;
             MineData d = (MineData) data;
-            return d.team == team;
+            return d.team == team && d.value == value;
         }
 
         public SymbolData copy() {
@@ -201,7 +201,7 @@ class XMLMapHandler extends DefaultHandler {
             if (!(data instanceof RobotData))
                 return false;
             RobotData d = (RobotData) data;
-            return type == d.type && team == d.team.opponent() && mine == d.mine;
+            return type == d.type && team == d.team.opponent() && mine == d.mine && d.value == value;
         }
 
         public String toString() {
@@ -266,7 +266,11 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         public boolean equalsMirror(SymbolData data) {
-            return data instanceof NodeData && mine == ((NodeData)data).mine;
+            if (!(data instanceof NodeData)) {
+                return false;
+            }
+            NodeData d = (NodeData) data;
+            return mine == ((NodeData)data).mine && d.value == value;
         }
 
         public SymbolData copy() {
@@ -301,7 +305,7 @@ class XMLMapHandler extends DefaultHandler {
         for (RobotType ch : RobotType.values()) {
             factories.put(ch.name(), RobotData.factory);
         }
-        factories.put("ENCAMPMENT", NodeData.factory);
+        //factories.put("ENCAMPMENT", NodeData.factory);
         factories.put("HQ", NodeData.factory);
     }
 
@@ -568,6 +572,11 @@ class XMLMapHandler extends DefaultHandler {
 
         System.out.println("Creating a game%%%%%%%%%");
 
+        // TODO(axc): remove this line before a release!
+        if (!isTournamentLegal()) {
+            fail("Map is not legal!", "Fix it.");
+        }
+
         TerrainTile[][] mapTiles = new TerrainTile[map.length][];
         for (int i = 0; i < map.length; i++) {
             mapTiles[i] = new TerrainTile[map[i].length];
@@ -642,6 +651,10 @@ class XMLMapHandler extends DefaultHandler {
                 add(loc.x - 1, loc.y);
                 add(loc.x, loc.y + 1);
                 add(loc.x, loc.y - 1);
+                add(loc.x - 1, loc.y + 1);
+                add(loc.x - 1, loc.y - 1);
+                add(loc.x + 1, loc.y + 1);
+                add(loc.x - 1, loc.y - 1);
             }
             return n_marked;
         }
@@ -649,7 +662,7 @@ class XMLMapHandler extends DefaultHandler {
         public void add(int x, int y) {
             if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight)
                 return;
-            if (map[x][y].tile() != TerrainTile.NORMAL) // TODO(axc): line is wrong
+            if (map[x][y].tile() != TerrainTile.NORMAL && map[x][y].tile() != TerrainTile.ROAD)
                 return;
             MapLocation loc = new MapLocation(x, y);
             if (marked.contains(loc))
@@ -657,6 +670,10 @@ class XMLMapHandler extends DefaultHandler {
             queue.push(loc);
             marked.add(loc);
             n_marked++;
+        }
+
+        public boolean reachable(int x, int y) {
+            return marked.contains(new MapLocation(x, y));
         }
     }
 
@@ -680,22 +697,29 @@ class XMLMapHandler extends DefaultHandler {
 
     }
 
-    // TODO this needs to be recoded
-    // TODO CORY FIX IT
     public boolean isTournamentLegal() {
         LegalityWarning warn = new LegalityWarning();
         int x, y, mx, my;
         SymbolData d, md;
-        boolean baseBad = false, archonsBad = false;
+        boolean baseBad = false;
         // check that the map is symmetric
-        for (y = 0, my = mapHeight - 1; my >= y; y++, my--)
-            for (x = 0, mx = mapWidth - 1; (my > y) ? (mx >= 0) : (mx >= x); x++, mx--) {
-                if (!map[x][y].equalsMirror(map[mx][my])) {
-                    warn.warnf("%d,%d does not match %d,%d", x, y, mx, my);
+        boolean symA = true, symB = true, symC = mapHeight == mapWidth, symD = mapHeight == mapWidth, symE = true;
+        for (y = 0; y < mapHeight; y++) {
+            for (x = 0; x < mapWidth; x++) {
+                symA = symA && (map[x][y].equalsMirror(map[x][mapHeight - y - 1]));
+                symB = symB && (map[x][y].equalsMirror(map[mapWidth - x - 1][y]));
+                if (mapWidth == mapHeight) {
+                    symC = symC && (map[x][y].equalsMirror(map[mapHeight - y - 1][mapWidth - x - 1]));
+                    symD = symD && (map[x][y].equalsMirror(map[y][x]));
                 }
+                symE = symE && (map[x][y].equalsMirror(map[mapWidth - x - 1][mapHeight - y - 1]));
             }
+        }
+        if (!symA && !symB && !symC && !symD && !symE) {
+            warn.warnf("Map is not symmetric in any way! " + symA + " " + symB + " " + symC + " " + symD + " " + symE);
+        }
         int grounds = 0, gx = 0, gy = 0;
-        int nodes = 0, archonsA = 0, baseAx = -1, baseAy = -1;
+        int nodes = 0, baseAx = -1, baseAy = -1, baseBx = -1, baseBy = -1;
         for (y = 0; y < mapHeight; y++) {
             for (x = 0; x < mapWidth; x++) {
                 d = map[x][y];
@@ -716,15 +740,23 @@ class XMLMapHandler extends DefaultHandler {
                     nodes++;
                     if (((NodeData) d).team == Team.A) {
                         if (baseAx != -1) {
-                            warn.warn("Team A has more than one power core.");
+                            warn.warn("Team A has more than one HQ.");
                             baseBad = true;
                         } else {
                             baseAx = x;
                             baseAy = y;
                         }
+                    } else if (((NodeData) d).team == Team.B) {
+                        if (baseBx != -1) {
+                            warn.warn("Team B has more than one HQ.");
+                            baseBad = true;
+                        } else {
+                            baseBx = x;
+                            baseBy = y;
+                        }
                     }
                 }
-                if (d.tile() == TerrainTile.NORMAL) { // TODO(axc): line is wrong
+                if (d.tile() == TerrainTile.NORMAL || d.tile() == TerrainTile.ROAD) {
                     grounds++;
                     gx = x;
                     gy = y;
@@ -734,32 +766,22 @@ class XMLMapHandler extends DefaultHandler {
 
         if (baseAx == -1) {
             baseBad = true;
-            warn.warn("Team A does not have a power core.");
+            warn.warn("Team A does not have a HQ.");
         }
-
-//        if (!(baseBad || archonsBad)) {
-//            for (y = baseAy - 1; y <= baseAy + 1; y++)
-//                for (x = baseAx - 1; x <= baseAx + 1; x++) {
-//                    if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
-//                        d = map[x][y];
-//                        if (d instanceof RobotData) {
-//                            RobotData rd = (RobotData) d;
-//                            if (rd.type == RobotType.ARCHON && rd.team == Team.A)
-//                                archonsA--;
-//                        }
-//                    }
-//                }
-//            if (archonsA != 0)
-//                warn.warn("Team A has an archon that is not next to its power core.");
-//        }
 
         // check that the ground squares are connected
         if (grounds == 0) {
             warn.warn("There are no land squares on the entire map!");
         } else {
-            int reachable = new FloodFill(gx, gy).size();
-            if (reachable != grounds) {
-                warn.warn(String.format("There are %d land squares but only %d are reachable from %d,%d", grounds, reachable, gx, gy));
+            FloodFill ff = new FloodFill(baseAx, baseAy);
+            ff.size();
+            //if (reachable != grounds) {
+                //warn.warn(String.format("There are %d land squares but only %d are reachable from %d,%d", grounds, reachable, gx, gy));
+            //}
+
+            // we just want the HQs to be reachable from each other
+            if (!ff.reachable(baseBx, baseBy)) {
+                warn.warn("The two HQs are not connected!");
             }
         }
         // check for walls that are passable diagonally
@@ -770,9 +792,9 @@ class XMLMapHandler extends DefaultHandler {
                 TerrainTile ur = map[x][y - 1].tile();
                 TerrainTile dl = map[x - 1][y].tile();
                 TerrainTile dr = map[x][y].tile();
-                if (ul == TerrainTile.VOID && dr == TerrainTile.VOID && ur == TerrainTile.NORMAL && dl == TerrainTile.NORMAL) // TODO(axc): line is wrong
+                if (ul == TerrainTile.VOID && dr == TerrainTile.VOID && (ur == TerrainTile.NORMAL || ur == TerrainTile.ROAD) && (dl == TerrainTile.NORMAL || dl == TerrainTile.ROAD))
                     System.err.format("Warning: diagonal passageway at %d, %d\n", x - 1, y);
-                if (ul == TerrainTile.NORMAL && dr == TerrainTile.NORMAL && ur == TerrainTile.VOID && dl == TerrainTile.VOID) // TODO(axc): this line is wrong temporarily
+                if (ul == TerrainTile.NORMAL && dr == TerrainTile.NORMAL && (ur == TerrainTile.VOID || ur == TerrainTile.ROAD) && (dl == TerrainTile.VOID || dl == TerrainTile.ROAD))
                     System.err.format("Warning: diagonal passageway at %d, %d\n", x, y);
             }
         int rounds = mapProperties.get(MapProperties.MAX_ROUNDS);
@@ -781,33 +803,11 @@ class XMLMapHandler extends DefaultHandler {
         else if (rounds > GameConstants.ROUND_MAX_LIMIT)
             warn.warn("The round limit is too large.");
 
-        connected:
-        {
-            HashMap<MapLocation, UnionFindNode> nodeMap = new HashMap<MapLocation, UnionFindNode>();
-            UnionFindNode n0, n1;
-            int components = nodes;
-            for (MapLocation[] link : nodeLinks) {
-                if (!isNode(link[0])) {
-                    warn.warnf("Nodelink contains %d,%d but there is no node there", link[0].x, link[0].y);
-                    break connected;
-                }
-                if (!isNode(link[1])) {
-                    warn.warnf("Nodelink contains %d,%d but there is no node there", link[1].x, link[1].y);
-                    break connected;
-                }
-                if (!nodeMap.containsKey(link[0]))
-                    nodeMap.put(link[0], new UnionFindNode());
-                if (!nodeMap.containsKey(link[1]))
-                    nodeMap.put(link[1], new UnionFindNode());
-                n0 = nodeMap.get(link[0]);
-                n1 = nodeMap.get(link[1]);
-                if (n0.find() != n1.find())
-                    components--;
-                n0.union(n1);
-            }
-            if (components != 1)
-                warn.warn("The power node graph is disconnected.");
+        // make sure HQs are far enough apart
+        if (Math.sqrt((baseBy - baseAy) * (baseBy - baseAy) + (baseBx - baseAx) * (baseBx - baseAx)) < GameConstants.MIN_DISTANCE_BETWEEN_SPAWN_POINTS) {
+            warn.warn("The HQs are too close together.");
         }
+
         return warn.legal;
     }
 
