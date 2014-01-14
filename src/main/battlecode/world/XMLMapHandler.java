@@ -653,8 +653,8 @@ class XMLMapHandler extends DefaultHandler {
                 add(loc.x, loc.y - 1);
                 add(loc.x - 1, loc.y + 1);
                 add(loc.x - 1, loc.y - 1);
+                add(loc.x + 1, loc.y - 1);
                 add(loc.x + 1, loc.y + 1);
-                add(loc.x - 1, loc.y - 1);
             }
             return n_marked;
         }
