@@ -44,10 +44,10 @@ public interface GameConstants {
     /** The maximum read/write-able of radio channel number */
     public static final int BROADCAST_MAX_CHANNELS = 65535;
    
-    /** Constant used to calculate how suppliers factor into the HQ spawn delay */
-    public static final double HQ_SPAWN_DELAY_CONSTANT_1 = 30; // a
+    /** Constant used to calculate the HQ spawn delay */
+    public static final double HQ_SPAWN_DELAY_CONSTANT_1 = 20; // a
     
-	/** Constant used to calculate how suppliers factor into the HQ spawn delay */
+	/** Constant used to calculate the HQ spawn delay */
 	public static final double HQ_SPAWN_DELAY_CONSTANT_2 = 1.5; // b -> a + N^b, where N is num robots
     
     /** Amount of milk required to wear a hat */
@@ -124,4 +124,7 @@ public interface GameConstants {
 
     /** Accuracy of milk quantity of your opponent when sensing. The quantity is rounded down to the nearest multiple of this value. */
     public static final double OPPONENT_MILK_SENSE_ACCURACY = 2500000.0;
+
+    /** The range of squares around any HQ in which no cows will enter. Note that this is not range^2, but instead a 7x7 square around the HQ. */
+    public static final int HQ_COW_SCARE_DISTANCE = 3;
 }

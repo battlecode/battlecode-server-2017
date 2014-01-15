@@ -110,6 +110,16 @@ public class NeutralsMap {
         }
     }
 
+    public void createVoid(MapLocation center, int distance) {
+        for (int x = center.x - distance; x <= center.x + distance; x++) {
+            for (int y = center.y - distance; y <= center.y + distance; y++) {
+                if (isValid(x, y)) {
+                    passable[x][y] = false;
+                }
+            }
+        }
+    }
+
     public double get(MapLocation m) {
         if (isValid(m.x, m.y)) {
             return currentAmount[m.x][m.y];
