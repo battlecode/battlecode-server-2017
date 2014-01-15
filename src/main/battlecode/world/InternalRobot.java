@@ -509,11 +509,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public double calculateAttackActionDelay(RobotType r) {
-        if (r == RobotType.SOLDIER) {
-            return GameConstants.SOLDIER_ATTACK_ACTION_DELAY;
-        } else {
-            return 1.0;
-        }
+        return r.attackDelay;
     }
 
     public void activateMovement(Signal s, double delay) {

@@ -716,7 +716,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()), MovementType.RUN);
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
                 true, (int) delay, MovementType.RUN), delay);
-        System.out.println("move delay is " + delay);
     }
 
     public void sneak(Direction d) throws GameActionException {
@@ -727,10 +726,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()), MovementType.SNEAK);
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
                 true, (int) delay, MovementType.SNEAK), delay);
-        System.out.println("move delay is " + delay);
     }
 
     public boolean canMove(Direction d) {
+        if (d == Direction.NONE || d == Direction.OMNI)
+            return false;
         assertValidDirection(d);
         return gameWorld.canMove(robot.getRobotLevel(), getLocation().add(d));
     }

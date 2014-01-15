@@ -90,7 +90,7 @@ public interface GameConstants {
     public static final double ROBOT_MILK_PERCENTAGE = 0.05;
 	
 	/** Flat damage dealt by a self destruct */
-    public static final double SELF_DESTRUCT_BASE_DAMAGE = 30.0; // a
+    public static final double SELF_DESTRUCT_BASE_DAMAGE = 40.0; // a
 	
 	/** Factor at which robot's health is converted to damage */
     public static final double SELF_DESTRUCT_DAMAGE_FACTOR = 0.5; // b -> a + health / b = damage
@@ -114,7 +114,7 @@ public interface GameConstants {
     public static final double SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR = 1.4;
 	
 	/** Factor at which movement-related and sneaking-related actiondelay is discounted on a road */
-    public static final double ROAD_ACTION_DELAY_FACTOR = 0.7;
+    public static final double ROAD_ACTION_DELAY_FACTOR = 0.5;
 
 	/** Factor of WIN_QTY milk that is gained after destroying an enemy PASTR */
     public static final double MILK_GAIN_FACTOR = 0.1; // get this * WIN_QTY after destroying pastr
@@ -124,4 +124,10 @@ public interface GameConstants {
 
     /** Accuracy of milk quantity of your opponent when sensing. The quantity is rounded down to the nearest multiple of this value. */
     public static final double OPPONENT_MILK_SENSE_ACCURACY = 2500000.0;
+
+    /** The number of cows within a PASTR that can be milked with perfect efficiency. */
+    public static final double MAX_EFFICIENT_COWS = 8000.0;
+
+    /** For a quantity of cows above the maximum efficient cows number X in a PASTR, we only get X^(this constant) milk. */
+    public static final double MILKING_INEFFICIENCY = 0.95;
 }

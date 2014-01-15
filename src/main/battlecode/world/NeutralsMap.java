@@ -195,15 +195,20 @@ public class NeutralsMap {
                 capturePercentage = 1.0;
             }
             MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
+            double milkGained = 0.0;
             for (MapLocation ml : affected) {
                 if (isValid(ml.x, ml.y)) {
                     if (ir.type == RobotType.PASTR) {
-                        delta += this.currentAmount[ml.x][ml.y] * capturePercentage / nPastrs[ml.x][ml.y];
+                        milkGained += this.currentAmount[ml.x][ml.y] * capturePercentage / nPastrs[ml.x][ml.y];
                     } else {
-                        delta += this.currentAmount[ml.x][ml.y] * capturePercentage;
+                        milkGained += this.currentAmount[ml.x][ml.y] * capturePercentage;
                     }
                 }
             }
+            if (milkGained > GameConstants.MAX_EFFICIENT_COWS && ir.type == RobotType.PASTR) {
+                milkGained = GameConstants.MAX_EFFICIENT_COWS + Math.pow(milkGained - GameConstants.MAX_EFFICIENT_COWS, GameConstants.MILKING_INEFFICIENCY);
+            }
+            delta += milkGained;
         }
         return delta;
     }

@@ -59,7 +59,7 @@ Generates a field to get milk from cows inside the field, and keep cows within t
 NOISE TOWERs are immobile structures can 'attack' (but for no damage) to create noise in a large range. There are two types of attacks that a NOISE TOWER can use. There is a normal attack (`rc.attackSquare`) and a light attack (`rc.attackSquareLight`). The former generates a noise source scaring all cows in square range 36 (`GameConstants.NOISE_SCARE_RANGE_LARGE`), while a light attack only scares cows in square range 9 (`GameConstants.NOISE_SCARE_RANGE_SMALL`).
 - Robot count: 3
 - Sight range: 35
-- Attack range: 400
+- Attack range: 300
 - Health: 100
 - Takes 100 turns to construct
 
@@ -107,6 +107,8 @@ Info on robots in sight range can be sensed. Vision is not shared between robots
 - The locations of all PASTRs on the map can be sensed.
 - The amount of milk you have and the amount of milk the opponent has. For sensing opponent milk, decreased accuracy causes the value to be rounded down to a multiple of `GameConstants.OPPONENT_MILK_SENSE_ACCURACY`.
 
+Sensing info on a robot includes the robot's location, actiondelay, whether it is currently constructing anything, its type, its health, and more. See `RobotInfo` Java documentation for more details.
+
 ### Broadcasting
 Radio Sensors: When a robot broadcasts to radio, all robots are made aware of the location of the broadcasting robot for for one turn. They can access the positions with a method call like `rc.senseBroadcastingRobots(Team t)` or `rc.senseBroadcastingRobotLocations(Team t)`.
 
@@ -116,13 +118,13 @@ The cost of transmitting and receiving are in bytecodes, which, as mentioned ear
 
 
 ### Attack
-Cowboy robots can attack any tile within attack range (square range of 10). Attacking and moving share the same cooldown (action delay). Attacking deals 10 damage (`RobotType.SOLDIER.attackPower`) and gives 2 `actiondelay` (`GameConstants.SOLDIER_ATTACK_ACTION_DELAY`).
+Cowboy robots can attack any tile within attack range (square range of 10). Attacking and moving share the same cooldown (action delay). Attacking deals 10 damage (`RobotType.SOLDIER.attackPower`) and gives 2 `actiondelay` (`GameConstants.SOLDIER_ATTACK_ACTION_DELAY`, consistent with `RobotType.SOLDIER.attackDelay`).
 
 An attack destroys all cows at the targeted location. In addition, it makes noise that scares cows at long range at the targeted location.
 
 Your HQ shoots depleted uranium girders out of a railgun, dealing overkill area damage to the target (50 and 25 splash in a square range of 2, based on `RobotType.HQ.attackPower` and `RobotType.HQ.splashPower`). HQ has square range of 15. Watch out for friendly fire.
 
-Noise Towers can also 'attack' in their attack range. Their attacks create noise (can choose to create noise in square range of 9 or square range of 36) but deal no damage.
+Noise Towers can also 'attack' in their attack range. Their attacks create noise (can choose to create noise in square range of 9 or square range of 36) but deal no damage. Noise Towers attacks give an `actiondelay` of 2 (`RobotType.NOISETOWER.attackDelay`).
 
 ### Movement
 Cowboy robots can move to any unoccupied adjacent square if their delay is less than one. Using bytecodes adds small fractions to the delay that eventually add up to one, requiring a momentary pause in movement or attack, representing careful thought. When a robot moves, its destination square is the source of noise.
@@ -137,7 +139,7 @@ The HQ can spawn soldiers, subject to a production delay (20 turns plus total nu
 Cowboy robots can construct structures on the square they are currently on. The robot will become unable to take any action for a certain number of turns (50 for PASTRs, 100 for Noise Towers) and then will be removed and replaced with the constructed structure.
 
 ### Suicide
-Calling `selfDestruct()` immediately removes the calling robot from the game and deals area damage (30+half of remaining hp to square range of 2, based on `GameConstants.SELF_DESTRUCT_BASE_DAMAGE` and `GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR`). This scares cows in square range 36 and destroys all cows on affected squares (square range 2). This replaces the `suicide()` method. Structures cannot self destruct.
+Calling `selfDestruct()` immediately removes the calling robot from the game and deals area damage (40+half of remaining hp to square range of 2, based on `GameConstants.SELF_DESTRUCT_BASE_DAMAGE` and `GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR`). This scares cows in square range 36 and destroys all cows on affected squares (square range 2). This replaces the `suicide()` method. Structures cannot self destruct.
 
 ### Team Memory
 Official matches will usually be sets of multiple games. Each team can save a small amount of information (`GameConstants.TEAM_MEMORY_LENGTH` longs) for the next game using the function `setTeamMemory()`. This information may be retrieved using `getTeamMemory()`. If there was no previous game in the match, or no information was saved, then the memory will be filled with zeros.
@@ -159,8 +161,6 @@ Cows can be influenced by noise and attacks. After each turn, cows will run away
 Cows in a PASTR containment field cannot leave the field, and cows on the same square as a robot will not leave that square due to noise until the robot moves. If a cow is in two PASTR containments, then it will stay within both PASTR containments.
 In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square and self destructs will destroy all cows within range. All weapons used are certified humane.
 
-Cows are incredibly scared of the headquarters. For this reason, cows will not move onto any locations within 3 movements (`GameConstants.HQ_COW_SCARE_DISTANCE`) of any HQ. This produces a 7x7 square around the HQ.
-
 The cow field is processed only at the end of the turn. First, all cows that were attacked are destroyed. Next, cows move based on all the noise they heard that turn. Finally, cows decay and then grow, in that order.
 
 ### Milk
@@ -173,7 +173,7 @@ Maps
 -----
 Battlecode maps are a rectangular grid of squares, each with a pair of integer coordinates. Each tile is an instance of `MapLocation`. Squares outside the map have TerrainType.OFF_MAP. The northwest map square is the origin (0,0). Maps specify the spawn points of the teams.
 
-There are three types of terrain: GROUND, VOID, and ROAD. VOID terrain is not traversable and do not have cows. ROAD terrain discounts movement-related and sneaking-related actiondelays by a factor of 0.7 for robots on the terrain (`GameConstants.ROAD_ACTION_DELAY_FACTOR`).
+There are three types of terrain: GROUND, VOID, and ROAD. VOID terrain is not traversable and do not have cows. ROAD terrain discounts movement-related and sneaking-related actiondelays by a factor of 0.5 for robots on the terrain (`GameConstants.ROAD_ACTION_DELAY_FACTOR`).
 
 ### Map Files
 
@@ -500,7 +500,13 @@ Changelog
     * Fixed bug with cow movement algorithm to comply with specs (behavior of cows on a noise tower's attack square, and no longer splitting cows proportionally based on angle).
     * Everything but the HQ regenerates health now.
     * You can now save match files outside of your home directory.
-* **1.1.2** (1/9/2014) - Spawn rate increased, but HQ can no longer attack during spawn delay.
+* **1.1.2** (1/9/2014) - Small gameplay changes and client graphics update:
+    * Fix bug: HQ can no longer attack during spawn delay. isActive() now will need to return true for the HQ to attack, and roundsUntilActive() now correctly reflects this.
+    * Spawn rate increased (the constant delay goes from 30 to 20).
+    * Noise Tower changes: attack range goes down from 400 to 300, and attack action delay goes from 1 to 2.
+    * Self destruct base damage moves from 30 to 40.
+    * The road action delay bonus is now 0.5.
+    * PASTR no longer get exactly x milk from x cows. Now, x cows produces x^0.9 milk. TODO
 
 Appendices
 ------------
