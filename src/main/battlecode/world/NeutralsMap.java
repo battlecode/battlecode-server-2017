@@ -33,7 +33,7 @@ public class NeutralsMap {
     private double[][] growthFactor;
     private double[][] dX, dY;
     private boolean[][] hasNoise;
-    private int[][] nPastrs;
+    private int[][] pastrID;
     private ArrayList<MapLocation> attacks;
     private Set[][] ids;
 
@@ -72,11 +72,12 @@ public class NeutralsMap {
         dX = new double[this.mapWidth][this.mapHeight];
         dY = new double[this.mapWidth][this.mapHeight];
         hasNoise = new boolean[this.mapWidth][this.mapHeight];
-        nPastrs = new int[this.mapWidth][this.mapHeight];
+        pastrID = new int[this.mapWidth][this.mapHeight];
         passable = new boolean[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
             for (int j = 0; j < this.mapHeight; j++) {
                 passable[i][j] = mapTiles[i][j] != TerrainTile.VOID;
+                pastrID[i][j] = Integer.MAX_VALUE;
             }
         }
         ids = new Set[this.mapWidth][this.mapHeight];
@@ -103,10 +104,11 @@ public class NeutralsMap {
         this.dX = new double[this.mapWidth][this.mapHeight];
         this.dY = new double[this.mapWidth][this.mapHeight];
         this.hasNoise = new boolean[this.mapWidth][this.mapHeight];
-        this.nPastrs = new int[this.mapWidth][this.mapHeight];
+        this.pastrID = new int[this.mapWidth][this.mapHeight];
         this.passable = new boolean[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
             System.arraycopy(nm.passable[i], 0, this.passable[i], 0, this.mapHeight);
+            System.arraycopy(nm.pastrID[i], 0, this.pastrID[i], 0, this.mapHeight);
         }
     }
 
@@ -186,7 +188,10 @@ public class NeutralsMap {
                 continue;
             }
             if (ir.type != RobotType.PASTR && ir.type != RobotType.SOLDIER) continue;
-            if (ir.type == RobotType.SOLDIER && nPastrs[ir.getLocation().x][ir.getLocation().y] > 0) continue; // soldiers do not milk when in pastr range
+            if (ir.type == RobotType.SOLDIER && pastrID[ir.getLocation().x][ir.getLocation().y] < Integer.MAX_VALUE) continue; // soldiers do not milk when in pastr range
+            if (pastrID[ir.getLocation().x][ir.getLocation().y] == 0) {
+                System.out.println("AHHHHHHHHH BAD");
+            }
 
             int captureRange = 0;
             double capturePercentage = GameConstants.ROBOT_MILK_PERCENTAGE;
@@ -198,9 +203,7 @@ public class NeutralsMap {
             double milkGained = 0.0;
             for (MapLocation ml : affected) {
                 if (isValid(ml.x, ml.y)) {
-                    if (ir.type == RobotType.PASTR) {
-                        milkGained += this.currentAmount[ml.x][ml.y] * capturePercentage / nPastrs[ml.x][ml.y];
-                    } else {
+                    if (ir.type == RobotType.PASTR && ir.getID() == pastrID[ml.x][ml.y] || ir.type == RobotType.SOLDIER) {
                         milkGained += this.currentAmount[ml.x][ml.y] * capturePercentage;
                     }
                 }
@@ -225,7 +228,7 @@ public class NeutralsMap {
             if (isValid(ml.x, ml.y)) {
                 this.ids[ml.x][ml.y].add(ir.getID());
                 if (ir.type == RobotType.PASTR) {
-                    nPastrs[ml.x][ml.y]++;
+                    pastrID[ml.x][ml.y] = Math.min(pastrID[ml.x][ml.y], ir.getID());
                 }
             }
         }
@@ -374,7 +377,7 @@ public class NeutralsMap {
                 this.dY[i][j] = 0;
                 this.ids[i][j].clear();
                 this.hasNoise[i][j] = false;
-                this.nPastrs[i][j] = 0;
+                this.pastrID[i][j] = Integer.MAX_VALUE;
             }
         }
         attacks.clear();
