@@ -92,7 +92,7 @@ Robots are equipped with a variety of high tech equipments and can perform the f
 Each robot has an `actiondelay` counter that decrements by 1 every turn. Movement and attacking cannot be performed unless `actiondelay` is less than 1, and they also give a certain amount of `actiondelay`.
 
 Running code uses bytecodes. Each turn, a robot can spend up to 10000 bytecodes on computation (`GameConstants.BYTECODE_LIMIT`). If this limit is reached, the robot's turn is immediately ended and the computation is continued on the next turn. Using `yield()` and `selfDestruct()` can end a turn early, saving bytecodes and ending computation. The former is generally preferred.
-For cowboy robots and for noise towers, each bytecode above 2000 gives 0.00005 `actiondelay` (see `GameConstants.FREE_BYTECODES` and `GameConstants.BYTECODE_PENALTY`).
+For cowboy robots and for noise towers, each bytecode above 1000 gives 0.00005 `actiondelay` (see `GameConstants.FREE_BYTECODES` and `GameConstants.BYTECODE_PENALTY`).
 
 Example: if a SOLDIER (cowboy) currently has 0 `actiondelay`, then it can attack. After attacking, the SOLDIER will have 2 `actiondelay`. At the end of the turn, this counter decrements to 1. At the end of the next turn, this counter decrements to 0. That means that two turns after the initial attack, the SOLDIER can attack again. In the case of fractional `actiondelay`, a robot is only unable to move or attack if its `actiondelay` is greater than or equal to 1.
 
@@ -164,7 +164,9 @@ In addition, attacking a square (except for Noise Tower attacks) destroys all co
 The cow field is processed only at the end of the turn. First, all cows that were attacked are destroyed. Next, cows move based on all the noise they heard that turn. Finally, cows decay and then grow, in that order.
 
 ### Milk
-Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). SOLDIER robots only give 5% of the milk that a PASTR would generate (`GameConstants.ROBOT_MILK_PERCENTAGE`). Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk (`GameConstants.MILK_GAIN_FACTOR`). The amount of milk gained from a square is exactly equal to the quantity of cows on that square. When more than one PASTR controls a square, the milk from that square is split equally (they all take a fraction of the milk). In addition, if a robot SOLDIER is located on a square within PASTR range, then the SOLDIER will not get any milk.
+Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). SOLDIER robots only give 5% of the milk that a PASTR would generate (`GameConstants.ROBOT_MILK_PERCENTAGE`). Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk (`GameConstants.MILK_GAIN_FACTOR`). The amount of milk gained from a PASTR is exactly equal to the quantity of cows herded by that PASTR when the total number of cows is less than 8000 (`GameConstants.MAX_EFFICIENT_COWS`), and equal to (8000 + (x^0.95)) otherwise (`GameConstants.MAX_EFFICIENT_COWS` and `GameConstants.MILKING_INEFFICIENCY`).
+
+When more than one PASTR controls a square, the PASTR with the smallest ID takes all the cows. In addition, if a robot SOLDIER is located on a square within PASTR range, then the SOLDIER will not get any milk.
 
 Since PASTRs cannot self destruct, any PASTR that explodes for any reason other than being attacked will spill milk, resulting in milk being awarded to the opposing team as if it had been destroyed by them (an amount equal to `GameConstants.MILK_PENALTY_FACTOR` times the win quantity).
 
@@ -502,11 +504,12 @@ Changelog
     * You can now save match files outside of your home directory.
 * **1.1.2** (1/9/2014) - Small gameplay changes and client graphics update:
     * Fix bug: HQ can no longer attack during spawn delay. isActive() now will need to return true for the HQ to attack, and roundsUntilActive() now correctly reflects this.
+    * Only 1000 free bytecodes per round instead of 2000.
     * Spawn rate increased (the constant delay goes from 30 to 20).
     * Noise Tower changes: attack range goes down from 400 to 300, and attack action delay goes from 1 to 2.
     * Self destruct base damage moves from 30 to 40.
     * The road action delay bonus is now 0.5.
-    * PASTR no longer get exactly x milk from x cows. Now, x cows produces x^0.9 milk. TODO
+    * PASTR no longer get exactly x milk from x cows when x is too large, due to inefficiencies in milking large numbers of cows. See changes in the Milk section. In addition, overlapping PASTRs no longer share milk: the PASTR with the smallest ID wins it all.
 
 Appendices
 ------------

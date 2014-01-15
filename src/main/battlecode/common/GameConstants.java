@@ -96,7 +96,7 @@ public interface GameConstants {
     public static final double SELF_DESTRUCT_DAMAGE_FACTOR = 0.5; // b -> a + health / b = damage
 
 	/** Number of bytecodes per turn that are not converted into actiondelay */
-    public static final int FREE_BYTECODES = 2000;
+    public static final int FREE_BYTECODES = 1000;
 	
 	/** Actiondelay per extra bytecode */
     public static final double BYTECODE_PENALTY = 0.00005;
