@@ -572,10 +572,9 @@ class XMLMapHandler extends DefaultHandler {
 
         System.out.println("Creating a game%%%%%%%%%");
 
-        // TODO(axc): remove this line before a release!
-        if (!isTournamentLegal()) {
-            fail("Map is not legal!", "Fix it.");
-        }
+        //if (!isTournamentLegal()) {
+            //fail("Map is not legal!", "Fix it.");
+        //}
 
         TerrainTile[][] mapTiles = new TerrainTile[map.length][];
         for (int i = 0; i < map.length; i++) {
@@ -716,7 +715,7 @@ class XMLMapHandler extends DefaultHandler {
             }
         }
         if (!symA && !symB && !symC && !symD && !symE) {
-            warn.warnf("Map is not symmetric in any way! " + symA + " " + symB + " " + symC + " " + symD + " " + symE);
+            warn.warnf("Map is not symmetric in any way!");
         }
         int grounds = 0, gx = 0, gy = 0;
         int nodes = 0, baseAx = -1, baseAy = -1, baseBx = -1, baseBy = -1;
@@ -726,13 +725,6 @@ class XMLMapHandler extends DefaultHandler {
                 if (d instanceof RobotData) {
                     RobotData rd = (RobotData) d;
                     switch (rd.type) {
-//                        case ARCHON:
-//                            if (rd.team == Team.NEUTRAL) {
-//                                warn.warnUnit(rd);
-//                            }
-//                            if (rd.team == Team.A)
-//                                archonsA++;
-//                            break;
                         default:
                             warn.warnUnit(rd);
                     }
@@ -774,10 +766,7 @@ class XMLMapHandler extends DefaultHandler {
             warn.warn("There are no land squares on the entire map!");
         } else {
             FloodFill ff = new FloodFill(baseAx, baseAy);
-            ff.size();
-            //if (reachable != grounds) {
-                //warn.warn(String.format("There are %d land squares but only %d are reachable from %d,%d", grounds, reachable, gx, gy));
-            //}
+            ff.size(); // calculate the flood fill
 
             // we just want the HQs to be reachable from each other
             if (!ff.reachable(baseBx, baseBy)) {
