@@ -83,6 +83,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
     private double[] teamResources = new double[2];
     private double[] teamSpawnRate = new double[2];
+    private int[] teamRobotCount = new int[2];
     private int[] teamCapturingNumber = new int[2];
 
     private List<MapLocation> encampments = new ArrayList<MapLocation>();
@@ -257,14 +258,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public int countRobots(Team t) {
-        int total = 0;
-        for (InternalObject obj : allObjects()) {
-            InternalRobot ir = (InternalRobot) obj;
-            if (obj.getTeam() == t) {
-                total += ir.type.count;
-            }
-        }
-        return total;
+        return teamRobotCount[t.ordinal()];
     }
     
     public int countEncampments(Team t) {
@@ -771,6 +765,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
         if (obj instanceof InternalRobot) {
             InternalRobot r = (InternalRobot) obj;
+
+            teamRobotCount[r.getTeam().ordinal()] -= r.type.count;
+
             RobotMonitor.killRobot(ID);
     		if (r.type == RobotType.SOLDIER && (r.getCapturingType() != null))
     			teamCapturingNumber[r.getTeam().ordinal()]--;
@@ -878,7 +875,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         //note: this also adds the signal
         InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent);
         
-        
+        teamRobotCount[robot.getTeam().ordinal()] += robot.type.count;
     }
     
     public void visitResearchSignal(ResearchSignal s) {
