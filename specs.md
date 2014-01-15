@@ -500,7 +500,7 @@ Changelog
     * Fixed bug with cow movement algorithm to comply with specs (behavior of cows on a noise tower's attack square, and no longer splitting cows proportionally based on angle).
     * Everything but the HQ regenerates health now.
     * You can now save match files outside of your home directory.
-* **1.1.2** (1/9/2014) - Cows are now too scared to be close to any HQ (see Cows section). Spawn rate increased, but HQ can no longer attack during spawn delay.
+* **1.1.2** (1/9/2014) - Spawn rate increased, but HQ can no longer attack during spawn delay.
 
 Appendices
 ------------

@@ -124,7 +124,4 @@ public interface GameConstants {
 
     /** Accuracy of milk quantity of your opponent when sensing. The quantity is rounded down to the nearest multiple of this value. */
     public static final double OPPONENT_MILK_SENSE_ACCURACY = 2500000.0;
-
-    /** The range of squares around any HQ in which no cows will enter. Note that this is not range^2, but instead a 7x7 square around the HQ. */
-    public static final int HQ_COW_SCARE_DISTANCE = 3;
 }
