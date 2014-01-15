@@ -502,7 +502,7 @@ Changelog
     * Fixed bug with cow movement algorithm to comply with specs (behavior of cows on a noise tower's attack square, and no longer splitting cows proportionally based on angle).
     * Everything but the HQ regenerates health now.
     * You can now save match files outside of your home directory.
-* **1.1.2** (1/9/2014) - Small gameplay changes and client graphics update:
+* **1.2.0** (1/15/2014) - Small gameplay changes and client graphics update:
     * Fix bug: HQ can no longer attack during spawn delay. isActive() now will need to return true for the HQ to attack, and roundsUntilActive() now correctly reflects this.
     * Only 1000 free bytecodes per round instead of 2000.
     * Spawn rate increased (the constant delay goes from 30 to 20).
