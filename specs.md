@@ -510,6 +510,7 @@ Changelog
     * Self destruct base damage moves from 30 to 40.
     * The road action delay bonus is now 0.5.
     * PASTRs no longer get exactly x milk from x cows when x is too large, due to inefficiencies in milking large numbers of cows. See changes in the Milk section. In addition, overlapping PASTRs no longer share milk: the PASTR with the smallest ID wins it all.
+* **1.2.1** (1/15/2014) - Fix backwards compatibility.
 
 Appendices
 ------------
