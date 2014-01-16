@@ -175,7 +175,7 @@ Maps
 -----
 Battlecode maps are a rectangular grid of squares, each with a pair of integer coordinates. Each tile is an instance of `MapLocation`. Squares outside the map have TerrainType.OFF_MAP. The northwest map square is the origin (0,0). Maps specify the spawn points of the teams.
 
-There are three types of terrain: GROUND, VOID, and ROAD. VOID terrain is not traversable and do not have cows. ROAD terrain discounts movement-related and sneaking-related actiondelays by a factor of 0.5 for robots on the terrain (`GameConstants.ROAD_ACTION_DELAY_FACTOR`).
+There are three types of terrain: GROUND, VOID, and ROAD. VOID terrain is not traversable and do not have cows. ROAD terrain discounts movement-related and sneaking-related actiondelays (only if you start on a ROAD) by a factor of 0.5 for robots on the terrain (`GameConstants.ROAD_ACTION_DELAY_FACTOR`).
 
 ### Map Files
 
@@ -511,6 +511,8 @@ Changelog
     * The road action delay bonus is now 0.5.
     * PASTRs no longer get exactly x milk from x cows when x is too large, due to inefficiencies in milking large numbers of cows. See changes in the Milk section. In addition, overlapping PASTRs no longer share milk: the PASTR with the smallest ID wins it all.
 * **1.2.1** (1/15/2014) - Fix backwards compatibility.
+* **1.2.2** (1/?/2014) - 
+    * Specs clarifications (roads).
 
 Appendices
 ------------
