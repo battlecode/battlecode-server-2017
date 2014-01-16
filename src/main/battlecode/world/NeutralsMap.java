@@ -34,6 +34,7 @@ public class NeutralsMap {
     private double[][] dX, dY;
     private boolean[][] hasNoise;
     private int[][] pastrID;
+    private int[][] nPastrs;
     private ArrayList<MapLocation> attacks;
     private Set[][] ids;
 
@@ -73,6 +74,7 @@ public class NeutralsMap {
         dY = new double[this.mapWidth][this.mapHeight];
         hasNoise = new boolean[this.mapWidth][this.mapHeight];
         pastrID = new int[this.mapWidth][this.mapHeight];
+        nPastrs = new int[this.mapWidth][this.mapHeight];
         passable = new boolean[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
             for (int j = 0; j < this.mapHeight; j++) {
@@ -105,10 +107,10 @@ public class NeutralsMap {
         this.dY = new double[this.mapWidth][this.mapHeight];
         this.hasNoise = new boolean[this.mapWidth][this.mapHeight];
         this.pastrID = new int[this.mapWidth][this.mapHeight];
+        this.nPastrs = new int[this.mapWidth][this.mapHeight];
         this.passable = new boolean[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
             System.arraycopy(nm.passable[i], 0, this.passable[i], 0, this.mapHeight);
-            System.arraycopy(nm.pastrID[i], 0, this.pastrID[i], 0, this.mapHeight);
         }
     }
 
