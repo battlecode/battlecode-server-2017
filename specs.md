@@ -164,7 +164,7 @@ In addition, attacking a square (except for Noise Tower attacks) destroys all co
 The cow field is processed only at the end of the turn. First, all cows that were attacked are destroyed. Next, cows move based on all the noise they heard that turn. Finally, cows decay and then grow, in that order.
 
 ### Milk
-Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). SOLDIER robots only give 5% of the milk that a PASTR would generate (`GameConstants.ROBOT_MILK_PERCENTAGE`). Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk (`GameConstants.MILK_GAIN_FACTOR`). The amount of milk gained from a PASTR is exactly equal to the quantity of cows herded by that PASTR when the total number of cows is less than 8000 (`GameConstants.MAX_EFFICIENT_COWS`), and equal to (8000 + (x^0.95)) otherwise (`GameConstants.MAX_EFFICIENT_COWS` and `GameConstants.MILKING_INEFFICIENCY`).
+Milk comes from cows. They are automatically milked by either being within the containment field of a PASTR, or by being on the same square as a robot (which milks them in its spare time). SOLDIER robots only give 5% of the milk that a PASTR would generate (`GameConstants.ROBOT_MILK_PERCENTAGE`). Destroying an enemy PASTR gives 1/10 of `GameConstants.WIN_QTY` milk (`GameConstants.MILK_GAIN_FACTOR`). The amount of milk gained from a PASTR is exactly equal to the quantity of cows herded by that PASTR when the total number of cows is less than 8000 (`GameConstants.MAX_EFFICIENT_COWS`), and equal to (8000 + ((x-8000)^0.95)) otherwise (`GameConstants.MAX_EFFICIENT_COWS` and `GameConstants.MILKING_INEFFICIENCY`), where x is the number of cows contained in the PASTR.
 
 When more than one PASTR controls a square, the PASTR with the smallest ID takes all the cows. In addition, if a robot SOLDIER is located on a square within PASTR range, then the SOLDIER will not get any milk.
 
@@ -509,7 +509,7 @@ Changelog
     * Noise Tower changes: attack range goes down from 400 to 300, and attack action delay goes from 1 to 2.
     * Self destruct base damage moves from 30 to 40.
     * The road action delay bonus is now 0.5.
-    * PASTR no longer get exactly x milk from x cows when x is too large, due to inefficiencies in milking large numbers of cows. See changes in the Milk section. In addition, overlapping PASTRs no longer share milk: the PASTR with the smallest ID wins it all.
+    * PASTRs no longer get exactly x milk from x cows when x is too large, due to inefficiencies in milking large numbers of cows. See changes in the Milk section. In addition, overlapping PASTRs no longer share milk: the PASTR with the smallest ID wins it all.
 
 Appendices
 ------------
