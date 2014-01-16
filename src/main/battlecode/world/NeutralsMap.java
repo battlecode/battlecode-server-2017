@@ -189,9 +189,6 @@ public class NeutralsMap {
             }
             if (ir.type != RobotType.PASTR && ir.type != RobotType.SOLDIER) continue;
             if (ir.type == RobotType.SOLDIER && pastrID[ir.getLocation().x][ir.getLocation().y] < Integer.MAX_VALUE) continue; // soldiers do not milk when in pastr range
-            if (pastrID[ir.getLocation().x][ir.getLocation().y] == 0) {
-                System.out.println("AHHHHHHHHH BAD");
-            }
 
             int captureRange = 0;
             double capturePercentage = GameConstants.ROBOT_MILK_PERCENTAGE;
