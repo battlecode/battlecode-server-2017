@@ -99,7 +99,7 @@ public interface GameConstants {
     public static final int FREE_BYTECODES = 1000;
 	
 	/** Actiondelay per extra bytecode */
-    public static final double BYTECODE_PENALTY = 0.00005;
+    public static final double BYTECODE_PENALTY = 0.00002;
 
 	/** Actiondelay gained every time a SOLDIER attacks. Consistent with RobotType.SOLDIER.attackDelay */
     public static final double SOLDIER_ATTACK_ACTION_DELAY = 2.0;
