@@ -324,9 +324,10 @@ public interface RobotController {
      * The new robot is created and starts executing bytecodes immediately
      *
      * @param dir the direction to spawn robot in
-     * @throws IllegalStateException if this robot is not the HQ
+     * @throws GameActionException   if this robot is not the HQ (CANT_DO_THAT_BRO)
      * @throws GameActionException   if this robot is currently inactive (NOT_ACTIVE)
      * @throws GameActionException   if location is already occupied (CANT_MOVE_THERE)
+     * @throws GameActionException   if the maximum robot count has already been reached (CANT_DO_THAT_BRO)
      */
     public void spawn(Direction dir) throws GameActionException;
    
