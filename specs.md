@@ -511,7 +511,7 @@ Changelog
     * The road action delay bonus is now 0.5.
     * PASTRs no longer get exactly x milk from x cows when x is too large, due to inefficiencies in milking large numbers of cows. See changes in the Milk section. In addition, overlapping PASTRs no longer share milk: the PASTR with the smallest ID wins it all.
 * **1.2.1** (1/15/2014) - Fix backwards compatibility.
-* **1.2.2** (1/19/2014) - Lower BYTECODE_PENALTY to 20% of its previous value.
+* **1.2.2** (1/19/2014) - Lower BYTECODE_PENALTY to 40% of its previous value.
     * Specs clarifications (roads).
 
 Appendices
