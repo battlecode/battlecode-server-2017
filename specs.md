@@ -89,7 +89,7 @@ Robot Actions
 Robots are equipped with a variety of high tech equipments and can perform the following actions during their turn.
 
 ### Action Delay and Bytecode
-Each robot has an `actiondelay` counter that decrements by 1 every turn. Movement and attacking cannot be performed unless `actiondelay` is less than 1, and they also give a certain amount of `actiondelay`.
+Each robot has an `actiondelay` counter that decrements by 1 at the beginning of every turn. Movement and attacking cannot be performed unless `actiondelay` is less than 1, and they also give a certain amount of `actiondelay`.
 
 Running code uses bytecodes. Each turn, a robot can spend up to 10000 bytecodes on computation (`GameConstants.BYTECODE_LIMIT`). If this limit is reached, the robot's turn is immediately ended and the computation is continued on the next turn. Using `yield()` and `selfDestruct()` can end a turn early, saving bytecodes and ending computation. The former is generally preferred.
 For cowboy robots and for noise towers, each bytecode above 1000 gives 0.00002 `actiondelay` (see `GameConstants.FREE_BYTECODES` and `GameConstants.BYTECODE_PENALTY`).
@@ -513,6 +513,7 @@ Changelog
 * **1.2.1** (1/15/2014) - Fix backwards compatibility.
 * **1.2.2** (1/19/2014) - Lower BYTECODE_PENALTY to 40% of its previous value.
     * Specs clarifications (roads).
+* **1.2.3** (1/20/2014) - The client is now much faster.
 
 Appendices
 ------------

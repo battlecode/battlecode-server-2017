@@ -260,6 +260,7 @@ public interface RobotController {
      * Tells whether this robot can move in the given direction. Takes into
      * account only the map terrain and positions of other robots. Does not take
      * into account this robot's type or whether this robot is currently active.
+     * Returns false for the OMNI and NONE directions.
      *
      * @return true if there are no robots or walls preventing this robot from
      *         moving in the given direction; false otherwise

@@ -32,6 +32,7 @@ import battlecode.engine.signal.SignalHandler;
 import battlecode.serial.DominationFactor;
 import battlecode.serial.GameStats;
 import battlecode.serial.RoundStats;
+import battlecode.world.signal.ActionDelaySignal;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.BytecodesUsedSignal;
@@ -552,6 +553,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         if (includeBytecodesUsedSignal)
             signals.add(new BytecodesUsedSignal(allRobots.toArray(new InternalRobot[]{})));
+
+        signals.add(new ActionDelaySignal(allRobots.toArray(new InternalRobot[]{})));
+
         return signals.toArray(new Signal[signals.size()]);
     }
     
