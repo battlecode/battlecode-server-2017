@@ -513,7 +513,7 @@ Changelog
 * **1.2.1** (1/15/2014) - Fix backwards compatibility.
 * **1.2.2** (1/19/2014) - Lower BYTECODE_PENALTY to 40% of its previous value.
     * Specs clarifications (roads).
-* **1.2.3** (1/20/2014) - The client is now much faster.
+* **1.2.3** (1/20/2014) - The client is now much faster, and now shows robot actiondelay values.
 
 Appendices
 ------------
