@@ -80,6 +80,9 @@ public class NeutralsMap {
             for (int j = 0; j < this.mapHeight; j++) {
                 passable[i][j] = mapTiles[i][j] != TerrainTile.VOID;
                 pastrID[i][j] = Integer.MAX_VALUE;
+                if (!passable[i][j]) {
+                    this.growthFactor[i][j] = 0;
+                }
             }
         }
         ids = new Set[this.mapWidth][this.mapHeight];
