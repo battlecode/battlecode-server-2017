@@ -572,9 +572,9 @@ class XMLMapHandler extends DefaultHandler {
 
         System.out.println("Creating a game%%%%%%%%%");
 
-        //if (!isTournamentLegal()) {
-            //fail("Map is not legal!", "Fix it.");
-        //}
+        if (!isTournamentLegal()) {
+            fail("Map is not legal!", "Fix it.");
+        }
 
         TerrainTile[][] mapTiles = new TerrainTile[map.length][];
         for (int i = 0; i < map.length; i++) {
