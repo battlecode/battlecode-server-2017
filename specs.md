@@ -517,6 +517,7 @@ Changelog
 * **1.3.0** (1/25/2014) -
     * Cow growth on a VOID square is sensed as 0, regardless of the map's value there.
     * All robots can now wear hats, not only just soldiers.
+    * Client updates, such as continuous motion (use "d" to toggle).
 
 Appendices
 ------------
