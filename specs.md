@@ -31,13 +31,13 @@ Robot Overview
 
 Robots are the central part of the Battlecode world. There are two types of basic robots. Note that we use the terms 'robot' and 'unit' interchangeably. All ranges below are specified as square distances (that is, the square of the Euclidean distance between two points). All these values can be seen in `RobotType.java` under the values `count`, `sensorRadiusSquared`, `attackRadiusMaxSquared`, and `maxHealth`. For example, the SOLDIER max health value is `RobotType.SOLDIER.maxHealth`. Construction turns is under the variable `captureTurns`.
 
-Hitpoints regenerate slowly over time (.25 per turn when it hasn't been damaged in the last 30 turns, based on `GameConstants.HEAL_TURN_DELAY` and `GameConstants.HEAL_RATE`). The HQ does not regenerate.
+Hitpoints regenerate slowly over time (.5 per turn when it hasn't been damaged in the last 30 turns, based on `GameConstants.HEAL_TURN_DELAY` and `GameConstants.HEAL_RATE`). The HQ does not regenerate.
 
 ### HQ
 The HQ is your main base, and by far the most important unit you have. Each team starts the game off with one HQ. The HQ is invincible, and can't be destroyed. Your company HQ produces the robot COWBOYs that can herd cows.
 - Robot count: 0
 - Sight range: 35
-- Attack range: 15
+- Attack range: 24
 - Health: Tons
 
 ### COWBOY
@@ -94,7 +94,7 @@ Each robot has an `actiondelay` counter that decrements by 1 at the beginning of
 Running code uses bytecodes. Each turn, a robot can spend up to 10000 bytecodes on computation (`GameConstants.BYTECODE_LIMIT`). If this limit is reached, the robot's turn is immediately ended and the computation is continued on the next turn. Using `yield()` and `selfDestruct()` can end a turn early, saving bytecodes and ending computation. The former is generally preferred.
 For cowboy robots and for noise towers, each bytecode above 1000 gives 0.00002 `actiondelay` (see `GameConstants.FREE_BYTECODES` and `GameConstants.BYTECODE_PENALTY`).
 
-Example: if a SOLDIER (cowboy) currently has 0 `actiondelay`, then it can attack. After attacking, the SOLDIER will have 2 `actiondelay`. At the end of the turn, this counter decrements to 1. At the end of the next turn, this counter decrements to 0. That means that two turns after the initial attack, the SOLDIER can attack again. In the case of fractional `actiondelay`, a robot is only unable to move or attack if its `actiondelay` is greater than or equal to 1.
+Example: if a SOLDIER (cowboy) currently has 0 `actiondelay`, then it can attack. After attacking, the SOLDIER will have 2 `actiondelay`. At the beginning of the next turn, this counter decrements to 1. At the beginning of the next turn after, this counter decrements to 0. That means that two turns after the initial attack, the SOLDIER can attack again. In the case of fractional `actiondelay`, a robot is only unable to move or attack if its `actiondelay` is greater than or equal to 1.
 
 
 ### Sensors
@@ -122,7 +122,7 @@ Cowboy robots can attack any tile within attack range (square range of 10). Atta
 
 An attack destroys all cows at the targeted location. In addition, it makes noise that scares cows at long range at the targeted location.
 
-Your HQ shoots depleted uranium girders out of a railgun, dealing overkill area damage to the target (50 and 25 splash in a square range of 2, based on `RobotType.HQ.attackPower` and `RobotType.HQ.splashPower`). HQ has square range of 15. Watch out for friendly fire.
+Your HQ shoots depleted uranium girders out of a railgun, dealing overkill area damage to the target (50, based on `RobotType.HQ.attackPower`). HQ has square range of 24. Watch out for friendly fire.
 
 Noise Towers can also 'attack' in their attack range. Their attacks create noise (can choose to create noise in square range of 9 or square range of 36) but deal no damage. Noise Towers attacks give an `actiondelay` of 2 (`RobotType.NOISETOWER.attackDelay`).
 
@@ -139,7 +139,7 @@ The HQ can spawn soldiers, subject to a production delay (20 turns plus total nu
 Cowboy robots can construct structures on the square they are currently on. The robot will become unable to take any action for a certain number of turns (50 for PASTRs, 100 for Noise Towers) and then will be removed and replaced with the constructed structure.
 
 ### Suicide
-Calling `selfDestruct()` immediately removes the calling robot from the game and deals area damage (40+half of remaining hp to square range of 2, based on `GameConstants.SELF_DESTRUCT_BASE_DAMAGE` and `GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR`). This scares cows in square range 36 and destroys all cows on affected squares (square range 2). This replaces the `suicide()` method. Structures cannot self destruct.
+Calling `selfDestruct()` immediately removes the calling robot from the game and deals area damage (41+half of remaining hp to square range of 2, based on `GameConstants.SELF_DESTRUCT_BASE_DAMAGE` and `GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR`). This scares cows in square range 36 and destroys all cows on affected squares (square range 2). This replaces the `suicide()` method. PASTRs cannot self destruct. NOISETOWERS can self destruct, but it will not do any damage or scare any cows.
 
 ### Team Memory
 Official matches will usually be sets of multiple games. Each team can save a small amount of information (`GameConstants.TEAM_MEMORY_LENGTH` longs) for the next game using the function `setTeamMemory()`. This information may be retrieved using `getTeamMemory()`. If there was no previous game in the match, or no information was saved, then the memory will be filled with zeros.
@@ -156,10 +156,10 @@ Calling `yield()` and `selfDestruct()` instantly end the turn of a robot, potent
 ### Cows
 Cows are a scalar field. Each location on the map has a certain natural cow growth. During each turn, each location gains a number of cows equal to the natural cow growth, and then 0.5% of the cows (`GameConstants.NEUTRALS_TURN_DECAY`) on that location die a natural death.
 
-Cows can be influenced by noise and attacks. After each turn, cows will run away from the averaged location of all the noises they heard that turn. Short-range noises (running, Noise Tower light attacks) scare cows in range^2 9 (`GameConstants.MOVEMENT_SCARE_RANGE` and `GameConstants.NOISE_SCARE_RANGE_SMALL`), and long-range noises (shooting, Noise Tower normal attacks, and self destructs) scare cows in range^2 36 (`GameConstants.ATTACK_SCARE_RANGE` and `GameConstants.NOISE_SCARE_RANGE_LARGE`). If the direction away from this averaged location points between two locations, the cows will split evenly between those locations. If the cows cannot move away from the average noise source, they will not move at all. If the average noise source is the current square of the cows, then the cows will scatter, dividing themselves equally amongst valid neighboring locations (including diagonals).
+Cows can be influenced by noise and attacks. After each turn, cows will run away from the averaged location of all the noises they heard that turn. Short-range noises (running, Noise Tower light attacks) scare cows in range^2 9 (`GameConstants.MOVEMENT_SCARE_RANGE` and `GameConstants.NOISE_SCARE_RANGE_SMALL`), and long-range noises (shooting, Noise Tower normal attacks, and soldier self destructs) scare cows in range^2 36 (`GameConstants.ATTACK_SCARE_RANGE` and `GameConstants.NOISE_SCARE_RANGE_LARGE`). If the direction away from this averaged location points between two locations, the cows will split evenly between those locations. If the cows cannot move away from the average noise source, they will not move at all. If the average noise source is the current square of the cows, then the cows will scatter, dividing themselves equally amongst valid neighboring locations (including diagonals).
 
 Cows in a PASTR containment field cannot leave the field, and cows on the same square as a robot will not leave that square due to noise until the robot moves. If a cow is in two PASTR containments, then it will stay within both PASTR containments.
-In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square and self destructs will destroy all cows within range. All weapons used are certified humane.
+In addition, attacking a square (except for Noise Tower attacks) destroys all cows on that square and soldier self destructs will destroy all cows within range. All weapons used are certified humane.
 
 The cow field is processed only at the end of the turn. First, all cows that were attacked are destroyed. Next, cows move based on all the noise they heard that turn. Finally, cows decay and then grow, in that order.
 
@@ -514,10 +514,14 @@ Changelog
 * **1.2.2** (1/19/2014) - Lower BYTECODE_PENALTY to 40% of its previous value.
     * Specs clarifications (roads).
 * **1.2.3** (1/21/2014) - The client is now much faster.
-* **1.3.0** (1/25/2014) -
+* **1.3.0** (1/25/2014) - Minor gameplay and client changes.
     * Cow growth on a VOID square is sensed as 0, regardless of the map's value there.
-    * All robots can now wear hats, not only just soldiers.
+    * All robots can now wear hats, not only just soldiers. HQ's first hat does not cost milk.
     * Client updates, such as continuous motion (use "d" to toggle).
+    * Self destruct has been buffed.
+    * HQ no longer does splash damage, but its attack range is increased.
+    * Regeneration rate is now doubled.
+    * Noisetowers can self destruct for no damage and no noise.
 
 Appendices
 ------------

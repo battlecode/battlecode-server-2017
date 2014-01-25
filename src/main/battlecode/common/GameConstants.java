@@ -72,13 +72,13 @@ public interface GameConstants {
     public static final int SOLDIER_HEAL_TURN_DELAY = 30;
 	
 	/** DEPRECATED. Amount of health a regenerating soldier heals per turn. Will be equal to HEAL_RATE.  */
-    public static final double SOLDIER_HEAL_RATE = 0.25;
+    public static final double SOLDIER_HEAL_RATE = 0.50;
 
 	/** Number of turns after taking damage before a robot or structure begins regenerating*/
     public static final int HEAL_TURN_DELAY = 30;
 	
 	/** Amount of health a regenerating robot or structure heals per turn */
-    public static final double HEAL_RATE = 0.25;
+    public static final double HEAL_RATE = 0.50;
 
 	/** Range in which a PASTR contains and milks cows */
     public static final int PASTR_RANGE = 5;
@@ -90,7 +90,7 @@ public interface GameConstants {
     public static final double ROBOT_MILK_PERCENTAGE = 0.05;
 	
 	/** Flat damage dealt by a self destruct */
-    public static final double SELF_DESTRUCT_BASE_DAMAGE = 40.0; // a
+    public static final double SELF_DESTRUCT_BASE_DAMAGE = 41.0; // a
 	
 	/** Factor at which robot's health is converted to damage */
     public static final double SELF_DESTRUCT_DAMAGE_FACTOR = 0.5; // b -> a + health / b = damage

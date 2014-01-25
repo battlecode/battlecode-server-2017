@@ -364,12 +364,14 @@ public interface RobotController {
      */
     public void resign();
 
+    public void win();
+
     // ***********************************
     // ******** MISC. METHODS *********
     // ***********************************
     
     /**
-     * Puts a hat on the robot. You require the BATTLECODE-HATS DLC. You also cannot be moving while putting on your hat. This costs milk (GameConstants.HAT_MILK_COST).
+     * Puts a hat on the robot. You require the BATTLECODE-HATS DLC. You also cannot be moving while putting on your hat. This costs milk (GameConstants.HAT_MILK_COST). The HQ's first hat is free.
      * @throws GameActionException if you have action delay or if you do not have enough milk
      */
     public void wearHat() throws GameActionException;

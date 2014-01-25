@@ -294,11 +294,20 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         gameWorld.removeDead();
     }
 
+    public void win() {
+        for (InternalObject obj : gameWorld.getAllGameObjects())
+            if ((obj instanceof InternalRobot) && obj.getTeam() == robot.getTeam())
+                gameWorld.notifyDied((InternalRobot) obj);
+        gameWorld.removeDead();
+    }
+
     public void selfDestruct() throws GameActionException {
-        if (robot.type != RobotType.SOLDIER) {
-            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT_BRO, "only soldiers can self destruct");
+        if (robot.type != RobotType.SOLDIER && robot.type != RobotType.NOISETOWER) {
+            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT_BRO, "only soldiers and noise towers can self destruct");
         }
-        robot.setSelfDestruct();
+        if (robot.type == RobotType.SOLDIER) {
+            robot.setSelfDestruct();
+        }
         throw new RobotDeathException();
     }
 
@@ -829,9 +838,12 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //************************************
     
     public void wearHat() throws GameActionException {
-    	assertHaveResource(GameConstants.HAT_MILK_COST);
     	assertNotMoving();
-    	gameWorld.adjustResources(getTeam(), -GameConstants.HAT_MILK_COST);
+        if (!(robot.getHatCount() == 0 && robot.type == RobotType.HQ)) {
+            assertHaveResource(GameConstants.HAT_MILK_COST);
+            gameWorld.adjustResources(getTeam(), -GameConstants.HAT_MILK_COST);
+        }
+        robot.incrementHatCount();
     	robot.activateMovement(new HatSignal(robot, gameWorld.randGen.nextInt()), 1);
     }
    

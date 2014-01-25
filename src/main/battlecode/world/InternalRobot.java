@@ -75,6 +75,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     private double actionDelay;
 
+    private int hatCount = 0;
+
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
                          boolean spawnedRobot) {
@@ -132,6 +134,14 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 //    	}
 //    	addAction(new ScanSignal(this));
 //    }
+
+    public void incrementHatCount() {
+        hatCount++;
+    }
+
+    public int getHatCount() {
+        return hatCount;
+    }
 
     public void addAction(Signal s) {
         myGameWorld.visitSignal(s);
