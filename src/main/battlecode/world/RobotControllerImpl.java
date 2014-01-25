@@ -829,8 +829,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //************************************
     
     public void wearHat() throws GameActionException {
-    	if (getType() != RobotType.SOLDIER)
-    		throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERS can wear hats.");
     	assertHaveResource(GameConstants.HAT_MILK_COST);
     	assertNotMoving();
     	gameWorld.adjustResources(getTeam(), -GameConstants.HAT_MILK_COST);

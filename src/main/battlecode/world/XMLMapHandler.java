@@ -30,6 +30,7 @@ class XMLMapHandler extends DefaultHandler {
      * Stores all the map properties.
      */
     private int mapWidth, mapHeight;
+    private String mapName = "";
     private SymbolData[][] map = null;
     private Map<Character, SymbolData> symbolMap = new HashMap<Character, SymbolData>();
 
@@ -316,6 +317,10 @@ class XMLMapHandler extends DefaultHandler {
     private int currentRow = 0;
     private int currentCol = 0;
 
+    public void setMapName(String mn) {
+        this.mapName = mn;
+    }
+
     /**
      * This method validates a given attribute, returning its value
      * if it is present and failing if it does not.
@@ -592,7 +597,7 @@ class XMLMapHandler extends DefaultHandler {
         }
         NeutralsMap nm = new NeutralsMap(floatData, mapTiles);
 
-        GameMap gm = new GameMap(mapProperties, mapTiles, nm);
+        GameMap gm = new GameMap(mapProperties, mapTiles, nm, mapName);
         //gm.setTheme(theme);
         GameWorld gw = new GameWorld(gm, teamA, teamB, archonMemory);
 
@@ -815,6 +820,7 @@ class XMLMapHandler extends DefaultHandler {
     public static XMLMapHandler loadMap(String mapName, String mapPath) {
         // Create a new XMLMapHandler.
         XMLMapHandler handler = new XMLMapHandler();
+        handler.setMapName(mapName);
 
         // Create a new SAX parser.
         SAXParser parser;

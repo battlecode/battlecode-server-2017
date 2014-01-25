@@ -128,7 +128,7 @@ public interface RobotController {
     
     
     /**
-     * Senses all game objects of a given type within a given search area specified by the parameters
+     * Senses all game objects of a given type within a given search area specified by the parameters (constrainted by sensor range and distance)
      * @param type - type of game object to sense, eg: Robot.class
      * @param center - center of the given search radius
      * @param radiusSquared - return objects this distance away from the center
@@ -213,12 +213,12 @@ public interface RobotController {
 	/**
 	 * Gives a representation of the cow growths of each location of the map (unconstrained by sensor range or distance)
 	 *
-     * @return an array of arrays of doubles, where element [a][b] is the natural cow growth at MapLocation (a,b)
+     * @return an array of arrays of doubles, where element [a][b] is the natural cow growth at MapLocation (a,b). Will be 0 on all VOID locations.
      */
     public double[][] senseCowGrowth();
 
 	/**
-     * Returns the number of cows currently at a given location
+     * Returns the number of cows currently at a given location. Returns 0 for locations off the map.
 	 *
 	 * @param loc - location to sense at (must be within sensor range)
 	 * @return a double equal to how many cows are currently at the location
@@ -282,6 +282,7 @@ public interface RobotController {
      * Attacks the given location
 	 * Also applies to NOISETOWER, but does not deal damage in that case
 	 * Creates a long-range noise at the targeted location
+     * @throws GameActionException if the robot cannot attack the given square
      */
     public void attackSquare(MapLocation loc) throws GameActionException;
 
@@ -289,6 +290,7 @@ public interface RobotController {
      * NOISETOWER only
      * 'Attacks' the given location
      * Does not deal damage, but creates a short-range noise at the targeted location
+     * @throws GameActionException if the robot cannot attack the given square
      */
     public void attackSquareLight(MapLocation loc) throws GameActionException;
 
@@ -301,7 +303,7 @@ public interface RobotController {
      * The data is not written until the end of the robot's turn.
      * @param channel - the channel to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
      * @param data - one int's worth of data to write
-     * @throws GameActionException
+     * @throws GameActionException if the channel is invalid
      */
     public void broadcast(int channel, int data) throws GameActionException;
 
@@ -309,7 +311,7 @@ public interface RobotController {
      * Retrieves the message stored at the given radio channel.
      * @param channel - radio channel to query, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
      * @return data currently stored on the channel
-     * @throws GameActionException 
+     * @throws GameActionException  if the channel is invalid
      */
     public int readBroadcast(int channel) throws GameActionException;
 
@@ -335,7 +337,7 @@ public interface RobotController {
     /**
      * After a delay, kills the soldier and spawns a robot of the given building type
      * @param type
-     * @throws GameActionException
+     * @throws GameActionException if it's not a soldier constructing or if the soldier is not constructing a structure
      */
     public void construct(RobotType type) throws GameActionException;
     
@@ -353,6 +355,7 @@ public interface RobotController {
 	/**
      * Kills your robot and deals area damage within distanceSquared 2 equal to <code>GameConstants.SELF_DESTRUCT_BASE_DAMAGE</code> plus the robot's current hp multiplied by <code>GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR</code>.
 	 * Destroys all cows in all effected squares and creates a long-range noise at the robot's former location
+     * @throws GameActionException if it's not a soldier
      */
     public void selfDestruct() throws GameActionException;
 
@@ -367,6 +370,7 @@ public interface RobotController {
     
     /**
      * Puts a hat on the robot. You require the BATTLECODE-HATS DLC. You also cannot be moving while putting on your hat. This costs milk (GameConstants.HAT_MILK_COST).
+     * @throws GameActionException if you have action delay or if you do not have enough milk
      */
     public void wearHat() throws GameActionException;
 

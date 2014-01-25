@@ -58,6 +58,11 @@ public class GameMap implements GenericGameMap {
      */
     private final int maxRounds;
 
+    /**
+     * The name of the map
+     */
+    private final String mapName;
+
     /** The minimum number of points needed to win the game */
     //private final int minPoints;
 
@@ -83,6 +88,7 @@ public class GameMap implements GenericGameMap {
         this.mapTheme = gm.mapTheme;
         this.seed = gm.seed;
         this.maxRounds = gm.maxRounds;
+        this.mapName = gm.mapName;
         //this.minPoints = gm.minPoints;
     }
 
@@ -94,8 +100,7 @@ public class GameMap implements GenericGameMap {
      * @param mapTiles           a matrix of TerrainTypes representing the map
      * @param neutralsMap        a NeutralsMap to copy
      */
-    GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, NeutralsMap neutralsMap) {
-
+    GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, NeutralsMap neutralsMap, String mapName) {
         if (mapProperties.containsKey(MapProperties.WIDTH))
             this.mapWidth = mapProperties.get(MapProperties.WIDTH);
         else
@@ -132,6 +137,8 @@ public class GameMap implements GenericGameMap {
         this.mapTiles = mapTiles;
 
         this.neutralsMap = neutralsMap;
+
+        this.mapName = mapName;
     }
 
     public void setTheme(String theme) {
@@ -164,6 +171,10 @@ public class GameMap implements GenericGameMap {
      */
     public String getThemeName() {
         return mapTheme;
+    }
+
+    public String getMapName() {
+        return mapName;
     }
 
     //public int getMinPoints() {

@@ -514,6 +514,9 @@ Changelog
 * **1.2.2** (1/19/2014) - Lower BYTECODE_PENALTY to 40% of its previous value.
     * Specs clarifications (roads).
 * **1.2.3** (1/21/2014) - The client is now much faster.
+* **1.3.0** (1/25/2014) -
+    * Cow growth on a VOID square is sensed as 0, regardless of the map's value there.
+    * All robots can now wear hats, not only just soldiers.
 
 Appendices
 ------------
