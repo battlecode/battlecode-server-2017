@@ -673,6 +673,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             }
 
         gameMap.getNeutralsMap().updateWithNoiseSource(targetLoc, GameConstants.ATTACK_SCARE_RANGE);
+
+        addSignal(s);
     }
 
     public void visitAttackSignal(AttackSignal s) {
