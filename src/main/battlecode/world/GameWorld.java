@@ -552,8 +552,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         signals.add(new ShieldChangeSignal(shieldChangedRobots.toArray(new InternalRobot[]{})));
 
         if (includeBytecodesUsedSignal) {
-            	signals.add(new BytecodesUsedSignal(allRobots.toArray(new InternalRobot[]{})));
-		signals.add(new ActionDelaySignal(allRobots.toArray(new InternalRobot[]{})));
+        	signals.add(new BytecodesUsedSignal(allRobots.toArray(new InternalRobot[]{})));
+        	signals.add(new ActionDelaySignal(allRobots.toArray(new InternalRobot[]{})));
         }
 
         return signals.toArray(new Signal[signals.size()]);
