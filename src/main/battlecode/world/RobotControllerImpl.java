@@ -373,13 +373,23 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public boolean checkCanSense(InternalObject obj) {
-        return obj.exists() && (obj.getTeam() == getTeam() || checkCanSense(obj.getLocation()));
+        boolean res = obj.exists() && (obj.getTeam() == getTeam() || checkCanSense(obj.getLocation()));
+        InternalRobot ir = castInternalObject(obj, InternalRobot.class);
+        if (res && ir.type == RobotType.SOLDIER && obj.getTeam() != getTeam() && obj.getLocation().distanceSquaredTo(senseEnemyHQLocation()) <= GameConstants.HQ_CLOAK_RADIUS) {
+            res = false;
+        }
+        return res;
     }
 
     public GameObject senseObjectAtLocation(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
         assertCanSense(loc);
-        return gameWorld.getObject(loc, RobotLevel.ON_GROUND);
+        InternalObject obj = gameWorld.getObject(loc, RobotLevel.ON_GROUND);
+        if (checkCanSense(obj)) {
+            return (GameObject) obj;
+        } else {
+            return null;
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -37,7 +37,7 @@ Hitpoints regenerate slowly over time (.5 per turn when it hasn't been damaged i
 The HQ is your main base, and by far the most important unit you have. Each team starts the game off with one HQ. The HQ is invincible, and can't be destroyed. Your company HQ produces the robot COWBOYs that can herd cows.
 - Robot count: 0
 - Sight range: 35
-- Attack range: 24
+- Attack range: 15
 - Health: Tons
 
 ### COWBOY
@@ -109,6 +109,8 @@ Info on robots in sight range can be sensed. Vision is not shared between robots
 
 Sensing info on a robot includes the robot's location, actiondelay, whether it is currently constructing anything, its type, its health, and more. See `RobotInfo` Java documentation for more details.
 
+There is one exception to this rule. Any SOLDIER on a MapLocation adjacent to their own HQ is under a magic cloak and cannot be sensed by the enemy, as if they were out of sight range. More formally, this includes any SOLDIER within a square radius of `GameConstants.HQ_CLOAK_RADIUS` of their own HQ cannot be sensed by the enemy team.
+
 ### Broadcasting
 Radio Sensors: When a robot broadcasts to radio, all robots are made aware of the location of the broadcasting robot for for one turn. They can access the positions with a method call like `rc.senseBroadcastingRobots(Team t)` or `rc.senseBroadcastingRobotLocations(Team t)`.
 
@@ -122,7 +124,7 @@ Cowboy robots can attack any tile within attack range (square range of 10). Atta
 
 An attack destroys all cows at the targeted location. In addition, it makes noise that scares cows at long range at the targeted location.
 
-Your HQ shoots depleted uranium girders out of a railgun, dealing overkill area damage to the target (50, based on `RobotType.HQ.attackPower`). HQ has square range of 24. Watch out for friendly fire.
+Your HQ shoots depleted uranium girders out of a railgun, dealing overkill area damage to the target (50 and 25 splash in a square range of 2, based on `RobotType.HQ.attackPower` and `RobotType.HQ.splashPower`). HQ has square range of 15. Watch out for friendly fire.
 
 Noise Towers can also 'attack' in their attack range. Their attacks create noise (can choose to create noise in square range of 9 or square range of 36) but deal no damage. Noise Towers attacks give an `actiondelay` of 2 (`RobotType.NOISETOWER.attackDelay`).
 
@@ -519,7 +521,7 @@ Changelog
     * All robots can now wear hats, not only just soldiers. HQ's first hat does not cost milk.
     * Client updates, such as continuous motion (use "d" to toggle) and showing action delay.
     * Self destruct has been buffed (40->41 base damage).
-    * HQ no longer does splash damage, but its attack range is increased (15->24).
+    * Soldiers next to their own HQ cannot be sensed by the enemy. See the Sensing section for more details.
     * Regeneration rate is now doubled (0.25->0.5 per turn).
     * Noisetowers can self destruct for no damage and no noise.
 

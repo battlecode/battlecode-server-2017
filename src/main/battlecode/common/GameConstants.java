@@ -130,4 +130,7 @@ public interface GameConstants {
 
     /** For a quantity of cows above the maximum efficient cows number X in a PASTR, we only get X^(this constant) milk. */
     public static final double MILKING_INEFFICIENCY = 0.95;
+
+    /** The radius (squared) around the HQ within which allied soldiers cannot be sensed by the enemy. */
+    public static final int HQ_CLOAK_RADIUS = 2;
 }
