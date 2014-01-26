@@ -374,9 +374,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     
     public boolean checkCanSense(InternalObject obj) {
         boolean res = obj.exists() && (obj.getTeam() == getTeam() || checkCanSense(obj.getLocation()));
-        InternalRobot ir = castInternalObject(obj, InternalRobot.class);
-        if (res && ir.type == RobotType.SOLDIER && obj.getTeam() != getTeam() && obj.getLocation().distanceSquaredTo(senseEnemyHQLocation()) <= GameConstants.HQ_CLOAK_RADIUS) {
-            res = false;
+        if (res) {
+            InternalRobot ir = castInternalObject(obj, InternalRobot.class);
+            if (res && ir.type == RobotType.SOLDIER && obj.getTeam() != getTeam() && obj.getLocation().distanceSquaredTo(senseEnemyHQLocation()) <= GameConstants.HQ_CLOAK_RADIUS) {
+                res = false;
+            }
         }
         return res;
     }
@@ -385,7 +387,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotNull(loc);
         assertCanSense(loc);
         InternalObject obj = gameWorld.getObject(loc, RobotLevel.ON_GROUND);
-        if (checkCanSense(obj)) {
+        if (obj != null && checkCanSense(obj)) {
             return (GameObject) obj;
         } else {
             return null;

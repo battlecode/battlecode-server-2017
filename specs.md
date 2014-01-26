@@ -524,6 +524,7 @@ Changelog
     * Soldiers next to their own HQ cannot be sensed by the enemy. See the Sensing section for more details.
     * Regeneration rate is now doubled (0.25->0.5 per turn).
     * Noisetowers can self destruct for no damage and no noise.
+* **1.3.1** (1/26/2014) - Small bug fix with sensing.
 
 Appendices
 ------------
