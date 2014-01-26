@@ -517,10 +517,10 @@ Changelog
 * **1.3.0** (1/25/2014) - Minor gameplay and client changes.
     * Cow growth on a VOID square is sensed as 0, regardless of the map's value there.
     * All robots can now wear hats, not only just soldiers. HQ's first hat does not cost milk.
-    * Client updates, such as continuous motion (use "d" to toggle).
-    * Self destruct has been buffed.
-    * HQ no longer does splash damage, but its attack range is increased.
-    * Regeneration rate is now doubled.
+    * Client updates, such as continuous motion (use "d" to toggle) and showing action delay.
+    * Self destruct has been buffed (40->41 base damage).
+    * HQ no longer does splash damage, but its attack range is increased (15->24).
+    * Regeneration rate is now doubled (0.25->0.5 per turn).
     * Noisetowers can self destruct for no damage and no noise.
 
 Appendices
