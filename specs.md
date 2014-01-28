@@ -526,7 +526,8 @@ Changelog
     * Regeneration rate is now doubled (0.25->0.5 per turn).
     * Noisetowers can self destruct for no damage and no noise.
 * **1.3.1** (1/26/2014) - Small bug fix with sensing.
-* **1.3.2** (1/27/2014) - Client bug fix with robot info strings. Specs clarifications on map connectedness and execution order.
+* **1.3.2** (1/28/2014) - Client bug fix with robot info strings. Specs clarifications on map connectedness and execution order.
+    * Decrease HAT_MILK_COST to 100000.
 
 Appendices
 ------------

@@ -51,7 +51,7 @@ public interface GameConstants {
 	public static final double HQ_SPAWN_DELAY_CONSTANT_2 = 1.5; // b -> a + N^b, where N is num robots
     
     /** Amount of milk required to wear a hat */
-    public static final double HAT_MILK_COST = 500000.0;
+    public static final double HAT_MILK_COST = 100000.0;
 
     /** Cow value decay per turn */
     public static final double NEUTRALS_TURN_DECAY = 0.995;
