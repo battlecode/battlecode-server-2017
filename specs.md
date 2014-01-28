@@ -116,7 +116,7 @@ Radio Sensors: When a robot broadcasts to radio, all robots are made aware of th
 
 Messages written to the team-shared integer list persist until overwritten. You can't read or write integers from or to the enemy team's shared integer list. 
 
-The cost of transmitting and receiving are in bytecodes, which, as mentioned earlier, affect movement and attack speeds.
+The cost of transmitting and receiving are in bytecodes, which, as mentioned earlier, affect movement and attack speeds. The message array is always initially all zeros.
 
 
 ### Attack
@@ -188,6 +188,7 @@ Official maps used in scrimmages and tournaments must all satisfy the following 
 - Maps are completely symmetric either by reflection or 180 degree rotation.
 - The width and height of the map are guaranteed to be between 20 and 100, inclusive.
 - The distance between the spawn points will be at least 10 units (Euclidean distance). 
+- The two headquarters are on connected locations.
 
 
 Writing a Player
@@ -288,7 +289,7 @@ The game is comprised of a number of rounds. During each round, all robots get a
 
 The following is a detailed list of a robot's execution order within a single turn. If it dies halfway through, the remainder of the list does not get executed. In particular, note that changes to a robot's state do not happen while player code is being executed. All actions instead get sent to an action queue, and they are executed after the player code is run. For example, if a SOLDIER calls move() and then getLocation(), it will not reflect the location of the robot yet.
 
-1. Robot executes up to `GameConstants.BYTECODE_LIMIT` of player code.
+1. Robot executes up to `GameConstants.BYTECODE_LIMIT` of player code. Self destructs happen here.
 2. Channels are updated with new broadcasts
 3. Actions are performed
 
@@ -525,6 +526,7 @@ Changelog
     * Regeneration rate is now doubled (0.25->0.5 per turn).
     * Noisetowers can self destruct for no damage and no noise.
 * **1.3.1** (1/26/2014) - Small bug fix with sensing.
+* **1.3.2** (1/27/2014) - Client bug fix with robot info strings. Specs clarifications on map connectedness and execution order.
 
 Appendices
 ------------
