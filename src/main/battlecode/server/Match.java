@@ -248,7 +248,7 @@ public class Match extends Observable {
         for (int i = 0; i < (50 - teamName.length()) / 2; i++)
             sb.append(' ');
         sb.append(teamName);
-        sb.append(" wins");
+        sb.append(" wins (round " + getRoundNumber() + ")");
 
         sb.append("\nReason: ");
         GameStats stats = gameWorldViewer.getGameStats();
