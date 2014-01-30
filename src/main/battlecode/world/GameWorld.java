@@ -216,11 +216,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 if (!(setWinnerIfNonzero(cowsDiff, DominationFactor.BARELY_BEAT) ||
                       setWinnerIfNonzero(killDiff, DominationFactor.BARELY_BEAT) ))
                 {
-                    // just tiebreak by ID
-                    if (HQA.getID() < HQB.getID())
-                        setWinner(Team.A, DominationFactor.WON_BY_DUBIOUS_REASONS);
-                    else
-                        setWinner(Team.B, DominationFactor.WON_BY_DUBIOUS_REASONS);
+                    // just tiebreak by letting team A win
+                    setWinner(Team.A, DominationFactor.WON_BY_DUBIOUS_REASONS);
                 }
             }
         }
