@@ -197,6 +197,13 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         // update neutrals
         gameMap.getNeutralsMap().next(gameObjects);
         
+        // MILK
+        teamResources[Team.A.ordinal()] += gameMap.getNeutralsMap().getScoreChange(Team.A, gameObjects);
+        teamResources[Team.B.ordinal()] += gameMap.getNeutralsMap().getScoreChange(Team.B, gameObjects);
+        if (teamResources[Team.A.ordinal()] >= GameConstants.WIN_QTY || teamResources[Team.B.ordinal()] >= GameConstants.WIN_QTY) {
+            setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.OWNED);
+        }
+        
         addSignal(new FluxChangeSignal(teamResources));
 		addSignal(new ResearchChangeSignal(research));
         addSignal(new NeutralsDensitySignal(gameMap.getNeutralsMap()));
@@ -236,13 +243,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         long aPoints = Math.round(teamRoundResources[Team.A.ordinal()] * 100), bPoints = Math.round(teamRoundResources[Team.B.ordinal()] * 100);
 
         roundStats = new RoundStats(teamResources[0] * 100, teamResources[1] * 100, teamRoundResources[0] * 100, teamRoundResources[1] * 100);
-        
-        // MILK
-        teamResources[Team.A.ordinal()] += gameMap.getNeutralsMap().getScoreChange(Team.A, gameObjects);
-        teamResources[Team.B.ordinal()] += gameMap.getNeutralsMap().getScoreChange(Team.B, gameObjects);
-        if (teamResources[Team.A.ordinal()] >= GameConstants.WIN_QTY || teamResources[Team.B.ordinal()] >= GameConstants.WIN_QTY) {
-            setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.OWNED);
-        }
         
         lastRoundResources = teamRoundResources;
         teamRoundResources = new double[2];
