@@ -446,9 +446,9 @@ The Seeding Tournament is a double elimination tournament. Contestants are seede
 - Furthest round achieved
 - Bayesian Elo rating for the tournament (computed on a per-game basis, not a per-match basis)
 
-The Qualifying Tournament is a double elimination tournament (see e.g. http://en.wikipedia.org/wiki/Image:NSB-doubleelim-draw-2004.png). Play continues until there are 8 teams remaining. These teams move on to the Final Tournament. Teams are seeded for the final tournament as follows:
+The Qualifying Tournament is a double elimination tournament (see e.g. http://en.wikipedia.org/wiki/Image:NSB-doubleelim-draw-2004.png). Play continues until there are 16 teams remaining. These teams move on to the Final Tournament. Teams are seeded for the final tournament as follows:
 
-- The four teams that did not lose a match receive the top four seeds.
+- The eight teams that did not lose a match receive the top eight seeds.
 - Teams that did not lose a single game are ranked by their qualifying seeds.
 - The remaining teams are ranked by Bayesian Elo rating for the tournament (computed on a per-game basis).
 - The Final Tournament is another double elimination tournament. The Final Tournament starts with a blank state, i.e., any losses in the Qualifying Tournament are erased.
@@ -528,6 +528,7 @@ Changelog
 * **1.3.1** (1/26/2014) - Small bug fix with sensing.
 * **1.3.2** (1/28/2014) - Client bug fix with robot info strings. Specs clarifications on map connectedness and execution order.
     * Decrease HAT_MILK_COST to 100000.
+* **1.3.3** (02/08/2014) - Post-finals release to give out the new maps. Also has client improvements.
 
 Appendices
 ------------
