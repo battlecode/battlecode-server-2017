@@ -453,7 +453,7 @@ The Qualifying Tournament is a double elimination tournament (see e.g. http://en
 - The remaining teams are ranked by Bayesian Elo rating for the tournament (computed on a per-game basis).
 - The Final Tournament is another double elimination tournament. The Final Tournament starts with a blank state, i.e., any losses in the Qualifying Tournament are erased.
 
-The Newbie Tournament will run concurrently with the Qualifying Tournament. All teams consisting entirely of MIT students who have not participated in Battlecode before will automatically be entered into the Newbie tournament in addition to the other tournaments. We will announce the format of the Newbie tournament soon.
+The Newbie Tournament will run concurrently with the Qualifying Tournament. All teams consisting entirely of MIT students who have not participated in Battlecode before will automatically be entered into the Newbie tournament in addition to the other tournaments. The Newbie Tournament will progress until there are 2 teams left in a double elimination format, and these two teams will compete with each other at the Newbie Finals (with losses reset).
 
 In order to receive credit for the course, or to be eligible for the newbie tournament, you must register with an mit.edu e-mail address. If you already registered with a different e-mail address, please let us know.
 
