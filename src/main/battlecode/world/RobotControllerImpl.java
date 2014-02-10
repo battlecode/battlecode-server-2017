@@ -36,6 +36,8 @@ import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.CaptureSignal;
 import battlecode.world.signal.HatSignal;
+import battlecode.world.signal.IndicatorDotSignal;
+import battlecode.world.signal.IndicatorLineSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MinelayerSignal;
@@ -871,6 +873,17 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public void setIndicatorStringFormat(int stringIndex, String format, Object... args) {
         setIndicatorString(stringIndex, String.format(format, args));
+    }
+
+    public void setIndicatorDot(MapLocation loc, int red, int green, int blue) {
+        assertNotNull(loc);
+        new IndicatorDotSignal(robot,loc,red,green,blue).accept(gameWorld);
+    }
+
+    public void setIndicatorLine(MapLocation from, MapLocation to, int red, int green, int blue) {
+        assertNotNull(from);
+        assertNotNull(to);
+        new IndicatorLineSignal(robot,from,to,red,green,blue).accept(gameWorld);
     }
 
     public long getControlBits() {

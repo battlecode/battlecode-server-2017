@@ -42,6 +42,8 @@ import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.EnergonChangeSignal;
 import battlecode.world.signal.FluxChangeSignal;
 import battlecode.world.signal.HatSignal;
+import battlecode.world.signal.IndicatorDotSignal;
+import battlecode.world.signal.IndicatorLineSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
@@ -814,6 +816,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public void visitIndicatorStringSignal(IndicatorStringSignal s) {
+        addSignal(s);
+    }
+
+    public void visitIndicatorDotSignal(IndicatorDotSignal s) {
+        addSignal(s);
+    }
+
+    public void visitIndicatorLineSignal(IndicatorLineSignal s) {
         addSignal(s);
     }
 

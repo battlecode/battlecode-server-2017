@@ -460,5 +460,17 @@ public interface RobotController {
      * resume execution.
      */
     public void breakpoint();
+
+    /**
+     * Draws a dot on the game map, for debugging purposes.
+     * Press V in the client to toggle which team's indicator dots are displayed.
+     */
+    public void setIndicatorDot(MapLocation loc, int red, int green, int blue);
+
+    /**
+     * Draws a line on the game map, for debugging purposes.
+     * Press V in the client to toggle which team's indicator lines are displayed.
+     */
+    public void setIndicatorLine(MapLocation from, MapLocation to, int red, int green, int blue);
    
 }
