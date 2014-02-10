@@ -528,7 +528,7 @@ Changelog
 * **1.3.1** (1/26/2014) - Small bug fix with sensing.
 * **1.3.2** (1/28/2014) - Client bug fix with robot info strings. Specs clarifications on map connectedness and execution order.
     * Decrease HAT_MILK_COST to 100000.
-* **1.3.3** (02/08/2014) - Post-finals release to give out the new maps. Also has minor client changes (fix bug where action delay does not change sometimes).
+* **1.3.3** (02/08/2014) - Post-finals release to give out the new maps. Also has minor client changes (fix bug where action delay does not change sometimes). New client key effects.
 
 Appendices
 ------------
