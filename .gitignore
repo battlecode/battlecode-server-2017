@@ -5,3 +5,4 @@
 *.jar
 *.swp
 *.DS_Store
+/testreport

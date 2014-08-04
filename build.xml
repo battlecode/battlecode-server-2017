@@ -35,7 +35,7 @@
     <property name="test.timeout" value="900000"/>
     <property name="test.build.dir" value="${build.dir}/tests"/>
     <property name="test.build.jar" value="${basedir}/${rootname}-test.jar"/>
-    <property name="test.report.file" value="TEST-AllTestSuite"/>
+    <property name="test.report.dir" value="testreport"/>
     <property name="instr.build.dir" value="${build.dir}/instrumented-classes"/>
     <property name="instr.datafile" value="${build.dir}/cobertura.ser"/>
 
@@ -96,6 +96,7 @@
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${pkg.build.dir}"/>
         <mkdir dir="${test.build.dir}"/>
+        <mkdir dir="${test.report.dir}"/>
     </target>
 
     <target name="clean"
@@ -126,6 +127,23 @@
         </javac>
     </target>
 
+    <target name="compiletest"
+            description="Compile Battlecode classes."
+            depends="init">
+        <javac encoding="${build.encoding}"
+                srcdir="${test.src.dir}"
+                includes="**/*.java"
+                destdir="${test.build.dir}"
+                debug="${javac.debug}"
+                optimize="${javac.optimize}"
+                target="${javac.version}"
+                source="${javac.version}"
+                deprecation="${javac.deprecation}"
+                includeantruntime="true">
+            <compilerarg line="${javac.args} ${javac.args.warnings}"/>
+            <classpath refid="classpath-libs"/>
+        </javac>
+    </target>
 
     <target name="jar"
             description="Build the jar (with dependencies included)."
@@ -171,6 +189,23 @@
         <packageset dir="${src.dir}" defaultexcludes="yes"/>
         <link href="http://java.sun.com/j2se/1.6.0/docs/api/"/>
         </javadoc>
+    </target>
+
+    <target name="unittest" depends="compiletest">
+        <junit printsummary="true" timeout="${test.timeout}" filtertrace="off">
+            <classpath refid="classpath-libs"/>
+            <classpath>
+                <pathelement location="${test.build.dir}"/>
+            </classpath>
+
+            <formatter type="plain"/>
+
+            <batchtest todir="${test.report.dir}">
+                <fileset dir="${test.src.dir}">
+                    <include name="**/*Test*.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
     </target>
 
 </project>
