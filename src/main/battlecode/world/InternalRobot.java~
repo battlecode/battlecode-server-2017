@@ -511,6 +511,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
                     break;
             }
         }
+
+        if (terrain == TerrainTile.ROAD) {
+            base *= GameConstants.ROAD_ACTION_DELAY_FACTOR;
+        }
         return base;
     }
 

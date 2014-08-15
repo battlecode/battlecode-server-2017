@@ -113,6 +113,9 @@ public interface GameConstants {
     /** Factor of increase for actiondelay for diagonal movement */
     public static final double SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR = 1.4;
 	
+	/** Factor at which movement-related and sneaking-related actiondelay is discounted on a road */
+    public static final double ROAD_ACTION_DELAY_FACTOR = 0.5;
+
 	/** Factor of WIN_QTY milk that is gained after destroying an enemy PASTR */
     public static final double MILK_GAIN_FACTOR = 0.1; // get this * WIN_QTY after destroying pastr
 
