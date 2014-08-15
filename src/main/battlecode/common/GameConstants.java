@@ -130,4 +130,7 @@ public interface GameConstants {
 
     /** The radius (squared) around the HQ within which allied soldiers cannot be sensed by the enemy. */
     public static final int HQ_CLOAK_RADIUS = 2;
+
+    /** The amount of ore a team starts the game with. */
+    public static final int ORE_INITIAL_AMOUNT = 500;
 }

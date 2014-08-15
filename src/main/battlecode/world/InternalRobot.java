@@ -20,7 +20,6 @@ import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.CaptureSignal;
 import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.RegenSignal;
 import battlecode.world.signal.SelfDestructSignal;
 import battlecode.world.signal.ShieldSignal;
@@ -265,21 +264,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
       	// quick hack to make mining work. move me out later
         if (type == RobotType.SOLDIER) {
 
-        	if (miningRounds > 0) {
-        		if (--miningRounds==0) {
-        			myGameWorld.visitSignal(new MineSignal(getLocation(), getTeam(), MineSignal.ADD));
-        			if(myGameWorld.hasUpgrade(getTeam(), Upgrade.PICKAXE)) {
-        				for(Direction d: new Direction[]{Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH}) {
-        					myGameWorld.visitSignal(new MineSignal(getLocation().add(d), getTeam(), MineSignal.ADD));
-        				}
-        			}
-        		}
-        	} else if (defusingRounds > 0) {
-        		if (--defusingRounds==0) {
-        			myGameWorld.visitSignal(new MineSignal(defusingLocation, getTeam(), MineSignal.REMOVE));
-        			defusingLocation = null;
-        		}
-        	} else if (capturingRounds > 0) {
+        	if (capturingRounds > 0) {
         		if (--capturingRounds==0) {
         			myGameWorld.visitSignal(new SpawnSignal(getLocation(), capturingType, getTeam(), this));
         			capturingRounds = -1;

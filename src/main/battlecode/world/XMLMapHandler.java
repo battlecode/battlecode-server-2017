@@ -4,7 +4,6 @@ import battlecode.common.*;
 import battlecode.engine.ErrorReporter;
 import battlecode.server.Config;
 import battlecode.world.GameMap.MapProperties;
-import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.NodeBirthSignal;
 import battlecode.world.signal.NodeConnectionSignal;
 import org.xml.sax.Attributes;
@@ -101,55 +100,6 @@ class XMLMapHandler extends DefaultHandler {
         }
     }
 
-    // TODO(axc): remove Mine    
-    private static class MineData implements SymbolData {
-
-        public static final SymbolDataFactory factory = new SymbolDataFactory() {
-
-            public MineData create(Attributes att) {
-                String type = getRequired(att, "team");
-                return new MineData(Team.valueOf(type));
-            }
-        };
-        private Team team;
-        private double value;
-
-        public MineData(Team t) {
-            this.team = t;
-            this.value = -1;
-        }
-
-        public void setValue(double value) {
-            this.value = value;
-        }
-
-        public TerrainTile tile() {
-            return TerrainTile.NORMAL; // TODO(axc): temp
-        }
-
-        public double floatData() {
-            return this.value;
-        }
-
-        public void createGameObject(GameWorld world, MapLocation loc) {
-        	world.addMine(team, loc);
-        	world.addSignal(new MineSignal(loc, team, true));
-        }
-
-        public boolean equalsMirror(SymbolData data) {
-            if (!(data instanceof MineData))
-                return false;
-            MineData d = (MineData) data;
-            return d.team == team && d.value == value;
-        }
-
-        public SymbolData copy() {
-            MineData m = new MineData(this.team);
-            m.setValue(this.value);
-            return m;
-        }
-    }
-
     // TODO(axc): we should allow different tiles other than normal
     private static class RobotData implements SymbolData {
 
@@ -191,11 +141,6 @@ class XMLMapHandler extends DefaultHandler {
 
         public void createGameObject(GameWorld world, MapLocation loc) {
             InternalRobot robot = GameWorldFactory.createPlayer(world, type, loc, team, null, false);
-            if (mine!=null)
-            {
-            	world.addMine(mine, loc);
-            	world.addSignal(new MineSignal(loc, mine, true));
-            }
         }
 
         public boolean equalsMirror(SymbolData data) {
@@ -258,11 +203,6 @@ class XMLMapHandler extends DefaultHandler {
             } else {
             	InternalRobot r = GameWorldFactory.createPlayer(world, RobotType.HQ, loc, team, null, false);
                 world.setHQ(r, team);
-            }
-            if (mine!=null)
-            {
-            	world.addMine(mine, loc);
-            	world.addSignal(new MineSignal(loc, mine, true));
             }
         }
 
@@ -527,7 +467,11 @@ class XMLMapHandler extends DefaultHandler {
                     fail("unrecognized symbol in map: '" + c + "'", "Check that '" + c + "' is defined as one of the symbols in the map file. DEBUG: '" + dataSoFar + "'\n");
 
                 map[currentCol][currentRow] = symbolMap.get(dataSoFar.charAt(0)).copy();
-                map[currentCol][currentRow].setValue(Double.parseDouble(dataSoFar.substring(1)));
+                if (dataSoFar.substring(1).trim().equals("")) {
+                    map[currentCol][currentRow].setValue(0);
+                } else {
+                    map[currentCol][currentRow].setValue(Double.parseDouble(dataSoFar.substring(1)));
+                }
 
                 currentCol++;
                 dataSoFar = "";
@@ -595,7 +539,7 @@ class XMLMapHandler extends DefaultHandler {
             floatData[i] = new double[map[i].length];
             for (int j = 0; j < map[i].length; j++) {
                 intData[i][j] = (int) map[i][j].floatData();
-                floatData[i][j] = map[i][j].floatData();
+                floatData[i][j] = map[i][j].floatData() / 1000;
             }
         }
 

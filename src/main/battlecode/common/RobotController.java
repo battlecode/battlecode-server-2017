@@ -333,6 +333,14 @@ public interface RobotController {
      * @throws GameActionException   if the maximum robot count has already been reached (CANT_DO_THAT_BRO)
      */
     public void spawn(Direction dir) throws GameActionException;
+
+    /**
+     * Mines the current square for ore.
+     *
+     * @throws GameActionException if the current unit is not one that can collect ore
+     * @throws GameActionException if there is currently movement delay and the unit cannot mine
+     */
+    public void mine() throws GameActionException;
    
     /**
      * After a delay, kills the soldier and spawns a robot of the given building type

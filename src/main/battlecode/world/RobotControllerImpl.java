@@ -38,8 +38,7 @@ import battlecode.world.signal.CaptureSignal;
 import battlecode.world.signal.HatSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.MatchObservationSignal;
-import battlecode.world.signal.MinelayerSignal;
-import battlecode.world.signal.MinelayerSignal.MineAction;
+import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.SpawnSignal;
@@ -200,6 +199,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         		new SpawnSignal(loc, type, robot.getTeam(), robot), 0
         		);
         robot.resetSpawnCounter();
+    }
+
+    public void mine() throws GameActionException {
+        // TODO: check if the unit is capable of mining (should be a parameter in RobotInfo)
+        assertNotMoving();
+        MapLocation loc = getLocation();
+        double delay = GameConstants.SOLDIER_MOVE_ACTION_DELAY;
+        robot.activateMovement(new MineSignal(loc, getTeam(), getType()), delay);
     }
     
     public void construct(RobotType type) throws GameActionException {

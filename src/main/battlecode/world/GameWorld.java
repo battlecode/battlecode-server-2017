@@ -118,6 +118,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         research.put(Team.B, new EnumMap<Upgrade, Integer>(Upgrade.class));
         radio.put(Team.A, new HashMap<Integer, Integer>());
         radio.put(Team.B, new HashMap<Integer, Integer>());
+
+        adjustResources(Team.A, GameConstants.ORE_INITIAL_AMOUNT);
+        adjustResources(Team.B, GameConstants.ORE_INITIAL_AMOUNT);
     }
     
     public GameMap.MapMemory getMapMemory(Team t) {
@@ -196,13 +199,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         // update neutrals
         gameMap.getNeutralsMap().next(gameObjects);
-        
-        // MILK
-        teamResources[Team.A.ordinal()] += gameMap.getNeutralsMap().getScoreChange(Team.A, gameObjects);
-        teamResources[Team.B.ordinal()] += gameMap.getNeutralsMap().getScoreChange(Team.B, gameObjects);
-        if (teamResources[Team.A.ordinal()] >= GameConstants.WIN_QTY || teamResources[Team.B.ordinal()] >= GameConstants.WIN_QTY) {
-            setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.OWNED);
-        }
         
         addSignal(new FluxChangeSignal(teamResources));
 		addSignal(new ResearchChangeSignal(research));
@@ -904,14 +900,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     
     public void visitMineSignal(MineSignal s) {
     	MapLocation loc = s.getMineLoc();
-    	if (s.shouldAdd()) {
-        	if (gameMap.getTerrainTile(loc) == TerrainTile.NORMAL) {
-        		addMine(s.getMineTeam(), loc);
-        	}
-    	} else {
-    		if (s.getMineTeam() != getMine(s.getMineLoc()))
-    			removeMines(s.getMineTeam(), loc);
-    	}
+        // TODO: calculate ore change amount based on unit type
+        int baseOre = gameMap.getOre(loc);
+        int ore = baseOre == 0 ? baseOre : Math.max(2, baseOre / 100); // TODO: is it min or max?
+        adjustResources(s.getMineTeam(), ore);
     	addSignal(s);
     }
     

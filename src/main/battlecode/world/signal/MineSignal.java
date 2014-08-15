@@ -1,25 +1,23 @@
 package battlecode.world.signal;
 
 import battlecode.common.MapLocation;
+import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
 
 public class MineSignal extends Signal {
-	
-	public static boolean ADD = true;
-	public static boolean REMOVE = false;
 	
 	
 	private static final long serialVersionUID = -4303228382203951149L;
 	
     private final MapLocation mineLoc;
     private final Team mineTeam;
-    private final boolean birth;
+    private final RobotType minerType;
 
-    public MineSignal(MapLocation mineLoc, Team mineTeam, boolean birth) {
+    public MineSignal(MapLocation mineLoc, Team mineTeam, RobotType minerType) {
     	this.mineLoc = mineLoc;
     	this.mineTeam = mineTeam;
-    	this.birth = birth;
+        this.minerType = minerType;
     }
     
     /** Location being mined */
@@ -27,8 +25,7 @@ public class MineSignal extends Signal {
     
     /** Mine owner */
     public Team getMineTeam() { return mineTeam; }
-    
-    public boolean shouldAdd() { return birth; }
-    public boolean shouldRemove() { return !birth; }
-    
+
+    /** Type of miner */
+    public RobotType getMinerType() { return minerType; }
 }
