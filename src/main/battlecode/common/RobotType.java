@@ -6,19 +6,25 @@ import static battlecode.common.RobotLevel.ON_GROUND;
  * Contains details on various attributes of the different robots.
  */
 public enum RobotType {
-    //          LEVEL,      MXE    SR  SA          AR AR   AA      AD      AP      ATTACK  BLDNG    SPLASH  COUNT CAPTURNS
-  	HQ          (ON_GROUND, Integer.MAX_VALUE,
-                                   35, 360,        0, 15,  360,    1,     50,      true,   false,   25,      0,    0),
-    SOLDIER     (ON_GROUND, 100,   35, 360,        0, 10,  360,    2,     10,      true,   false,   0,      1,    0),
-    NOISETOWER  (ON_GROUND, 100,   35, 360,        0,300,  360,    2,      0,      true,   true,    0,      3,  100),
-    PASTR       (ON_GROUND, 200,    5, 360,        0,  0,  360,    0,      0,     false,   true,    0,      2,   50),
-    
-    //WALL        (ON_GROUND, 200,    0,   0,        0,  0,    0,    0,      0,     false,   true,    0,      0,   30),
-	//MEDBAY      (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      2,      true,   true,    0,      1,   50),
-    //SHIELDS     (ON_GROUND, 100,   14, 360,        0, 2 ,  360,    1,      10,     true,   true,    0,      1,   50),
-    //ARTILLERY   (ON_GROUND, 100,   14, 360,        0, 63,  360,    20,     60,     true,   true,    0,      1,   50),
-    //GENERATOR   (ON_GROUND, 100,   14, 360,        0, 0 ,  0,      0,      0,      true,   true,    0,      1,   50),
-    //SUPPLIER    (ON_GROUND, 100,   14, 360,        0, 0 ,  0,      0,      0,      true,   true,    0,      1,   50),
+    // MXE = max energon / health
+    // SR = sight range
+    // SA = sight angle
+    // AR = attack radius
+    // AR = attack range
+    // AA = attack angle
+    // AD = attack delay
+    // AP = attack power
+    // ATTACK = can attack?
+    // BLDNG = is building?
+    // SPLASH = splash damage
+    // COUNT = contribution towards robot count
+    // CAPTURNS = number of turns required to build
+    //          LEVEL,      MXE    SR  SA     AR AR   AA      AD      AP      ATTACK  BLDNG    SPLASH  COUNT CAPTURNS
+  	HQ          (ON_GROUND, 1000,  35, 360,   0, 24,  360,    2,     24,      true,   false,   0,      0,    0),
+    TOWER       (ON_GROUND,  500,  35, 360,   0, 24,  360,    2,     15,      true,   false,   0,      0,    0),
+    SOLDIER     (ON_GROUND,  100,  35, 360,   0, 10,  360,    2,     10,      true,   false,   0,      1,    0),
+    NOISETOWER  (ON_GROUND,  100,  35, 360,   0,300,  360,    2,      0,      true,   true,    0,      3,  100),
+    PASTR       (ON_GROUND,  200,   5, 360,   0,  0,  360,    0,      0,     false,   true,    0,      2,   50),
     ;
 
     /**
