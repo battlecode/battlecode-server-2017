@@ -377,6 +377,16 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return regen;
     }
 
+    // includes buffs
+    public int getAttackRadiusMaxSquared() {
+        int base = type.attackRadiusMaxSquared;
+        if (type == RobotType.HQ && myGameWorld.getRobotCount(getTeam(), RobotType.TOWER) >= 2) {
+            return GameConstants.ATTACK_RADIUS_SQUARED_BUFFED_HQ;
+        } else {
+            return base;
+        }
+    }
+
     public void takeDamage(double baseAmount) {
         if (baseAmount < 0) {
             changeEnergonLevel(-baseAmount);

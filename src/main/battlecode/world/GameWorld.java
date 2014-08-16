@@ -1000,7 +1000,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     protected static boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
         MapLocation myLoc = ir.getLocation();
         int d = myLoc.distanceSquaredTo(loc);
-        return d <= ir.type.attackRadiusMaxSquared && d >= ir.type.attackRadiusMinSquared;
+        int attackRadiusMaxSquared = ir.getAttackRadiusMaxSquared();
+        return d <= attackRadiusMaxSquared && d >= ir.type.attackRadiusMinSquared;
 //                && inAngleRange(myLoc, ir.getDirection(), loc, ir.type.attackCosHalfTheta);
     }
 

@@ -133,4 +133,8 @@ public interface GameConstants {
 
     /** The amount of ore a team starts the game with. */
     public static final int ORE_INITIAL_AMOUNT = 500;
+
+    // TODO maybe put in RobotType
+    /** The attack radius of a buffed HQ. */
+    public static final int ATTACK_RADIUS_SQUARED_BUFFED_HQ = 35;
 }
