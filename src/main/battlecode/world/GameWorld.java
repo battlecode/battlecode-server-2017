@@ -490,6 +490,15 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return gameMap.getTerrainTile(loc);
     }
 
+    public int getRobotCount(Team team, RobotType type) {
+        Integer res = robotTypeCount.get(team).get(type);
+        if (res == null) {
+            return 0;
+        } else {
+            return res;
+        }
+    }
+
     // TODO: optimize this too
     public int getUnitCount(Team team) {
         int result = 0;

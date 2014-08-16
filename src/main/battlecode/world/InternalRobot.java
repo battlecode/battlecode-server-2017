@@ -384,7 +384,19 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             if (baseAmount > 0) {
                 roundsSinceLastDamage = 0;
             }
-            changeEnergonLevelFromAttack(-baseAmount);
+            // HQ has a tower boost
+            double rate = 1.0;
+            if (type == RobotType.HQ) {
+                int towerCount = myGameWorld.getRobotCount(getTeam(), RobotType.TOWER);
+                if (towerCount >= 6) {
+                    rate = 0.3;
+                } else if (towerCount >= 4) {
+                    rate = 0.5;
+                } else if (towerCount >= 1) {
+                    rate = 0.8;
+                }
+            }
+            changeEnergonLevelFromAttack(-rate * baseAmount);
         }
     }
     
