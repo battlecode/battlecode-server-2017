@@ -360,7 +360,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
       if (robot.myLocation.distanceSquaredTo(loc) <= sensorRadius)
         	return true;
        
-        /* 
         for (InternalObject o : gameWorld.allObjects())
         {
         	if  ((Robot.class.isInstance(o)) 
@@ -369,14 +368,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         		return true;
         		
         }
-        */
         return false;
-    	// make global vision work on this.
-    	// MAKE SURE YOU CANT GLOBL DEFUSE SHIT OTHERWISE YOURE GUNNA GET G'D
-//        MapLocation myLoc = getLocation();
-//        int sensorRadius = robot.type.sensorRadiusSquared + (hasUpgrade(Upgrade.VISION) ? GameConstants.VISION_UPGRADE_BONUS : 0);
-//        return myLoc.distanceSquaredTo(loc) <= sensorRadius;
-////                && gameWorld.inAngleRange(myLoc, getDirection(), loc, robot.type.sensorCosHalfTheta);
     }
     
     public boolean checkCanSense(InternalObject obj) {
