@@ -248,6 +248,21 @@ public class GameMap implements GenericGameMap {
     }
 
     /**
+     * Determines the amount of ore on the map at the given location.
+     * Indexes the origin at (0, 0).
+     *
+     * @param x the x index to use
+     * @param y the y index to use
+     * @return the amount of ore in the given location, or 0 if off the map
+     */
+    public int getOre(int x, int y) {
+        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
+            return 0;
+        }
+        return mapOre[x][y];
+    }
+
+    /**
      * Returns a two-dimensional array of ore data for this map.
      *
      * @return the map's ore in a 2D array
