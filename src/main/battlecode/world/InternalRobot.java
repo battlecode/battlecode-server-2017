@@ -522,6 +522,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public double calculateAttackActionDelay(RobotType r) {
+        if (r == RobotType.HQ && myGameWorld.getRobotCount(getTeam(), RobotType.TOWER) >= 5) {
+            return r.attackDelay / 2;
+        }
         return r.attackDelay;
     }
 
