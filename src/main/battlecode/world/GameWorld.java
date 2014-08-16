@@ -98,6 +98,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private Map<Team, Set<Upgrade>> upgrades = new EnumMap<Team, Set<Upgrade>>(Team.class);
     private Map<Team, Map<Integer, Integer>> radio = new EnumMap<Team, Map<Integer, Integer>>(Team.class);
 
+    // a count for each robot type per team for tech tree checks and for tower counts
+    private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<Team, Map<RobotType, Integer>>(Team.class);
+
     // robots to remove from the game at end of turn
     private List<InternalRobot> deadRobots = new ArrayList<InternalRobot>();
     private List<InternalRobot> revealedRobots = new ArrayList<InternalRobot>();
@@ -118,6 +121,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         research.put(Team.B, new EnumMap<Upgrade, Integer>(Upgrade.class));
         radio.put(Team.A, new HashMap<Integer, Integer>());
         radio.put(Team.B, new HashMap<Integer, Integer>());
+        robotTypeCount.put(Team.A, new EnumMap<RobotType, Integer>(RobotType.class));
+        robotTypeCount.put(Team.B, new EnumMap<RobotType, Integer>(RobotType.class));
+
+        // TODO: these lines don't go here, but have to because parts dealing with robotTypeCount are in the wrong places
+        robotTypeCount.get(Team.A).put(RobotType.HQ, 1);
+        robotTypeCount.get(Team.B).put(RobotType.HQ, 1);
+        robotTypeCount.get(Team.A).put(RobotType.TOWER, 6);
+        robotTypeCount.get(Team.B).put(RobotType.TOWER, 6);
 
         adjustResources(Team.A, GameConstants.ORE_INITIAL_AMOUNT);
         adjustResources(Team.B, GameConstants.ORE_INITIAL_AMOUNT);
@@ -766,6 +777,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             InternalRobot r = (InternalRobot) obj;
 
             teamRobotCount[r.getTeam().ordinal()] -= r.type.count;
+            Integer currentCount = robotTypeCount.get(r.getTeam()).get(r.type);
+            robotTypeCount.get(r.getTeam()).put(r.type, currentCount - 1);
 
             RobotMonitor.killRobot(ID);
     		if (r.type == RobotType.SOLDIER && (r.getCapturingType() != null))
@@ -875,6 +888,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent);
         
         teamRobotCount[robot.getTeam().ordinal()] += robot.type.count;
+        Integer currentCount = robotTypeCount.get(robot.getTeam()).get(robot.type);
+        if (currentCount == null) {
+            currentCount = 0;
+        }
+        robotTypeCount.get(robot.getTeam()).put(robot.type, currentCount + 1);
     }
     
     public void visitResearchSignal(ResearchSignal s) {
