@@ -703,6 +703,16 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         switch (attacker.type) {
 		case SOLDIER:
 		case HQ:
+            double rate = 1.0;
+            if (attacker.type == RobotType.HQ) {
+                int towerCount = getRobotCount(attacker.getTeam(), RobotType.TOWER);
+                if (towerCount >= 6) {
+                    rate = 10.0;
+                } else if (towerCount >= 3) {
+                    rate = 1.5;
+                }
+            }
+
 			InternalRobot target;
 			for (int dx = -1; dx <= 1; dx++)
 				for (int dy = -1; dy <= 1; dy++) {
@@ -711,9 +721,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
 					if (target != null) {
 						if (dx == 0 && dy == 0) {
-							target.takeDamage(attacker.type.attackPower, attacker);
+							target.takeDamage(attacker.type.attackPower * rate, attacker);
                         } else {
-							target.takeDamage(attacker.type.splashPower, attacker);
+							target.takeDamage(attacker.type.splashPower * rate, attacker);
                         }
 
                         if (target.getEnergonLevel() <= 0.0 && target.getTeam() != attacker.getTeam()) {
