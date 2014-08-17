@@ -683,7 +683,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
         return res.toArray(new MapLocation[0]);
     }
-   
+
+    public int senseOre(MapLocation loc) throws GameActionException {
+        assertCanSense(loc);
+        return gameWorld.getGameMap().getOre(loc);
+    }   
 
     public double[][] senseCowGrowth() {
         return gameWorld.getCowsCopy();

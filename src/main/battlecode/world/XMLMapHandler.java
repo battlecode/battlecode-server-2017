@@ -545,7 +545,7 @@ class XMLMapHandler extends DefaultHandler {
 
         NeutralsMap nm = new NeutralsMap(floatData, mapTiles);
         GameMap gm = new GameMap(mapProperties, mapTiles, nm, intData, mapName);
-        //gm.setTheme(theme);
+        nm.setOrigin(gm.getMapOrigin());
         GameWorld gw = new GameWorld(gm, teamA, teamB, archonMemory);
 
         gw.reserveRandomIDs(100);

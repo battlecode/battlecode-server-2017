@@ -29,6 +29,7 @@ public class NeutralsMap {
      * The integer scalar field showing the distribution of the neutral AI.
      */
     private boolean[][] passable;
+    private MapLocation origin;
     private double[][] currentAmount;
     private double[][] growthFactor;
     private double[][] dX, dY;
@@ -55,6 +56,8 @@ public class NeutralsMap {
 
     public NeutralsMap(double[][] growthFactor, TerrainTile[][] mapTiles) {
         attacks = new ArrayList<MapLocation>();
+
+        this.origin = new MapLocation(0, 0);
 
         this.mapWidth = growthFactor.length;
         int tempMapHeight = 0;
@@ -96,6 +99,7 @@ public class NeutralsMap {
     public NeutralsMap(NeutralsMap nm) {
         this.mapWidth = nm.mapWidth;
         this.mapHeight = nm.mapHeight;
+        this.origin = nm.origin;
         this.currentAmount = new double[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
             System.arraycopy(nm.currentAmount[i], 0, this.currentAmount[i], 0,
@@ -117,11 +121,15 @@ public class NeutralsMap {
         }
     }
 
+    public void setOrigin(MapLocation o) {
+        this.origin = o;
+    }
+
     public void createVoid(MapLocation center, int distance) {
         for (int x = center.x - distance; x <= center.x + distance; x++) {
             for (int y = center.y - distance; y <= center.y + distance; y++) {
-                if (isValid(x, y)) {
-                    passable[x][y] = false;
+                if (isValidUseOrigin(x, y)) {
+                    passable[x - origin.x][y - origin.y] = false;
                 }
             }
         }
@@ -129,7 +137,7 @@ public class NeutralsMap {
 
     public double get(MapLocation m) {
         if (isValid(m.x, m.y)) {
-            return currentAmount[m.x][m.y];
+            return currentAmount[m.x - origin.x][m.y - origin.y];
         } else {
             return 0;
         }
@@ -164,7 +172,11 @@ public class NeutralsMap {
     }
 
     public boolean isValid(int x, int y) {
-        return x >= 0 && x < this.mapWidth && y >= 0 && y < this.mapHeight && passable[x][y];
+        return x >= 0 && x < this.mapWidth && y >= 0 && y < origin.y && passable[x][y];
+    }
+
+    public boolean isValidUseOrigin(int x, int y) {
+        return x >= origin.x && x < origin.x + this.mapWidth && y >= origin.y && y < origin.y + this.mapHeight && passable[x - origin.x][y - origin.y];
     }
 
     @SuppressWarnings("unchecked")
@@ -185,39 +197,6 @@ public class NeutralsMap {
         System.out.println("END Neutrals Map");
     }
 
-    public double getScoreChange(Team t, InternalObject[] objs) {
-        double delta = 0.0;
-        for (InternalObject obj : objs) {
-            InternalRobot ir = (InternalRobot) obj;
-            if (ir.getTeam() != t) {
-                continue;
-            }
-            if (ir.type != RobotType.PASTR && ir.type != RobotType.SOLDIER) continue;
-            if (ir.type == RobotType.SOLDIER && pastrID[ir.getLocation().x][ir.getLocation().y] < Integer.MAX_VALUE) continue; // soldiers do not milk when in pastr range
-
-            int captureRange = 0;
-            double capturePercentage = GameConstants.ROBOT_MILK_PERCENTAGE;
-            if (ir.type == RobotType.PASTR) {
-                captureRange = GameConstants.PASTR_RANGE;
-                capturePercentage = 1.0;
-            }
-            MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
-            double milkGained = 0.0;
-            for (MapLocation ml : affected) {
-                if (isValid(ml.x, ml.y)) {
-                    if (ir.type == RobotType.PASTR && ir.getID() == pastrID[ml.x][ml.y] || ir.type == RobotType.SOLDIER) {
-                        milkGained += this.currentAmount[ml.x][ml.y] * capturePercentage;
-                    }
-                }
-            }
-            if (milkGained > GameConstants.MAX_EFFICIENT_COWS && ir.type == RobotType.PASTR) {
-                milkGained = GameConstants.MAX_EFFICIENT_COWS + Math.pow(milkGained - GameConstants.MAX_EFFICIENT_COWS, GameConstants.MILKING_INEFFICIENCY);
-            }
-            delta += milkGained;
-        }
-        return delta;
-    }
-
     @SuppressWarnings("unchecked")
     public void updateIds(InternalObject obj) {
         InternalRobot ir = (InternalRobot) obj;
@@ -227,10 +206,10 @@ public class NeutralsMap {
         if (ir.type == RobotType.PASTR) captureRange = GameConstants.PASTR_RANGE;
         MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
         for (MapLocation ml : affected) {
-            if (isValid(ml.x, ml.y)) {
-                this.ids[ml.x][ml.y].add(ir.getID());
+            if (isValidUseOrigin(ml.x, ml.y)) {
+                this.ids[ml.x - origin.x][ml.y - origin.y].add(ir.getID());
                 if (ir.type == RobotType.PASTR) {
-                    pastrID[ml.x][ml.y] = Math.min(pastrID[ml.x][ml.y], ir.getID());
+                    pastrID[ml.x - origin.x][ml.y - origin.y] = Math.min(pastrID[ml.x - origin.x][ml.y - origin.y], ir.getID());
                 }
             }
         }
@@ -251,6 +230,7 @@ public class NeutralsMap {
         // 3) cow growth and decay happens
         for (int i = 0; i < attacks.size(); i++) {
             MapLocation target = attacks.get(i);
+            target = new MapLocation(target.x - origin.x, target.y - origin.y);
             if (target.x >= 0 && target.x < this.mapWidth &&
                 target.y >= 0 && target.y < this.mapHeight) {
                 this.currentAmount[target.x][target.y] = 0;
@@ -350,12 +330,12 @@ public class NeutralsMap {
     public void updateWithNoiseSource(MapLocation source, int radiusSquared) {
         MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(source, radiusSquared);
         for (int i = 0; i < affected.length; i++) {
-            if (isValid(affected[i].x, affected[i].y)) {
-                hasNoise[affected[i].x][affected[i].y] = true;
+            if (isValidUseOrigin(affected[i].x, affected[i].y)) {
+                hasNoise[affected[i].x - origin.x][affected[i].y - origin.y] = true;
                 int curdX = affected[i].x - source.x;
                 int curdY = affected[i].y - source.y;
-                dX[affected[i].x][affected[i].y] += curdX;
-                dY[affected[i].x][affected[i].y] += curdY;
+                dX[affected[i].x - origin.x][affected[i].y - origin.y] += curdX;
+                dY[affected[i].x - origin.x][affected[i].y - origin.y] += curdY;
             }
         }
     }

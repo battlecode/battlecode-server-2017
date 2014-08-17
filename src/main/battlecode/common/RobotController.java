@@ -201,7 +201,14 @@ public interface RobotController {
      * Returns location of the enemy team's HQ (unconstrained by sensor range or distance)
      * @return the enemy team's HQ location
      */
-    public MapLocation senseEnemyHQLocation();
+    //public MapLocation senseEnemyHQLocation();
+
+    /**
+     * Returns the amount of ore at a given location.
+     *
+     * @return the amount of ore at a given location. Will be 0 for locations off the map and for all VOID locations.
+     */
+    public int senseOre(MapLocation loc) throws GameActionException;
     
 	/**
 	 * Returns the locations of PASTRS filtered by a team (unconstrained by sensor range or distance)
