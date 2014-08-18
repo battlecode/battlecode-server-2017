@@ -71,9 +71,6 @@ public class RobotDoc implements Taglet {
 								append(builder, "Type", "Soldier");
 
             append(builder, "Max Health", String.format("%1.0f", rt.maxHealth));
-            if (rt.sensorAngle > 0) {
-                append(builder, "Sensor Radius Squared", String.format("%d", rt.sensorRadiusSquared));
-            }
             if (rt.canAttack) {
                 append(builder, "Attack Radius Squared", String.format("%d", rt.attackRadiusMaxSquared));
                 append(builder, "Attack Power", String.format("%1.1f", rt.attackPower));

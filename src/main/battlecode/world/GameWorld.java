@@ -965,29 +965,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         int d = myLoc.distanceSquaredTo(loc);
         int attackRadiusMaxSquared = ir.getAttackRadiusMaxSquared();
         return d <= attackRadiusMaxSquared && d >= ir.type.attackRadiusMinSquared;
-//                && inAngleRange(myLoc, ir.getDirection(), loc, ir.type.attackCosHalfTheta);
-    }
-
-    protected static boolean inAngleRange(MapLocation sensor, Direction dir, MapLocation target, double cosHalfTheta) {
-        MapLocation dirVec = origin.add(dir);
-        double dx = target.x - sensor.x;
-        double dy = target.y - sensor.y;
-        int a = dirVec.x;
-        int b = dirVec.y;
-        double dotProduct = a * dx + b * dy;
-
-        if (dotProduct < 0) {
-            if (cosHalfTheta > 0)
-                return false;
-        } else if (cosHalfTheta < 0)
-            return true;
-
-        double rhs = cosHalfTheta * cosHalfTheta * (dx * dx + dy * dy) * (a * a + b * b);
-
-        if (dotProduct < 0)
-            return (dotProduct * dotProduct <= rhs + 0.00001d);
-        else
-            return (dotProduct * dotProduct >= rhs - 0.00001d);
     }
 
     // TODO: make a faster implementation of this

@@ -8,10 +8,8 @@ import static battlecode.common.RobotLevel.ON_GROUND;
 public enum RobotType {
     // MXE = max energon / health
     // SR = sight range
-    // SA = sight angle
     // AR = attack radius
     // AR = attack range
-    // AA = attack angle
     // AD = attack delay
     // AP = attack power
     // ATTACK = can attack?
@@ -19,10 +17,10 @@ public enum RobotType {
     // SPLASH = splash damage
     // COUNT = contribution towards robot count
     // CAPTURNS = number of turns required to build
-    //          LEVEL,      MXE    SR  SA     AR AR   AA      AD      AP      ATTACK  BLDNG    SPLASH  COUNT CAPTURNS
-  	HQ          (ON_GROUND, 1000,  35, 360,   0, 24,  360,    2,     24,      true,   false,   0,      0,    0),
-    TOWER       (ON_GROUND,  500,  35, 360,   0, 24,  360,    2,     15,      true,   false,   0,      0,    0),
-    SOLDIER     (ON_GROUND,  100,  35, 360,   0, 10,  360,    2,    200,      true,   false,   0,      1,    0),
+    //          LEVEL,      MXE    SR   AR  AR    AD      AP      ATTACK  BLDNG    SPLASH  COUNT CAPTURNS
+  	HQ          (ON_GROUND, 1000,  35,   0, 24,    2,     24,      true,   false,   0,      0,    0),
+    TOWER       (ON_GROUND,  500,  35,   0, 24,    2,     15,      true,   false,   0,      0,    0),
+    SOLDIER     (ON_GROUND,  100,  35,   0, 24,    2,    200,      true,   false,   0,      1,    0),
     ;
 
     /**
@@ -41,11 +39,6 @@ public enum RobotType {
     public final int sensorRadiusSquared;
 
     /**
-     * Not used for 2014 (all angles allowable by default).
-     */
-    public final double sensorAngle;
-
-    /**
      * The square of the maximum distance that the robot can attack.
      */
     public final int attackRadiusMaxSquared;
@@ -54,11 +47,6 @@ public enum RobotType {
      * The square of the minimum distance that the robot can attack.
      */
     public final int attackRadiusMinSquared;
-
-    /**
-     * Not used for 2014 (all angles allowable by default).
-     */
-    public final double attackAngle;
 
     /**
      * Action delay due to attacks. Everything has attack delay 1, except for SOLDIERs, which have an attack delay specified as a game constant (consistent with information here).
@@ -75,9 +63,6 @@ public enum RobotType {
      */
     public final boolean canAttack;
 
-    public final double sensorCosHalfTheta;
-    public final double attackCosHalfTheta;
-   
     /**
      * Whether the robot must be built.
      */ 
@@ -108,10 +93,8 @@ public enum RobotType {
     RobotType(RobotLevel level,
               double maxHealth,
               int sensorRadiusSquared,
-              double sensorAngle,
               int attackRadiusMinSquared,
               int attackRadiusMaxSquared,
-              double attackAngle,
               int attackDelay,
               double attackPower,
               boolean canAttack,
@@ -122,15 +105,11 @@ public enum RobotType {
         this.level = level;
         this.maxHealth = maxHealth;
         this.sensorRadiusSquared = sensorRadiusSquared;
-        this.sensorAngle = sensorAngle;
         this.attackRadiusMaxSquared = attackRadiusMaxSquared;
         this.attackRadiusMinSquared = attackRadiusMinSquared;
-        this.attackAngle = attackAngle;
         this.attackDelay = attackDelay;
         this.attackPower = attackPower;
         this.canAttack = canAttack;
-        this.sensorCosHalfTheta = Math.cos(sensorAngle * Math.PI / 360.);
-        this.attackCosHalfTheta = Math.cos(attackAngle * Math.PI / 360.);
         this.isBuilding = isBuilding;
         this.splashPower = splashPower;
         this.count = count;

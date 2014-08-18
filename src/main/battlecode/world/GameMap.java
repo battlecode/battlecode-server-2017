@@ -395,33 +395,12 @@ public class GameMap implements GenericGameMap {
         for (RobotType type : RobotType.values()) {
             offsetsForType = new int[9][][];
             offsets.put(type, offsetsForType);
-            if ((type.sensorAngle >= 360.0)) {
-                // Same range of vision independent of direction;
-                // save memory by using the same array each time
-                int[][] tmpOffsets = computeOffsets360(type.sensorRadiusSquared);
-                for (int i = 0; i < 8; i++) {
-                    offsetsForType[i] = tmpOffsets;
-                }
-            } else {
-                for (int i = 0; i < 8; i++) {
-                    Direction dir = Direction.values()[i];
-                    nOffsets = 0;
-                    MAX_RANGE = (int) Math.sqrt(type.sensorRadiusSquared);
-                    for (int y = -MAX_RANGE; y <= MAX_RANGE; y++) {
-                        for (int x = -MAX_RANGE; x <= MAX_RANGE; x++) {
-                            MapLocation loc = new MapLocation(x, y);
-                            if (CENTER.distanceSquaredTo(loc) <= type.sensorRadiusSquared
-                                    && GameWorld.inAngleRange(CENTER, dir, loc, type.sensorCosHalfTheta)) {
-                                XOffsets[nOffsets] = x;
-                                YOffsets[nOffsets] = y;
-                                nOffsets++;
-                            }
-                        }
-                    }
 
-                    offsetsForType[i] = new int[][]{Arrays.copyOf(XOffsets, nOffsets), Arrays.copyOf(YOffsets, nOffsets)};
-
-                }
+            // Same range of vision independent of direction;
+            // save memory by using the same array each time
+            int[][] tmpOffsets = computeOffsets360(type.sensorRadiusSquared);
+            for (int i = 0; i < 8; i++) {
+                offsetsForType[i] = tmpOffsets;
             }
         }
         return offsets;

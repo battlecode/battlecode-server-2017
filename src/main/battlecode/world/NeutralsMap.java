@@ -172,7 +172,7 @@ public class NeutralsMap {
     }
 
     public boolean isValid(int x, int y) {
-        return x >= 0 && x < this.mapWidth && y >= 0 && y < origin.y && passable[x][y];
+        return x >= 0 && x < this.mapWidth && y >= 0 && y < this.mapHeight && passable[x][y];
     }
 
     public boolean isValidUseOrigin(int x, int y) {
