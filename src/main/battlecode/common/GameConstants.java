@@ -74,9 +74,6 @@ public interface GameConstants {
 	/** Amount of health a regenerating robot or structure heals per turn */
     public static final double HEAL_RATE = 0.50;
 
-	/** Range in which a PASTR contains and milks cows */
-    public static final int PASTR_RANGE = 5;
-	
 	/** Amount of milk necessary for victory */
     public static final double WIN_QTY = 10000000.0;
 	
@@ -106,21 +103,9 @@ public interface GameConstants {
 
     /** Factor of increase for actiondelay for diagonal movement */
     public static final double SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR = 1.4;
-	
-	/** Factor of WIN_QTY milk that is gained after destroying an enemy PASTR */
-    public static final double MILK_GAIN_FACTOR = 0.1; // get this * WIN_QTY after destroying pastr
-
-	/** Factor of WIN_QTY milk that is given to your opponent if your PASTR self destructs */
-    public static final double MILK_PENALTY_FACTOR = 0.2; // opponent gets this * WIN_QTY if your pastr self destructs
 
     /** Accuracy of milk quantity of your opponent when sensing. The quantity is rounded down to the nearest multiple of this value. */
     public static final double OPPONENT_MILK_SENSE_ACCURACY = 2500000.0;
-
-    /** The number of cows within a PASTR that can be milked with perfect efficiency. */
-    public static final double MAX_EFFICIENT_COWS = 8000.0;
-
-    /** For a quantity of cows above the maximum efficient cows number X in a PASTR, we only get X^(this constant) milk. */
-    public static final double MILKING_INEFFICIENCY = 0.95;
 
     /** The radius (squared) around the HQ within which allied soldiers cannot be sensed by the enemy. */
     public static final int HQ_CLOAK_RADIUS = 2;

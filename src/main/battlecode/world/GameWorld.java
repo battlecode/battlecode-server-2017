@@ -674,9 +674,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                         target.takeDamage(damage, attacker);
 
                         // kill enemy pastr --> we gain milk
-                        if (target.getEnergonLevel() <= 0.0 && target.type == RobotType.PASTR && target.getTeam() != attacker.getTeam()) {
-                            adjustResources(attacker.getTeam(), GameConstants.WIN_QTY * GameConstants.MILK_GAIN_FACTOR);
-                        }
                         if (target.getEnergonLevel() <= 0.0 && target.getTeam() != attacker.getTeam()) {
                             teamKills[attacker.getTeam().ordinal()]++;
                         }
@@ -774,10 +771,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     			teamCapturingNumber[r.getTeam().ordinal()]--;
             if (r.hasBeenAttacked()) {
                 gameStats.setUnitKilled(r.getTeam(), currentRound);
-            }
-            if (r.type == RobotType.PASTR && r.getEnergonLevel() > 0.0) {
-                // oops, should reward other team
-                adjustResources(r.getTeam().opponent(), GameConstants.WIN_QTY * GameConstants.MILK_PENALTY_FACTOR);
             }
             if (r.type == RobotType.HQ) {
             	setWinner(r.getTeam().opponent(), getDominationFactor(r.getTeam().opponent()));

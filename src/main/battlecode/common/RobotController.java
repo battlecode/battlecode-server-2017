@@ -211,13 +211,6 @@ public interface RobotController {
     public int senseOre(MapLocation loc) throws GameActionException;
     
 	/**
-	 * Returns the locations of PASTRS filtered by a team (unconstrained by sensor range or distance)
-	 * @param t - filter PASTR locations by the given team
-     * @return an array of all MapLocations of PASTR locations
-     */
-    public MapLocation[] sensePastrLocations(Team t);
-
-	/**
 	 * Gives a representation of the cow growths of each location of the map (unconstrained by sensor range or distance)
 	 *
      * @return an array of arrays of doubles, where element [a][b] is the natural cow growth at MapLocation (a,b). Will be 0 on all VOID locations.

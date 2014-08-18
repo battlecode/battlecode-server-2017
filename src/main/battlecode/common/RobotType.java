@@ -23,7 +23,6 @@ public enum RobotType {
   	HQ          (ON_GROUND, 1000,  35, 360,   0, 24,  360,    2,     24,      true,   false,   0,      0,    0),
     TOWER       (ON_GROUND,  500,  35, 360,   0, 24,  360,    2,     15,      true,   false,   0,      0,    0),
     SOLDIER     (ON_GROUND,  100,  35, 360,   0, 10,  360,    2,    200,      true,   false,   0,      1,    0),
-    PASTR       (ON_GROUND,  200,   5, 360,   0,  0,  360,    0,      0,     false,   true,    0,      2,   50),
     ;
 
     /**

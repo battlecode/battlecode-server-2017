@@ -200,17 +200,13 @@ public class NeutralsMap {
     @SuppressWarnings("unchecked")
     public void updateIds(InternalObject obj) {
         InternalRobot ir = (InternalRobot) obj;
-        if (ir.type != RobotType.PASTR && ir.type != RobotType.SOLDIER) return;
+        if (ir.type != RobotType.SOLDIER) return;
 
         int captureRange = 0;
-        if (ir.type == RobotType.PASTR) captureRange = GameConstants.PASTR_RANGE;
         MapLocation[] affected = MapLocation.getAllMapLocationsWithinRadiusSq(ir.getLocation(), captureRange);
         for (MapLocation ml : affected) {
             if (isValidUseOrigin(ml.x, ml.y)) {
                 this.ids[ml.x - origin.x][ml.y - origin.y].add(ir.getID());
-                if (ir.type == RobotType.PASTR) {
-                    pastrID[ml.x - origin.x][ml.y - origin.y] = Math.min(pastrID[ml.x - origin.x][ml.y - origin.y], ir.getID());
-                }
             }
         }
     }
