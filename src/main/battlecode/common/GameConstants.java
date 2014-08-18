@@ -62,12 +62,6 @@ public interface GameConstants {
 	/** Range in which attacking scares cows (from the target location of the attack) */
     public static final int ATTACK_SCARE_RANGE = 36;
 	
-	/** Range in which NOISETOWER light attacks scare cows */
-    public static final int NOISE_SCARE_RANGE_SMALL = 9;
-	
-	/** Range in which NOISETOWER normal attacks scare cows */
-    public static final int NOISE_SCARE_RANGE_LARGE = 36;
-
 	/** DEPRECATED. Number of turns after taking damage before a SOLDIER begins regenerating. Will be equal to HEAL_TURN_DELAY. */
     public static final int SOLDIER_HEAL_TURN_DELAY = 30;
 	

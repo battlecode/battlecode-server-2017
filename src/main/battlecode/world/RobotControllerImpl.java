@@ -309,7 +309,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void selfDestruct() throws GameActionException {
-        if (robot.type != RobotType.SOLDIER && robot.type != RobotType.NOISETOWER) {
+        if (robot.type != RobotType.SOLDIER) {
             throw new GameActionException(GameActionExceptionType.CANT_DO_THAT_BRO, "only soldiers and noise towers can self destruct");
         }
         if (robot.type == RobotType.SOLDIER) {
@@ -808,18 +808,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertCanAttack(loc, RobotLevel.ON_GROUND);
         assertNoActionDelay();
         robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND), robot.calculateAttackActionDelay(robot.type));
-    }
-
-    public void attackSquareLight(MapLocation loc) throws GameActionException {
-        if (getType() != RobotType.NOISETOWER) {
-            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT_BRO, "Only Noise Towers can use a light attack");
-        }
-        assertNotAttacking();
-        assertNotMoving();
-        assertNotNull(loc);
-        assertCanAttack(loc, RobotLevel.ON_GROUND);
-        assertNoActionDelay();
-        robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND, 1), robot.calculateAttackActionDelay(robot.type));
     }
 
     //************************************

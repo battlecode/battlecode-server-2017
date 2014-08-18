@@ -224,11 +224,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             {
                 // first tie breaker - total # of cows in pastrs
                 // second tie breaker - total # of enemy robots killed 
-                double cowsDiff = gameMap.getNeutralsMap().getScoreChange(Team.A, gameObjects) - gameMap.getNeutralsMap().getScoreChange(Team.B, gameObjects);
                 double killDiff = teamKills[Team.A.ordinal()] - teamKills[Team.B.ordinal()];
                 
-                if (!(setWinnerIfNonzero(cowsDiff, DominationFactor.BARELY_BEAT) ||
-                      setWinnerIfNonzero(killDiff, DominationFactor.BARELY_BEAT) ))
+                if ( setWinnerIfNonzero(killDiff, DominationFactor.BARELY_BEAT ))
                 {
                     // just tiebreak by ID
                     if (HQA.getID() < HQB.getID())
@@ -735,37 +733,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             gameMap.getNeutralsMap().updateWithAttack(s);
             
 			break;
-        case NOISETOWER:
-            if (s.getAttackType() == 0) {
-                gameMap.getNeutralsMap().updateWithNoiseSource(targetLoc, GameConstants.NOISE_SCARE_RANGE_LARGE);
-            } else {
-                gameMap.getNeutralsMap().updateWithNoiseSource(targetLoc, GameConstants.NOISE_SCARE_RANGE_SMALL);
-            }
 		default:
 			// ERROR, should never happen
 		}
-        
-        // TODO if we want units to not damange allied units
-        // TODO CORY FIX IT
-//        switch (attacker.type) {
-//            case SOLDIER:
-//                break;
-//            case ARTILLERY:
-//            	int dist = (int)Math.sqrt(GameConstants.ARTILLERY_SPLASH_RADIUS_SQUARED);
-//            	InternalRobot target;
-//                for (int dx=-dist; dx<=dist; dx++)
-//                	for (int dy=-dist; dy<=dist; dy++)
-//                	{
-//                		if (dx==0 && dy==0) continue;
-//                		target = getRobot(targetLoc.add(dx, dy), level);
-//                		if (target != null)
-//                			target.takeDamage(attacker.type.attackPower, attacker);
-//                	}
-//                		
-//                break;
-//            default:
-//            	// ERROR, should never happen
-//        }
         
         addSignal(s);
         removeDead();

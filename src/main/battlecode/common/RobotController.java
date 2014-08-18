@@ -287,19 +287,10 @@ public interface RobotController {
 
     /**   
      * Attacks the given location
-	 * Also applies to NOISETOWER, but does not deal damage in that case
 	 * Creates a long-range noise at the targeted location
      * @throws GameActionException if the robot cannot attack the given square
      */
     public void attackSquare(MapLocation loc) throws GameActionException;
-
-	/**
-     * NOISETOWER only
-     * 'Attacks' the given location
-     * Does not deal damage, but creates a short-range noise at the targeted location
-     * @throws GameActionException if the robot cannot attack the given square
-     */
-    public void attackSquareLight(MapLocation loc) throws GameActionException;
 
     // ***********************************
     // ****** BROADCAST METHODS *******
