@@ -94,12 +94,6 @@ public interface RobotController {
      */
     public double senseTeamMilkQuantity(Team t);
 
-	/**
-     * Gets the team's current robot count (with weighting).
-     * @return the total number of robots controlled (with weighting).
-     */
-    public int senseRobotCount();
-
     /**
      * Returns the object at the given location, or <code>null</code>
      * if there is no object there.

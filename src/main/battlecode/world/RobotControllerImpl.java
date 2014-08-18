@@ -187,9 +187,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can spawn.");
         assertNotMoving();
         // check robot limit
-        if (gameWorld.countRobots(getTeam()) >= GameConstants.MAX_ROBOTS) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Maximum robot limit reached.");
-        }
 
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(type.level, loc))
@@ -220,7 +217,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         
         //assertHaveResource(cost);
     	//gameWorld.adjustResources(getTeam(), -cost);
-        robot.activateCapturing(new CaptureSignal(getLocation(), type, robot.getTeam(), false, robot), type.captureTurns);
+        robot.activateCapturing(new CaptureSignal(getLocation(), type, robot.getTeam(), false, robot), type.buildTurns);
     
     }
     
@@ -336,10 +333,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         } else {
             return ((int) (gameWorld.resources(t) / GameConstants.OPPONENT_MILK_SENSE_ACCURACY)) * GameConstants.OPPONENT_MILK_SENSE_ACCURACY;
         }
-    }
-
-    public int senseRobotCount() {
-        return gameWorld.countRobots(getTeam());
     }
 
     public void assertCanSense(MapLocation loc) throws GameActionException {

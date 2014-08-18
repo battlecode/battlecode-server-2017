@@ -84,7 +84,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
     private double[] teamResources = new double[2];
     private double[] teamSpawnRate = new double[2];
-    private int[] teamRobotCount = new int[2];
     private int[] teamCapturingNumber = new int[2];
 
     private List<MapLocation> encampments = new ArrayList<MapLocation>();
@@ -261,10 +260,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         else if (n < 0)
             setWinner(Team.B, d);
         return n != 0;
-    }
-
-    public int countRobots(Team t) {
-        return teamRobotCount[t.ordinal()];
     }
     
     public int countEncampments(Team t) {
@@ -522,19 +517,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return gameMap.getTerrainTile(loc).isTraversableAtHeight(level) && (gameObjectsByLoc.get(new MapLocation3D(loc, level)) == null);
     }
 
-    public void splashDamageGround(MapLocation loc, double damage, double falloutFraction) {
-        //TODO: optimize this
-        InternalRobot[] robots = getAllRobotsWithinRadiusDonutSq(loc, 2, -1);
-        for (InternalRobot r : robots) {
-            if (r.getRobotLevel() == RobotLevel.ON_GROUND) {
-                if (r.getLocation().equals(loc))
-                    r.changeEnergonLevelFromAttack(-damage);
-                else
-                    r.changeEnergonLevelFromAttack(-damage * falloutFraction);
-            }
-        }
-    }
-
     public InternalObject[] getAllGameObjects() {
         return gameObjectsByID.values().toArray(new InternalObject[gameObjectsByID.size()]);
     }
@@ -709,6 +691,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             }
 
 			InternalRobot target;
+            // TODO: splash damage is currently gone
 			for (int dx = -1; dx <= 1; dx++)
 				for (int dy = -1; dy <= 1; dy++) {
 
@@ -717,8 +700,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 					if (target != null) {
 						if (dx == 0 && dy == 0) {
 							target.takeDamage(attacker.type.attackPower * rate, attacker);
-                        } else {
-							target.takeDamage(attacker.type.splashPower * rate, attacker);
                         }
 
                         if (target.getEnergonLevel() <= 0.0 && target.getTeam() != attacker.getTeam()) {
@@ -762,7 +743,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         if (obj instanceof InternalRobot) {
             InternalRobot r = (InternalRobot) obj;
 
-            teamRobotCount[r.getTeam().ordinal()] -= r.type.count;
             Integer currentCount = robotTypeCount.get(r.getTeam()).get(r.type);
             robotTypeCount.get(r.getTeam()).put(r.type, currentCount - 1);
 
@@ -869,7 +849,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         //note: this also adds the signal
         InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent);
         
-        teamRobotCount[robot.getTeam().ordinal()] += robot.type.count;
         Integer currentCount = robotTypeCount.get(robot.getTeam()).get(robot.type);
         if (currentCount == null) {
             currentCount = 0;
@@ -1022,6 +1001,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
     
     protected void adjustSpawnRate(Team t) {
-    	teamSpawnRate[t.ordinal()] = GameConstants.HQ_SPAWN_DELAY_CONSTANT_1 + Math.pow(countRobots(t), GameConstants.HQ_SPAWN_DELAY_CONSTANT_2);//10*GameConstants.HQ_SPAWN_DELAY/(10*GameConstants.HQ_SPAWN_DELAY/teamSpawnRate[t.ordinal()]+1);
+    	teamSpawnRate[t.ordinal()] = GameConstants.HQ_SPAWN_DELAY_CONSTANT_1;
     }
 }

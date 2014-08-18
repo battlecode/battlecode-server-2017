@@ -14,13 +14,11 @@ public enum RobotType {
     // AP = attack power
     // ATTACK = can attack?
     // BLDNG = is building?
-    // SPLASH = splash damage
-    // COUNT = contribution towards robot count
-    // CAPTURNS = number of turns required to build
-    //          LEVEL,      MXE    SR   AR  AR    AD      AP      ATTACK  BLDNG    SPLASH  COUNT CAPTURNS
-  	HQ          (ON_GROUND, 1000,  35,   0, 24,    2,     24,      true,   false,   0,      0,    0),
-    TOWER       (ON_GROUND,  500,  35,   0, 24,    2,     15,      true,   false,   0,      0,    0),
-    SOLDIER     (ON_GROUND,  100,  35,   0, 24,    2,    200,      true,   false,   0,      1,    0),
+    // BUILDTURNS = number of turns required to build
+    //          LEVEL,      MXE    SR   AR  AR    AD      AP      ATTACK  BLDNG   BUILDTURNS
+  	HQ          (ON_GROUND, 1000,  35,   0, 24,    2,     24,      true,   false,    0),
+    TOWER       (ON_GROUND,  500,  35,   0, 24,    2,     15,      true,   false,    0),
+    SOLDIER     (ON_GROUND,  100,  35,   0, 24,    2,    200,      true,   false,    0),
     ;
 
     /**
@@ -69,19 +67,9 @@ public enum RobotType {
     public final boolean isBuilding;
 
     /**
-     * Splash damage of attack.
-     */
-    public final double splashPower;
-
-    /**
-     * Amount the robot counts towards the total robot count.
-     */
-    public final int count;
-
-    /**
      * How many turns it takes to build this building.
      */
-    public final int captureTurns;
+    public final int buildTurns;
 
     /**
      * Returns true if the robot can attack robots at the given level.
@@ -99,9 +87,7 @@ public enum RobotType {
               double attackPower,
               boolean canAttack,
               boolean isBuilding,
-              double splashPower,
-              int count,
-              int captureTurns) {
+              int buildTurns) {
         this.level = level;
         this.maxHealth = maxHealth;
         this.sensorRadiusSquared = sensorRadiusSquared;
@@ -111,9 +97,7 @@ public enum RobotType {
         this.attackPower = attackPower;
         this.canAttack = canAttack;
         this.isBuilding = isBuilding;
-        this.splashPower = splashPower;
-        this.count = count;
-        this.captureTurns = captureTurns;
+        this.buildTurns = buildTurns;
     }
 
 }
