@@ -180,13 +180,22 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         RobotMonitor.endRunner();
     }
 
-    public void spawn(Direction dir) throws GameActionException {
-    	// only possible for HQ to spawn soldiers
-    	RobotType type = RobotType.SOLDIER;
-        if (robot.type != RobotType.HQ)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can spawn.");
+    public void mine() throws GameActionException {
+        // TODO: check if the unit is capable of mining (should be a parameter in RobotInfo)
         assertNotMoving();
-        // check robot limit
+        MapLocation loc = getLocation();
+        double delay = GameConstants.SOLDIER_MOVE_ACTION_DELAY;
+        robot.activateMovement(new MineSignal(loc, getTeam(), getType()), delay);
+    }
+
+    public void spawn(Direction dir, RobotType type) throws GameActionException {
+        if (!robot.type.isBuilding) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only buildings can spawn");
+        }
+        if (type.spawnSource != robot.type) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "This spawn can only be by a certain type");
+        }
+        assertNotMoving();
 
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(type.level, loc))
@@ -198,27 +207,30 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         robot.resetSpawnCounter();
     }
 
-    public void mine() throws GameActionException {
-        // TODO: check if the unit is capable of mining (should be a parameter in RobotInfo)
-        assertNotMoving();
-        MapLocation loc = getLocation();
-        double delay = GameConstants.SOLDIER_MOVE_ACTION_DELAY;
-        robot.activateMovement(new MineSignal(loc, getTeam(), getType()), delay);
-    }
     
-    public void construct(RobotType type) throws GameActionException {
-    	if (robot.type != RobotType.SOLDIER)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can capture encampments.");
+    public void build(Direction dir, RobotType type) throws GameActionException {
+    	if (robot.type != RobotType.FURBY && robot.type != RobotType.BUILDER)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only FURBY and BUILDER can build");
     	if (!type.isBuilding)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Must specify a valid encampment type to create");
+            throw new GameActionException(CANT_DO_THAT_BRO, "Can only build buildings");
+
+        // TODO: check requirements!!!
+
     	assertNotMoving();
         //assertIsEncampment(getLocation());
         //double cost = GameConstants.CAPTURE_POWER_COST * (gameWorld.getNumCapturing(getTeam()) + gameWorld.getEncampmentsByTeam(getTeam()).size() + 1);
         
         //assertHaveResource(cost);
     	//gameWorld.adjustResources(getTeam(), -cost);
-        robot.activateCapturing(new CaptureSignal(getLocation(), type, robot.getTeam(), false, robot), type.buildTurns);
-    
+
+        MapLocation loc = getLocation().add(dir);
+        if (!gameWorld.canMove(type.level, loc))
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
+
+        robot.activateMovement(
+        		new SpawnSignal(loc, type, robot.getTeam(), robot), 0
+        		);
+        robot.resetSpawnCounter();
     }
     
     public double senseCaptureCost() {
@@ -713,8 +725,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void move(Direction d) throws GameActionException {
-        if (robot.type != RobotType.SOLDIER)
-        	throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can move.");
+        if (robot.type.isBuilding)
+        	throw new GameActionException(CANT_DO_THAT_BRO, "Buildings can't move");
     	assertNotMoving();
         assertCanMove(d);
         assertNoActionDelay();

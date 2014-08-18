@@ -317,7 +317,7 @@ public interface RobotController {
      * @throws GameActionException   if location is already occupied (CANT_MOVE_THERE)
      * @throws GameActionException   if the maximum robot count has already been reached (CANT_DO_THAT_BRO)
      */
-    public void spawn(Direction dir) throws GameActionException;
+    public void spawn(Direction dir, RobotType type) throws GameActionException;
 
     /**
      * Mines the current square for ore.
@@ -332,7 +332,7 @@ public interface RobotController {
      * @param type
      * @throws GameActionException if it's not a soldier constructing or if the soldier is not constructing a structure
      */
-    public void construct(RobotType type) throws GameActionException;
+    public void build(Direction dir, RobotType type) throws GameActionException;
     
     /**
      * Ends the current round.

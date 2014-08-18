@@ -7,8 +7,8 @@ import static battlecode.common.RobotLevel.ON_GROUND;
  */
 public enum RobotType {
     //  isbuilding, spawn-source, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
-    HQ          (false, null, 0, 0, 0, 1000, 24, 24, 0, 2, 0, 0, 35, 10000),    
-    TOWER       (false, null, 0, 0, 0,  500, 15, 24, 0, 2, 0, 0, 35,  2000),
+    HQ          (true, null, 0, 0, 0, 1000, 24, 24, 0, 2, 0, 0, 35, 10000),    
+    TOWER       (true, null, 0, 0, 0,  500, 15, 24, 0, 2, 0, 0, 35,  2000),
 
     SUPPLYDEPOT                 (true, null, 100,  20, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
     TECHNOLOGYINSTITUTE         (true, null, 300,  80, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
