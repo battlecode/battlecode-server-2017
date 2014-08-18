@@ -7,24 +7,23 @@ import static battlecode.common.RobotLevel.ON_GROUND;
  */
 public enum RobotType {
     // MXE = max energon / health
-    // SR = sight range
-    // AR = attack radius
-    // AR = attack range
+    // SR = sight radius squared
+    // AR = attack radius squared
     // AD = attack delay
     // AP = attack power
     // ATTACK = can attack?
     // BLDNG = is building?
     // BUILDTURNS = number of turns required to build
-    //          LEVEL,      MXE    SR   AR  AR    AD      AP      ATTACK  BLDNG   BUILDTURNS
-  	HQ          (ON_GROUND, 1000,  35,   0, 24,    2,     24,      true,   false,    0),
-    TOWER       (ON_GROUND,  500,  35,   0, 24,    2,     15,      true,   false,    0),
-    SOLDIER     (ON_GROUND,  100,  35,   0, 24,    2,    200,      true,   false,    0),
+    //          MXE    SR   AR    AD      AP      ATTACK  BLDNG   BUILDTURNS
+  	HQ          (1000,  35, 24,    2,     24,      true,   false,    0),
+    TOWER       ( 500,  35, 24,    2,     15,      true,   false,    0),
+    SOLDIER     ( 100,  35, 24,    2,    200,      true,   false,    0),
     ;
 
     /**
      * The robot's level.
      */
-    public final RobotLevel level;
+    public final RobotLevel level = ON_GROUND;
 
     /**
      * The maximum amount of health the robot can have.
@@ -39,12 +38,7 @@ public enum RobotType {
     /**
      * The square of the maximum distance that the robot can attack.
      */
-    public final int attackRadiusMaxSquared;
-
-    /**
-     * The square of the minimum distance that the robot can attack.
-     */
-    public final int attackRadiusMinSquared;
+    public final int attackRadiusSquared;
 
     /**
      * Action delay due to attacks. Everything has attack delay 1, except for SOLDIERs, which have an attack delay specified as a game constant (consistent with information here).
@@ -78,21 +72,17 @@ public enum RobotType {
 				return canAttack;
     }
 
-    RobotType(RobotLevel level,
-              double maxHealth,
+    RobotType(double maxHealth,
               int sensorRadiusSquared,
-              int attackRadiusMinSquared,
-              int attackRadiusMaxSquared,
+              int attackRadiusSquared,
               int attackDelay,
               double attackPower,
               boolean canAttack,
               boolean isBuilding,
               int buildTurns) {
-        this.level = level;
         this.maxHealth = maxHealth;
         this.sensorRadiusSquared = sensorRadiusSquared;
-        this.attackRadiusMaxSquared = attackRadiusMaxSquared;
-        this.attackRadiusMinSquared = attackRadiusMinSquared;
+        this.attackRadiusSquared = attackRadiusSquared;
         this.attackDelay = attackDelay;
         this.attackPower = attackPower;
         this.canAttack = canAttack;

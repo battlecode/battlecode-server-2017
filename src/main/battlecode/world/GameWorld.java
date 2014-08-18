@@ -889,12 +889,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	MapLocation targetLoc = medbay.getLocation();
     	RobotLevel level = RobotLevel.ON_GROUND;
     	
-    	int dist = (int)Math.sqrt(medbay.type.attackRadiusMaxSquared);
+    	int dist = (int)Math.sqrt(medbay.type.attackRadiusSquared);
     	InternalRobot target;
         for (int dx=-dist; dx<=dist; dx++)
         	for (int dy=-dist; dy<=dist; dy++)
         	{
-        		if (dx*dx+dy*dy > medbay.type.attackRadiusMaxSquared) continue;
+        		if (dx*dx+dy*dy > medbay.type.attackRadiusSquared) continue;
         		target = getRobot(targetLoc.add(dx, dy), level);
         		if (target != null)
         			if (target.getTeam() == medbay.getTeam() && target.type != RobotType.HQ)
@@ -909,12 +909,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	MapLocation targetLoc = shields.getLocation();
     	RobotLevel level = RobotLevel.ON_GROUND;
     	
-    	int dist = (int)Math.sqrt(shields.type.attackRadiusMaxSquared);
+    	int dist = (int)Math.sqrt(shields.type.attackRadiusSquared);
     	InternalRobot target;
         for (int dx=-dist; dx<=dist; dx++)
         	for (int dy=-dist; dy<=dist; dy++)
         	{
-        		if (dx*dx+dy*dy > shields.type.attackRadiusMaxSquared) continue;
+        		if (dx*dx+dy*dy > shields.type.attackRadiusSquared) continue;
         		target = getRobot(targetLoc.add(dx, dy), level);
         		if (target != null)
         			if (target.getTeam() == shields.getTeam())
@@ -942,8 +942,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     protected static boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
         MapLocation myLoc = ir.getLocation();
         int d = myLoc.distanceSquaredTo(loc);
-        int attackRadiusMaxSquared = ir.getAttackRadiusMaxSquared();
-        return d <= attackRadiusMaxSquared && d >= ir.type.attackRadiusMinSquared;
+        int attackRadiusSquared = ir.getAttackRadiusSquared();
+        return d <= attackRadiusSquared;
     }
 
     // TODO: make a faster implementation of this

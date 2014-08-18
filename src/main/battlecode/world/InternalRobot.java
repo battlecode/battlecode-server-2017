@@ -378,8 +378,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     // includes buffs
-    public int getAttackRadiusMaxSquared() {
-        int base = type.attackRadiusMaxSquared;
+    public int getAttackRadiusSquared() {
+        int base = type.attackRadiusSquared;
         if (type == RobotType.HQ && myGameWorld.getRobotCount(getTeam(), RobotType.TOWER) >= 2) {
             return GameConstants.ATTACK_RADIUS_SQUARED_BUFFED_HQ;
         } else {
