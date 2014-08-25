@@ -71,11 +71,9 @@ public class RobotDoc implements Taglet {
 								append(builder, "Type", "Soldier");
 
             append(builder, "Max Health", String.format("%1.0f", rt.maxHealth));
-            if (rt.canAttack) {
-                append(builder, "Attack Radius Squared", String.format("%d", rt.attackRadiusMaxSquared));
-                append(builder, "Attack Power", String.format("%1.1f", rt.attackPower));
-                append(builder, "Attack Action Delay", String.format("%1.1f", rt.attackDelay));
-            }
+            append(builder, "Attack Radius Squared", String.format("%d", rt.attackRadiusSquared));
+            append(builder, "Attack Power", String.format("%1.1f", rt.attackPower));
+            append(builder, "Attack Action Delay", String.format("%1.1f", rt.attackDelay));
         } catch (Exception e) {
             e.printStackTrace();
         }

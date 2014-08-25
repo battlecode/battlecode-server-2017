@@ -26,6 +26,12 @@ public interface RobotController {
      * @return this robot's current health / hitpoints
      */
     public double getHealth();
+
+    /**
+     * Gets the team's total ore.
+     * @return the team's total ore
+     */
+    public double getTeamOre();
     
     /**
      * Gets the robot's current location.

@@ -98,7 +98,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     
     public void assertHaveResource(double amount) throws GameActionException {
     	if (amount > gameWorld.resources(getTeam()))
-    		throw new GameActionException(NOT_ENOUGH_RESOURCE, "You do not have enough MILK to do that.");
+    		throw new GameActionException(NOT_ENOUGH_RESOURCE, "You do not have enough ORE to do that.");
     }
     
     public void assertHaveUpgrade(Upgrade upgrade) throws GameActionException {
@@ -124,7 +124,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getEnergonLevel();
     }
 
-    public double getTeamPower() {
+    public double getTeamOre() {
         return gameWorld.resources(getTeam());
     }
     
@@ -195,7 +195,12 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (type.spawnSource != robot.type) {
             throw new GameActionException(CANT_DO_THAT_BRO, "This spawn can only be by a certain type");
         }
+
         assertNotMoving();
+        double cost = type.oreCost;
+        
+        assertHaveResource(cost);
+    	gameWorld.adjustResources(getTeam(), -cost);
 
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(type.level, loc))
@@ -214,14 +219,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	if (!type.isBuilding)
             throw new GameActionException(CANT_DO_THAT_BRO, "Can only build buildings");
 
-        // TODO: check requirements!!!
-
     	assertNotMoving();
-        //assertIsEncampment(getLocation());
-        //double cost = GameConstants.CAPTURE_POWER_COST * (gameWorld.getNumCapturing(getTeam()) + gameWorld.getEncampmentsByTeam(getTeam()).size() + 1);
+        double cost = type.oreCost;
         
-        //assertHaveResource(cost);
-    	//gameWorld.adjustResources(getTeam(), -cost);
+        assertHaveResource(cost);
+    	gameWorld.adjustResources(getTeam(), -cost);
 
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(type.level, loc))
