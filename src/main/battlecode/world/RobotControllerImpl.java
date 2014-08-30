@@ -182,6 +182,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public void mine() throws GameActionException {
         // TODO: check if the unit is capable of mining (should be a parameter in RobotInfo)
+        if (robot.type != RobotType.FURBY && robot.type != RobotType.MINER) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only FURBY and MINER can mine");
+        }
         assertNotMoving();
         MapLocation loc = getLocation();
         double delay = GameConstants.SOLDIER_MOVE_ACTION_DELAY;
@@ -218,6 +221,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Only FURBY and BUILDER can build");
     	if (!type.isBuilding)
             throw new GameActionException(CANT_DO_THAT_BRO, "Can only build buildings");
+
+        // check dependencies
+        if (type.dependency1 != null && gameWorld.getRobotTypeCount(getTeam(), type.dependency1) == 0) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build");
+        }
+        if (type.dependency2 != null && gameWorld.getRobotTypeCount(getTeam(), type.dependency1) == 0) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build");
+        }
 
     	assertNotMoving();
         double cost = type.oreCost;

@@ -196,6 +196,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	return teamCapturingNumber[team.ordinal()];
     }
 
+    public int getRobotTypeCount(Team team, RobotType type) {
+        if (robotTypeCount.get(team).containsKey(type)) {
+            return robotTypeCount.get(team).get(type);
+        } else {
+            return 0;
+        }
+    }
+
     public void processEndOfRound() {
         // process all gameobjects
         InternalObject[] gameObjects = new InternalObject[gameObjectsByID.size()];
@@ -878,7 +886,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	MapLocation loc = s.getMineLoc();
         // TODO: calculate ore change amount based on unit type
         int baseOre = gameMap.getOre(loc);
-        int ore = baseOre == 0 ? baseOre : Math.max(2, baseOre / 100); // TODO: is it min or max?
+        int ore = baseOre == 0 ? baseOre : (s.getMinerType() == RobotType.FURBY ?  Math.max(2, baseOre / 100) : Math.max(3, baseOre / 30)); // TODO: is it min or max?
         adjustResources(s.getMineTeam(), ore);
     	addSignal(s);
     }
