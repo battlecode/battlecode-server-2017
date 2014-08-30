@@ -224,16 +224,33 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         addSignal(new NeutralsTeamSignal(gameObjects, gameMap.getWidth(), gameMap.getHeight()));
 
         if (timeLimitReached() && winner == null) {
-            // main tie breaker = milk
             InternalRobot HQA = baseHQs.get(Team.A);
             InternalRobot HQB = baseHQs.get(Team.B);
-            if (!(setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.BARELY_BEAT)))
+            // tiebreak by number of towers
+            // tiebreak by hq energon level
+            if (!(setWinnerIfNonzero(getRobotCount(Team.A, RobotType.TOWER) - getRobotCount(Team.B, RobotType.TOWER), DominationFactor.BARELY_BEAT)) &&
+                !(setWinnerIfNonzero(HQA.getEnergonLevel() - HQB.getEnergonLevel(), DominationFactor.BARELY_BEAT)))
             {
-                // first tie breaker - total # of cows in pastrs
-                // second tie breaker - total # of enemy robots killed 
-                double killDiff = teamKills[Team.A.ordinal()] - teamKills[Team.B.ordinal()];
-                
-                if ( setWinnerIfNonzero(killDiff, DominationFactor.BARELY_BEAT ))
+                // tiebreak by total tower health
+                // tiebreak by number of handwash stations
+
+                double towerDiff = 0.0;
+                InternalObject[] objs = getAllGameObjects();
+                for (InternalObject obj : objs) {
+                    if (obj instanceof InternalRobot) {
+                        InternalRobot ir = (InternalRobot) obj;
+                        if (ir.type == RobotType.TOWER) {
+                            if (ir.getTeam() == Team.A) {
+                                towerDiff += ir.getEnergonLevel();
+                            } else {
+                                towerDiff -= ir.getEnergonLevel();
+                            }
+                        }
+                    }
+                }
+
+                if ( !(setWinnerIfNonzero(towerDiff, DominationFactor.BARELY_BEAT )) &&
+                     !(setWinnerIfNonzero(getRobotCount(Team.A, RobotType.HANDWASHSTATION) - getRobotCount(Team.B, RobotType.HANDWASHSTATION), DominationFactor.BARELY_BEAT)))
                 {
                     // just tiebreak by ID
                     if (HQA.getID() < HQB.getID())
