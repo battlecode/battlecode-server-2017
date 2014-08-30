@@ -182,7 +182,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //***********************************
 
     public void yield() {
-        int bytecodesBelowBase = GameConstants.BYTECODE_LIMIT - RobotMonitor.getBytecodesUsed();
+        //int bytecodesBelowBase = GameConstants.BYTECODE_LIMIT - RobotMonitor.getBytecodesUsed();
         //if (bytecodesBelowBase > 0)
             //gameWorld.adjustResources(getTeam(), GameConstants.POWER_COST_PER_BYTECODE * bytecodesBelowBase);
         RobotMonitor.endRunner();

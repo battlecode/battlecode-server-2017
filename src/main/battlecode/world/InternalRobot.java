@@ -709,7 +709,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public int getBytecodeLimit() {
-        return canExecuteCode() && upkeepPaid ? GameConstants.BYTECODE_LIMIT : 0;
+        return canExecuteCode() && upkeepPaid ? type.bytecodeLimit : type.bytecodeLimit / 2;
     }
 
     public boolean hasBeenAttacked() {

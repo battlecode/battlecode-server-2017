@@ -26,9 +26,6 @@ public interface GameConstants {
     /** The number of indicator strings that a player can associate with a robot */
     public static final int NUMBER_OF_INDICATOR_STRINGS = 3;
     
-    /** The base number of bytecodes a robot can execute each round */
-    public static final int BYTECODE_LIMIT = 10000;
-    
     /** The number of longs that your team can remember between games. */
     public static final int TEAM_MEMORY_LENGTH = 32;
 
