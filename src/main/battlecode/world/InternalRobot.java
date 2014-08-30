@@ -69,6 +69,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     private int roundsSinceLastDamage;
     private int roundsSinceLastSpawn;
+    private int roundsAlive;
 
     private boolean didSelfDestruct;
 
@@ -84,6 +85,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         this.type = type;
 
         myEnergonLevel = getMaxEnergon();
+        if (type.isBuilding && type != RobotType.HQ && type != RobotType.TOWER) {
+            myEnergonLevel /= 2.0;
+        }
         myShieldLevel = 0.0;
         
         researchRounds = 0;
@@ -96,6 +100,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
         roundsSinceLastDamage = 0;
         roundsSinceLastSpawn = Integer.MAX_VALUE / 2;
+        roundsAlive = 0;
 
 //        incomingMessageQueue = new LinkedList<Message>();
 
@@ -167,6 +172,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     
     public boolean canExecuteCode() {
     	if (getEnergonLevel() <= 0.0) return false;
+        if (type.isBuilding && type != RobotType.HQ && type != RobotType.TOWER && roundsAlive < type.buildTurns) return false;
     	return true;
     }
 
@@ -259,6 +265,12 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             }
         } else {
             roundsSinceLastSpawn++;
+        }
+
+        roundsAlive++;
+        // after building is done, double health
+        if (type.isBuilding && roundsAlive == type.buildTurns && type != RobotType.HQ && type != RobotType.TOWER) {
+            myEnergonLevel *= 2;
         }
 
       	// quick hack to make mining work. move me out later

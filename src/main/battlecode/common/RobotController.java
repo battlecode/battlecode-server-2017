@@ -201,7 +201,7 @@ public interface RobotController {
      * Returns location of the enemy team's HQ (unconstrained by sensor range or distance)
      * @return the enemy team's HQ location
      */
-    //public MapLocation senseEnemyHQLocation();
+    public MapLocation senseEnemyHQLocation();
 
     /**
      * Returns the amount of ore at a given location.

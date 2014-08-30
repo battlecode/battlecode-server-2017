@@ -210,7 +210,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         robot.activateMovement(
-        		new SpawnSignal(loc, type, robot.getTeam(), robot), 0
+        		new SpawnSignal(loc, type, robot.getTeam(), robot), type.buildTurns
         		);
         robot.resetSpawnCounter();
     }
@@ -241,7 +241,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         robot.activateMovement(
-        		new SpawnSignal(loc, type, robot.getTeam(), robot), 0
+        		new SpawnSignal(loc, type, robot.getTeam(), robot), type.buildTurns
         		);
         robot.resetSpawnCounter();
     }
