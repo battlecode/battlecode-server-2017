@@ -20,14 +20,23 @@ public class ActionDelaySignal extends Signal {
     /**
      * The amount of action delay of each robot.
      */
-    private final double[] amountActionDelay;
+    private final double[] amountAttackDelay;
+    private final double[] amountMovementDelay;
+    private final double[] amountCooldownDelay;
+    private final double[] amountLoadingDelay;
 
     public ActionDelaySignal(InternalRobot[] robots) {
         robotIDs = new int[robots.length];
-        amountActionDelay = new double[robots.length];
+        amountAttackDelay = new double[robots.length];
+        amountMovementDelay = new double[robots.length];
+        amountCooldownDelay = new double[robots.length];
+        amountLoadingDelay = new double[robots.length];
         for (int i = 0; i < robots.length; i++) {
             robotIDs[i] = robots[i].getID();
-            amountActionDelay[i] = robots[i].getActionDelay();
+            amountAttackDelay[i] = robots[i].getAttackDelay();
+            amountMovementDelay[i] = robots[i].getMovementDelay();
+            amountLoadingDelay[i] = robots[i].getLoadingDelay();
+            amountCooldownDelay[i] = robots[i].getCooldownDelay();
         }
     }
 
@@ -35,7 +44,19 @@ public class ActionDelaySignal extends Signal {
         return robotIDs;
     }
 
-    public double[] getActionDelays() {
-        return amountActionDelay;
+    public double[] getAttackDelays() {
+        return amountAttackDelay;
+    }
+
+    public double[] getMovementDelays() {
+        return amountMovementDelay;
+    }
+
+    public double[] getCooldownDelays() {
+        return amountCooldownDelay;
+    }
+
+    public double[] getLoadingDelays() {
+        return amountLoadingDelay;
     }
 }

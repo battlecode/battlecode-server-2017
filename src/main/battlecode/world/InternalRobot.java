@@ -73,7 +73,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     private boolean didSelfDestruct;
 
-    private double actionDelay;
+    private double timeUntilMovement;
+    private double timeUntilAttack;
+    private double loadingDelay;
+    private double cooldownDelay;
 
     private int hatCount = 0;
 
@@ -110,7 +113,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
         didSelfDestruct = false;
         
-        actionDelay = 0.0;
+        timeUntilMovement = 0.0;
+        timeUntilAttack = 0.0;
+        loadingDelay = 0.0;
+        cooldownDelay = 0.0;
     }
     
     public void clearResearching() {
@@ -151,19 +157,63 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         myGameWorld.visitSignal(s);
     }
 
-    public void addActionDelay(double ad) {
-        actionDelay += ad;
+    public void addTimeUntilMovement(double time) {
+        timeUntilMovement += time;
     }
 
-    public void decrementActionDelay() {
-        actionDelay--;
-        if (actionDelay < 0.0) {
-            actionDelay = 0.0;
+    public void addTimeUntilAttack(double time) {
+        timeUntilAttack += time;
+    }
+
+    public void addCooldownDelay(double delay) {
+        cooldownDelay += delay;
+    }
+
+    public void addLoadingDelay(double delay) {
+        loadingDelay += delay;
+    }
+
+    public void decrementDelays() {
+        timeUntilAttack--;
+        timeUntilMovement--;
+        loadingDelay--;
+        cooldownDelay--;
+        if (timeUntilAttack < 0.0) {
+            timeUntilAttack = 0.0;
+        }
+        if (timeUntilMovement < 0.0) {
+            timeUntilMovement = 0.0;
+        }
+        if (loadingDelay < 0.0) {
+            loadingDelay = 0.0;
+        }
+        if (cooldownDelay < 0.0) {
+            cooldownDelay = 0.0;
         }
     }
 
-    public double getActionDelay() {
-        return actionDelay;
+    public double getTimeUntilMovement() {
+        return Math.max(timeUntilMovement, loadingDelay);
+    }
+
+    public double getTimeUntilAttack() {
+        return Math.max(timeUntilAttack, cooldownDelay);
+    }
+
+    public double getAttackDelay() {
+        return timeUntilAttack;
+    }
+
+    public double getMovementDelay() {
+        return timeUntilMovement;
+    }
+
+    public double getLoadingDelay() {
+        return loadingDelay;
+    }
+
+    public double getCooldownDelay() {
+        return cooldownDelay;
     }
     
     public Upgrade getResearchingUpgrade() {
@@ -178,14 +228,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public void resetSpawnCounter() {
         roundsSinceLastSpawn = 0;
-    }
-
-    public boolean canSpawn(double spawnRate) {
-        return roundsSinceLastSpawn >= spawnRate;
-    }
-
-    public int roundsUntilCanSpawn(double spawnRate) {
-        return Math.max(0, (int) Math.ceil(spawnRate - roundsSinceLastSpawn));
     }
 
     @Override
@@ -204,7 +246,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void processBeginningOfTurn() {
-        decrementActionDelay();
+        decrementDelays();
     	
     	// TODO we can do beginning of turn damage/healing/etc here
         // TODO CORY FIX IT
@@ -248,14 +290,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         
     	broadcastMap = new HashMap<Integer, Integer>();
         broadcasted = false;
-
-        if (type != RobotType.HQ) {
-            int bytecodesPenalty = getBytecodesUsed() - GameConstants.FREE_BYTECODES;
-            if (bytecodesPenalty < 0) {
-                bytecodesPenalty = 0;
-            }
-            addActionDelay(bytecodesPenalty * GameConstants.BYTECODE_PENALTY);
-        }
        
         if (type != RobotType.HQ) { 
             roundsSinceLastDamage++;
@@ -540,14 +574,16 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return r.attackDelay;
     }
 
-    public void activateMovement(Signal s, double delay) {
+    public void activateMovement(Signal s, double attackDelay, double movementDelay) {
         movementSignal = s;
-        addActionDelay(delay);
+        addLoadingDelay(attackDelay);
+        addTimeUntilMovement(movementDelay);
     }
     
-    public void activateAttack(Signal s, double delay) {
+    public void activateAttack(Signal s, double attackDelay, double movementDelay) {
         attackSignal = s;
-        addActionDelay(delay);
+        addTimeUntilAttack(attackDelay);
+        addCooldownDelay(movementDelay);
     }
 
     public void addBroadcast(int channel, int data) {
@@ -570,13 +606,15 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	defusingRounds = delay;
     	defusingLocation = target;
     }
-    
+   
+    /* 
     public void activateCapturing(CaptureSignal s, int delay) {
     	myGameWorld.visitSignal(s);
     	capturingRounds = delay;
         addActionDelay(delay);
     	capturingType = s.getType();
     }
+    */
 
     public int getMiningRounds() {
     	return miningRounds;

@@ -116,8 +116,16 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //****** QUERY METHODS ********
     //*********************************
 
-    public double getActionDelay() {
-        return robot.getActionDelay();
+    public boolean isActive() {
+        return canMove() && canAttack();
+    }
+
+    public double getTimeUntilMovement() {
+        return robot.getTimeUntilMovement();
+    }
+
+    public double getTimeUntilAttack() {
+        return robot.getTimeUntilAttack();
     }
 
     public double getHealth() {
@@ -181,14 +189,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void mine() throws GameActionException {
-        // TODO: check if the unit is capable of mining (should be a parameter in RobotInfo)
         if (robot.type != RobotType.FURBY && robot.type != RobotType.MINER) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Only FURBY and MINER can mine");
         }
         assertNotMoving();
         MapLocation loc = getLocation();
         double delay = GameConstants.SOLDIER_MOVE_ACTION_DELAY;
-        robot.activateMovement(new MineSignal(loc, getTeam(), getType()), delay);
+        robot.activateMovement(new MineSignal(loc, getTeam(), getType()), delay, delay);
     }
 
     public void spawn(Direction dir, RobotType type) throws GameActionException {
@@ -210,7 +217,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         robot.activateMovement(
-        		new SpawnSignal(loc, type, robot.getTeam(), robot), type.buildTurns
+        		new SpawnSignal(loc, type, robot.getTeam(), robot), robot.type == RobotType.HQ ? 0 : type.buildTurns, type.buildTurns
         		);
         robot.resetSpawnCounter();
     }
@@ -241,7 +248,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         robot.activateMovement(
-        		new SpawnSignal(loc, type, robot.getTeam(), robot), type.buildTurns
+        		new SpawnSignal(loc, type, robot.getTeam(), robot), type.buildTurns, type.buildTurns
         		);
         robot.resetSpawnCounter();
     }
@@ -257,7 +264,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	if (gameWorld.hasUpgrade(getTeam(), upgrade))
     		throw new GameActionException(CANT_DO_THAT_BRO, "You already have that upgrade. ("+upgrade+")");
     	assertNotMoving();
-        robot.activateMovement(new ResearchSignal(robot, upgrade), 1);
+        robot.activateMovement(new ResearchSignal(robot, upgrade), 1, 1);
     }
     
     public int checkResearchProgress(Upgrade upgrade) throws GameActionException {
@@ -524,7 +531,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         InternalRobot ir = castInternalRobot(r);
         assertCanSense(ir);
         return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(),
-                ir.getDirection(), ir.type, ir.getTeam(), ir.getActionDelay(),
+                ir.getDirection(), ir.type, ir.getTeam(), 0,
                 ir.getCapturingType() != null, ir.getCapturingType(), ir.getCapturingRounds());
     }
     
@@ -704,37 +711,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return gameWorld.getGameMap().getNeutralsMap().get(m);
     }
 
-    public void assertNoActionDelay() throws GameActionException {
-        if (robot.getActionDelay() >= 1.0) {
-            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT_BRO, "You have action delay and cannot do that");
-        }
-    }
-
     // ***********************************
     // ****** MOVEMENT METHODS ********
     // ***********************************
 
-    public int roundsUntilActive() {
-        int spawnRounds = 0;
-        if (robot.type == RobotType.HQ) {
-            gameWorld.adjustSpawnRate(getTeam());
-            spawnRounds = robot.roundsUntilCanSpawn(gameWorld.getSpawnRate(getTeam()));
-        }
-        return Math.max((int) robot.getActionDelay(), spawnRounds);
-    }
-
-    public boolean isActive() {
-        boolean canSpawn = true;
-        if (robot.type == RobotType.HQ) {
-            gameWorld.adjustSpawnRate(getTeam());
-            canSpawn = robot.canSpawn(gameWorld.getSpawnRate(getTeam()));
-        }
-        return robot.getActionDelay() < 1.0 && canSpawn;
-    }
-
     public void assertNotMoving() throws GameActionException {
-        if (!isActive())
-            throw new GameActionException(NOT_ACTIVE, "This robot has action delay and cannot move.");
+        if (!canMove())
+            throw new GameActionException(NOT_ACTIVE, "This robot has movement delay and cannot move.");
     }
 
     public void move(Direction d) throws GameActionException {
@@ -742,20 +725,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         	throw new GameActionException(CANT_DO_THAT_BRO, "Buildings can't move");
     	assertNotMoving();
         assertCanMove(d);
-        assertNoActionDelay();
         double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()), MovementType.RUN);
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-                true, (int) delay, MovementType.RUN), delay);
-    }
-
-    public void sneak(Direction d) throws GameActionException {
-        if (robot.type != RobotType.SOLDIER)
-        	throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can move.");
-    	assertNotMoving();
-        assertCanMove(d);
-        double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()), MovementType.SNEAK);
-        robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-                true, (int) delay, MovementType.SNEAK), delay);
+                true, (int) delay, MovementType.RUN), robot.type.loadingDelay, delay);
     }
 
     public boolean canMove(Direction d) {
@@ -763,6 +735,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             return false;
         assertValidDirection(d);
         return gameWorld.canMove(robot.getRobotLevel(), getLocation().add(d));
+    }
+
+    public boolean canMove() {
+        return getTimeUntilMovement() < 1;
     }
 
     public void assertCanMove(Direction d) throws GameActionException {
@@ -781,17 +757,21 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
 
     public boolean isAttackActive() {
-        return !isActive();
+        return canAttack();
     }
 
     protected void assertNotAttacking() throws GameActionException {
-        if (isAttackActive())
+        if (!isAttackActive())
             throw new GameActionException(NOT_ACTIVE, "This robot has action delay and cannot attack.");
     }
 
     protected void assertCanAttack(MapLocation loc, RobotLevel height) throws GameActionException {
         if (!canAttackSquare(loc))
             throw new GameActionException(OUT_OF_RANGE, "That location is out of this robot's attack range");
+    }
+
+    public boolean canAttack() {
+        return getTimeUntilAttack() < 1;
     }
 
     public boolean canAttackSquare(MapLocation loc) {
@@ -812,8 +792,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotMoving();
         assertNotNull(loc);
         assertCanAttack(loc, RobotLevel.ON_GROUND);
-        assertNoActionDelay();
-        robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND), robot.calculateAttackActionDelay(robot.type));
+        robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND), robot.calculateAttackActionDelay(robot.type), robot.type.cooldownDelay);
     }
 
     //************************************
@@ -853,7 +832,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             gameWorld.adjustResources(getTeam(), -GameConstants.HAT_MILK_COST);
         }
         robot.incrementHatCount();
-    	robot.activateMovement(new HatSignal(robot, gameWorld.randGen.nextInt()), 1);
+    	robot.activateMovement(new HatSignal(robot, gameWorld.randGen.nextInt()), 0, 1);
     }
    
     public boolean hasUpgrade(Upgrade upgrade) {

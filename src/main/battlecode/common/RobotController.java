@@ -15,11 +15,8 @@ public interface RobotController {
     // ****** QUERY METHODS ********
     // *********************************
 
-    /**
-     * Gets the robot's current action delay.
-     * @return this robot's current action delay
-     */
-    public double getActionDelay();
+    public double getTimeUntilMovement();
+    public double getTimeUntilAttack();
 
     /**
      * Gets the robot's current health (hitpoints).
@@ -233,7 +230,7 @@ public interface RobotController {
      * Returns the number of rounds until the robot is active again
      * @return the number of rounds until this robot's action cooldown ends, or 0 if it is already active
      */
-    public int roundsUntilActive();
+    //public int roundsUntilActive();
 
     /**
      * Returns if the robot is active (able to move, construct, and attack)
@@ -254,7 +251,7 @@ public interface RobotController {
      * @param dir
      * @throws GameActionException if the robot cannot move in this direction
      */
-    public void sneak(Direction dir) throws GameActionException;
+    //public void sneak(Direction dir) throws GameActionException;
 
     /**
      * Tells whether this robot can move in the given direction. Takes into
@@ -267,6 +264,8 @@ public interface RobotController {
      */
     public boolean canMove(Direction dir);
 
+    public boolean canMove();
+
     // ***********************************
     // ****** ATTACK METHODS *******
     // ***********************************
@@ -277,6 +276,8 @@ public interface RobotController {
      * Does not take into account whether the robot is currently attacking
      */
     public boolean canAttackSquare(MapLocation loc);
+
+    public boolean canAttack();
 
     /**   
      * Attacks the given location
