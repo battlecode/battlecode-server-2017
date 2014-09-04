@@ -259,17 +259,17 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public void researchUpgrade(Upgrade upgrade) throws GameActionException {
-    	if (robot.type != RobotType.HQ)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can research.");
+    	if (robot.type != upgrade.researcher)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only certain units can research.");
     	if (gameWorld.hasUpgrade(getTeam(), upgrade))
     		throw new GameActionException(CANT_DO_THAT_BRO, "You already have that upgrade. ("+upgrade+")");
     	assertNotMoving();
+        assertHaveResource(upgrade.oreCost / upgrade.numRounds);
+    	gameWorld.adjustResources(getTeam(), -upgrade.oreCost / upgrade.numRounds);
         robot.activateMovement(new ResearchSignal(robot, upgrade), 1, 1);
     }
     
     public int checkResearchProgress(Upgrade upgrade) throws GameActionException {
-    	if (robot.type != RobotType.HQ)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can research.");
     	return gameWorld.getUpgradeProgress(getTeam(), upgrade);
     }
     
@@ -533,12 +533,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(),
                 ir.getDirection(), ir.type, ir.getTeam(), 0,
                 ir.getCapturingType() != null, ir.getCapturingType(), ir.getCapturingRounds());
-    }
-    
-    public boolean senseEnemyNukeHalfDone() throws GameActionException {
-    	if (getRobot().type != RobotType.HQ)
-    		throw new GameActionException(CANT_DO_THAT_BRO, "Only HQs can sense NUKE progress");
-    	return gameWorld.getUpgradeProgress(getTeam().opponent(), Upgrade.NUKE) >= Upgrade.NUKE.numRounds/2;
     }
 
     public MapLocation senseLocationOf(GameObject o) throws GameActionException {

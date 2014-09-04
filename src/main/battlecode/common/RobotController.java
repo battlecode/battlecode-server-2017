@@ -87,6 +87,12 @@ public interface RobotController {
      */
     public int getConstructingRounds();
 
+    /**
+     * Checks whether a given upgrade has been researched and is available.
+     * @param upgrade
+     */
+    public boolean hasUpgrade(Upgrade upgrade);
+
     // ***********************************
     // ****** SENSOR METHODS ********
     // ***********************************
@@ -365,6 +371,22 @@ public interface RobotController {
     public void resign();
 
     public void win();
+
+    /**
+     * Researches the given upgrade for a turn.
+     * Will only work if the robot is an HQ
+     * @param upgrade
+     * @throws GameActionException
+     */
+    public void researchUpgrade(Upgrade upgrade) throws GameActionException;
+    
+    /**
+     * Checks the total number of rounds a given research has been researched
+     * @param upgrade
+     * @return
+     * @throws GameActionException
+     */
+    public int checkResearchProgress(Upgrade upgrade) throws GameActionException;
 
     // ***********************************
     // ******** MISC. METHODS *********

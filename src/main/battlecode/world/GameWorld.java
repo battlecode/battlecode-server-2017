@@ -590,11 +590,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
     
     public void addUpgrade(Team t, Upgrade upgrade) {
-    	if(upgrade == Upgrade.NUKE) {
-    		getBaseHQ(t.opponent()).suicide();
-    	} else {
-    		upgrades.get(t).add(upgrade);
-    	}
+        upgrades.get(t).add(upgrade);
     }
 
     public RoundStats getRoundStats() {
