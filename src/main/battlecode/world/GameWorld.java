@@ -699,6 +699,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         RobotLevel level = s.getTargetHeight();
         
         switch (attacker.type) {
+        case FURBY:
 		case SOLDIER:
 		case HQ:
             double rate = 1.0;

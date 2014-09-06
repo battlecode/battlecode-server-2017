@@ -339,6 +339,8 @@ public interface RobotController {
      * @throws GameActionException if there is currently movement delay and the unit cannot mine
      */
     public void mine() throws GameActionException;
+
+    public boolean canBuild(Direction dir, RobotType type);
    
     /**
      * After a delay, kills the soldier and spawns a robot of the given building type

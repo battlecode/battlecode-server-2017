@@ -222,6 +222,33 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         robot.resetSpawnCounter();
     }
 
+    public boolean canBuild(Direction dir, RobotType type) {
+    	if (robot.type != RobotType.FURBY && robot.type != RobotType.BUILDER)
+            return false;
+    	if (!type.isBuilding)
+            return false;
+
+        // check dependencies
+        if (type.dependency1 != null && gameWorld.getRobotTypeCount(getTeam(), type.dependency1) == 0) {
+            return false;
+        }
+        if (type.dependency2 != null && gameWorld.getRobotTypeCount(getTeam(), type.dependency1) == 0) {
+            return false;
+        }
+        if (!canMove()) {
+            return false;
+        }
+        MapLocation loc = getLocation().add(dir);
+        if (!gameWorld.canMove(type.level, loc))
+            return false;
+
+        double cost = type.oreCost;
+    	if (cost > gameWorld.resources(getTeam())) {
+            return false;
+        }
+
+        return true;
+    }
     
     public void build(Direction dir, RobotType type) throws GameActionException {
     	if (robot.type != RobotType.FURBY && robot.type != RobotType.BUILDER)
@@ -231,10 +258,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
         // check dependencies
         if (type.dependency1 != null && gameWorld.getRobotTypeCount(getTeam(), type.dependency1) == 0) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build");
+            throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build of " + type);
         }
         if (type.dependency2 != null && gameWorld.getRobotTypeCount(getTeam(), type.dependency1) == 0) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build");
+            throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build of " + type);
         }
 
     	assertNotMoving();
