@@ -389,6 +389,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public Team getMine(MapLocation loc) {
     	return mineLocations.get(loc);
     }
+
+    public void resetUpgrade(Team t, Upgrade u) {
+        research.get(t).put(u, 0);
+    }
     
     public void researchUpgrade(Team t, Upgrade u) {
     	Integer i = research.get(t).get(u);
@@ -765,6 +769,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         if (obj instanceof InternalRobot) {
             InternalRobot r = (InternalRobot) obj;
 
+            // reset research
+            if (r.researchSignal != null) {
+                resetUpgrade(r.getTeam(), r.researchSignal.getUpgrade());
+            }
+
             Integer currentCount = robotTypeCount.get(r.getTeam()).get(r.type);
             robotTypeCount.get(r.getTeam()).put(r.type, currentCount - 1);
 
@@ -900,7 +909,18 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	MapLocation loc = s.getMineLoc();
         // TODO: calculate ore change amount based on unit type
         int baseOre = gameMap.getOre(loc);
-        int ore = baseOre == 0 ? baseOre : (s.getMinerType() == RobotType.FURBY ?  Math.max(2, baseOre / 100) : Math.max(3, baseOre / 30)); // TODO: is it min or max?
+        int ore = 0;
+        if (baseOre > 0) {
+            if (s.getMinerType() == RobotType.FURBY) {
+                ore = Math.min(2, baseOre / 100);
+            } else {
+                if (hasUpgrade(s.getMineTeam(), Upgrade.IMPROVEDMINING)) {
+                    ore = Math.min(baseOre / 30, 4);
+                } else {
+                    ore = Math.min(baseOre / 30, 3);
+                }
+            }
+        }
         adjustResources(s.getMineTeam(), ore);
     	addSignal(s);
     }

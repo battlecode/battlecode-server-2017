@@ -108,7 +108,7 @@ public interface GameConstants {
     public static final int HQ_CLOAK_RADIUS = 2;
 
     /** The amount of ore a team starts the game with. */
-    public static final int ORE_INITIAL_AMOUNT = 500;
+    public static final int ORE_INITIAL_AMOUNT = 50000; // TODO make this smaller
 
     // TODO maybe put in RobotType
     /** The attack radius of a buffed HQ. */
