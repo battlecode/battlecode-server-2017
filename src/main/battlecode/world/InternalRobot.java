@@ -21,6 +21,7 @@ import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.CaptureSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.RegenSignal;
+import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.SelfDestructSignal;
 import battlecode.world.signal.ShieldSignal;
 import battlecode.world.signal.SpawnSignal;
@@ -66,6 +67,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     private Signal movementSignal;
     private Signal attackSignal;
+    private ResearchSignal researchSignal;
 
     private int roundsSinceLastDamage;
     private int roundsSinceLastSpawn;
@@ -325,6 +327,14 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             myGameWorld.visitSignal(movementSignal);
             movementSignal = null;
         }
+
+        if (researchSignal != null) {
+            if (!myGameWorld.hasUpgrade(getTeam(), researchSignal.getUpgrade())) {
+                myGameWorld.visitSignal(researchSignal);
+            } else {
+                researchSignal = null;
+            }
+        }
         
         if (!type.isBuilding)
     	{
@@ -574,6 +584,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return r.attackDelay;
     }
 
+    public void activateResearch(ResearchSignal s, double attackDelay, double movementDelay) {
+        addLoadingDelay(attackDelay);
+        addTimeUntilMovement(movementDelay);
+
+        researchSignal = s;
+    }
+
     public void activateMovement(Signal s, double attackDelay, double movementDelay) {
         movementSignal = s;
         addLoadingDelay(attackDelay);
@@ -709,7 +726,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public int getBytecodeLimit() {
-        return canExecuteCode() && upkeepPaid ? type.bytecodeLimit : type.bytecodeLimit / 2;
+        return canExecuteCode() ? (upkeepPaid ? type.bytecodeLimit : type.bytecodeLimit / 2) : 0;
     }
 
     public boolean hasBeenAttacked() {

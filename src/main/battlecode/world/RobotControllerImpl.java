@@ -290,10 +290,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Only certain units can research.");
     	if (gameWorld.hasUpgrade(getTeam(), upgrade))
     		throw new GameActionException(CANT_DO_THAT_BRO, "You already have that upgrade. ("+upgrade+")");
+        if (checkResearchProgress(upgrade) > 0) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "You already started researching this upgrade. ("+upgrade+")");
+        }
     	assertNotMoving();
-        assertHaveResource(upgrade.oreCost / upgrade.numRounds);
-    	gameWorld.adjustResources(getTeam(), -upgrade.oreCost / upgrade.numRounds);
-        robot.activateMovement(new ResearchSignal(robot, upgrade), 1, 1);
+        assertHaveResource(upgrade.oreCost);
+    	gameWorld.adjustResources(getTeam(), -upgrade.oreCost);
+        robot.activateResearch(new ResearchSignal(robot, upgrade), upgrade.numRounds, upgrade.numRounds);
     }
     
     public int checkResearchProgress(Upgrade upgrade) throws GameActionException {

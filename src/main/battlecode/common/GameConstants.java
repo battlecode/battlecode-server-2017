@@ -60,16 +60,16 @@ public interface GameConstants {
     public static final int ATTACK_SCARE_RANGE = 36;
 	
 	/** DEPRECATED. Number of turns after taking damage before a SOLDIER begins regenerating. Will be equal to HEAL_TURN_DELAY. */
-    public static final int SOLDIER_HEAL_TURN_DELAY = 30;
+    public static final int SOLDIER_HEAL_TURN_DELAY = 0;
 	
 	/** DEPRECATED. Amount of health a regenerating soldier heals per turn. Will be equal to HEAL_RATE.  */
-    public static final double SOLDIER_HEAL_RATE = 0.50;
+    public static final double SOLDIER_HEAL_RATE = 0;
 
 	/** Number of turns after taking damage before a robot or structure begins regenerating*/
-    public static final int HEAL_TURN_DELAY = 30;
+    public static final int HEAL_TURN_DELAY = 0;
 	
 	/** Amount of health a regenerating robot or structure heals per turn */
-    public static final double HEAL_RATE = 0.50;
+    public static final double HEAL_RATE = 0;
 
 	/** Amount of milk necessary for victory */
     public static final double WIN_QTY = 10000000.0;
