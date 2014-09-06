@@ -82,12 +82,15 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     private int hatCount = 0;
 
+    private int buildDelay;
+
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
-                         boolean spawnedRobot) {
+                         boolean spawnedRobot, int buildDelay) {
         super(gw, loc, type.level, t);
 //        myDirection = Direction.values()[gw.getRandGen().nextInt(8)];
         this.type = type;
+        this.buildDelay = buildDelay;
 
         myEnergonLevel = getMaxEnergon();
         if (type.isBuilding && type != RobotType.HQ && type != RobotType.TOWER) {
@@ -224,7 +227,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     
     public boolean canExecuteCode() {
     	if (getEnergonLevel() <= 0.0) return false;
-        if (type.isBuilding && type != RobotType.HQ && type != RobotType.TOWER && roundsAlive < type.buildTurns) return false;
+        if (type.isBuilding && type != RobotType.HQ && type != RobotType.TOWER && roundsAlive < buildDelay) return false;
     	return true;
     }
 
@@ -305,7 +308,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
         roundsAlive++;
         // after building is done, double health
-        if (type.isBuilding && roundsAlive == type.buildTurns && type != RobotType.HQ && type != RobotType.TOWER) {
+        if (type.isBuilding && roundsAlive == buildDelay && type != RobotType.HQ && type != RobotType.TOWER) {
             myEnergonLevel *= 2;
         }
 
@@ -314,7 +317,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
         	if (capturingRounds > 0) {
         		if (--capturingRounds==0) {
-        			myGameWorld.visitSignal(new SpawnSignal(getLocation(), capturingType, getTeam(), this));
+        			myGameWorld.visitSignal(new SpawnSignal(getLocation(), capturingType, getTeam(), this, 0));
         			capturingRounds = -1;
         			suicide();
         			return;

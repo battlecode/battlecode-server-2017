@@ -878,7 +878,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
 
         //note: this also adds the signal
-        InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent);
+        InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent, s.getDelay());
         
         Integer currentCount = robotTypeCount.get(robot.getTeam()).get(robot.type);
         if (currentCount == null) {

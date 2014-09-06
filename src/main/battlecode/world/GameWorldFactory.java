@@ -20,22 +20,22 @@ public class GameWorldFactory {
         return handler.createGameWorld(teamA, teamB, archonMemory);
     }
 
-    public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay) {
+    public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay, int buildDelay) {
 
         // first, make the robot
         InternalRobot robot;
-				robot = new InternalRobot(gw, type, loc, t, wakeDelay);
+				robot = new InternalRobot(gw, type, loc, t, wakeDelay, buildDelay);
 				loadPlayer(gw, robot, t, parent);
         return robot;
     }
 
     // defaults to wakeDelay = true
-    public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent) {
-        return createPlayer(gw, type, loc, t, parent, true);
+    public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, int buildDelay) {
+        return createPlayer(gw, type, loc, t, parent, true, buildDelay);
     }
 
     private static void loadPlayer(GameWorld gw, InternalRobot robot, Team t, InternalRobot parent) {
-        gw.addSignal(new SpawnSignal(robot, parent));
+        gw.addSignal(new SpawnSignal(robot, parent, 0));
         RobotControllerImpl rc = new RobotControllerImpl(gw, robot);
         String teamName = gw.getTeamName(t);
         PlayerFactory.loadPlayer(rc, teamName);

@@ -41,6 +41,8 @@ public class SpawnSignal extends Signal {
      */
     private final Team team;
 
+    private final int delay;
+
 //    /**
 //     * The new robot's direction
 //     */
@@ -49,8 +51,9 @@ public class SpawnSignal extends Signal {
     /**
      * Creates a signal for a robot that was just spawned
      */
-    public SpawnSignal(InternalRobot child, InternalRobot parent) {
+    public SpawnSignal(InternalRobot child, InternalRobot parent, int delay) {
         robotID = child.getID();
+        this.delay = delay;
         if (parent == null)
             parentID = 0;
         else
@@ -64,10 +67,11 @@ public class SpawnSignal extends Signal {
     /**
      * Creates a spawn signal for a robot that hasn't been spawned yet
      */
-    public SpawnSignal(MapLocation loc, RobotType type, Team team, InternalRobot parent) {
+    public SpawnSignal(MapLocation loc, RobotType type, Team team, InternalRobot parent, int delay) {
         this.loc = loc;
         this.type = type;
         this.team = team;
+        this.delay = delay;
         robotID = 0;
         if (parent == null)
             parentID = 0;
@@ -98,5 +102,9 @@ public class SpawnSignal extends Signal {
 
     public int getParentID() {
         return parentID;
+    }
+
+    public int getDelay() {
+        return delay;
     }
 }

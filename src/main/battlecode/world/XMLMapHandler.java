@@ -140,7 +140,7 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         public void createGameObject(GameWorld world, MapLocation loc) {
-            InternalRobot robot = GameWorldFactory.createPlayer(world, type, loc, team, null, false);
+            InternalRobot robot = GameWorldFactory.createPlayer(world, type, loc, team, null, false, 0);
         }
 
         public boolean equalsMirror(SymbolData data) {
@@ -201,7 +201,7 @@ class XMLMapHandler extends DefaultHandler {
 //            	new InternalEncampment(world, loc);
             	world.visitSignal(new NodeBirthSignal(loc));
             } else {
-            	InternalRobot r = GameWorldFactory.createPlayer(world, RobotType.HQ, loc, team, null, false);
+            	InternalRobot r = GameWorldFactory.createPlayer(world, RobotType.HQ, loc, team, null, false, 0);
                 world.setHQ(r, team);
             }
         }
