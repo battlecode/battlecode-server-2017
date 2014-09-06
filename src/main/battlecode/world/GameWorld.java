@@ -541,9 +541,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return teamRoundResources[team.ordinal()];
     }
 
-    public boolean canMove(RobotLevel level, MapLocation loc) {
+    public boolean canMove(RobotLevel level, MapLocation loc, RobotType type) {
 
-        return gameMap.getTerrainTile(loc).isTraversableAtHeight(level) && (gameObjectsByLoc.get(new MapLocation3D(loc, level)) == null);
+        return (gameMap.getTerrainTile(loc).isTraversableAtHeight(level) || gameMap.getTerrainTile(loc) == TerrainTile.VOID && type == RobotType.DRONE) && (gameObjectsByLoc.get(new MapLocation3D(loc, level)) == null);
     }
 
     public InternalObject[] getAllGameObjects() {
@@ -705,6 +705,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         switch (attacker.type) {
         case FURBY:
 		case SOLDIER:
+        case TOWER:
+        case MINER:
+        case DRONE:
+        case TANK:
+        case COMMANDER:
 		case HQ:
             double rate = 1.0;
             if (attacker.type == RobotType.HQ) {
@@ -724,7 +729,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 					target = getRobot(targetLoc.add(dx, dy), level);
 
 					if (target != null) {
-						if (dx == 0 && dy == 0) {
+						if (dx == 0 && dy == 0 || attacker.type == RobotType.BASHER) {
 							target.takeDamage(attacker.type.attackPower * rate, attacker);
                         }
 
@@ -833,7 +838,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void visitMovementOverrideSignal(MovementOverrideSignal s) {
         InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
-        if (!canMove(r.getRobotLevel(), s.getNewLoc()))
+        if (!canMove(r.getRobotLevel(), s.getNewLoc(), r.type))
             throw new RuntimeException("GameActionException in MovementOverrideSignal", new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move to location: " + s.getNewLoc()));
         r.setLocation(s.getNewLoc());
         addSignal(s);

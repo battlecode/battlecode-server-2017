@@ -213,7 +213,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	gameWorld.adjustResources(getTeam(), -cost);
 
         MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(type.level, loc))
+        if (!gameWorld.canMove(type.level, loc, type))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         robot.activateMovement(
@@ -239,7 +239,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             return false;
         }
         MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(type.level, loc))
+        if (!gameWorld.canMove(type.level, loc, type))
             return false;
 
         double cost = type.oreCost;
@@ -271,7 +271,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	gameWorld.adjustResources(getTeam(), -cost);
 
         MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(type.level, loc))
+        if (!gameWorld.canMove(type.level, loc, type))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         int delay = type.buildTurns;
@@ -767,7 +767,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (d == Direction.NONE || d == Direction.OMNI)
             return false;
         assertValidDirection(d);
-        return gameWorld.canMove(robot.getRobotLevel(), getLocation().add(d));
+        return gameWorld.canMove(robot.getRobotLevel(), getLocation().add(d), robot.type);
     }
 
     public boolean canMove() {
