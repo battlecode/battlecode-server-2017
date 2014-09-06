@@ -705,11 +705,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         switch (attacker.type) {
         case FURBY:
 		case SOLDIER:
-        case TOWER:
+        case BASHER:
         case MINER:
         case DRONE:
         case TANK:
         case COMMANDER:
+        case TOWER:
 		case HQ:
             double rate = 1.0;
             if (attacker.type == RobotType.HQ) {
