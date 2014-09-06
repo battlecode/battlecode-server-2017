@@ -446,6 +446,30 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
     }
 
+    public int getMovementDelayForType() {
+        if (type == RobotType.BASHER && myGameWorld.hasUpgrade(getTeam(), Upgrade.REGENERATIVEMACHINERY)) {
+            return 1;
+        } else {
+            return type.movementDelay;
+        }
+    }
+
+    public int getLoadingDelayForType() {
+        if (type == RobotType.SOLDIER && myGameWorld.hasUpgrade(getTeam(), Upgrade.NEUROMORPHICS)) {
+            return 0;
+        } else {
+            return type.loadingDelay;
+        }
+    }
+
+    public int getCooldownDelayForType() {
+        if (type == RobotType.SOLDIER && myGameWorld.hasUpgrade(getTeam(), Upgrade.NEUROMORPHICS)) {
+            return 0;
+        } else {
+            return type.cooldownDelay;
+        }
+    }
+
     public void takeDamage(double baseAmount) {
         if (baseAmount < 0) {
             changeEnergonLevel(-baseAmount);
@@ -550,32 +574,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public double calculateMovementActionDelay(MapLocation from, MapLocation to, TerrainTile terrain, MovementType mt) {
-        double base = 1.0;
+        double base = 1;
         if (from.distanceSquaredTo(to) <= 1) {
-            switch (mt) {
-                case RUN:
-                    base = GameConstants.SOLDIER_MOVE_ACTION_DELAY;
-                    break;
-                case SNEAK:
-                    base = GameConstants.SOLDIER_SNEAK_ACTION_DELAY;
-                    break;
-                default:
-                    base = 1000;
-                    break;
-            }
+            base = getMovementDelayForType();
         } else {
-            switch (mt) {
-                // TODO(axc): make these not hard-coded. right now they're this way because 4.2 becomes 4.19999999 due to precision issues, and this makes a difference
-                case RUN:
-                    base = 2.8; //GameConstants.SOLDIER_MOVE_ACTION_DELAY * GameConstants.SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR;
-                    break;
-                case SNEAK:
-                    base = 4.2; //GameConstants.SOLDIER_SNEAK_ACTION_DELAY * GameConstants.SOLDIER_DIAGONAL_MOVEMENT_ACTION_DELAY_FACTOR;
-                    break;
-                default:
-                    base = 1000;
-                    break;
-            }
+            base = getMovementDelayForType() * 1.4;
         }
         return base;
     }

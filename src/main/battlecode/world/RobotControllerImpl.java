@@ -760,7 +760,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertCanMove(d);
         double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()), MovementType.RUN);
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-                true, (int) delay, MovementType.RUN), robot.type.loadingDelay, delay);
+                true, (int) delay, MovementType.RUN), robot.getLoadingDelayForType(), delay);
     }
 
     public boolean canMove(Direction d) {
@@ -825,7 +825,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotMoving();
         assertNotNull(loc);
         assertCanAttack(loc, RobotLevel.ON_GROUND);
-        robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND), robot.calculateAttackActionDelay(robot.type), robot.type.cooldownDelay);
+        robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND), robot.calculateAttackActionDelay(robot.type), robot.getCooldownDelayForType());
     }
 
     //************************************
