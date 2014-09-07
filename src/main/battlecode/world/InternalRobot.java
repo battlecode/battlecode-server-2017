@@ -30,6 +30,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     protected volatile double myEnergonLevel;
     protected volatile double myShieldLevel;
+    protected volatile double mySupplyLevel;
     protected volatile Direction myDirection;
     protected volatile boolean energonChanged = true;
     protected volatile boolean shieldChanged = true;
@@ -98,6 +99,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             myEnergonLevel /= 2.0;
         }
         myShieldLevel = 0.0;
+        mySupplyLevel = 0.0;
         
         researchRounds = 0;
         researchUpgrade = null;
@@ -125,6 +127,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         cooldownDelay = 0.0;
 
         missileCount = 0;
+
+        
     }
     
     public void clearResearching() {
@@ -273,17 +277,14 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 //            regen = false;
 //        }
     	
-        if (upkeepEnabled && canExecuteCode()) {
-            //upkeepPaid = myGameWorld.resources(getTeam()) > GameConstants.BYTECODE_LIMIT*GameConstants.POWER_COST_PER_BYTECODE + GameConstants.UNIT_POWER_UPKEEP;
-            //if (upkeepPaid)
-            //    myGameWorld.adjustResources(getTeam(), -(GameConstants.BYTECODE_LIMIT*GameConstants.POWER_COST_PER_BYTECODE + GameConstants.UNIT_POWER_UPKEEP));
-            //else // we need to subtract energon
-            //{
-            //	this.takeDamage(GameConstants.UNIT_ENERGON_UPKEEP);
-            	upkeepPaid = true;
-            //}
-        } else
+        if (canExecuteCode() && type.supplyUpkeep > 0) {
+            upkeepPaid = mySupplyLevel > (Math.max(type.bytecodeLimit - 2000, 0) / 1000.0);
+            if (upkeepPaid) {
+                decreaseSupplyLevel(Math.max(type.bytecodeLimit - 2000, 0) / 1000.0);
+            }
+        } else {
             upkeepPaid = true;
+        }
     }
 
 //    public void HQProduction() {
@@ -309,12 +310,32 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
        
         if (type != RobotType.HQ) { 
             roundsSinceLastDamage++;
-            // Maybe heal
-            if (roundsSinceLastDamage >= GameConstants.HEAL_TURN_DELAY) {
-                takeDamage(-GameConstants.HEAL_RATE);
-            }
         } else {
             roundsSinceLastSpawn++;
+        }
+
+        // refund supply
+        if (upkeepPaid) {
+            double supplyPaid = Math.max(type.bytecodeLimit - 2000, 0) / 1000.0;
+            double supplyNeeded = Math.max(getBytecodesUsed() - 2000, 0) / 1000.0;
+            increaseSupplyLevel(supplyPaid - supplyNeeded);
+        }
+
+        if (type != RobotType.HQ && type != RobotType.SUPPLYDEPOT) {
+            mySupplyLevel *= (1 - GameConstants.SUPPLY_DECAY);
+        }
+
+        // generate supply
+        if ((type == RobotType.SOLDIER || type == RobotType.BASHER) && myGameWorld.hasUpgrade(getTeam(), Upgrade.CONTROLLEDECOPHAGY)) {
+            if (type == RobotType.SOLDIER) {
+                increaseSupplyLevel(5);
+            } else if (type == RobotType.BASHER) {
+                increaseSupplyLevel(10);
+            }
+        }
+
+        if (type == RobotType.SUPPLYDEPOT) {
+            increaseSupplyLevel(100);
         }
 
         roundsAlive++;
@@ -438,6 +459,18 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     
     public double getShieldLevel() {
     	return myShieldLevel;
+    }
+
+    public double getSupplyLevel() {
+        return mySupplyLevel;
+    }
+
+    public void decreaseSupplyLevel(double dec) {
+        mySupplyLevel -= dec;
+    }
+
+    public void increaseSupplyLevel(double inc) {
+        mySupplyLevel += inc;
     }
 
     public Direction getDirection() {

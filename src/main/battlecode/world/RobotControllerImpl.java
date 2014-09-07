@@ -37,6 +37,7 @@ import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.CaptureSignal;
 import battlecode.world.signal.HatSignal;
 import battlecode.world.signal.IndicatorStringSignal;
+import battlecode.world.signal.LocationSupplyChangeSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.MovementSignal;
@@ -132,6 +133,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getEnergonLevel();
     }
 
+    public double getSupplyLevel() {
+        return robot.getSupplyLevel();
+    }
+
     public double getTeamOre() {
         return gameWorld.resources(getTeam());
     }
@@ -196,6 +201,47 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         MapLocation loc = getLocation();
         double delay = GameConstants.SOLDIER_MOVE_ACTION_DELAY;
         robot.activateMovement(new MineSignal(loc, getTeam(), getType()), delay, delay);
+    }
+
+    public void transferSuppliesToHQ() throws GameActionException {
+        if (robot.type != RobotType.SUPPLYDEPOT) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only supply depot can transfer supplies to hq");
+        }
+
+        double amount = robot.getSupplyLevel();
+        robot.decreaseSupplyLevel(amount);
+        gameWorld.getBaseHQ(getTeam()).increaseSupplyLevel(amount);
+    }
+
+    public int senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException {
+        checkCanSense(loc);
+
+        return gameWorld.getSupplyLevel(loc);
+    }
+
+    public void dropSupplies(int amount, MapLocation loc) throws GameActionException {
+        if (robot.getSupplyLevel() < amount) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Not enough supply to drop");
+        }
+
+        if (loc.distanceSquaredTo(robot.getLocation()) > 2) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "supplies can only be dropped on neighboring squares");
+        }
+
+        // some signal here
+        robot.decreaseSupplyLevel(amount);
+        gameWorld.changeSupplyLevel(loc, amount);
+    }
+
+    public void pickUpSupplies(int amount) throws GameActionException {
+        if (gameWorld.getSupplyLevel(robot.getLocation()) < amount) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Not enough supply to pick up");
+        }
+
+        // some signal here
+
+        robot.increaseSupplyLevel(amount);
+        gameWorld.changeSupplyLevel(robot.getLocation(), -amount);
     }
 
     public void spawn(Direction dir, RobotType type) throws GameActionException {
@@ -772,8 +818,16 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	assertNotMoving();
         assertCanMove(d);
         double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()), MovementType.RUN);
+
+        int factor = 1;
+        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
+            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
+        } else {
+            factor = 2;
+        }
+
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-                true, (int) delay, MovementType.RUN), robot.getLoadingDelayForType(), delay);
+                true, ((int) delay) * factor, MovementType.RUN), robot.getLoadingDelayForType(), delay * factor);
     }
 
     public boolean canMove(Direction d) {
@@ -838,7 +892,15 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotMoving();
         assertNotNull(loc);
         assertCanAttack(loc, RobotLevel.ON_GROUND);
-        robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND), robot.calculateAttackActionDelay(robot.type), robot.getCooldownDelayForType());
+
+        int factor = 1;
+        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
+            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
+        } else {
+            factor = 2;
+        }
+
+        robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
     }
 
     public void explode() throws GameActionException {

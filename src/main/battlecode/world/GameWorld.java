@@ -43,6 +43,7 @@ import battlecode.world.signal.EnergonChangeSignal;
 import battlecode.world.signal.FluxChangeSignal;
 import battlecode.world.signal.HatSignal;
 import battlecode.world.signal.IndicatorStringSignal;
+import battlecode.world.signal.LocationSupplyChangeSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.MinelayerSignal;
@@ -90,6 +91,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private Map<MapLocation, Team> encampmentMap = new HashMap<MapLocation, Team>();
     private Map<Team, InternalRobot> baseHQs = new EnumMap<Team, InternalRobot>(Team.class);
     private Map<MapLocation, Team> mineLocations = new HashMap<MapLocation, Team>();
+    private Map<MapLocation, Integer> droppedSupplies = new HashMap<MapLocation, Integer>();
     private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<Team, GameMap.MapMemory>(Team.class);
     private Map<Team, Set<MapLocation>> knownMineLocations = new EnumMap<Team, Set<MapLocation>>(Team.class);
     private Map<Team, Map<Upgrade, Integer>> research = new EnumMap<Team, Map<Upgrade, Integer>>(Team.class);
@@ -202,6 +204,31 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         } else {
             return 0;
         }
+    }
+
+    public int getSupplyLevel(MapLocation loc) {
+        if (droppedSupplies.containsKey(loc)) {
+            return droppedSupplies.get(loc);
+        } else {
+            return 0;
+        }
+    }
+
+    public void changeSupplyLevel(MapLocation loc, int delta) {
+        int cur = 0;
+        if (droppedSupplies.containsKey(loc)) {
+            cur = droppedSupplies.get(loc);
+        }
+
+        cur += delta;
+
+        if (cur == 0) {
+            droppedSupplies.remove(loc);
+        } else {
+            droppedSupplies.put(loc, cur);
+        }
+
+        addSignal(new LocationSupplyChangeSignal(loc, cur));
     }
 
     public void processEndOfRound() {

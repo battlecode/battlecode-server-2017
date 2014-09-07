@@ -24,6 +24,8 @@ public interface RobotController {
      */
     public double getHealth();
 
+    public double getSupplyLevel();
+
     /**
      * Gets the team's total ore.
      * @return the team's total ore
@@ -314,6 +316,19 @@ public interface RobotController {
      * @throws GameActionException  if the channel is invalid
      */
     public int readBroadcast(int channel) throws GameActionException;
+
+    // ***********************************
+    // ****** SUPPLY METHODS ***** *******
+    // ***********************************
+
+    public void transferSuppliesToHQ() throws GameActionException;
+
+    public int senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException;
+
+    public void dropSupplies(int amount, MapLocation loc) throws GameActionException;
+
+    // note: movement is queued for the END of the round
+    public void pickUpSupplies(int amount) throws GameActionException;
 
     // ***********************************
     // ****** OTHER ACTION METHODS *******

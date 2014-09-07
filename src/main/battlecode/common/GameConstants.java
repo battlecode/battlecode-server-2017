@@ -116,4 +116,6 @@ public interface GameConstants {
 
     public static final int MISSILE_SPAWN_FREQUENCY = 6;
     public static final int MAX_MISSILE_COUNT = 8;
+
+    public static final double SUPPLY_DECAY = 0.01;
 }
