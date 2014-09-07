@@ -669,8 +669,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         teamKills[attacker.getTeam().opponent().ordinal()]++;
 
-        double damage = GameConstants.SELF_DESTRUCT_BASE_DAMAGE;
-        damage += attacker.getEnergonLevel() * GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR;
+        double damage = attacker.type.attackPower;
         InternalRobot target;
         for (int dx = -1; dx <= 1; dx++)
             for (int dy = -1; dy <= 1; dy++) {
@@ -679,11 +678,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 if (target != null) {
                     if (!(dx == 0 && dy == 0)) {
                         target.takeDamage(damage, attacker);
-
-                        // kill enemy pastr --> we gain milk
-                        if (target.getEnergonLevel() <= 0.0 && target.getTeam() != attacker.getTeam()) {
-                            teamKills[attacker.getTeam().ordinal()]++;
-                        }
                     }
                 }
 
@@ -702,6 +696,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         MapLocation targetLoc = s.getTargetLoc();
         RobotLevel level = s.getTargetHeight();
         
+        InternalRobot target;
         switch (attacker.type) {
         case FURBY:
 		case SOLDIER:
@@ -722,7 +717,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 }
             }
 
-			InternalRobot target;
             // TODO: splash damage is currently gone
 			for (int dx = -1; dx <= 1; dx++)
 				for (int dy = -1; dy <= 1; dy++) {
@@ -743,6 +737,29 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             gameMap.getNeutralsMap().updateWithAttack(s);
             
 			break;
+        case MISSILE:
+            // TODO: splash damage is currently gone
+			for (int dx = -1; dx <= 1; dx++)
+				for (int dy = -1; dy <= 1; dy++) {
+
+					target = getRobot(targetLoc.add(dx, dy), level);
+
+					if (target != null) {
+						if (dx == 0 && dy == 0) {
+                            continue;
+                        } else {
+							target.takeDamage(attacker.type.attackPower, attacker);
+                        }
+
+                        if (target.getEnergonLevel() <= 0.0 && target.getTeam() != attacker.getTeam()) {
+                            teamKills[attacker.getTeam().ordinal()]++;
+                        }
+                    }
+				}
+
+            gameMap.getNeutralsMap().updateWithAttack(s);
+            
+            break;
 		default:
 			// ERROR, should never happen
 		}

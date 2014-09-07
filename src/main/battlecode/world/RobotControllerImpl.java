@@ -288,6 +288,29 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         		);
         robot.resetSpawnCounter();
     }
+
+    public int getMissileCount() {
+        return robot.getMissileCount();
+    }
+    
+    public void launchMissile(Direction dir) throws GameActionException {
+    	if (robot.type != RobotType.LAUNCHER)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only LAUNCHER can launch missiles");
+
+        if (robot.getMissileCount() == 0) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "No missiles to launch");
+        }
+
+    	assertNotMoving();
+
+        MapLocation loc = getLocation().add(dir);
+        if (!gameWorld.canMove(RobotLevel.ON_GROUND, loc, RobotType.MISSILE))
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
+
+        robot.decrementMissileCount();
+        robot.activateMovement(
+        		new SpawnSignal(loc, RobotType.MISSILE, robot.getTeam(), robot, 0), 0, 0);
+    }
     
     public double senseCaptureCost() {
         return 0;
@@ -374,16 +397,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             if ((obj instanceof InternalRobot) && obj.getTeam() == robot.getTeam())
                 gameWorld.notifyDied((InternalRobot) obj);
         gameWorld.removeDead();
-    }
-
-    public void selfDestruct() throws GameActionException {
-        if (robot.type != RobotType.SOLDIER) {
-            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT_BRO, "only soldiers and noise towers can self destruct");
-        }
-        if (robot.type == RobotType.SOLDIER) {
-            robot.setSelfDestruct();
-        }
-        throw new RobotDeathException();
     }
 
     public void suicide() {
@@ -826,6 +839,16 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotNull(loc);
         assertCanAttack(loc, RobotLevel.ON_GROUND);
         robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND), robot.calculateAttackActionDelay(robot.type), robot.getCooldownDelayForType());
+    }
+
+    public void explode() throws GameActionException {
+        if (robot.type != RobotType.MISSILE) {
+            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT_BRO, "only missiles can self destruct");
+        }
+        if (robot.type == RobotType.MISSILE) {
+            robot.setSelfDestruct();
+        }
+        throw new RobotDeathException();
     }
 
     //************************************

@@ -80,6 +80,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private double loadingDelay;
     private double cooldownDelay;
 
+    private int missileCount = 0;
     private int hatCount = 0;
 
     private int buildDelay;
@@ -122,6 +123,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         timeUntilAttack = 0.0;
         loadingDelay = 0.0;
         cooldownDelay = 0.0;
+
+        missileCount = 0;
     }
     
     public void clearResearching() {
@@ -149,6 +152,14 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 //    	}
 //    	addAction(new ScanSignal(this));
 //    }
+
+    public void decrementMissileCount() {
+        missileCount--;
+    }
+
+    public int getMissileCount() {
+        return missileCount;
+    }
 
     public void incrementHatCount() {
         hatCount++;
@@ -312,6 +323,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             myEnergonLevel *= 2;
         }
 
+        if (roundsAlive % GameConstants.MISSILE_SPAWN_FREQUENCY == 0 && type == RobotType.LAUNCHER) {
+            missileCount = Math.min(missileCount + 1, GameConstants.MAX_MISSILE_COUNT);
+        }
+
       	// quick hack to make mining work. move me out later
         if (type == RobotType.SOLDIER) {
 
@@ -324,7 +339,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         		}
         	}
         }
-        
+
+        if (type == RobotType.MISSILE && roundsAlive >= 5) {
+            suicide();
+        }
         
         if (movementSignal != null) {
             myGameWorld.visitSignal(movementSignal);

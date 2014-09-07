@@ -292,6 +292,8 @@ public interface RobotController {
      */
     public void attackSquare(MapLocation loc) throws GameActionException;
 
+    public void explode() throws GameActionException;
+
     // ***********************************
     // ****** BROADCAST METHODS *******
     // ***********************************
@@ -348,6 +350,10 @@ public interface RobotController {
      * @throws GameActionException if it's not a soldier constructing or if the soldier is not constructing a structure
      */
     public void build(Direction dir, RobotType type) throws GameActionException;
+
+    public int getMissileCount();
+
+    public void launchMissile(Direction dir) throws GameActionException;
     
     /**
      * Ends the current round.
@@ -365,7 +371,7 @@ public interface RobotController {
 	 * Destroys all cows in all effected squares and creates a long-range noise at the robot's former location
      * @throws GameActionException if it's not a soldier
      */
-    public void selfDestruct() throws GameActionException;
+    //public void selfDestruct() throws GameActionException;
 
     /**
      * Causes your team to lose the game. It's like typing "gg."

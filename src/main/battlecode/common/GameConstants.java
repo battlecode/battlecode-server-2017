@@ -113,4 +113,7 @@ public interface GameConstants {
     // TODO maybe put in RobotType
     /** The attack radius of a buffed HQ. */
     public static final int ATTACK_RADIUS_SQUARED_BUFFED_HQ = 35;
+
+    public static final int MISSILE_SPAWN_FREQUENCY = 6;
+    public static final int MAX_MISSILE_COUNT = 8;
 }
