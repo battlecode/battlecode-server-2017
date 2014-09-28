@@ -251,6 +251,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (type.spawnSource != robot.type) {
             throw new GameActionException(CANT_DO_THAT_BRO, "This spawn can only be by a certain type");
         }
+        if (robot.type == RobotType.COMMANDER && !hasCommander()) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only one commander per team!");
+        }
 
         assertNotMoving();
         double cost = type.oreCost;
@@ -333,6 +336,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         		new SpawnSignal(loc, type, robot.getTeam(), robot, delay), delay, delay
         		);
         robot.resetSpawnCounter();
+    }
+    public boolean hasCommander() {
+        return gameWorld.getRobotTypeCount(robot.getTeam(), RobotType.COMMANDER) > 0;
     }
 
     public int getMissileCount() {
