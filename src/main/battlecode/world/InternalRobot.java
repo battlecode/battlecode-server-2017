@@ -10,6 +10,7 @@ import battlecode.common.MovementType;
 import battlecode.common.Robot;
 import battlecode.common.RobotLevel;
 import battlecode.common.RobotType;
+import battlecode.common.CommanderSkillType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
 import battlecode.common.Upgrade;
@@ -253,7 +254,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @Override
     public void processBeginningOfRound() {
         super.processBeginningOfRound();
-        
+
         // TODO we can do beginning of round damage/healing/etc here
     	// TODO also, resoruce generation is done here
         // TODO CORY FIX IT
@@ -276,7 +277,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 //            changeEnergonLevel(GameConstants.REGEN_AMOUNT);
 //            regen = false;
 //        }
-    	
+        
+        if (type == RobotType.COMMANDER && ((InternalCommander)this).hasSkill(CommanderSkillType.REGENERATION)) {
+           this.changeEnergonLevel(1); 
+        }
+
         if (canExecuteCode() && type.supplyUpkeep > 0) {
             upkeepPaid = mySupplyLevel > (Math.max(type.bytecodeLimit - 2000, 0) / 1000.0);
             if (upkeepPaid) {
@@ -459,6 +464,15 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     
     public double getShieldLevel() {
     	return myShieldLevel;
+    }
+
+    public int getXP() {
+        if (type == RobotType.COMMANDER) {
+            System.out.println(this);
+            System.out.println( (InternalCommander)this);
+            return ((InternalCommander)this).getXP();
+        }
+        return 0;
     }
 
     public double getSupplyLevel() {

@@ -22,6 +22,11 @@ public class RobotInfo {
      */
     public final double health;
     /**
+     * The amount of experience this robot has.
+     * Will always return 0 if robot type is not RobotType.COMMANDER.
+     */
+    public final int xp;
+    /**
      * The direction this Robot is facing.
      */
     public final Direction direction;
@@ -51,13 +56,14 @@ public class RobotInfo {
     public final int constructingRounds;
 
     public RobotInfo(Robot robot, MapLocation location,
-                     double hitpoints, Direction direction,
+                     double hitpoints, int xp, Direction direction,
                      RobotType type, Team team, double actionDelay,
                      boolean isConstructing, RobotType constructingType, int constructingRounds) {
         super();
         this.robot = robot;
         this.location = location;
         this.health = hitpoints;
+        this.xp = xp;
         this.direction = direction;
         this.type = type;
         this.team = team;

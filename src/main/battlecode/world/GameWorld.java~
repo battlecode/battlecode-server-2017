@@ -43,6 +43,7 @@ import battlecode.world.signal.EnergonChangeSignal;
 import battlecode.world.signal.FluxChangeSignal;
 import battlecode.world.signal.HatSignal;
 import battlecode.world.signal.IndicatorStringSignal;
+import battlecode.world.signal.LocationSupplyChangeSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.MinelayerSignal;
@@ -84,19 +85,22 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
     private double[] teamResources = new double[2];
     private double[] teamSpawnRate = new double[2];
-    private int[] teamRobotCount = new int[2];
     private int[] teamCapturingNumber = new int[2];
 
     private List<MapLocation> encampments = new ArrayList<MapLocation>();
     private Map<MapLocation, Team> encampmentMap = new HashMap<MapLocation, Team>();
     private Map<Team, InternalRobot> baseHQs = new EnumMap<Team, InternalRobot>(Team.class);
     private Map<MapLocation, Team> mineLocations = new HashMap<MapLocation, Team>();
+    private Map<MapLocation, Integer> droppedSupplies = new HashMap<MapLocation, Integer>();
     private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<Team, GameMap.MapMemory>(Team.class);
     private Map<Team, Set<MapLocation>> knownMineLocations = new EnumMap<Team, Set<MapLocation>>(Team.class);
     private Map<Team, Map<Upgrade, Integer>> research = new EnumMap<Team, Map<Upgrade, Integer>>(Team.class);
     
     private Map<Team, Set<Upgrade>> upgrades = new EnumMap<Team, Set<Upgrade>>(Team.class);
     private Map<Team, Map<Integer, Integer>> radio = new EnumMap<Team, Map<Integer, Integer>>(Team.class);
+
+    // a count for each robot type per team for tech tree checks and for tower counts
+    private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<Team, Map<RobotType, Integer>>(Team.class);
 
     // robots to remove from the game at end of turn
     private List<InternalRobot> deadRobots = new ArrayList<InternalRobot>();
@@ -118,6 +122,17 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         research.put(Team.B, new EnumMap<Upgrade, Integer>(Upgrade.class));
         radio.put(Team.A, new HashMap<Integer, Integer>());
         radio.put(Team.B, new HashMap<Integer, Integer>());
+        robotTypeCount.put(Team.A, new EnumMap<RobotType, Integer>(RobotType.class));
+        robotTypeCount.put(Team.B, new EnumMap<RobotType, Integer>(RobotType.class));
+
+        // TODO: these lines don't go here, but have to because parts dealing with robotTypeCount are in the wrong places
+        robotTypeCount.get(Team.A).put(RobotType.HQ, 1);
+        robotTypeCount.get(Team.B).put(RobotType.HQ, 1);
+        robotTypeCount.get(Team.A).put(RobotType.TOWER, 6);
+        robotTypeCount.get(Team.B).put(RobotType.TOWER, 6);
+
+        adjustResources(Team.A, GameConstants.ORE_INITIAL_AMOUNT);
+        adjustResources(Team.B, GameConstants.ORE_INITIAL_AMOUNT);
     }
     
     public GameMap.MapMemory getMapMemory(Team t) {
@@ -183,6 +198,39 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	return teamCapturingNumber[team.ordinal()];
     }
 
+    public int getRobotTypeCount(Team team, RobotType type) {
+        if (robotTypeCount.get(team).containsKey(type)) {
+            return robotTypeCount.get(team).get(type);
+        } else {
+            return 0;
+        }
+    }
+
+    public int getSupplyLevel(MapLocation loc) {
+        if (droppedSupplies.containsKey(loc)) {
+            return droppedSupplies.get(loc);
+        } else {
+            return 0;
+        }
+    }
+
+    public void changeSupplyLevel(MapLocation loc, int delta) {
+        int cur = 0;
+        if (droppedSupplies.containsKey(loc)) {
+            cur = droppedSupplies.get(loc);
+        }
+
+        cur += delta;
+
+        if (cur == 0) {
+            droppedSupplies.remove(loc);
+        } else {
+            droppedSupplies.put(loc, cur);
+        }
+
+        addSignal(new LocationSupplyChangeSignal(loc, cur));
+    }
+
     public void processEndOfRound() {
         // process all gameobjects
         InternalObject[] gameObjects = new InternalObject[gameObjectsByID.size()];
@@ -197,31 +245,39 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         // update neutrals
         gameMap.getNeutralsMap().next(gameObjects);
         
-        // MILK
-        teamResources[Team.A.ordinal()] += gameMap.getNeutralsMap().getScoreChange(Team.A, gameObjects);
-        teamResources[Team.B.ordinal()] += gameMap.getNeutralsMap().getScoreChange(Team.B, gameObjects);
-        if (teamResources[Team.A.ordinal()] >= GameConstants.WIN_QTY || teamResources[Team.B.ordinal()] >= GameConstants.WIN_QTY) {
-            setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.OWNED);
-        }
-        
         addSignal(new FluxChangeSignal(teamResources));
 		addSignal(new ResearchChangeSignal(research));
         addSignal(new NeutralsDensitySignal(gameMap.getNeutralsMap()));
         addSignal(new NeutralsTeamSignal(gameObjects, gameMap.getWidth(), gameMap.getHeight()));
 
         if (timeLimitReached() && winner == null) {
-            // main tie breaker = milk
             InternalRobot HQA = baseHQs.get(Team.A);
             InternalRobot HQB = baseHQs.get(Team.B);
-            if (!(setWinnerIfNonzero(teamResources[Team.A.ordinal()] - teamResources[Team.B.ordinal()], DominationFactor.BARELY_BEAT)))
+            // tiebreak by number of towers
+            // tiebreak by hq energon level
+            if (!(setWinnerIfNonzero(getRobotCount(Team.A, RobotType.TOWER) - getRobotCount(Team.B, RobotType.TOWER), DominationFactor.BARELY_BEAT)) &&
+                !(setWinnerIfNonzero(HQA.getEnergonLevel() - HQB.getEnergonLevel(), DominationFactor.BARELY_BEAT)))
             {
-                // first tie breaker - total # of cows in pastrs
-                // second tie breaker - total # of enemy robots killed 
-                double cowsDiff = gameMap.getNeutralsMap().getScoreChange(Team.A, gameObjects) - gameMap.getNeutralsMap().getScoreChange(Team.B, gameObjects);
-                double killDiff = teamKills[Team.A.ordinal()] - teamKills[Team.B.ordinal()];
-                
-                if (!(setWinnerIfNonzero(cowsDiff, DominationFactor.BARELY_BEAT) ||
-                      setWinnerIfNonzero(killDiff, DominationFactor.BARELY_BEAT) ))
+                // tiebreak by total tower health
+                // tiebreak by number of handwash stations
+
+                double towerDiff = 0.0;
+                InternalObject[] objs = getAllGameObjects();
+                for (InternalObject obj : objs) {
+                    if (obj instanceof InternalRobot) {
+                        InternalRobot ir = (InternalRobot) obj;
+                        if (ir.type == RobotType.TOWER) {
+                            if (ir.getTeam() == Team.A) {
+                                towerDiff += ir.getEnergonLevel();
+                            } else {
+                                towerDiff -= ir.getEnergonLevel();
+                            }
+                        }
+                    }
+                }
+
+                if ( !(setWinnerIfNonzero(towerDiff, DominationFactor.BARELY_BEAT )) &&
+                     !(setWinnerIfNonzero(getRobotCount(Team.A, RobotType.HANDWASHSTATION) - getRobotCount(Team.B, RobotType.HANDWASHSTATION), DominationFactor.BARELY_BEAT)))
                 {
                     // just tiebreak by ID
                     if (HQA.getID() < HQB.getID())
@@ -256,10 +312,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         else if (n < 0)
             setWinner(Team.B, d);
         return n != 0;
-    }
-
-    public int countRobots(Team t) {
-        return teamRobotCount[t.ordinal()];
     }
     
     public int countEncampments(Team t) {
@@ -363,6 +415,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     
     public Team getMine(MapLocation loc) {
     	return mineLocations.get(loc);
+    }
+
+    public void resetUpgrade(Team t, Upgrade u) {
+        research.get(t).put(u, 0);
     }
     
     public void researchUpgrade(Team t, Upgrade u) {
@@ -483,6 +539,15 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return gameMap.getTerrainTile(loc);
     }
 
+    public int getRobotCount(Team team, RobotType type) {
+        Integer res = robotTypeCount.get(team).get(type);
+        if (res == null) {
+            return 0;
+        } else {
+            return res;
+        }
+    }
+
     // TODO: optimize this too
     public int getUnitCount(Team team) {
         int result = 0;
@@ -503,22 +568,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return teamRoundResources[team.ordinal()];
     }
 
-    public boolean canMove(RobotLevel level, MapLocation loc) {
+    public boolean canMove(RobotLevel level, MapLocation loc, RobotType type) {
 
-        return gameMap.getTerrainTile(loc).isTraversableAtHeight(level) && (gameObjectsByLoc.get(new MapLocation3D(loc, level)) == null);
-    }
-
-    public void splashDamageGround(MapLocation loc, double damage, double falloutFraction) {
-        //TODO: optimize this
-        InternalRobot[] robots = getAllRobotsWithinRadiusDonutSq(loc, 2, -1);
-        for (InternalRobot r : robots) {
-            if (r.getRobotLevel() == RobotLevel.ON_GROUND) {
-                if (r.getLocation().equals(loc))
-                    r.changeEnergonLevelFromAttack(-damage);
-                else
-                    r.changeEnergonLevelFromAttack(-damage * falloutFraction);
-            }
-        }
+        return (gameMap.getTerrainTile(loc).isTraversableAtHeight(level) || gameMap.getTerrainTile(loc) == TerrainTile.VOID && type == RobotType.DRONE) && (gameObjectsByLoc.get(new MapLocation3D(loc, level)) == null);
     }
 
     public InternalObject[] getAllGameObjects() {
@@ -569,11 +621,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
     
     public void addUpgrade(Team t, Upgrade upgrade) {
-    	if(upgrade == Upgrade.NUKE) {
-    		getBaseHQ(t.opponent()).suicide();
-    	} else {
-    		upgrades.get(t).add(upgrade);
-    	}
+        upgrades.get(t).add(upgrade);
     }
 
     public RoundStats getRoundStats() {
@@ -648,8 +696,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         teamKills[attacker.getTeam().opponent().ordinal()]++;
 
-        double damage = GameConstants.SELF_DESTRUCT_BASE_DAMAGE;
-        damage += attacker.getEnergonLevel() * GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR;
+        double damage = attacker.type.attackPower;
         InternalRobot target;
         for (int dx = -1; dx <= 1; dx++)
             for (int dy = -1; dy <= 1; dy++) {
@@ -658,14 +705,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 if (target != null) {
                     if (!(dx == 0 && dy == 0)) {
                         target.takeDamage(damage, attacker);
-
-                        // kill enemy pastr --> we gain milk
-                        if (target.getEnergonLevel() <= 0.0 && target.type == RobotType.PASTR && target.getTeam() != attacker.getTeam()) {
-                            adjustResources(attacker.getTeam(), GameConstants.WIN_QTY * GameConstants.MILK_GAIN_FACTOR);
-                        }
-                        if (target.getEnergonLevel() <= 0.0 && target.getTeam() != attacker.getTeam()) {
-                            teamKills[attacker.getTeam().ordinal()]++;
-                        }
                     }
                 }
 
@@ -684,25 +723,38 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         MapLocation targetLoc = s.getTargetLoc();
         RobotLevel level = s.getTargetHeight();
         
+        InternalRobot target;
         switch (attacker.type) {
+        case FURBY:
 		case SOLDIER:
+        case BASHER:
+        case MINER:
+        case DRONE:
+        case TANK:
+        case COMMANDER:
+        case TOWER:
 		case HQ:
-			InternalRobot target;
+            double rate = 1.0;
+            if (attacker.type == RobotType.HQ) {
+                int towerCount = getRobotCount(attacker.getTeam(), RobotType.TOWER);
+                if (towerCount >= 6) {
+                    rate = 10.0;
+                } else if (towerCount >= 3) {
+                    rate = 1.5;
+                }
+            }
+
+            // TODO: splash damage is currently gone
 			for (int dx = -1; dx <= 1; dx++)
 				for (int dy = -1; dy <= 1; dy++) {
 
 					target = getRobot(targetLoc.add(dx, dy), level);
 
 					if (target != null) {
-						if (dx == 0 && dy == 0)
-							target.takeDamage(attacker.type.attackPower, attacker);
-						else
-							target.takeDamage(attacker.type.splashPower, attacker);
-
-                        // kill enemy pastr --> we gain milk
-                        if (target.getEnergonLevel() <= 0.0 && target.type == RobotType.PASTR && target.getTeam() != attacker.getTeam()) {
-                            adjustResources(attacker.getTeam(), GameConstants.WIN_QTY * GameConstants.MILK_GAIN_FACTOR);
+						if (dx == 0 && dy == 0 || attacker.type == RobotType.BASHER) {
+							target.takeDamage(attacker.type.attackPower * rate, attacker);
                         }
+
                         if (target.getEnergonLevel() <= 0.0 && target.getTeam() != attacker.getTeam()) {
                             teamKills[attacker.getTeam().ordinal()]++;
                         }
@@ -712,37 +764,32 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             gameMap.getNeutralsMap().updateWithAttack(s);
             
 			break;
-        case NOISETOWER:
-            if (s.getAttackType() == 0) {
-                gameMap.getNeutralsMap().updateWithNoiseSource(targetLoc, GameConstants.NOISE_SCARE_RANGE_LARGE);
-            } else {
-                gameMap.getNeutralsMap().updateWithNoiseSource(targetLoc, GameConstants.NOISE_SCARE_RANGE_SMALL);
-            }
+        case MISSILE:
+            // TODO: splash damage is currently gone
+			for (int dx = -1; dx <= 1; dx++)
+				for (int dy = -1; dy <= 1; dy++) {
+
+					target = getRobot(targetLoc.add(dx, dy), level);
+
+					if (target != null) {
+						if (dx == 0 && dy == 0) {
+                            continue;
+                        } else {
+							target.takeDamage(attacker.type.attackPower, attacker);
+                        }
+
+                        if (target.getEnergonLevel() <= 0.0 && target.getTeam() != attacker.getTeam()) {
+                            teamKills[attacker.getTeam().ordinal()]++;
+                        }
+                    }
+				}
+
+            gameMap.getNeutralsMap().updateWithAttack(s);
+            
+            break;
 		default:
 			// ERROR, should never happen
 		}
-        
-        // TODO if we want units to not damange allied units
-        // TODO CORY FIX IT
-//        switch (attacker.type) {
-//            case SOLDIER:
-//                break;
-//            case ARTILLERY:
-//            	int dist = (int)Math.sqrt(GameConstants.ARTILLERY_SPLASH_RADIUS_SQUARED);
-//            	InternalRobot target;
-//                for (int dx=-dist; dx<=dist; dx++)
-//                	for (int dy=-dist; dy<=dist; dy++)
-//                	{
-//                		if (dx==0 && dy==0) continue;
-//                		target = getRobot(targetLoc.add(dx, dy), level);
-//                		if (target != null)
-//                			target.takeDamage(attacker.type.attackPower, attacker);
-//                	}
-//                		
-//                break;
-//            default:
-//            	// ERROR, should never happen
-//        }
         
         addSignal(s);
         removeDead();
@@ -772,7 +819,13 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         if (obj instanceof InternalRobot) {
             InternalRobot r = (InternalRobot) obj;
 
-            teamRobotCount[r.getTeam().ordinal()] -= r.type.count;
+            // reset research
+            if (r.researchSignal != null) {
+                resetUpgrade(r.getTeam(), r.researchSignal.getUpgrade());
+            }
+
+            Integer currentCount = robotTypeCount.get(r.getTeam()).get(r.type);
+            robotTypeCount.get(r.getTeam()).put(r.type, currentCount - 1);
 
             RobotMonitor.killRobot(ID);
     		if (r.type == RobotType.SOLDIER && (r.getCapturingType() != null))
@@ -780,15 +833,30 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             if (r.hasBeenAttacked()) {
                 gameStats.setUnitKilled(r.getTeam(), currentRound);
             }
-            if (r.type == RobotType.PASTR && r.getEnergonLevel() > 0.0) {
-                // oops, should reward other team
-                adjustResources(r.getTeam().opponent(), GameConstants.WIN_QTY * GameConstants.MILK_PENALTY_FACTOR);
-            }
             if (r.type == RobotType.HQ) {
             	setWinner(r.getTeam().opponent(), getDominationFactor(r.getTeam().opponent()));
             } else if (r.type.isBuilding)
             {
             	encampmentMap.put(r.getLocation(), Team.NEUTRAL);
+            }
+
+            // give XP
+            MapLocation loc = r.getLocation();
+            InternalRobot target;
+            RobotLevel level = RobotLevel.ON_GROUND;
+
+            for (int dx = -4; dx <= 4; dx++) {
+				for (int dy = -4; dy <= 4; dy++) {
+                    target = getRobot(loc.add(dx, dy), level);
+
+					if (target != null) {
+                        if (target.type == RobotType.COMMANDER && target.getTeam() != r.getTeam()) {
+                            int xpYield = r.type.oreCost;
+
+                            ((InternalCommander)target).giveXP(xpYield);
+                        }
+                    }
+				}
             }
         }
     }
@@ -834,7 +902,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void visitMovementOverrideSignal(MovementOverrideSignal s) {
         InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
-        if (!canMove(r.getRobotLevel(), s.getNewLoc()))
+        if (!canMove(r.getRobotLevel(), s.getNewLoc(), r.type))
             throw new RuntimeException("GameActionException in MovementOverrideSignal", new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move to location: " + s.getNewLoc()));
         r.setLocation(s.getNewLoc());
         addSignal(s);
@@ -879,9 +947,13 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
 
         //note: this also adds the signal
-        InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent);
+        InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent, s.getDelay());
         
-        teamRobotCount[robot.getTeam().ordinal()] += robot.type.count;
+        Integer currentCount = robotTypeCount.get(robot.getTeam()).get(robot.type);
+        if (currentCount == null) {
+            currentCount = 0;
+        }
+        robotTypeCount.get(robot.getTeam()).put(robot.type, currentCount + 1);
     }
     
     public void visitResearchSignal(ResearchSignal s) {
@@ -904,14 +976,21 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     
     public void visitMineSignal(MineSignal s) {
     	MapLocation loc = s.getMineLoc();
-    	if (s.shouldAdd()) {
-        	if (gameMap.getTerrainTile(loc) == TerrainTile.NORMAL) { // TODO(axc): NORMAL and ROAD?
-        		addMine(s.getMineTeam(), loc);
-        	}
-    	} else {
-    		if (s.getMineTeam() != getMine(s.getMineLoc()))
-    			removeMines(s.getMineTeam(), loc);
-    	}
+        // TODO: calculate ore change amount based on unit type
+        int baseOre = gameMap.getOre(loc);
+        int ore = 0;
+        if (baseOre > 0) {
+            if (s.getMinerType() == RobotType.FURBY) {
+                ore = Math.min(2, baseOre / 100);
+            } else {
+                if (hasUpgrade(s.getMineTeam(), Upgrade.IMPROVEDMINING)) {
+                    ore = Math.min(baseOre / 30, 4);
+                } else {
+                    ore = Math.min(baseOre / 30, 3);
+                }
+            }
+        }
+        adjustResources(s.getMineTeam(), ore);
     	addSignal(s);
     }
     
@@ -921,12 +1000,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	MapLocation targetLoc = medbay.getLocation();
     	RobotLevel level = RobotLevel.ON_GROUND;
     	
-    	int dist = (int)Math.sqrt(medbay.type.attackRadiusMaxSquared);
+    	int dist = (int)Math.sqrt(medbay.type.attackRadiusSquared);
     	InternalRobot target;
         for (int dx=-dist; dx<=dist; dx++)
         	for (int dy=-dist; dy<=dist; dy++)
         	{
-        		if (dx*dx+dy*dy > medbay.type.attackRadiusMaxSquared) continue;
+        		if (dx*dx+dy*dy > medbay.type.attackRadiusSquared) continue;
         		target = getRobot(targetLoc.add(dx, dy), level);
         		if (target != null)
         			if (target.getTeam() == medbay.getTeam() && target.type != RobotType.HQ)
@@ -941,12 +1020,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	MapLocation targetLoc = shields.getLocation();
     	RobotLevel level = RobotLevel.ON_GROUND;
     	
-    	int dist = (int)Math.sqrt(shields.type.attackRadiusMaxSquared);
+    	int dist = (int)Math.sqrt(shields.type.attackRadiusSquared);
     	InternalRobot target;
         for (int dx=-dist; dx<=dist; dx++)
         	for (int dy=-dist; dy<=dist; dy++)
         	{
-        		if (dx*dx+dy*dy > shields.type.attackRadiusMaxSquared) continue;
+        		if (dx*dx+dy*dy > shields.type.attackRadiusSquared) continue;
         		target = getRobot(targetLoc.add(dx, dy), level);
         		if (target != null)
         			if (target.getTeam() == shields.getTeam())
@@ -974,30 +1053,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     protected static boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
         MapLocation myLoc = ir.getLocation();
         int d = myLoc.distanceSquaredTo(loc);
-        return d <= ir.type.attackRadiusMaxSquared && d >= ir.type.attackRadiusMinSquared;
-//                && inAngleRange(myLoc, ir.getDirection(), loc, ir.type.attackCosHalfTheta);
-    }
-
-    protected static boolean inAngleRange(MapLocation sensor, Direction dir, MapLocation target, double cosHalfTheta) {
-        MapLocation dirVec = origin.add(dir);
-        double dx = target.x - sensor.x;
-        double dy = target.y - sensor.y;
-        int a = dirVec.x;
-        int b = dirVec.y;
-        double dotProduct = a * dx + b * dy;
-
-        if (dotProduct < 0) {
-            if (cosHalfTheta > 0)
-                return false;
-        } else if (cosHalfTheta < 0)
-            return true;
-
-        double rhs = cosHalfTheta * cosHalfTheta * (dx * dx + dy * dy) * (a * a + b * b);
-
-        if (dotProduct < 0)
-            return (dotProduct * dotProduct <= rhs + 0.00001d);
-        else
-            return (dotProduct * dotProduct >= rhs - 0.00001d);
+        int attackRadiusSquared = ir.getAttackRadiusSquared();
+        return d <= attackRadiusSquared;
     }
 
     // TODO: make a faster implementation of this
@@ -1055,6 +1112,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
     
     protected void adjustSpawnRate(Team t) {
-    	teamSpawnRate[t.ordinal()] = GameConstants.HQ_SPAWN_DELAY_CONSTANT_1 + Math.pow(countRobots(t), GameConstants.HQ_SPAWN_DELAY_CONSTANT_2);//10*GameConstants.HQ_SPAWN_DELAY/(10*GameConstants.HQ_SPAWN_DELAY/teamSpawnRate[t.ordinal()]+1);
+    	teamSpawnRate[t.ordinal()] = GameConstants.HQ_SPAWN_DELAY_CONSTANT_1;
     }
 }

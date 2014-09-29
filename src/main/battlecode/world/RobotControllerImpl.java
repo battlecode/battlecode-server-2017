@@ -133,6 +133,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getEnergonLevel();
     }
 
+    public int getXP() {
+        return robot.getXP();
+    }
+
     public double getSupplyLevel() {
         return robot.getSupplyLevel();
     }
@@ -634,7 +638,12 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public RobotInfo senseRobotInfo(Robot r) throws GameActionException {
         InternalRobot ir = castInternalRobot(r);
         assertCanSense(ir);
-        return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(),
+
+        int xpVal = 0;
+        if (ir.type == RobotType.COMMANDER) {
+            xpVal = ((InternalCommander)ir).getXP();
+        }
+        return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getXP(),
                 ir.getDirection(), ir.type, ir.getTeam(), 0,
                 ir.getCapturingType() != null, ir.getCapturingType(), ir.getCapturingRounds());
     }

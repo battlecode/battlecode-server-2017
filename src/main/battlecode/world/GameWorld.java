@@ -839,6 +839,25 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             {
             	encampmentMap.put(r.getLocation(), Team.NEUTRAL);
             }
+
+            // give XP
+            MapLocation loc = r.getLocation();
+            InternalRobot target;
+            RobotLevel level = RobotLevel.ON_GROUND;
+
+            for (int dx = -4; dx <= 4; dx++) {
+				for (int dy = -4; dy <= 4; dy++) {
+                    target = getRobot(loc.add(dx, dy), level);
+
+					if (target != null) {
+                        if (target.type == RobotType.COMMANDER && target.getTeam() != r.getTeam()) {
+                            int xpYield = r.type.oreCost;
+
+                            ((InternalCommander)target).giveXP(xpYield);
+                        }
+                    }
+				}
+            }
         }
     }
 

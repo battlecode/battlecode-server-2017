@@ -368,6 +368,8 @@ public interface RobotController {
 
     public boolean hasCommander();
 
+    public int getXP();
+
     public int getMissileCount();
 
     public void launchMissile(Direction dir) throws GameActionException;
