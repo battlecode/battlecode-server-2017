@@ -118,4 +118,19 @@ public interface GameConstants {
     public static final int MAX_MISSILE_COUNT = 8;
 
     public static final double SUPPLY_DECAY = 0.01;
+
+    // commander constants
+
+    public static final int XP_RANGE = 24;
+
+    public static final int BURST_DELAY = 3;
+    public static final int BURST_RANGE = 35;
+    public static final int BURST_DAMAGE = 80;
+
+    public static final int LEADERSHIP_RANGE = 15;
+
+    public static final int INTERVENTION_RANGE = 15;
+    public static final int INTERVENTION_LENGTH = 10;
+
+    public static final int FLASH_RANGE = 15;
 }

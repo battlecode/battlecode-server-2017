@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import battlecode.common.CommanderSkillType;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameActionExceptionType;
@@ -95,6 +96,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<Team, GameMap.MapMemory>(Team.class);
     private Map<Team, Set<MapLocation>> knownMineLocations = new EnumMap<Team, Set<MapLocation>>(Team.class);
     private Map<Team, Map<Upgrade, Integer>> research = new EnumMap<Team, Map<Upgrade, Integer>>(Team.class);
+
+    private Map<Team, InternalRobot> commanders = new EnumMap<Team, InternalRobot>(Team.class);
+    private Map<Team, ArrayList<CommanderSkillType>> skills = new EnumMap<Team, ArrayList<CommanderSkillType>>(Team.class);
+
+    // these handle the placement of skillshots
+    private Map<Team, Map<MapLocation, Integer>> layWaste = new EnumMap<Team, Map<MapLocation, Integer>>(Team.class);
+    private Map<Team, Map<MapLocation, Integer>> intervention = new EnumMap<Team, Map<MapLocation, Integer>>(Team.class);
+
     
     private Map<Team, Set<Upgrade>> upgrades = new EnumMap<Team, Set<Upgrade>>(Team.class);
     private Map<Team, Map<Integer, Integer>> radio = new EnumMap<Team, Map<Integer, Integer>>(Team.class);
@@ -133,6 +142,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         adjustResources(Team.A, GameConstants.ORE_INITIAL_AMOUNT);
         adjustResources(Team.B, GameConstants.ORE_INITIAL_AMOUNT);
+
+        skills.put(Team.A, new ArrayList<CommanderSkillType>());
+        skills.put(Team.B, new ArrayList<CommanderSkillType>());
+
+        addSkill(Team.A, CommanderSkillType.REGENERATION);
+        addSkill(Team.A, CommanderSkillType.LEADERSHIP);
     }
     
     public GameMap.MapMemory getMapMemory(Team t) {
@@ -343,6 +358,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public InternalRobot getBaseHQ(Team t) {
         return baseHQs.get(t);
     }
+    public InternalRobot getCommander(Team t) {
+        return commanders.get(t);
+    }
 
     public boolean timeLimitReached() {
         return currentRound >= gameMap.getMaxRounds() - 1;
@@ -437,7 +455,30 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	if (i == null) i = 0;
     	return i;
     }
-    
+
+    public void channelLayWaste(Team t, MapLocation m) {
+        Integer i = layWaste.get(t).get(m);
+        if (i == null) i = GameConstants.BURST_DELAY;
+        i = i-1;
+        layWaste.get(t).put(m, i);
+        if (i == 0) {
+            castLayWaste(m);
+
+            layWaste.get(t).remove(m);
+            // unleash the kraken
+        }
+    }
+
+    public void addSkill(Team t, CommanderSkillType sk) {
+        skills.get(t).add(sk);
+    }
+    public boolean hasSkill(Team t, CommanderSkillType sk) {
+        ArrayList<CommanderSkillType> skillList = skills.get(t);
+        for (int i=0; i<skillList.size(); ++i) {
+            if (skillList.get(i) == sk) return true;
+        }
+        return false;
+    }
 
     // should only be called by the InternalObject constructor
     public void notifyAddingNewObject(InternalObject o) {
@@ -680,6 +721,15 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         baseHQs.put(t, r);
     }
 
+    public void castLayWaste(MapLocation m) {
+        InternalRobot target = getRobot(m, RobotLevel.ON_GROUND);
+
+        if (target != null) {
+            target.takeDamage(80);
+        }
+    }
+
+
     // ******************************
     // SIGNAL HANDLER METHODS
     // ******************************
@@ -742,6 +792,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 } else if (towerCount >= 3) {
                     rate = 1.5;
                 }
+            }
+
+            boolean underLeadership = false;
+            
+            InternalRobot commander = getCommander(attacker.getTeam());
+
+            if (commander != null && hasSkill(attacker.getTeam(), CommanderSkillType.LEADERSHIP) && commander.getLocation().distanceSquaredTo(attacker.getLocation()) <= GameConstants.LEADERSHIP_RANGE) {
+                underLeadership = true;
             }
 
             // TODO: splash damage is currently gone
@@ -839,14 +897,27 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             {
             	encampmentMap.put(r.getLocation(), Team.NEUTRAL);
             }
+            if (r.type == RobotType.COMMANDER) {
+                commanders.put(r.getTeam(), null);
+            }
 
             // give XP
             MapLocation loc = r.getLocation();
-            InternalRobot target;
             RobotLevel level = RobotLevel.ON_GROUND;
 
+            InternalRobot target = getCommander(r.getTeam().opponent());
+
+            if (target != null && target.getLocation().distanceSquaredTo(loc) <= 24) {
+                int xpYield = r.type.oreCost;
+
+                ((InternalCommander)target).giveXP(xpYield);
+            }
+
+            /*
             for (int dx = -4; dx <= 4; dx++) {
 				for (int dy = -4; dy <= 4; dy++) {
+                    if (dx*dx + dy*dy > 24) continue;
+
                     target = getRobot(loc.add(dx, dy), level);
 
 					if (target != null) {
@@ -857,7 +928,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                         }
                     }
 				}
-            }
+            }*/
         }
     }
 
@@ -948,6 +1019,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         //note: this also adds the signal
         InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent, s.getDelay());
+        if (s.getType() == RobotType.COMMANDER) {
+            commanders.put(robot.getTeam(), robot);
+        }
         
         Integer currentCount = robotTypeCount.get(robot.getTeam()).get(robot.type);
         if (currentCount == null) {
@@ -962,6 +1036,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	researchUpgrade(hq.getTeam(), s.getUpgrade());
     	addSignal(s);
     }
+    /*public void visitBurstSignal(BurstSignal s) {
+        addSignal(s);
+    }*/
     
     public void visitMinelayerSignal(MinelayerSignal s) {
     	// noop
