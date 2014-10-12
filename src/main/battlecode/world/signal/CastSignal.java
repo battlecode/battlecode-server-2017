@@ -2,13 +2,14 @@ package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import battlecode.common.MapLocation;
 
 /**
  * Signifies that a robot cast a spell.
  *
  * @author npinsker
  */
-public class HatSignal extends Signal {
+public class CastSignal extends Signal {
 
 	private static final long serialVersionUID = -2274815073063498123L;
 	
