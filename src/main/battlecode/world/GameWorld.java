@@ -808,7 +808,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
 					target = getRobot(targetLoc.add(dx, dy), level);
 
-					if (target != null) {
+					if (target != null && target.getTeam() != attacker.getTeam()) {
 						if (dx == 0 && dy == 0 || attacker.type == RobotType.BASHER) {
 							target.takeDamage(attacker.type.attackPower * rate, attacker);
                         }
