@@ -186,6 +186,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getCapturingRounds();
     }
 
+    public int getRobotTypeCount(RobotType type) {
+        return gameWorld.getRobotTypeCount(getTeam(), type);
+    }
+
     //***********************************
     //****** ACTION METHODS *************
     //***********************************
@@ -285,7 +289,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (type.dependency1 != null && gameWorld.getRobotTypeCount(getTeam(), type.dependency1) == 0) {
             return false;
         }
-        if (type.dependency2 != null && gameWorld.getRobotTypeCount(getTeam(), type.dependency1) == 0) {
+        if (type.dependency2 != null && gameWorld.getRobotTypeCount(getTeam(), type.dependency2) == 0) {
             return false;
         }
         if (!canMove()) {

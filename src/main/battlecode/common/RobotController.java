@@ -95,6 +95,12 @@ public interface RobotController {
      */
     public boolean hasUpgrade(Upgrade upgrade);
 
+    /**
+     * Counts how many of a certain type of unit you own.
+     * @param type
+     */
+    public int getRobotTypeCount(RobotType type);
+
     // ***********************************
     // ****** SENSOR METHODS ********
     // ***********************************

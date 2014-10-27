@@ -346,7 +346,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         roundsAlive++;
         // after building is done, double health
         if (type.isBuilding && roundsAlive == buildDelay && type != RobotType.HQ && type != RobotType.TOWER) {
-            myEnergonLevel *= 2;
+            changeEnergonLevel(getEnergonLevel());
         }
 
         if (roundsAlive % GameConstants.MISSILE_SPAWN_FREQUENCY == 0 && type == RobotType.LAUNCHER) {
