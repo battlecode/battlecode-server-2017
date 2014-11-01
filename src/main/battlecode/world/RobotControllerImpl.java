@@ -810,7 +810,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public int senseOre(MapLocation loc) throws GameActionException {
         assertCanSense(loc);
-        return gameWorld.getGameMap().getOre(loc);
+        return gameWorld.getOre(loc);
     }   
 
     public double[][] senseCowGrowth() {

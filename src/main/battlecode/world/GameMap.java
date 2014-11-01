@@ -44,7 +44,7 @@ public class GameMap implements GenericGameMap {
     /**
      * The scalar field of the ore on the map.
      */
-    private final int[][] mapOre;
+    private final int[][] mapOreInitial;
     /**
      * The coordinates of the origin.
      */
@@ -84,10 +84,10 @@ public class GameMap implements GenericGameMap {
         this.mapHeight = gm.mapHeight;
         this.mapTiles = new TerrainTile[this.mapWidth][this.mapHeight];
         this.neutralsMap = new NeutralsMap(gm.neutralsMap);
-        this.mapOre = new int[this.mapWidth][this.mapHeight];
+        this.mapOreInitial = new int[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
             System.arraycopy(gm.mapTiles[i], 0, this.mapTiles[i], 0, this.mapHeight);
-            System.arraycopy(gm.mapOre[i], 0, this.mapOre[i], 0, this.mapHeight);
+            System.arraycopy(gm.mapOreInitial[i], 0, this.mapOreInitial[i], 0, this.mapHeight);
         }
         this.mapOriginX = gm.mapOriginX;
         this.mapOriginY = gm.mapOriginY;
@@ -106,7 +106,7 @@ public class GameMap implements GenericGameMap {
      * @param mapTiles           a matrix of TerrainTypes representing the map
      * @param neutralsMap        a NeutralsMap to copy
      */
-    GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, NeutralsMap neutralsMap, int[][] mapOre, String mapName) {
+    GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, NeutralsMap neutralsMap, int[][] mapOreInitial, String mapName) {
         if (mapProperties.containsKey(MapProperties.WIDTH))
             this.mapWidth = mapProperties.get(MapProperties.WIDTH);
         else
@@ -139,7 +139,7 @@ public class GameMap implements GenericGameMap {
 
         this.neutralsMap = neutralsMap;
 
-        this.mapOre = mapOre;
+        this.mapOreInitial = mapOreInitial;
 
         this.mapName = mapName;
     }
@@ -240,11 +240,11 @@ public class GameMap implements GenericGameMap {
      * @param location the MapLocation to test
      * @return the amount of ore in the given location, or 0 if off the map
      */
-    public int getOre(MapLocation location) {
+    public int getInitialOre(MapLocation location) {
         if (!onTheMap(location))
             return 0;
 
-        return mapOre[location.x - mapOriginX][location.y - mapOriginY];
+        return mapOreInitial[location.x - mapOriginX][location.y - mapOriginY];
     }
 
     /**
@@ -255,11 +255,11 @@ public class GameMap implements GenericGameMap {
      * @param y the y index to use
      * @return the amount of ore in the given location, or 0 if off the map
      */
-    public int getOre(int x, int y) {
+    public int getInitialOre(int x, int y) {
         if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
             return 0;
         }
-        return mapOre[x][y];
+        return mapOreInitial[x][y];
     }
 
     /**
@@ -267,8 +267,8 @@ public class GameMap implements GenericGameMap {
      *
      * @return the map's ore in a 2D array
      */
-    public int[][] getOreMatrix() {
-        return mapOre;
+    public int[][] getInitialOreMatrix() {
+        return mapOreInitial;
     }
 
     /**

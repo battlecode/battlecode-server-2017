@@ -45,6 +45,7 @@ import battlecode.world.signal.FluxChangeSignal;
 import battlecode.world.signal.HatSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.LocationSupplyChangeSignal;
+import battlecode.world.signal.LocationOreChangeSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.MinelayerSignal;
@@ -93,6 +94,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private Map<Team, InternalRobot> baseHQs = new EnumMap<Team, InternalRobot>(Team.class);
     private Map<MapLocation, Team> mineLocations = new HashMap<MapLocation, Team>();
     private Map<MapLocation, Integer> droppedSupplies = new HashMap<MapLocation, Integer>();
+    private Map<MapLocation, Integer> oreMined = new HashMap<MapLocation, Integer>();
     private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<Team, GameMap.MapMemory>(Team.class);
     private Map<Team, Set<MapLocation>> knownMineLocations = new EnumMap<Team, Set<MapLocation>>(Team.class);
     private Map<Team, Map<Upgrade, Integer>> research = new EnumMap<Team, Map<Upgrade, Integer>>(Team.class);
@@ -244,6 +246,23 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
 
         addSignal(new LocationSupplyChangeSignal(loc, cur));
+    }
+
+    public void mineOre(MapLocation loc, int amount) {
+        int cur = 0;
+        if (oreMined.containsKey(loc)) {
+            cur = oreMined.get(loc);
+        }
+        oreMined.put(loc, cur + amount);
+        addSignal(new LocationOreChangeSignal(loc, cur + amount));
+    }
+
+    public int getOre(MapLocation loc) {
+        int mined = 0;
+        if (oreMined.containsKey(loc)) {
+            mined = oreMined.get(loc);
+        }
+        return gameMap.getInitialOre(loc) - mined;
     }
 
     public void processEndOfRound() {
@@ -1054,7 +1073,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public void visitMineSignal(MineSignal s) {
     	MapLocation loc = s.getMineLoc();
         // TODO: calculate ore change amount based on unit type
-        int baseOre = gameMap.getOre(loc);
+        int baseOre = getOre(loc);
         int ore = 0;
         if (baseOre > 0) {
             if (s.getMinerType() == RobotType.FURBY) {
@@ -1067,6 +1086,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 }
             }
         }
+        ore = Math.min(ore, baseOre);
+        mineOre(loc, ore);
         adjustResources(s.getMineTeam(), ore);
     	addSignal(s);
     }
