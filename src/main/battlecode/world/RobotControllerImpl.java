@@ -908,7 +908,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public void attackSquare(MapLocation loc) throws GameActionException {
         assertNotAttacking();
-        assertNotMoving();
         assertNotNull(loc);
         assertCanAttack(loc, RobotLevel.ON_GROUND);
 
