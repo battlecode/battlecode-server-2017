@@ -910,6 +910,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotAttacking();
         assertNotNull(loc);
         assertCanAttack(loc, RobotLevel.ON_GROUND);
+        if (robot.type == RobotType.BASHER) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers can only attack using the attack() method.");
+        }
 
         int factor = 1;
         if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
@@ -919,6 +922,22 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
 
         robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
+    }
+
+    public void attack() throws GameActionException {
+        assertNotAttacking();
+        if (robot.type != RobotType.BASHER) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only Bashers can attack using the attack() method.");
+        }
+
+        int factor = 1;
+        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
+            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
+        } else {
+            factor = 2;
+        }
+
+        robot.activateAttack(new AttackSignal(robot, getLocation(), RobotLevel.ON_GROUND), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
     }
 
     public void explode() throws GameActionException {

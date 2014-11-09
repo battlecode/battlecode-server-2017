@@ -300,6 +300,8 @@ public interface RobotController {
      */
     public void attackSquare(MapLocation loc) throws GameActionException;
 
+    public void attack() throws GameActionException;
+
     public void explode() throws GameActionException;
 
     // ***********************************

@@ -27,7 +27,7 @@ public enum RobotType {
     FURBY       (false,                  HQ, null, null, 100,  20, 20,  30,  6,  8, 2, 2, 1, 1, 24, 10000),
     COMPUTER    (false, TECHNOLOGYINSTITUTE, null, null,  10,  25,  5,   1,  0,  0, 8, 0, 0, 0, 24, 10000),
     SOLDIER     (false,            BARRACKS, null, null,  10,  15, 10,  40,  8, 15, 2, 2, 1, 1, 24, 10000),
-    BASHER      (false,            BARRACKS, null, null,  80,  15, 10,  40,  8,  0, 2, 2, 1, 1, 24, 10000),
+    BASHER      (false,            BARRACKS, null, null,  80,  15, 10,  40,  4,  2, 2, 2, 1, 1, 24, 10000),
     BUILDER     (false,         METABUILDER, null, null, 100,  20,  5,  80,  0,  0, 3, 0, 0, 0, 24, 10000),
     MINER       (false,        MINERFACTORY, null, null,  50,  20, 15,  50,  3,  5, 2, 2, 2, 1, 24, 10000),
     DRONE       (false,             HELIPAD, null, null, 120,  40,  5,  80, 10,  8, 1, 3, 0, 0, 24, 10000),
