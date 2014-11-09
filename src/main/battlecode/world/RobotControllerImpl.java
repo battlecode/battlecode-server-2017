@@ -259,7 +259,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (type.spawnSource != robot.type) {
             throw new GameActionException(CANT_DO_THAT_BRO, "This spawn can only be by a certain type");
         }
-        if (robot.type == RobotType.COMMANDER && !hasCommander()) {
+        if (type == RobotType.COMMANDER && hasCommander()) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Only one commander per team!");
         }
 
@@ -277,6 +277,26 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         		new SpawnSignal(loc, type, robot.getTeam(), robot, 0), robot.type == RobotType.HQ ? 0 : type.buildTurns, type.buildTurns 
         		);
         robot.resetSpawnCounter();
+    }
+
+    public boolean canSpawn(Direction dir, RobotType type) {
+        if (!robot.type.isBuilding || type.spawnSource != robot.type || type == RobotType.COMMANDER && hasCommander()) {
+            return false;
+        }
+
+        if (!canMove()) {
+            return false;
+        }
+        MapLocation loc = getLocation().add(dir);
+        if (!gameWorld.canMove(type.level, loc, type))
+            return false;
+
+        double cost = type.oreCost;
+    	if (cost > gameWorld.resources(getTeam())) {
+            return false;
+        }
+
+        return true;
     }
 
     public boolean canBuild(Direction dir, RobotType type) {
@@ -500,8 +520,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         for (InternalObject o : gameWorld.allObjects())
         {
         	if  ((Robot.class.isInstance(o)) 
-        			&& o.getTeam() == robot.getTeam()
-        			&& loc.distanceSquaredTo(o.getLocation()) <= sensorRadius)
+        			&& (o.getTeam() == robot.getTeam()
+        			|| loc.distanceSquaredTo(o.getLocation()) <= sensorRadius))
         		return true;
         		
         }
@@ -510,11 +530,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     
     public boolean checkCanSense(InternalObject obj) {
         boolean res = obj.exists() && (obj.getTeam() == getTeam() || checkCanSense(obj.getLocation()));
-        if (res) {
-            InternalRobot ir = castInternalObject(obj, InternalRobot.class);
-            if (res && ir.type == RobotType.SOLDIER && obj.getTeam() != getTeam() && obj.getLocation().distanceSquaredTo(senseEnemyHQLocation()) <= GameConstants.HQ_CLOAK_RADIUS) {
-                res = false;
-            }
+        if (!res) {
+            System.out.println("failed sense with " + obj.exists() + " " + (obj.getTeam() == getTeam()) + " " + checkCanSense(obj.getLocation()) + " with object id " + obj.getID());
         }
         return res;
     }

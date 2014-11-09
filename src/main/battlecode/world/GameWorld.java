@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import battlecode.common.Clock;
 import battlecode.common.CommanderSkillType;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -579,8 +580,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         } else
             System.out.println("Couldn't remove " + o + " from the game");
 
-        if (gameObjectsByID.get(o.getID()) == o)
+        if (gameObjectsByID.get(o.getID()) == o) {
             gameObjectsByID.remove(o.getID());
+        }
 
         if (o instanceof InternalRobot) {
             InternalRobot r = (InternalRobot) o;

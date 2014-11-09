@@ -357,6 +357,8 @@ public interface RobotController {
      */
     public void spawn(Direction dir, RobotType type) throws GameActionException;
 
+    public boolean canSpawn(Direction dir, RobotType type);
+
     /**
      * Mines the current square for ore.
      *
