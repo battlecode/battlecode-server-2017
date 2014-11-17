@@ -316,11 +316,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             return false;
 
         // check dependencies
-        if (type.dependency1 != null && gameWorld.getRobotTypeCount(getTeam(), type.dependency1) == 0) {
-            return false;
-        }
-        if (type.dependency2 != null && gameWorld.getRobotTypeCount(getTeam(), type.dependency2) == 0) {
-            return false;
+        for (RobotType dependency : type.dependencies) {
+            if (gameWorld.getRobotTypeCount(getTeam(), dependency) == 0) {
+                return false;
+            }
         }
         if (!canMove()) {
             return false;
@@ -344,11 +343,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Can only build buildings");
 
         // check dependencies
-        if (type.dependency1 != null && gameWorld.getRobotTypeCount(getTeam(), type.dependency1) == 0) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build of " + type);
-        }
-        if (type.dependency2 != null && gameWorld.getRobotTypeCount(getTeam(), type.dependency1) == 0) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build of " + type);
+        for (RobotType dependency : type.dependencies) {
+            if (gameWorld.getRobotTypeCount(getTeam(), dependency) == 0) {
+                throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build of " + type);
+            }
         }
 
     	assertNotMoving();

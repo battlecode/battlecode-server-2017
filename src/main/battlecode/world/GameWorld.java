@@ -113,6 +113,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     // a count for each robot type per team for tech tree checks and for tower counts
     private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<Team, Map<RobotType, Integer>>(Team.class);
+    private Map<Team, Map<RobotType, Integer>> inactiveRobotTypeCount = new EnumMap<Team, Map<RobotType, Integer>>(Team.class);
 
     // robots to remove from the game at end of turn
     private List<InternalRobot> deadRobots = new ArrayList<InternalRobot>();
@@ -216,6 +217,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	return teamCapturingNumber[team.ordinal()];
     }
 
+    // only returns active robots
     public int getRobotTypeCount(Team team, RobotType type) {
         if (robotTypeCount.get(team).containsKey(type)) {
             return robotTypeCount.get(team).get(type);
@@ -1079,12 +1081,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         int ore = 0;
         if (baseOre > 0) {
             if (s.getMinerType() == RobotType.FURBY) {
-                ore = Math.min(2, baseOre / 100);
+                ore = Math.max(Math.min(GameConstants.FURBY_MINE_MAX, baseOre / GameConstants.FURBY_MINE_RATE), GameConstants.MINIMUM_MINE_AMOUNT);
             } else {
                 if (hasUpgrade(s.getMineTeam(), Upgrade.IMPROVEDMINING)) {
-                    ore = Math.min(baseOre / 30, 4);
+                    ore = Math.max(Math.min(baseOre / GameConstants.MINER_MINE_RATE, GameConstants.MINER_MINE_MAX_UPGRADED), GameConstants.MINIMUM_MINE_AMOUNT);
                 } else {
-                    ore = Math.min(baseOre / 30, 3);
+                    ore = Math.max(Math.min(baseOre / GameConstants.MINER_MINE_RATE, GameConstants.MINER_MINE_MAX), GameConstants.MINIMUM_MINE_AMOUNT);
                 }
             }
         }

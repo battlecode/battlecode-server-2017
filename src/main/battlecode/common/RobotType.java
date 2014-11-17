@@ -42,8 +42,7 @@ public enum RobotType {
     public final RobotLevel level = ON_GROUND;
     public final boolean isBuilding;
     public final RobotType spawnSource;
-    public final RobotType dependency1;
-    public final RobotType dependency2;
+    public final ArrayList<RobotType> dependencies;
     public final int oreCost;
     public final int buildTurns;
     public final int supplyUpkeep;
@@ -79,8 +78,13 @@ public enum RobotType {
               int bytecodeLimit) {
         this.isBuilding = isBuilding;
         this.spawnSource = spawnSource;
-        this.dependency1 = dependency1;
-        this.dependency2 = dependency2;
+        this.dependencies = new ArrayList<RobotType>();
+        if (dependency1 != null) {
+            this.dependencies.add(dependency1);
+        }
+        if (dependency2 != null) {
+            this.dependencies.add(dependency2);
+        }
         this.oreCost = oreCost;
         this.buildTurns = buildTurns;
         this.supplyUpkeep = supplyUpkeep;

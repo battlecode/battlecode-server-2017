@@ -133,4 +133,12 @@ public interface GameConstants {
     public static final int INTERVENTION_LENGTH = 10;
 
     public static final int FLASH_RANGE = 15;
+
+    // mining stuff
+    public static final int MINIMUM_MINE_AMOUNT = 1;
+    public static final int FURBY_MINE_MAX = 2;
+    public static final int FURBY_MINE_RATE = 100;
+    public static final int MINER_MINE_RATE = 30;
+    public static final int MINER_MINE_MAX = 3;
+    public static final int MINER_MINE_MAX_UPGRADED = 4;
 }
