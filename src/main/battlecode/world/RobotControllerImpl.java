@@ -61,70 +61,78 @@ TODO:
 - fix playerfactory/spawnsignal hack??
 - better suicide() ??
 - pare down GW, GWviewer methods; add engine.getallsignals?
+*/
 
-- TEST energon transfer every round, with cap
-- TEST better println tagging
-- TEST optimized silencing
-- TEST "control ints"
-- TEST indicator strings
-- TEST map offsets
-- TEST tiebreaking conditions
-- TEST senseNearbyUpgrades
-- TEST no battery freeze
-- TEST upgrades
-- TEST upgrades on map
-- TEST only one energonchangesignal / round / robot
-- TEST exception polling for action queue
-- TEST fix action timing
-- TEST action queue
-- TEST broadcast queue
-- TEST emp detonate
-- TEST locating enemy batteries -- return direction
-- TEST InternalArchon
-- TEST energon decay
-- TEST new energon transfer
-- TEST map parsing
-- TEST run perl script to get robottypes
-- TEST serializable stuff
-- TEST getNextMessage arrays
-- TEST responding to signals
-- TEST clock
- */
 public class RobotControllerImpl extends ControllerShared implements RobotController, GenericController {
 
     public RobotControllerImpl(GameWorld gw, InternalRobot r) {
         super(gw, r);
     }
+
+    public int hashCode() {
+        return robot.getID();
+    }
+
+    // *********************************
+    // ****** GLOBAL QUERY METHODS *****
+    // *********************************
+
+    public int getMapWidth() {
+        return robot.myGameWorld.getGameMap().getWidth();
+    }
+
+    public int getMapHeight() {
+        return robot.myGameWorld.getGameMap().getHeight();
+    }
+
+    public boolean hasUpgrade(Upgrade upgrade) {
+        assertNotNull(upgrade);
+        return gameWorld.hasUpgrade(getTeam(), upgrade);
+    }
+    
+    public double getTeamOre() {
+        return gameWorld.resources(getTeam());
+    }
+
+    public int getRobotTypeCount(RobotType type) {
+        return gameWorld.getRobotTypeCount(getTeam(), type);
+    }
+
+    public boolean hasCommander() {
+        return gameWorld.getRobotTypeCount(robot.getTeam(), RobotType.COMMANDER) > 0;
+    }
     
     public void assertHaveResource(double amount) throws GameActionException {
-    	if (amount > gameWorld.resources(getTeam()))
-    		throw new GameActionException(NOT_ENOUGH_RESOURCE, "You do not have enough ORE to do that.");
+        if (amount > gameWorld.resources(getTeam()))
+            throw new GameActionException(NOT_ENOUGH_RESOURCE, "You do not have enough ORE to do that.");
     }
     
     public void assertHaveUpgrade(Upgrade upgrade) throws GameActionException {
-    	if (!gameWorld.hasUpgrade(getTeam(), upgrade))
-    		throw new GameActionException(MISSING_UPGRADE, "You need the following upgrade: "+upgrade);
-    }
-    
-    public void assertIsEncampment(MapLocation loc) throws GameActionException {
-    	if (!gameWorld.isEncampment(loc))
-    		throw new GameActionException(NO_ROBOT_THERE, "That location is not an Encampment");
-    }
-    
-
-    //*********************************
-    //****** QUERY METHODS ********
-    //*********************************
-
-    public boolean isActive() {
-        return canMove() && canAttack();
+        if (!gameWorld.hasUpgrade(getTeam(), upgrade))
+            throw new GameActionException(MISSING_UPGRADE, "You need the following upgrade: "+upgrade);
     }
 
-    public double getTimeUntilMovement() {
+    // *********************************
+    // ****** UNIT QUERY METHODS *******
+    // *********************************
+
+    public Team getTeam() {
+        return robot.getTeam();
+    }
+
+    public RobotType getType() {
+        return robot.type;
+    }
+
+    public MapLocation getLocation() {
+        return robot.getLocation();
+    }
+
+    public double getTurnsUntilMovement() {
         return robot.getTimeUntilMovement();
     }
 
-    public double getTimeUntilAttack() {
+    public double getTurnsUntilAttack() {
         return robot.getTimeUntilAttack();
     }
 
@@ -132,94 +140,344 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getEnergonLevel();
     }
 
+    public double getSupplyLevel() {
+        return robot.getSupplyLevel();
+    }
+    
     public int getXP() {
         return robot.getXP();
     }
 
-    public double getSupplyLevel() {
-        return robot.getSupplyLevel();
+    public boolean isBuilding() {
+        return getBuildingTypeBeingBuilt() != null;
     }
 
-    public double getTeamOre() {
-        return gameWorld.resources(getTeam());
-    }
-    
-    public double getShields() {
-    	return robot.getShieldLevel();
-    }
-
-    public MapLocation getLocation() {
-        return robot.getLocation();
-    }
-
-
-    public Team getTeam() {
-        return robot.getTeam();
-    }
-
-    public int getBytecodeLimit() {
-        return robot.getBytecodeLimit();
-    }
-
-    public RobotType getType() {
-        return robot.type;
-    }
-    
-    public int getMapWidth() {
-    	return robot.myGameWorld.getGameMap().getWidth();
-    }
-
-    public int getMapHeight() {
-    	return robot.myGameWorld.getGameMap().getHeight();
-    }
-
-    public boolean isConstructing() {
-        return getConstructingType() != null;
-    }
-
-    public RobotType getConstructingType() {
+    public RobotType getBuildingTypeBeingBuilt() {
         return robot.getCapturingType();
     }
 
-    public int getConstructingRounds() {
+    public int getBuildingRoundsRemaining() {
         return robot.getCapturingRounds();
     }
 
-    public int getRobotTypeCount(RobotType type) {
-        return gameWorld.getRobotTypeCount(getTeam(), type);
+    public int getMissileCount() {
+        return robot.getMissileCount();
     }
 
-    //***********************************
-    //****** ACTION METHODS *************
-    //***********************************
+    // ***********************************
+    // ****** GENERAL SENSOR METHODS *****
+    // ***********************************
 
-    public void yield() {
-        //int bytecodesBelowBase = GameConstants.BYTECODE_LIMIT - RobotMonitor.getBytecodesUsed();
-        //if (bytecodesBelowBase > 0)
-            //gameWorld.adjustResources(getTeam(), GameConstants.POWER_COST_PER_BYTECODE * bytecodesBelowBase);
-        RobotMonitor.endRunner();
-    }
+    public boolean checkCanSense(MapLocation loc) {
+        
+        int sensorRadius = robot.type.sensorRadiusSquared;
 
-    public void mine() throws GameActionException {
-        if (robot.type != RobotType.FURBY && robot.type != RobotType.MINER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only FURBY and MINER can mine");
+        if (robot.myLocation.distanceSquaredTo(loc) <= sensorRadius) {
+            return true;
         }
+       
+        for (InternalObject o : gameWorld.allObjects()) {
+            if ((Robot.class.isInstance(o)) && (o.getTeam() == robot.getTeam() || loc.distanceSquaredTo(o.getLocation()) <= sensorRadius)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean checkCanSense(InternalObject obj) {
+        return obj.exists() && (obj.getTeam() == getTeam() || checkCanSense(obj.getLocation()));
+    }
+
+    public void assertCanSense(MapLocation loc) throws GameActionException {
+        if (!checkCanSense(loc))
+            throw new GameActionException(CANT_SENSE_THAT, "That location is not within the robot's sensor range.");
+    }
+
+    public void assertCanSense(InternalObject obj) throws GameActionException {
+        if (!checkCanSense(obj))
+            throw new GameActionException(CANT_SENSE_THAT, "That object is not within the robot's sensor range.");
+    }
+
+    public MapLocation senseHQLocation() {
+        return gameWorld.getBaseHQ(getTeam()).getLocation();
+    }
+    
+    public MapLocation senseEnemyHQLocation() {
+        return gameWorld.getBaseHQ(getTeam().opponent()).getLocation();
+    }
+
+    public TerrainTile senseTerrainTile(MapLocation loc) {
+        assertNotNull(loc);
+        return gameWorld.getMapTerrain(loc);
+    }
+    
+    public RobotInfo senseRobotInfo(Robot r) throws GameActionException {
+        InternalRobot ir = castInternalRobot(r);
+        assertCanSense(ir);
+
+        int xpVal = 0;
+        if (ir.type == RobotType.COMMANDER) {
+            xpVal = ((InternalCommander)ir).getXP();
+        }
+        return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getXP(),
+                ir.getDirection(), ir.type, ir.getTeam(), 0,
+                ir.getCapturingType() != null, ir.getCapturingType(), ir.getCapturingRounds());
+    }
+
+    public boolean canSenseObject(GameObject o) {
+        return checkCanSense(castInternalObject(o));
+    }
+
+    public boolean canSenseSquare(MapLocation loc) {
+        return checkCanSense(loc);
+    }
+
+    public MapLocation senseLocationOf(GameObject o) throws GameActionException {
+        InternalObject io = castInternalObject(o);
+        assertCanSense(io);
+        return io.sensedLocation();
+    }
+
+    public GameObject senseObjectAtLocation(MapLocation loc) throws GameActionException {
+        assertNotNull(loc);
+        assertCanSense(loc);
+        InternalObject obj = gameWorld.getObject(loc);
+        if (obj != null && checkCanSense(obj)) {
+            return (GameObject) obj;
+        } else {
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type) {
+        Predicate<InternalObject> p = new Predicate<InternalObject>() {
+            public boolean apply(InternalObject o) {
+                return checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
+            }
+        };
+        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
+    }
+
+    // USE THIS METHOD CAREFULLY
+    public <T extends GameObject> Robot[] getRobotsFromGameObjects(T[] array) {
+        Robot[] robots = new Robot[array.length];
+        for (int i = 0; i < robots.length; ++i) {
+            robots[i] = (Robot) array[i];
+        }
+        return robots;
+    }
+
+    public Robot[] senseNearbyRobots() {
+        return getRobotsFromGameObjects(senseNearbyGameObjects(Robot.class));
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type, final int radiusSquared) {
+        Predicate<InternalObject> p = new Predicate<InternalObject>() {
+            public boolean apply(InternalObject o) {
+                return o.myLocation.distanceSquaredTo(robot.myLocation) <= radiusSquared 
+                        && checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
+            }
+        };
+        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
+    }
+
+    public Robot[] senseNearbyRobots(int radiusSquared) {
+        return getRobotsFromGameObjects(senseNearbyGameObjects(Robot.class, radiusSquared));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type, final int radiusSquared, final Team team) {
+        if (team == null) {
+            return senseNearbyGameObjects(type, radiusSquared);
+        }
+        Predicate<InternalObject> p = new Predicate<InternalObject>() {
+            public boolean apply(InternalObject o) {
+                return o.myLocation.distanceSquaredTo(robot.myLocation) <= radiusSquared
+                        && o.getTeam() == team
+                        && checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
+            }
+        };
+        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
+    }
+
+    public Robot[] senseNearbyRobots(int radiusSquared, Team team) {
+        return getRobotsFromGameObjects(senseNearbyGameObjects(Robot.class, radiusSquared, team));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type, final MapLocation center, final int radiusSquared, final Team team) {
+        if (team == null) {
+            Predicate<InternalObject> p = new Predicate<InternalObject>() {
+                public boolean apply(InternalObject o) {
+                    return o.myLocation.distanceSquaredTo(center) <= radiusSquared
+                            && checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
+                }
+            };
+            return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
+        }
+        Predicate<InternalObject> p = new Predicate<InternalObject>() {
+            public boolean apply(InternalObject o) {
+                return o.myLocation.distanceSquaredTo(center) <= radiusSquared
+                        && o.getTeam() == team
+                        && checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
+            }
+        };
+        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
+    }
+
+    public Robot[] senseNearbyRobots(MapLocation center, int radiusSquared, Team team) {
+        return getRobotsFromGameObjects(senseNearbyGameObjects(Robot.class, center, radiusSquared, team));
+    }
+
+    // ***********************************
+    // ****** MOVEMENT METHODS ***********
+    // ***********************************
+
+    public void assertNotMoving() throws GameActionException {
+        if (!isMovementActive()) {
+            throw new GameActionException(NOT_ACTIVE, "This robot has movement delay and cannot move.");
+        }
+    }
+
+    public void assertCanMove(Direction d) throws GameActionException {
+        if (!canMove(d)) {
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move in the given direction: " + d);
+        }
+    }
+
+    protected void assertValidDirection(Direction d) {
+        assertNotNull(d);
+        if (d == Direction.NONE || d == Direction.OMNI) {
+            throw new IllegalArgumentException("You cannot move in the direction NONE or OMNI.");
+        }
+    }
+
+    public boolean isMovementActive() {
+        return getTurnsUntilMovement() < 1;
+    }
+
+    public boolean canMove(Direction d) {
+        if (d == Direction.NONE || d == Direction.OMNI)
+            return false;
+        assertValidDirection(d);
+        return gameWorld.canMove(getLocation().add(d), robot.type);
+    }
+
+    public void move(Direction d) throws GameActionException {
+        if (robot.type.isBuilding)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Buildings can't move");
         assertNotMoving();
-        MapLocation loc = getLocation();
-        robot.activateMovement(new MineSignal(loc, getTeam(), getType()), 1, 1);
-    }
+        assertCanMove(d);
+        double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()), MovementType.RUN);
 
-    public void transferSuppliesToHQ() throws GameActionException {
-        if (robot.type != RobotType.SUPPLYDEPOT) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only supply depot can transfer supplies to hq");
+        int factor = 1;
+        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
+            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
+        } else {
+            factor = 2;
         }
 
-        double amount = robot.getSupplyLevel();
-        robot.decreaseSupplyLevel(amount);
-        gameWorld.getBaseHQ(getTeam()).increaseSupplyLevel(amount);
+        robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
+                true, ((int) delay) * factor, MovementType.RUN), robot.getLoadingDelayForType(), delay * factor);
     }
 
-    public int senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException {
+    // ***********************************
+    // ****** ATTACK METHODS *************
+    // ***********************************
+
+    public boolean isAttackActive() {
+        return getTurnsUntilAttack() < 1;
+    }
+
+    protected void assertNotAttacking() throws GameActionException {
+        if (!isAttackActive())
+            throw new GameActionException(NOT_ACTIVE, "This robot has action delay and cannot attack.");
+    }
+
+    protected void assertCanAttack(MapLocation loc) throws GameActionException {
+        if (!canAttackSquare(loc))
+            throw new GameActionException(OUT_OF_RANGE, "That location is out of this robot's attack range");
+    }
+
+    public boolean canAttackSquare(MapLocation loc) {
+        assertNotNull(loc);
+        return GameWorld.canAttackSquare(robot, loc);
+    }
+
+    public void attackSquare(MapLocation loc) throws GameActionException {
+        assertNotAttacking();
+        assertNotNull(loc);
+        assertCanAttack(loc);
+        if (robot.type == RobotType.BASHER) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers can only attack using the attack() method.");
+        }
+
+        int factor = 1;
+        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
+            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
+        } else {
+            factor = 2;
+        }
+
+        robot.activateAttack(new AttackSignal(robot, loc), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
+    }
+
+    public void bash() throws GameActionException {
+        assertNotAttacking();
+        if (robot.type != RobotType.BASHER) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only Bashers can attack using the attack() method.");
+        }
+
+        int factor = 1;
+        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
+            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
+        } else {
+            factor = 2;
+        }
+
+        robot.activateAttack(new AttackSignal(robot, getLocation()), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
+    }
+
+    public void explode() throws GameActionException {
+        if (robot.type != RobotType.MISSILE) {
+            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT_BRO, "only missiles can self destruct");
+        }
+        if (robot.type == RobotType.MISSILE) {
+            robot.setSelfDestruct();
+        }
+        throw new RobotDeathException();
+    }
+
+    // ***********************************
+    // ****** BROADCAST METHODS **********
+    // ***********************************
+
+    public boolean hasBroadcasted() {
+        return robot.hasBroadcasted();
+    }
+    
+    public void broadcast(int channel, int data) throws GameActionException {
+        if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
+        
+        robot.addBroadcast(channel, data);
+    }
+    
+    @Override
+    public int readBroadcast(int channel) throws GameActionException {
+        if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
+        int m = gameWorld.getMessage(robot.getTeam(), channel);
+        return m;
+    }
+
+    // ***********************************
+    // ****** SUPPLY METHODS *************
+    // ***********************************
+
+    public double senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException {
         checkCanSense(loc);
 
         return gameWorld.getSupplyLevel(loc);
@@ -260,6 +518,74 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         gameWorld.changeSupplyLevel(robot.getLocation(), -amount);
     }
 
+    public void transferSuppliesToHQ() throws GameActionException {
+        if (robot.type != RobotType.SUPPLYDEPOT) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only supply depot can transfer supplies to hq");
+        }
+
+        double amount = robot.getSupplyLevel();
+        robot.decreaseSupplyLevel(amount);
+        gameWorld.getBaseHQ(getTeam()).increaseSupplyLevel(amount);
+    }
+
+    // ***********************************
+    // ****** MINING METHODS *************
+    // ***********************************
+
+    public void mine() throws GameActionException {
+        if (robot.type != RobotType.FURBY && robot.type != RobotType.MINER) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only FURBY and MINER can mine");
+        }
+        assertNotMoving();
+        MapLocation loc = getLocation();
+        robot.activateMovement(new MineSignal(loc, getTeam(), getType()), 1, 1);
+    }
+
+    public int senseOre(MapLocation loc) throws GameActionException {
+        assertCanSense(loc);
+        return gameWorld.getOre(loc);
+    }   
+
+    // ***********************************
+    // ****** BUILDING/SPAWNING **********
+    // ***********************************
+
+    public void launchMissile(Direction dir) throws GameActionException {
+        if (robot.type != RobotType.LAUNCHER)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only LAUNCHER can launch missiles");
+
+        if (robot.getMissileCount() == 0) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "No missiles to launch");
+        }
+
+        assertNotMoving();
+
+        MapLocation loc = getLocation().add(dir);
+        if (!gameWorld.canMove(loc, RobotType.MISSILE))
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
+
+        robot.decrementMissileCount();
+        robot.activateMovement(
+                new SpawnSignal(loc, RobotType.MISSILE, robot.getTeam(), robot, 0), 0, 0);
+    }
+
+    public boolean canSpawn(Direction dir, RobotType type) {
+        if (!robot.type.isBuilding || type.spawnSource != robot.type || type == RobotType.COMMANDER && hasCommander()) {
+            return false;
+        }
+
+        MapLocation loc = getLocation().add(dir);
+        if (!gameWorld.canMove(loc, type))
+            return false;
+
+        double cost = type.oreCost;
+        if (cost > gameWorld.resources(getTeam())) {
+            return false;
+        }
+
+        return true;
+    }
+
     public void spawn(Direction dir, RobotType type) throws GameActionException {
         if (!robot.type.isBuilding) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Only buildings can spawn");
@@ -275,42 +601,22 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         double cost = type.oreCost;
         
         assertHaveResource(cost);
-    	gameWorld.adjustResources(getTeam(), -cost);
+        gameWorld.adjustResources(getTeam(), -cost);
 
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(loc, type))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         robot.activateMovement(
-        		new SpawnSignal(loc, type, robot.getTeam(), robot, 0), robot.type == RobotType.HQ ? 0 : type.buildTurns, type.buildTurns 
-        		);
+                new SpawnSignal(loc, type, robot.getTeam(), robot, 0), robot.type == RobotType.HQ ? 0 : type.buildTurns, type.buildTurns 
+                );
         robot.resetSpawnCounter();
     }
 
-    public boolean canSpawn(Direction dir, RobotType type) {
-        if (!robot.type.isBuilding || type.spawnSource != robot.type || type == RobotType.COMMANDER && hasCommander()) {
-            return false;
-        }
-
-        if (!canMove()) {
-            return false;
-        }
-        MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(loc, type))
-            return false;
-
-        double cost = type.oreCost;
-    	if (cost > gameWorld.resources(getTeam())) {
-            return false;
-        }
-
-        return true;
-    }
-
     public boolean canBuild(Direction dir, RobotType type) {
-    	if (robot.type != RobotType.FURBY && robot.type != RobotType.BUILDER)
+        if (robot.type != RobotType.FURBY && robot.type != RobotType.BUILDER)
             return false;
-    	if (!type.isBuilding)
+        if (!type.isBuilding)
             return false;
 
         // check dependencies
@@ -319,15 +625,12 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
                 return false;
             }
         }
-        if (!canMove()) {
-            return false;
-        }
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(loc, type))
             return false;
 
         double cost = type.oreCost;
-    	if (cost > gameWorld.resources(getTeam())) {
+        if (cost > gameWorld.resources(getTeam())) {
             return false;
         }
 
@@ -335,9 +638,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public void build(Direction dir, RobotType type) throws GameActionException {
-    	if (robot.type != RobotType.FURBY && robot.type != RobotType.BUILDER)
+        if (robot.type != RobotType.FURBY && robot.type != RobotType.BUILDER)
             throw new GameActionException(CANT_DO_THAT_BRO, "Only FURBY and BUILDER can build");
-    	if (!type.isBuilding)
+        if (!type.isBuilding)
             throw new GameActionException(CANT_DO_THAT_BRO, "Can only build buildings");
 
         // check dependencies
@@ -347,11 +650,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             }
         }
 
-    	assertNotMoving();
+        assertNotMoving();
         double cost = type.oreCost;
         
         assertHaveResource(cost);
-    	gameWorld.adjustResources(getTeam(), -cost);
+        gameWorld.adjustResources(getTeam(), -cost);
 
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(loc, type))
@@ -367,109 +670,45 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
 
         robot.activateMovement(
-        		new SpawnSignal(loc, type, robot.getTeam(), robot, delay), delay, delay
-        		);
+                new SpawnSignal(loc, type, robot.getTeam(), robot, delay), delay, delay
+                );
         robot.resetSpawnCounter();
     }
-    public boolean hasCommander() {
-        return gameWorld.getRobotTypeCount(robot.getTeam(), RobotType.COMMANDER) > 0;
-    }
-
-    public int getMissileCount() {
-        return robot.getMissileCount();
-    }
     
-    public void launchMissile(Direction dir) throws GameActionException {
-    	if (robot.type != RobotType.LAUNCHER)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only LAUNCHER can launch missiles");
 
-        if (robot.getMissileCount() == 0) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "No missiles to launch");
-        }
+    //***********************************
+    //****** UPGRADE METHODS ************
+    //***********************************
 
-    	assertNotMoving();
-
-        MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(loc, RobotType.MISSILE))
-            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
-
-        robot.decrementMissileCount();
-        robot.activateMovement(
-        		new SpawnSignal(loc, RobotType.MISSILE, robot.getTeam(), robot, 0), 0, 0);
-    }
-    
-    public double senseCaptureCost() {
-        return 0;
-    	//return GameConstants.CAPTURE_POWER_COST * (gameWorld.getNumCapturing(getTeam()) + gameWorld.getEncampmentsByTeam(getTeam()).size() + 1);
-    }
-    
     public void researchUpgrade(Upgrade upgrade) throws GameActionException {
-    	if (robot.type != upgrade.researcher)
+        if (robot.type != upgrade.researcher)
             throw new GameActionException(CANT_DO_THAT_BRO, "Only certain units can research.");
-    	if (gameWorld.hasUpgrade(getTeam(), upgrade))
-    		throw new GameActionException(CANT_DO_THAT_BRO, "You already have that upgrade. ("+upgrade+")");
+        if (gameWorld.hasUpgrade(getTeam(), upgrade))
+            throw new GameActionException(CANT_DO_THAT_BRO, "You already have that upgrade. ("+upgrade+")");
         if (checkResearchProgress(upgrade) > 0) {
             throw new GameActionException(CANT_DO_THAT_BRO, "You already started researching this upgrade. ("+upgrade+")");
         }
-    	assertNotMoving();
+        assertNotMoving();
         assertHaveResource(upgrade.oreCost);
-    	gameWorld.adjustResources(getTeam(), -upgrade.oreCost);
+        gameWorld.adjustResources(getTeam(), -upgrade.oreCost);
         robot.activateResearch(new ResearchSignal(robot, upgrade), upgrade.numRounds, upgrade.numRounds);
     }
     
     public int checkResearchProgress(Upgrade upgrade) throws GameActionException {
-    	return gameWorld.getUpgradeProgress(getTeam(), upgrade);
+        return gameWorld.getUpgradeProgress(getTeam(), upgrade);
     }
     
-    
-    public void layMine() throws GameActionException {
-    	if (robot.type != RobotType.SOLDIER)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
-    	assertNotMoving();
-    	//robot.activateMinelayer(new MinelayerSignal(robot, MineAction.LAYING, getLocation()), GameConstants.MINE_LAY_DELAY);
+    // ***********************************
+    // ****** OTHER ACTION METHODS *******
+    // ***********************************
+
+    public void yield() {
+        RobotMonitor.endRunner();
     }
-    
-    private void stopMine() throws GameActionException {
-    	if (robot.type != RobotType.SOLDIER)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
-    	if (robot.getMiningRounds() == 0)
-    		throw new GameActionException(CANT_DO_THAT_BRO, "You are not mining currently");
-    	//robot.activateMinelayer(new MinelayerSignal(robot,  MineAction.LAYINGSTOP, getLocation()), GameConstants.MINE_LAY_DELAY);
+
+    public void disintegrate() {
+        throw new RobotDeathException();
     }
-    
-    public int senseMineRoundsLeft() throws GameActionException {
-    	if (robot.type != RobotType.SOLDIER)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
-    	return robot.getMiningRounds();
-    }
-    
-    public void defuseMine(MapLocation loc) throws GameActionException {
-      
-    	// if (robot.type != RobotType.SOLDIER)
-      //       throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can lay mines.");
-    	// assertNotMoving();
-    	
-    	// int defuseRadius = 2;
-    	// if (hasUpgrade(Upgrade.DEFUSION))
-    	// 	defuseRadius = robot.type.sensorRadiusSquared;// + (hasUpgrade(Upgrade.VISION) ? GameConstants.VISION_UPGRADE_BONUS : 0);
-    		
-    	// if (loc.distanceSquaredTo(getLocation()) > defuseRadius)
-    	// 	throw new GameActionException(OUT_OF_RANGE, "You can't defuse that far");
-      // /
-    	// if (hasUpgrade(Upgrade.DEFUSION))
-    	// 	robot.activateDefuser(new MinelayerSignal(robot, MineAction.DEFUSING, loc), GameConstants.MINE_DEFUSE_DEFUSION_DELAY, loc);
-    	// else
-    	// 	robot.activateDefuser(new MinelayerSignal(robot, MineAction.DEFUSING, loc), GameConstants.MINE_DEFUSE_DELAY, loc);
-    }
-    
-//    public boolean scanMines() throws GameActionException {
-//    	if (robot.type != RobotType.SOLDIER)
-//            throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIERs can scan for mines.");
-//    	assertHaveResource(GameConstants.SCAN_COST);
-//        assertHaveUpgrade(Upgrade.MINEDETECTOR);
-//        
-//        return robot.scanForMines();
-//    }
     
     public void resign() {
         for (InternalObject obj : gameWorld.getAllGameObjects())
@@ -485,531 +724,20 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         gameWorld.removeDead();
     }
 
-    public void suicide() {
-        throw new RobotDeathException();
-    }
-
-    public void breakpoint() {
-        gameWorld.notifyBreakpoint();
-    }
-
-    //***********************************
-    //****** SENSING METHODS *******
-    //***********************************
-
-    public void assertCanSense(MapLocation loc) throws GameActionException {
-        if (!checkCanSense(loc))
-            throw new GameActionException(CANT_SENSE_THAT, "That location is not within the robot's sensor range.");
-    }
-
-    public void assertCanSense(InternalObject obj) throws GameActionException {
-        if (!checkCanSense(obj))
-            throw new GameActionException(CANT_SENSE_THAT, "That object is not within the robot's sensor range.");
-    }
-
-    public boolean checkCanSense(MapLocation loc) {
-    	
-      int sensorRadius = robot.type.sensorRadiusSquared; // + (hasUpgrade(Upgrade.VISION) ? GameConstants.VISION_UPGRADE_BONUS : 0);
-//    	return getGameObjectsNearLocation(Robot.class, loc, sensorRadius, robot.getTeam()).length > 0;
-    	
-      if (robot.myLocation.distanceSquaredTo(loc) <= sensorRadius)
-        	return true;
-       
-        for (InternalObject o : gameWorld.allObjects())
-        {
-        	if  ((Robot.class.isInstance(o)) 
-        			&& (o.getTeam() == robot.getTeam()
-        			|| loc.distanceSquaredTo(o.getLocation()) <= sensorRadius))
-        		return true;
-        		
-        }
-        return false;
-    }
-    
-    public boolean checkCanSense(InternalObject obj) {
-        boolean res = obj.exists() && (obj.getTeam() == getTeam() || checkCanSense(obj.getLocation()));
-        if (!res) {
-            System.out.println("failed sense with " + obj.exists() + " " + (obj.getTeam() == getTeam()) + " " + checkCanSense(obj.getLocation()) + " with object id " + obj.getID());
-        }
-        return res;
-    }
-
-    public GameObject senseObjectAtLocation(MapLocation loc) throws GameActionException {
-        assertNotNull(loc);
-        assertCanSense(loc);
-        InternalObject obj = gameWorld.getObject(loc);
-        if (obj != null && checkCanSense(obj)) {
-            return (GameObject) obj;
-        } else {
-            return null;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type) {
-        Predicate<InternalObject> p = new Predicate<InternalObject>() {
-            public boolean apply(InternalObject o) {
-                return checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
-            }
-        };
-        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
-    }
-    
-    @SuppressWarnings("unchecked")
-	public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type, final int radiusSquared) {
-        Predicate<InternalObject> p = new Predicate<InternalObject>() {
-            public boolean apply(InternalObject o) {
-                return o.myLocation.distanceSquaredTo(robot.myLocation) <= radiusSquared 
-                		&& checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
-            }
-        };
-        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
-    }
-
-    @SuppressWarnings("unchecked")
-	public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type, final int radiusSquared, final Team team) {
-    	if (team == null)
-    		return senseNearbyGameObjects(type, radiusSquared);
-        Predicate<InternalObject> p = new Predicate<InternalObject>() {
-            public boolean apply(InternalObject o) {
-                return o.myLocation.distanceSquaredTo(robot.myLocation) <= radiusSquared
-                		&& o.getTeam() == team
-                		&& checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
-            }
-        };
-        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type, final MapLocation center, final int radiusSquared, final Team team) {
-    	if (team == null)
-    	{
-    		Predicate<InternalObject> p = new Predicate<InternalObject>() {
-                public boolean apply(InternalObject o) {
-                    return o.myLocation.distanceSquaredTo(center) <= radiusSquared
-                    		&& checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
-                }
-            };
-            return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
-    	}
-        Predicate<InternalObject> p = new Predicate<InternalObject>() {
-            public boolean apply(InternalObject o) {
-                return o.myLocation.distanceSquaredTo(center) <= radiusSquared
-                		&& o.getTeam() == team
-                		&& checkCanSense(o) && (type.isInstance(o)) && (!o.equals(robot));
-            }
-        };
-        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
-    }
-
-    public Robot[] senseBroadcastingRobots() {
-        return robot.myGameWorld.getRevealedRobots().toArray(new Robot[0]);
-    }
-
-    public Robot[] senseBroadcastingRobots(final Team t) {
-        Predicate<Robot> p = new Predicate<Robot>() {
-            public boolean apply(Robot r) {
-                return r.getTeam() == t;
-            }
-        };
-        return Iterables.toArray(Iterables.filter(robot.myGameWorld.getRevealedRobots(), p), Robot.class);
-    }
-
-    public MapLocation[] senseBroadcastingRobotLocations() {
-        InternalRobot[] bots = robot.myGameWorld.getRevealedRobots().toArray(new InternalRobot[0]);
-        MapLocation[] locs = new MapLocation[bots.length];
-        for (int i = 0; i < bots.length; i++) {
-            locs[i] = bots[i].getLocation();
-        }
-        return locs;
-    }
-
-    public MapLocation[] senseBroadcastingRobotLocations(final Team t) {
-        Predicate<Robot> p = new Predicate<Robot>() {
-            public boolean apply(Robot r) {
-                return r.getTeam() == t;
-            }
-        };
-        InternalRobot[] bots = Iterables.toArray(Iterables.filter(robot.myGameWorld.getRevealedRobots(), p), InternalRobot.class);
-        MapLocation[] locs = new MapLocation[bots.length];
-        for (int i = 0; i < bots.length; i++) {
-            locs[i] = bots[i].getLocation();
-        }
-        return locs;
-    }
-
-    
-    /**
-     * Private version used for engine checks to see if there is a robot w/ a given characteristic
-     */
-    @SuppressWarnings("unchecked")
-	private <T extends GameObject> T[] getGameObjectsNearLocation (final Class<T> type, final MapLocation location, final int radiusSquared, final Team team) {
-        Predicate<InternalObject> p = new Predicate<InternalObject>() {
-            public boolean apply(InternalObject o) {
-                return (type.isInstance(o)) &&
-                		o.getTeam() == team &&
-                		location.distanceSquaredTo(o.getLocation()) <= radiusSquared;
-            }
-        };
-        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
-    }
-    
-    public RobotInfo senseRobotInfo(Robot r) throws GameActionException {
-        InternalRobot ir = castInternalRobot(r);
-        assertCanSense(ir);
-
-        int xpVal = 0;
-        if (ir.type == RobotType.COMMANDER) {
-            xpVal = ((InternalCommander)ir).getXP();
-        }
-        return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getXP(),
-                ir.getDirection(), ir.type, ir.getTeam(), 0,
-                ir.getCapturingType() != null, ir.getCapturingType(), ir.getCapturingRounds());
-    }
-
-    public MapLocation senseLocationOf(GameObject o) throws GameActionException {
-        InternalObject io = castInternalObject(o);
-        assertCanSense(io);
-        return io.sensedLocation();
-    }
-
-    public boolean canSenseObject(GameObject o) {
-        return checkCanSense(castInternalObject(o));
-    }
-
-    public boolean canSenseSquare(MapLocation loc) {
-        return checkCanSense(loc);
-    }
-
-    public MapLocation senseHQLocation() {
-        return gameWorld.getBaseHQ(getTeam()).getLocation();
-    }
-    
-    public MapLocation senseEnemyHQLocation() {
-    	return gameWorld.getBaseHQ(getTeam().opponent()).getLocation();
-    }
-
-    public TerrainTile senseTerrainTile(MapLocation loc) {
-        assertNotNull(loc);
-        return gameWorld.getMapTerrain(loc);
-    }
-    
-    public MapLocation[] senseAllEncampmentSquares() {
-    	return gameWorld.getAllEncampments().toArray(new MapLocation[0]);
-    }
-    
-    public MapLocation[] senseAlliedEncampmentSquares() {
-    	return gameWorld.getEncampmentsByTeam(getTeam()).toArray(new MapLocation[]{});
-    }
-    
-    public MapLocation[] senseEncampmentSquares(final MapLocation center, final int radiusSquared, final Team team) throws GameActionException {
-    	if (team == getTeam().opponent())
-    		throw new GameActionException(CANT_DO_THAT_BRO, "can't sense enemy encampments");
-    	ArrayList<MapLocation> camps = new ArrayList<MapLocation>();
-    	Map<MapLocation, Team> campmap = gameWorld.getEncampmentMap();
-    	for (Entry<MapLocation, Team> entry : campmap.entrySet())
-    	{
-    		if ( ( team == null 
-    				|| (team == getTeam() && entry.getValue() == team)
-    				|| (team == Team.NEUTRAL && entry.getValue() != getTeam()) )
-    				&& center.distanceSquaredTo(entry.getKey()) <= radiusSquared)
-    			camps.add(entry.getKey());
-    	}
-        return camps.toArray(new MapLocation[]{});
-    }
-    
-    public Team senseMine(MapLocation loc) {
-    	Team mt = gameWorld.getMine(loc);
-    	if((mt == getTeam().opponent()) && !(gameWorld.isKnownMineLocation(getTeam(), loc)))
-    		return null;
-    	return mt;
-    }
-    
-    public boolean senseEncampmentSquare(MapLocation loc) {
-    	return gameWorld.getEncampment(loc) != null;
-    }
-    
-//    public int senseAlliedMines(MapLocation loc) {
-//    	return gameWorld.getMineCount(getTeam(), loc);
-//    }
-//    
-//    public int senseEnemyMines(MapLocation loc) {
-//    	return gameWorld.isKnownMineLocation(getTeam(), loc) ? gameWorld.getMineCount(getTeam().opponent(), loc) : 0;
-//    }
-    
-    public MapLocation[] senseMineLocations(final MapLocation center, final int radiusSquared, final Team team) {
-    	final Set<MapLocation> knownlocs = gameWorld.getKnownMineMap(getTeam());
-    	if (team == null)
-    	{
-    		if (radiusSquared >= GameConstants.MAP_MAX_HEIGHT*GameConstants.MAP_MAX_HEIGHT + GameConstants.MAP_MAX_WIDTH*GameConstants.MAP_MAX_WIDTH)
-        	{
-    			Predicate<MapLocation> p = new Predicate<MapLocation>() {
-            		public boolean apply(MapLocation o) {
-            			return gameWorld.getMine(o) != getTeam().opponent()
-            					|| knownlocs.contains(o);
-            		}
-            	};
-            	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
-        	}
-    		Predicate<MapLocation> p = new Predicate<MapLocation>() {
-        		public boolean apply(MapLocation o) {
-        			return (gameWorld.getMine(o) != getTeam().opponent() || knownlocs.contains(o))
-        					&& center.distanceSquaredTo(o) <= radiusSquared;
-        		}
-        	};
-        	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
-    	}
-    	if (radiusSquared >= GameConstants.MAP_MAX_HEIGHT*GameConstants.MAP_MAX_HEIGHT + GameConstants.MAP_MAX_WIDTH*GameConstants.MAP_MAX_WIDTH)
-    	{
-    		if (team != getTeam().opponent())
-    		{
-    			Predicate<MapLocation> p = new Predicate<MapLocation>() {
-            		public boolean apply(MapLocation o) {
-            			return gameWorld.getMine(o) == team;
-            		}
-            	};
-            	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
-    		}
-    		Predicate<MapLocation> p = new Predicate<MapLocation>() {
-        		public boolean apply(MapLocation o) {
-        			return gameWorld.getMine(o) == team
-        					&& knownlocs.contains(o);
-        		}
-        	};
-        	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
-    	}
-    	if (team != getTeam().opponent())
-		{
-        	Predicate<MapLocation> p = new Predicate<MapLocation>() {
-        		public boolean apply(MapLocation o) {
-        			return center.distanceSquaredTo(o) <= radiusSquared
-    		        		 && gameWorld.getMine(o) == team;
-        		}
-        	};
-        	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
-		}
-    	Predicate<MapLocation> p = new Predicate<MapLocation>() {
-    		public boolean apply(MapLocation o) {
-    			return center.distanceSquaredTo(o) <= radiusSquared
-		        		 && gameWorld.getMine(o) == team
-		        		 && knownlocs.contains(o);
-    		}
-    	};
-    	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
-    }
-    
-    public MapLocation[] senseNonAlliedMineLocations(final MapLocation center, final int radiusSquared) {
-    	final Set<MapLocation> knownlocs = gameWorld.getKnownMineMap(getTeam());
-    	if (radiusSquared >= GameConstants.MAP_MAX_HEIGHT*GameConstants.MAP_MAX_HEIGHT + GameConstants.MAP_MAX_WIDTH*GameConstants.MAP_MAX_WIDTH)
-    	{
-    		Predicate<MapLocation> p = new Predicate<MapLocation>() {
-        		public boolean apply(MapLocation o) {
-        			return (gameWorld.getMine(o) != getTeam()
-        					&& knownlocs.contains(o))
-        					|| gameWorld.getMine(o) == Team.NEUTRAL;
-        					
-        		}
-        	};
-        	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
-    	}
-    	Predicate<MapLocation> p = new Predicate<MapLocation>() {
-    		public boolean apply(MapLocation o) {
-    			return center.distanceSquaredTo(o) <= radiusSquared
-		        		 && ((gameWorld.getMine(o) != getTeam()
-		        		 && knownlocs.contains(o))
-		        		 || gameWorld.getMine(o) == Team.NEUTRAL);
-    		}
-    	};
-    	return Iterables.toArray((Iterable<MapLocation>) Iterables.filter(gameWorld.getMineMaps().keySet(), p), MapLocation.class); 
-    }
-
-    public int senseOre(MapLocation loc) throws GameActionException {
-        assertCanSense(loc);
-        return gameWorld.getOre(loc);
-    }   
-
     // ***********************************
-    // ****** MOVEMENT METHODS ********
+    // ******** MISC. METHODS ************
     // ***********************************
 
-    public void assertNotMoving() throws GameActionException {
-        if (!canMove())
-            throw new GameActionException(NOT_ACTIVE, "This robot has movement delay and cannot move.");
-    }
-
-    public void move(Direction d) throws GameActionException {
-        if (robot.type.isBuilding)
-        	throw new GameActionException(CANT_DO_THAT_BRO, "Buildings can't move");
-    	assertNotMoving();
-        assertCanMove(d);
-        double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()), MovementType.RUN);
-
-        int factor = 1;
-        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
-            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
-        } else {
-            factor = 2;
-        }
-
-        robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-                true, ((int) delay) * factor, MovementType.RUN), robot.getLoadingDelayForType(), delay * factor);
-    }
-
-    public boolean canMove(Direction d) {
-        if (d == Direction.NONE || d == Direction.OMNI)
-            return false;
-        assertValidDirection(d);
-        return gameWorld.canMove(getLocation().add(d), robot.type);
-    }
-
-    public boolean canMove() {
-        return getTimeUntilMovement() < 1;
-    }
-
-    public void assertCanMove(Direction d) throws GameActionException {
-        if (!canMove(d))
-            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move in the given direction: " + d);
-    }
-
-    protected void assertValidDirection(Direction d) {
-        assertNotNull(d);
-        if (d == Direction.NONE || d == Direction.OMNI)
-            throw new IllegalArgumentException("You cannot move in the direction NONE or OMNI.");
-    }
-
-    // ***********************************
-    // ****** ATTACK METHODS ********
-    // ***********************************
-
-    public boolean isAttackActive() {
-        return canAttack();
-    }
-
-    protected void assertNotAttacking() throws GameActionException {
-        if (!isAttackActive())
-            throw new GameActionException(NOT_ACTIVE, "This robot has action delay and cannot attack.");
-    }
-
-    protected void assertCanAttack(MapLocation loc) throws GameActionException {
-        if (!canAttackSquare(loc))
-            throw new GameActionException(OUT_OF_RANGE, "That location is out of this robot's attack range");
-    }
-
-    public boolean canAttack() {
-        return getTimeUntilAttack() < 1;
-    }
-
-    public boolean canAttackSquare(MapLocation loc) {
-        assertNotNull(loc);
-        return GameWorld.canAttackSquare(robot, loc);
-    }
-
-    public void attackSquare(MapLocation loc) throws GameActionException {
-        assertNotAttacking();
-        assertNotNull(loc);
-        assertCanAttack(loc);
-        if (robot.type == RobotType.BASHER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers can only attack using the attack() method.");
-        }
-
-        int factor = 1;
-        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
-            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
-        } else {
-            factor = 2;
-        }
-
-        robot.activateAttack(new AttackSignal(robot, loc), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
-    }
-
-    public void attack() throws GameActionException {
-        assertNotAttacking();
-        if (robot.type != RobotType.BASHER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only Bashers can attack using the attack() method.");
-        }
-
-        int factor = 1;
-        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
-            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
-        } else {
-            factor = 2;
-        }
-
-        robot.activateAttack(new AttackSignal(robot, getLocation()), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
-    }
-
-    public void explode() throws GameActionException {
-        if (robot.type != RobotType.MISSILE) {
-            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT_BRO, "only missiles can self destruct");
-        }
-        if (robot.type == RobotType.MISSILE) {
-            robot.setSelfDestruct();
-        }
-        throw new RobotDeathException();
-    }
-
-    //************************************
-    //******** BROADCAST METHODS **********
-    //************************************
-
-    public boolean hasBroadcasted() {
-        return robot.hasBroadcasted();
-    }
-    
-    public void broadcast(int channel, int data) throws GameActionException {
-    	if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
-    		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
-    	
-    	robot.addBroadcast(channel, data);
-    	//gameWorld.adjustResources(getTeam(), -cost);
-    	
-    }
-    
-    @Override
-    public int readBroadcast(int channel) throws GameActionException {
-    	if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
-    		throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
-    	int m = gameWorld.getMessage(robot.getTeam(), channel);
-    	//gameWorld.adjustResources(getTeam(), -cost);
-    	return m;
-    }
-
-    //************************************
-    //******** MISC. METHODS **********
-    //************************************
-    
     public void wearHat() throws GameActionException {
-    	assertNotMoving();
+        assertNotMoving();
         if (!(robot.getHatCount() == 0 && robot.type == RobotType.HQ)) {
             assertHaveResource(GameConstants.HAT_ORE_COST);
             gameWorld.adjustResources(getTeam(), -GameConstants.HAT_ORE_COST);
         }
         robot.incrementHatCount();
-    	robot.activateMovement(new HatSignal(robot, gameWorld.randGen.nextInt()), 0, 1);
+        robot.activateMovement(new HatSignal(robot, gameWorld.randGen.nextInt()), 0, 1);
     }
    
-    public boolean hasUpgrade(Upgrade upgrade) {
-    	assertNotNull(upgrade);
-    	return gameWorld.hasUpgrade(getTeam(), upgrade);
-    }
-    
-    public void setIndicatorString(int stringIndex, String newString) {
-        if (stringIndex >= 0 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS)
-            (new IndicatorStringSignal(robot, stringIndex, newString)).accept(gameWorld);
-    }
-
-    public void setIndicatorStringFormat(int stringIndex, String format, Object... args) {
-        setIndicatorString(stringIndex, String.format(format, args));
-    }
-
-    public long getControlBits() {
-        return robot.getControlBits();
-    }
-
-    public void addMatchObservation(String observation) {
-        (new MatchObservationSignal(robot, observation)).accept(gameWorld);
-    }
-
     public void setTeamMemory(int index, long value) {
         gameWorld.setArchonMemory(robot.getTeam(), index, value);
     }
@@ -1023,8 +751,20 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return Arrays.copyOf(arr, arr.length);
     }
 
-    public int hashCode() {
-        return robot.getID();
+    // ***********************************
+    // ******** DEBUG METHODS ************
+    // ***********************************
+
+    public void setIndicatorString(int stringIndex, String newString) {
+        if (stringIndex >= 0 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS)
+            (new IndicatorStringSignal(robot, stringIndex, newString)).accept(gameWorld);
     }
 
+    public void addMatchObservation(String observation) {
+        (new MatchObservationSignal(robot, observation)).accept(gameWorld);
+    }
+
+    public void breakpoint() {
+        gameWorld.notifyBreakpoint();
+    }
 }

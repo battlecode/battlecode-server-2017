@@ -12,239 +12,258 @@ package battlecode.common;
 public interface RobotController {
 
     // *********************************
-    // ****** QUERY METHODS ************
+    // ****** GLOBAL QUERY METHODS *****
     // *********************************
 
-    public double getTimeUntilMovement();
-    public double getTimeUntilAttack();
-
     /**
-     * Gets the robot's current health (hitpoints).
-     * @return this robot's current health / hitpoints
-     */
-    public double getHealth();
-
-    public double getSupplyLevel();
-
-    /**
-     * Gets the team's total ore.
-     * @return the team's total ore
-     */
-    public double getTeamOre();
-    
-    /**
-     * Gets the robot's current location.
-     * @return this robot's current location
-     */
-    public MapLocation getLocation();
-
-    /**
-     * @return the current map's width
+     * Returns the current game map's width.
+     *
+     * @return the current map's width.
      */
     public int getMapWidth();
    
     /**
-     * @return the current map's height
+     * Returns the current game map's height.
+     *
+     * @return the current map's height.
      */
     public int getMapHeight();
 
     /**
-     * Gets the Team of this robot. Equivalent to
-     * <code>this.getRobot().getTeam()</code>.
-     *
-     * @return this robot's Team
-     * @see battlecode.common.Team
-     */
-    public Team getTeam();
-
-    /**
-     * Use this method to access your robot.
-     *
-     * @return the Robot associated with this RobotController
-     */
-    public Robot getRobot();
-
-    /**
-     * Gets this robot's type (SOLDIER, HQ, etc.)
-     *
-     * @return this robot's type.
-     */
-    public RobotType getType();
-
-	/**
-     * Returns whether the robot is currently constructing a structure.
-     * @return whether this robot is currently constructing a structure.
-     */
-    public boolean isConstructing();
-	
-	/**
-     * Returns the RobotType of the structure the robot is constructing.
-     * @return the RobotType of the structure this robot is constructing.
-     */
-    public RobotType getConstructingType();
-	
-	/**
-     * Returns the number of turns left in the current construction.
-     * @return the number of turns left in the current construction.
-     */
-    public int getConstructingRounds();
-
-    /**
      * Checks whether a given upgrade has been researched and is available.
-     * @param upgrade
+     *
+     * @param upgrade the upgrade to check.
+     * @return whether a given upgrade is available.
      */
     public boolean hasUpgrade(Upgrade upgrade);
 
     /**
+     * Gets the team's total ore.
+     *
+     * @return the team's total ore.
+     */
+    public double getTeamOre();
+
+    /**
      * Counts how many of a certain type of unit you own.
-     * @param type
+     *
+     * @param type the RobotType to query.
+     * @return the number of a certain type you own.
      */
     public int getRobotTypeCount(RobotType type);
 
+    /**
+     * Returns whether the team has a commander.
+     *
+     * @return whether the team has a commander.
+     */
+    public boolean hasCommander();
+
+    // *********************************
+    // ****** UNIT QUERY METHODS *******
+    // *********************************
+
+    /**
+     * Use this method to access your robot.
+     *
+     * @return the Robot associated with this RobotController.
+     */
+    public Robot getRobot();
+
+    /**
+     * Gets the Team of this robot.
+     *
+     * @return this robot's Team
+     */
+    public Team getTeam();
+
+    /**
+     * Gets this robot's type (SOLDIER, HQ, etc.).
+     *
+     * @return this robot's type.
+     */
+    public RobotType getType();
+    
+    /**
+     * Gets the robot's current location.
+     *
+     * @return this robot's current location.
+     */
+    public MapLocation getLocation();
+
+    /**
+     * Returns the number of turns until the unit can move again. If the result is less than 1, then the unit can move.
+     *
+     * @return the number of turns until the unit can move again.
+     */
+    public double getTurnsUntilMovement();
+
+    /**
+     * Returns the number of turns until the unit can attack again. If the result is less than 1, then the unit can attack.
+     *
+     * @return the number of turns until the unit can attack again.
+     */
+    public double getTurnsUntilAttack();
+
+    /**
+     * Gets the robot's current health.
+     *
+     * @return this robot's current health.
+     */
+    public double getHealth();
+
+    /**
+     * Gets the robot's current suplly level.
+     *
+     * @return this robot's supply leve.
+     */
+    public double getSupplyLevel();
+
+    /**
+     * Gets the experience a robot has. Only meaningful for COMMANDER.
+     *
+     * @return the number of XP the unit has.
+     */
+    public int getXP();
+
+	/**
+     * Returns whether the robot is currently building a building.
+     *
+     * @return whether this robot is currently building a building.
+     */
+    public boolean isBuilding();
+	
+	/**
+     * Returns the RobotType of the building the robot is building.
+     *
+     * @return the RobotType of the building this robot is building.
+     */
+    public RobotType getBuildingTypeBeingBuilt();
+	
+	/**
+     * Returns the number of turns left in the current building.
+     *
+     * @return the number of turns left in the current building.
+     */
+    public int getBuildingRoundsRemaining();
+
+    /**
+     * Returns how many missiles the unit has. Only useful for launcher.
+     *
+     * @return the number of missiles the unit has.
+     */
+    public int getMissileCount();
+
     // ***********************************
-    // ****** SENSOR METHODS *************
+    // ****** GENERAL SENSOR METHODS *****
     // ***********************************
+    
+    /**
+     * Returns location of the allied team's HQ (unconstrained by sensor range or distance).
+     * @return the team's HQ location.
+     */
+    public MapLocation senseHQLocation();
+
+    /**
+     * Returns location of the enemy team's HQ (unconstrained by sensor range or distance).
+     *
+     * @return the enemy team's HQ location.
+     */
+    public MapLocation senseEnemyHQLocation();
+
+    /**
+     * Senses the terrain at the given location. Returns TerrainTile.UNKNOWN for a terrain tile that has never been in sensor range.
+     *
+     * @param loc the location to check.
+     * @return the TerrainTile at the location.
+     */
+    public TerrainTile senseTerrainTile(MapLocation loc);
+
+    /**
+     * Sense the RobotInfo for the given robot.
+     *
+     * @param r the robot to sense the information of.
+     * @return the RobotInfo for the given robot.
+     * @throws GameActionException if robot is not within sensor range (CANT_SENSE_THAT).
+     */
+    public RobotInfo senseRobotInfo(Robot r) throws GameActionException;
+
+    /**
+	 * Returns true if the given object is within the robot's sensor range.
+     *
+     * @param o the game object to check.
+     * @return whether the given object is within the robot's sensor range.
+     */
+    public boolean canSenseObject(GameObject o);
+
+    /**
+     * Returns true if the given location is within the robot's sensor range.
+     *
+     * @param loc the location to check.
+     * @return whether the given location is within the robot's sensor range.
+     */
+    public boolean canSenseSquare(MapLocation loc);
+    
+    /**
+     * Sense the location of the given object.
+     *
+     * @param o the object to check
+     * @return the location of the given object.
+     * @throws GameActionException if object is not within sensor range (CANT_SENSE_THAT).
+     */
+    public MapLocation senseLocationOf(GameObject o) throws GameActionException;
 
     /**
      * Returns the object at the given location, or <code>null</code>
      * if there is no object there.
      *
-     * @throws GameActionException if <code>loc</code> is not within sensor range (CANT_SENSE_THAT)
+     * @param loc the location to check.
+     * @return the object at the given location.
+     * @throws GameActionException if <code>loc</code> is not within sensor range (CANT_SENSE_THAT).
      */
     public GameObject senseObjectAtLocation(MapLocation loc) throws GameActionException;
 
     /** 
-     * Returns all game objects of a given type nearby the robot
-     * @see #senseNearbyGameObjects(Class, MapLocation, int, Team)
-     */
-    public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type);
-
-    /**
-     * Returns all game objects of a given type nearby the robot
-     * @see #senseNearbyGameObjects(Class, MapLocation, int, Team)
-     */
-    public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type, int radiusSquared);
-    
-    /**
-     * Returns all game objects of a given type nearby the robot of a given team
-     * @see #senseNearbyGameObjects(Class, MapLocation, int, Team)
-     */
-    public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type, int radiusSquared, Team team);
-    
-    
-    /**
-     * Senses all game objects of a given type within a given search area specified by the parameters (constrainted by sensor range and distance)
-     * @param type - type of game object to sense, eg: Robot.class
-     * @param center - center of the given search radius
-     * @param radiusSquared - return objects this distance away from the center
-     * @param team - filter game objects by the given team. If null is passed, objects from all teams are returned
-     * @return array of class type of game objects
-     */
-    public <T extends GameObject> T[] senseNearbyGameObjects(Class<T> type, MapLocation center, int radiusSquared, Team team);
-
-	/**
-     * Returns an array of all the robots that have broadcasted in the last round (unconstrained by sensor range or distance)
-     * @return an array of all robots that have broadcasted in the last round.
-     */
-    public Robot[] senseBroadcastingRobots();
-	
-	/**
-     * Returns an array of all the robots that have broadcasted in the last round, filtered by team (unconstrained by sensor range or distance)
-	 * @param t - filter robots by the given team.
-     * @return an array of all robots of the given team that have broadcasted in the last round.
-     */
-    public Robot[] senseBroadcastingRobots(Team t);
-    
-	/**
-     * Returns an array of all the locations of the robots that have broadcasted in the last round (unconstrained by sensor range or distance)
-     * @return an array of all the locations of the robots that have broadcasted in the last round.
-     */
-    public MapLocation[] senseBroadcastingRobotLocations();
-	
-	/**
-     * Returns an array of all the locations of the robots that have broadcasted in the last round, filtered by team (unconstrained by sensor range or distance)
-	 * @param t - filter robots by the given team.
-     * @return an array of all the locations of the robots of the given team that have broadcasted in the last round.
-     */
-    public MapLocation[] senseBroadcastingRobotLocations(Team t);
-    
-    /**
-     * Sense the location of the given object.
+     * Returns all robots of a given type nearby the robot.
      *
-     * @return the location of the given object.
-     * @throws GameActionException if object is not within sensor range (CANT_SENSE_THAT)
+     * @see #senseNearbyRobots(MapLocation, int, Team).
      */
-    public MapLocation senseLocationOf(GameObject o) throws GameActionException;
+    public Robot[] senseNearbyRobots();
 
     /**
-     * Sense the RobotInfo for the given robot.
+     * Returns all robots of a given type nearby the robot.
      *
-     * @return the RobotInfo for the given robot.
-     * @throws GameActionException if robot is not within sensor range (CANT_SENSE_THAT)
+     * @see #senseNearbyRobots(MapLocation, int, Team).
      */
-    public RobotInfo senseRobotInfo(Robot r) throws GameActionException;
-
-    /**
-	 * Returns true if the given object is within the robot's sensor range
-     * @return whether the given object is within the robot's sensor range
-     */
-    public boolean canSenseObject(GameObject o);
-
-    /**
-     * Returns true if the given location is within the robot's sensor range
-     * @return whether the given location is within the robot's sensor range
-     */
-    public boolean canSenseSquare(MapLocation loc);
+    public Robot[] senseNearbyRobots(int radiusSquared);
     
     /**
-     * Returns location of the allied team's HQ (unconstrained by sensor range or distance)
-     * @return the team's HQ location
-     */
-    public MapLocation senseHQLocation();
-
-    /**
-     * Returns location of the enemy team's HQ (unconstrained by sensor range or distance)
-     * @return the enemy team's HQ location
-     */
-    public MapLocation senseEnemyHQLocation();
-
-    /**
-     * Returns the amount of ore at a given location.
+     * Returns all robots of a given type nearby the robot of a given team.
      *
-     * @return the amount of ore at a given location. Will be 0 for locations off the map and for all VOID locations.
+     * @see #senseNearbyRobot(MapLocation, int, Team).
      */
-    public int senseOre(MapLocation loc) throws GameActionException;
+    public Robot[] senseNearbyRobots(int radiusSquared, Team team);
+    
+    /**
+     * Senses all robots of a given type within a given search area specified by the parameters (constrainted by sensor range and distance).
+     *
+     * @param center center of the given search radius.
+     * @param radiusSquared return objects this distance away from the center.
+     * @param team filter game objects by the given team. If null is passed, objects from all teams are returned.
+     * @return array of class type of game objects.
+     */
+    public Robot[] senseNearbyRobots(MapLocation center, int radiusSquared, Team team);
 
     // ***********************************
     // ****** MOVEMENT METHODS ***********
     // ***********************************
 
     /**
-     * Returns the number of rounds until the robot is active again
-     * @return the number of rounds until this robot's action cooldown ends, or 0 if it is already active
+     * Returns whether the robot is able to move in the current turn. Essentially, it checks whether the number of turns until movement is less than 1.
+     *
+     * @return whether the robot is able to move in the current turn.
      */
-    //public int roundsUntilActive();
-
-    /**
-     * Returns if the robot is active (able to move, construct, and attack)
-     * @return true if this robot is active. If a robot is active, it can move, construct, and attack
-     */
-    public boolean isActive();
-
-    /**
-     * Move in the given direction if possible
-	 * Creates a short-range noise at the destination location
-     * @param dir
-     * @throws GameActionException if the robot cannot move in this direction
-     */
-    public void move(Direction dir) throws GameActionException;
-
-	/**
-     * Sneak in the given direction if possible
-     * @param dir
-     * @throws GameActionException if the robot cannot move in this direction
-     */
-    //public void sneak(Direction dir) throws GameActionException;
+    public boolean isMovementActive();
 
     /**
      * Tells whether this robot can move in the given direction. Takes into
@@ -253,34 +272,57 @@ public interface RobotController {
      * Returns false for the OMNI and NONE directions.
      *
      * @return true if there are no robots or walls preventing this robot from
-     *         moving in the given direction; false otherwise
+     *         moving in the given direction; false otherwise.
      */
     public boolean canMove(Direction dir);
 
-    public boolean canMove();
+    /**
+     * Move in the given direction if possible.
+     *
+     * @param dir the direction to move in.
+     * @throws GameActionException if the robot cannot move in this direction.
+     */
+    public void move(Direction dir) throws GameActionException;
 
     // ***********************************
     // ****** ATTACK METHODS *************
     // ***********************************
 
     /**
+     * Returns whether the robot is able to attack in the current turn. Essentially, it checks whether the number of turns until attack is less than 1.
+     *
+     * @return whether the robot is able to attack in the current turn.
+     */
+    public boolean isAttackActive();
+
+    /**
      * Returns whether the given location is within the robot's attack range. Does not take into account whether the robot is currently attacking.
+     *
      * @return true if the given location is within this robot's attack range.
-     * Does not take into account whether the robot is currently attacking
+     * Does not take into account whether the robot is currently attacking.
      */
     public boolean canAttackSquare(MapLocation loc);
 
-    public boolean canAttack();
-
     /**   
-     * Attacks the given location
-	 * Creates a long-range noise at the targeted location
-     * @throws GameActionException if the robot cannot attack the given square
+     * Attacks the given location.
+     *
+     * @param loc the location to attack.
+     * @throws GameActionException if the robot cannot attack the given square.
      */
     public void attackSquare(MapLocation loc) throws GameActionException;
 
-    public void attack() throws GameActionException;
+    /**
+     * BASHERS ONLY. Attacks all surrounding enemies.
+     *
+     * @throws GameActionException if the robot is not a BASHER or if attack is not allowed.
+     */
+    public void bash() throws GameActionException;
 
+    /**
+     * MISSILE ONLY. Attacks all surrounding enemies.
+     *
+     * @throws GameActionException if the robot is not a MISSILE or if attack is not allowed.
+     */
     public void explode() throws GameActionException;
 
     // ***********************************
@@ -290,17 +332,19 @@ public interface RobotController {
     /**
      * Broadcasts a message to the global message board.
      * The data is not written until the end of the robot's turn.
-     * @param channel - the channel to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
-     * @param data - one int's worth of data to write
-     * @throws GameActionException if the channel is invalid
+     *
+     * @param channel the channel to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>.
+     * @param data one int's worth of data to write.
+     * @throws GameActionException if the channel is invalid.
      */
     public void broadcast(int channel, int data) throws GameActionException;
 
     /**
      * Retrieves the message stored at the given radio channel.
-     * @param channel - radio channel to query, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
-     * @return data currently stored on the channel
-     * @throws GameActionException  if the channel is invalid
+     *
+     * @param channel radio channel to query, from 0 to <code>BROADCAST_MAX_CHANNELS</code>.
+     * @return data currently stored on the channel.
+     * @throws GameActionException if the channel is invalid.
      */
     public int readBroadcast(int channel) throws GameActionException;
 
@@ -308,37 +352,58 @@ public interface RobotController {
     // ****** SUPPLY METHODS *************
     // ***********************************
 
-    public void transferSuppliesToHQ() throws GameActionException;
+    /**
+     * Senses the amount of supply at a given location.
+     *
+     * @param loc the location to sense.
+     * @return the amount of supply at the location.
+     * @throws GameActionException if the location can't be sensed.
+     */
+    public double senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException;
 
-    public int senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException;
-
+    /**
+     * Drops supplies to the current location the robot is standing on.
+     *
+     * @param amount the amount of supply to drop.
+     * @throws GameActionException if there isn't enough supply to drop.
+     */
     public void dropSupplies(int amount) throws GameActionException;
 
+    /**
+     * Transfers supplies to a robot in the given direction.
+     *
+     * @param amount the amount of supply to transfer.
+     * @param dir the direction to transfer the supply
+     * @throws GameActionException if there isn't enough supply or if there is no one to transfer to.
+     */
     public void transferSupplies(int amount, Direction dir) throws GameActionException;
 
-    // note: movement is queued for the END of the round
+    /**
+     * Picks up supplies from the location the robot is standing on.
+     *
+     * @param amount the amount of supply to pick up.
+     * @throws GameActionException if there isn't enough supply to pick up.
+     */
     public void pickUpSupplies(int amount) throws GameActionException;
 
+    /**
+     * SUPPLYDEPOT ONLY. Transfers all supplies to HQ.
+     *
+     * @throws GameActionException if not a SUPPLYDEPOT.
+     */
+    public void transferSuppliesToHQ() throws GameActionException;
+
     // ***********************************
-    // ****** OTHER ACTION METHODS *******
+    // ****** MINING METHODS *************
     // ***********************************
 
     /**
-     * HQ ONLY.
-     * Queues a spawn action to be performed at the end of this robot's turn.
-     * When the action is executed, a new robot will be created adjacent to the HQ
-     * in the given direction.  The square must not already be occupied.
-     * The new robot is created and starts executing bytecodes immediately
+     * Returns the amount of ore at a given location. If the location is out of sensor range, this returns the last known ore amount at that location. If the location is off the map or is void, then 0 is returned. If the location has never been in sensor range, then -1 is returned.
      *
-     * @param dir the direction to spawn robot in
-     * @throws GameActionException   if this robot is not the HQ (CANT_DO_THAT_BRO)
-     * @throws GameActionException   if this robot is currently inactive (NOT_ACTIVE)
-     * @throws GameActionException   if location is already occupied (CANT_MOVE_THERE)
-     * @throws GameActionException   if the maximum robot count has already been reached (CANT_DO_THAT_BRO)
+     * @param loc the MapLocation to sense ore at.
+     * @return the amount of ore at a given location. If the location is out of sensor range, then the last known ore amount is returned.
      */
-    public void spawn(Direction dir, RobotType type) throws GameActionException;
-
-    public boolean canSpawn(Direction dir, RobotType type);
+    public int senseOre(MapLocation loc) throws GameActionException;
 
     /**
      * Mines the current square for ore.
@@ -348,22 +413,81 @@ public interface RobotController {
      */
     public void mine() throws GameActionException;
 
+    // ***********************************
+    // ****** BUILDING/SPAWNING **********
+    // ***********************************
+
+    /**
+     * LAUNCHER ONLY. Launches a missile in the given direction.
+     *
+     * @param dir the direction to launch a missile.
+     * @throws GameActionException if not enough missiles or otherwise can't attack.
+     */
+    public void launchMissile(Direction dir) throws GameActionException;
+
+    /**
+     * Returns whether the unit can spawn a robot in the given direction of the given type.
+     * Checks dependencies and ore costs. Does not check if a robot is active.
+     *
+     * @param dir the direction to spawn in.
+     * @param type the robot type to spawn.
+     */
+    public boolean canSpawn(Direction dir, RobotType type);
+
+    /**
+     * Queues a spawn action to be performed at the end of this robot's turn.
+     * When the action is executed, a new robot will be created adjacent to the HQ
+     * in the given direction.  The square must not already be occupied.
+     * The new robot is created and starts executing bytecodes immediately
+     *
+     * @param dir the direction to spawn robot in.
+     * @param type the robot type to spawn.
+     * @throws GameActionException if bad.
+     */
+    public void spawn(Direction dir, RobotType type) throws GameActionException;
+
+    /**
+     * Returns whether the unit can build a building in the given direction of the given type.
+     * Checks dependencies and ore costs. Does not check if a robot is active.
+     *
+     * @param dir the direction to build in.
+     * @param type the robot type to build.
+     */
     public boolean canBuild(Direction dir, RobotType type);
    
     /**
-     * After a delay, kills the soldier and spawns a robot of the given building type
-     * @param type
-     * @throws GameActionException if it's not a soldier constructing or if the soldier is not constructing a structure
+     * Builds a building in the given direction. The building will initially be inactive for a number of turns (during which this robot cannot move or attack). After several turns, the building will become active.
+     *
+     * @param dir the direction to bulid in.
+     * @param type the type to build.
+     * @throws GameActionException if bad.
      */
     public void build(Direction dir, RobotType type) throws GameActionException;
 
-    public boolean hasCommander();
+    // ***********************************
+    // ****** UPGRADE METHODS ************
+    // ***********************************
 
-    public int getXP();
+    /**
+     * Researches the given upgrade for a turn.
+     *
+     * @param upgrade the upgrade to research.
+     * @throws GameActionException if can't research.
+     */
+    public void researchUpgrade(Upgrade upgrade) throws GameActionException;
+    
+    /**
+     * Checks the total number of rounds a given research has been researched
+     *
+     * @param upgrade the upgrade to check.
+     * @return how many turns have been spent on the upgrade.
+     * @throws GameActionException if bad.
+     */
+    public int checkResearchProgress(Upgrade upgrade) throws GameActionException;
 
-    public int getMissileCount();
-
-    public void launchMissile(Direction dir) throws GameActionException;
+    // ***********************************
+    // ****** OTHER ACTION METHODS *******
+    // ***********************************
     
     /**
      * Ends the current round.
@@ -372,16 +496,9 @@ public interface RobotController {
     public void yield();
 
     /**
-     * Kills your robot and ends the current round. Never fails.
+     * Kills your robot and ends the current round. Never fails. Drops supplies on the ground.
      */
-    //public void suicide();
-
-	/**
-     * Kills your robot and deals area damage within distanceSquared 2 equal to <code>GameConstants.SELF_DESTRUCT_BASE_DAMAGE</code> plus the robot's current hp multiplied by <code>GameConstants.SELF_DESTRUCT_DAMAGE_FACTOR</code>.
-	 * Destroys all cows in all effected squares and creates a long-range noise at the robot's former location
-     * @throws GameActionException if it's not a soldier
-     */
-    //public void selfDestruct() throws GameActionException;
+    public void disintegrate();
 
     /**
      * Causes your team to lose the game. It's like typing "gg."
@@ -390,63 +507,16 @@ public interface RobotController {
 
     public void win();
 
-    /**
-     * Researches the given upgrade for a turn.
-     * Will only work if the robot is an HQ
-     * @param upgrade
-     * @throws GameActionException
-     */
-    public void researchUpgrade(Upgrade upgrade) throws GameActionException;
-    
-    /**
-     * Checks the total number of rounds a given research has been researched
-     * @param upgrade
-     * @return
-     * @throws GameActionException
-     */
-    public int checkResearchProgress(Upgrade upgrade) throws GameActionException;
-
     // ***********************************
     // ******** MISC. METHODS ************
     // ***********************************
     
     /**
-     * Puts a hat on the robot. You require the BATTLECODE-HATS DLC. You also cannot be moving while putting on your hat. This costs milk (GameConstants.HAT_MILK_COST). The HQ's first hat is free.
-     * @throws GameActionException if you have action delay or if you do not have enough milk
+     * Puts a hat on the robot. You require the BATTLECODE-HATS DLC. You also cannot be moving while putting on your hat. This costs ore (GameConstants.HAT_ORE_COST). The HQ's first hat is free.
+     *
+     * @throws GameActionException if you have action delay or if you do not have enough ore.
      */
     public void wearHat() throws GameActionException;
-
-    /**
-     * Sets one of this robot's 'indicator strings' for debugging purposes.
-     * These strings are displayed in the client. This method has no effect on
-     * gameplay (aside from the number of bytecodes executed to call this
-     * method).
-     *
-     * @param stringIndex the index of the indicator string to set. Must satisfy
-     *                    <code>stringIndex >= 0 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS</code>
-     * @param newString   the value to which the indicator string should be set
-     */
-    public void setIndicatorString(int stringIndex, String newString);
-
-    /**
-     * Senses the terrain at the given location.
-     */
-    public TerrainTile senseTerrainTile(MapLocation loc);
-
-    /**
-     * Gets this robot's 'control bits' for debugging purposes. These bits can
-     * be set manually by the user, so a robot can respond to them.
-     *
-     * @return this robot's control bits
-     */
-    public long getControlBits();
-
-    /**
-     * Adds a custom observation to the match file, such that when it is analyzed, this observation will appear.
-     *
-     * @param observation the observation you want to inject into the match file
-     */
-    public void addMatchObservation(String observation);
 
     /**
      * Sets the team's "memory", which is saved for the next game in the
@@ -455,11 +525,11 @@ public interface RobotController {
      * in the same game, the last call is what is saved for the
      * next game.
      *
-     * @param index the index of the array to set
-     * @param value the data that the team should remember for the next game
+     * @param index the index of the array to set.
+     * @param value the data that the team should remember for the next game.
      * @throws java.lang.ArrayIndexOutOfBoundsException
      *          if {@code index} is less
-     *          than zero or greater than or equal to {@link GameConstants#TEAM_MEMORY_LENGTH}
+     *          than zero or greater than or equal to {@link GameConstants#TEAM_MEMORY_LENGTH}.
      * @see #getTeamMemory
      * @see #setTeamMemory(int, long, long)
      */
@@ -471,12 +541,12 @@ public interface RobotController {
      * if {@code mask == 0xFF} then only the eight least significant bits of
      * the memory will be set.
      *
-     * @param index the index of the array to set
-     * @param value the data that the team should remember for the next game
-     * @param mask  indicates which bits should be set
+     * @param index the index of the array to set.
+     * @param value the data that the team should remember for the next game.
+     * @param mask  indicates which bits should be set.
      * @throws java.lang.ArrayIndexOutOfBoundsException
      *          if {@code index} is less
-     *          than zero or greater than or equal to {@link GameConstants#TEAM_MEMORY_LENGTH}
+     *          than zero or greater than or equal to {@link GameConstants#TEAM_MEMORY_LENGTH}.
      * @see #getTeamMemory
      * @see #setTeamMemory(int, long)
      */
@@ -488,11 +558,34 @@ public interface RobotController {
      * If setTeamMemory was not called in the last game, or there was no last game, the
      * corresponding long defaults to 0.
      *
-     * @return the team memory from the the last game of the match
+     * @return the team memory from the the last game of the match.
      * @see #setTeamMemory(int, long)
      * @see #setTeamMemory(int, long, long)
      */
     public long[] getTeamMemory();
+
+    // ***********************************
+    // ******** DEBUG METHODS ************
+    // ***********************************
+
+    /**
+     * Sets one of this robot's 'indicator strings' for debugging purposes.
+     * These strings are displayed in the client. This method has no effect on
+     * gameplay (aside from the number of bytecodes executed to call this
+     * method).
+     *
+     * @param stringIndex the index of the indicator string to set. Must satisfy
+     *                    <code>stringIndex >= 0 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS</code>.
+     * @param newString  the value to which the indicator string should be set.
+     */
+    public void setIndicatorString(int stringIndex, String newString);
+
+    /**
+     * Adds a custom observation to the match file, such that when it is analyzed, this observation will appear.
+     *
+     * @param observation the observation you want to inject into the match file.
+     */
+    public void addMatchObservation(String observation);
 
     /**
      * If breakpoints are enabled, calling this method causes the game engine to
@@ -500,5 +593,4 @@ public interface RobotController {
      * resume execution.
      */
     public void breakpoint();
-   
 }
