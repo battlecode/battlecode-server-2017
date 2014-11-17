@@ -333,7 +333,9 @@ public interface RobotController {
 
     public int senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException;
 
-    public void dropSupplies(int amount, MapLocation loc) throws GameActionException;
+    public void dropSupplies(int amount) throws GameActionException;
+
+    public void transferSupplies(int amount, Direction dir) throws GameActionException;
 
     // note: movement is queued for the END of the round
     public void pickUpSupplies(int amount) throws GameActionException;

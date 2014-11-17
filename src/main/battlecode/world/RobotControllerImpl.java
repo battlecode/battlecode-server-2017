@@ -227,18 +227,28 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return gameWorld.getSupplyLevel(loc);
     }
 
-    public void dropSupplies(int amount, MapLocation loc) throws GameActionException {
+    public void dropSupplies(int amount) throws GameActionException {
         if (robot.getSupplyLevel() < amount) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Not enough supply to drop");
         }
 
-        if (loc.distanceSquaredTo(robot.getLocation()) > 2) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "supplies can only be dropped on neighboring squares");
-        }
-
         // some signal here
         robot.decreaseSupplyLevel(amount);
-        gameWorld.changeSupplyLevel(loc, amount);
+        gameWorld.changeSupplyLevel(robot.getLocation(), amount);
+    }
+
+    public void transferSupplies(int amount, Direction dir) throws GameActionException {
+        if (robot.getSupplyLevel() < amount) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Not enough supply to drop");
+        }
+        MapLocation target = robot.getLocation().add(dir);
+        InternalObject obj = gameWorld.getObject(target, RobotLevel.ON_GROUND);
+        if (obj == null) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "No one to receive supply from transfer in that direction.");
+        }
+        robot.decreaseSupplyLevel(amount);
+        InternalRobot other = (InternalRobot) obj;
+        other.increaseSupplyLevel(amount);
     }
 
     public void pickUpSupplies(int amount) throws GameActionException {
