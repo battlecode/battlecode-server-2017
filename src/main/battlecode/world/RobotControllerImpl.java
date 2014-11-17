@@ -206,8 +206,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
         assertNotMoving();
         MapLocation loc = getLocation();
-        double delay = GameConstants.SOLDIER_MOVE_ACTION_DELAY;
-        robot.activateMovement(new MineSignal(loc, getTeam(), getType()), delay, delay);
+        robot.activateMovement(new MineSignal(loc, getTeam(), getType()), 1, 1);
     }
 
     public void transferSuppliesToHQ() throws GameActionException {
@@ -497,14 +496,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //***********************************
     //****** SENSING METHODS *******
     //***********************************
-
-    public double senseTeamMilkQuantity(Team t) {
-        if (t == getTeam()) {
-            return gameWorld.resources(t);
-        } else {
-            return ((int) (gameWorld.resources(t) / GameConstants.OPPONENT_MILK_SENSE_ACCURACY)) * GameConstants.OPPONENT_MILK_SENSE_ACCURACY;
-        }
-    }
 
     public void assertCanSense(MapLocation loc) throws GameActionException {
         if (!checkCanSense(loc))
@@ -990,8 +981,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public void wearHat() throws GameActionException {
     	assertNotMoving();
         if (!(robot.getHatCount() == 0 && robot.type == RobotType.HQ)) {
-            assertHaveResource(GameConstants.HAT_MILK_COST);
-            gameWorld.adjustResources(getTeam(), -GameConstants.HAT_MILK_COST);
+            assertHaveResource(GameConstants.HAT_ORE_COST);
+            gameWorld.adjustResources(getTeam(), -GameConstants.HAT_ORE_COST);
         }
         robot.incrementHatCount();
     	robot.activateMovement(new HatSignal(robot, gameWorld.randGen.nextInt()), 0, 1);

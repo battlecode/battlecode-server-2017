@@ -84,7 +84,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private int[] teamKills = new int[2];
     private final Map<MapLocation, InternalObject> gameObjectsByLoc = new HashMap<MapLocation, InternalObject>();
     private double[] teamResources = new double[2];
-    private double[] teamSpawnRate = new double[2];
     private int[] teamCapturingNumber = new int[2];
 
     private List<MapLocation> encampments = new ArrayList<MapLocation>();
@@ -169,10 +168,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         nextID += randGen.nextInt(10);
 
         wasBreakpointHit = false;
-
-        // reset necessary game constants
-        teamSpawnRate = new double[]{GameConstants.HQ_SPAWN_DELAY_CONSTANT_1 + GameConstants.HQ_SPAWN_DELAY_CONSTANT_2,
-                                     GameConstants.HQ_SPAWN_DELAY_CONSTANT_1 + GameConstants.HQ_SPAWN_DELAY_CONSTANT_2};
         
         // process all gameobjects
         InternalObject[] gameObjects = new InternalObject[gameObjectsByID.size()];
@@ -609,10 +604,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return result;
     }
     
-    public double getSpawnRate(Team team) {
-    	return teamSpawnRate[team.ordinal()];
-    }
-
     public double getPoints(Team team) {
         return teamRoundResources[team.ordinal()];
     }
@@ -1164,9 +1155,5 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     protected void adjustResources(Team t, double amount) {
         teamResources[t.ordinal()] += amount;
-    }
-    
-    protected void adjustSpawnRate(Team t) {
-    	teamSpawnRate[t.ordinal()] = GameConstants.HQ_SPAWN_DELAY_CONSTANT_1;
     }
 }
