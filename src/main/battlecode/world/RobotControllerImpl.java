@@ -838,15 +838,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return gameWorld.getOre(loc);
     }   
 
-    public double[][] senseCowGrowth() {
-        return gameWorld.getCowsCopy();
-    }
-
-    public double senseCowsAtLocation(MapLocation m) throws GameActionException {
-        assertCanSense(m);
-        return gameWorld.getGameMap().getNeutralsMap().get(m);
-    }
-
     // ***********************************
     // ****** MOVEMENT METHODS ********
     // ***********************************

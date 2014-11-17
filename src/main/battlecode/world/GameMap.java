@@ -38,10 +38,6 @@ public class GameMap implements GenericGameMap {
      */
     private final TerrainTile[][] mapTiles;
     /**
-     * The scalar field of neutral characters on the map.
-     */
-    private final NeutralsMap neutralsMap;
-    /**
      * The scalar field of the ore on the map.
      */
     private final int[][] mapOreInitial;
@@ -83,7 +79,6 @@ public class GameMap implements GenericGameMap {
         this.mapWidth = gm.mapWidth;
         this.mapHeight = gm.mapHeight;
         this.mapTiles = new TerrainTile[this.mapWidth][this.mapHeight];
-        this.neutralsMap = new NeutralsMap(gm.neutralsMap);
         this.mapOreInitial = new int[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
             System.arraycopy(gm.mapTiles[i], 0, this.mapTiles[i], 0, this.mapHeight);
@@ -104,9 +99,8 @@ public class GameMap implements GenericGameMap {
      *
      * @param mapProperties      a map of MapProperties to their integer values containing dimensions, etc.
      * @param mapTiles           a matrix of TerrainTypes representing the map
-     * @param neutralsMap        a NeutralsMap to copy
      */
-    GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, NeutralsMap neutralsMap, int[][] mapOreInitial, String mapName) {
+    GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, int[][] mapOreInitial, String mapName) {
         if (mapProperties.containsKey(MapProperties.WIDTH))
             this.mapWidth = mapProperties.get(MapProperties.WIDTH);
         else
@@ -136,8 +130,6 @@ public class GameMap implements GenericGameMap {
         this.mapOriginY = rand.nextInt(32001) - 16000;
         
         this.mapTiles = mapTiles;
-
-        this.neutralsMap = neutralsMap;
 
         this.mapOreInitial = mapOreInitial;
 
@@ -269,13 +261,6 @@ public class GameMap implements GenericGameMap {
      */
     public int[][] getInitialOreMatrix() {
         return mapOreInitial;
-    }
-
-    /**
-     * Updates the neutrals map for the next turn.
-     */
-    public NeutralsMap getNeutralsMap() {
-        return neutralsMap;
     }
 
     /**

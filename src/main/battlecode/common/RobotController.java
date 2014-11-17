@@ -220,21 +220,6 @@ public interface RobotController {
      * @return the amount of ore at a given location. Will be 0 for locations off the map and for all VOID locations.
      */
     public int senseOre(MapLocation loc) throws GameActionException;
-    
-	/**
-	 * Gives a representation of the cow growths of each location of the map (unconstrained by sensor range or distance)
-	 *
-     * @return an array of arrays of doubles, where element [a][b] is the natural cow growth at MapLocation (a,b). Will be 0 on all VOID locations.
-     */
-    public double[][] senseCowGrowth();
-
-	/**
-     * Returns the number of cows currently at a given location. Returns 0 for locations off the map.
-	 *
-	 * @param loc - location to sense at (must be within sensor range)
-	 * @return a double equal to how many cows are currently at the location
-     */
-    public double senseCowsAtLocation(MapLocation loc) throws GameActionException;
 
     // ***********************************
     // ****** MOVEMENT METHODS ********

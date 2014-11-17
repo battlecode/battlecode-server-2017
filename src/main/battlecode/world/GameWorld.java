@@ -52,8 +52,6 @@ import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.MinelayerSignal;
 import battlecode.world.signal.MovementOverrideSignal;
 import battlecode.world.signal.MovementSignal;
-import battlecode.world.signal.NeutralsDensitySignal;
-import battlecode.world.signal.NeutralsTeamSignal;
 import battlecode.world.signal.NodeBirthSignal;
 import battlecode.world.signal.RegenSignal;
 import battlecode.world.signal.ResearchSignal;
@@ -166,10 +164,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return gameMap;
     }
 
-    public double[][] getCowsCopy() {
-        return gameMap.getNeutralsMap().copyOfData();
-    }
-
     public void processBeginningOfRound() {
         currentRound++;
         
@@ -278,14 +272,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         removeDead();
 
         updateRevealedRobots();
-
-        // update neutrals
-        gameMap.getNeutralsMap().next(gameObjects);
         
         addSignal(new FluxChangeSignal(teamResources));
 		addSignal(new ResearchChangeSignal(research));
-        addSignal(new NeutralsDensitySignal(gameMap.getNeutralsMap()));
-        addSignal(new NeutralsTeamSignal(gameObjects, gameMap.getWidth(), gameMap.getHeight()));
 
         if (timeLimitReached() && winner == null) {
             InternalRobot HQA = baseHQs.get(Team.A);
@@ -339,8 +328,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         
         lastRoundResources = teamRoundResources;
         teamRoundResources = new double[2];
-
-        gameMap.getNeutralsMap().resetAfterTurn();
     }
 
     public boolean setWinnerIfNonzero(double n, DominationFactor d) {
@@ -780,11 +767,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                         target.takeDamage(damage, attacker);
                     }
                 }
-
-                gameMap.getNeutralsMap().updateWithQuietAttack(targetLoc.add(dx, dy));
             }
-
-        gameMap.getNeutralsMap().updateWithNoiseSource(targetLoc, GameConstants.ATTACK_SCARE_RANGE);
 
         addSignal(s);
     }
@@ -841,8 +824,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                         }
                     }
 				}
-
-            gameMap.getNeutralsMap().updateWithAttack(s);
             
 			break;
         case MISSILE:
@@ -864,8 +845,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                         }
                     }
 				}
-
-            gameMap.getNeutralsMap().updateWithAttack(s);
             
             break;
 		default:
@@ -1005,8 +984,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public void visitMovementSignal(MovementSignal s) {
         InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
         MapLocation loc = s.getNewLoc();//(s.isMovingForward() ? r.getLocation().add(r.getDirection()) : r.getLocation().add(r.getDirection().opposite()));
-
-        gameMap.getNeutralsMap().updateWithMovement(s);
 
         r.setLocation(loc);
 
