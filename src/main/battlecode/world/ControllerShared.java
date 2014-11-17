@@ -43,12 +43,6 @@ public abstract class ControllerShared {
         throw new IllegalArgumentException("Invalid GameObject (don't extend GameObject!)");
     }
 
-    protected static void assertRobotHeight(RobotLevel h) {
-        assertNotNull(h);
-//        if (h == RobotLevel.ENCAMPMENT_LEVEL)
-//            throw new IllegalArgumentException("There are no robots at that height.");
-    }
-
     protected static void assertNotNull(Object o) {
         if (o == null)
             throw new NullPointerException("Argument has an invalid null value");
@@ -71,10 +65,9 @@ public abstract class ControllerShared {
         return castInternalObject(o, InternalObject.class);
     }
 
-    protected InternalRobot robotOrException(MapLocation loc, RobotLevel height) throws GameActionException {
+    protected InternalRobot robotOrException(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
-        assertNotNull(height);
-        InternalRobot r = gameWorld.getRobot(loc, height);
+        InternalRobot r = gameWorld.getRobot(loc);
         if (r == null)
             throw new GameActionException(NO_ROBOT_THERE, "There is no robot there.");
         return r;

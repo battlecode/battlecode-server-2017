@@ -19,7 +19,6 @@ import battlecode.common.GameActionExceptionType;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.MovementType;
-import battlecode.common.RobotLevel;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
@@ -83,7 +82,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private double[] teamRoundResources = new double[2];
     private double[] lastRoundResources = new double[2];
     private int[] teamKills = new int[2];
-    private final Map<MapLocation3D, InternalObject> gameObjectsByLoc = new HashMap<MapLocation3D, InternalObject>();
+    private final Map<MapLocation, InternalObject> gameObjectsByLoc = new HashMap<MapLocation, InternalObject>();
     private double[] teamResources = new double[2];
     private double[] teamSpawnRate = new double[2];
     private int[] teamCapturingNumber = new int[2];
@@ -379,20 +378,20 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return lastRoundResources;
     }
 
-    public InternalObject getObject(MapLocation loc, RobotLevel level) {
-        return gameObjectsByLoc.get(new MapLocation3D(loc, level));
+    public InternalObject getObject(MapLocation loc) {
+        return gameObjectsByLoc.get(loc);
     }
 
-    public <T extends InternalObject> T getObjectOfType(MapLocation loc, RobotLevel level, Class<T> cl) {
-        InternalObject o = getObject(loc, level);
+    public <T extends InternalObject> T getObjectOfType(MapLocation loc, Class<T> cl) {
+        InternalObject o = getObject(loc);
         if (cl.isInstance(o))
             return cl.cast(o);
         else
             return null;
     }
 
-    public InternalRobot getRobot(MapLocation loc, RobotLevel level) {
-        InternalObject obj = getObject(loc, level);
+    public InternalRobot getRobot(MapLocation loc) {
+        InternalObject obj = getObject(loc);
         if (obj instanceof InternalRobot)
             return (InternalRobot) obj;
         else
@@ -495,7 +494,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             return;
         gameObjectsByID.put(o.getID(), o);
         if (o.getLocation() != null) {
-            gameObjectsByLoc.put(new MapLocation3D(o.getLocation(), o.getRobotLevel()), o);
+            gameObjectsByLoc.put(o.getLocation(), o);
         }
 //        if (o instanceof InternalEncampment)
 //        {
@@ -540,23 +539,22 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     // should only be called by InternalObject.setLocation
     public void notifyMovingObject(InternalObject o, MapLocation oldLoc, MapLocation newLoc) {
         if (oldLoc != null) {
-            MapLocation3D oldLoc3D = new MapLocation3D(oldLoc, o.getRobotLevel());
-            if (gameObjectsByLoc.get(oldLoc3D) != o) {
+            if (gameObjectsByLoc.get(oldLoc) != o) {
                 ErrorReporter.report("Internal Error: invalid oldLoc in notifyMovingObject");
                 return;
             }
-            gameObjectsByLoc.remove(oldLoc3D);
+            gameObjectsByLoc.remove(oldLoc);
         }
         if (newLoc != null) {
-            gameObjectsByLoc.put(new MapLocation3D(newLoc, o.getRobotLevel()), o);
+            gameObjectsByLoc.put(newLoc, o);
         }
     }
 
     public void removeObject(InternalObject o) {
         if (o.getLocation() != null) {
-            MapLocation3D loc3D = new MapLocation3D(o.getLocation(), o.getRobotLevel());
-            if (gameObjectsByLoc.get(loc3D) == o)
-                gameObjectsByLoc.remove(loc3D);
+            MapLocation loc = o.getLocation();
+            if (gameObjectsByLoc.get(loc) == o)
+                gameObjectsByLoc.remove(loc);
             else
             	if (o instanceof InternalRobot) {
             		InternalRobot ir = (InternalRobot) o;
@@ -619,9 +617,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return teamRoundResources[team.ordinal()];
     }
 
-    public boolean canMove(RobotLevel level, MapLocation loc, RobotType type) {
+    public boolean canMove(MapLocation loc, RobotType type) {
 
-        return (gameMap.getTerrainTile(loc).isTraversableAtHeight(level) || gameMap.getTerrainTile(loc) == TerrainTile.VOID && type == RobotType.DRONE) && (gameObjectsByLoc.get(new MapLocation3D(loc, level)) == null);
+        return (gameMap.getTerrainTile(loc).isTraversable() || gameMap.getTerrainTile(loc) == TerrainTile.VOID && type == RobotType.DRONE) && (gameObjectsByLoc.get(loc) == null);
     }
 
     public InternalObject[] getAllGameObjects() {
@@ -732,7 +730,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public void castLayWaste(MapLocation m) {
-        InternalRobot target = getRobot(m, RobotLevel.ON_GROUND);
+        InternalRobot target = getRobot(m);
 
         if (target != null) {
             target.takeDamage(80);
@@ -752,7 +750,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public void visitSelfDestructSignal(SelfDestructSignal s) {
         InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
         MapLocation targetLoc = s.getLoc();
-        RobotLevel level = RobotLevel.ON_GROUND;
 
         teamKills[attacker.getTeam().opponent().ordinal()]++;
 
@@ -760,7 +757,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         InternalRobot target;
         for (int dx = -1; dx <= 1; dx++)
             for (int dy = -1; dy <= 1; dy++) {
-                target = getRobot(targetLoc.add(dx, dy), level);
+                target = getRobot(targetLoc.add(dx, dy));
 
                 if (target != null) {
                     if (!(dx == 0 && dy == 0)) {
@@ -777,7 +774,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
 
         MapLocation targetLoc = s.getTargetLoc();
-        RobotLevel level = s.getTargetHeight();
         
         InternalRobot target;
         switch (attacker.type) {
@@ -812,7 +808,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			for (int dx = -1; dx <= 1; dx++)
 				for (int dy = -1; dy <= 1; dy++) {
 
-					target = getRobot(targetLoc.add(dx, dy), level);
+					target = getRobot(targetLoc.add(dx, dy));
 
 					if (target != null && target.getTeam() != attacker.getTeam()) {
 						if (dx == 0 && dy == 0 || attacker.type == RobotType.BASHER) {
@@ -831,7 +827,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			for (int dx = -1; dx <= 1; dx++)
 				for (int dy = -1; dy <= 1; dy++) {
 
-					target = getRobot(targetLoc.add(dx, dy), level);
+					target = getRobot(targetLoc.add(dx, dy));
 
 					if (target != null) {
 						if (dx == 0 && dy == 0) {
@@ -905,7 +901,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
             // give XP
             MapLocation loc = r.getLocation();
-            RobotLevel level = RobotLevel.ON_GROUND;
 
             InternalRobot target = getCommander(r.getTeam().opponent());
 
@@ -914,23 +909,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
                 ((InternalCommander)target).giveXP(xpYield);
             }
-
-            /*
-            for (int dx = -4; dx <= 4; dx++) {
-				for (int dy = -4; dy <= 4; dy++) {
-                    if (dx*dx + dy*dy > 24) continue;
-
-                    target = getRobot(loc.add(dx, dy), level);
-
-					if (target != null) {
-                        if (target.type == RobotType.COMMANDER && target.getTeam() != r.getTeam()) {
-                            int xpYield = r.type.oreCost;
-
-                            ((InternalCommander)target).giveXP(xpYield);
-                        }
-                    }
-				}
-            }*/
         }
     }
 
@@ -975,7 +953,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void visitMovementOverrideSignal(MovementOverrideSignal s) {
         InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
-        if (!canMove(r.getRobotLevel(), s.getNewLoc(), r.type))
+        if (!canMove(s.getNewLoc(), r.type))
             throw new RuntimeException("GameActionException in MovementOverrideSignal", new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move to location: " + s.getNewLoc()));
         r.setLocation(s.getNewLoc());
         addSignal(s);
@@ -1077,7 +1055,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	InternalRobot medbay = (InternalRobot) getObjectByID(s.robotID);
     	
     	MapLocation targetLoc = medbay.getLocation();
-    	RobotLevel level = RobotLevel.ON_GROUND;
     	
     	int dist = (int)Math.sqrt(medbay.type.attackRadiusSquared);
     	InternalRobot target;
@@ -1085,7 +1062,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         	for (int dy=-dist; dy<=dist; dy++)
         	{
         		if (dx*dx+dy*dy > medbay.type.attackRadiusSquared) continue;
-        		target = getRobot(targetLoc.add(dx, dy), level);
+        		target = getRobot(targetLoc.add(dx, dy));
         		if (target != null)
         			if (target.getTeam() == medbay.getTeam() && target.type != RobotType.HQ)
         				target.takeDamage(-medbay.type.attackPower, medbay);
@@ -1097,7 +1074,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	InternalRobot shields = (InternalRobot) getObjectByID(s.robotID);
     	
     	MapLocation targetLoc = shields.getLocation();
-    	RobotLevel level = RobotLevel.ON_GROUND;
     	
     	int dist = (int)Math.sqrt(shields.type.attackRadiusSquared);
     	InternalRobot target;
@@ -1105,7 +1081,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         	for (int dy=-dist; dy<=dist; dy++)
         	{
         		if (dx*dx+dy*dy > shields.type.attackRadiusSquared) continue;
-        		target = getRobot(targetLoc.add(dx, dy), level);
+        		target = getRobot(targetLoc.add(dx, dy));
         		if (target != null)
         			if (target.getTeam() == shields.getTeam())
         				target.takeShieldedDamage(-shields.type.attackPower);

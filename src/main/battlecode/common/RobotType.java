@@ -1,7 +1,6 @@
 package battlecode.common;
 
 import java.util.ArrayList;
-import static battlecode.common.RobotLevel.ON_GROUND;
 
 /**
  * Contains details on various attributes of the different robots.
@@ -39,7 +38,6 @@ public enum RobotType {
 
     //  isbuilding, spawn-source, build-dep1, build-dep2, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
 
-    public final RobotLevel level = ON_GROUND;
     public final boolean isBuilding;
     public final RobotType spawnSource;
     public final ArrayList<RobotType> dependencies;
@@ -56,7 +54,7 @@ public enum RobotType {
     public final int sensorRadiusSquared;
     public final int bytecodeLimit;
 
-    public boolean canAttack(RobotLevel level) {
+    public boolean canAttack() {
         return attackPower > 0;
     }
 

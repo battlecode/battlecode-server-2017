@@ -25,7 +25,6 @@ import battlecode.common.MovementType;
 import battlecode.common.Robot;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
-import battlecode.common.RobotLevel;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
@@ -242,7 +241,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Not enough supply to drop");
         }
         MapLocation target = robot.getLocation().add(dir);
-        InternalObject obj = gameWorld.getObject(target, RobotLevel.ON_GROUND);
+        InternalObject obj = gameWorld.getObject(target);
         if (obj == null) {
             throw new GameActionException(CANT_DO_THAT_BRO, "No one to receive supply from transfer in that direction.");
         }
@@ -280,7 +279,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	gameWorld.adjustResources(getTeam(), -cost);
 
         MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(type.level, loc, type))
+        if (!gameWorld.canMove(loc, type))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         robot.activateMovement(
@@ -298,7 +297,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             return false;
         }
         MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(type.level, loc, type))
+        if (!gameWorld.canMove(loc, type))
             return false;
 
         double cost = type.oreCost;
@@ -325,7 +324,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             return false;
         }
         MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(type.level, loc, type))
+        if (!gameWorld.canMove(loc, type))
             return false;
 
         double cost = type.oreCost;
@@ -356,7 +355,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	gameWorld.adjustResources(getTeam(), -cost);
 
         MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(type.level, loc, type))
+        if (!gameWorld.canMove(loc, type))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         int delay = type.buildTurns;
@@ -392,7 +391,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     	assertNotMoving();
 
         MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(RobotLevel.ON_GROUND, loc, RobotType.MISSILE))
+        if (!gameWorld.canMove(loc, RobotType.MISSILE))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         robot.decrementMissileCount();
@@ -547,7 +546,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public GameObject senseObjectAtLocation(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
         assertCanSense(loc);
-        InternalObject obj = gameWorld.getObject(loc, RobotLevel.ON_GROUND);
+        InternalObject obj = gameWorld.getObject(loc);
         if (obj != null && checkCanSense(obj)) {
             return (GameObject) obj;
         } else {
@@ -869,7 +868,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (d == Direction.NONE || d == Direction.OMNI)
             return false;
         assertValidDirection(d);
-        return gameWorld.canMove(robot.getRobotLevel(), getLocation().add(d), robot.type);
+        return gameWorld.canMove(getLocation().add(d), robot.type);
     }
 
     public boolean canMove() {
@@ -900,7 +899,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(NOT_ACTIVE, "This robot has action delay and cannot attack.");
     }
 
-    protected void assertCanAttack(MapLocation loc, RobotLevel height) throws GameActionException {
+    protected void assertCanAttack(MapLocation loc) throws GameActionException {
         if (!canAttackSquare(loc))
             throw new GameActionException(OUT_OF_RANGE, "That location is out of this robot's attack range");
     }
@@ -913,19 +912,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotNull(loc);
         return GameWorld.canAttackSquare(robot, loc);
     }
-    
-//    public void attack() throws GameActionException {
-//        if (robot.type != RobotType.SOLDIER)
-//        	throw new GameActionException(CANT_DO_THAT_BRO, "Only SOLDIER make melee attacks.");
-//    	assertNotAttacking();
-//    	
-//    	robot.activateAttack(new AttackSignal(robot, robot.getLocation(), RobotLevel.ON_GROUND), robot.type.attackDelay);
-//    }
 
     public void attackSquare(MapLocation loc) throws GameActionException {
         assertNotAttacking();
         assertNotNull(loc);
-        assertCanAttack(loc, RobotLevel.ON_GROUND);
+        assertCanAttack(loc);
         if (robot.type == RobotType.BASHER) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Bashers can only attack using the attack() method.");
         }
@@ -937,7 +928,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             factor = 2;
         }
 
-        robot.activateAttack(new AttackSignal(robot, loc, RobotLevel.ON_GROUND), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
+        robot.activateAttack(new AttackSignal(robot, loc), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
     }
 
     public void attack() throws GameActionException {
@@ -953,7 +944,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             factor = 2;
         }
 
-        robot.activateAttack(new AttackSignal(robot, getLocation(), RobotLevel.ON_GROUND), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
+        robot.activateAttack(new AttackSignal(robot, getLocation()), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
     }
 
     public void explode() throws GameActionException {

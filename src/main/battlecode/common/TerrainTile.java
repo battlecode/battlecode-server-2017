@@ -11,7 +11,7 @@ public enum TerrainTile {
      * Returns <code>true</code> if robots at the given
      * height can traverse this terrain tile.
      */
-    public boolean isTraversableAtHeight(RobotLevel height) {
+    public boolean isTraversable() {
         switch (this) {
             case VOID:
                 return false;

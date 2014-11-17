@@ -9,7 +9,6 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.MovementType;
 import battlecode.common.Robot;
-import battlecode.common.RobotLevel;
 import battlecode.common.RobotType;
 import battlecode.common.CommanderSkillType;
 import battlecode.common.Team;

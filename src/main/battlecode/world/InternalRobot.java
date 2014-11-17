@@ -8,7 +8,6 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.MovementType;
 import battlecode.common.Robot;
-import battlecode.common.RobotLevel;
 import battlecode.common.RobotType;
 import battlecode.common.CommanderSkillType;
 import battlecode.common.Team;
@@ -90,7 +89,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
                          boolean spawnedRobot, int buildDelay) {
-        super(gw, loc, type.level, t);
+        super(gw, loc, t);
 //        myDirection = Direction.values()[gw.getRandGen().nextInt(8)];
         this.type = type;
         this.buildDelay = buildDelay;
@@ -419,32 +418,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         boolean nearbyEnemy = false;
         
     	for(int i=0; i<8; i++) {
-    		Robot nearby = myGameWorld.getRobot(this.getLocation().add(Direction.values()[i]),
-    				RobotLevel.ON_GROUND);
+    		Robot nearby = myGameWorld.getRobot(this.getLocation().add(Direction.values()[i]));
     		if(nearby != null) {
     			if(nearby.getTeam() == getTeam()) nearbyAlly = true;
     			else if(nearby.getTeam() == getTeam().opponent()) nearbyEnemy = true;
         	}
     	}
        
-        /* 
-        // Soldiers Automatically Attack
-        if (type == RobotType.SOLDIER && nearbyEnemy && this.turnsUntilAttackIdle == 0) {
-        	myGameWorld.visitSignal(new AttackSignal(this, getLocation(), RobotLevel.ON_GROUND));
-        } // Medbays Auto Heal
-        else if (type == RobotType.MEDBAY) {
-        	if (nearbyAlly)
-        		myGameWorld.visitSignal(new RegenSignal(this));
-        	else
-        		takeDamage(-this.type.attackPower, this);
-        } // Shields Auto Shield
-        else if (type == RobotType.SHIELDS) {
-        	if (nearbyAlly)
-        		myGameWorld.visitSignal(new ShieldSignal(this));
-        	else
-        		takeShieldedDamage(-this.type.attackPower);
-        }*/
-        
         // shield decay
         if (myShieldLevel > 0.0)
         {

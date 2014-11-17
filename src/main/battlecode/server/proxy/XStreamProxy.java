@@ -270,7 +270,6 @@ public class XStreamProxy extends Proxy {
         xstream.useAttributeFor(String.class);
         xstream.useAttributeFor(battlecode.common.Direction.class);
         xstream.useAttributeFor(battlecode.common.MapLocation.class);
-        xstream.useAttributeFor(battlecode.common.RobotLevel.class);
         xstream.useAttributeFor(battlecode.common.RobotType.class);
         xstream.useAttributeFor(battlecode.common.Team.class);
         xstream.useAttributeFor(battlecode.serial.DominationFactor.class);
