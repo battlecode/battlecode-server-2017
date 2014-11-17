@@ -12,7 +12,7 @@ package battlecode.common;
 public interface RobotController {
 
     // *********************************
-    // ****** QUERY METHODS ********
+    // ****** QUERY METHODS ************
     // *********************************
 
     public double getTimeUntilMovement();
@@ -102,7 +102,7 @@ public interface RobotController {
     public int getRobotTypeCount(RobotType type);
 
     // ***********************************
-    // ****** SENSOR METHODS ********
+    // ****** SENSOR METHODS *************
     // ***********************************
 
     /**
@@ -216,7 +216,7 @@ public interface RobotController {
     public int senseOre(MapLocation loc) throws GameActionException;
 
     // ***********************************
-    // ****** MOVEMENT METHODS ********
+    // ****** MOVEMENT METHODS ***********
     // ***********************************
 
     /**
@@ -260,7 +260,7 @@ public interface RobotController {
     public boolean canMove();
 
     // ***********************************
-    // ****** ATTACK METHODS *******
+    // ****** ATTACK METHODS *************
     // ***********************************
 
     /**
@@ -284,7 +284,7 @@ public interface RobotController {
     public void explode() throws GameActionException;
 
     // ***********************************
-    // ****** BROADCAST METHODS *******
+    // ****** BROADCAST METHODS **********
     // ***********************************
     
     /**
@@ -305,7 +305,7 @@ public interface RobotController {
     public int readBroadcast(int channel) throws GameActionException;
 
     // ***********************************
-    // ****** SUPPLY METHODS ***** *******
+    // ****** SUPPLY METHODS *************
     // ***********************************
 
     public void transferSuppliesToHQ() throws GameActionException;
@@ -407,7 +407,7 @@ public interface RobotController {
     public int checkResearchProgress(Upgrade upgrade) throws GameActionException;
 
     // ***********************************
-    // ******** MISC. METHODS *********
+    // ******** MISC. METHODS ************
     // ***********************************
     
     /**
