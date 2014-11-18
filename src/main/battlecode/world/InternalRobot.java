@@ -256,30 +256,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @Override
     public void processBeginningOfRound() {
         super.processBeginningOfRound();
-
-        // TODO we can do beginning of round damage/healing/etc here
-    	// TODO also, resoruce generation is done here
-        // TODO CORY FIX IT
-        //if (type == RobotType.HQ)
-        	//myGameWorld.adjustResources(getTeam(), GameConstants.HQ_POWER_PRODUCTION);
-        //else if (type == RobotType.GENERATOR)
-        //	myGameWorld.adjustResources(getTeam(), GameConstants.GENERATOR_POWER_PRODUCTION);
-        //else if (type == RobotType.SUPPLIER)
-        //myGameWorld.adjustSpawnRate(getTeam());
     }
 
     public void processBeginningOfTurn() {
         decrementDelays();
     	
-    	// TODO we can do beginning of turn damage/healing/etc here
-        // TODO CORY FIX IT
-//        if (type == RobotType.HQ)
-//            HQProduction();
-//        if (regen) {
-//            changeEnergonLevel(GameConstants.REGEN_AMOUNT);
-//            regen = false;
-//        }
-        
         if (type == RobotType.COMMANDER && ((InternalCommander)this).hasSkill(CommanderSkillType.REGENERATION)) {
            this.changeEnergonLevel(1); 
         }
@@ -293,17 +274,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             upkeepPaid = true;
         }
     }
-
-//    public void HQProduction() {
-//        int d, dmin = GameConstants.PRODUCTION_PENALTY_R2;
-//        for (MapLocation l : myGameWorld.getArchons(getTeam())) {
-//            d = getLocation().distanceSquaredTo(l);
-//            if (d > 0 && d <= dmin)
-//                dmin = d;
-//        }
-//        double prod = GameConstants.MIN_PRODUCTION + (GameConstants.MAX_PRODUCTION - GameConstants.MIN_PRODUCTION) * Math.sqrt(((double) dmin) / GameConstants.PRODUCTION_PENALTY_R2);
-//        
-//    }
 
     @Override
     public void processEndOfTurn() {
@@ -359,19 +329,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             missileCount = Math.min(missileCount + 1, GameConstants.MAX_MISSILE_COUNT);
         }
 
-      	// quick hack to make mining work. move me out later
-        if (type == RobotType.SOLDIER) {
-
-        	if (capturingRounds > 0) {
-        		if (--capturingRounds==0) {
-        			myGameWorld.visitSignal(new SpawnSignal(getLocation(), capturingType, getTeam(), this, 0));
-        			capturingRounds = -1;
-        			suicide();
-        			return;
-        		}
-        	}
-        }
-
         if (type == RobotType.MISSILE && roundsAlive >= 5) {
             suicide();
         }
@@ -389,54 +346,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             }
         }
         
-        if (!type.isBuilding)
-    	{
-    		Team mines = myGameWorld.getMine(getLocation());
-    		if (mines!=null && mines!=getTeam()) {
-    			
-    			/*this.takeShieldedDamage(GameConstants.MINE_DAMAGE*GameConstants.MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD);
-    			this.takeDamage(GameConstants.MINE_DAMAGE*(1.0-GameConstants.MINE_DAMAGE_RATIO_ABSORBED_BY_SHIELD));
-          */
-    			
-    			myGameWorld.addKnownMineLocation(getTeam(), getLocation());
-    			if (myEnergonLevel <= 0.0)
-    				return;
-    		}
-    	}
-        
         if (attackSignal != null) {
         	myGameWorld.visitSignal(attackSignal);
         	attackSignal = null;
-        }
-        if (type == RobotType.HQ)
-        {
-        	if (researchRounds > 0)
-            {
-            	researchRounds--;
-            	if (researchRounds==0)
-            	{
-            		myGameWorld.addUpgrade(getTeam(), researchUpgrade);
-            		clearResearching();
-            	}
-            }
-        }
-       
-        boolean nearbyAlly = false;
-        boolean nearbyEnemy = false;
-        
-    	for(int i=0; i<8; i++) {
-    		Robot nearby = myGameWorld.getRobot(this.getLocation().add(Direction.values()[i]));
-    		if(nearby != null) {
-    			if(nearby.getTeam() == getTeam()) nearbyAlly = true;
-    			else if(nearby.getTeam() == getTeam().opponent()) nearbyEnemy = true;
-        	}
-    	}
-       
-        // shield decay
-        if (myShieldLevel > 0.0)
-        {
-        	shieldChanged = true;
-        	//myShieldLevel = Math.max(0.0, myShieldLevel-GameConstants.SHIELD_DECAY_RATE);
         }
     }
 

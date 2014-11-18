@@ -54,6 +54,7 @@ import battlecode.world.signal.NodeBirthSignal;
 import battlecode.world.signal.RegenSignal;
 import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.ResearchChangeSignal;
+import battlecode.world.signal.RobotInfoSignal;
 import battlecode.world.signal.ScanSignal;
 import battlecode.world.signal.SelfDestructSignal;
 import battlecode.world.signal.SetDirectionSignal;
@@ -310,6 +311,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         teamResources[Team.B.ordinal()] += GameConstants.HQ_ORE_INCOME;
 
         updateRevealedRobots();
+
+        // robot info signal
+        for (int i = 0; i < gameObjects.length; i++) {
+            InternalRobot ir = (InternalRobot) gameObjects[i];
+            addSignal(new RobotInfoSignal(ir.getID(), ir.getRobotInfo()));
+        }
         
         addSignal(new FluxChangeSignal(teamResources));
 		addSignal(new ResearchChangeSignal(research));
