@@ -18,7 +18,6 @@ import battlecode.common.GameActionException;
 import battlecode.common.GameActionExceptionType;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
-import battlecode.common.MovementType;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;

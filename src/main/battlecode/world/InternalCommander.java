@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import battlecode.common.Direction;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
-import battlecode.common.MovementType;
 import battlecode.common.Robot;
 import battlecode.common.RobotType;
 import battlecode.common.CommanderSkillType;

@@ -21,7 +21,6 @@ import battlecode.common.GameActionExceptionType;
 import battlecode.common.GameConstants;
 import battlecode.common.GameObject;
 import battlecode.common.MapLocation;
-import battlecode.common.MovementType;
 import battlecode.common.Robot;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -370,7 +369,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Buildings can't move");
         assertNotMoving();
         assertCanMove(d);
-        double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()), MovementType.RUN);
+        double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()));
 
         int factor = 1;
         if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
@@ -380,7 +379,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
 
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-                true, ((int) delay) * factor, MovementType.RUN), robot.getLoadingDelayForType(), delay * factor);
+                true, ((int) delay) * factor), robot.getLoadingDelayForType(), delay * factor);
     }
 
     // ***********************************

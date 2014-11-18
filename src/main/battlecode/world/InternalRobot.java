@@ -6,7 +6,6 @@ import java.util.Map;
 import battlecode.common.Direction;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
-import battlecode.common.MovementType;
 import battlecode.common.Robot;
 import battlecode.common.RobotType;
 import battlecode.common.CommanderSkillType;
@@ -618,7 +617,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return type.maxHealth;
     }
 
-    public double calculateMovementActionDelay(MapLocation from, MapLocation to, TerrainTile terrain, MovementType mt) {
+    public double calculateMovementActionDelay(MapLocation from, MapLocation to, TerrainTile terrain) {
         double base = 1;
         if (from.distanceSquaredTo(to) <= 1) {
             base = getMovementDelayForType();
