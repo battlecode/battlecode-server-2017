@@ -16,7 +16,7 @@ public interface GenericWorld extends GameWorldViewer, SignalHandler {
 
     public void processEndOfRound();
 
-    public long[][] getArchonMemory();
+    public long[][] getTeamMemory();
 
     public void resetStatic();
 

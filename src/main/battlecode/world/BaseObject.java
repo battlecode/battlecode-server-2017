@@ -1,6 +1,5 @@
 package battlecode.world;
 
-import battlecode.common.GameObject;
 import battlecode.common.Team;
 import battlecode.engine.GenericWorld;
 
@@ -26,12 +25,6 @@ public abstract class BaseObject implements GameObject {
     // should be called at the end of every round
     public void processEndOfRound() {
     }
-
-    // should be called whenever a new game is started
-    /*public static void resetIDs() {
-    nextID = numRandomIDs+1;
-    randomIDsInitialized = false;
-    }*/
 
     public int getID() {
         return myID;

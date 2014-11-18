@@ -6,7 +6,7 @@ import java.util.Map;
 import battlecode.common.Direction;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
-import battlecode.common.Robot;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.CommanderSkillType;
 import battlecode.common.Team;
@@ -128,6 +128,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         missileCount = 0;
 
         
+    }
+
+    public RobotInfo getRobotInfo() {
+        return new RobotInfo(getID(), getTeam(), type, getLocation(), getTimeUntilMovement(), getTimeUntilAttack(), getEnergonLevel(), getSupplyLevel(), getXP(), getCapturingType() != null, getCapturingType(), getCapturingRounds(), getMissileCount());
     }
     
     public void clearResearching() {

@@ -180,39 +180,22 @@ public interface RobotController {
     public TerrainTile senseTerrainTile(MapLocation loc);
 
     /**
-	 * Returns true if the given object is within the robot's sensor range.
-     *
-     * @param o the game object to check.
-     * @return whether the given object is within the robot's sensor range.
-     */
-    public boolean canSenseObject(GameObject o);
-
-    /**
      * Returns true if the given location is within the robot's sensor range.
      *
      * @param loc the location to check.
      * @return whether the given location is within the robot's sensor range.
      */
     public boolean canSenseSquare(MapLocation loc);
-    
-    /**
-     * Sense the location of the given object.
-     *
-     * @param o the object to check
-     * @return the location of the given object.
-     * @throws GameActionException if object is not within sensor range (CANT_SENSE_THAT).
-     */
-    public MapLocation senseLocationOf(GameObject o) throws GameActionException;
 
     /**
-     * Returns the object at the given location, or <code>null</code>
+     * Returns the robot at the given location, or <code>null</code>
      * if there is no object there.
      *
      * @param loc the location to check.
-     * @return the object at the given location.
+     * @return the robot at the given location.
      * @throws GameActionException if <code>loc</code> is not within sensor range (CANT_SENSE_THAT).
      */
-    public GameObject senseObjectAtLocation(MapLocation loc) throws GameActionException;
+    public RobotInfo senseRobotAtLocation(MapLocation loc) throws GameActionException;
 
     /** 
      * Returns all robots of a given type nearby the robot.

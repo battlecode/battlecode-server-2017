@@ -116,8 +116,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private List<InternalRobot> nextRevealedRobots = new ArrayList<InternalRobot>();
 
     @SuppressWarnings("unchecked")
-    public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldArchonMemory) {
-        super(gm.getSeed(), teamA, teamB, oldArchonMemory);
+    public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldTeamMemory) {
+        super(gm.getSeed(), teamA, teamB, oldTeamMemory);
         gameMap = gm;
         mapMemory.put(Team.A, new GameMap.MapMemory(gameMap));
         mapMemory.put(Team.B, new GameMap.MapMemory(gameMap));

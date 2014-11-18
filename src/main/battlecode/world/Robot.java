@@ -1,4 +1,4 @@
-package battlecode.common;
+package battlecode.world;
 
 /**
  * A Robot instance represents a robot in the game world.

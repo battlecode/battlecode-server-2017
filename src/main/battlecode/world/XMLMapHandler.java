@@ -517,7 +517,7 @@ class XMLMapHandler extends DefaultHandler {
 
     }
 
-    public GameWorld createGameWorld(String teamA, String teamB, long[][] archonMemory) {
+    public GameWorld createGameWorld(String teamA, String teamB, long[][] teamMemory) {
 
         System.out.println("Creating a game%%%%%%%%%");
 
@@ -544,7 +544,7 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         GameMap gm = new GameMap(mapProperties, mapTiles, intData, mapName);
-        GameWorld gw = new GameWorld(gm, teamA, teamB, archonMemory);
+        GameWorld gw = new GameWorld(gm, teamA, teamB, teamMemory);
 
         gw.reserveRandomIDs(100);
 

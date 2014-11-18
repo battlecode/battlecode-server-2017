@@ -222,8 +222,8 @@ public class Server implements Observer, Runnable {
         while (!matches.isEmpty()) {
             Match match = matches.peek();
             if (!finished.isEmpty())
-                match.setInitialArchonMemory(finished.getLast()
-                        .getComputedArchonMemory());
+                match.setInitialTeamMemory(finished.getLast()
+                        .getComputedTeamMemory());
 
             try {
                 debug("running match " + match);

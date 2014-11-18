@@ -14,10 +14,10 @@ TODO:
  */
 public class GameWorldFactory {
 
-    public static GameWorld createGameWorld(String teamA, String teamB, String mapName, String mapPath, long[][] archonMemory) throws IllegalArgumentException {
+    public static GameWorld createGameWorld(String teamA, String teamB, String mapName, String mapPath, long[][] teamMemory) throws IllegalArgumentException {
         XMLMapHandler handler = XMLMapHandler.loadMap(mapName, mapPath);
 
-        return handler.createGameWorld(teamA, teamB, archonMemory);
+        return handler.createGameWorld(teamA, teamB, teamMemory);
     }
 
     public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay, int buildDelay) {

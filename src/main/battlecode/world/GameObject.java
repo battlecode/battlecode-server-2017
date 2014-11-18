@@ -1,4 +1,6 @@
-package battlecode.common;
+package battlecode.world;
+
+import battlecode.common.Team;
 
 /**
  * A GameObject instance represents an object in the game world.

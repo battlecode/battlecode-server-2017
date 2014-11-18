@@ -19,9 +19,7 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameActionExceptionType;
 import battlecode.common.GameConstants;
-import battlecode.common.GameObject;
 import battlecode.common.MapLocation;
-import battlecode.common.Robot;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
@@ -222,18 +220,12 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return checkCanSense(loc);
     }
 
-    public MapLocation senseLocationOf(GameObject o) throws GameActionException {
-        InternalObject io = castInternalObject(o);
-        assertCanSense(io);
-        return io.sensedLocation();
-    }
-
-    public GameObject senseObjectAtLocation(MapLocation loc) throws GameActionException {
+    public RobotInfo senseRobotAtLocation(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
         assertCanSense(loc);
-        InternalObject obj = gameWorld.getObject(loc);
+        InternalRobot obj = (InternalRobot) gameWorld.getObject(loc);
         if (obj != null && checkCanSense(obj)) {
-            return (GameObject) obj;
+            return obj.getRobotInfo();
         } else {
             return null;
         }
@@ -254,11 +246,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         RobotInfo[] robots = new RobotInfo[array.length];
         for (int i = 0; i < robots.length; ++i) {
             InternalRobot ir = (InternalRobot) array[i];
-            int xpVal = 0;
-            if (ir.type == RobotType.COMMANDER) {
-                xpVal = ((InternalCommander)ir).getXP();
-            }
-            robots[i] = new RobotInfo(ir.getID(), ir.getTeam(), ir.type, ir.getLocation(), ir.getTimeUntilMovement(), ir.getTimeUntilAttack(), ir.getEnergonLevel(), ir.getSupplyLevel(), xpVal, ir.getCapturingType() != null, ir.getCapturingType(), ir.getCapturingRounds(), ir.getMissileCount());
+            robots[i] = ir.getRobotInfo();
         }
         return robots;
     }
@@ -734,15 +722,15 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
    
     public void setTeamMemory(int index, long value) {
-        gameWorld.setArchonMemory(robot.getTeam(), index, value);
+        gameWorld.setTeamMemory(robot.getTeam(), index, value);
     }
 
     public void setTeamMemory(int index, long value, long mask) {
-        gameWorld.setArchonMemory(robot.getTeam(), index, value, mask);
+        gameWorld.setTeamMemory(robot.getTeam(), index, value, mask);
     }
 
     public long[] getTeamMemory() {
-        long[] arr = gameWorld.getOldArchonMemory()[robot.getTeam().ordinal()];
+        long[] arr = gameWorld.getOldTeamMemory()[robot.getTeam().ordinal()];
         return Arrays.copyOf(arr, arr.length);
     }
 
