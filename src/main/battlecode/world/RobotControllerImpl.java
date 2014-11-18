@@ -115,6 +115,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ****** UNIT QUERY METHODS *******
     // *********************************
 
+    public int getID() {
+        return robot.getID();
+    }
+
     public Team getTeam() {
         return robot.getTeam();
     }
@@ -147,7 +151,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getXP();
     }
 
-    public boolean isBuilding() {
+    public boolean isBuildingSomething() {
         return getBuildingTypeBeingBuilt() != null;
     }
 
@@ -210,19 +214,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return gameWorld.getMapTerrain(loc);
     }
     
-    public RobotInfo senseRobotInfo(Robot r) throws GameActionException {
-        InternalRobot ir = castInternalRobot(r);
-        assertCanSense(ir);
-
-        int xpVal = 0;
-        if (ir.type == RobotType.COMMANDER) {
-            xpVal = ((InternalCommander)ir).getXP();
-        }
-        return new RobotInfo(ir, ir.sensedLocation(), ir.getEnergonLevel(), ir.getXP(),
-                ir.getDirection(), ir.type, ir.getTeam(), 0,
-                ir.getCapturingType() != null, ir.getCapturingType(), ir.getCapturingRounds());
-    }
-
     public boolean canSenseObject(GameObject o) {
         return checkCanSense(castInternalObject(o));
     }
@@ -259,15 +250,20 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     // USE THIS METHOD CAREFULLY
-    public <T extends GameObject> Robot[] getRobotsFromGameObjects(T[] array) {
-        Robot[] robots = new Robot[array.length];
+    public <T extends GameObject> RobotInfo[] getRobotsFromGameObjects(T[] array) {
+        RobotInfo[] robots = new RobotInfo[array.length];
         for (int i = 0; i < robots.length; ++i) {
-            robots[i] = (Robot) array[i];
+            InternalRobot ir = (InternalRobot) array[i];
+            int xpVal = 0;
+            if (ir.type == RobotType.COMMANDER) {
+                xpVal = ((InternalCommander)ir).getXP();
+            }
+            robots[i] = new RobotInfo(ir.getID(), ir.getTeam(), ir.type, ir.getLocation(), ir.getTimeUntilMovement(), ir.getTimeUntilAttack(), ir.getEnergonLevel(), ir.getSupplyLevel(), xpVal, ir.getCapturingType() != null, ir.getCapturingType(), ir.getCapturingRounds(), ir.getMissileCount());
         }
         return robots;
     }
 
-    public Robot[] senseNearbyRobots() {
+    public RobotInfo[] senseNearbyRobots() {
         return getRobotsFromGameObjects(senseNearbyGameObjects(Robot.class));
     }
     
@@ -282,7 +278,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
     }
 
-    public Robot[] senseNearbyRobots(int radiusSquared) {
+    public RobotInfo[] senseNearbyRobots(int radiusSquared) {
         return getRobotsFromGameObjects(senseNearbyGameObjects(Robot.class, radiusSquared));
     }
 
@@ -301,7 +297,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
     }
 
-    public Robot[] senseNearbyRobots(int radiusSquared, Team team) {
+    public RobotInfo[] senseNearbyRobots(int radiusSquared, Team team) {
         return getRobotsFromGameObjects(senseNearbyGameObjects(Robot.class, radiusSquared, team));
     }
 
@@ -326,7 +322,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
     }
 
-    public Robot[] senseNearbyRobots(MapLocation center, int radiusSquared, Team team) {
+    public RobotInfo[] senseNearbyRobots(MapLocation center, int radiusSquared, Team team) {
         return getRobotsFromGameObjects(senseNearbyGameObjects(Robot.class, center, radiusSquared, team));
     }
 

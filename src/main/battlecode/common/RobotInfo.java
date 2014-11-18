@@ -9,72 +9,38 @@ package battlecode.common;
  */
 public class RobotInfo {
 
-    /**
-     * The robot that was sensed.
-     */
-    public final Robot robot;
-    /**
-     * The location of this Robot.
-     */
-    public final MapLocation location;
-    /**
-     * The energon of this Robot.
-     */
-    public final double health;
-    /**
-     * The amount of experience this robot has.
-     * Will always return 0 if robot type is not RobotType.COMMANDER.
-     */
-    public final int xp;
-    /**
-     * The direction this Robot is facing.
-     */
-    public final Direction direction;
-    /**
-     * The type of this Robot.
-     */
-    public final RobotType type;
-    /**
-     * The team of this Robot.
-     */
+    public final int ID;
     public final Team team;
-    /**
-     * Action delay of the robot.
-     */
-    public final double actionDelay;
-    /**
-     * Whether the robot is constructing anything.
-     */
-    public final boolean isConstructing;
-    /**
-     * The type of building being constructed.
-     */
-    public final RobotType constructingType;
-    /**
-     * The number of constructing rounds remaining.
-     */
-    public final int constructingRounds;
+    public final RobotType type;
+    public final MapLocation location;
+    public final double turnsUntilMovement;
+    public final double turnsUntilAttack;
+    public final double health;
+    public final double supplyLevel;
+    public final int xp;
+    public final boolean isBuildingSomething;
+    public final RobotType buildingTypeBeingBuilt;
+    public final int buildingRoundsRemaining;
+    public final int missileCount;
 
-    public RobotInfo(Robot robot, MapLocation location,
-                     double hitpoints, int xp, Direction direction,
-                     RobotType type, Team team, double actionDelay,
-                     boolean isConstructing, RobotType constructingType, int constructingRounds) {
+    public RobotInfo(int ID, Team team, RobotType type, MapLocation location, double turnsUntilMovement, double turnsUntilAttack, double health, double supplyLevel, int xp, boolean isBuildingSomething, RobotType buildingTypeBeingBuilt, int buildingRoundsRemaining, int missileCount) {
         super();
-        this.robot = robot;
-        this.location = location;
-        this.health = hitpoints;
-        this.xp = xp;
-        this.direction = direction;
-        this.type = type;
+        this.ID = ID;
         this.team = team;
-        this.actionDelay = actionDelay;
-
-        this.isConstructing = isConstructing;
-        this.constructingType = constructingType;
-        this.constructingRounds = constructingRounds;
+        this.type = type;
+        this.location = location;
+        this.turnsUntilMovement = turnsUntilMovement;
+        this.turnsUntilAttack = turnsUntilAttack;
+        this.health = health;
+        this.supplyLevel = supplyLevel;
+        this.xp = xp;
+        this.isBuildingSomething = isBuildingSomething;
+        this.buildingTypeBeingBuilt = buildingTypeBeingBuilt;
+        this.buildingRoundsRemaining = buildingRoundsRemaining;
+        this.missileCount = missileCount;
     }
 
     public int hashCode() {
-        return robot.hashCode();
+        return ID;
     }
 }

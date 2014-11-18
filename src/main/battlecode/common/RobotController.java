@@ -64,11 +64,11 @@ public interface RobotController {
     // *********************************
 
     /**
-     * Use this method to access your robot.
+     * Use this method to access your ID.
      *
-     * @return the Robot associated with this RobotController.
+     * @return the ID of the robot.
      */
-    public Robot getRobot();
+    public int getID();
 
     /**
      * Gets the Team of this robot.
@@ -131,7 +131,7 @@ public interface RobotController {
      *
      * @return whether this robot is currently building a building.
      */
-    public boolean isBuilding();
+    public boolean isBuildingSomething();
 	
 	/**
      * Returns the RobotType of the building the robot is building.
@@ -180,15 +180,6 @@ public interface RobotController {
     public TerrainTile senseTerrainTile(MapLocation loc);
 
     /**
-     * Sense the RobotInfo for the given robot.
-     *
-     * @param r the robot to sense the information of.
-     * @return the RobotInfo for the given robot.
-     * @throws GameActionException if robot is not within sensor range (CANT_SENSE_THAT).
-     */
-    public RobotInfo senseRobotInfo(Robot r) throws GameActionException;
-
-    /**
 	 * Returns true if the given object is within the robot's sensor range.
      *
      * @param o the game object to check.
@@ -228,21 +219,21 @@ public interface RobotController {
      *
      * @see #senseNearbyRobots(MapLocation, int, Team).
      */
-    public Robot[] senseNearbyRobots();
+    public RobotInfo[] senseNearbyRobots();
 
     /**
      * Returns all robots of a given type nearby the robot.
      *
      * @see #senseNearbyRobots(MapLocation, int, Team).
      */
-    public Robot[] senseNearbyRobots(int radiusSquared);
+    public RobotInfo[] senseNearbyRobots(int radiusSquared);
     
     /**
      * Returns all robots of a given type nearby the robot of a given team.
      *
      * @see #senseNearbyRobot(MapLocation, int, Team).
      */
-    public Robot[] senseNearbyRobots(int radiusSquared, Team team);
+    public RobotInfo[] senseNearbyRobots(int radiusSquared, Team team);
     
     /**
      * Senses all robots of a given type within a given search area specified by the parameters (constrainted by sensor range and distance).
@@ -252,7 +243,7 @@ public interface RobotController {
      * @param team filter game objects by the given team. If null is passed, objects from all teams are returned.
      * @return array of class type of game objects.
      */
-    public Robot[] senseNearbyRobots(MapLocation center, int radiusSquared, Team team);
+    public RobotInfo[] senseNearbyRobots(MapLocation center, int radiusSquared, Team team);
 
     // ***********************************
     // ****** MOVEMENT METHODS ***********

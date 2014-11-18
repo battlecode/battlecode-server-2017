@@ -1,11 +1,5 @@
 package battlecode.common;
 
-
-/*
-TODO:
-
- */
-
 /**
  * A GameObject instance represents an object in the game world.
  * <p/>
