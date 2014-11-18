@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import battlecode.common.DependencyProgress;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameActionExceptionType;
@@ -91,8 +92,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return gameWorld.resources(getTeam());
     }
 
-    public int getRobotTypeCount(RobotType type) {
-        return gameWorld.getRobotTypeCount(getTeam(), type);
+    public DependencyProgress checkDependencyProgress(RobotType type) {
+        if (gameWorld.getRobotTypeCount(robot.getTeam(), type) > 0) {
+            return DependencyProgress.DONE;
+        } else if (gameWorld.getTotalRobotTypeCount(robot.getTeam(), type) > 0) {
+            return DependencyProgress.INPROGRESS;
+        } else {
+            return DependencyProgress.NONE;
+        }
     }
 
     public boolean hasCommander() {

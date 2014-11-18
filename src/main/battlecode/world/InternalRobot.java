@@ -241,6 +241,14 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	return true;
     }
 
+    public boolean isActive() {
+        if (type.isBuilding && type != RobotType.HQ && type != RobotType.TOWER && roundsAlive < buildDelay) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     public void resetSpawnCounter() {
         roundsSinceLastSpawn = 0;
     }
@@ -341,6 +349,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         // after building is done, double health
         if (type.isBuilding && roundsAlive == buildDelay && type != RobotType.HQ && type != RobotType.TOWER) {
             changeEnergonLevel(getEnergonLevel());
+            // increase robot count
+            myGameWorld.incrementRobotTypeCount(getTeam(), type);
+        } else if (!type.isBuilding && roundsAlive == 1) {
+            myGameWorld.incrementRobotTypeCount(getTeam(), type);
         }
 
         if (roundsAlive % GameConstants.MISSILE_SPAWN_FREQUENCY == 0 && type == RobotType.LAUNCHER) {
@@ -479,7 +491,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     // includes buffs
     public int getAttackRadiusSquared() {
         int base = type.attackRadiusSquared;
-        if (type == RobotType.HQ && myGameWorld.getRobotCount(getTeam(), RobotType.TOWER) >= 2) {
+        if (type == RobotType.HQ && myGameWorld.getRobotTypeCount(getTeam(), RobotType.TOWER) >= 2) {
             return GameConstants.ATTACK_RADIUS_SQUARED_BUFFED_HQ;
         } else {
             return base;
@@ -520,7 +532,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             // HQ has a tower boost
             double rate = 1.0;
             if (type == RobotType.HQ) {
-                int towerCount = myGameWorld.getRobotCount(getTeam(), RobotType.TOWER);
+                int towerCount = myGameWorld.getRobotTypeCount(getTeam(), RobotType.TOWER);
                 if (towerCount >= 6) {
                     rate = 0.3;
                 } else if (towerCount >= 4) {
@@ -624,7 +636,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public double calculateAttackActionDelay(RobotType r) {
-        if (r == RobotType.HQ && myGameWorld.getRobotCount(getTeam(), RobotType.TOWER) >= 5) {
+        if (r == RobotType.HQ && myGameWorld.getRobotTypeCount(getTeam(), RobotType.TOWER) >= 5) {
             return r.attackDelay / 2;
         }
         return r.attackDelay;

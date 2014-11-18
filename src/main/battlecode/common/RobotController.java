@@ -45,12 +45,12 @@ public interface RobotController {
     public double getTeamOre();
 
     /**
-     * Counts how many of a certain type of unit you own.
+     * Gets the current progress of a dependency.
      *
-     * @param type the RobotType to query.
-     * @return the number of a certain type you own.
+     * @param type the dependency to check.
+     * @return a DependencyProgress to check
      */
-    public int getRobotTypeCount(RobotType type);
+    public DependencyProgress checkDependencyProgress(RobotType type);
 
     /**
      * Returns whether the team has a commander.
