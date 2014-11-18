@@ -165,7 +165,7 @@ public interface RobotController {
     public MapLocation senseHQLocation();
 
     /**
-     * Returns location of the enemy team's HQ (unconstrained by sensor range or distance).
+     * Returns location of the enemy team's HQ. Returns null if the enemy HQ location has never been sensed before.
      *
      * @return the enemy team's HQ location.
      */

@@ -38,16 +38,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     protected volatile boolean hasBeenAttacked = false;
     private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean("bc.engine.upkeep");
     /**
-     * first index is robot type, second is direction, third is x or y
-     */
-    private static final Map<RobotType, int[][][]> offsets = GameMap.computeVisibleOffsets();
-    /**
      * number of bytecodes used in the most recent round
      */
     private volatile int bytecodesUsed = 0;
-//    private List<Message> incomingMessageQueue;
-//    now in gameworld, since each team has combined map memory
-    protected GameMap.MapMemory mapMemory;
+
     public final RobotType type;
 
     private volatile HashMap<Integer, Integer> broadcastMap = new HashMap<Integer, Integer>();
@@ -114,8 +108,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
 //        incomingMessageQueue = new LinkedList<Message>();
 
-        mapMemory = gw.getMapMemory(getTeam());
-        saveMapMemory(null, loc, false);
         controlBits = 0;
 
         didSelfDestruct = false;
@@ -702,12 +694,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void setLocation(MapLocation loc) {
     	MapLocation oldloc = getLocation();
         super.setLocation(loc);
-        saveMapMemory(oldloc, loc, true);
     }
 
     public void setDirection(Direction dir) {
         myDirection = dir;
-//        saveMapMemory(getLocation());
     }
 
     public void setSelfDestruct() {
@@ -748,21 +738,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	return capturingType;
     }
 
-    public GameMap.MapMemory getMapMemory() {
-        return mapMemory;
-    }
-
-    // TODO this year all robots have 360 vision, probably can make this better
-    public void saveMapMemory(MapLocation oldLoc, MapLocation newLoc,
-                              boolean fringeOnly) {
-    	int[][] myOffsets;
-    	if (oldLoc == null)
-    		myOffsets = offsets.get(type)[0];
-    	else
-    		myOffsets = offsets.get(type)[oldLoc.directionTo(newLoc).ordinal()];
-        mapMemory.rememberLocations(newLoc, myOffsets[0], myOffsets[1]);
-    }
-
     public void setControlBits(long l) {
         controlBits = l;
     }
@@ -794,7 +769,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public void freeMemory() {
 //        incomingMessageQueue = null;
-        mapMemory = null;
         movementSignal = null;
         attackSignal = null;
     }

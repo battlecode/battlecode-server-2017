@@ -213,12 +213,25 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
     }
 
+    public MapLocation senseEnemyHQLocation(Team team) {
+        MapLocation candidate = getBaseHQ(team.opponent()).getLocation();
+        if (mapMemory.get(team).seenBefore(candidate)) {
+            return candidate;
+        } else {
+            return null;
+        }
+    }
+
     public int getSupplyLevel(MapLocation loc) {
         if (droppedSupplies.containsKey(loc)) {
             return droppedSupplies.get(loc);
         } else {
             return 0;
         }
+    }
+
+    public int senseSupplyLevel(Team team, MapLocation loc) {
+        return mapMemory.get(team).recallSupplyLevel(loc);
     }
 
     public void changeSupplyLevel(MapLocation loc, int delta) {
@@ -263,6 +276,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             gameObjects[i].processEndOfRound();
         }
         removeDead();
+
+        // update map memory
+        for (int i = 0; i < gameObjects.length; i++) {
+            InternalRobot ir = (InternalRobot) gameObjects[i];
+            mapMemory.get(ir.getTeam()).rememberLocations(ir.getLocation(), ir.type.sensorRadiusSquared, droppedSupplies);
+        }
 
         updateRevealedRobots();
         
@@ -578,8 +597,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     /**
      * @return the TerrainType at a given MapLocation <tt>loc<tt>
      */
-    public TerrainTile getMapTerrain(MapLocation loc) {
-        return gameMap.getTerrainTile(loc);
+    public TerrainTile senseMapTerrain(Team team, MapLocation loc) {
+        return mapMemory.get(team).recallTerrain(loc);
     }
 
     public int getRobotCount(Team team, RobotType type) {

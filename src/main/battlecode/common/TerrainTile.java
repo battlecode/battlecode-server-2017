@@ -5,7 +5,7 @@ package battlecode.common;
  */
 public enum TerrainTile {
 
-    NORMAL, VOID, OFF_MAP;
+    NORMAL, VOID, UNKNOWN, OFF_MAP;
 
     /**
      * Returns <code>true</code> if robots at the given
@@ -17,6 +17,8 @@ public enum TerrainTile {
                 return false;
             case NORMAL:
                 return true;
+            case UNKNOWN:
+                return false;
             default:
                 return false;
         }

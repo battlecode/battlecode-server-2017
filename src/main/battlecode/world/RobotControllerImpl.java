@@ -204,12 +204,12 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public MapLocation senseEnemyHQLocation() {
-        return gameWorld.getBaseHQ(getTeam().opponent()).getLocation();
+        return gameWorld.senseEnemyHQLocation(getTeam());
     }
 
     public TerrainTile senseTerrainTile(MapLocation loc) {
         assertNotNull(loc);
-        return gameWorld.getMapTerrain(loc);
+        return gameWorld.senseMapTerrain(getTeam(), loc);
     }
     
     public boolean canSenseObject(GameObject o) {
@@ -463,7 +463,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public double senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException {
         checkCanSense(loc);
 
-        return gameWorld.getSupplyLevel(loc);
+        return gameWorld.senseSupplyLevel(getTeam(), loc);
     }
 
     public void dropSupplies(int amount) throws GameActionException {

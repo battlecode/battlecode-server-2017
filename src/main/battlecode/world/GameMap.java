@@ -27,8 +27,6 @@ public class GameMap implements GenericGameMap {
      * The default game maxiumum number of rounds.
      */
     public static final int GAME_DEFAULT_MAX_ROUNDS = 10000;
-    /** The default game minimum number of points. */
-    //public static final int GAME_DEFAULT_MIN_POINTS = 5000;
     /**
      * The width and height of the map.
      */
@@ -40,15 +38,11 @@ public class GameMap implements GenericGameMap {
     /**
      * The scalar field of the ore on the map.
      */
-    private final int[][] mapOreInitial;
+    private final int[][] mapInitialOre;
     /**
      * The coordinates of the origin.
      */
     private final int mapOriginX, mapOriginY;
-    /**
-     * The name of the map theme.
-     */
-    private String mapTheme;
     /**
      * The random seed contained in the map file
      */
@@ -63,34 +57,28 @@ public class GameMap implements GenericGameMap {
      */
     private final String mapName;
 
-    /** The minimum number of points needed to win the game */
-    //private final int minPoints;
-
     /**
      * Represents the various integer properties a GameMap
      * can have.
      */
     static enum MapProperties {
-
-        WIDTH, HEIGHT, SEED, MAX_ROUNDS, THEME /*, MIN_POINTS*/
+        WIDTH, HEIGHT, SEED, MAX_ROUNDS
     }
 
     public GameMap(GameMap gm) {
         this.mapWidth = gm.mapWidth;
         this.mapHeight = gm.mapHeight;
         this.mapTiles = new TerrainTile[this.mapWidth][this.mapHeight];
-        this.mapOreInitial = new int[this.mapWidth][this.mapHeight];
+        this.mapInitialOre = new int[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
             System.arraycopy(gm.mapTiles[i], 0, this.mapTiles[i], 0, this.mapHeight);
-            System.arraycopy(gm.mapOreInitial[i], 0, this.mapOreInitial[i], 0, this.mapHeight);
+            System.arraycopy(gm.mapInitialOre[i], 0, this.mapInitialOre[i], 0, this.mapHeight);
         }
         this.mapOriginX = gm.mapOriginX;
         this.mapOriginY = gm.mapOriginY;
-        this.mapTheme = gm.mapTheme;
         this.seed = gm.seed;
         this.maxRounds = gm.maxRounds;
         this.mapName = gm.mapName;
-        //this.minPoints = gm.minPoints;
     }
 
     /**
@@ -100,7 +88,7 @@ public class GameMap implements GenericGameMap {
      * @param mapProperties      a map of MapProperties to their integer values containing dimensions, etc.
      * @param mapTiles           a matrix of TerrainTypes representing the map
      */
-    GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, int[][] mapOreInitial, String mapName) {
+    GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, int[][] mapInitialOre, String mapName) {
         if (mapProperties.containsKey(MapProperties.WIDTH))
             this.mapWidth = mapProperties.get(MapProperties.WIDTH);
         else
@@ -131,13 +119,9 @@ public class GameMap implements GenericGameMap {
         
         this.mapTiles = mapTiles;
 
-        this.mapOreInitial = mapOreInitial;
+        this.mapInitialOre = mapInitialOre;
 
         this.mapName = mapName;
-    }
-
-    public void setTheme(String theme) {
-        this.mapTheme = theme;
     }
 
     /**
@@ -158,23 +142,9 @@ public class GameMap implements GenericGameMap {
         return mapHeight;
     }
 
-    /**
-     * Returns the name of the suggested map
-     * theme to use when displaying the map.
-     *
-     * @return the string name of the map theme
-     */
-    public String getThemeName() {
-        return mapTheme;
-    }
-
     public String getMapName() {
         return mapName;
     }
-
-    //public int getMinPoints() {
-    //	return minPoints;
-    //}
 
     /**
      * Determines whether or not the location at the specified
@@ -236,22 +206,7 @@ public class GameMap implements GenericGameMap {
         if (!onTheMap(location))
             return 0;
 
-        return mapOreInitial[location.x - mapOriginX][location.y - mapOriginY];
-    }
-
-    /**
-     * Determines the amount of ore on the map at the given location.
-     * Indexes the origin at (0, 0).
-     *
-     * @param x the x index to use
-     * @param y the y index to use
-     * @return the amount of ore in the given location, or 0 if off the map
-     */
-    public int getInitialOre(int x, int y) {
-        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
-            return 0;
-        }
-        return mapOreInitial[x][y];
+        return mapInitialOre[location.x - mapOriginX][location.y - mapOriginY];
     }
 
     /**
@@ -260,7 +215,7 @@ public class GameMap implements GenericGameMap {
      * @return the map's ore in a 2D array
      */
     public int[][] getInitialOreMatrix() {
-        return mapOreInitial;
+        return mapInitialOre;
     }
 
     /**
@@ -290,104 +245,62 @@ public class GameMap implements GenericGameMap {
     }
 
     public static class MapMemory {
-
-        // should be ge the max of all robot sensor ranges
-        private final static int BUFFER;
-
-        static {
-            int buf = 0;
-            for (RobotType t : RobotType.values()) {
-                if (t.sensorRadiusSquared > buf)
-                    buf = t.sensorRadiusSquared;
-            }
-            BUFFER = buf;// + GameConstants.VISION_UPGRADE_BONUS;
-        }
-
-        private final boolean data[][];
         private final GameMap map;
-        private final int Xwidth;
-        private final int Ywidth;
+        private final boolean[][] seen;
+        private final int[][] supplyLevel;
 
         public MapMemory(GameMap map) {
             this.map = map;
-            Xwidth = map.mapWidth + (2 * BUFFER);
-            Ywidth = map.mapHeight + (2 * BUFFER);
-            data = new boolean[Xwidth][Ywidth];
+            this.seen = new boolean[map.getWidth()][map.getHeight()];
+            this.supplyLevel = new int[map.getWidth()][map.getHeight()];
         }
 
-        public void rememberLocations(MapLocation loc, int[] offsetsX, int[] offsetsY) {
-            int X = loc.x - map.mapOriginX + BUFFER;
-            int Y = loc.y - map.mapOriginY + BUFFER;
+        public void rememberLocations(MapLocation loc, int radiusSquared, Map<MapLocation, Integer> droppedSupplies) {
+            MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
-            for (int i = 0; i < offsetsX.length; i++) {
-                data[X + offsetsX[i]][Y + offsetsY[i]] = true;
+            for (int i = 0; i < locs.length; i++) {
+                int x = locs[i].x - map.mapOriginX;
+                int y = locs[i].y - map.mapOriginY;
+                if (x >= 0 && x < map.getWidth() && y >= 0 && y < map.getHeight()) {
+                    seen[x][y] = true;
+                    if (droppedSupplies.containsKey(locs[i])) {
+                        supplyLevel[x][y] = droppedSupplies.get(locs[i]);
+                    }
+                }
+            }
+        }
+
+        public boolean seenBefore(MapLocation loc) {
+            int X = loc.x - map.mapOriginX;
+            int Y = loc.y - map.mapOriginY;
+
+            if (X >= 0 && X < map.getWidth() && Y >= 0 && Y < map.getHeight() && seen[X][Y]) {
+                return seen[X][Y];
+            } else {
+                return false;
             }
         }
 
         public TerrainTile recallTerrain(MapLocation loc) {
-            int X = loc.x - map.mapOriginX + BUFFER;
-            int Y = loc.y - map.mapOriginY + BUFFER;
+            int X = loc.x - map.mapOriginX;
+            int Y = loc.y - map.mapOriginY;
 
-            if (X >= 0 && X < Xwidth && Y >= 0 && Y < Ywidth && data[X][Y])
+            if (X >= 0 && X < map.getWidth() && Y >= 0 && Y < map.getHeight() && seen[X][Y]) {
                 return map.getTerrainTile(loc);
-            else
-                return null;
-        }
-    }
-
-    public static int[][] computeOffsets360(int radiusSquared) {
-        int[] XOffsets = new int[4 * radiusSquared + 7];
-        int[] YOffsets = new int[4 * radiusSquared + 7];
-        int nOffsets = 0;
-        for (int y = 0; y * y <= radiusSquared; y++) {
-            XOffsets[nOffsets] = 0;
-            YOffsets[nOffsets] = y;
-            nOffsets++;
-            if (y > 0) {
-                XOffsets[nOffsets] = 0;
-                YOffsets[nOffsets] = -y;
-                nOffsets++;
-            }
-            for (int x = 1; x * x + y * y <= radiusSquared; x++) {
-                MapLocation loc = new MapLocation(x, y);
-                XOffsets[nOffsets] = x;
-                YOffsets[nOffsets] = y;
-                nOffsets++;
-                XOffsets[nOffsets] = -x;
-                YOffsets[nOffsets] = y;
-                nOffsets++;
-                if (y > 0) {
-                    XOffsets[nOffsets] = x;
-                    YOffsets[nOffsets] = -y;
-                    nOffsets++;
-                    XOffsets[nOffsets] = -x;
-                    YOffsets[nOffsets] = -y;
-                    nOffsets++;
-                }
+            } else {
+                return TerrainTile.UNKNOWN;
             }
         }
-        return new int[][]{Arrays.copyOf(XOffsets, nOffsets), Arrays.copyOf(YOffsets, nOffsets)};
-    }
 
-    public static Map<RobotType, int[][][]> computeVisibleOffsets() {
-        int MAX_RANGE;
-        final MapLocation CENTER = new MapLocation(0, 0);
-        Map<RobotType, int[][][]> offsets = new EnumMap<RobotType, int[][][]>(RobotType.class);
-        int[][][] offsetsForType;
-        int[] XOffsets = new int[169];
-        int[] YOffsets = new int[169];
-        int nOffsets;
-        for (RobotType type : RobotType.values()) {
-            offsetsForType = new int[9][][];
-            offsets.put(type, offsetsForType);
+        public int recallSupplyLevel(MapLocation loc) {
+            int X = loc.x - map.mapOriginX;
+            int Y = loc.y - map.mapOriginY;
 
-            // Same range of vision independent of direction;
-            // save memory by using the same array each time
-            int[][] tmpOffsets = computeOffsets360(type.sensorRadiusSquared);
-            for (int i = 0; i < 8; i++) {
-                offsetsForType[i] = tmpOffsets;
+            if (X >= 0 && X < map.getWidth() && Y >= 0 && Y < map.getHeight() && seen[X][Y]) {
+                return supplyLevel[X][Y];
+            } else {
+                return -1;
             }
         }
-        return offsets;
     }
 }
