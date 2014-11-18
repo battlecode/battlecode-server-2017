@@ -63,17 +63,46 @@ public class RobotDoc implements Taglet {
         }
         StringBuilder builder = new StringBuilder();
         try {
-						if (rt.isBuilding)
-								append(builder, "Type", "Structure"); 
-						else if (rt == RobotType.HQ)
-								append(builder, "Type", "HQ");
-						else
-								append(builder, "Type", "Soldier");
+            if (rt == RobotType.HQ) {
+                    append(builder, "Type", "HQ");
+            } else if (rt == RobotType.TOWER) {
+                    append(builder, "Type", "Tower");
+            } else if (rt.isBuilding) {
+                    append(builder, "Type", "Building"); 
+            } else {
+                    append(builder, "Type", "Unit");
+            }
 
+            if (rt.spawnSource != null) {
+                append(builder, "Spawned By", rt.spawnSource.toString());
+            }
+            String dependencies = "";
+            for (RobotType dependency : rt.dependencies) {
+                if (dependencies.length() == 0) {
+                    dependencies = dependency.toString();
+                } else {
+                    dependencies += ", " + dependency.toString();
+                }
+            }
+            if (dependencies.length() > 0) {
+                append(builder, "Dependencies", dependencies);
+            }
+            if (rt.oreCost > 0) {
+                append(builder, "Ore Cost", rt.oreCost + "");
+            }
+            if (rt.buildTurns > 0) {
+                append(builder, "Build Turns", rt.buildTurns + "");
+            }
+            append(builder, "Supply Upkeep", rt.supplyUpkeep + "");
             append(builder, "Max Health", String.format("%1.0f", rt.maxHealth));
-            append(builder, "Attack Radius Squared", String.format("%d", rt.attackRadiusSquared));
             append(builder, "Attack Power", String.format("%1.1f", rt.attackPower));
-            append(builder, "Attack Action Delay", String.format("%1.1f", rt.attackDelay));
+            append(builder, "Attack Radius Squared", rt.attackRadiusSquared + "");
+            append(builder, "Movement Delay", rt.movementDelay + "");
+            append(builder, "Attack Delay", rt.attackDelay + "");
+            append(builder, "Loading Delay", rt.loadingDelay + "");
+            append(builder, "Cooldown Delay", rt.cooldownDelay + "");
+            append(builder, "Sensor Radius Squared", rt.sensorRadiusSquared + "");
+            append(builder, "Bytecode Limit", rt.bytecodeLimit + "");
         } catch (Exception e) {
             e.printStackTrace();
         }
