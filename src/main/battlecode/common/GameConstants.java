@@ -59,6 +59,9 @@ public interface GameConstants {
     // ****** MINING *******************
     // *********************************
 
+    /** The amount of ore the HQ gets for free each turn. */
+    public static final int HQ_ORE_INCOME = 5;
+
     /** The minimum amount that is mined on a square with no ore. */
     public static final int MINIMUM_MINE_AMOUNT = 1;
 

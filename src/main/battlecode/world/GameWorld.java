@@ -305,6 +305,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             mapMemory.get(ir.getTeam()).rememberLocations(ir.getLocation(), ir.type.sensorRadiusSquared, droppedSupplies);
         }
 
+        // free ore
+        teamResources[Team.A.ordinal()] += GameConstants.HQ_ORE_INCOME;
+        teamResources[Team.B.ordinal()] += GameConstants.HQ_ORE_INCOME;
+
         updateRevealedRobots();
         
         addSignal(new FluxChangeSignal(teamResources));
@@ -629,7 +633,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public boolean canMove(MapLocation loc, RobotType type) {
 
-        return (gameMap.getTerrainTile(loc).isTraversable() || gameMap.getTerrainTile(loc) == TerrainTile.VOID && type == RobotType.DRONE) && (gameObjectsByLoc.get(loc) == null);
+        return (gameMap.getTerrainTile(loc).isTraversable() || gameMap.getTerrainTile(loc) == TerrainTile.VOID && (type == RobotType.DRONE || type == RobotType.MISSILE)) && (gameObjectsByLoc.get(loc) == null);
     }
 
     public InternalObject[] getAllGameObjects() {
