@@ -40,7 +40,7 @@ public enum RobotType {
 
     public final boolean isBuilding;
     public final RobotType spawnSource;
-    public final ArrayList<RobotType> dependencies;
+    private final ArrayList<RobotType> dependencies;
     public final int oreCost;
     public final int buildTurns;
     public final int supplyUpkeep;
@@ -56,6 +56,14 @@ public enum RobotType {
 
     public boolean canAttack() {
         return attackPower > 0;
+    }
+
+    public RobotType[] getDependencies() {
+        RobotType[] res = new RobotType[dependencies.size()];
+        for (int i = 0; i < res.length; ++i) {
+            res[i] = dependencies.get(i);
+        }
+        return res;
     }
 
     RobotType(boolean isBuilding,

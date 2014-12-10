@@ -610,7 +610,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             return false;
 
         // check dependencies
-        for (RobotType dependency : type.dependencies) {
+        for (RobotType dependency : type.getDependencies()) {
             if (gameWorld.getRobotTypeCount(getTeam(), dependency) == 0) {
                 return false;
             }
@@ -634,7 +634,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Can only build buildings");
 
         // check dependencies
-        for (RobotType dependency : type.dependencies) {
+        for (RobotType dependency : type.getDependencies()) {
             if (gameWorld.getRobotTypeCount(getTeam(), dependency) == 0) {
                 throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build of " + type);
             }
