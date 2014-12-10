@@ -285,7 +285,9 @@ public class GameMap implements GenericGameMap {
             int X = loc.x - map.mapOriginX;
             int Y = loc.y - map.mapOriginY;
 
-            if (X >= 0 && X < map.getWidth() && Y >= 0 && Y < map.getHeight() && seen[X][Y]) {
+            if (X < 0 || X >= map.getWidth() || Y < 0 || Y >= map.getHeight()) {
+                return TerrainTile.OFF_MAP;
+            } else if (seen[X][Y]) {
                 return map.getTerrainTile(loc);
             } else {
                 return TerrainTile.UNKNOWN;
@@ -296,7 +298,9 @@ public class GameMap implements GenericGameMap {
             int X = loc.x - map.mapOriginX;
             int Y = loc.y - map.mapOriginY;
 
-            if (X >= 0 && X < map.getWidth() && Y >= 0 && Y < map.getHeight() && seen[X][Y]) {
+            if (X < 0 || X >= map.getWidth() || Y < 0 || Y >= map.getHeight()) {
+                return 0;
+            } else if (seen[X][Y]) {
                 return supplyLevel[X][Y];
             } else {
                 return -1;
