@@ -20,14 +20,14 @@ public interface RobotController {
      *
      * @return the current map's width.
      */
-    public int getMapWidth();
+    //public int getMapWidth();
    
     /**
      * Returns the current game map's height.
      *
      * @return the current map's height.
      */
-    public int getMapHeight();
+    //public int getMapHeight();
 
     /**
      * Checks whether a given upgrade has been researched and is available.
