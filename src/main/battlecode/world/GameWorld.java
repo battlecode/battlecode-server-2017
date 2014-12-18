@@ -237,12 +237,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public MapLocation senseEnemyHQLocation(Team team) {
-        MapLocation candidate = getBaseHQ(team.opponent()).getLocation();
-        if (mapMemory.get(team).seenBefore(candidate)) {
-            return candidate;
-        } else {
-            return null;
-        }
+        return getBaseHQ(team.opponent()).getLocation();
     }
 
     public int getSupplyLevel(MapLocation loc) {

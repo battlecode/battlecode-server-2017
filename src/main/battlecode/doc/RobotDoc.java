@@ -77,7 +77,7 @@ public class RobotDoc implements Taglet {
                 append(builder, "Spawned By", rt.spawnSource.toString());
             }
             String dependencies = "";
-            for (RobotType dependency : rt.dependencies) {
+            for (RobotType dependency : rt.getDependencies()) {
                 if (dependencies.length() == 0) {
                     dependencies = dependency.toString();
                 } else {
