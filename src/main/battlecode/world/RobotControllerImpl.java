@@ -459,6 +459,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public int readBroadcast(int channel) throws GameActionException {
         if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
             throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
+	Integer queued = robot.getQueuedBroadcastFor(channel);
+	if (queued != null) {
+	    return queued.intValue();
+	}
         int m = gameWorld.getMessage(robot.getTeam(), channel);
         return m;
     }

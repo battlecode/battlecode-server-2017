@@ -577,6 +577,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	broadcastMap.put(channel, data);
         broadcasted = true;
     }
+
+    public Integer getQueuedBroadcastFor(int channel) {
+	return broadcastMap.get(channel);
+    }
     
     public void activateMinelayer(Signal s, int delay) {
     	myGameWorld.visitSignal(s);
