@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 public enum RobotType {
     //  isbuilding, spawn-source, build-dep1, build-dep2, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
-    HQ          (true, null, null, null, 0, 0, 0, 1000, 12, 24, 0, 1, 0, 0, 35, 10000),    
+    HQ          (true, null, null, null, 0, 0, 0, 1000, 24, 24, 0, 2, 0, 0, 35, 10000),    
     TOWER       (true, null, null, null, 0, 0, 0,  500, 8, 24, 0, 1, 0, 0, 35,  2000),
 
     SUPPLYDEPOT                 (true, null,                  HQ,                null, 100,  20, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
