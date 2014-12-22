@@ -401,7 +401,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotNull(loc);
         assertCanAttack(loc);
         if (robot.type == RobotType.BASHER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers can only attack using the attack() method.");
+            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers can only attack using the bash() method.");
         }
 
         int factor = 1;
