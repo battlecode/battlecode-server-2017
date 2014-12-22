@@ -109,4 +109,5 @@ public interface GameConstants {
     public static final int INTERVENTION_LENGTH = 10;
 
     public static final int FLASH_RANGE = 15;
+    public static final double FLASH_MOVEMENT_DELAY = 1.0;
 }
