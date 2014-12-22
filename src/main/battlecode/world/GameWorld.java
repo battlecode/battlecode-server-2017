@@ -37,6 +37,7 @@ import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.BytecodesUsedSignal;
 import battlecode.world.signal.CaptureSignal;
+import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.ControlBitsSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.EnergonChangeSignal;
@@ -98,6 +99,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     private Map<Team, InternalRobot> commanders = new EnumMap<Team, InternalRobot>(Team.class);
     private Map<Team, ArrayList<CommanderSkillType>> skills = new EnumMap<Team, ArrayList<CommanderSkillType>>(Team.class);
+    private Map<Team, Map<CommanderSkillType, Integer>> skillCooldowns = new EnumMap<Team, Map<CommanderSkillType, Integer>>(Team.class);
 
     // these handle the placement of skillshots
     private Map<Team, Map<MapLocation, Integer>> layWaste = new EnumMap<Team, Map<MapLocation, Integer>>(Team.class);
@@ -505,17 +507,17 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	return i;
     }
 
-    public void channelLayWaste(Team t, MapLocation m) {
-        Integer i = layWaste.get(t).get(m);
-        if (i == null) i = GameConstants.BURST_DELAY;
-        i = i-1;
-        layWaste.get(t).put(m, i);
-        if (i == 0) {
-            castLayWaste(m);
+    public void castLayWaste(Team t, MapLocation m) {
+	layWaste.get(t).remove(m); //just in case?
 
-            layWaste.get(t).remove(m);
-            // unleash the kraken
-        }
+	layWaste.get(t).put(m, GameConstants.BURST_DELAY);
+    }
+    public void processLayWaste(Team t, MapLocation m) {
+
+    }
+    public void castFlash(Team t, MapLocation m) {
+	//TODO(npinsker): error handling for this is done when the signal is visited -- is this good practice?
+	addSignal(new CastSignal(getCommander(t), CommanderSkillType.FLASH, m));
     }
 
     public void addSkill(Team t, CommanderSkillType sk) {
@@ -527,6 +529,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             if (skillList.get(i) == sk) return true;
         }
         return false;
+    }
+    public boolean skillIsOnCooldown(Team t, CommanderSkillType sk) {
+	Map<CommanderSkillType, Integer> cooldowns = skillCooldowns.get(t);
+
+	return cooldowns.get(sk) > 0;
     }
 
     // should only be called by the InternalObject constructor
@@ -1108,6 +1115,23 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         				target.takeShieldedDamage(-shields.type.attackPower);
         	}
         addSignal(s);
+    }
+    public void visitCastSignal(CastSignal s) {
+	//TODO(npinsker): finish this...
+	
+	InternalRobot commander = (InternalRobot) getObjectByID(s.getRobotID());
+
+	MapLocation currentLoc = commander.getLocation(), targetLoc = s.getTargetLoc();
+
+	CommanderSkillType skill = s.getSpell();
+
+	if (skill == CommanderSkillType.FLASH) {
+	    if (currentLoc.distanceSquaredTo(targetLoc) <= GameConstants.FLASH_RANGE && canMove(targetLoc, commander.type)) {
+		commander.setLocation(targetLoc);
+	    }
+	}
+	
+	addSignal(s);
     }
     
     public void visitScanSignal(ScanSignal s) {

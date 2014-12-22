@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import battlecode.common.CommanderSkillType;
 import battlecode.common.DependencyProgress;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -32,6 +33,7 @@ import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.CaptureSignal;
+import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.HatSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.LocationSupplyChangeSignal;
@@ -414,6 +416,32 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         robot.activateAttack(new AttackSignal(robot, loc), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
     }
 
+    public void castTargetedSpell(MapLocation loc, CommanderSkillType skill) throws GameActionException {
+	assertNotNull(loc);
+
+	if (robot.type != RobotType.COMMANDER) {
+	    throw new GameActionException(CANT_DO_THAT_BRO, "Only Commanders can cast spells.");
+	}
+        int factor = 1;
+        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
+            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
+        } else {
+            factor = 2;
+        }
+
+	//is this kosher? i hope so
+	
+	if (skill == CommanderSkillType.FLASH) {
+	    assertNotMoving();
+	    if (!gameWorld.canMove(loc, robot.type)) {
+		throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot teleport to " + loc.toString());
+	    }
+	    else {
+		robot.activateMovement(new CastSignal(robot, skill, loc), robot.getLoadingDelayForType(), GameConstants.FLASH_MOVEMENT_DELAY * factor);
+	    }
+	}
+    }
+
     public void bash() throws GameActionException {
         assertNotAttacking();
         if (robot.type != RobotType.BASHER) {
@@ -690,6 +718,27 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     
     public int checkResearchProgress(Upgrade upgrade) throws GameActionException {
         return gameWorld.getUpgradeProgress(getTeam(), upgrade);
+    }
+   
+    //***********************************
+    //****** COMMANDER METHODS **********
+    //***********************************
+
+    public void useSkill(CommanderSkillType skill) throws GameActionException {
+	if (!gameWorld.hasSkill(getTeam(), skill)) {
+	    throw new GameActionException(CANT_DO_THAT_BRO, "You don't have that skill. (" + skill + ")");
+	}
+	else if (gameWorld.skillIsOnCooldown(getTeam(), skill)) {
+	    throw new GameActionException(CANT_DO_THAT_BRO, "That skill is on cooldown. (" + skill + ")");
+	}
+	else if (skill == CommanderSkillType.DELAYED_BURST) {
+	}
+	else if (skill == CommanderSkillType.INTERVENTION) {
+	}
+	else if (skill == CommanderSkillType.FLASH) {
+	}
+	else {
+	}
     }
     
     // ***********************************
