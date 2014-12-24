@@ -555,8 +555,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
 
     public void mine() throws GameActionException {
-        if (robot.type != RobotType.FURBY && robot.type != RobotType.MINER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only FURBY and MINER can mine");
+        if (robot.type != RobotType.BEAVER && robot.type != RobotType.MINER) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only BEAVER and MINER can mine");
         }
         assertNotMoving();
         MapLocation loc = getLocation();
@@ -636,7 +636,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public boolean canBuild(Direction dir, RobotType type) {
-        if (robot.type != RobotType.FURBY && robot.type != RobotType.BUILDER)
+        if (robot.type != RobotType.BEAVER && robot.type != RobotType.BUILDER)
             return false;
         if (!type.isBuilding)
             return false;
@@ -660,8 +660,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public void build(Direction dir, RobotType type) throws GameActionException {
-        if (robot.type != RobotType.FURBY && robot.type != RobotType.BUILDER)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only FURBY and BUILDER can build");
+        if (robot.type != RobotType.BEAVER && robot.type != RobotType.BUILDER)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only BEAVER and BUILDER can build");
         if (!type.isBuilding)
             throw new GameActionException(CANT_DO_THAT_BRO, "Can only build buildings");
 

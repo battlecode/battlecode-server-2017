@@ -23,7 +23,7 @@ public enum RobotType {
     BIOMECHATRONICRESEARCHLAB   (true, null,     HANDWASHSTATION,            BARRACKS, 200, 200, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
     AEROSPACELAB                (true, null,             HELIPAD,     HANDWASHSTATION, 500, 200, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
 
-    FURBY       (false,                  HQ, null, null, 100,  20, 20,  30,  6,  8, 2, 2, 1, 1, 24, 10000),
+    BEAVER      (false,                  HQ, null, null, 100,  20, 20,  30,  6,  8, 2, 2, 1, 1, 24, 10000),
     COMPUTER    (false, TECHNOLOGYINSTITUTE, null, null,  10,  25,  5,   1,  0,  0, 8, 0, 0, 0, 24, 10000),
     SOLDIER     (false,            BARRACKS, null, null,  10,  15, 10,  40,  8, 15, 2, 2, 1, 1, 24, 10000),
     BASHER      (false,            BARRACKS, null, null,  80,  15, 10,  40,  4,  2, 2, 2, 1, 1, 24, 10000),

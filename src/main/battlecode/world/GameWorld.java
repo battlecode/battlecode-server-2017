@@ -800,7 +800,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         
         InternalRobot target;
         switch (attacker.type) {
-        case FURBY:
+        case BEAVER:
 		case SOLDIER:
         case BASHER:
         case MINER:
@@ -1063,8 +1063,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         int baseOre = getOre(loc);
         int ore = 0;
         if (baseOre > 0) {
-            if (s.getMinerType() == RobotType.FURBY) {
-                ore = Math.max(Math.min(GameConstants.FURBY_MINE_MAX, baseOre / GameConstants.FURBY_MINE_RATE), GameConstants.MINIMUM_MINE_AMOUNT);
+            if (s.getMinerType() == RobotType.BEAVER) {
+                ore = Math.max(Math.min(GameConstants.BEAVER_MINE_MAX, baseOre / GameConstants.BEAVER_MINE_RATE), GameConstants.MINIMUM_MINE_AMOUNT);
             } else {
                 if (hasUpgrade(s.getMineTeam(), Upgrade.IMPROVEDMINING)) {
                     ore = Math.max(Math.min(baseOre / GameConstants.MINER_MINE_RATE, GameConstants.MINER_MINE_MAX_UPGRADED), GameConstants.MINIMUM_MINE_AMOUNT);
