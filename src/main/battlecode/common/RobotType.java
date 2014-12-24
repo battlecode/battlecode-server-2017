@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public enum RobotType {
     //  isbuilding, spawn-source, build-dep1, build-dep2, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
     HQ          (true, null, null, null, 0, 0, 0, 1000, 24, 24, 0, 2, 0, 0, 35, 10000),    
-    TOWER       (true, null, null, null, 0, 0, 0,  500, 8, 24, 0, 1, 0, 0, 35,  2000),
+    TOWER       (true, null, null, null, 0, 0, 0,  500, 8, 15, 0, 1, 0, 0, 35,  2000),
 
     SUPPLYDEPOT                 (true, null,                  HQ,                null, 100,  20, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
     TECHNOLOGYINSTITUTE         (true, null,                  HQ,                null, 300,  80, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
@@ -23,15 +23,15 @@ public enum RobotType {
     BIOMECHATRONICRESEARCHLAB   (true, null,     HANDWASHSTATION,            BARRACKS, 200, 200, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
     AEROSPACELAB                (true, null,             HELIPAD,     HANDWASHSTATION, 500, 200, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
 
-    FURBY       (false,                  HQ, null, null, 100,  20, 20,  30,  6,  8, 2, 2, 1, 1, 24, 10000),
+    FURBY       (false,                  HQ, null, null, 100,  20, 20,  30,  4,  5, 2, 2, 1, 1, 24, 10000),
     COMPUTER    (false, TECHNOLOGYINSTITUTE, null, null,  10,  25,  5,   1,  0,  0, 8, 0, 0, 0, 24, 10000),
-    SOLDIER     (false,            BARRACKS, null, null,  10,  15, 10,  40,  8, 15, 2, 2, 1, 1, 24, 10000),
-    BASHER      (false,            BARRACKS, null, null,  80,  15, 10,  40,  4,  2, 2, 2, 1, 1, 24, 10000),
+    SOLDIER     (false,            BARRACKS, null, null,  10,  15, 10,  40,  8,  5, 2, 2, 1, 1, 24, 10000),
+    BASHER      (false,            BARRACKS, null, null,  80,  15, 10,  64,  5,  2, 2, 1, 0, 0, 24, 10000),
     BUILDER     (false,         METABUILDER, null, null, 100,  20,  5,  80,  0,  0, 3, 0, 0, 0, 24, 10000),
     MINER       (false,        MINERFACTORY, null, null,  50,  20, 15,  50,  3,  5, 2, 2, 2, 1, 24, 10000),
-    DRONE       (false,             HELIPAD, null, null, 120,  40,  5,  80, 10,  8, 1, 3, 0, 0, 24, 10000),
-    TANK        (false,         TANKFACTORY, null, null, 200,  60, 30, 160, 20, 24, 2, 3, 2, 2, 24, 10000),
-    COMMANDER   (false,       TRAININGFIELD, null, null, 100,  80, 10, 120,  8, 15, 2, 1, 0, 0, 24, 10000),
+    DRONE       (false,             HELIPAD, null, null, 120,  30,  5,  80,  8, 10, 1, 3, 0, 0, 24, 10000),
+    TANK        (false,         TANKFACTORY, null, null, 200,  60, 30, 160, 20, 15, 2, 3, 2, 2, 24, 10000),
+    COMMANDER   (false,       TRAININGFIELD, null, null, 100,  80, 10, 120,  8, 10, 2, 1, 0, 0, 24, 10000),
     LAUNCHER    (false,        AEROSPACELAB, null, null, 400, 100, 50, 400,  0,  0, 4, 0, 0, 0, 24, 10000),
     MISSILE     (false,            LAUNCHER, null, null,   0,   6,  0,   5, 20,  2, 1, 0, 0, 0, 24,   500),
     ;

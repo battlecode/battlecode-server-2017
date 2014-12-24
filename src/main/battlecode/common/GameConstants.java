@@ -69,7 +69,7 @@ public interface GameConstants {
     public static final int FURBY_MINE_MAX = 2;
 
     /** The fraction of ore that a FURBY gets from a square. */
-    public static final int FURBY_MINE_RATE = 100; // means 1/100
+    public static final int FURBY_MINE_RATE = 20; // means 1/20
 
     /** The maximum amount of ore that a MINER can mine. */
     public static final int MINER_MINE_MAX = 3;
@@ -78,7 +78,7 @@ public interface GameConstants {
     public static final int MINER_MINE_MAX_UPGRADED = 4;
 
     /** The fraction of ore that a MINER gets from a square. */
-    public static final int MINER_MINE_RATE = 30; // means 1/30
+    public static final int MINER_MINE_RATE = 4; // means 1/4
 
     // *********************************
     // ****** UNIT PROPERTIES **********
