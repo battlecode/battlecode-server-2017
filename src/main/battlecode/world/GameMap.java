@@ -248,14 +248,16 @@ public class GameMap implements GenericGameMap {
         private final GameMap map;
         private final boolean[][] seen;
         private final int[][] supplyLevel;
+        private final int[][] oreMined;
 
         public MapMemory(GameMap map) {
             this.map = map;
             this.seen = new boolean[map.getWidth()][map.getHeight()];
             this.supplyLevel = new int[map.getWidth()][map.getHeight()];
+            this.oreMined = new int[map.getWidth()][map.getHeight()];
         }
 
-        public void rememberLocations(MapLocation loc, int radiusSquared, Map<MapLocation, Integer> droppedSupplies) {
+        public void rememberLocations(MapLocation loc, int radiusSquared, Map<MapLocation, Integer> droppedSupplies, Map<MapLocation, Integer> oreMinedMap) {
             MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
             for (int i = 0; i < locs.length; i++) {
@@ -265,6 +267,9 @@ public class GameMap implements GenericGameMap {
                     seen[x][y] = true;
                     if (droppedSupplies.containsKey(locs[i])) {
                         supplyLevel[x][y] = droppedSupplies.get(locs[i]);
+                    }
+                    if (oreMinedMap.containsKey(locs[i])) {
+                        oreMined[x][y] = oreMinedMap.get(locs[i]);
                     }
                 }
             }
@@ -302,6 +307,18 @@ public class GameMap implements GenericGameMap {
                 return 0;
             } else if (seen[X][Y]) {
                 return supplyLevel[X][Y];
+            } else {
+                return -1;
+            }
+        }
+        public int recallOreMined(MapLocation loc) {
+            int X = loc.x - map.mapOriginX;
+            int Y = loc.y - map.mapOriginY;
+
+            if (X < 0 || X >= map.getWidth() || Y < 0 || Y >= map.getHeight()) {
+                return 0;
+            } else if (seen[X][Y]) {
+                return oreMined[X][Y];
             } else {
                 return -1;
             }

@@ -500,8 +500,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
 
     public double senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException {
-        checkCanSense(loc);
-
         return gameWorld.senseSupplyLevel(getTeam(), loc);
     }
 
@@ -564,8 +562,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public int senseOre(MapLocation loc) throws GameActionException {
-        assertCanSense(loc);
-        return gameWorld.getOre(loc);
+        return gameWorld.senseOre(getTeam(), loc);
     }   
 
     // ***********************************
@@ -636,16 +633,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public boolean canBuild(Direction dir, RobotType type) {
-        if (robot.type != RobotType.BEAVER && robot.type != RobotType.BUILDER)
+        if (robot.type != RobotType.BEAVER)
             return false;
         if (!type.isBuilding)
             return false;
 
         // check dependencies
-        for (RobotType dependency : type.getDependencies()) {
-            if (gameWorld.getRobotTypeCount(getTeam(), dependency) == 0) {
-                return false;
-            }
+        if (gameWorld.getRobotTypeCount(getTeam(), type.dependency) == 0) {
+            return false;
         }
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(loc, type))
@@ -660,16 +655,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public void build(Direction dir, RobotType type) throws GameActionException {
-        if (robot.type != RobotType.BEAVER && robot.type != RobotType.BUILDER)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only BEAVER and BUILDER can build");
+        if (robot.type != RobotType.BEAVER)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only BEAVER can build");
         if (!type.isBuilding)
             throw new GameActionException(CANT_DO_THAT_BRO, "Can only build buildings");
 
         // check dependencies
-        for (RobotType dependency : type.getDependencies()) {
-            if (gameWorld.getRobotTypeCount(getTeam(), dependency) == 0) {
-                throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build of " + type);
-            }
+        if (gameWorld.getRobotTypeCount(getTeam(), type.dependency) == 0) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build of " + type);
         }
 
         assertNotMoving();
@@ -683,13 +676,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         int delay = type.buildTurns;
-        if (robot.type == RobotType.BUILDER) {
-            if (gameWorld.hasUpgrade(getTeam(), Upgrade.IMPROVEDBUILDING)) {
-                delay = delay / 2;
-            } else {
-                delay = delay * 2 / 3;
-            }
-        }
 
         robot.activateMovement(
                 new SpawnSignal(loc, type, robot.getTeam(), robot, delay), delay, delay
@@ -703,8 +689,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //***********************************
 
     public void researchUpgrade(Upgrade upgrade) throws GameActionException {
-        if (robot.type != upgrade.researcher)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only certain units can research.");
         if (gameWorld.hasUpgrade(getTeam(), upgrade))
             throw new GameActionException(CANT_DO_THAT_BRO, "You already have that upgrade. ("+upgrade+")");
         if (checkResearchProgress(upgrade) > 0) {

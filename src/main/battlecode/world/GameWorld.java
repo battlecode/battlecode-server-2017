@@ -288,6 +288,15 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return gameMap.getInitialOre(loc) - mined;
     }
 
+    public int senseOre(Team team, MapLocation loc) {
+        int res = mapMemory.get(team).recallOreMined(loc);
+        if (res < 0) {
+            return res;
+        } else {
+            return gameMap.getInitialOre(loc) - res;
+        }
+    }
+
     public void processEndOfRound() {
         // process all gameobjects
         InternalObject[] gameObjects = new InternalObject[gameObjectsByID.size()];
@@ -300,7 +309,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         // update map memory
         for (int i = 0; i < gameObjects.length; i++) {
             InternalRobot ir = (InternalRobot) gameObjects[i];
-            mapMemory.get(ir.getTeam()).rememberLocations(ir.getLocation(), ir.type.sensorRadiusSquared, droppedSupplies);
+            mapMemory.get(ir.getTeam()).rememberLocations(ir.getLocation(), ir.type.sensorRadiusSquared, droppedSupplies, oreMined);
         }
 
         // free ore
