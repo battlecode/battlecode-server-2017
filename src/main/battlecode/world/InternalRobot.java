@@ -61,6 +61,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     private Signal movementSignal;
     private Signal attackSignal;
+    private Signal castSignal;
+
     public ResearchSignal researchSignal;
 
     private int roundsSinceLastDamage;

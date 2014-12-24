@@ -65,11 +65,11 @@ public interface GameConstants {
     /** The minimum amount that is mined on a square with no ore. */
     public static final int MINIMUM_MINE_AMOUNT = 1;
 
-    /** The maximum amount of ore that a FURBY can mine. */
-    public static final int FURBY_MINE_MAX = 2;
+    /** The maximum amount of ore that a BEAVER can mine. */
+    public static final int BEAVER_MINE_MAX = 2;
 
-    /** The fraction of ore that a FURBY gets from a square. */
-    public static final int FURBY_MINE_RATE = 20; // means 1/20
+    /** The fraction of ore that a BEAVER gets from a square. */
+    public static final int BEAVER_MINE_RATE = 20; // means 1/20
 
     /** The maximum amount of ore that a MINER can mine. */
     public static final int MINER_MINE_MAX = 3;
@@ -109,4 +109,5 @@ public interface GameConstants {
     public static final int INTERVENTION_LENGTH = 10;
 
     public static final int FLASH_RANGE = 15;
+    public static final double FLASH_MOVEMENT_DELAY = 1.0;
 }

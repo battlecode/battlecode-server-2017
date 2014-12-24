@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import battlecode.common.CommanderSkillType;
 import battlecode.common.DependencyProgress;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -32,6 +33,7 @@ import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.CaptureSignal;
+import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.HatSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.LocationSupplyChangeSignal;
@@ -401,7 +403,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotNull(loc);
         assertCanAttack(loc);
         if (robot.type == RobotType.BASHER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers can only attack using the attack() method.");
+            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers can only attack using the bash() method.");
         }
 
         int factor = 1;
@@ -412,6 +414,32 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
 
         robot.activateAttack(new AttackSignal(robot, loc), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
+    }
+
+    public void castTargetedSpell(MapLocation loc, CommanderSkillType skill) throws GameActionException {
+	assertNotNull(loc);
+
+	if (robot.type != RobotType.COMMANDER) {
+	    throw new GameActionException(CANT_DO_THAT_BRO, "Only Commanders can cast spells.");
+	}
+        int factor = 1;
+        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
+            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
+        } else {
+            factor = 2;
+        }
+
+	//is this kosher? i hope so
+	
+	if (skill == CommanderSkillType.FLASH) {
+	    assertNotMoving();
+	    if (!gameWorld.canMove(loc, robot.type)) {
+		throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot teleport to " + loc.toString());
+	    }
+	    else {
+		robot.activateMovement(new CastSignal(robot, skill, loc), robot.getLoadingDelayForType(), GameConstants.FLASH_MOVEMENT_DELAY * factor);
+	    }
+	}
     }
 
     public void bash() throws GameActionException {
@@ -472,8 +500,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
 
     public double senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException {
-        checkCanSense(loc);
-
         return gameWorld.senseSupplyLevel(getTeam(), loc);
     }
 
@@ -527,8 +553,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
 
     public void mine() throws GameActionException {
-        if (robot.type != RobotType.FURBY && robot.type != RobotType.MINER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only FURBY and MINER can mine");
+        if (robot.type != RobotType.BEAVER && robot.type != RobotType.MINER) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only BEAVER and MINER can mine");
         }
         assertNotMoving();
         MapLocation loc = getLocation();
@@ -536,8 +562,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public int senseOre(MapLocation loc) throws GameActionException {
-        assertCanSense(loc);
-        return gameWorld.getOre(loc);
+        return gameWorld.senseOre(getTeam(), loc);
     }   
 
     // ***********************************
@@ -608,16 +633,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public boolean canBuild(Direction dir, RobotType type) {
-        if (robot.type != RobotType.FURBY && robot.type != RobotType.BUILDER)
+        if (robot.type != RobotType.BEAVER)
             return false;
         if (!type.isBuilding)
             return false;
 
         // check dependencies
-        for (RobotType dependency : type.getDependencies()) {
-            if (gameWorld.getRobotTypeCount(getTeam(), dependency) == 0) {
-                return false;
-            }
+        if (gameWorld.getRobotTypeCount(getTeam(), type.dependency) == 0) {
+            return false;
         }
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(loc, type))
@@ -632,16 +655,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public void build(Direction dir, RobotType type) throws GameActionException {
-        if (robot.type != RobotType.FURBY && robot.type != RobotType.BUILDER)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only FURBY and BUILDER can build");
+        if (robot.type != RobotType.BEAVER)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only BEAVER can build");
         if (!type.isBuilding)
             throw new GameActionException(CANT_DO_THAT_BRO, "Can only build buildings");
 
         // check dependencies
-        for (RobotType dependency : type.getDependencies()) {
-            if (gameWorld.getRobotTypeCount(getTeam(), dependency) == 0) {
-                throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build of " + type);
-            }
+        if (gameWorld.getRobotTypeCount(getTeam(), type.dependency) == 0) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build of " + type);
         }
 
         assertNotMoving();
@@ -655,13 +676,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         int delay = type.buildTurns;
-        if (robot.type == RobotType.BUILDER) {
-            if (gameWorld.hasUpgrade(getTeam(), Upgrade.IMPROVEDBUILDING)) {
-                delay = delay / 2;
-            } else {
-                delay = delay * 2 / 3;
-            }
-        }
 
         robot.activateMovement(
                 new SpawnSignal(loc, type, robot.getTeam(), robot, delay), delay, delay
@@ -675,8 +689,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //***********************************
 
     public void researchUpgrade(Upgrade upgrade) throws GameActionException {
-        if (robot.type != upgrade.researcher)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only certain units can research.");
         if (gameWorld.hasUpgrade(getTeam(), upgrade))
             throw new GameActionException(CANT_DO_THAT_BRO, "You already have that upgrade. ("+upgrade+")");
         if (checkResearchProgress(upgrade) > 0) {
@@ -690,6 +702,27 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     
     public int checkResearchProgress(Upgrade upgrade) throws GameActionException {
         return gameWorld.getUpgradeProgress(getTeam(), upgrade);
+    }
+   
+    //***********************************
+    //****** COMMANDER METHODS **********
+    //***********************************
+
+    public void useSkill(CommanderSkillType skill) throws GameActionException {
+	if (!gameWorld.hasSkill(getTeam(), skill)) {
+	    throw new GameActionException(CANT_DO_THAT_BRO, "You don't have that skill. (" + skill + ")");
+	}
+	else if (gameWorld.skillIsOnCooldown(getTeam(), skill)) {
+	    throw new GameActionException(CANT_DO_THAT_BRO, "That skill is on cooldown. (" + skill + ")");
+	}
+	else if (skill == CommanderSkillType.DELAYED_BURST) {
+	}
+	else if (skill == CommanderSkillType.INTERVENTION) {
+	}
+	else if (skill == CommanderSkillType.FLASH) {
+	}
+	else {
+	}
     }
     
     // ***********************************

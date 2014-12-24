@@ -286,6 +286,16 @@ public interface RobotController {
     public void attackSquare(MapLocation loc) throws GameActionException;
 
     /**
+     * Casts a targeted spell at the given location.
+     *
+     * @param loc the location to attack.
+     * @param skill the skill being cast.
+     * @throws GameActionException if the robot has not learned the spell or cannot cast at the given square.
+     *
+     */
+    public void castTargetedSpell(MapLocation loc, CommanderSkillType skill) throws GameActionException;
+
+    /**
      * BASHERS ONLY. Attacks all surrounding enemies.
      *
      * @throws GameActionException if the robot is not a BASHER or if attack is not allowed.
