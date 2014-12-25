@@ -373,13 +373,13 @@ public interface RobotController {
     public void dropSupplies(int amount) throws GameActionException;
 
     /**
-     * Transfers supplies to a robot in the given direction.
+     * Transfers supplies to a robot in a nearby location. See GameConstants for maximum transfer distance.
      *
      * @param amount the amount of supply to transfer.
-     * @param dir the direction to transfer the supply
-     * @throws GameActionException if there isn't enough supply or if there is no one to transfer to.
+     * @param loc the location to transfer the supply to.
+     * @throws GameActionException if there isn't enough supply or if there is no one to transfer to, or if the distance is too much for a supply transfer.
      */
-    public void transferSupplies(int amount, Direction dir) throws GameActionException;
+    public void transferSupplies(int amount, MapLocation loc) throws GameActionException;
 
     /**
      * Picks up supplies from the location the robot is standing on.
@@ -406,7 +406,7 @@ public interface RobotController {
      * @param loc the MapLocation to sense ore at.
      * @return the amount of ore at a given location. If the location is out of sensor range, then the last known ore amount is returned.
      */
-    public int senseOre(MapLocation loc) throws GameActionException;
+    public double senseOre(MapLocation loc) throws GameActionException;
 
     /**
      * Mines the current square for ore.
