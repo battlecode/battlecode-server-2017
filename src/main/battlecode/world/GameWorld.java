@@ -308,6 +308,15 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return gameMap.getInitialOre(loc) - mined;
     }
 
+    public int senseOre(Team team, MapLocation loc) {
+        int res = mapMemory.get(team).recallOreMined(loc);
+        if (res < 0) {
+            return res;
+        } else {
+            return gameMap.getInitialOre(loc) - res;
+        }
+    }
+
     public void processEndOfRound() {
         // process all gameobjects
         InternalObject[] gameObjects = new InternalObject[gameObjectsByID.size()];
@@ -320,7 +329,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         // update map memory
         for (int i = 0; i < gameObjects.length; i++) {
             InternalRobot ir = (InternalRobot) gameObjects[i];
-            mapMemory.get(ir.getTeam()).rememberLocations(ir.getLocation(), ir.type.sensorRadiusSquared, droppedSupplies);
+            mapMemory.get(ir.getTeam()).rememberLocations(ir.getLocation(), ir.type.sensorRadiusSquared, droppedSupplies, oreMined);
         }
 
         // free ore
@@ -826,7 +835,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         
         InternalRobot target;
         switch (attacker.type) {
-        case FURBY:
+        case BEAVER:
 		case SOLDIER:
         case BASHER:
         case MINER:
@@ -1089,8 +1098,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         int baseOre = getOre(loc);
         int ore = 0;
         if (baseOre > 0) {
-            if (s.getMinerType() == RobotType.FURBY) {
-                ore = Math.max(Math.min(GameConstants.FURBY_MINE_MAX, baseOre / GameConstants.FURBY_MINE_RATE), GameConstants.MINIMUM_MINE_AMOUNT);
+            if (s.getMinerType() == RobotType.BEAVER) {
+                ore = Math.max(Math.min(GameConstants.BEAVER_MINE_MAX, baseOre / GameConstants.BEAVER_MINE_RATE), GameConstants.MINIMUM_MINE_AMOUNT);
             } else {
                 if (hasUpgrade(s.getMineTeam(), Upgrade.IMPROVEDMINING)) {
                     ore = Math.max(Math.min(baseOre / GameConstants.MINER_MINE_RATE, GameConstants.MINER_MINE_MAX_UPGRADED), GameConstants.MINIMUM_MINE_AMOUNT);
