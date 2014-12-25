@@ -452,6 +452,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
     public int incrementCommandersSpawned(Team t) {
         numCommandersSpawned.put(t, numCommandersSpawned.get(t) + 1);
+		return numCommandersSpawned.get(t);
     }
 
     public boolean timeLimitReached() {

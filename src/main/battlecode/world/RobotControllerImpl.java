@@ -601,11 +601,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         double cost = type.oreCost;
 
 	if (type == RobotType.COMMANDER) {
-<<<<<<< HEAD
 	    cost *= (1 << Math.min(gameWorld.getCommandersSpawned(robot.getTeam()), 8));
-=======
-	    cost *= (1 << Math.min(getCommandersSpawned(robot.getTeam()), 8));
->>>>>>> 8c8422b8f601f2414ba90a9d0cdf4ae1fd0eeec6
+	    //cost *= (1 << Math.min(getCommandersSpawned(robot.getTeam()), 8));
 	}
         
         assertHaveResource(cost);
