@@ -91,14 +91,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private Map<MapLocation, Team> encampmentMap = new HashMap<MapLocation, Team>();
     private Map<Team, InternalRobot> baseHQs = new EnumMap<Team, InternalRobot>(Team.class);
     private Map<MapLocation, Team> mineLocations = new HashMap<MapLocation, Team>();
-    private Map<MapLocation, Integer> droppedSupplies = new HashMap<MapLocation, Integer>();
+    private Map<MapLocation, Double> droppedSupplies = new HashMap<MapLocation, Double>();
     private Map<MapLocation, Double> oreMined = new HashMap<MapLocation, Double>();
     private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<Team, GameMap.MapMemory>(Team.class);
     private Map<Team, Set<MapLocation>> knownMineLocations = new EnumMap<Team, Set<MapLocation>>(Team.class);
     private Map<Team, Map<Upgrade, Integer>> research = new EnumMap<Team, Map<Upgrade, Integer>>(Team.class);
 
     private Map<Team, InternalRobot> commanders = new EnumMap<Team, InternalRobot>(Team.class);
-    private Map<Team, Integer> numCommandersSpawned = new EnumMapTeam, Integer>(Team.class);
+    private Map<Team, Integer> numCommandersSpawned = new EnumMap<Team, Integer>(Team.class);
     private Map<Team, Map<CommanderSkillType, Integer>> skillCooldowns = new EnumMap<Team, Map<CommanderSkillType, Integer>>(Team.class);
 
     
@@ -262,7 +262,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return getBaseHQ(team.opponent()).getLocation();
     }
 
-    public int getSupplyLevel(MapLocation loc) {
+    public double getSupplyLevel(MapLocation loc) {
         if (droppedSupplies.containsKey(loc)) {
             return droppedSupplies.get(loc);
         } else {
@@ -274,8 +274,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return mapMemory.get(team).recallSupplyLevel(loc);
     }
 
-    public void changeSupplyLevel(MapLocation loc, int delta) {
-        int cur = 0;
+    public void changeSupplyLevel(MapLocation loc, double delta) {
+        double cur = 0;
         if (droppedSupplies.containsKey(loc)) {
             cur = droppedSupplies.get(loc);
         }
@@ -974,7 +974,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             }
 
             // drop supplies
-            changeSupplyLevel(loc, (int) r.getSupplyLevel());
+            changeSupplyLevel(loc, r.getSupplyLevel());
         }
     }
 

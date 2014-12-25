@@ -165,11 +165,23 @@ public interface RobotController {
     public MapLocation senseHQLocation();
 
     /**
-     * Returns location of the enemy team's HQ. Returns null if the enemy HQ location has never been sensed before.
+     * Returns location of the enemy team's HQ.
      *
      * @return the enemy team's HQ location.
      */
     public MapLocation senseEnemyHQLocation();
+
+    /**
+     * Returns the locations of your own towers, unconstrained by sensor range or distance.
+     * @return an array of the locations of your towers.
+    */
+    //public MapLocation[] senseTowerLocations();
+
+    /**
+     * Returns the locations of enemy towers, unconstrained by sensor range or distance.
+     * @return an array of the locations of enemy towers.
+    */
+    //public MapLocation[] senseEnemyLowerLocations();
 
     /**
      * Senses the terrain at the given location. Returns TerrainTile.UNKNOWN for a terrain tile that has never been in sensor range.
@@ -365,27 +377,25 @@ public interface RobotController {
     public double senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException;
 
     /**
-     * Drops supplies to the current location the robot is standing on.
+     * Drops supplies to the current location the robot is standing on. If you specify more supply than you own, all your supply will be dropped.
      *
      * @param amount the amount of supply to drop.
-     * @throws GameActionException if there isn't enough supply to drop.
      */
     public void dropSupplies(int amount) throws GameActionException;
 
     /**
-     * Transfers supplies to a robot in a nearby location. See GameConstants for maximum transfer distance.
+     * Transfers supplies to a robot in a nearby location. See GameConstants for maximum transfer distance. If you specify more supply than you own, all your supply will be transferred.
      *
      * @param amount the amount of supply to transfer.
      * @param loc the location to transfer the supply to.
-     * @throws GameActionException if there isn't enough supply or if there is no one to transfer to, or if the distance is too much for a supply transfer.
+     * @throws GameActionException if there is no one to transfer to, or if the distance is too much for a supply transfer.
      */
     public void transferSupplies(int amount, MapLocation loc) throws GameActionException;
 
     /**
-     * Picks up supplies from the location the robot is standing on.
+     * Picks up supplies from the location the robot is standing on. If you specify more than the supply level on the square, all the supply will be picked up.
      *
      * @param amount the amount of supply to pick up.
-     * @throws GameActionException if there isn't enough supply to pick up.
      */
     public void pickUpSupplies(int amount) throws GameActionException;
 

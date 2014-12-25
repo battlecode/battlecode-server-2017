@@ -481,7 +481,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public void dropSupplies(int amount) throws GameActionException {
         if (robot.getSupplyLevel() < amount) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Not enough supply to drop");
+            amount = robot.getSupplyLevel();
         }
 
         // some signal here
@@ -491,7 +491,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public void transferSupplies(int amount, MapLocation loc) throws GameActionException {
         if (robot.getSupplyLevel() < amount) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Not enough supply to drop");
+            amount = robot.getSupplyLevel();
         }
         if (loc.distanceSquaredTo(getLocation()) > GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Can't transfer supply that much distance.");
@@ -507,7 +507,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public void pickUpSupplies(int amount) throws GameActionException {
         if (gameWorld.getSupplyLevel(robot.getLocation()) < amount) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Not enough supply to pick up");
+            amount = gameWorld.getSupplyLevel(robot.getLocation());
         }
 
         // some signal here
