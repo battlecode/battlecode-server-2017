@@ -41,7 +41,7 @@ import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.ControlBitsSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.EnergonChangeSignal;
-import battlecode.world.signal.FluxChangeSignal;
+import battlecode.world.signal.TeamOreSignal;
 import battlecode.world.signal.HatSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.LocationSupplyChangeSignal;
@@ -344,7 +344,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             addSignal(new RobotInfoSignal(ir.getID(), ir.getRobotInfo()));
         }
         
-        addSignal(new FluxChangeSignal(teamResources));
+        addSignal(new TeamOreSignal(teamResources));
 		addSignal(new ResearchChangeSignal(research));
 
         if (timeLimitReached() && winner == null) {
