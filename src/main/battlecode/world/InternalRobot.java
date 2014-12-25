@@ -294,7 +294,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
 
         // refund supply
-        if (upkeepPaid) {
+        if (upkeepPaid && type.supplyUpkeep > 0) {
             double supplyPaid = Math.max(type.bytecodeLimit - 2000, 0) / 1000.0;
             double supplyNeeded = Math.max(getBytecodesUsed() - 2000, 0) / 1000.0;
             increaseSupplyLevel(supplyPaid - supplyNeeded);
@@ -314,8 +314,12 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
 
         if (type == RobotType.SUPPLYDEPOT) {
-            increaseSupplyLevel(100);
+            increaseSupplyLevel(GameConstants.DEPOT_SUPPLY_GEN);
         }
+		
+		if (type == RobotType.HQ) {
+			increaseSupplyLevel(GameConstants.HQ_SUPPLY_GEN);
+		}
 
         roundsAlive++;
         // after building is done, double health

@@ -53,10 +53,16 @@ public interface GameConstants {
     public static final int HAT_ORE_COST = 1000;
 
     /** The rate at which supply decays each turn. */
-    public static final double SUPPLY_DECAY = 0.01;
+    public static final double SUPPLY_DECAY = 0.00;
 
     /** The maximum distance over which supplies can be transferred. */
     public static final int SUPPLY_TRANSFER_RADIUS_SQUARED = 15;
+
+	/** The amount of supply a SUPPLYDEPOT generates each turn. */
+	public static final int DEPOT_SUPPLY_GEN = 100;
+	
+	/** The amount of supply a HQ generates each turn. */
+	public static final int HQ_SUPPLY_GEN = 200;
 
     // *********************************
     // ****** MINING *******************
