@@ -480,18 +480,20 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void dropSupplies(int amount) throws GameActionException {
-        if (robot.getSupplyLevel() < amount) {
-            amount = robot.getSupplyLevel();
+        double amt_to_drop = (double) amount;
+        if (robot.getSupplyLevel() < amt_to_drop) {
+            amt_to_drop = robot.getSupplyLevel();
         }
 
         // some signal here
-        robot.decreaseSupplyLevel(amount);
-        gameWorld.changeSupplyLevel(robot.getLocation(), amount);
+        robot.decreaseSupplyLevel(amt_to_drop);
+        gameWorld.changeSupplyLevel(robot.getLocation(), amt_to_drop);
     }
 
     public void transferSupplies(int amount, MapLocation loc) throws GameActionException {
-        if (robot.getSupplyLevel() < amount) {
-            amount = robot.getSupplyLevel();
+        double amt_to_transfer = (double) amount;
+        if (robot.getSupplyLevel() < amt_to_transfer) {
+            amt_to_transfer = robot.getSupplyLevel();
         }
         if (loc.distanceSquaredTo(getLocation()) > GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Can't transfer supply that much distance.");
@@ -500,20 +502,21 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (obj == null) {
             throw new GameActionException(CANT_DO_THAT_BRO, "No one to receive supply from transfer in that direction.");
         }
-        robot.decreaseSupplyLevel(amount);
+        robot.decreaseSupplyLevel(amt_to_transfer);
         InternalRobot other = (InternalRobot) obj;
-        other.increaseSupplyLevel(amount);
+        other.increaseSupplyLevel(amt_to_transfer);
     }
 
     public void pickUpSupplies(int amount) throws GameActionException {
-        if (gameWorld.getSupplyLevel(robot.getLocation()) < amount) {
-            amount = gameWorld.getSupplyLevel(robot.getLocation());
+        double amount_to_pickup = (double) amount;
+        if (gameWorld.getSupplyLevel(robot.getLocation()) < amount_to_pickup) {
+            amount_to_pickup = gameWorld.getSupplyLevel(robot.getLocation());
         }
 
         // some signal here
 
-        robot.increaseSupplyLevel(amount);
-        gameWorld.changeSupplyLevel(robot.getLocation(), -amount);
+        robot.increaseSupplyLevel(amount_to_pickup);
+        gameWorld.changeSupplyLevel(robot.getLocation(), -amount_to_pickup);
     }
 
     public void transferSuppliesToHQ() throws GameActionException {
@@ -598,7 +601,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         double cost = type.oreCost;
 
 	if (type == RobotType.COMMANDER) {
-	    cost *= (1 << Math.min(getCommandersSpawned(robot.getTeam()), 8);
+	    cost *= (1 << Math.min(getCommandersSpawned(robot.getTeam()), 8));
 	}
         
         assertHaveResource(cost);

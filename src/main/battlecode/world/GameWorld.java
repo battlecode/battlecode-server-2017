@@ -270,7 +270,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
     }
 
-    public int senseSupplyLevel(Team team, MapLocation loc) {
+    public double senseSupplyLevel(Team team, MapLocation loc) {
         return mapMemory.get(team).recallSupplyLevel(loc);
     }
 
@@ -448,10 +448,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public int getCommandersSpawned(Team t) {
-	return numCommandersSpawned.get(t);
+        return numCommandersSpawned.get(t);
     }
+
     public int incrementCommandersSpawned(Team t) {
-	numCommandersSpawned.put(t, numCommandersSpawned.get(t) + 1);
+        numCommandersSpawned.put(t, numCommandersSpawned.get(t) + 1);
+    }
 
     public boolean timeLimitReached() {
         return currentRound >= gameMap.getMaxRounds() - 1;
