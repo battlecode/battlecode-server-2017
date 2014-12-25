@@ -98,12 +98,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private Map<Team, Map<Upgrade, Integer>> research = new EnumMap<Team, Map<Upgrade, Integer>>(Team.class);
 
     private Map<Team, InternalRobot> commanders = new EnumMap<Team, InternalRobot>(Team.class);
-    private Map<Team, ArrayList<CommanderSkillType>> skills = new EnumMap<Team, ArrayList<CommanderSkillType>>(Team.class);
+    private Map<Team, Integer> numCommandersSpawned = new EnumMapTeam, Integer>(Team.class);
     private Map<Team, Map<CommanderSkillType, Integer>> skillCooldowns = new EnumMap<Team, Map<CommanderSkillType, Integer>>(Team.class);
-
-    // these handle the placement of skillshots
-    private Map<Team, Map<MapLocation, Integer>> layWaste = new EnumMap<Team, Map<MapLocation, Integer>>(Team.class);
-    private Map<Team, Map<MapLocation, Integer>> intervention = new EnumMap<Team, Map<MapLocation, Integer>>(Team.class);
 
     
     private Map<Team, Set<Upgrade>> upgrades = new EnumMap<Team, Set<Upgrade>>(Team.class);
@@ -151,11 +147,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         adjustResources(Team.A, GameConstants.ORE_INITIAL_AMOUNT);
         adjustResources(Team.B, GameConstants.ORE_INITIAL_AMOUNT);
 
-        skills.put(Team.A, new ArrayList<CommanderSkillType>());
-        skills.put(Team.B, new ArrayList<CommanderSkillType>());
+	numCommandersSpawned.put(Team.A, 0);
+	numCommandersSpawned.put(Team.B, 0);
 
-        addSkill(Team.A, CommanderSkillType.REGENERATION);
-        addSkill(Team.A, CommanderSkillType.LEADERSHIP);
+	skillCooldowns.put(Team.A, new EnumMap<CommanderSkillType, Integer>(CommanderSkillType.class));
+	skillCooldowns.put(Team.B, new EnumMap<CommanderSkillType, Integer>(CommanderSkillType.class));
     }
     
     public GameMap.MapMemory getMapMemory(Team t) {
@@ -183,7 +179,31 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         for (int i = 0; i < gameObjects.length; i++) {
             gameObjects[i].processBeginningOfRound();
         }
+	
+	processSkillCooldowns();
+    }
+    public int getSkillCooldown(Team t, CommanderSkillType c) {
+	Map<CommanderSkillType, Integer> m = skillCooldowns.get(t);
 
+	if (m.get(c) == null) return 0;
+	return m.get(c);
+    }
+
+    public void processSkillCooldowns() {
+	Team teams[] = new Team[]{Team.A, Team.B};
+
+	for (int t=0; t<2; ++t) {
+	    for (Entry<CommanderSkillType, Integer> o : skillCooldowns.get(teams[t]).entrySet()) {
+		CommanderSkillType skillType = o.getKey();
+		int value = o.getValue()-1;
+		if (value == 0) {
+		    skillCooldowns.get(teams[t]).remove(skillType);
+		}
+		else {
+		    skillCooldowns.get(teams[t]).put(skillType, value);
+		}
+	    }
+	}
     }
 
     public double getEnergonDifference() {
@@ -409,9 +429,20 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public InternalRobot getBaseHQ(Team t) {
         return baseHQs.get(t);
     }
+
+    public boolean hasCommander(Team t) {
+	return getRobotTypeCount(t, RobotType.COMMANDER) > 0;
+    }
+
     public InternalRobot getCommander(Team t) {
         return commanders.get(t);
     }
+
+    public int getCommandersSpawned(Team t) {
+	return numCommandersSpawned.get(t);
+    }
+    public int incrementCommandersSpawned(Team t) {
+	numCommandersSpawned.put(t, numCommandersSpawned.get(t) + 1);
 
     public boolean timeLimitReached() {
         return currentRound >= gameMap.getMaxRounds() - 1;
@@ -507,33 +538,28 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	return i;
     }
 
-    public void castLayWaste(Team t, MapLocation m) {
-	layWaste.get(t).remove(m); //just in case?
-
-	layWaste.get(t).put(m, GameConstants.BURST_DELAY);
-    }
-    public void processLayWaste(Team t, MapLocation m) {
-
-    }
     public void castFlash(Team t, MapLocation m) {
 	//TODO(npinsker): error handling for this is done when the signal is visited -- is this good practice?
-	addSignal(new CastSignal(getCommander(t), CommanderSkillType.FLASH, m));
-    }
-
-    public void addSkill(Team t, CommanderSkillType sk) {
-        skills.get(t).add(sk);
+	addSignal(new CastSignal(getCommander(t), m));
     }
     public boolean hasSkill(Team t, CommanderSkillType sk) {
-        ArrayList<CommanderSkillType> skillList = skills.get(t);
-        for (int i=0; i<skillList.size(); ++i) {
-            if (skillList.get(i) == sk) return true;
-        }
-        return false;
+	InternalRobot commander = getCommander(t);
+
+	if (sk == CommanderSkillType.REGENERATION) {
+	    return true;
+	}
+	else if (sk == CommanderSkillType.LEADERSHIP) {
+	    return ((InternalCommander)commander).getXP() >= GameConstants.XP_REQUIRED_LEADERSHIP;
+	}
+	else if (sk == CommanderSkillType.FLASH) {
+	    return ((InternalCommander)commander).getXP() >= GameConstants.XP_REQUIRED_FLASH;
+	}
+	return false;
     }
     public boolean skillIsOnCooldown(Team t, CommanderSkillType sk) {
 	Map<CommanderSkillType, Integer> cooldowns = skillCooldowns.get(t);
 
-	return cooldowns.get(sk) > 0;
+	return cooldowns.get(sk) != null && cooldowns.get(sk) > 0;
     }
 
     // should only be called by the InternalObject constructor
@@ -1123,12 +1149,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
 	MapLocation currentLoc = commander.getLocation(), targetLoc = s.getTargetLoc();
 
-	CommanderSkillType skill = s.getSpell();
-
-	if (skill == CommanderSkillType.FLASH) {
-	    if (currentLoc.distanceSquaredTo(targetLoc) <= GameConstants.FLASH_RANGE && canMove(targetLoc, commander.type)) {
-		commander.setLocation(targetLoc);
-	    }
+	if (currentLoc.distanceSquaredTo(targetLoc) <= GameConstants.FLASH_RANGE && canMove(targetLoc, commander.type)) {
+	    commander.setLocation(targetLoc);
 	}
 	
 	addSignal(s);

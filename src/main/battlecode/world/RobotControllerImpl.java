@@ -105,7 +105,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public boolean hasCommander() {
-        return gameWorld.getRobotTypeCount(robot.getTeam(), RobotType.COMMANDER) > 0;
+        return gameWorld.hasCommander(robot.getTeam());
     }
     
     public void assertHaveResource(double amount) throws GameActionException {
@@ -416,31 +416,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         robot.activateAttack(new AttackSignal(robot, loc), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
     }
 
-    public void castTargetedSpell(MapLocation loc, CommanderSkillType skill) throws GameActionException {
-	assertNotNull(loc);
-
-	if (robot.type != RobotType.COMMANDER) {
-	    throw new GameActionException(CANT_DO_THAT_BRO, "Only Commanders can cast spells.");
-	}
-        int factor = 1;
-        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
-            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
-        } else {
-            factor = 2;
-        }
-
-	//is this kosher? i hope so
-	
-	if (skill == CommanderSkillType.FLASH) {
-	    assertNotMoving();
-	    if (!gameWorld.canMove(loc, robot.type)) {
-		throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot teleport to " + loc.toString());
-	    }
-	    else {
-		robot.activateMovement(new CastSignal(robot, skill, loc), robot.getLoadingDelayForType(), GameConstants.FLASH_MOVEMENT_DELAY * factor);
-	    }
-	}
-    }
+    
 
     public void bash() throws GameActionException {
         assertNotAttacking();
@@ -621,6 +597,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
         assertNotMoving();
         double cost = type.oreCost;
+
+	if (type == RobotType.COMMANDER) {
+	    cost *= (1 << Math.min(getCommandersSpawned(robot.getTeam()), 8);
+	}
         
         assertHaveResource(cost);
         gameWorld.adjustResources(getTeam(), -cost);
@@ -633,6 +613,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
                 new SpawnSignal(loc, type, robot.getTeam(), robot, 0), robot.type == RobotType.HQ ? 0 : type.buildTurns, type.buildTurns 
                 );
         robot.resetSpawnCounter();
+
+	if (type == RobotType.COMMANDER) {
+	    incrementCommandersSpawned(robot.getTeam());
+	}
     }
 
     public boolean canBuild(Direction dir, RobotType type) {
@@ -723,22 +707,44 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //***********************************
     //****** COMMANDER METHODS **********
     //***********************************
+    public boolean hasLearnedSkill(CommanderSkillType skill) throws GameActionException {
+	if (!hasCommander()) {
+	    throw new GameActionException(CANT_DO_THAT_BRO, "Cannot call hasLearnedSkill without a Commander.");
+	}
+	return gameWorld.hasSkill(robot.getTeam(), skill);
+    }
 
-    public void useSkill(CommanderSkillType skill) throws GameActionException {
-	if (!gameWorld.hasSkill(getTeam(), skill)) {
-	    throw new GameActionException(CANT_DO_THAT_BRO, "You don't have that skill. (" + skill + ")");
+    public void castFlash(MapLocation loc) throws GameActionException {
+	assertNotNull(loc);
+
+	if (robot.type != RobotType.COMMANDER) {
+	    throw new GameActionException(CANT_DO_THAT_BRO, "Only Commanders can cast Flash.");
 	}
-	else if (gameWorld.skillIsOnCooldown(getTeam(), skill)) {
-	    throw new GameActionException(CANT_DO_THAT_BRO, "That skill is on cooldown. (" + skill + ")");
-	}
-	else if (skill == CommanderSkillType.DELAYED_BURST) {
-	}
-	else if (skill == CommanderSkillType.INTERVENTION) {
-	}
-	else if (skill == CommanderSkillType.FLASH) {
+        int factor = 1;
+        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
+            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
+        } else {
+            factor = 2;
+        }
+
+	//is this kosher? i hope so
+	
+	assertNotMoving();
+	if (!gameWorld.canMove(loc, robot.type)) {
+	    throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot teleport to " + loc.toString());
 	}
 	else {
+	    robot.activateMovement(new CastSignal(robot, loc), robot.getLoadingDelayForType(), GameConstants.FLASH_MOVEMENT_DELAY * factor);
 	}
+    }
+    public int getFlashCooldown() throws GameActionException {
+	if (!hasCommander()) {
+	    throw new GameActionException(CANT_DO_THAT_BRO, "Cannot call getFlashCooldown without a Commander.");
+	} 
+	if (!hasLearnedSkill(CommanderSkillType.FLASH)) {
+	    throw new GameActionException(CANT_DO_THAT_BRO, "Cannot call getFlashCooldown without having learned Flash.");
+	}
+	return gameWorld.getSkillCooldown(robot.getTeam(), CommanderSkillType.FLASH);
     }
     
     // ***********************************
