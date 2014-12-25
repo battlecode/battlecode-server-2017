@@ -845,6 +845,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         case TOWER:
 		case HQ:
             double rate = 1.0;
+	    boolean isSplash = (attacker.type == RobotType.BASHER);
             if (attacker.type == RobotType.HQ) {
                 int towerCount = getRobotTypeCount(attacker.getTeam(), RobotType.TOWER);
                 if (towerCount >= 6) {
@@ -852,14 +853,17 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 } else if (towerCount >= 3) {
                     rate = 1.5;
                 }
+		if (towerCount >= 5) {
+		    isSplash = true;
+		}
             }
 
-            boolean underLeadership = false;
+            int underLeadership = 0;
             
             InternalRobot commander = getCommander(attacker.getTeam());
 
             if (commander != null && hasSkill(attacker.getTeam(), CommanderSkillType.LEADERSHIP) && commander.getLocation().distanceSquaredTo(attacker.getLocation()) <= GameConstants.LEADERSHIP_RANGE) {
-                underLeadership = true;
+                underLeadership = 1;
             }
 
             // TODO: splash damage is currently gone
@@ -869,8 +873,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 					target = getRobot(targetLoc.add(dx, dy));
 
 					if (target != null && target.getTeam() != attacker.getTeam()) {
-						if (dx == 0 && dy == 0 || attacker.type == RobotType.BASHER) {
-							target.takeDamage(attacker.type.attackPower * rate, attacker);
+						if (dx == 0 && dy == 0 || isSplash) {
+							target.takeDamage((attacker.type.attackPower + underLeadership) * rate, attacker);
                         }
 
                         if (target.getEnergonLevel() <= 0.0 && target.getTeam() != attacker.getTeam()) {
