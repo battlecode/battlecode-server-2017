@@ -4,23 +4,11 @@ public enum CommanderSkillType {
         /* passive: +1 hp/sec */
         REGENERATION,
 
-        /* target square: do damage after a short number of rounds */
-        DELAYED_BURST,
-
-        /* passive: AoE increase to damage dealt */
+        /* passive: AoE increase to damage dealt; gained at 1000 XP */
         LEADERSHIP,
 
-        /* passive: no longer costs supply */
-        SELF_SUFFICIENCY, 
-
-        /* target square: all non-self units on that square become invulnerable */
-        INTERVENTION,
-
-        /* short-range teleport */
+        /* short-range teleport; gained at 2000 XP */
         FLASH,
-
-        /* can hold and fire 3 charges of delayed burst at once */
-        ARCANE_RITE,
 
         /* ... and more? */
 }

@@ -285,16 +285,7 @@ public interface RobotController {
      */
     public void attackSquare(MapLocation loc) throws GameActionException;
 
-    /**
-     * Casts a targeted spell at the given location.
-     *
-     * @param loc the location to attack.
-     * @param skill the skill being cast.
-     * @throws GameActionException if the robot has not learned the spell or cannot cast at the given square.
-     *
-     */
-    public void castTargetedSpell(MapLocation loc, CommanderSkillType skill) throws GameActionException;
-
+    
     /**
      * BASHERS ONLY. Attacks all surrounding enemies.
      *
@@ -308,6 +299,34 @@ public interface RobotController {
      * @throws GameActionException if the robot is not a MISSILE or if attack is not allowed.
      */
     public void explode() throws GameActionException;
+
+    // ***********************************
+    // ****** COMMANDER METHODS **********
+    // ***********************************
+
+    /**
+     * Casts Flash at the given location.
+     *
+     * @param loc the location to attack.
+     * @throws GameActionException if the robot has not learned the spell or cannot cast at the given square.
+     *
+     */
+    public void castFlash(MapLocation loc) throws GameActionException;
+
+    /**
+     * Returns whether the robot has learned a skill.
+     *
+     * @param skill the skill being checked.
+     * @return whether the robot has that skill.
+     */
+    public boolean hasLearnedSkill(CommanderSkillType skill) throws GameActionException;
+
+    /**
+     * Returns the cooldown of FLASH.
+     *
+     * @return the cooldown of FLASH.
+     */
+    public int getFlashCooldown() throws GameActionException;
 
     // ***********************************
     // ****** BROADCAST METHODS **********

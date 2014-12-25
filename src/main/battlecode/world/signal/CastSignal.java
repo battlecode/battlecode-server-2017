@@ -23,12 +23,10 @@ public class CastSignal extends Signal {
      * The location that the robot cast the spell
      */
 
-    public final CommanderSkillType spell;
     public final MapLocation targetLoc;
 
-    public CastSignal(InternalRobot robot, CommanderSkillType spell, MapLocation loc) {
+    public CastSignal(InternalRobot robot, MapLocation loc) {
         this.robotID = robot.getID();
-	this.spell = spell;
         this.targetLoc = loc;
     }
 
@@ -39,14 +37,6 @@ public class CastSignal extends Signal {
      */
     public int getRobotID() {
         return robotID;
-    }
-    /**
-     * Returns the spell that the robot is casting
-     *
-     * @return the spell being cast
-     */
-    public CommanderSkillType getSpell() {
-        return spell;
     }
     /**
      * Returns the location that the robot cast the spell
