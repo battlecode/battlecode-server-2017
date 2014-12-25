@@ -98,7 +98,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private Map<Team, Map<Upgrade, Integer>> research = new EnumMap<Team, Map<Upgrade, Integer>>(Team.class);
 
     private Map<Team, InternalRobot> commanders = new EnumMap<Team, InternalRobot>(Team.class);
-    private Map<Team, Integer> numCommandersSpawned = new EnumMapTeam, Integer>(Team.class);
+    private Map<Team, Integer> numCommandersSpawned = new EnumMap<Team, Integer>(Team.class);
     private Map<Team, Map<CommanderSkillType, Integer>> skillCooldowns = new EnumMap<Team, Map<CommanderSkillType, Integer>>(Team.class);
 
     
@@ -450,8 +450,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public int getCommandersSpawned(Team t) {
 	return numCommandersSpawned.get(t);
     }
-    public int incrementCommandersSpawned(Team t) {
+    public void incrementCommandersSpawned(Team t) {
 	numCommandersSpawned.put(t, numCommandersSpawned.get(t) + 1);
+    }
 
     public boolean timeLimitReached() {
         return currentRound >= gameMap.getMaxRounds() - 1;
