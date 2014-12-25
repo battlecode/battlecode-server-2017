@@ -8,9 +8,9 @@ public class LocationOreChangeSignal extends Signal {
     private static final long serialVersionUID = -4229507739170593123L;
 
     public final MapLocation loc;
-    public final int ore;
+    public final double ore;
 
-    public LocationOreChangeSignal(MapLocation loc, int ore) {
+    public LocationOreChangeSignal(MapLocation loc, double ore) {
         this.loc = loc;
         this.ore = ore;
     }
@@ -19,7 +19,7 @@ public class LocationOreChangeSignal extends Signal {
         return loc;
     }
 
-    public int getOre() {
+    public double getOre() {
         return ore;
     }
 }

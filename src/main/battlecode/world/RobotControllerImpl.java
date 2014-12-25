@@ -513,12 +513,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         gameWorld.changeSupplyLevel(robot.getLocation(), amount);
     }
 
-    public void transferSupplies(int amount, Direction dir) throws GameActionException {
+    public void transferSupplies(int amount, MapLocation loc) throws GameActionException {
         if (robot.getSupplyLevel() < amount) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Not enough supply to drop");
         }
-        MapLocation target = robot.getLocation().add(dir);
-        InternalObject obj = gameWorld.getObject(target);
+        if (loc.distanceSquaredTo(getLocation()) > GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Can't transfer supply that much distance.");
+        }
+        InternalObject obj = gameWorld.getObject(loc);
         if (obj == null) {
             throw new GameActionException(CANT_DO_THAT_BRO, "No one to receive supply from transfer in that direction.");
         }
@@ -561,7 +563,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         robot.activateMovement(new MineSignal(loc, getTeam(), getType()), 1, 1);
     }
 
-    public int senseOre(MapLocation loc) throws GameActionException {
+    public double senseOre(MapLocation loc) throws GameActionException {
         return gameWorld.senseOre(getTeam(), loc);
     }   
 

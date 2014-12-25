@@ -92,7 +92,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private Map<Team, InternalRobot> baseHQs = new EnumMap<Team, InternalRobot>(Team.class);
     private Map<MapLocation, Team> mineLocations = new HashMap<MapLocation, Team>();
     private Map<MapLocation, Integer> droppedSupplies = new HashMap<MapLocation, Integer>();
-    private Map<MapLocation, Integer> oreMined = new HashMap<MapLocation, Integer>();
+    private Map<MapLocation, Double> oreMined = new HashMap<MapLocation, Double>();
     private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<Team, GameMap.MapMemory>(Team.class);
     private Map<Team, Set<MapLocation>> knownMineLocations = new EnumMap<Team, Set<MapLocation>>(Team.class);
     private Map<Team, Map<Upgrade, Integer>> research = new EnumMap<Team, Map<Upgrade, Integer>>(Team.class);
@@ -271,8 +271,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         addSignal(new LocationSupplyChangeSignal(loc, cur));
     }
 
-    public void mineOre(MapLocation loc, int amount) {
-        int cur = 0;
+    public void mineOre(MapLocation loc, double amount) {
+        double cur = 0;
         if (oreMined.containsKey(loc)) {
             cur = oreMined.get(loc);
         }
@@ -280,16 +280,16 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         addSignal(new LocationOreChangeSignal(loc, cur + amount));
     }
 
-    public int getOre(MapLocation loc) {
-        int mined = 0;
+    public double getOre(MapLocation loc) {
+        double mined = 0.0;
         if (oreMined.containsKey(loc)) {
             mined = oreMined.get(loc);
         }
         return gameMap.getInitialOre(loc) - mined;
     }
 
-    public int senseOre(Team team, MapLocation loc) {
-        int res = mapMemory.get(team).recallOreMined(loc);
+    public double senseOre(Team team, MapLocation loc) {
+        double res = mapMemory.get(team).recallOreMined(loc);
         if (res < 0) {
             return res;
         } else {
@@ -946,6 +946,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
                 ((InternalCommander)target).giveXP(xpYield);
             }
+
+            // drop supplies
+            changeSupplyLevel(loc, (int) r.getSupplyLevel());
         }
     }
 
@@ -1069,8 +1072,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public void visitMineSignal(MineSignal s) {
     	MapLocation loc = s.getMineLoc();
         // TODO: calculate ore change amount based on unit type
-        int baseOre = getOre(loc);
-        int ore = 0;
+        double baseOre = getOre(loc);
+        double ore = 0;
         if (baseOre > 0) {
             if (s.getMinerType() == RobotType.BEAVER) {
                 ore = Math.max(Math.min(GameConstants.BEAVER_MINE_MAX, baseOre / GameConstants.BEAVER_MINE_RATE), GameConstants.MINIMUM_MINE_AMOUNT);
