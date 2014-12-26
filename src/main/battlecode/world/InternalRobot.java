@@ -1,5 +1,6 @@
 package battlecode.world;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,9 +19,12 @@ import battlecode.server.Config;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
+import battlecode.world.signal.DropSupplySignal;
+import battlecode.world.signal.PickUpSupplySignal;
 import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.SelfDestructSignal;
 import battlecode.world.signal.SpawnSignal;
+import battlecode.world.signal.TransferSupplySignal;
 
 public class InternalRobot extends InternalObject implements Robot, GenericRobot {
 
@@ -45,7 +49,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private boolean broadcasted = false;
     
     protected volatile boolean regen;
-    private boolean upkeepPaid;
+    int currentBytecodeLimit;
     
     private int researchRounds;
     private Upgrade researchUpgrade;
@@ -55,6 +59,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private MapLocation defusingLocation;
     private int capturingRounds;
     private RobotType capturingType;
+
+    private ArrayList<Signal> supplyActions;
 
     private Signal movementSignal;
     private Signal attackSignal;
@@ -70,8 +76,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     private double timeUntilMovement;
     private double timeUntilAttack;
-    private double loadingDelay;
-    private double cooldownDelay;
 
     private int missileCount = 0;
     private int hatCount = 0;
@@ -101,11 +105,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         capturingRounds = 0;
         capturingType = null;;
 
+        supplyActions = new ArrayList<Signal>();
+
         roundsSinceLastDamage = 0;
         roundsSinceLastSpawn = Integer.MAX_VALUE / 2;
         roundsAlive = 0;
 
-//        incomingMessageQueue = new LinkedList<Message>();
+        currentBytecodeLimit = type.bytecodeLimit;
 
         controlBits = 0;
 
@@ -113,12 +119,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         
         timeUntilMovement = 0.0;
         timeUntilAttack = 0.0;
-        loadingDelay = 0.0;
-        cooldownDelay = 0.0;
 
         missileCount = 0;
-
-        
     }
 
     public RobotInfo getRobotInfo() {
@@ -138,18 +140,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public int getResearchRounds() {
     	return researchRounds;
     }
-    
-//    public void scanForMines() {
-//    	MapLocation base = getLocation();
-//    	Team t = getTeam().opponent();
-//    	for (int dx=-1; dx<=1; dx++) {
-//    		for (int dy=-1; dy<=1; dy++) {
-//    			MapLocation loc = base.add(dx, dy);
-//    			if(myGameWorld.getMine(loc) == t) myGameWorld.addKnownMineLocation(getTeam(), loc);
-//    		}
-//    	}
-//    	addAction(new ScanSignal(this));
-//    }
 
     public void decrementMissileCount() {
         missileCount--;
@@ -180,54 +170,42 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void addCooldownDelay(double delay) {
-        cooldownDelay += delay;
+        timeUntilMovement = Math.max(timeUntilMovement, delay);
     }
 
     public void addLoadingDelay(double delay) {
-        loadingDelay += delay;
+        timeUntilAttack = Math.max(timeUntilAttack, delay);
     }
 
     public void decrementDelays() {
-        timeUntilAttack--;
-        timeUntilMovement--;
-        loadingDelay--;
-        cooldownDelay--;
+        if (timeUntilAttack >= 1 || timeUntilMovement >= 1) {
+            // this means we need to pay upkeep
+            if (getSupplyLevel() >= type.supplyUpkeep) {
+                // can afford! all good
+                decreaseSupplyLevel(type.supplyUpkeep);
+                timeUntilAttack--;
+                timeUntilMovement--;
+            } else {
+                // cannot afford, so we slow down the decrease
+                timeUntilAttack -= 0.5;
+                timeUntilMovement -= 0.5;
+            }
+        }
+
         if (timeUntilAttack < 0.0) {
             timeUntilAttack = 0.0;
         }
         if (timeUntilMovement < 0.0) {
             timeUntilMovement = 0.0;
         }
-        if (loadingDelay < 0.0) {
-            loadingDelay = 0.0;
-        }
-        if (cooldownDelay < 0.0) {
-            cooldownDelay = 0.0;
-        }
     }
 
     public double getTimeUntilMovement() {
-        return Math.max(timeUntilMovement, loadingDelay);
-    }
-
-    public double getTimeUntilAttack() {
-        return Math.max(timeUntilAttack, cooldownDelay);
-    }
-
-    public double getAttackDelay() {
-        return timeUntilAttack;
-    }
-
-    public double getMovementDelay() {
         return timeUntilMovement;
     }
 
-    public double getLoadingDelay() {
-        return loadingDelay;
-    }
-
-    public double getCooldownDelay() {
-        return cooldownDelay;
+    public double getTimeUntilAttack() {
+        return timeUntilAttack;
     }
     
     public Upgrade getResearchingUpgrade() {
@@ -258,19 +236,16 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void processBeginningOfTurn() {
-        decrementDelays();
+        decrementDelays(); // expends supply to decrement delays
     	
         if (type == RobotType.COMMANDER && ((InternalCommander)this).hasSkill(CommanderSkillType.REGENERATION)) {
            this.changeEnergonLevel(1); 
         }
 
-        if (canExecuteCode() && type.supplyUpkeep > 0) {
-            upkeepPaid = mySupplyLevel > (Math.max(type.bytecodeLimit - 2000, 0) / 1000.0);
-            if (upkeepPaid) {
-                decreaseSupplyLevel(Math.max(type.bytecodeLimit - 2000, 0) / 1000.0);
-            }
-        } else {
-            upkeepPaid = true;
+        this.currentBytecodeLimit = type.bytecodeLimit;
+        if (type.supplyUpkeep > 0) {
+            // decide how many bytecodes we'll be allowed
+            this.currentBytecodeLimit = Math.max(type.bytecodeLimit / 2, Math.min(type.bytecodeLimit, GameConstants.FREE_BYTECODES + (int) (mySupplyLevel * GameConstants.BYTECODES_PER_SUPPLY)));
         }
     }
 
@@ -283,18 +258,23 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         
     	broadcastMap = new HashMap<Integer, Integer>();
         broadcasted = false;
+
+        // charge supply for bytecodes
+        if (type.supplyUpkeep > 0) {
+            double supplyNeeded = Math.max(getBytecodesUsed() - GameConstants.FREE_BYTECODES, 0) / (double) GameConstants.BYTECODES_PER_SUPPLY;
+            decreaseSupplyLevel(supplyNeeded);
+        }
+
+        // supply actions
+        for (Signal s : supplyActions) {
+            myGameWorld.visitSignal(s);
+        }
+        supplyActions.clear();
        
         if (type != RobotType.HQ) { 
             roundsSinceLastDamage++;
         } else {
             roundsSinceLastSpawn++;
-        }
-
-        // refund supply
-        if (upkeepPaid && type.supplyUpkeep > 0) {
-            double supplyPaid = Math.max(type.bytecodeLimit - 2000, 0) / 1000.0;
-            double supplyNeeded = Math.max(getBytecodesUsed() - 2000, 0) / 1000.0;
-            increaseSupplyLevel(supplyPaid - supplyNeeded);
         }
 
         if (type != RobotType.HQ && type != RobotType.SUPPLYDEPOT) {
@@ -377,12 +357,27 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return 0;
     }
 
+    public void dropSupply(int amount) {
+        supplyActions.add(new DropSupplySignal(this, amount));
+    }
+
+    public void pickUpSupply(int amount) {
+        supplyActions.add(new PickUpSupplySignal(this, amount));
+    }
+
+    public void transferSupply(int amount, InternalRobot target) {
+        supplyActions.add(new TransferSupplySignal(this, target, amount));
+    }
+
     public double getSupplyLevel() {
         return mySupplyLevel;
     }
 
     public void decreaseSupplyLevel(double dec) {
         mySupplyLevel -= dec;
+        if (mySupplyLevel < 0) {
+            mySupplyLevel = 0;
+        }
     }
 
     public void increaseSupplyLevel(double inc) {
@@ -392,12 +387,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public Direction getDirection() {
         return myDirection;
     }
-
-//    there is no regen, healing by medbay is immediate
-//    public void setRegen() {
-//        if (type != RobotType.TOWER || !myGameWorld.timeLimitReached())
-//            regen = true;
-//    }
 
     public boolean getRegen() {
         return regen;
@@ -600,15 +589,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     	defusingRounds = delay;
     	defusingLocation = target;
     }
-   
-    /* 
-    public void activateCapturing(CaptureSignal s, int delay) {
-    	myGameWorld.visitSignal(s);
-    	capturingRounds = delay;
-        addActionDelay(delay);
-    	capturingType = s.getType();
-    }
-    */
 
     public int getMiningRounds() {
     	return miningRounds;
@@ -641,25 +621,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
         (new DeathSignal(this)).accept(myGameWorld);
     }
-
-//    public void enqueueIncomingMessage(Message msg) {
-//        incomingMessageQueue.add(msg);
-//    }
-//
-//    public Message dequeueIncomingMessage() {
-//        if (incomingMessageQueue.size() > 0) {
-//            return incomingMessageQueue.remove(0);
-//        } else {
-//            return null;
-//        }
-//        // ~ return incomingMessageQueue.poll();
-//    }
-//
-//    public Message[] dequeueIncomingMessages() {
-//        Message[] result = incomingMessageQueue.toArray(new Message[incomingMessageQueue.size()]);
-//        incomingMessageQueue.clear();
-//        return result;
-//    }
     
     public int getCapturingRounds() {
     	return capturingRounds;
@@ -686,7 +647,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public int getBytecodeLimit() {
-        return canExecuteCode() ? (upkeepPaid ? type.bytecodeLimit : type.bytecodeLimit / 2) : 0;
+        return canExecuteCode() ? this.currentBytecodeLimit : 0;
     }
 
     public boolean hasBeenAttacked() {

@@ -46,6 +46,12 @@ public interface GameConstants {
     /** The bytecode penalty that is imposed each time an exception is thrown */
     public static final int EXCEPTION_BYTECODE_PENALTY = 500;
 
+    /** Number of bytecodes per turn that don't cost supply. */
+    public static final int FREE_BYTECODES = 2000;
+
+    /** Bytecodes executed per unit of supply. */
+    public static final int BYTECODES_PER_SUPPLY = 1000;
+
     /** The amount of ore a team starts the game with. */
     public static final int ORE_INITIAL_AMOUNT = 500;
 
@@ -88,6 +94,12 @@ public interface GameConstants {
 
     /** The fraction of ore that a MINER gets from a square. */
     public static final int MINER_MINE_RATE = 4; // means 1/4
+
+    /** The movement delay gained from mining. */
+    public static final int MINING_MOVEMENT_DELAY = 2;
+
+    /** The loading delay from mining. */
+    public static final int MINING_LOADING_DELAY = 1;
 
     // *********************************
     // ****** UNIT PROPERTIES **********

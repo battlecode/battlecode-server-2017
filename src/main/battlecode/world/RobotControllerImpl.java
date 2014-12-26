@@ -340,15 +340,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertCanMove(d);
         double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()));
 
-        int factor = 1;
-        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
-            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
-        } else {
-            factor = 2;
-        }
-
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-                true, ((int) delay) * factor), robot.getLoadingDelayForType(), delay * factor);
+                true, (int) delay), robot.getLoadingDelayForType(), delay);
     }
 
     // ***********************************
@@ -380,16 +373,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertCanAttack(loc);
         if (robot.type == RobotType.BASHER) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Bashers can only attack using the bash() method.");
+        } else if (robot.type == RobotType.MISSILE) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Missiles can only attack using the explode() method.");
+        } else if (robot.type.isBuilding && robot.type != RobotType.HQ && robot.type != RobotType.TOWER) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Buildings can't attack.");
         }
 
-        int factor = 1;
-        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
-            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
-        } else {
-            factor = 2;
-        }
-
-        robot.activateAttack(new AttackSignal(robot, loc), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
+        robot.activateAttack(new AttackSignal(robot, loc), robot.calculateAttackActionDelay(robot.type), robot.getCooldownDelayForType());
     }
 
     public void bash() throws GameActionException {
@@ -398,14 +388,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Only Bashers can attack using the attack() method.");
         }
 
-        int factor = 1;
-        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
-            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
-        } else {
-            factor = 2;
-        }
-
-        robot.activateAttack(new AttackSignal(robot, getLocation()), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
+        robot.activateAttack(new AttackSignal(robot, getLocation()), robot.calculateAttackActionDelay(robot.type), robot.getCooldownDelayForType());
     }
 
     public void explode() throws GameActionException {
@@ -439,12 +422,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (robot.type != RobotType.COMMANDER) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Only Commanders can cast Flash.");
         }
-        int factor = 1;
-        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
-            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
-        } else {
-            factor = 2;
-        }
 
         //is this kosher? i hope so
         
@@ -453,7 +430,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot teleport to " + loc.toString());
         }
         else {
-            robot.activateMovement(new CastSignal(robot, loc), robot.getLoadingDelayForType(), GameConstants.FLASH_MOVEMENT_DELAY * factor);
+            robot.activateMovement(new CastSignal(robot, loc), robot.getLoadingDelayForType(), GameConstants.FLASH_MOVEMENT_DELAY);
         }
     }
 
@@ -503,43 +480,22 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void dropSupplies(int amount) throws GameActionException {
-        double amt_to_drop = (double) amount;
-        if (robot.getSupplyLevel() < amt_to_drop) {
-            amt_to_drop = robot.getSupplyLevel();
-        }
-
-        // some signal here
-        robot.decreaseSupplyLevel(amt_to_drop);
-        gameWorld.changeSupplyLevel(robot.getLocation(), amt_to_drop);
-    }
-
-    public void transferSupplies(int amount, MapLocation loc) throws GameActionException {
-        double amt_to_transfer = (double) amount;
-        if (robot.getSupplyLevel() < amt_to_transfer) {
-            amt_to_transfer = robot.getSupplyLevel();
-        }
-        if (loc.distanceSquaredTo(getLocation()) > GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Can't transfer supply that much distance.");
-        }
-        InternalObject obj = gameWorld.getObject(loc);
-        if (obj == null) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "No one to receive supply from transfer in that direction.");
-        }
-        robot.decreaseSupplyLevel(amt_to_transfer);
-        InternalRobot other = (InternalRobot) obj;
-        other.increaseSupplyLevel(amt_to_transfer);
+        robot.dropSupply(amount);
     }
 
     public void pickUpSupplies(int amount) throws GameActionException {
-        double amount_to_pickup = (double) amount;
-        if (gameWorld.getSupplyLevel(robot.getLocation()) < amount_to_pickup) {
-            amount_to_pickup = gameWorld.getSupplyLevel(robot.getLocation());
+        robot.pickUpSupply(amount);
+    }
+
+    public void transferSupplies(int amount, MapLocation loc) throws GameActionException {
+        if (loc.distanceSquaredTo(getLocation()) > GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Can't transfer supply that much distance.");
         }
-
-        // some signal here
-
-        robot.increaseSupplyLevel(amount_to_pickup);
-        gameWorld.changeSupplyLevel(robot.getLocation(), -amount_to_pickup);
+        InternalRobot obj = (InternalRobot) gameWorld.getObject(loc);
+        if (obj == null) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "No one to receive supply from transfer in that direction.");
+        }
+        robot.transferSupply(amount, obj);
     }
 
     public void transferSuppliesToHQ() throws GameActionException {
@@ -547,9 +503,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Only supply depot can transfer supplies to hq");
         }
 
-        double amount = robot.getSupplyLevel();
-        robot.decreaseSupplyLevel(amount);
-        gameWorld.getBaseHQ(getTeam()).increaseSupplyLevel(amount);
+        robot.transferSupply(Integer.MAX_VALUE, gameWorld.getBaseHQ(robot.getTeam()));
     }
 
     // ***********************************
@@ -562,15 +516,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
         assertNotMoving();
         MapLocation loc = getLocation();
-        
-		int factor=1;
-		if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
-            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
-        } else {
-            factor = 2;
-        }
 		
-		robot.activateMovement(new MineSignal(loc, getTeam(), getType()), 1*factor, 2*factor);
+		robot.activateMovement(new MineSignal(loc, getTeam(), getType()), GameConstants.MINING_LOADING_DELAY, GameConstants.MINING_MOVEMENT_DELAY);
     }
 
     public double senseOre(MapLocation loc) throws GameActionException {
@@ -643,27 +590,20 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
 
         assertNotMoving();
-        double cost = type.oreCost;
 
+        double cost = type.oreCost;
         if (type == RobotType.COMMANDER) {
             cost *= (1 << Math.min(gameWorld.getCommandersSpawned(robot.getTeam()), 8));
         }
-        
         assertHaveResource(cost);
-        gameWorld.adjustResources(getTeam(), -cost);
 
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(loc, type))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
         robot.activateMovement(
-                new SpawnSignal(loc, type, robot.getTeam(), robot, 0), robot.type == RobotType.HQ ? 0 : type.buildTurns, type.buildTurns 
-                );
+                new SpawnSignal(loc, type, robot.getTeam(), robot, 0), 0, type.buildTurns);
         robot.resetSpawnCounter();
-
-        if (type == RobotType.COMMANDER) {
-            gameWorld.incrementCommandersSpawned(robot.getTeam());
-        }
     }
 
     public boolean canBuildRobotType(RobotType type) {
@@ -703,10 +643,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
 
         assertNotMoving();
+
         double cost = type.oreCost;
         
         assertHaveResource(cost);
-        gameWorld.adjustResources(getTeam(), -cost);
 
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(loc, type))
@@ -715,11 +655,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         int delay = type.buildTurns;
 
         robot.activateMovement(
-                new SpawnSignal(loc, type, robot.getTeam(), robot, delay), delay, delay
-                );
+                new SpawnSignal(loc, type, robot.getTeam(), robot, delay), delay, delay);
         robot.resetSpawnCounter();
     }
-    
 
     //***********************************
     //****** UPGRADE METHODS ************
@@ -736,6 +674,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void researchUpgrade(Upgrade upgrade) throws GameActionException {
+        if (robot.type != RobotType.HQ) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only HQ can research.");
+        }
         if (gameWorld.hasUpgrade(getTeam(), upgrade))
             throw new GameActionException(CANT_DO_THAT_BRO, "You already have that upgrade. ("+upgrade+")");
         if (checkResearchProgress(upgrade) > 0) {
@@ -765,13 +706,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public void resign() {
-        for (InternalObject obj : gameWorld.getAllGameObjects())
-            if ((obj instanceof InternalRobot) && obj.getTeam() == robot.getTeam())
-                gameWorld.notifyDied((InternalRobot) obj);
-        gameWorld.removeDead();
-    }
-
-    public void win() {
         for (InternalObject obj : gameWorld.getAllGameObjects())
             if ((obj instanceof InternalRobot) && obj.getTeam() == robot.getTeam())
                 gameWorld.notifyDied((InternalRobot) obj);

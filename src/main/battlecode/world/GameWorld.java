@@ -38,6 +38,7 @@ import battlecode.world.signal.BytecodesUsedSignal;
 import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.ControlBitsSignal;
 import battlecode.world.signal.DeathSignal;
+import battlecode.world.signal.DropSupplySignal;
 import battlecode.world.signal.TeamOreSignal;
 import battlecode.world.signal.IndicatorDotSignal;
 import battlecode.world.signal.IndicatorLineSignal;
@@ -48,11 +49,13 @@ import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.MovementOverrideSignal;
+import battlecode.world.signal.PickUpSupplySignal;
 import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.ResearchChangeSignal;
 import battlecode.world.signal.RobotInfoSignal;
 import battlecode.world.signal.SelfDestructSignal;
 import battlecode.world.signal.SpawnSignal;
+import battlecode.world.signal.TransferSupplySignal;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -856,6 +859,34 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         addSignal(s);
     }
 
+    public void visitDropSupplySignal(DropSupplySignal s) {
+        InternalRobot robot = (InternalRobot) getObjectByID(s.getID());
+        double amount = Math.min(s.getAmount(), robot.getSupplyLevel());
+
+        robot.decreaseSupplyLevel(amount);
+        changeSupplyLevel(robot.getLocation(), amount);
+        //addSignal(s); // client doesn't need this
+    }
+
+    public void visitPickUpSupplySignal(PickUpSupplySignal s) {
+        InternalRobot robot = (InternalRobot) getObjectByID(s.getID());
+        double amount = Math.min(s.getAmount(), getSupplyLevel(robot.getLocation()));
+
+        robot.increaseSupplyLevel(amount);
+        changeSupplyLevel(robot.getLocation(), -amount);
+        //addSignal(s); // client doesn't need this
+    }
+
+    public void visitTransferSupplySignal(TransferSupplySignal s) {
+        InternalRobot robotFrom = (InternalRobot) getObjectByID(s.fromID);
+        InternalRobot robotTo = (InternalRobot) getObjectByID(s.toID);
+        double amount = Math.min(s.getAmount(), robotFrom.getSupplyLevel());
+
+        robotFrom.decreaseSupplyLevel(amount);
+        robotTo.increaseSupplyLevel(amount);
+        addSignal(s);
+    }
+
     @SuppressWarnings("unchecked")
     public void visitSpawnSignal(SpawnSignal s) {
         InternalRobot parent;
@@ -868,9 +899,16 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             parent = (InternalRobot) getObjectByID(parentID);
             loc = s.getLoc();
         }
+
+        double cost = (int) s.getType().oreCost;        
+        if (s.getType() == RobotType.COMMANDER) {
+            cost *= (1 << Math.min(getCommandersSpawned(s.getTeam()), 8));
+        }
+        adjustResources(s.getTeam(), -cost);
         
         //note: this also adds the signal
         InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent, s.getDelay());
+
         if (s.getType() == RobotType.COMMANDER) {
             commanders.put(robot.getTeam(), robot);
         }
@@ -880,6 +918,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             currentCount = 0;
         }
         totalRobotTypeCount.get(robot.getTeam()).put(robot.type, currentCount + 1);
+
+        if (robot.type == RobotType.COMMANDER) {
+            incrementCommandersSpawned(robot.getTeam());
+        }
     }
     
     public void visitResearchSignal(ResearchSignal s) {
