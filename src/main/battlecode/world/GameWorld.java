@@ -118,11 +118,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         totalRobotTypeCount.put(Team.A, new EnumMap<RobotType, Integer>(RobotType.class));
         totalRobotTypeCount.put(Team.B, new EnumMap<RobotType, Integer>(RobotType.class));
 
-        // TODO: these lines don't go here, but have to because parts dealing with robotTypeCount are in the wrong places
-        robotTypeCount.get(Team.A).put(RobotType.HQ, 1);
-        robotTypeCount.get(Team.B).put(RobotType.HQ, 1);
-        robotTypeCount.get(Team.A).put(RobotType.TOWER, 6);
-        robotTypeCount.get(Team.B).put(RobotType.TOWER, 6);
         totalRobotTypeCount.get(Team.A).put(RobotType.HQ, 1);
         totalRobotTypeCount.get(Team.B).put(RobotType.HQ, 1);
         totalRobotTypeCount.get(Team.A).put(RobotType.TOWER, 6);
@@ -332,12 +327,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         // free ore
         teamResources[Team.A.ordinal()] += GameConstants.HQ_ORE_INCOME;
         teamResources[Team.B.ordinal()] += GameConstants.HQ_ORE_INCOME;
-
-        // robot info signal
-        for (int i = 0; i < gameObjects.length; i++) {
-            InternalRobot ir = (InternalRobot) gameObjects[i];
-            addSignal(new RobotInfoSignal(ir.getID(), ir.getRobotInfo()));
-        }
         
         addSignal(new TeamOreSignal(teamResources));
 		addSignal(new ResearchChangeSignal(research));
@@ -348,7 +337,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             // tiebreak by number of towers
             // tiebreak by hq energon level
             if (!(setWinnerIfNonzero(getRobotTypeCount(Team.A, RobotType.TOWER) - getRobotTypeCount(Team.B, RobotType.TOWER), DominationFactor.BARELY_BEAT)) &&
-                !(setWinnerIfNonzero(HQA.getEnergonLevel() - HQB.getEnergonLevel(), DominationFactor.BARELY_BEAT)))
+                !(setWinnerIfNonzero(HQA.getHealthLevel() - HQB.getHealthLevel(), DominationFactor.BARELY_BEAT)))
             {
                 // tiebreak by total tower health
                 // tiebreak by number of handwash stations
@@ -360,9 +349,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                         InternalRobot ir = (InternalRobot) obj;
                         if (ir.type == RobotType.TOWER) {
                             if (ir.getTeam() == Team.A) {
-                                towerDiff += ir.getEnergonLevel();
+                                towerDiff += ir.getHealthLevel();
                             } else {
-                                towerDiff -= ir.getEnergonLevel();
+                                towerDiff -= ir.getHealthLevel();
                             }
                         }
                     }
@@ -512,7 +501,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             else
             	if (o instanceof InternalRobot) {
             		InternalRobot ir = (InternalRobot) o;
-            		if (ir.type == RobotType.SOLDIER && ir.getCapturingRounds() == -1)
+            		if (ir.type == RobotType.SOLDIER && ir.getBuildTurns() == -1)
             			; // don't do anything
             		else
             			System.out.println("Couldn't remove " + o + " from the game");
@@ -556,23 +545,16 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public Signal[] getAllSignals(boolean includeBytecodesUsedSignal) {
-        ArrayList<InternalRobot> energonChangedRobots = new ArrayList<InternalRobot>();
-        ArrayList<InternalRobot> shieldChangedRobots = new ArrayList<InternalRobot>();
         ArrayList<InternalRobot> allRobots = null;
         if (includeBytecodesUsedSignal)
             allRobots = new ArrayList<InternalRobot>();
         for (InternalObject obj : gameObjectsByID.values()) {
             if (!(obj instanceof InternalRobot))
                 continue;
-            InternalRobot r = (InternalRobot) obj;
+            InternalRobot ir = (InternalRobot) obj;
+            signals.add(new RobotInfoSignal(ir.getID(), ir.getRobotInfo()));
             if (includeBytecodesUsedSignal)
-                allRobots.add(r);
-            if (r.clearEnergonChanged()) {
-                energonChangedRobots.add(r);
-            }
-            if (r.clearShieldChanged()) {
-            	shieldChangedRobots.add(r);
-            }
+                allRobots.add(ir);
         }
 
         if (includeBytecodesUsedSignal) {
@@ -971,11 +953,15 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     // *****************************
     private static MapLocation origin = new MapLocation(0, 0);
 
-    protected static boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
+    protected boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
         MapLocation myLoc = ir.getLocation();
         int d = myLoc.distanceSquaredTo(loc);
-        int attackRadiusSquared = ir.getAttackRadiusSquared();
-        return d <= attackRadiusSquared;
+
+        int radius = ir.type.attackRadiusSquared;
+        if (ir.type == RobotType.HQ && getRobotTypeCount(ir.getTeam(), RobotType.TOWER) >= 2) {
+            radius = GameConstants.ATTACK_RADIUS_SQUARED_BUFFED_HQ;
+        }
+        return d <= radius;
     }
 
     // TODO: make a faster implementation of this

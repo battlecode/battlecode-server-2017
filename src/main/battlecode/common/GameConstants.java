@@ -120,6 +120,8 @@ public interface GameConstants {
 
     public static final int XP_RANGE = 24;
 
+    public static final double REGEN_RATE = 1.0;
+
     public static final int XP_REQUIRED_LEADERSHIP = 1000;
     public static final int XP_REQUIRED_FLASH = 2000;
 

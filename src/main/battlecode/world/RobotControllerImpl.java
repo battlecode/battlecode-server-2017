@@ -123,7 +123,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public double getHealth() {
-        return robot.getEnergonLevel();
+        return robot.getHealthLevel();
     }
 
     public double getSupplyLevel() {
@@ -139,11 +139,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public RobotType getBuildingTypeBeingBuilt() {
-        return robot.getCapturingType();
+        return robot.getBuildingType();
     }
 
     public int getBuildingRoundsRemaining() {
-        return robot.getCapturingRounds();
+        return robot.getBuildTurns();
     }
 
     public int getMissileCount() {
@@ -364,7 +364,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public boolean canAttackSquare(MapLocation loc) {
         assertNotNull(loc);
-        return GameWorld.canAttackSquare(robot, loc);
+        return gameWorld.canAttackSquare(robot, loc);
     }
 
     public void attackSquare(MapLocation loc) throws GameActionException {
@@ -379,7 +379,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Buildings can't attack.");
         }
 
-        robot.activateAttack(new AttackSignal(robot, loc), robot.calculateAttackActionDelay(robot.type), robot.getCooldownDelayForType());
+        robot.activateAttack(new AttackSignal(robot, loc), robot.getAttackDelayForType(), robot.getCooldownDelayForType());
     }
 
     public void bash() throws GameActionException {
@@ -388,7 +388,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Only Bashers can attack using the attack() method.");
         }
 
-        robot.activateAttack(new AttackSignal(robot, getLocation()), robot.calculateAttackActionDelay(robot.type), robot.getCooldownDelayForType());
+        robot.activateAttack(new AttackSignal(robot, getLocation()), robot.getAttackDelayForType(), robot.getCooldownDelayForType());
     }
 
     public void explode() throws GameActionException {
@@ -603,7 +603,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
         robot.activateMovement(
                 new SpawnSignal(loc, type, robot.getTeam(), robot, 0), 0, type.buildTurns);
-        robot.resetSpawnCounter();
     }
 
     public boolean canBuildRobotType(RobotType type) {
@@ -656,7 +655,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
         robot.activateMovement(
                 new SpawnSignal(loc, type, robot.getTeam(), robot, delay), delay, delay);
-        robot.resetSpawnCounter();
     }
 
     //***********************************
