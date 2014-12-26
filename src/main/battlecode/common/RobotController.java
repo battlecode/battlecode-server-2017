@@ -431,13 +431,22 @@ public interface RobotController {
     public void launchMissile(Direction dir) throws GameActionException;
 
     /**
-     * Returns whether the unit can spawn a robot in the given direction of the given type.
+     * Returns whether the unit can spawn a robot of the given type.
      * Checks dependencies and ore costs. Does not check if a robot is active.
      *
-     * @param dir the direction to spawn in.
      * @param type the robot type to spawn.
+     * @return whether it is possible to spawn a robot of the given type.
      */
-    public boolean canSpawn(Direction dir, RobotType type);
+    public boolean canSpawnRobotType(RobotType type);
+
+    /**
+     * Returns whether the given direction is a valid spawning direction.
+     * This is similar to canMove. It does not check whether the current robot is the right building, or if there is sufficient ore to spawn. It merely checks whether the location in the given direction is available for spawning.
+     *
+     * @param dir the direction to spawn in.
+     * @return whether the spawn direction is valid.
+     */
+    public boolean canSpawnInDirection(Direction dir);
 
     /**
      * Queues a spawn action to be performed at the end of this robot's turn.
@@ -452,13 +461,22 @@ public interface RobotController {
     public void spawn(Direction dir, RobotType type) throws GameActionException;
 
     /**
-     * Returns whether the unit can build a building in the given direction of the given type.
-     * Checks dependencies and ore costs. Does not check if a robot is active.
+     * Returns whether the unit can build a building of the given type.
+     * Checks dependencies and ore costs. Does not check if a robot is active, or if a robot is capable of building.
+     *
+     * @param type the robot type to spawn.
+     * @return whether it is possible to build a building of the given type.
+     */
+    public boolean canBuildRobotType(RobotType type);
+
+    /**
+     * Returns whether the given direction is a valid building direction.
+     * This is similar to canMove. It does not check whether the current robot is able to build, or if there is sufficient ore to build. It merely checks whether the location in the given direction is available for building.
      *
      * @param dir the direction to build in.
-     * @param type the robot type to build.
+     * @return whether the build direction is valid.
      */
-    public boolean canBuild(Direction dir, RobotType type);
+    public boolean canBuildInDirection(Direction dir);
    
     /**
      * Builds a building in the given direction. The building will initially be inactive for a number of turns (during which this robot cannot move or attack). After several turns, the building will become active.

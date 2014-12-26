@@ -610,19 +610,23 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
                 new SpawnSignal(loc, RobotType.MISSILE, robot.getTeam(), robot, 0), 0, 0);
     }
 
-    public boolean canSpawn(Direction dir, RobotType type) {
+    public boolean canSpawnRobotType(RobotType type) {
         if (!robot.type.isBuilding || type.spawnSource != robot.type || type == RobotType.COMMANDER && hasCommander()) {
             return false;
         }
-
-        MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(loc, type))
-            return false;
 
         double cost = type.oreCost;
         if (cost > gameWorld.resources(getTeam())) {
             return false;
         }
+
+        return true;
+    }
+
+    public boolean canSpawnInDirection(Direction dir) {
+        MapLocation loc = getLocation().add(dir);
+        if (!gameWorld.canMove(loc, robot.type))
+            return false;
 
         return true;
     }
@@ -641,9 +645,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertNotMoving();
         double cost = type.oreCost;
 
-	if (type == RobotType.COMMANDER) {
-	    cost *= (1 << Math.min(gameWorld.getCommandersSpawned(robot.getTeam()), 8));
-	}
+        if (type == RobotType.COMMANDER) {
+            cost *= (1 << Math.min(gameWorld.getCommandersSpawned(robot.getTeam()), 8));
+        }
         
         assertHaveResource(cost);
         gameWorld.adjustResources(getTeam(), -cost);
@@ -657,14 +661,12 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
                 );
         robot.resetSpawnCounter();
 
-	if (type == RobotType.COMMANDER) {
-	    gameWorld.incrementCommandersSpawned(robot.getTeam());
-	}
+        if (type == RobotType.COMMANDER) {
+            gameWorld.incrementCommandersSpawned(robot.getTeam());
+        }
     }
 
-    public boolean canBuild(Direction dir, RobotType type) {
-        if (robot.type != RobotType.BEAVER)
-            return false;
+    public boolean canBuildRobotType(RobotType type) {
         if (!type.isBuilding)
             return false;
 
@@ -672,14 +674,19 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (gameWorld.getRobotTypeCount(getTeam(), type.dependency) == 0) {
             return false;
         }
-        MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(loc, type))
-            return false;
 
         double cost = type.oreCost;
         if (cost > gameWorld.resources(getTeam())) {
             return false;
         }
+
+        return true;
+    }
+
+    public boolean canBuildInDirection(Direction dir) {
+        MapLocation loc = getLocation().add(dir);
+        if (!gameWorld.canMove(loc, robot.type))
+            return false;
 
         return true;
     }
