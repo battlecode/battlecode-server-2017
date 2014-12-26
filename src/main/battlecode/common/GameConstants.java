@@ -114,6 +114,9 @@ public interface GameConstants {
     /** The maximum number of missiles a launcher can have at a time. */
     public static final int MAX_MISSILE_COUNT = 8;
 
+    /** Bash radius of a basher. */
+    public static final int BASH_RADIUS_SQUARED = 2;
+
     // *********************************
     // ****** COMMANDER ***** **********
     // *********************************
