@@ -442,6 +442,50 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         throw new RobotDeathException();
     }
 
+    //***********************************
+    //****** COMMANDER METHODS **********
+    //***********************************
+    public boolean hasLearnedSkill(CommanderSkillType skill) throws GameActionException {
+        if (!hasCommander()) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Cannot call hasLearnedSkill without a Commander.");
+        }
+        return gameWorld.hasSkill(robot.getTeam(), skill);
+    }
+
+    public void castFlash(MapLocation loc) throws GameActionException {
+        assertNotNull(loc);
+
+        if (robot.type != RobotType.COMMANDER) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only Commanders can cast Flash.");
+        }
+        int factor = 1;
+        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
+            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
+        } else {
+            factor = 2;
+        }
+
+        //is this kosher? i hope so
+        
+        assertNotMoving();
+        if (!gameWorld.canMove(loc, robot.type)) {
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot teleport to " + loc.toString());
+        }
+        else {
+            robot.activateMovement(new CastSignal(robot, loc), robot.getLoadingDelayForType(), GameConstants.FLASH_MOVEMENT_DELAY * factor);
+        }
+    }
+
+    public int getFlashCooldown() throws GameActionException {
+        if (!hasCommander()) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Cannot call getFlashCooldown without a Commander.");
+        } 
+        if (!hasLearnedSkill(CommanderSkillType.FLASH)) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Cannot call getFlashCooldown without having learned Flash.");
+        }
+        return gameWorld.getSkillCooldown(robot.getTeam(), CommanderSkillType.FLASH);
+    }
+
     // ***********************************
     // ****** BROADCAST METHODS **********
     // ***********************************
@@ -699,48 +743,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return gameWorld.getUpgradeProgress(getTeam(), upgrade);
     }
    
-    //***********************************
-    //****** COMMANDER METHODS **********
-    //***********************************
-    public boolean hasLearnedSkill(CommanderSkillType skill) throws GameActionException {
-	if (!hasCommander()) {
-	    throw new GameActionException(CANT_DO_THAT_BRO, "Cannot call hasLearnedSkill without a Commander.");
-	}
-	return gameWorld.hasSkill(robot.getTeam(), skill);
-    }
-
-    public void castFlash(MapLocation loc) throws GameActionException {
-	assertNotNull(loc);
-
-	if (robot.type != RobotType.COMMANDER) {
-	    throw new GameActionException(CANT_DO_THAT_BRO, "Only Commanders can cast Flash.");
-	}
-        int factor = 1;
-        if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
-            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
-        } else {
-            factor = 2;
-        }
-
-	//is this kosher? i hope so
-	
-	assertNotMoving();
-	if (!gameWorld.canMove(loc, robot.type)) {
-	    throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot teleport to " + loc.toString());
-	}
-	else {
-	    robot.activateMovement(new CastSignal(robot, loc), robot.getLoadingDelayForType(), GameConstants.FLASH_MOVEMENT_DELAY * factor);
-	}
-    }
-    public int getFlashCooldown() throws GameActionException {
-	if (!hasCommander()) {
-	    throw new GameActionException(CANT_DO_THAT_BRO, "Cannot call getFlashCooldown without a Commander.");
-	} 
-	if (!hasLearnedSkill(CommanderSkillType.FLASH)) {
-	    throw new GameActionException(CANT_DO_THAT_BRO, "Cannot call getFlashCooldown without having learned Flash.");
-	}
-	return gameWorld.getSkillCooldown(robot.getTeam(), CommanderSkillType.FLASH);
-    }
     
     // ***********************************
     // ****** OTHER ACTION METHODS *******
