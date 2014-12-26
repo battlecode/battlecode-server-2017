@@ -534,15 +534,20 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "No missiles to launch");
         }
 
-        assertNotMoving();
+        if (robot.movedThisTurn()) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Launchers can't move and launch in the same turn.");
+        }
 
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(loc, RobotType.MISSILE))
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "That square is occupied.");
 
+        if (!robot.canLaunchMissileAtLocation(loc)) {
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Missile already launched in that direction.");
+        }
+
         robot.decrementMissileCount();
-        robot.activateMovement(
-                new SpawnSignal(loc, RobotType.MISSILE, robot.getTeam(), robot, 0), 0, 0);
+        robot.launchMissile(loc);
     }
 
     public boolean canSpawnRobotType(RobotType type) {

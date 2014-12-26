@@ -47,6 +47,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private int roundsAlive;
     
     private ArrayList<Signal> supplyActions;
+    private ArrayList<SpawnSignal> missileLaunchActions;
     private Signal movementSignal;
     private Signal attackSignal;
     private Signal castSignal;
@@ -85,6 +86,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         roundsAlive = 0;
     
         supplyActions = new ArrayList<Signal>();
+        missileLaunchActions = new ArrayList<SpawnSignal>();
         movementSignal = null;
         attackSignal = null;
         castSignal = null;
@@ -124,6 +126,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return canExecuteCode() ? this.currentBytecodeLimit : 0;
     }
 
+    public boolean movedThisTurn() {
+        return this.movementSignal != null;
+    }
+
     public boolean isActive() {
         if (type.isBuilding && type != RobotType.HQ && type != RobotType.TOWER && roundsAlive < buildDelay) {
             return false;
@@ -141,14 +147,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return 0;
     }
 
-    public void decrementMissileCount() {
-        missileCount--;
-    }
-
-    public int getMissileCount() {
-        return missileCount;
-    }
-
     public void setControlBits(long l) {
         controlBits = l;
     }
@@ -159,6 +157,31 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public boolean hasBeenAttacked() {
         return hasBeenAttacked;
+    }
+
+    // *********************************
+    // ****** MISSILE METHODS **********
+    // *********************************
+
+    public void decrementMissileCount() {
+        missileCount--;
+    }
+
+    public int getMissileCount() {
+        return missileCount;
+    }
+
+    public boolean canLaunchMissileAtLocation(MapLocation loc) {
+        for (SpawnSignal s : missileLaunchActions) {
+            if (s.getLoc().equals(loc)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void launchMissile(MapLocation loc) {
+        missileLaunchActions.add(new SpawnSignal(getLocation(), RobotType.MISSILE, getTeam(), this, 0));
     }
 
     // *********************************
@@ -446,6 +469,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @Override
     public void processEndOfTurn() {
         super.processEndOfTurn();
+
+        // resetting stuff
+        hasBeenAttacked = false;
         
         // broadcasts
         if (broadcasted) myGameWorld.visitSignal(new BroadcastSignal(this, broadcastMap));
@@ -516,6 +542,12 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             myGameWorld.visitSignal(movementSignal);
             movementSignal = null;
         }
+
+        // launch missiles
+        for (SpawnSignal s : missileLaunchActions) {
+            myGameWorld.visitSignal(s);
+        }
+        missileLaunchActions.clear();
 
         // perform research
         if (researchSignal != null) {
