@@ -46,6 +46,12 @@ public interface GameConstants {
     /** The bytecode penalty that is imposed each time an exception is thrown */
     public static final int EXCEPTION_BYTECODE_PENALTY = 500;
 
+    /** Number of bytecodes per turn that don't cost supply. */
+    public static final int FREE_BYTECODES = 2000;
+
+    /** Bytecodes executed per unit of supply. */
+    public static final int BYTECODES_PER_SUPPLY = 1000;
+
     /** The amount of ore a team starts the game with. */
     public static final int ORE_INITIAL_AMOUNT = 500;
 
@@ -53,7 +59,16 @@ public interface GameConstants {
     public static final int HAT_ORE_COST = 1000;
 
     /** The rate at which supply decays each turn. */
-    public static final double SUPPLY_DECAY = 0.01;
+    public static final double SUPPLY_DECAY = 0.00;
+
+    /** The maximum distance over which supplies can be transferred. */
+    public static final int SUPPLY_TRANSFER_RADIUS_SQUARED = 15;
+
+	/** The amount of supply a SUPPLYDEPOT generates each turn. */
+	public static final int DEPOT_SUPPLY_GEN = 100;
+	
+	/** The amount of supply a HQ generates each turn. */
+	public static final int HQ_SUPPLY_GEN = 200;
 
     // *********************************
     // ****** MINING *******************
@@ -65,11 +80,11 @@ public interface GameConstants {
     /** The minimum amount that is mined on a square with no ore. */
     public static final int MINIMUM_MINE_AMOUNT = 1;
 
-    /** The maximum amount of ore that a FURBY can mine. */
-    public static final int FURBY_MINE_MAX = 2;
+    /** The maximum amount of ore that a BEAVER can mine. */
+    public static final int BEAVER_MINE_MAX = 2;
 
-    /** The fraction of ore that a FURBY gets from a square. */
-    public static final int FURBY_MINE_RATE = 100; // means 1/100
+    /** The fraction of ore that a BEAVER gets from a square. */
+    public static final int BEAVER_MINE_RATE = 20; // means 1/20
 
     /** The maximum amount of ore that a MINER can mine. */
     public static final int MINER_MINE_MAX = 3;
@@ -78,7 +93,13 @@ public interface GameConstants {
     public static final int MINER_MINE_MAX_UPGRADED = 4;
 
     /** The fraction of ore that a MINER gets from a square. */
-    public static final int MINER_MINE_RATE = 30; // means 1/30
+    public static final int MINER_MINE_RATE = 4; // means 1/4
+
+    /** The movement delay gained from mining. */
+    public static final int MINING_MOVEMENT_DELAY = 2;
+
+    /** The loading delay from mining. */
+    public static final int MINING_LOADING_DELAY = 1;
 
     // *********************************
     // ****** UNIT PROPERTIES **********
@@ -101,6 +122,11 @@ public interface GameConstants {
     // *********************************
 
     public static final int XP_RANGE = 24;
+
+    public static final double REGEN_RATE = 1.0;
+
+    public static final int XP_REQUIRED_LEADERSHIP = 1000;
+    public static final int XP_REQUIRED_FLASH = 2000;
 
     public static final int BURST_DELAY = 3;
     public static final int BURST_RANGE = 35;

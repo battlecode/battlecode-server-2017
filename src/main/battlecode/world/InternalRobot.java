@@ -1,5 +1,6 @@
 package battlecode.world;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,67 +18,42 @@ import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.BroadcastSignal;
-import battlecode.world.signal.CaptureSignal;
 import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.RegenSignal;
+import battlecode.world.signal.DropSupplySignal;
+import battlecode.world.signal.PickUpSupplySignal;
 import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.SelfDestructSignal;
-import battlecode.world.signal.ShieldSignal;
 import battlecode.world.signal.SpawnSignal;
+import battlecode.world.signal.TransferSupplySignal;
 
 public class InternalRobot extends InternalObject implements Robot, GenericRobot {
 
-    protected volatile double myEnergonLevel;
-    protected volatile double myShieldLevel;
-    protected volatile double mySupplyLevel;
-    protected volatile Direction myDirection;
-    protected volatile boolean energonChanged = true;
-    protected volatile boolean shieldChanged = true;
-    protected volatile long controlBits;
-    // is this used ever?
-    protected volatile boolean hasBeenAttacked = false;
-    private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean("bc.engine.upkeep");
-    /**
-     * number of bytecodes used in the most recent round
-     */
-    private volatile int bytecodesUsed = 0;
-
     public final RobotType type;
 
-    private volatile HashMap<Integer, Integer> broadcastMap = new HashMap<Integer, Integer>();
-    private boolean broadcasted = false;
-    
-    protected volatile boolean regen;
-    private boolean upkeepPaid;
-    
-    private int researchRounds;
-    private Upgrade researchUpgrade;
-    
-    private int miningRounds;
-    private int defusingRounds;
-    private MapLocation defusingLocation;
-    private int capturingRounds;
-    private RobotType capturingType;
+    protected volatile double myHealthLevel;
+    protected volatile double mySupplyLevel;
+    private double timeUntilMovement;
+    private double timeUntilAttack;
+    private int missileCount;
 
+    protected volatile long controlBits;
+
+    int currentBytecodeLimit;
+    private volatile int bytecodesUsed;
+    protected volatile boolean hasBeenAttacked;
+    private boolean didSelfDestruct;
+    private boolean broadcasted;
+    private volatile HashMap<Integer, Integer> broadcastMap;
+    private int roundsAlive;
+    
+    private ArrayList<Signal> supplyActions;
     private Signal movementSignal;
     private Signal attackSignal;
     private Signal castSignal;
-
     public ResearchSignal researchSignal;
 
-    private int roundsSinceLastDamage;
-    private int roundsSinceLastSpawn;
-    private int roundsAlive;
-
-    private boolean didSelfDestruct;
-
-    private double timeUntilMovement;
-    private double timeUntilAttack;
-    private double loadingDelay;
-    private double cooldownDelay;
-
-    private int missileCount = 0;
-    private int hatCount = 0;
+    private int researchRounds;
+    private Upgrade researchUpgrade;
 
     private int buildDelay;
 
@@ -85,162 +61,67 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
                          boolean spawnedRobot, int buildDelay) {
         super(gw, loc, t);
-//        myDirection = Direction.values()[gw.getRandGen().nextInt(8)];
         this.type = type;
         this.buildDelay = buildDelay;
 
-        myEnergonLevel = getMaxEnergon();
+        myHealthLevel = getMaxHealth();
         if (type.isBuilding && type != RobotType.HQ && type != RobotType.TOWER) {
-            myEnergonLevel /= 2.0;
+            myHealthLevel /= 2.0;
         }
-        myShieldLevel = 0.0;
+
         mySupplyLevel = 0.0;
-        
-        researchRounds = 0;
-        researchUpgrade = null;
-        
-        miningRounds = 0;
-        defusingRounds = 0;
-        capturingRounds = 0;
-        capturingType = null;;
-
-        roundsSinceLastDamage = 0;
-        roundsSinceLastSpawn = Integer.MAX_VALUE / 2;
-        roundsAlive = 0;
-
-//        incomingMessageQueue = new LinkedList<Message>();
+        timeUntilMovement = 0.0;
+        timeUntilAttack = 0.0;
+        missileCount = 0;
 
         controlBits = 0;
 
+        currentBytecodeLimit = type.bytecodeLimit;
+        bytecodesUsed = 0;
+        hasBeenAttacked = false;
         didSelfDestruct = false;
-        
-        timeUntilMovement = 0.0;
-        timeUntilAttack = 0.0;
-        loadingDelay = 0.0;
-        cooldownDelay = 0.0;
+        broadcasted = false;
+        broadcastMap = new HashMap<Integer, Integer>();
+        roundsAlive = 0;
+    
+        supplyActions = new ArrayList<Signal>();
+        movementSignal = null;
+        attackSignal = null;
+        castSignal = null;
+        researchSignal = null;
 
-        missileCount = 0;
-
-        
+        researchRounds = 0;
+        researchUpgrade = null;
     }
+
+    // *********************************
+    // ****** QUERY METHODS ************
+    // *********************************
 
     public RobotInfo getRobotInfo() {
-        return new RobotInfo(getID(), getTeam(), type, getLocation(), getTimeUntilMovement(), getTimeUntilAttack(), getEnergonLevel(), getSupplyLevel(), getXP(), getCapturingType() != null, getCapturingType(), getCapturingRounds(), getMissileCount());
-    }
-    
-    public void clearResearching() {
-    	researchRounds = 0;
-    	researchUpgrade = null;
-    }
-    
-    public void setResearching(Upgrade upgrade) {
-		researchRounds = upgrade.numRounds;
-    	researchUpgrade = upgrade;
-    }
-    
-    public int getResearchRounds() {
-    	return researchRounds;
-    }
-    
-//    public void scanForMines() {
-//    	MapLocation base = getLocation();
-//    	Team t = getTeam().opponent();
-//    	for (int dx=-1; dx<=1; dx++) {
-//    		for (int dy=-1; dy<=1; dy++) {
-//    			MapLocation loc = base.add(dx, dy);
-//    			if(myGameWorld.getMine(loc) == t) myGameWorld.addKnownMineLocation(getTeam(), loc);
-//    		}
-//    	}
-//    	addAction(new ScanSignal(this));
-//    }
-
-    public void decrementMissileCount() {
-        missileCount--;
+        return new RobotInfo(getID(), getTeam(), type, getLocation(), getTimeUntilMovement(), getTimeUntilAttack(), getHealthLevel(), getSupplyLevel(), getXP(), getMissileCount());
     }
 
-    public int getMissileCount() {
-        return missileCount;
-    }
+    // *********************************
+    // ****** BASIC METHODS ************
+    // *********************************
 
-    public void incrementHatCount() {
-        hatCount++;
-    }
-
-    public int getHatCount() {
-        return hatCount;
-    }
-
-    public void addAction(Signal s) {
-        myGameWorld.visitSignal(s);
-    }
-
-    public void addTimeUntilMovement(double time) {
-        timeUntilMovement += time;
-    }
-
-    public void addTimeUntilAttack(double time) {
-        timeUntilAttack += time;
-    }
-
-    public void addCooldownDelay(double delay) {
-        cooldownDelay += delay;
-    }
-
-    public void addLoadingDelay(double delay) {
-        loadingDelay += delay;
-    }
-
-    public void decrementDelays() {
-        timeUntilAttack--;
-        timeUntilMovement--;
-        loadingDelay--;
-        cooldownDelay--;
-        if (timeUntilAttack < 0.0) {
-            timeUntilAttack = 0.0;
-        }
-        if (timeUntilMovement < 0.0) {
-            timeUntilMovement = 0.0;
-        }
-        if (loadingDelay < 0.0) {
-            loadingDelay = 0.0;
-        }
-        if (cooldownDelay < 0.0) {
-            cooldownDelay = 0.0;
-        }
-    }
-
-    public double getTimeUntilMovement() {
-        return Math.max(timeUntilMovement, loadingDelay);
-    }
-
-    public double getTimeUntilAttack() {
-        return Math.max(timeUntilAttack, cooldownDelay);
-    }
-
-    public double getAttackDelay() {
-        return timeUntilAttack;
-    }
-
-    public double getMovementDelay() {
-        return timeUntilMovement;
-    }
-
-    public double getLoadingDelay() {
-        return loadingDelay;
-    }
-
-    public double getCooldownDelay() {
-        return cooldownDelay;
-    }
-    
-    public Upgrade getResearchingUpgrade() {
-    	return researchUpgrade;
-    }
-    
     public boolean canExecuteCode() {
-    	if (getEnergonLevel() <= 0.0) return false;
+    	if (getHealthLevel() <= 0.0) return false;
         if (type.isBuilding && type != RobotType.HQ && type != RobotType.TOWER && roundsAlive < buildDelay) return false;
     	return true;
+    }
+
+    public void setBytecodesUsed(int numBytecodes) {
+        bytecodesUsed = numBytecodes;
+    }
+
+    public int getBytecodesUsed() {
+        return bytecodesUsed;
+    }
+
+    public int getBytecodeLimit() {
+        return canExecuteCode() ? this.currentBytecodeLimit : 0;
     }
 
     public boolean isActive() {
@@ -249,122 +130,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         } else {
             return true;
         }
-    }
-
-    public void resetSpawnCounter() {
-        roundsSinceLastSpawn = 0;
-    }
-
-    @Override
-    public void processBeginningOfRound() {
-        super.processBeginningOfRound();
-    }
-
-    public void processBeginningOfTurn() {
-        decrementDelays();
-    	
-        if (type == RobotType.COMMANDER && ((InternalCommander)this).hasSkill(CommanderSkillType.REGENERATION)) {
-           this.changeEnergonLevel(1); 
-        }
-
-        if (canExecuteCode() && type.supplyUpkeep > 0) {
-            upkeepPaid = mySupplyLevel > (Math.max(type.bytecodeLimit - 2000, 0) / 1000.0);
-            if (upkeepPaid) {
-                decreaseSupplyLevel(Math.max(type.bytecodeLimit - 2000, 0) / 1000.0);
-            }
-        } else {
-            upkeepPaid = true;
-        }
-    }
-
-    @Override
-    public void processEndOfTurn() {
-        super.processEndOfTurn();
-        
-        // autosend aggregated broadcast
-        if (broadcasted) myGameWorld.visitSignal(new BroadcastSignal(this, broadcastMap));
-        
-    	broadcastMap = new HashMap<Integer, Integer>();
-        broadcasted = false;
-       
-        if (type != RobotType.HQ) { 
-            roundsSinceLastDamage++;
-        } else {
-            roundsSinceLastSpawn++;
-        }
-
-        // refund supply
-        if (upkeepPaid) {
-            double supplyPaid = Math.max(type.bytecodeLimit - 2000, 0) / 1000.0;
-            double supplyNeeded = Math.max(getBytecodesUsed() - 2000, 0) / 1000.0;
-            increaseSupplyLevel(supplyPaid - supplyNeeded);
-        }
-
-        if (type != RobotType.HQ && type != RobotType.SUPPLYDEPOT) {
-            mySupplyLevel *= (1 - GameConstants.SUPPLY_DECAY);
-        }
-
-        // generate supply
-        if ((type == RobotType.SOLDIER || type == RobotType.BASHER) && myGameWorld.hasUpgrade(getTeam(), Upgrade.CONTROLLEDECOPHAGY)) {
-            if (type == RobotType.SOLDIER) {
-                increaseSupplyLevel(5);
-            } else if (type == RobotType.BASHER) {
-                increaseSupplyLevel(10);
-            }
-        }
-
-        if (type == RobotType.SUPPLYDEPOT) {
-            increaseSupplyLevel(100);
-        }
-
-        roundsAlive++;
-        // after building is done, double health
-        if (type.isBuilding && roundsAlive == buildDelay && type != RobotType.HQ && type != RobotType.TOWER) {
-            changeEnergonLevel(getEnergonLevel());
-            // increase robot count
-            myGameWorld.incrementRobotTypeCount(getTeam(), type);
-        } else if (!type.isBuilding && roundsAlive == 1) {
-            myGameWorld.incrementRobotTypeCount(getTeam(), type);
-        }
-
-        if (roundsAlive % GameConstants.MISSILE_SPAWN_FREQUENCY == 0 && type == RobotType.LAUNCHER) {
-            missileCount = Math.min(missileCount + 1, GameConstants.MAX_MISSILE_COUNT);
-        }
-
-        if (type == RobotType.MISSILE && roundsAlive >= 5) {
-            suicide();
-        }
-        
-        if (movementSignal != null) {
-            myGameWorld.visitSignal(movementSignal);
-            movementSignal = null;
-        }
-
-        if (researchSignal != null) {
-            if (!myGameWorld.hasUpgrade(getTeam(), researchSignal.getUpgrade())) {
-                myGameWorld.visitSignal(researchSignal);
-            } else {
-                researchSignal = null;
-            }
-        }
-        
-        if (attackSignal != null) {
-        	myGameWorld.visitSignal(attackSignal);
-        	attackSignal = null;
-        }
-    }
-
-    @Override
-    public void processEndOfRound() {
-        super.processEndOfRound();
-    }
-
-    public double getEnergonLevel() {
-        return myEnergonLevel;
-    }
-    
-    public double getShieldLevel() {
-    	return myShieldLevel;
     }
 
     public int getXP() {
@@ -376,40 +141,140 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return 0;
     }
 
-    public double getSupplyLevel() {
-        return mySupplyLevel;
+    public void decrementMissileCount() {
+        missileCount--;
     }
 
-    public void decreaseSupplyLevel(double dec) {
-        mySupplyLevel -= dec;
+    public int getMissileCount() {
+        return missileCount;
     }
 
-    public void increaseSupplyLevel(double inc) {
-        mySupplyLevel += inc;
+    public void setControlBits(long l) {
+        controlBits = l;
     }
 
-    public Direction getDirection() {
-        return myDirection;
+    public long getControlBits() {
+        return controlBits;
     }
 
-//    there is no regen, healing by medbay is immediate
-//    public void setRegen() {
-//        if (type != RobotType.TOWER || !myGameWorld.timeLimitReached())
-//            regen = true;
-//    }
-
-    public boolean getRegen() {
-        return regen;
+    public boolean hasBeenAttacked() {
+        return hasBeenAttacked;
     }
 
-    // includes buffs
-    public int getAttackRadiusSquared() {
-        int base = type.attackRadiusSquared;
-        if (type == RobotType.HQ && myGameWorld.getRobotTypeCount(getTeam(), RobotType.TOWER) >= 2) {
-            return GameConstants.ATTACK_RADIUS_SQUARED_BUFFED_HQ;
+    // *********************************
+    // ****** HEALTH METHODS ***********
+    // *********************************
+
+    public double getHealthLevel() {
+        return myHealthLevel;
+    }
+
+    public void takeDamage(double baseAmount) {
+        if (baseAmount < 0) {
+            changeHealthLevel(-baseAmount);
         } else {
-            return base;
+            // HQ has a tower boost
+            double rate = 1.0;
+            if (type == RobotType.HQ) {
+                int towerCount = myGameWorld.getRobotTypeCount(getTeam(), RobotType.TOWER);
+                if (towerCount >= 6) {
+                    rate = 0.3;
+                } else if (towerCount >= 4) {
+                    rate = 0.5;
+                } else if (towerCount >= 1) {
+                    rate = 0.8;
+                }
+            }
+            changeHealthLevelFromAttack(-rate * baseAmount);
         }
+    }
+    
+    public void takeDamage(double amt, InternalRobot source) {
+        if (!(getTeam() == Team.NEUTRAL)) {
+            takeDamage(amt);
+        }
+    }
+    
+    public void changeHealthLevelFromAttack(double amount) {
+        hasBeenAttacked = true;
+        changeHealthLevel(amount);
+    }
+
+    public void changeHealthLevel(double amount) {
+        myHealthLevel += amount;
+        if (myHealthLevel > getMaxHealth()) {
+            myHealthLevel = getMaxHealth();
+        }
+
+        if (myHealthLevel <= 0 && getMaxHealth() != Integer.MAX_VALUE) {
+            processLethalDamage();
+        }
+    }
+
+    public void processLethalDamage() {
+        myGameWorld.notifyDied(this);
+    }
+
+    public double getMaxHealth() {
+        return type.maxHealth;
+    }
+
+    // *********************************
+    // ****** DELAYS METHODS ***********
+    // *********************************
+
+    public double getTimeUntilMovement() {
+        return timeUntilMovement;
+    }
+
+    public double getTimeUntilAttack() {
+        return timeUntilAttack;
+    }
+
+    public void addTimeUntilMovement(double time) {
+        timeUntilMovement += time;
+    }
+
+    public void addTimeUntilAttack(double time) {
+        timeUntilAttack += time;
+    }
+
+    public void addCooldownDelay(double delay) {
+        timeUntilMovement = Math.max(timeUntilMovement, delay);
+    }
+
+    public void addLoadingDelay(double delay) {
+        timeUntilAttack = Math.max(timeUntilAttack, delay);
+    }
+
+    public void decrementDelays() {
+        if (timeUntilAttack >= 1 || timeUntilMovement >= 1) {
+            // this means we need to pay upkeep
+            if (getSupplyLevel() >= type.supplyUpkeep) {
+                // can afford! all good
+                decreaseSupplyLevel(type.supplyUpkeep);
+                timeUntilAttack--;
+                timeUntilMovement--;
+            } else {
+                // cannot afford, so we slow down the decrease
+                timeUntilAttack -= 0.5;
+                timeUntilMovement -= 0.5;
+            }
+        }
+
+        if (timeUntilAttack < 0.0) {
+            timeUntilAttack = 0.0;
+        }
+        if (timeUntilMovement < 0.0) {
+            timeUntilMovement = 0.0;
+        }
+    }
+
+    public int getAttackDelayForType() {
+        if (type == RobotType.HQ && myGameWorld.getRobotTypeCount(getTeam(), RobotType.TOWER) >= 5) {
+            return type.attackDelay / 2;
+        }
+        return type.attackDelay;
     }
 
     public int getMovementDelayForType() {
@@ -436,109 +301,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
     }
 
-    public void takeDamage(double baseAmount) {
-        if (baseAmount < 0) {
-            changeEnergonLevel(-baseAmount);
-        } else {
-            if (baseAmount > 0) {
-                roundsSinceLastDamage = 0;
-            }
-            // HQ has a tower boost
-            double rate = 1.0;
-            if (type == RobotType.HQ) {
-                int towerCount = myGameWorld.getRobotTypeCount(getTeam(), RobotType.TOWER);
-                if (towerCount >= 6) {
-                    rate = 0.3;
-                } else if (towerCount >= 4) {
-                    rate = 0.5;
-                } else if (towerCount >= 1) {
-                    rate = 0.8;
-                }
-            }
-            changeEnergonLevelFromAttack(-rate * baseAmount);
-        }
-    }
-    
-    public void takeShieldedDamage(double baseAmount) {
-        if (baseAmount < 0) {
-        	changeShieldLevel(-baseAmount);
-        } else {
-            double remainder = changeShieldLevelFromAttack(-baseAmount);
-            changeEnergonLevelFromAttack(-remainder);
-        }
-    }
-
-    public void takeDamage(double amt, InternalRobot source) {
-        // uncomment this to test immortal base nodes
-        //if(type==RobotType.TOWER&&myGameWorld.towerToNode(this).isPowerCore())
-        //	return;
-    	// make sure encampments don't take damage
-        if (!(getTeam() == Team.NEUTRAL))
-        {
-        	//if (source.type == RobotType.ARTILLERY)
-        	//	takeShieldedDamage(amt);
-        	//else
-                takeDamage(amt);
-        }
-    }
-    
-    public double changeShieldLevelFromAttack(double amount) {
-        hasBeenAttacked = true;
-        return changeShieldLevel(amount);
-    }
-    
-    public void changeEnergonLevelFromAttack(double amount) {
-        hasBeenAttacked = true;
-        changeEnergonLevel(amount);
-    }
-    
-    public double changeShieldLevel(double amount) {
-        myShieldLevel += amount;
-        /*if (myShieldLevel > GameConstants.SHIELD_CAP) {
-        	myShieldLevel = GameConstants.SHIELD_CAP;
-          }*/
-        shieldChanged = true;
-
-        if (myShieldLevel <= 0) {
-        	double diff = -myShieldLevel;
-        	myShieldLevel = 0;
-        	return diff;
-        }
-        return 0.0;
-    }
-
-    public void changeEnergonLevel(double amount) {
-        myEnergonLevel += amount;
-        if (myEnergonLevel > getMaxEnergon()) {
-            myEnergonLevel = getMaxEnergon();
-        }
-        energonChanged = true;
-
-        if (myEnergonLevel <= 0 && getMaxEnergon() != Integer.MAX_VALUE) {
-            processLethalDamage();
-        }
-    }
-
-    public void processLethalDamage() {
-        myGameWorld.notifyDied(this);
-    }
-
-    public boolean clearEnergonChanged() {
-        boolean wasChanged = energonChanged;
-        energonChanged = false;
-        return wasChanged;
-    }
-    
-    public boolean clearShieldChanged() {
-        boolean wasChanged = shieldChanged;
-        shieldChanged = false;
-        return wasChanged;
-    }
-
-    public double getMaxEnergon() {
-        return type.maxHealth;
-    }
-
     public double calculateMovementActionDelay(MapLocation from, MapLocation to, TerrainTile terrain) {
         double base = 1;
         if (from.distanceSquaredTo(to) <= 1) {
@@ -549,11 +311,57 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return base;
     }
 
-    public double calculateAttackActionDelay(RobotType r) {
-        if (r == RobotType.HQ && myGameWorld.getRobotTypeCount(getTeam(), RobotType.TOWER) >= 5) {
-            return r.attackDelay / 2;
+    // *********************************
+    // ****** SUPPLY METHODS ***********
+    // *********************************
+
+    public void dropSupply(int amount) {
+        supplyActions.add(new DropSupplySignal(this, amount));
+    }
+
+    public void pickUpSupply(int amount) {
+        supplyActions.add(new PickUpSupplySignal(this, amount));
+    }
+
+    public void transferSupply(int amount, InternalRobot target) {
+        supplyActions.add(new TransferSupplySignal(this, target, amount));
+    }
+
+    public double getSupplyLevel() {
+        return mySupplyLevel;
+    }
+
+    public void decreaseSupplyLevel(double dec) {
+        mySupplyLevel -= dec;
+        if (mySupplyLevel < 0) {
+            mySupplyLevel = 0;
         }
-        return r.attackDelay;
+    }
+
+    public void increaseSupplyLevel(double inc) {
+        mySupplyLevel += inc;
+    }
+    
+    // *********************************
+    // ****** RESEARCH METHODS *********
+    // *********************************
+
+    public void clearResearching() {
+    	researchRounds = 0;
+    	researchUpgrade = null;
+    }
+    
+    public void setResearching(Upgrade upgrade) {
+		researchRounds = upgrade.numRounds;
+    	researchUpgrade = upgrade;
+    }
+    
+    public int getResearchRounds() {
+    	return researchRounds;
+    }
+
+    public Upgrade getResearchingUpgrade() {
+    	return researchUpgrade;
     }
 
     public void activateResearch(ResearchSignal s, double attackDelay, double movementDelay) {
@@ -561,6 +369,31 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         addTimeUntilMovement(movementDelay);
 
         researchSignal = s;
+    }
+
+    // *********************************
+    // ****** BROADCAST METHODS ********
+    // *********************************
+
+    public void addBroadcast(int channel, int data) {
+    	broadcastMap.put(channel, data);
+        broadcasted = true;
+    }
+
+    public Integer getQueuedBroadcastFor(int channel) {
+        return broadcastMap.get(channel);
+    }
+
+    public boolean hasBroadcasted() {
+        return broadcasted;
+    }
+    
+    // *********************************
+    // ****** ACTION METHODS ***********
+    // *********************************
+
+    public void addAction(Signal s) {
+        myGameWorld.visitSignal(s);
     }
 
     public void activateMovement(Signal s, double attackDelay, double movementDelay) {
@@ -575,59 +408,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         addCooldownDelay(movementDelay);
     }
 
-    public void addBroadcast(int channel, int data) {
-    	broadcastMap.put(channel, data);
-        broadcasted = true;
-    }
-
-    public Integer getQueuedBroadcastFor(int channel) {
-	return broadcastMap.get(channel);
-    }
-    
-    public void activateMinelayer(Signal s, int delay) {
-    	myGameWorld.visitSignal(s);
-    	miningRounds = delay;
-    }
-    
-    public void activateMinestop(Signal s, int delay) {
-    	myGameWorld.visitSignal(s);
-    	miningRounds = 0;
-    }
-    
-    public void activateDefuser(Signal s, int delay, MapLocation target) {
-    	myGameWorld.visitSignal(s);
-    	defusingRounds = delay;
-    	defusingLocation = target;
-    }
-   
-    /* 
-    public void activateCapturing(CaptureSignal s, int delay) {
-    	myGameWorld.visitSignal(s);
-    	capturingRounds = delay;
-        addActionDelay(delay);
-    	capturingType = s.getType();
-    }
-    */
-
-    public int getMiningRounds() {
-    	return miningRounds;
-    }
-    
-    public int getDefusingRounds() { 
-    	return defusingRounds;
-    }
-
-    public boolean hasBroadcasted() {
-        return broadcasted;
-    }
-    
     public void setLocation(MapLocation loc) {
     	MapLocation oldloc = getLocation();
         super.setLocation(loc);
-    }
-
-    public void setDirection(Direction dir) {
-        myDirection = dir;
     }
 
     public void setSelfDestruct() {
@@ -641,56 +424,123 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         (new DeathSignal(this)).accept(myGameWorld);
     }
 
-//    public void enqueueIncomingMessage(Message msg) {
-//        incomingMessageQueue.add(msg);
-//    }
-//
-//    public Message dequeueIncomingMessage() {
-//        if (incomingMessageQueue.size() > 0) {
-//            return incomingMessageQueue.remove(0);
-//        } else {
-//            return null;
-//        }
-//        // ~ return incomingMessageQueue.poll();
-//    }
-//
-//    public Message[] dequeueIncomingMessages() {
-//        Message[] result = incomingMessageQueue.toArray(new Message[incomingMessageQueue.size()]);
-//        incomingMessageQueue.clear();
-//        return result;
-//    }
-    
-    public int getCapturingRounds() {
-    	return capturingRounds;
-    }
-    
-    public RobotType getCapturingType() {
-    	return capturingType;
+    // *********************************
+    // ****** GAMEPLAY METHODS *********
+    // *********************************
+
+    @Override
+    public void processBeginningOfRound() {
+        super.processBeginningOfRound();
     }
 
-    public void setControlBits(long l) {
-        controlBits = l;
+    public void processBeginningOfTurn() {
+        decrementDelays(); // expends supply to decrement delays
+
+        this.currentBytecodeLimit = type.bytecodeLimit;
+        if (type.supplyUpkeep > 0) {
+            // decide how many bytecodes we'll be allowed
+            this.currentBytecodeLimit = Math.max(type.bytecodeLimit / 2, Math.min(type.bytecodeLimit, GameConstants.FREE_BYTECODES + (int) (mySupplyLevel * GameConstants.BYTECODES_PER_SUPPLY)));
+        }
     }
 
-    public long getControlBits() {
-        return controlBits;
+    @Override
+    public void processEndOfTurn() {
+        super.processEndOfTurn();
+        
+        // broadcasts
+        if (broadcasted) myGameWorld.visitSignal(new BroadcastSignal(this, broadcastMap));
+        
+    	broadcastMap = new HashMap<Integer, Integer>();
+        broadcasted = false;
+
+        // remove supply from bytecode usage
+        if (type.supplyUpkeep > 0) {
+            double supplyNeeded = Math.max(getBytecodesUsed() - GameConstants.FREE_BYTECODES, 0) / (double) GameConstants.BYTECODES_PER_SUPPLY;
+            decreaseSupplyLevel(supplyNeeded);
+        }
+
+        // perform supply actions
+        for (Signal s : supplyActions) {
+            myGameWorld.visitSignal(s);
+        }
+        supplyActions.clear();
+
+        // supply decay
+        if (type != RobotType.HQ && type != RobotType.SUPPLYDEPOT) {
+            mySupplyLevel *= (1 - GameConstants.SUPPLY_DECAY);
+        }
+
+        // generate supply
+        if ((type == RobotType.SOLDIER || type == RobotType.BASHER) && myGameWorld.hasUpgrade(getTeam(), Upgrade.CONTROLLEDECOPHAGY)) {
+            if (type == RobotType.SOLDIER) {
+                increaseSupplyLevel(5);
+            } else if (type == RobotType.BASHER) {
+                increaseSupplyLevel(10);
+            }
+        }
+        if (type == RobotType.SUPPLYDEPOT) {
+            increaseSupplyLevel(GameConstants.DEPOT_SUPPLY_GEN);
+        }
+		if (type == RobotType.HQ) {
+			increaseSupplyLevel(GameConstants.HQ_SUPPLY_GEN);
+		}
+
+        // possibly convert building from inactive to active
+        roundsAlive++;
+        // after building is done, double health
+        if (type.isBuilding && roundsAlive == buildDelay && type != RobotType.HQ && type != RobotType.TOWER) {
+            changeHealthLevel(getHealthLevel());
+            // increase robot count
+            myGameWorld.incrementRobotTypeCount(getTeam(), type);
+        } else if ((!type.isBuilding || type == RobotType.HQ || type == RobotType.TOWER) && roundsAlive == 1) {
+            myGameWorld.incrementRobotTypeCount(getTeam(), type);
+        }
+
+        // produce missile
+        if (roundsAlive % GameConstants.MISSILE_SPAWN_FREQUENCY == 0 && type == RobotType.LAUNCHER) {
+            missileCount = Math.min(missileCount + 1, GameConstants.MAX_MISSILE_COUNT);
+        }
+    	
+        // commander regen
+        if (type == RobotType.COMMANDER && ((InternalCommander)this).hasSkill(CommanderSkillType.REGENERATION)) {
+           this.changeHealthLevel(GameConstants.REGEN_RATE); 
+        }
+
+        // missiles should die automatically
+        if (type == RobotType.MISSILE && roundsAlive >= 5) {
+            suicide();
+        }
+        
+        // perform movements (moving, spawning, mining)
+        if (movementSignal != null) {
+            myGameWorld.visitSignal(movementSignal);
+            movementSignal = null;
+        }
+
+        // perform research
+        if (researchSignal != null) {
+            if (!myGameWorld.hasUpgrade(getTeam(), researchSignal.getUpgrade())) {
+                myGameWorld.visitSignal(researchSignal);
+            } else {
+                researchSignal = null;
+            }
+        }
+        
+        // perform attacks
+        if (attackSignal != null) {
+        	myGameWorld.visitSignal(attackSignal);
+        	attackSignal = null;
+        }
     }
 
-    public void setBytecodesUsed(int numBytecodes) {
-        bytecodesUsed = numBytecodes;
+    @Override
+    public void processEndOfRound() {
+        super.processEndOfRound();
     }
 
-    public int getBytecodesUsed() {
-        return bytecodesUsed;
-    }
-
-    public int getBytecodeLimit() {
-        return canExecuteCode() ? (upkeepPaid ? type.bytecodeLimit : type.bytecodeLimit / 2) : 0;
-    }
-
-    public boolean hasBeenAttacked() {
-        return hasBeenAttacked;
-    }
+    // *********************************
+    // ****** MISC. METHODS ************
+    // *********************************
 
     @Override
     public String toString() {
@@ -698,7 +548,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void freeMemory() {
-//        incomingMessageQueue = null;
         movementSignal = null;
         attackSignal = null;
     }

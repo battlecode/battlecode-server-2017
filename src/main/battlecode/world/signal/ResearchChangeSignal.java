@@ -18,7 +18,7 @@ public class ResearchChangeSignal extends Signal {
      * Creates a signal for updating research
      */
     public ResearchChangeSignal(Map<Team, Map<Upgrade, Integer>> rmap) {
-		progress = new double[2][5];
+		progress = new double[2][4];
 
 		for (int t = 0; t < progress.length; t++) {
 			Team team = Team.values()[t];

@@ -30,34 +30,11 @@ public interface RobotController {
     //public int getMapHeight();
 
     /**
-     * Checks whether a given upgrade has been researched and is available.
-     *
-     * @param upgrade the upgrade to check.
-     * @return whether a given upgrade is available.
-     */
-    public boolean hasUpgrade(Upgrade upgrade);
-
-    /**
      * Gets the team's total ore.
      *
      * @return the team's total ore.
      */
     public double getTeamOre();
-
-    /**
-     * Gets the current progress of a dependency.
-     *
-     * @param type the dependency to check.
-     * @return a DependencyProgress to check
-     */
-    public DependencyProgress checkDependencyProgress(RobotType type);
-
-    /**
-     * Returns whether the team has a commander.
-     *
-     * @return whether the team has a commander.
-     */
-    public boolean hasCommander();
 
     // *********************************
     // ****** UNIT QUERY METHODS *******
@@ -126,27 +103,6 @@ public interface RobotController {
      */
     public int getXP();
 
-	/**
-     * Returns whether the robot is currently building a building.
-     *
-     * @return whether this robot is currently building a building.
-     */
-    public boolean isBuildingSomething();
-	
-	/**
-     * Returns the RobotType of the building the robot is building.
-     *
-     * @return the RobotType of the building this robot is building.
-     */
-    public RobotType getBuildingTypeBeingBuilt();
-	
-	/**
-     * Returns the number of turns left in the current building.
-     *
-     * @return the number of turns left in the current building.
-     */
-    public int getBuildingRoundsRemaining();
-
     /**
      * Returns how many missiles the unit has. Only useful for launcher.
      *
@@ -165,11 +121,23 @@ public interface RobotController {
     public MapLocation senseHQLocation();
 
     /**
-     * Returns location of the enemy team's HQ. Returns null if the enemy HQ location has never been sensed before.
+     * Returns location of the enemy team's HQ.
      *
      * @return the enemy team's HQ location.
      */
     public MapLocation senseEnemyHQLocation();
+
+    /**
+     * Returns the locations of your own towers, unconstrained by sensor range or distance.
+     * @return an array of the locations of your towers.
+    */
+    //public MapLocation[] senseTowerLocations();
+
+    /**
+     * Returns the locations of enemy towers, unconstrained by sensor range or distance.
+     * @return an array of the locations of enemy towers.
+    */
+    //public MapLocation[] senseEnemyLowerLocations();
 
     /**
      * Senses the terrain at the given location. Returns TerrainTile.UNKNOWN for a terrain tile that has never been in sensor range.
@@ -285,16 +253,7 @@ public interface RobotController {
      */
     public void attackSquare(MapLocation loc) throws GameActionException;
 
-    /**
-     * Casts a targeted spell at the given location.
-     *
-     * @param loc the location to attack.
-     * @param skill the skill being cast.
-     * @throws GameActionException if the robot has not learned the spell or cannot cast at the given square.
-     *
-     */
-    public void castTargetedSpell(MapLocation loc, CommanderSkillType skill) throws GameActionException;
-
+    
     /**
      * BASHERS ONLY. Attacks all surrounding enemies.
      *
@@ -308,6 +267,41 @@ public interface RobotController {
      * @throws GameActionException if the robot is not a MISSILE or if attack is not allowed.
      */
     public void explode() throws GameActionException;
+
+    // ***********************************
+    // ****** COMMANDER METHODS **********
+    // ***********************************
+
+    /**
+     * Returns whether the team has a commander.
+     *
+     * @return whether the team has a commander.
+     */
+    public boolean hasCommander();
+
+    /**
+     * Casts Flash at the given location.
+     *
+     * @param loc the location to attack.
+     * @throws GameActionException if the robot has not learned the spell or cannot cast at the given square.
+     *
+     */
+    public void castFlash(MapLocation loc) throws GameActionException;
+
+    /**
+     * Returns whether the robot has learned a skill.
+     *
+     * @param skill the skill being checked.
+     * @return whether the robot has that skill.
+     */
+    public boolean hasLearnedSkill(CommanderSkillType skill) throws GameActionException;
+
+    /**
+     * Returns the cooldown of FLASH.
+     *
+     * @return the cooldown of FLASH.
+     */
+    public int getFlashCooldown() throws GameActionException;
 
     // ***********************************
     // ****** BROADCAST METHODS **********
@@ -346,29 +340,27 @@ public interface RobotController {
     public double senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException;
 
     /**
-     * Drops supplies to the current location the robot is standing on.
+     * Drops supplies to the current location the robot is standing on. If you specify more supply than you own, all your supply will be dropped.
      *
      * @param amount the amount of supply to drop.
-     * @throws GameActionException if there isn't enough supply to drop.
      */
     public void dropSupplies(int amount) throws GameActionException;
 
     /**
-     * Transfers supplies to a robot in the given direction.
-     *
-     * @param amount the amount of supply to transfer.
-     * @param dir the direction to transfer the supply
-     * @throws GameActionException if there isn't enough supply or if there is no one to transfer to.
-     */
-    public void transferSupplies(int amount, Direction dir) throws GameActionException;
-
-    /**
-     * Picks up supplies from the location the robot is standing on.
+     * Picks up supplies from the location the robot is standing on. If you specify more than the supply level on the square, all the supply will be picked up.
      *
      * @param amount the amount of supply to pick up.
-     * @throws GameActionException if there isn't enough supply to pick up.
      */
     public void pickUpSupplies(int amount) throws GameActionException;
+
+    /**
+     * Transfers supplies to a robot in a nearby location. See GameConstants for maximum transfer distance. If you specify more supply than you own, all your supply will be transferred.
+     *
+     * @param amount the amount of supply to transfer.
+     * @param loc the location to transfer the supply to.
+     * @throws GameActionException if there is no one to transfer to, or if the distance is too much for a supply transfer.
+     */
+    public void transferSupplies(int amount, MapLocation loc) throws GameActionException;
 
     /**
      * SUPPLYDEPOT ONLY. Transfers all supplies to HQ.
@@ -387,7 +379,7 @@ public interface RobotController {
      * @param loc the MapLocation to sense ore at.
      * @return the amount of ore at a given location. If the location is out of sensor range, then the last known ore amount is returned.
      */
-    public int senseOre(MapLocation loc) throws GameActionException;
+    public double senseOre(MapLocation loc) throws GameActionException;
 
     /**
      * Mines the current square for ore.
@@ -402,6 +394,14 @@ public interface RobotController {
     // ***********************************
 
     /**
+     * Gets the current progress of a dependency.
+     *
+     * @param type the dependency to check.
+     * @return a DependencyProgress to check
+     */
+    public DependencyProgress checkDependencyProgress(RobotType type);
+
+    /**
      * LAUNCHER ONLY. Launches a missile in the given direction.
      *
      * @param dir the direction to launch a missile.
@@ -410,13 +410,22 @@ public interface RobotController {
     public void launchMissile(Direction dir) throws GameActionException;
 
     /**
-     * Returns whether the unit can spawn a robot in the given direction of the given type.
+     * Returns whether the unit can spawn a robot of the given type.
      * Checks dependencies and ore costs. Does not check if a robot is active.
      *
-     * @param dir the direction to spawn in.
      * @param type the robot type to spawn.
+     * @return whether it is possible to spawn a robot of the given type.
      */
-    public boolean canSpawn(Direction dir, RobotType type);
+    public boolean canSpawnRobotType(RobotType type);
+
+    /**
+     * Returns whether the given direction is a valid spawning direction.
+     * This is similar to canMove. It does not check whether the current robot is the right building, or if there is sufficient ore to spawn. It merely checks whether the location in the given direction is available for spawning.
+     *
+     * @param dir the direction to spawn in.
+     * @return whether the spawn direction is valid.
+     */
+    public boolean canSpawnInDirection(Direction dir);
 
     /**
      * Queues a spawn action to be performed at the end of this robot's turn.
@@ -431,13 +440,22 @@ public interface RobotController {
     public void spawn(Direction dir, RobotType type) throws GameActionException;
 
     /**
-     * Returns whether the unit can build a building in the given direction of the given type.
-     * Checks dependencies and ore costs. Does not check if a robot is active.
+     * Returns whether the unit can build a building of the given type.
+     * Checks dependencies and ore costs. Does not check if a robot is active, or if a robot is capable of building.
+     *
+     * @param type the robot type to spawn.
+     * @return whether it is possible to build a building of the given type.
+     */
+    public boolean canBuildRobotType(RobotType type);
+
+    /**
+     * Returns whether the given direction is a valid building direction.
+     * This is similar to canMove. It does not check whether the current robot is able to build, or if there is sufficient ore to build. It merely checks whether the location in the given direction is available for building.
      *
      * @param dir the direction to build in.
-     * @param type the robot type to build.
+     * @return whether the build direction is valid.
      */
-    public boolean canBuild(Direction dir, RobotType type);
+    public boolean canBuildInDirection(Direction dir);
    
     /**
      * Builds a building in the given direction. The building will initially be inactive for a number of turns (during which this robot cannot move or attack). After several turns, the building will become active.
@@ -451,6 +469,14 @@ public interface RobotController {
     // ***********************************
     // ****** UPGRADE METHODS ************
     // ***********************************
+
+    /**
+     * Checks whether a given upgrade has been researched and is available.
+     *
+     * @param upgrade the upgrade to check.
+     * @return whether a given upgrade is available.
+     */
+    public boolean hasUpgrade(Upgrade upgrade);
 
     /**
      * Researches the given upgrade for a turn.
@@ -489,18 +515,9 @@ public interface RobotController {
      */
     public void resign();
 
-    public void win();
-
     // ***********************************
     // ******** MISC. METHODS ************
     // ***********************************
-    
-    /**
-     * Puts a hat on the robot. You require the BATTLECODE-HATS DLC. You also cannot be moving while putting on your hat. This costs ore (GameConstants.HAT_ORE_COST). The HQ's first hat is free.
-     *
-     * @throws GameActionException if you have action delay or if you do not have enough ore.
-     */
-    public void wearHat() throws GameActionException;
 
     /**
      * Sets the team's "memory", which is saved for the next game in the
@@ -563,6 +580,37 @@ public interface RobotController {
      * @param newString  the value to which the indicator string should be set.
      */
     public void setIndicatorString(int stringIndex, String newString);
+
+    /**
+     * Draws a dot on the game map, for debugging purposes.
+     * Press V in the client to toggle which team's indicator dots are displayed.
+     *
+     * @param loc the location to draw the dot.
+     * @param red the red component of the dot's color.
+     * @param green the green component of the dot's color.
+     * @param blue the blue component of the dot's color.
+     */
+    public void setIndicatorDot(MapLocation loc, int red, int green, int blue);
+
+    /**
+     * Draws a line on the game map, for debugging purposes.
+     * Press V in the client to toggle which team's indicator lines are displayed.
+     *
+     * @param from the location to draw the line from.
+     * @param to the location to draw the line to.
+     * @param red the red component of the line's color.
+     * @param green the green component of the line's color.
+     * @param blue the blue component of the line's color.
+     */
+    public void setIndicatorLine(MapLocation from, MapLocation to, int red, int green, int blue);
+
+    /**
+     * Gets this robot's 'control bits' for debugging purposes. These bits can
+     * be set manually by the user, so a robot can respond to them.
+     *
+     * @return this robot's control bits
+     */
+    public long getControlBits();
 
     /**
      * Adds a custom observation to the match file, such that when it is analyzed, this observation will appear.

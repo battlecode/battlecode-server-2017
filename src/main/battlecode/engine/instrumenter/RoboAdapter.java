@@ -7,7 +7,7 @@ import org.objectweb.asm.*;
  *
  * @author adamd
  */
-public class RoboAdapter extends ClassAdapter implements Opcodes {
+public class RoboAdapter extends ClassVisitor implements Opcodes {
     private String className;
     private final String teamPackageName;
     private final boolean debugMethodsEnabled;
@@ -27,7 +27,7 @@ public class RoboAdapter extends ClassAdapter implements Opcodes {
      * @param silenced            whether System.out should be silenced for this class
      */
     public RoboAdapter(final ClassVisitor cv, final String teamPackageName, final boolean debugMethodsEnabled, boolean silenced, boolean checkDisallowed) {
-        super(cv);
+        super(Opcodes.ASM5, cv);
         this.teamPackageName = teamPackageName;
         this.debugMethodsEnabled = debugMethodsEnabled;
         this.silenced = silenced;

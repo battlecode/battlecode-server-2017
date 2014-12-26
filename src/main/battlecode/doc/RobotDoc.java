@@ -76,16 +76,8 @@ public class RobotDoc implements Taglet {
             if (rt.spawnSource != null) {
                 append(builder, "Spawned By", rt.spawnSource.toString());
             }
-            String dependencies = "";
-            for (RobotType dependency : rt.getDependencies()) {
-                if (dependencies.length() == 0) {
-                    dependencies = dependency.toString();
-                } else {
-                    dependencies += ", " + dependency.toString();
-                }
-            }
-            if (dependencies.length() > 0) {
-                append(builder, "Dependencies", dependencies);
+            if (rt.dependency != null) {
+                append(builder, "Dependencies", rt.dependency.toString());
             }
             if (rt.oreCost > 0) {
                 append(builder, "Ore Cost", rt.oreCost + "");

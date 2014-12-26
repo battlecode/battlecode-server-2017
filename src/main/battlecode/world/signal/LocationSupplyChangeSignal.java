@@ -8,9 +8,9 @@ public class LocationSupplyChangeSignal extends Signal {
     private static final long serialVersionUID = -4229507739170593123L;
 
     public final MapLocation loc;
-    public final int supply;
+    public final double supply;
 
-    public LocationSupplyChangeSignal(MapLocation loc, int supply) {
+    public LocationSupplyChangeSignal(MapLocation loc, double supply) {
         this.loc = loc;
         this.supply = supply;
     }
@@ -19,7 +19,7 @@ public class LocationSupplyChangeSignal extends Signal {
         return loc;
     }
 
-    public int getSupply() {
+    public double getSupply() {
         return supply;
     }
 }
