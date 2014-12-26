@@ -181,7 +181,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void launchMissile(MapLocation loc) {
-        missileLaunchActions.add(new SpawnSignal(getLocation(), RobotType.MISSILE, getTeam(), this, 0));
+        missileLaunchActions.add(new SpawnSignal(loc, RobotType.MISSILE, getTeam(), this, 0));
     }
 
     // *********************************
