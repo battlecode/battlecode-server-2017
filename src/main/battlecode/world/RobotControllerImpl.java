@@ -85,27 +85,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.myGameWorld.getGameMap().getHeight();
     }
 
-    public boolean hasUpgrade(Upgrade upgrade) {
-        assertNotNull(upgrade);
-        return gameWorld.hasUpgrade(getTeam(), upgrade);
-    }
-    
     public double getTeamOre() {
         return gameWorld.resources(getTeam());
-    }
-
-    public DependencyProgress checkDependencyProgress(RobotType type) {
-        if (gameWorld.getRobotTypeCount(robot.getTeam(), type) > 0) {
-            return DependencyProgress.DONE;
-        } else if (gameWorld.getTotalRobotTypeCount(robot.getTeam(), type) > 0) {
-            return DependencyProgress.INPROGRESS;
-        } else {
-            return DependencyProgress.NONE;
-        }
-    }
-
-    public boolean hasCommander() {
-        return gameWorld.hasCommander(robot.getTeam());
     }
     
     public void assertHaveResource(double amount) throws GameActionException {
@@ -113,11 +94,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(NOT_ENOUGH_RESOURCE, "You do not have enough ORE to do that.");
     }
     
-    public void assertHaveUpgrade(Upgrade upgrade) throws GameActionException {
-        if (!gameWorld.hasUpgrade(getTeam(), upgrade))
-            throw new GameActionException(MISSING_UPGRADE, "You need the following upgrade: "+upgrade);
-    }
-
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************
@@ -416,8 +392,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         robot.activateAttack(new AttackSignal(robot, loc), robot.calculateAttackActionDelay(robot.type) * factor, robot.getCooldownDelayForType());
     }
 
-    
-
     public void bash() throws GameActionException {
         assertNotAttacking();
         if (robot.type != RobotType.BASHER) {
@@ -447,6 +421,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //***********************************
     //****** COMMANDER METHODS **********
     //***********************************
+
+    public boolean hasCommander() {
+        return gameWorld.hasCommander(robot.getTeam());
+    }
+
     public boolean hasLearnedSkill(CommanderSkillType skill) throws GameActionException {
         if (!hasCommander()) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Cannot call hasLearnedSkill without a Commander.");
@@ -602,6 +581,16 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ****** BUILDING/SPAWNING **********
     // ***********************************
 
+    public DependencyProgress checkDependencyProgress(RobotType type) {
+        if (gameWorld.getRobotTypeCount(robot.getTeam(), type) > 0) {
+            return DependencyProgress.DONE;
+        } else if (gameWorld.getTotalRobotTypeCount(robot.getTeam(), type) > 0) {
+            return DependencyProgress.INPROGRESS;
+        } else {
+            return DependencyProgress.NONE;
+        }
+    }
+
     public void launchMissile(Direction dir) throws GameActionException {
         if (robot.type != RobotType.LAUNCHER)
             throw new GameActionException(CANT_DO_THAT_BRO, "Only LAUNCHER can launch missiles");
@@ -728,6 +717,16 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //***********************************
     //****** UPGRADE METHODS ************
     //***********************************
+
+    public boolean hasUpgrade(Upgrade upgrade) {
+        assertNotNull(upgrade);
+        return gameWorld.hasUpgrade(getTeam(), upgrade);
+    }
+
+    public void assertHaveUpgrade(Upgrade upgrade) throws GameActionException {
+        if (!gameWorld.hasUpgrade(getTeam(), upgrade))
+            throw new GameActionException(MISSING_UPGRADE, "You need the following upgrade: "+upgrade);
+    }
 
     public void researchUpgrade(Upgrade upgrade) throws GameActionException {
         if (gameWorld.hasUpgrade(getTeam(), upgrade))

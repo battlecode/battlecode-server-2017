@@ -30,34 +30,11 @@ public interface RobotController {
     //public int getMapHeight();
 
     /**
-     * Checks whether a given upgrade has been researched and is available.
-     *
-     * @param upgrade the upgrade to check.
-     * @return whether a given upgrade is available.
-     */
-    public boolean hasUpgrade(Upgrade upgrade);
-
-    /**
      * Gets the team's total ore.
      *
      * @return the team's total ore.
      */
     public double getTeamOre();
-
-    /**
-     * Gets the current progress of a dependency.
-     *
-     * @param type the dependency to check.
-     * @return a DependencyProgress to check
-     */
-    public DependencyProgress checkDependencyProgress(RobotType type);
-
-    /**
-     * Returns whether the team has a commander.
-     *
-     * @return whether the team has a commander.
-     */
-    public boolean hasCommander();
 
     // *********************************
     // ****** UNIT QUERY METHODS *******
@@ -317,6 +294,13 @@ public interface RobotController {
     // ***********************************
 
     /**
+     * Returns whether the team has a commander.
+     *
+     * @return whether the team has a commander.
+     */
+    public boolean hasCommander();
+
+    /**
      * Casts Flash at the given location.
      *
      * @param loc the location to attack.
@@ -431,6 +415,14 @@ public interface RobotController {
     // ***********************************
 
     /**
+     * Gets the current progress of a dependency.
+     *
+     * @param type the dependency to check.
+     * @return a DependencyProgress to check
+     */
+    public DependencyProgress checkDependencyProgress(RobotType type);
+
+    /**
      * LAUNCHER ONLY. Launches a missile in the given direction.
      *
      * @param dir the direction to launch a missile.
@@ -480,6 +472,14 @@ public interface RobotController {
     // ***********************************
     // ****** UPGRADE METHODS ************
     // ***********************************
+
+    /**
+     * Checks whether a given upgrade has been researched and is available.
+     *
+     * @param upgrade the upgrade to check.
+     * @return whether a given upgrade is available.
+     */
+    public boolean hasUpgrade(Upgrade upgrade);
 
     /**
      * Researches the given upgrade for a turn.
