@@ -134,18 +134,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getXP();
     }
 
-    public boolean isBuildingSomething() {
-        return getBuildingTypeBeingBuilt() != null;
-    }
-
-    public RobotType getBuildingTypeBeingBuilt() {
-        return robot.getBuildingType();
-    }
-
-    public int getBuildingRoundsRemaining() {
-        return robot.getBuildTurns();
-    }
-
     public int getMissileCount() {
         return robot.getMissileCount();
     }

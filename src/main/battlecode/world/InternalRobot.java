@@ -32,8 +32,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     protected volatile double myHealthLevel;
     protected volatile double mySupplyLevel;
-    private int buildingRoundsLeft;
-    private RobotType buildingType;
     private double timeUntilMovement;
     private double timeUntilAttack;
     private int missileCount;
@@ -72,8 +70,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
 
         mySupplyLevel = 0.0;
-        buildingRoundsLeft = 0;
-        RobotType buildingType = null;
         timeUntilMovement = 0.0;
         timeUntilAttack = 0.0;
         missileCount = 0;
@@ -103,7 +99,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     // *********************************
 
     public RobotInfo getRobotInfo() {
-        return new RobotInfo(getID(), getTeam(), type, getLocation(), getTimeUntilMovement(), getTimeUntilAttack(), getHealthLevel(), getSupplyLevel(), getXP(), getBuildingType() != null, getBuildingType(), getBuildTurns(), getMissileCount());
+        return new RobotInfo(getID(), getTeam(), type, getLocation(), getTimeUntilMovement(), getTimeUntilAttack(), getHealthLevel(), getSupplyLevel(), getXP(), getMissileCount());
     }
 
     // *********************************
@@ -151,14 +147,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public int getMissileCount() {
         return missileCount;
-    }
-    
-    public int getBuildTurns() {
-    	return buildingRoundsLeft;
-    }
-    
-    public RobotType getBuildingType() {
-    	return buildingType;
     }
 
     public void setControlBits(long l) {

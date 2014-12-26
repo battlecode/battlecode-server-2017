@@ -499,14 +499,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             if (gameObjectsByLoc.get(loc) == o)
                 gameObjectsByLoc.remove(loc);
             else
-            	if (o instanceof InternalRobot) {
-            		InternalRobot ir = (InternalRobot) o;
-            		if (ir.type == RobotType.SOLDIER && ir.getBuildTurns() == -1)
-            			; // don't do anything
-            		else
-            			System.out.println("Couldn't remove " + o + " from the game");
-            	} else
-            		System.out.println("Couldn't remove " + o + " from the game");
+                System.out.println("Couldn't remove " + o + " from the game");
         } else
             System.out.println("Couldn't remove " + o + " from the game");
 

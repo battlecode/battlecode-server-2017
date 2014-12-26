@@ -103,27 +103,6 @@ public interface RobotController {
      */
     public int getXP();
 
-	/**
-     * Returns whether the robot is currently building a building.
-     *
-     * @return whether this robot is currently building a building.
-     */
-    public boolean isBuildingSomething();
-	
-	/**
-     * Returns the RobotType of the building the robot is building.
-     *
-     * @return the RobotType of the building this robot is building.
-     */
-    public RobotType getBuildingTypeBeingBuilt();
-	
-	/**
-     * Returns the number of turns left in the current building.
-     *
-     * @return the number of turns left in the current building.
-     */
-    public int getBuildingRoundsRemaining();
-
     /**
      * Returns how many missiles the unit has. Only useful for launcher.
      *
