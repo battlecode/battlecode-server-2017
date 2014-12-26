@@ -32,35 +32,24 @@ import battlecode.engine.signal.SignalHandler;
 import battlecode.serial.DominationFactor;
 import battlecode.serial.GameStats;
 import battlecode.serial.RoundStats;
-import battlecode.world.signal.ActionDelaySignal;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.BytecodesUsedSignal;
-import battlecode.world.signal.CaptureSignal;
 import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.ControlBitsSignal;
 import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.EnergonChangeSignal;
 import battlecode.world.signal.TeamOreSignal;
-import battlecode.world.signal.HatSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.LocationSupplyChangeSignal;
 import battlecode.world.signal.LocationOreChangeSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
-import battlecode.world.signal.MinelayerSignal;
-import battlecode.world.signal.MovementOverrideSignal;
 import battlecode.world.signal.MovementSignal;
-import battlecode.world.signal.NodeBirthSignal;
-import battlecode.world.signal.RegenSignal;
+import battlecode.world.signal.MovementOverrideSignal;
 import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.ResearchChangeSignal;
 import battlecode.world.signal.RobotInfoSignal;
-import battlecode.world.signal.ScanSignal;
 import battlecode.world.signal.SelfDestructSignal;
-import battlecode.world.signal.SetDirectionSignal;
-import battlecode.world.signal.ShieldChangeSignal;
-import battlecode.world.signal.ShieldSignal;
 import battlecode.world.signal.SpawnSignal;
 
 import com.google.common.base.Predicate;
@@ -709,12 +698,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             	shieldChangedRobots.add(r);
             }
         }
-        signals.add(new EnergonChangeSignal(energonChangedRobots.toArray(new InternalRobot[]{})));
-        signals.add(new ShieldChangeSignal(shieldChangedRobots.toArray(new InternalRobot[]{})));
 
         if (includeBytecodesUsedSignal) {
         	signals.add(new BytecodesUsedSignal(allRobots.toArray(new InternalRobot[]{})));
-        	signals.add(new ActionDelaySignal(allRobots.toArray(new InternalRobot[]{})));
         }
 
         return signals.toArray(new Signal[signals.size()]);
@@ -984,26 +970,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
     }
 
-    public void visitEnergonChangeSignal(EnergonChangeSignal s) {
-        int[] robotIDs = s.getRobotIDs();
-        double[] energon = s.getEnergon();
-        for (int i = 0; i < robotIDs.length; i++) {
-            InternalRobot r = (InternalRobot) getObjectByID(robotIDs[i]);
-            System.out.println("el " + energon[i] + " " + r.getEnergonLevel());
-            r.changeEnergonLevel(energon[i] - r.getEnergonLevel());
-        }
-    }
-    
-    public void visitShieldChangeSignal(ShieldChangeSignal s) {
-        int[] robotIDs = s.getRobotIDs();
-        double[] shield = s.getShield();
-        for (int i = 0; i < robotIDs.length; i++) {
-            InternalRobot r = (InternalRobot) getObjectByID(robotIDs[i]);
-            System.out.println("sh " + shield[i] + " " + r.getEnergonLevel());
-            r.changeShieldLevel(shield[i] - r.getShieldLevel());
-        }
-    }
-
     public void visitIndicatorStringSignal(IndicatorStringSignal s) {
         addSignal(s);
     }
@@ -1012,10 +978,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         addSignal(s);
     }
     
-    public void visitHatSignal(HatSignal s) {
-    	addSignal(s);
-    }
-
     public void visitControlBitsSignal(ControlBitsSignal s) {
         InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
         r.setControlBits(s.getControlBits());
@@ -1036,15 +998,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         MapLocation loc = s.getNewLoc();//(s.isMovingForward() ? r.getLocation().add(r.getDirection()) : r.getLocation().add(r.getDirection().opposite()));
 
         r.setLocation(loc);
-
-        addSignal(s);
-    }
-
-    public void visitSetDirectionSignal(SetDirectionSignal s) {
-        InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
-        Direction dir = s.getDirection();
-
-        r.setDirection(dir);
 
         addSignal(s);
     }
@@ -1082,22 +1035,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     
     public void visitResearchSignal(ResearchSignal s) {
     	InternalRobot hq = (InternalRobot)getObjectByID(s.getRobotID());
-//    	hq.setResearching(s.getUpgrade());
     	researchUpgrade(hq.getTeam(), s.getUpgrade());
-    	addSignal(s);
-    }
-    /*public void visitBurstSignal(BurstSignal s) {
-        addSignal(s);
-    }*/
-    
-    public void visitMinelayerSignal(MinelayerSignal s) {
-    	// noop
-    	addSignal(s);
-    }
-    
-    public void visitCaptureSignal(CaptureSignal s) {
-    	// noop
-    	teamCapturingNumber[s.getTeam().ordinal()]++;
     	addSignal(s);
     }
     
@@ -1123,43 +1061,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	addSignal(s);
     }
     
-    public void visitRegenSignal(RegenSignal s) {
-    	InternalRobot medbay = (InternalRobot) getObjectByID(s.robotID);
-    	
-    	MapLocation targetLoc = medbay.getLocation();
-    	
-    	int dist = (int)Math.sqrt(medbay.type.attackRadiusSquared);
-    	InternalRobot target;
-        for (int dx=-dist; dx<=dist; dx++)
-        	for (int dy=-dist; dy<=dist; dy++)
-        	{
-        		if (dx*dx+dy*dy > medbay.type.attackRadiusSquared) continue;
-        		target = getRobot(targetLoc.add(dx, dy));
-        		if (target != null)
-        			if (target.getTeam() == medbay.getTeam() && target.type != RobotType.HQ)
-        				target.takeDamage(-medbay.type.attackPower, medbay);
-        	}
-        addSignal(s);
-    }
-    
-    public void visitShieldSignal(ShieldSignal s) {
-    	InternalRobot shields = (InternalRobot) getObjectByID(s.robotID);
-    	
-    	MapLocation targetLoc = shields.getLocation();
-    	
-    	int dist = (int)Math.sqrt(shields.type.attackRadiusSquared);
-    	InternalRobot target;
-        for (int dx=-dist; dx<=dist; dx++)
-        	for (int dy=-dist; dy<=dist; dy++)
-        	{
-        		if (dx*dx+dy*dy > shields.type.attackRadiusSquared) continue;
-        		target = getRobot(targetLoc.add(dx, dy));
-        		if (target != null)
-        			if (target.getTeam() == shields.getTeam())
-        				target.takeShieldedDamage(-shields.type.attackPower);
-        	}
-        addSignal(s);
-    }
     public void visitCastSignal(CastSignal s) {
 	//TODO(npinsker): finish this...
 	
@@ -1173,17 +1074,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 	
 	addSignal(s);
     }
-    
-    public void visitScanSignal(ScanSignal s) {
-//    	nothing needs to be done
-        addSignal(s);
-    }
-    
-    public void visitNodeBirthSignal(NodeBirthSignal s) {
-    	addEncampment(s.location, Team.NEUTRAL);
-    	addSignal(s);
-    }
-    
 
     // *****************************
     //    UTILITY METHODS

@@ -523,13 +523,6 @@ public interface RobotController {
     // ***********************************
     // ******** MISC. METHODS ************
     // ***********************************
-    
-    /**
-     * Puts a hat on the robot. You require the BATTLECODE-HATS DLC. You also cannot be moving while putting on your hat. This costs ore (GameConstants.HAT_ORE_COST). The HQ's first hat is free.
-     *
-     * @throws GameActionException if you have action delay or if you do not have enough ore.
-     */
-    public void wearHat() throws GameActionException;
 
     /**
      * Sets the team's "memory", which is saved for the next game in the
@@ -592,6 +585,14 @@ public interface RobotController {
      * @param newString  the value to which the indicator string should be set.
      */
     public void setIndicatorString(int stringIndex, String newString);
+
+    /**
+     * Gets this robot's 'control bits' for debugging purposes. These bits can
+     * be set manually by the user, so a robot can respond to them.
+     *
+     * @return this robot's control bits
+     */
+    public long getControlBits();
 
     /**
      * Adds a custom observation to the match file, such that when it is analyzed, this observation will appear.

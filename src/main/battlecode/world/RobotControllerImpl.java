@@ -32,9 +32,7 @@ import battlecode.engine.GenericController;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.world.signal.AttackSignal;
-import battlecode.world.signal.CaptureSignal;
 import battlecode.world.signal.CastSignal;
-import battlecode.world.signal.HatSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.LocationSupplyChangeSignal;
 import battlecode.world.signal.MatchObservationSignal;
@@ -767,16 +765,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ******** MISC. METHODS ************
     // ***********************************
 
-    public void wearHat() throws GameActionException {
-        assertNotMoving();
-        if (!(robot.getHatCount() == 0 && robot.type == RobotType.HQ)) {
-            assertHaveResource(GameConstants.HAT_ORE_COST);
-            gameWorld.adjustResources(getTeam(), -GameConstants.HAT_ORE_COST);
-        }
-        robot.incrementHatCount();
-        robot.activateMovement(new HatSignal(robot, gameWorld.randGen.nextInt()), 0, 1);
-    }
-   
     public void setTeamMemory(int index, long value) {
         gameWorld.setTeamMemory(robot.getTeam(), index, value);
     }
@@ -797,6 +785,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public void setIndicatorString(int stringIndex, String newString) {
         if (stringIndex >= 0 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS)
             (new IndicatorStringSignal(robot, stringIndex, newString)).accept(gameWorld);
+    }
+
+    public long getControlBits() {
+        return robot.getControlBits();
     }
 
     public void addMatchObservation(String observation) {

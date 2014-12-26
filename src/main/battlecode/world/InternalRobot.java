@@ -17,12 +17,9 @@ import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.BroadcastSignal;
-import battlecode.world.signal.CaptureSignal;
 import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.RegenSignal;
 import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.SelfDestructSignal;
-import battlecode.world.signal.ShieldSignal;
 import battlecode.world.signal.SpawnSignal;
 
 public class InternalRobot extends InternalObject implements Robot, GenericRobot {
