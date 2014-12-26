@@ -39,6 +39,8 @@ import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.ControlBitsSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.TeamOreSignal;
+import battlecode.world.signal.IndicatorDotSignal;
+import battlecode.world.signal.IndicatorLineSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.LocationSupplyChangeSignal;
 import battlecode.world.signal.LocationOreChangeSignal;
@@ -812,6 +814,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             // drop supplies
             changeSupplyLevel(loc, r.getSupplyLevel());
         }
+    }
+
+    public void visitIndicatorDotSignal(IndicatorDotSignal s) {
+        addSignal(s);
+    }
+
+    public void visitIndicatorLineSignal(IndicatorLineSignal s) {
+        addSignal(s);
     }
 
     public void visitIndicatorStringSignal(IndicatorStringSignal s) {
