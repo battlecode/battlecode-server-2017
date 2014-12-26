@@ -15,16 +15,17 @@ import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
  *
  * @author adamd
  */
-class InterfaceReader implements ClassVisitor {
+class InterfaceReader extends ClassVisitor {
 
     // this will store the final result of which interfaces are transitively implemented
     private String[] interfaces = null;
 
     public InterfaceReader() {
-        super();
+        super(Opcodes.ASM5);
     }
 
     public InterfaceReader(String className) {
+        super(Opcodes.ASM5);
         ClassReader cr;
         try {
             cr = new ClassReader(className);
