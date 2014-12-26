@@ -537,7 +537,15 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
         assertNotMoving();
         MapLocation loc = getLocation();
-        robot.activateMovement(new MineSignal(loc, getTeam(), getType()), 1, 1);
+        
+		int factor=1;
+		if (robot.getSupplyLevel() >= robot.type.supplyUpkeep) {
+            robot.decreaseSupplyLevel(robot.type.supplyUpkeep);
+        } else {
+            factor = 2;
+        }
+		
+		robot.activateMovement(new MineSignal(loc, getTeam(), getType()), 1*factor, 2*factor);
     }
 
     public double senseOre(MapLocation loc) throws GameActionException {
@@ -600,7 +608,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
 	if (type == RobotType.COMMANDER) {
 	    cost *= (1 << Math.min(gameWorld.getCommandersSpawned(robot.getTeam()), 8));
-	    //cost *= (1 << Math.min(getCommandersSpawned(robot.getTeam()), 8));
 	}
         
         assertHaveResource(cost);
