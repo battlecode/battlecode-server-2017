@@ -90,6 +90,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private List<MapLocation> encampments = new ArrayList<MapLocation>();
     private Map<MapLocation, Team> encampmentMap = new HashMap<MapLocation, Team>();
     private Map<Team, InternalRobot> baseHQs = new EnumMap<Team, InternalRobot>(Team.class);
+    private Map<Team, Set<InternalRobot>> baseTowers = new EnumMap<Team, Set<InternalRobot>>(Team.class);
     private Map<MapLocation, Team> mineLocations = new HashMap<MapLocation, Team>();
     private Map<MapLocation, Double> droppedSupplies = new HashMap<MapLocation, Double>();
     private Map<MapLocation, Double> oreMined = new HashMap<MapLocation, Double>();
@@ -133,6 +134,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         robotTypeCount.put(Team.B, new EnumMap<RobotType, Integer>(RobotType.class));
         totalRobotTypeCount.put(Team.A, new EnumMap<RobotType, Integer>(RobotType.class));
         totalRobotTypeCount.put(Team.B, new EnumMap<RobotType, Integer>(RobotType.class));
+	baseTowers.put(Team.A, new HashSet<InternalRobot>());
+	baseTowers.put(Team.B, new HashSet<InternalRobot>());
 
         // TODO: these lines don't go here, but have to because parts dealing with robotTypeCount are in the wrong places
         robotTypeCount.get(Team.A).put(RobotType.HQ, 1);
@@ -260,6 +263,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public MapLocation senseEnemyHQLocation(Team team) {
         return getBaseHQ(team.opponent()).getLocation();
+    }
+
+    public MapLocation[] senseTowerLocations(Team team) {
+	ArrayList<MapLocation> locs = new ArrayList<MapLocation>();
+	for (InternalRobot r: baseTowers.get(team)) {
+	    locs.add(r.getLocation());
+	}
+	return locs.toArray(new MapLocation[locs.size()]);
     }
 
     public double getSupplyLevel(MapLocation loc) {
@@ -787,6 +798,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     
     public void setHQ(InternalRobot r, Team t) {
         baseHQs.put(t, r);
+    }
+    public void addTower(InternalRobot tower, Team t) {
+    	baseTowers.get(t).add(tower);
     }
 
     public void castLayWaste(MapLocation m) {

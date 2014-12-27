@@ -175,13 +175,13 @@ public interface RobotController {
      * Returns the locations of your own towers, unconstrained by sensor range or distance.
      * @return an array of the locations of your towers.
     */
-    //public MapLocation[] senseTowerLocations();
+    public MapLocation[] senseTowerLocations();
 
     /**
      * Returns the locations of enemy towers, unconstrained by sensor range or distance.
      * @return an array of the locations of enemy towers.
     */
-    //public MapLocation[] senseEnemyLowerLocations();
+    public MapLocation[] senseEnemyTowerLocations();
 
     /**
      * Senses the terrain at the given location. Returns TerrainTile.UNKNOWN for a terrain tile that has never been in sensor range.

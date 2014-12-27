@@ -216,6 +216,14 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return gameWorld.senseEnemyHQLocation(getTeam());
     }
 
+    public MapLocation[] senseTowerLocations() {
+	return gameWorld.senseTowerLocations(getTeam());
+    }
+
+    public MapLocation[] senseEnemyTowerLocations() {
+	return gameWorld.senseTowerLocations(getTeam().opponent());
+    }
+
     public TerrainTile senseTerrainTile(MapLocation loc) {
         assertNotNull(loc);
         return gameWorld.senseMapTerrain(getTeam(), loc);

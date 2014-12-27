@@ -141,6 +141,10 @@ class XMLMapHandler extends DefaultHandler {
 
         public void createGameObject(GameWorld world, MapLocation loc) {
             InternalRobot robot = GameWorldFactory.createPlayer(world, type, loc, team, null, false, 0);
+
+	    if (this.type == RobotType.TOWER) {
+		world.addTower(robot, this.team);
+	    }
         }
 
         public boolean equalsMirror(SymbolData data) {
