@@ -984,7 +984,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             incrementCommandersSpawned(robot.getTeam());
         }
 
-        addSignal(s);
+        //addSignal(s); //client doesn't need this one
     }
 
     public void visitTransferSupplySignal(TransferSupplySignal s) {
