@@ -53,9 +53,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private Signal castSignal;
     public ResearchSignal researchSignal;
 
-    private int researchRounds;
-    private Upgrade researchUpgrade;
-
     private int buildDelay;
 
     @SuppressWarnings("unchecked")
@@ -91,9 +88,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         attackSignal = null;
         castSignal = null;
         researchSignal = null;
-
-        researchRounds = 0;
-        researchUpgrade = null;
     }
 
     // *********************************
@@ -199,7 +193,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             // HQ has a tower boost
             double rate = 1.0;
             if (type == RobotType.HQ) {
-                int towerCount = myGameWorld.getRobotTypeCount(getTeam(), RobotType.TOWER);
+                int towerCount = myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.TOWER);
                 if (towerCount >= 6) {
                     rate = 0.3;
                 } else if (towerCount >= 4) {
@@ -294,7 +288,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public int getAttackDelayForType() {
-        if (type == RobotType.HQ && myGameWorld.getRobotTypeCount(getTeam(), RobotType.TOWER) >= 5) {
+        if (type == RobotType.HQ && myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.TOWER) >= 5) {
             return type.attackDelay / 2;
         }
         return type.attackDelay;
@@ -368,24 +362,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     // *********************************
     // ****** RESEARCH METHODS *********
     // *********************************
-
-    public void clearResearching() {
-    	researchRounds = 0;
-    	researchUpgrade = null;
-    }
-    
-    public void setResearching(Upgrade upgrade) {
-		researchRounds = upgrade.numRounds;
-    	researchUpgrade = upgrade;
-    }
-    
-    public int getResearchRounds() {
-    	return researchRounds;
-    }
-
-    public Upgrade getResearchingUpgrade() {
-    	return researchUpgrade;
-    }
 
     public void activateResearch(ResearchSignal s, double attackDelay, double movementDelay) {
         addLoadingDelay(attackDelay);
@@ -551,11 +527,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
         // perform research
         if (researchSignal != null) {
-            if (!myGameWorld.hasUpgrade(getTeam(), researchSignal.getUpgrade())) {
-                myGameWorld.visitSignal(researchSignal);
-            } else {
-                researchSignal = null;
-            }
+            myGameWorld.visitSignal(researchSignal);
+            researchSignal = null;
         }
         
         // perform attacks

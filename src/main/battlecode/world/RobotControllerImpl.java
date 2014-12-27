@@ -148,7 +148,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public MapLocation senseEnemyHQLocation() {
-        return gameWorld.senseEnemyHQLocation(getTeam());
+        return gameWorld.getBaseHQ(getTeam().opponent()).getLocation();
     }
 
     public TerrainTile senseTerrainTile(MapLocation loc) {
@@ -615,7 +615,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
 
     public DependencyProgress checkDependencyProgress(RobotType type) {
-        if (gameWorld.getRobotTypeCount(robot.getTeam(), type) > 0) {
+        if (gameWorld.getActiveRobotTypeCount(robot.getTeam(), type) > 0) {
             return DependencyProgress.DONE;
         } else if (gameWorld.getTotalRobotTypeCount(robot.getTeam(), type) > 0) {
             return DependencyProgress.INPROGRESS;
@@ -696,13 +696,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void assertHasDependencyFor(RobotType type) throws GameActionException {
-        if (gameWorld.getRobotTypeCount(getTeam(), type.dependency) == 0) {
+        if (gameWorld.getActiveRobotTypeCount(getTeam(), type.dependency) == 0) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build of " + type);
         }
     }
 
     public boolean hasBuildRequirements(RobotType type) {
-        return isBuildingUnit() && type.isBuildable() && gameWorld.getRobotTypeCount(getTeam(), type.dependency) > 0 && type.oreCost <= gameWorld.resources(getTeam());
+        return isBuildingUnit() && type.isBuildable() && gameWorld.getActiveRobotTypeCount(getTeam(), type.dependency) > 0 && type.oreCost <= gameWorld.resources(getTeam());
     }
 
     public boolean canBuild(Direction dir, RobotType type) {
@@ -756,23 +756,16 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(MISSING_UPGRADE, "You already have the following upgrade: "+upgrade);
     }
 
-    public void assertNoUpgradeProgress(Upgrade upgrade) throws GameActionException {
-        if (checkResearchProgress(upgrade) > 0)
-            throw new GameActionException(CANT_DO_THAT_BRO, "You already started researching this upgrade. ("+upgrade+")");
-    }
-
     public boolean canResearch(Upgrade upgrade) {
-        return isResearchingUnit() && !hasUpgrade(upgrade) && checkResearchProgress(upgrade) == 0 && upgrade.oreCost <= getTeamOre();
+        return isResearchingUnit() && !hasUpgrade(upgrade) && upgrade.oreCost / upgrade.numRounds <= getTeamOre();
     }
 
     public void researchUpgrade(Upgrade upgrade) throws GameActionException {
         assertIsResearchingUnit();
         assertNoUpgrade(upgrade);
-        assertNoUpgradeProgress(upgrade);
         assertIsMovementActive();
-        assertHaveResource(upgrade.oreCost);
-        gameWorld.adjustResources(getTeam(), -upgrade.oreCost);
-        robot.activateResearch(new ResearchSignal(robot, upgrade), upgrade.numRounds, upgrade.numRounds);
+        assertHaveResource(upgrade.oreCost / upgrade.numRounds);
+        robot.activateResearch(new ResearchSignal(robot, upgrade), 1, 1);
     }
     
     public int checkResearchProgress(Upgrade upgrade) {
