@@ -153,7 +153,7 @@ public interface RobotController {
      * @param loc the location to check.
      * @return whether the given location is within the robot's sensor range.
      */
-    public boolean canSenseSquare(MapLocation loc);
+    public boolean canSenseLocation(MapLocation loc);
 
     /**
      * Returns whether there is a robot at the given location.
@@ -442,19 +442,19 @@ public interface RobotController {
     public DependencyProgress checkDependencyProgress(RobotType type);
 
     /**
+     * Checks to make sure you have the ore requirements to spawn, and that the right unit is trying to spawn.
+     * @param type the type to check.
+     * @return whether the spawn requirements are met.
+     */
+    public boolean hasSpawnRequirements(RobotType type);
+
+    /**
      * Returns whether the current unit can spawn in the current round. This essentially checks whether the unit is the right spawning building, and makes sure that there is sufficient ore.
      * @param dir the direction to spawn in.
      * @param type the type to spawn.
      * @return whether the spawn is valid.
      */
     public boolean canSpawn(Direction dir, RobotType type);
-
-    /**
-     * Checks to make sure you have the ore requirements to spawn, and that the right unit is trying to spawn.
-     * @param type the type to check.
-     * @return whether the spawn requirements are met.
-     */
-    public boolean hasSpawnRequirements(RobotType type);
 
     /**
      * Queues a spawn action to be performed at the end of this robot's turn.
@@ -469,6 +469,14 @@ public interface RobotController {
     public void spawn(Direction dir, RobotType type) throws GameActionException;
 
     /**
+     * Returns whether you have the ore and the dependencies to build the given robot. Makes sure you are a building unit.
+     *
+     * @param type the type to build.
+     * @return whether the requirements to build are met.
+     */
+    public boolean hasBuildRequirements(RobotType type);
+
+    /**
      * Returns whether the unit can build a building of the given type in the given direction.
      * Checks dependencies, ore costs, and whether the unit can build. Does not check if a robot is active. Checks to make sure that the direction of building is valid as well.
      *
@@ -477,14 +485,6 @@ public interface RobotController {
      * @return whether it is possible to build a building of the given type in the given direction.
      */
     public boolean canBuild(Direction dir, RobotType type);
-
-    /**
-     * Returns whether you have the ore and the dependencies to build the given robot. Makes sure you are a building unit.
-     *
-     * @param type the type to build.
-     * @return whether the requirements to build are met.
-     */
-    public boolean hasBuildRequirements(RobotType type);
    
     /**
      * Builds a building in the given direction. The building will initially be inactive for a number of turns (during which this robot cannot move or attack). After several turns, the building will become active.
