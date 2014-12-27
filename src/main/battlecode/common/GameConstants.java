@@ -46,11 +46,15 @@ public interface GameConstants {
     /** The bytecode penalty that is imposed each time an exception is thrown */
     public static final int EXCEPTION_BYTECODE_PENALTY = 500;
 
-    /** The amount of ore a team starts the game with. */
-    public static final int ORE_INITIAL_AMOUNT = 500;
+    /** Number of bytecodes per turn that don't cost supply. */
+    public static final int FREE_BYTECODES = 2000;
 
-    /** The amount of ore it costs to put on a hat. */
-    public static final int HAT_ORE_COST = 1000;
+    /** Bytecodes executed per unit of supply. */
+    public static final int BYTECODES_PER_SUPPLY = 1000;
+
+    // *********************************
+    // ****** SUPPLY *******************
+    // *********************************
 
     /** The rate at which supply decays each turn. */
     public static final double SUPPLY_DECAY = 0.00;
@@ -67,6 +71,9 @@ public interface GameConstants {
     // *********************************
     // ****** MINING *******************
     // *********************************
+
+    /** The amount of ore a team starts the game with. */
+    public static final int ORE_INITIAL_AMOUNT = 500;
 
     /** The amount of ore the HQ gets for free each turn. */
     public static final int HQ_ORE_INCOME = 5;
@@ -89,6 +96,12 @@ public interface GameConstants {
     /** The fraction of ore that a MINER gets from a square. */
     public static final int MINER_MINE_RATE = 4; // means 1/4
 
+    /** The movement delay gained from mining. */
+    public static final int MINING_MOVEMENT_DELAY = 2;
+
+    /** The loading delay from mining. */
+    public static final int MINING_LOADING_DELAY = 1;
+
     // *********************************
     // ****** UNIT PROPERTIES **********
     // *********************************
@@ -102,11 +115,22 @@ public interface GameConstants {
     /** The maximum number of missiles a launcher can have at a time. */
     public static final int MAX_MISSILE_COUNT = 8;
 
+    /** Bash radius of a basher. */
+    public static final int BASH_RADIUS_SQUARED = 2;
+
+    /** Missile explosion splash radius. */
+    public static final int MISSILE_RADIUS_SQUARED = 2;
+
+    /** Splash radius of HQ with tower bonus. */
+    public static final int HQ_SPLASH_RADIUS_SQUARED = 2;
+
     // *********************************
     // ****** COMMANDER ***** **********
     // *********************************
 
     public static final int XP_RANGE = 24;
+
+    public static final double REGEN_RATE = 1.0;
 
     public static final int XP_REQUIRED_LEADERSHIP = 1000;
     public static final int XP_REQUIRED_FLASH = 2000;

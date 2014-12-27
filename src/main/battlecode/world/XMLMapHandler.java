@@ -4,8 +4,6 @@ import battlecode.common.*;
 import battlecode.engine.ErrorReporter;
 import battlecode.server.Config;
 import battlecode.world.GameMap.MapProperties;
-import battlecode.world.signal.NodeBirthSignal;
-import battlecode.world.signal.NodeConnectionSignal;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -201,9 +199,6 @@ class XMLMapHandler extends DefaultHandler {
 
         public void createGameObject(GameWorld world, MapLocation loc) {
             if (team == Team.NEUTRAL) {
-//            	new InternalRobot(world, RobotType.ENCAMPMENT, loc, Team.NEUTRAL, false);
-//            	new InternalEncampment(world, loc);
-            	world.visitSignal(new NodeBirthSignal(loc));
             } else {
             	InternalRobot r = GameWorldFactory.createPlayer(world, RobotType.HQ, loc, team, null, false, 0);
                 world.setHQ(r, team);

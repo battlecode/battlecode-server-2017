@@ -49,7 +49,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
     private static boolean checkedFastHash = false, usingFastHash;
 
     public RoboMethodTree(final MethodVisitor mv, final String className, final int access, final String methodName, final String methodDesc, final String signature, final String[] exceptions, final String teamPackageName, final boolean debugMethodsEnabled, boolean silenced, boolean checkDisallowed) {
-        super(access, methodName, methodDesc, signature, exceptions);
+        super(Opcodes.ASM5, access, methodName, methodDesc, signature, exceptions);
         this.methodName = methodName;
         this.teamPackageName = teamPackageName;
         this.className = className;
@@ -162,7 +162,6 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
         return n;
     }
 
-    @SuppressWarnings("unchecked")
     private void addRobotDeathHandler() {
         LabelNode robotDeathLabel = new LabelNode(new Label());
         tryCatchBlocks.add(0, new TryCatchBlockNode(startLabel, robotDeathLabel, robotDeathLabel, "java/lang/VirtualMachineError"));
@@ -171,14 +170,13 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
         instructions.add(new InsnNode(ATHROW));
     }
 
-    @SuppressWarnings("unchecked")
     private void addDebugHandler() {
         LabelNode debugEndLabel = new LabelNode(new Label());
         tryCatchBlocks.add(new TryCatchBlockNode(startLabel, debugEndLabel, debugEndLabel, null));
-        instructions.insertBefore(nextInstruction(instructions.getFirst()), new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "incrementDebugLevel", "()V"));
+        instructions.insertBefore(nextInstruction(instructions.getFirst()), new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "incrementDebugLevel", "()V", false));
         instructions.add(debugEndLabel);
         instructions.add(new FrameNode(F_FULL, 0, new Object[0], 1, new Object[]{"java/lang/Throwable"}));
-        instructions.add(new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "decrementDebugLevel", "()V"));
+        instructions.add(new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "decrementDebugLevel", "()V", false));
         instructions.add(new InsnNode(ATHROW));
     }
 
@@ -199,7 +197,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
             case RETURN:
                 endOfBasicBlock(n);
                 if (methodName.startsWith("debug_") && methodDesc.endsWith("V")) {
-                    instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "decrementDebugLevel", "()V"));
+                    instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "decrementDebugLevel", "()V", false));
                 }
                 break;
             case ATHROW:
@@ -225,7 +223,14 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
     }
 
     private void visitMethodInsnNode(MethodInsnNode n) {
-
+    	
+    	// This will probably need to be fixed if support for jruby/jython/closure, etc. is to be added-back in
+    	// When do you so, it's probably necessary to make sure both the bootstrap method & the actual dynamic target are
+    	// instrumented properly. Otherwise you could probably do some crazy shit by stuffing all your computations into the bootstrap
+    	if(n.getOpcode() == INVOKE_DYNAMIC_INSN) {
+    		throw new RuntimeException("Invoke Dynamic probably not instrumented correctly by Battlecode Engine. Plz don't use for now");
+    	}
+    	
         if (n.name.equals("hashCode") && n.desc.equals("()I") && n.getOpcode() != INVOKESTATIC) {
             bytecodeCtr++;
             endOfBasicBlock(n);
@@ -233,13 +238,13 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
             // send the object, its hash code, and the hash code method owner to
             // ObjectHashCode for analysis
             instructions.insertBefore(n, new InsnNode(DUP));
-            instructions.insertBefore(n, new MethodInsnNode(n.getOpcode(), classReference(n.owner), "hashCode", "()I"));
+            instructions.insertBefore(n, new MethodInsnNode(n.getOpcode(), classReference(n.owner), "hashCode", "()I", false));
             instructions.insertBefore(n, new InsnNode(SWAP));
             if (n.getOpcode() == INVOKESPECIAL) {
                 instructions.insertBefore(n, new LdcInsnNode(Type.getObjectType(n.owner)));
             } else {
                 instructions.insertBefore(n, new InsnNode(DUP));
-                instructions.insertBefore(n, new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;"));
+                instructions.insertBefore(n, new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false));
             }
             n.name = usingFastHash ? "fastHashCode" : "hashCode";
             n.owner = "battlecode/engine/instrumenter/lang/ObjectHashCode";
@@ -255,7 +260,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 
         if (n.owner.equals("java/util/Random") && n.name.equals("<init>") &&
                 n.desc.equals("()V")) {
-            instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/lang/RoboRandom", "getMapSeed", "()J"));
+            instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/lang/RoboRandom", "getMapSeed", "()J", false));
             n.owner = "instrumented/java/util/Random";
             n.desc = "(J)V";
             return;
@@ -385,7 +390,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
     private void illegalMethod(MethodInsnNode n, String message) {
         if (InstrumentingClassLoader.lazy()) {
             instructions.insertBefore(n, new LdcInsnNode(message));
-            instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RoboMethodTree", "reportIllegalMethod", "(Ljava/lang/String;)V"));
+            instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RoboMethodTree", "reportIllegalMethod", "(Ljava/lang/String;)V", false));
         } else {
             ErrorReporter.report(message, false);
             throw new InstrumentationException();
@@ -424,8 +429,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
         n.signature = fieldSignatureReference(n.signature);
     }
 
-    @SuppressWarnings("unchecked")
-    private void replaceVars(List l) {
+    private void replaceVars(List<Object> l) {
         if (l == null)
             return;
         for (int i = 0; i < l.size(); i++) {
@@ -445,7 +449,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
         if (bytecodeCtr == 0)
             return;
         instructions.insertBefore(n, new LdcInsnNode(new Integer(bytecodeCtr)));
-        instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "incrementBytecodes", "(I)V"));
+        instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "incrementBytecodes", "(I)V", false));
         bytecodeCtr = 0;
     }
 

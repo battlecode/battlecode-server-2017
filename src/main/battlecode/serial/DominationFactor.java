@@ -5,27 +5,27 @@ package battlecode.serial;
  */
 public enum DominationFactor {
     /**
-     * Beat by having more energon at the end of the round limit
+     * Beat via a HANDWASHSTATION count or by team ID.
      */
     WON_BY_DUBIOUS_REASONS,
     /**
-     * Beat by having more archons at the end of the round limit
+     * Beat by tiebreaks.
      */
     BARELY_BEAT,
     /**
-     * Beat by having more points
+     * Beat by destroying enemy HQ.
      */
     BEAT,
     /**
-     * Beat by having greater than the minimum points and greater than the min difference as well *
+     * N/A
      */
     OWNED,
     /**
-     * Beat by killing the enemy's units other than towers
+     * N/A
      */
     PWNED,
     /**
-     * Beat by killing the enemy's units other than towers w/o losing any archons
+     * N/A
      */
     DESTROYED;
 }
