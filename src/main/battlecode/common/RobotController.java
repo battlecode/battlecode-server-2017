@@ -450,6 +450,13 @@ public interface RobotController {
     public boolean canSpawn(Direction dir, RobotType type);
 
     /**
+     * Checks to make sure you have the ore requirements to spawn, and that the right unit is trying to spawn.
+     * @param type the type to check.
+     * @return whether the spawn requirements are met.
+     */
+    public boolean hasSpawnRequirements(RobotType type);
+
+    /**
      * Queues a spawn action to be performed at the end of this robot's turn.
      * When the action is executed, a new robot will be created adjacent to the HQ
      * in the given direction.  The square must not already be occupied.
@@ -470,6 +477,14 @@ public interface RobotController {
      * @return whether it is possible to build a building of the given type in the given direction.
      */
     public boolean canBuild(Direction dir, RobotType type);
+
+    /**
+     * Returns whether you have the ore and the dependencies to build the given robot. Makes sure you are a building unit.
+     *
+     * @param type the type to build.
+     * @return whether the requirements to build are met.
+     */
+    public boolean hasBuildRequirements(RobotType type);
    
     /**
      * Builds a building in the given direction. The building will initially be inactive for a number of turns (during which this robot cannot move or attack). After several turns, the building will become active.

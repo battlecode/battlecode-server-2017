@@ -640,6 +640,21 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return true;
     }
 
+    public boolean hasSpawnRequirements(RobotType type) {
+        if (!isSpawningUnit() || type == RobotType.COMMANDER && hasCommander()) {
+            return false;
+        }
+        double cost = type.oreCost;
+        if (type == RobotType.COMMANDER) {
+            cost *= (1 << Math.min(gameWorld.getCommandersSpawned(robot.getTeam()), 8));
+        }
+        if (cost > gameWorld.resources(getTeam())) {
+            return false;
+        }
+
+        return true;
+    }
+
     public void spawn(Direction dir, RobotType type) throws GameActionException {
         if (!isSpawningUnit()) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Only certain buildings can spawn");
@@ -672,7 +687,16 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public boolean canBuild(Direction dir, RobotType type) {
-        if (!type.isBuilding)
+        MapLocation loc = getLocation().add(dir);
+        if (!gameWorld.canMove(loc, type)) {
+            return false;
+        }
+
+        if (!isBuildingUnit()) {
+            return false;
+        }
+
+        if (!type.isBuildable())
             return false;
 
         // check dependencies
@@ -685,9 +709,26 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             return false;
         }
 
-        MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(loc, robot.type))
+        return true;
+    }
+
+    public boolean hasBuildRequirements(RobotType type) {
+        if (!isBuildingUnit()) {
             return false;
+        }
+
+        if (!type.isBuildable())
+            return false;
+
+        // check dependencies
+        if (gameWorld.getRobotTypeCount(getTeam(), type.dependency) == 0) {
+            return false;
+        }
+
+        double cost = type.oreCost;
+        if (cost > gameWorld.resources(getTeam())) {
+            return false;
+        }
 
         return true;
     }
@@ -695,7 +736,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public void build(Direction dir, RobotType type) throws GameActionException {
         if (!isBuildingUnit())
             throw new GameActionException(CANT_DO_THAT_BRO, "Only BEAVER can build");
-        if (!type.isBuilding)
+        if (!type.isBuildable())
             throw new GameActionException(CANT_DO_THAT_BRO, "Can only build buildings");
 
         // check dependencies

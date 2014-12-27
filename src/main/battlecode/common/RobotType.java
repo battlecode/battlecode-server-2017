@@ -76,6 +76,10 @@ public enum RobotType {
         return this == BEAVER;
     }
 
+    public boolean isBuildable() {
+        return isBuilding && this != HQ && this != TOWER;
+    }
+
     public boolean canSpawn() {
         return isBuilding && this != TOWER && this != SUPPLYDEPOT;
     }
