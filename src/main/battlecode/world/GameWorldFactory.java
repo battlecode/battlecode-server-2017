@@ -31,7 +31,7 @@ public class GameWorldFactory {
             robot = new InternalRobot(gw, type, loc, t, wakeDelay, buildDelay);
         }
 
-        loadPlayer(gw, robot, t, parent);
+        loadPlayer(gw, robot, t, parent, buildDelay);
         return robot;
     }
 
@@ -40,8 +40,8 @@ public class GameWorldFactory {
         return createPlayer(gw, type, loc, t, parent, true, buildDelay);
     }
 
-    private static void loadPlayer(GameWorld gw, InternalRobot robot, Team t, InternalRobot parent) {
-        gw.addSignal(new SpawnSignal(robot, parent, 0));
+    private static void loadPlayer(GameWorld gw, InternalRobot robot, Team t, InternalRobot parent, int buildDelay) {
+        gw.addSignal(new SpawnSignal(robot, parent, buildDelay));
         RobotControllerImpl rc = new RobotControllerImpl(gw, robot);
         String teamName = gw.getTeamName(t);
         PlayerFactory.loadPlayer(rc, teamName);

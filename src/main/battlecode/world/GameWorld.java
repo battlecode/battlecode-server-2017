@@ -829,8 +829,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
         MapLocation loc = s.getNewLoc();//(s.isMovingForward() ? r.getLocation().add(r.getDirection()) : r.getLocation().add(r.getDirection().opposite()));
 
-        r.setLocation(loc);
-
+        r.setLocation(loc);     
         addSignal(s);
     }
 
