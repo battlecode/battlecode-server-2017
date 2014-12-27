@@ -52,11 +52,9 @@ public interface GameConstants {
     /** Bytecodes executed per unit of supply. */
     public static final int BYTECODES_PER_SUPPLY = 1000;
 
-    /** The amount of ore a team starts the game with. */
-    public static final int ORE_INITIAL_AMOUNT = 500;
-
-    /** The amount of ore it costs to put on a hat. */
-    public static final int HAT_ORE_COST = 1000;
+    // *********************************
+    // ****** SUPPLY *******************
+    // *********************************
 
     /** The rate at which supply decays each turn. */
     public static final double SUPPLY_DECAY = 0.00;
@@ -73,6 +71,9 @@ public interface GameConstants {
     // *********************************
     // ****** MINING *******************
     // *********************************
+
+    /** The amount of ore a team starts the game with. */
+    public static final int ORE_INITIAL_AMOUNT = 500;
 
     /** The amount of ore the HQ gets for free each turn. */
     public static final int HQ_ORE_INCOME = 5;
@@ -116,6 +117,12 @@ public interface GameConstants {
 
     /** Bash radius of a basher. */
     public static final int BASH_RADIUS_SQUARED = 2;
+
+    /** Missile explosion splash radius. */
+    public static final int MISSILE_RADIUS_SQUARED = 2;
+
+    /** Splash radius of HQ with tower bonus. */
+    public static final int HQ_SPLASH_RADIUS_SQUARED = 2;
 
     // *********************************
     // ****** COMMANDER ***** **********
