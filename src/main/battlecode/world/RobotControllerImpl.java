@@ -193,6 +193,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return checkCanSense(loc);
     }
 
+    public boolean isLocationOccupied(MapLocation loc) throws GameActionException {
+        assertNotNull(loc);
+        assertCanSense(loc);
+        InternalRobot obj = (InternalRobot) gameWorld.getObject(loc);
+        return obj != null;
+    }
+
     public RobotInfo senseRobotAtLocation(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
         assertCanSense(loc);
@@ -291,15 +298,33 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ****** MOVEMENT METHODS ***********
     // ***********************************
 
-    public void assertNotMoving() throws GameActionException {
+    public boolean isMovementActive() {
+        return getTurnsUntilMovement() < 1;
+    }
+
+    public void assertIsMovementActive() throws GameActionException {
         if (!isMovementActive()) {
-            throw new GameActionException(NOT_ACTIVE, "This robot has movement delay and cannot move.");
+            throw new GameActionException(NOT_ACTIVE, "This robot has movement delay.");
         }
     }
 
-    public void assertCanMove(Direction d) throws GameActionException {
-        if (!canMove(d)) {
-            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move in the given direction: " + d);
+    public void assertValidRobotPlacement(RobotType type, MapLocation loc) throws GameActionException {
+        if (!isPathable(type, loc)) {
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move robot of given type to that location.");
+        }
+    }
+
+    public boolean isPathable(RobotType type, MapLocation loc) {
+        return gameWorld.canMove(loc, type);
+    }
+
+    public boolean isMovingUnit() {
+        return robot.type.canMove();
+    }
+
+    public void assertIsMovingUnit() throws GameActionException {
+        if (!isMovingUnit()) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "This unit cannot move.");
         }
     }
 
@@ -310,22 +335,21 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
     }
 
-    public boolean isMovementActive() {
-        return getTurnsUntilMovement() < 1;
+    public boolean isValidMoveDirection(Direction d) {
+        if (d == null || d == Direction.NONE || d == Direction.OMNI)
+            return false;
+        return isMovingUnit() && gameWorld.canMove(getLocation().add(d), robot.type);
     }
 
-    public boolean canMove(Direction d) {
-        if (d == Direction.NONE || d == Direction.OMNI)
-            return false;
-        assertValidDirection(d);
-        return gameWorld.canMove(getLocation().add(d), robot.type);
+    public boolean canMove(Direction dir) {
+        return isMovingUnit() && isValidMoveDirection(dir);
     }
 
     public void move(Direction d) throws GameActionException {
-        if (robot.type.isBuilding)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Buildings can't move");
-        assertNotMoving();
-        assertCanMove(d);
+        assertIsMovementActive();
+        assertIsMovingUnit();
+        assertValidDirection(d);
+        assertValidRobotPlacement(robot.type, getLocation().add(d));
         double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()));
 
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
@@ -340,38 +364,49 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return getTurnsUntilAttack() < 1;
     }
 
-    protected void assertNotAttacking() throws GameActionException {
+    public boolean isAttackingUnit() {
+        return robot.type.canAttack();
+    }
+
+    public boolean canAttackLocation(MapLocation loc) {
+        return isAttackingUnit() && isValidAttackLocation(loc) && robot.type != RobotType.BASHER;
+    }
+
+    protected void assertIsAttackActive() throws GameActionException {
         if (!isAttackActive())
             throw new GameActionException(NOT_ACTIVE, "This robot has action delay and cannot attack.");
     }
 
-    protected void assertCanAttack(MapLocation loc) throws GameActionException {
-        if (!canAttackSquare(loc))
+    protected void assertIsAttackingUnit() throws GameActionException {
+        if (!isAttackingUnit()) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Not attacking unit.");
+        }
+    }
+
+    protected void assertValidAttackLocation(MapLocation loc) throws GameActionException {
+        if (!isValidAttackLocation(loc))
             throw new GameActionException(OUT_OF_RANGE, "That location is out of this robot's attack range");
     }
 
-    public boolean canAttackSquare(MapLocation loc) {
+    public boolean isValidAttackLocation(MapLocation loc) {
         assertNotNull(loc);
-        return gameWorld.canAttackSquare(robot, loc);
+        return isAttackingUnit() && gameWorld.canAttackSquare(robot, loc);
     }
 
-    public void attackSquare(MapLocation loc) throws GameActionException {
-        assertNotAttacking();
+    public void attackLocation(MapLocation loc) throws GameActionException {
+        assertIsAttackActive();
+        assertIsAttackingUnit();
         assertNotNull(loc);
-        assertCanAttack(loc);
+        assertValidAttackLocation(loc);
         if (robot.type == RobotType.BASHER) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Bashers can only attack using the bash() method.");
-        } else if (robot.type == RobotType.MISSILE) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Missiles can only attack using the explode() method.");
-        } else if (robot.type.isBuilding && robot.type != RobotType.HQ && robot.type != RobotType.TOWER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Buildings can't attack.");
         }
 
         robot.activateAttack(new AttackSignal(robot, loc), robot.getAttackDelayForType(), robot.getCooldownDelayForType());
     }
 
     public void bash() throws GameActionException {
-        assertNotAttacking();
+        assertIsAttackActive();
         if (robot.type != RobotType.BASHER) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Only Bashers can attack using the attack() method.");
         }
@@ -380,9 +415,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void explode() throws GameActionException {
-        if (robot.type != RobotType.MISSILE) {
-            throw new GameActionException(GameActionExceptionType.CANT_DO_THAT_BRO, "only missiles can self destruct");
-        }
         if (robot.type == RobotType.MISSILE) {
             robot.setSelfDestruct();
         }
@@ -413,7 +445,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
         //is this kosher? i hope so
         
-        assertNotMoving();
+        assertIsMovementActive();
         if (!gameWorld.canMove(loc, robot.type)) {
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot teleport to " + loc.toString());
         }
@@ -498,11 +530,23 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ****** MINING METHODS *************
     // ***********************************
 
-    public void mine() throws GameActionException {
-        if (robot.type != RobotType.BEAVER && robot.type != RobotType.MINER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only BEAVER and MINER can mine");
+    public boolean isMiningUnit() {
+        return robot.type.canMine();
+    }
+
+    public boolean canMine() {
+        return isMiningUnit();
+    }
+
+    public void assertIsMiningUnit() throws GameActionException {
+        if (!isMiningUnit()) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Cannot mine.");
         }
-        assertNotMoving();
+    }
+
+    public void mine() throws GameActionException {
+        assertIsMovementActive();
+        assertIsMiningUnit();
         MapLocation loc = getLocation();
 		
 		robot.activateMovement(new MineSignal(loc, getTeam(), getType()), GameConstants.MINING_LOADING_DELAY, GameConstants.MINING_MOVEMENT_DELAY);
@@ -513,22 +557,30 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }   
 
     // ***********************************
-    // ****** BUILDING/SPAWNING **********
+    // ****** LAUNCHER *******************
     // ***********************************
 
-    public DependencyProgress checkDependencyProgress(RobotType type) {
-        if (gameWorld.getRobotTypeCount(robot.getTeam(), type) > 0) {
-            return DependencyProgress.DONE;
-        } else if (gameWorld.getTotalRobotTypeCount(robot.getTeam(), type) > 0) {
-            return DependencyProgress.INPROGRESS;
-        } else {
-            return DependencyProgress.NONE;
+    public boolean isLaunchingUnit() {
+        return robot.type.canLaunch();
+    }
+
+    public boolean canLaunch(Direction dir) {
+        if (!isLaunchingUnit()) {
+            return false;
         }
+
+        MapLocation loc = getLocation().add(dir);
+        if (!gameWorld.canMove(loc, RobotType.MISSILE)) {
+            return false;
+        }
+
+        return !robot.movedThisTurn() && robot.getMissileCount() > 0;
     }
 
     public void launchMissile(Direction dir) throws GameActionException {
-        if (robot.type != RobotType.LAUNCHER)
+        if (!isLaunchingUnit()) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Only LAUNCHER can launch missiles");
+        }
 
         if (robot.getMissileCount() == 0) {
             throw new GameActionException(CANT_DO_THAT_BRO, "No missiles to launch");
@@ -550,12 +602,37 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         robot.launchMissile(loc);
     }
 
-    public boolean canSpawnRobotType(RobotType type) {
-        if (!robot.type.isBuilding || type.spawnSource != robot.type || type == RobotType.COMMANDER && hasCommander()) {
+    // ***********************************
+    // ****** BUILDING/SPAWNING **********
+    // ***********************************
+
+    public DependencyProgress checkDependencyProgress(RobotType type) {
+        if (gameWorld.getRobotTypeCount(robot.getTeam(), type) > 0) {
+            return DependencyProgress.DONE;
+        } else if (gameWorld.getTotalRobotTypeCount(robot.getTeam(), type) > 0) {
+            return DependencyProgress.INPROGRESS;
+        } else {
+            return DependencyProgress.NONE;
+        }
+    }
+
+    public boolean isSpawningUnit() {
+        return robot.type.canSpawn();
+    }
+
+    public boolean canSpawn(Direction dir, RobotType type) {
+        MapLocation loc = getLocation().add(dir);
+        if (!gameWorld.canMove(loc, robot.type)) {
             return false;
         }
 
+        if (!isSpawningUnit() || type == RobotType.COMMANDER && hasCommander()) {
+            return false;
+        }
         double cost = type.oreCost;
+        if (type == RobotType.COMMANDER) {
+            cost *= (1 << Math.min(gameWorld.getCommandersSpawned(robot.getTeam()), 8));
+        }
         if (cost > gameWorld.resources(getTeam())) {
             return false;
         }
@@ -563,17 +640,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return true;
     }
 
-    public boolean canSpawnInDirection(Direction dir) {
-        MapLocation loc = getLocation().add(dir);
-        if (!gameWorld.canMove(loc, robot.type))
-            return false;
-
-        return true;
-    }
-
     public void spawn(Direction dir, RobotType type) throws GameActionException {
-        if (!robot.type.isBuilding) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only buildings can spawn");
+        if (!isSpawningUnit()) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only certain buildings can spawn");
         }
         if (type.spawnSource != robot.type) {
             throw new GameActionException(CANT_DO_THAT_BRO, "This spawn can only be by a certain type");
@@ -582,7 +651,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Only one commander per team!");
         }
 
-        assertNotMoving();
+        assertIsMovementActive();
 
         double cost = type.oreCost;
         if (type == RobotType.COMMANDER) {
@@ -598,7 +667,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
                 new SpawnSignal(loc, type, robot.getTeam(), robot, 0), 0, type.buildTurns);
     }
 
-    public boolean canBuildRobotType(RobotType type) {
+    public boolean isBuildingUnit() {
+        return robot.type.canBuild();
+    }
+
+    public boolean canBuild(Direction dir, RobotType type) {
         if (!type.isBuilding)
             return false;
 
@@ -612,10 +685,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             return false;
         }
 
-        return true;
-    }
-
-    public boolean canBuildInDirection(Direction dir) {
         MapLocation loc = getLocation().add(dir);
         if (!gameWorld.canMove(loc, robot.type))
             return false;
@@ -624,7 +693,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
     
     public void build(Direction dir, RobotType type) throws GameActionException {
-        if (robot.type != RobotType.BEAVER)
+        if (!isBuildingUnit())
             throw new GameActionException(CANT_DO_THAT_BRO, "Only BEAVER can build");
         if (!type.isBuilding)
             throw new GameActionException(CANT_DO_THAT_BRO, "Can only build buildings");
@@ -634,7 +703,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build of " + type);
         }
 
-        assertNotMoving();
+        assertIsMovementActive();
 
         double cost = type.oreCost;
         
@@ -654,6 +723,30 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //****** UPGRADE METHODS ************
     //***********************************
 
+    public boolean isResearchingUnit() {
+        return robot.type.canResearch();
+    }
+
+    public boolean canResearch(Upgrade upgrade) {
+        if (!isResearchingUnit()) {
+            return false;
+        }
+
+        if (gameWorld.hasUpgrade(getTeam(), upgrade)) {
+            return false;
+        }
+
+        if (checkResearchProgress(upgrade) > 0) {
+            return false;
+        }
+
+        if (upgrade.oreCost > gameWorld.resources(getTeam())) {
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean hasUpgrade(Upgrade upgrade) {
         assertNotNull(upgrade);
         return gameWorld.hasUpgrade(getTeam(), upgrade);
@@ -665,7 +758,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void researchUpgrade(Upgrade upgrade) throws GameActionException {
-        if (robot.type != RobotType.HQ) {
+        if (!isResearchingUnit()) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Only HQ can research.");
         }
         if (gameWorld.hasUpgrade(getTeam(), upgrade))
@@ -673,17 +766,16 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (checkResearchProgress(upgrade) > 0) {
             throw new GameActionException(CANT_DO_THAT_BRO, "You already started researching this upgrade. ("+upgrade+")");
         }
-        assertNotMoving();
+        assertIsMovementActive();
         assertHaveResource(upgrade.oreCost);
         gameWorld.adjustResources(getTeam(), -upgrade.oreCost);
         robot.activateResearch(new ResearchSignal(robot, upgrade), upgrade.numRounds, upgrade.numRounds);
     }
     
-    public int checkResearchProgress(Upgrade upgrade) throws GameActionException {
+    public int checkResearchProgress(Upgrade upgrade) {
         return gameWorld.getUpgradeProgress(getTeam(), upgrade);
     }
    
-    
     // ***********************************
     // ****** OTHER ACTION METHODS *******
     // ***********************************

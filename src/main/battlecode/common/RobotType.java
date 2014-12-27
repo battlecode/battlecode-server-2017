@@ -56,6 +56,30 @@ public enum RobotType {
         return attackPower > 0;
     }
 
+    public boolean canMove() {
+        return !isBuilding;
+    }
+
+    public boolean canMine() {
+        return this == MINER || this == BEAVER;
+    }
+
+    public boolean canResearch() {
+        return this == HQ;
+    }
+
+    public boolean canLaunch() {
+        return this == LAUNCHER;
+    }
+
+    public boolean canBuild() {
+        return this == BEAVER;
+    }
+
+    public boolean canSpawn() {
+        return isBuilding && this != TOWER && this != SUPPLYDEPOT;
+    }
+
     RobotType(boolean isBuilding,
               RobotType spawnSource,
               RobotType dependency,
