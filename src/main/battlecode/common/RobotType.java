@@ -29,7 +29,7 @@ public enum RobotType {
     MINER       (false,        MINERFACTORY, null,  50,  20,  8,  50,  3,  5, 2, 2, 2, 1, 24, 10000),
     DRONE       (false,             HELIPAD, null, 125,  30,  2,  70,  8, 10, 1, 3, 0, 0, 24, 10000),
     TANK        (false,         TANKFACTORY, null, 250,  50, 15, 160, 20, 15, 2, 3, 2, 2, 24, 10000),
-    COMMANDER   (false,       TRAININGFIELD, null, 100,  80,  5, 120,  8, 10, 2, 1, 0, 0, 24, 10000),
+    COMMANDER   (false,       TRAININGFIELD, null, 100,  80,  5, 120, 10, 10, 2, 1, 0, 0, 24, 10000),
     LAUNCHER    (false,        AEROSPACELAB, null, 400, 100, 25, 400,  0,  0, 4, 0, 0, 0, 24, 10000),
     MISSILE     (false,            LAUNCHER, null,   0,   6,  0,   3, 20,  2, 1, 0, 0, 0, 24,   500),
     ;
