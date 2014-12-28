@@ -509,7 +509,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
 
         // missiles should die automatically
-        if (type == RobotType.MISSILE && roundsAlive >= 5) {
+        if (type == RobotType.MISSILE && roundsAlive >= GameConstants.MISSILE_LIFESPAN) {
+            setSelfDestruct();
             suicide();
         }
         

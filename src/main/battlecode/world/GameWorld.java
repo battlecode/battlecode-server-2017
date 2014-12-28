@@ -772,7 +772,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                     if (!target.getLocation().equals(targetLoc)) {
                         rate *= 0.5;
                     }
-                    target.takeDamage((attacker.type.attackPower + underLeadership) * rate, attacker);
+                    double damage = (attacker.type.attackPower + underLeadership) * rate;
+                    if (target.type == RobotType.MISSILE) {
+                        damage = Math.min(damage, GameConstants.MISSILE_MAXIMUM_DAMAGE);
+                    }
+                    target.takeDamage(damage, attacker);
                 }
             }
 			break;
@@ -942,7 +946,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         double damage = attacker.type.attackPower;
         InternalRobot[] targets = getAllRobotsWithinRadiusSq(targetLoc, GameConstants.MISSILE_RADIUS_SQUARED);
         for (InternalRobot target : targets) {
-            target.takeDamage(damage, attacker);
+            if (target.type == RobotType.MISSILE) {
+                target.takeDamage(Math.min(damage, GameConstants.MISSILE_MAXIMUM_DAMAGE), attacker);
+            } else {
+                target.takeDamage(damage, attacker);
+            }
         }
 
         addSignal(s);

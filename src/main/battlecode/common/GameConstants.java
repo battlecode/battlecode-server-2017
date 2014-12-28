@@ -112,8 +112,14 @@ public interface GameConstants {
     /** The rate at which a launcher spawns missiles. */
     public static final int MISSILE_SPAWN_FREQUENCY = 6;
 
+    /** Maximum damage a missile can take. */
+    public static final double MISSILE_MAXIMUM_DAMAGE = 1.0;
+
     /** The maximum number of missiles a launcher can have at a time. */
     public static final int MAX_MISSILE_COUNT = 8;
+
+    /** After this many turns, a missile automatically detonates. */
+    public static final int MISSILE_LIFESPAN = 5;
 
     /** Bash radius of a basher. */
     public static final int BASH_RADIUS_SQUARED = 2;
