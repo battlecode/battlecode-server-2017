@@ -266,16 +266,21 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void decrementDelays() {
-		timeUntilAttack -= 0.5;
-		timeUntilMovement -= 0.5;
-		double maxDelay = Math.max(timeUntilAttack,timeUntilMovement);
-		if (maxDelay > 0.0) {
-			//fraction of upkeep that can be paid
-			double supplyDelayReduction = Math.min(Math.min(0.5,getSupplyLevel()/(2*type.supplyUpkeep)),maxDelay);
-			timeUntilAttack-=supplyDelayReduction;
-			timeUntilMovement-=supplyDelayReduction;
-			decreaseSupplyLevel(2*supplyDelayReduction*type.supplyUpkeep);
-		}
+        if (type.supplyUpkeep > 0) {
+            timeUntilAttack -= 0.5;
+            timeUntilMovement -= 0.5;
+            double maxDelay = Math.max(timeUntilAttack,timeUntilMovement);
+            if (maxDelay > 0.0) {
+                //fraction of upkeep that can be paid
+                double supplyDelayReduction = Math.min(Math.min(0.5,getSupplyLevel()/(2*type.supplyUpkeep)),maxDelay);
+                timeUntilAttack-=supplyDelayReduction;
+                timeUntilMovement-=supplyDelayReduction;
+                decreaseSupplyLevel(2*supplyDelayReduction*type.supplyUpkeep);
+            }
+        } else {
+            timeUntilAttack--;
+            timeUntilMovement--;
+        }
 
         if (timeUntilAttack < 0.0) {
             timeUntilAttack = 0.0;
