@@ -527,6 +527,12 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             suicide();
         }
         
+        // perform attacks
+        if (attackSignal != null) {
+        	myGameWorld.visitSignal(attackSignal);
+        	attackSignal = null;
+        }
+        
         // perform movements (moving, spawning, mining)
         if (movementSignal != null) {
             myGameWorld.visitSignal(movementSignal);
@@ -543,12 +549,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         if (researchSignal != null) {
             myGameWorld.visitSignal(researchSignal);
             researchSignal = null;
-        }
-        
-        // perform attacks
-        if (attackSignal != null) {
-        	myGameWorld.visitSignal(attackSignal);
-        	attackSignal = null;
         }
     }
 
