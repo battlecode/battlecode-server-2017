@@ -32,6 +32,7 @@ import battlecode.engine.GenericController;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.world.signal.AttackSignal;
+import battlecode.world.signal.BuildSignal;
 import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.IndicatorDotSignal;
 import battlecode.world.signal.IndicatorLineSignal;
@@ -731,7 +732,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
         int delay = type.buildTurns;
         robot.activateMovement(
-                new SpawnSignal(loc, type, robot.getTeam(), robot, delay), delay, delay);
+                new BuildSignal(loc, type, robot.getTeam(), robot, delay), delay, delay);
     }
 
     //***********************************
