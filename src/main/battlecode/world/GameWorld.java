@@ -270,6 +270,16 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 InternalRobot[] res = { getRobot(center) };
                 return res;
             }
+        } else if (radiusSquared < 16) {
+            MapLocation[] locs = getAllMapLocationsWithinRadiusSq(center, radiusSquared);
+            ArrayList<InternalRobot> robots = new ArrayList<InternalRobot>();
+            for (MapLocation loc : locs) {
+                InternalRobot res = getRobot(loc);
+                if (res != null) {
+                    robots.add(res);
+                }
+            }
+            return robots.toArray(new InternalRobot[robots.size()]);
         }
 
         ArrayList<InternalRobot> robots = new ArrayList<InternalRobot>();
@@ -770,10 +780,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             for (InternalRobot target : targets) {
                 // disable friendly fire
                 if (target.getTeam() != attacker.getTeam()) {
-                    if (!target.getLocation().equals(targetLoc)) {
-                        rate *= 0.5;
+                    double finalRate = rate;
+                    if (!target.getLocation().equals(targetLoc) && attacker.type == RobotType.HQ) {
+                        finalRate *= 0.5; // splash is only 50% damage for HQ
                     }
-                    double damage = (attacker.type.attackPower + underLeadership) * rate;
+                    double damage = (attacker.type.attackPower + underLeadership) * finalRate;
                     if (target.type == RobotType.MISSILE) {
                         damage = Math.min(damage, GameConstants.MISSILE_MAXIMUM_DAMAGE);
                     }
