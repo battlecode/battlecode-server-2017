@@ -759,10 +759,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 }
             }
 
-            int underLeadership = 0;
+            double underLeadership = 0;
             InternalRobot commander = getCommander(attacker.getTeam());
             if (commander != null && hasSkill(attacker.getTeam(), CommanderSkillType.LEADERSHIP) && commander.getLocation().distanceSquaredTo(attacker.getLocation()) <= GameConstants.LEADERSHIP_RANGE) {
-                underLeadership = 1;
+                underLeadership = GameConstants.LEADERSHIP_DAMAGE_BONUS;
             }
 
             InternalRobot[] targets = getAllRobotsWithinRadiusSq(targetLoc, splashRadius);

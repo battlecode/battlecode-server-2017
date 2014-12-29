@@ -452,12 +452,20 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return gameWorld.hasSkill(robot.getTeam(), skill);
     }
 
+    public void assertHasLearnedSkill(CommanderSkillType skill) throws GameActionException {
+        if (!hasLearnedSkill(skill)) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Not enough XP for that skill.");
+        }
+    }
+
     public void castFlash(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
 
         if (robot.type != RobotType.COMMANDER) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Only Commanders can cast Flash.");
         }
+
+        assertHasLearnedSkill(CommanderSkillType.FLASH);
 
         //is this kosher? i hope so
         assertIsMovementActive();
