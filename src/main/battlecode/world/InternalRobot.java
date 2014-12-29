@@ -17,6 +17,7 @@ import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
 import battlecode.world.signal.AttackSignal;
+import battlecode.world.signal.BashSignal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.DropSupplySignal;
@@ -265,7 +266,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void decrementDelays() {
-        
 		timeUntilAttack -= 0.5;
 		timeUntilMovement -= 0.5;
 		double maxDelay = Math.max(timeUntilAttack,timeUntilMovement);
@@ -276,21 +276,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 			timeUntilMovement-=supplyDelayReduction;
 			decreaseSupplyLevel(2*supplyDelayReduction*type.supplyUpkeep);
 		}
-		
-		/*
-		if (timeUntilAttack >= 1 || timeUntilMovement >= 1) {
-            // this means we need to pay upkeep
-            if (getSupplyLevel() >= type.supplyUpkeep) {
-                // can afford! all good
-                decreaseSupplyLevel(type.supplyUpkeep);
-                timeUntilAttack--;
-                timeUntilMovement--;
-            } else {
-                // cannot afford, so we slow down the decrease
-                timeUntilAttack -= 0.5;
-                timeUntilMovement -= 0.5;
-            }
-        }*/
 
         if (timeUntilAttack < 0.0) {
             timeUntilAttack = 0.0;
@@ -549,6 +534,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         if (researchSignal != null) {
             myGameWorld.visitSignal(researchSignal);
             researchSignal = null;
+        }
+
+        // bashers should bash()
+        if (type == RobotType.BASHER) {
+            myGameWorld.visitSignal(new BashSignal(this, getLocation()));
         }
     }
 

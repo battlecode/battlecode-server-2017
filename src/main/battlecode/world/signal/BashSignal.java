@@ -9,33 +9,28 @@ import battlecode.world.InternalRobot;
  *
  * @author adamd
  */
-public class AttackSignal extends Signal {
+public class BashSignal extends Signal {
 
     private static final long serialVersionUID = 8064711239305833273L;
 
     /**
-     * TheID of the robot that attacked.
+     * The ID of the robot that bashed.
      */
     public final int robotID;
 
     /**
-     * The location that the robot attacked
+     * The location that the robot bashed.
      */
     public final MapLocation targetLoc;
 
     /**
-     * Creates a signal for a robot attack.
+     * Creates a signal for a robot bash.
      *
      * @param robot     the robot that attacked
      * @param targetLoc the location that the robot attacked
      */
-    public AttackSignal(InternalRobot robot, MapLocation targetLoc) {
+    public BashSignal(InternalRobot robot, MapLocation targetLoc) {
         this.robotID = robot.getID();
-        this.targetLoc = targetLoc;
-    }
-
-    public AttackSignal(int ID, MapLocation targetLoc) {
-        this.robotID = ID;
         this.targetLoc = targetLoc;
     }
 

@@ -405,19 +405,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertValidAttackLocation(loc);
 
         if (robot.type == RobotType.BASHER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers can only attack using the bash() method.");
+            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers attack automatically.");
         }
 
         robot.activateAttack(new AttackSignal(robot, loc), robot.getAttackDelayForType(), robot.getCooldownDelayForType());
-    }
-
-    public void bash() throws GameActionException {
-        assertIsAttackActive();
-        if (robot.type != RobotType.BASHER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only Bashers can attack using the attack() method.");
-        }
-
-        robot.activateAttack(new AttackSignal(robot, getLocation()), robot.getAttackDelayForType(), robot.getCooldownDelayForType());
     }
 
     public void explode() throws GameActionException {

@@ -33,6 +33,7 @@ import battlecode.serial.DominationFactor;
 import battlecode.serial.GameStats;
 import battlecode.serial.RoundStats;
 import battlecode.world.signal.AttackSignal;
+import battlecode.world.signal.BashSignal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.BytecodesUsedSignal;
 import battlecode.world.signal.CastSignal;
@@ -786,6 +787,13 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         
         addSignal(s);
         removeDead();
+    }
+
+    public void visitBashSignal(BashSignal s) {
+        // bashing is actually just the equivalent of attacking, so we can use visitAttackSignal
+        visitAttackSignal(new AttackSignal(s.getRobotID(), s.getTargetLoc()));
+
+        addSignal(s);
     }
 
     public void visitBroadcastSignal(BroadcastSignal s) {

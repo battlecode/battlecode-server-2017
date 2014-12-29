@@ -269,13 +269,6 @@ public interface RobotController {
      * @throws GameActionException if the robot cannot attack the given square.
      */
     public void attackLocation(MapLocation loc) throws GameActionException;
-    
-    /**
-     * BASHERS ONLY. Attacks all surrounding enemies.
-     *
-     * @throws GameActionException if the robot is not a BASHER or if attack is not allowed.
-     */
-    public void bash() throws GameActionException;
 
     /**
      * MISSILE ONLY. Attacks all surrounding enemies. Other units can call this but will just result in disintegration.
