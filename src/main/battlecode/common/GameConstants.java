@@ -146,6 +146,7 @@ public interface GameConstants {
     public static final int BURST_DAMAGE = 80;
 
     public static final int LEADERSHIP_RANGE = 15;
+    public static final double LEADERSHIP_DAMAGE_BONUS = 1;
 
     public static final int INTERVENTION_RANGE = 15;
     public static final int INTERVENTION_LENGTH = 10;

@@ -32,6 +32,7 @@ import battlecode.engine.GenericController;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.world.signal.AttackSignal;
+import battlecode.world.signal.BuildSignal;
 import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.IndicatorDotSignal;
 import battlecode.world.signal.IndicatorLineSignal;
@@ -405,19 +406,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertValidAttackLocation(loc);
 
         if (robot.type == RobotType.BASHER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers can only attack using the bash() method.");
+            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers attack automatically.");
         }
 
         robot.activateAttack(new AttackSignal(robot, loc), robot.getAttackDelayForType(), robot.getCooldownDelayForType());
-    }
-
-    public void bash() throws GameActionException {
-        assertIsAttackActive();
-        if (robot.type != RobotType.BASHER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only Bashers can attack using the attack() method.");
-        }
-
-        robot.activateAttack(new AttackSignal(robot, getLocation()), robot.getAttackDelayForType(), robot.getCooldownDelayForType());
     }
 
     public void explode() throws GameActionException {
@@ -452,12 +444,20 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return gameWorld.hasSkill(robot.getTeam(), skill);
     }
 
+    public void assertHasLearnedSkill(CommanderSkillType skill) throws GameActionException {
+        if (!hasLearnedSkill(skill)) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Not enough XP for that skill.");
+        }
+    }
+
     public void castFlash(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
 
         if (robot.type != RobotType.COMMANDER) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Only Commanders can cast Flash.");
         }
+
+        assertHasLearnedSkill(CommanderSkillType.FLASH);
 
         //is this kosher? i hope so
         assertIsMovementActive();
@@ -732,7 +732,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
         int delay = type.buildTurns;
         robot.activateMovement(
-                new SpawnSignal(loc, type, robot.getTeam(), robot, delay), delay, delay);
+                new BuildSignal(loc, type, robot.getTeam(), robot, delay), delay, delay);
     }
 
     //***********************************

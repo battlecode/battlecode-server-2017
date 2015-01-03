@@ -33,7 +33,9 @@ import battlecode.serial.DominationFactor;
 import battlecode.serial.GameStats;
 import battlecode.serial.RoundStats;
 import battlecode.world.signal.AttackSignal;
+import battlecode.world.signal.BashSignal;
 import battlecode.world.signal.BroadcastSignal;
+import battlecode.world.signal.BuildSignal;
 import battlecode.world.signal.BytecodesUsedSignal;
 import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.ControlBitsSignal;
@@ -269,6 +271,16 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 InternalRobot[] res = { getRobot(center) };
                 return res;
             }
+        } else if (radiusSquared < 16) {
+            MapLocation[] locs = getAllMapLocationsWithinRadiusSq(center, radiusSquared);
+            ArrayList<InternalRobot> robots = new ArrayList<InternalRobot>();
+            for (MapLocation loc : locs) {
+                InternalRobot res = getRobot(loc);
+                if (res != null) {
+                    robots.add(res);
+                }
+            }
+            return robots.toArray(new InternalRobot[robots.size()]);
         }
 
         ArrayList<InternalRobot> robots = new ArrayList<InternalRobot>();
@@ -759,20 +771,21 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 }
             }
 
-            int underLeadership = 0;
+            double underLeadership = 0;
             InternalRobot commander = getCommander(attacker.getTeam());
             if (commander != null && hasSkill(attacker.getTeam(), CommanderSkillType.LEADERSHIP) && commander.getLocation().distanceSquaredTo(attacker.getLocation()) <= GameConstants.LEADERSHIP_RANGE) {
-                underLeadership = 1;
+                underLeadership = GameConstants.LEADERSHIP_DAMAGE_BONUS;
             }
 
             InternalRobot[] targets = getAllRobotsWithinRadiusSq(targetLoc, splashRadius);
             for (InternalRobot target : targets) {
                 // disable friendly fire
                 if (target.getTeam() != attacker.getTeam()) {
-                    if (!target.getLocation().equals(targetLoc)) {
-                        rate *= 0.5;
+                    double finalRate = rate;
+                    if (!target.getLocation().equals(targetLoc) && attacker.type == RobotType.HQ) {
+                        finalRate *= 0.5; // splash is only 50% damage for HQ
                     }
-                    double damage = (attacker.type.attackPower + underLeadership) * rate;
+                    double damage = (attacker.type.attackPower + underLeadership) * finalRate;
                     if (target.type == RobotType.MISSILE) {
                         damage = Math.min(damage, GameConstants.MISSILE_MAXIMUM_DAMAGE);
                     }
@@ -784,14 +797,50 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			// ERROR, should never happen
 		}
         
-        addSignal(s);
+        if (attacker.type != RobotType.BASHER) { // BashSignal is already handled
+            addSignal(s);
+        }
         removeDead();
+    }
+
+    public void visitBashSignal(BashSignal s) {
+        // bashing is actually just the equivalent of attacking, so we can use visitAttackSignal
+        visitAttackSignal(new AttackSignal(s.getRobotID(), s.getTargetLoc()));
+
+        addSignal(s);
     }
 
     public void visitBroadcastSignal(BroadcastSignal s) {
     	radio.get(s.getRobotTeam()).putAll(s.broadcastMap);
     	s.broadcastMap = null;
         addSignal(s);
+    }
+
+    public void visitBuildSignal(BuildSignal s) {
+        InternalRobot parent;
+        int parentID = s.getParentID();
+        MapLocation loc;
+        if (parentID == 0) {
+            parent = null;
+            loc = s.getLoc();
+        } else {
+            parent = (InternalRobot) getObjectByID(parentID);
+            loc = s.getLoc();
+        }
+
+        double cost = (int) s.getType().oreCost;        
+        adjustResources(s.getTeam(), -cost);
+        
+        //note: this also adds the signal
+        InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent, s.getDelay());
+        
+        Integer currentCount = totalRobotTypeCount.get(robot.getTeam()).get(robot.type);
+        if (currentCount == null) {
+            currentCount = 0;
+        }
+        totalRobotTypeCount.get(robot.getTeam()).put(robot.type, currentCount + 1);
+
+        //addSignal(s); //client doesn't need this one
     }
     
     public void visitCastSignal(CastSignal s) {

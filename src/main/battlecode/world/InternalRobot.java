@@ -17,6 +17,7 @@ import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
 import battlecode.world.signal.AttackSignal;
+import battlecode.world.signal.BashSignal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.DropSupplySignal;
@@ -265,32 +266,21 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void decrementDelays() {
-        
-		timeUntilAttack -= 0.5;
-		timeUntilMovement -= 0.5;
-		double maxDelay = Math.max(timeUntilAttack,timeUntilMovement);
-		if (maxDelay > 0.0) {
-			//fraction of upkeep that can be paid
-			double supplyDelayReduction = Math.min(Math.min(0.5,getSupplyLevel()/(2*type.supplyUpkeep)),maxDelay);
-			timeUntilAttack-=supplyDelayReduction;
-			timeUntilMovement-=supplyDelayReduction;
-			decreaseSupplyLevel(2*supplyDelayReduction*type.supplyUpkeep);
-		}
-		
-		/*
-		if (timeUntilAttack >= 1 || timeUntilMovement >= 1) {
-            // this means we need to pay upkeep
-            if (getSupplyLevel() >= type.supplyUpkeep) {
-                // can afford! all good
-                decreaseSupplyLevel(type.supplyUpkeep);
-                timeUntilAttack--;
-                timeUntilMovement--;
-            } else {
-                // cannot afford, so we slow down the decrease
-                timeUntilAttack -= 0.5;
-                timeUntilMovement -= 0.5;
+        if (type.supplyUpkeep > 0) {
+            timeUntilAttack -= 0.5;
+            timeUntilMovement -= 0.5;
+            double maxDelay = Math.max(timeUntilAttack,timeUntilMovement);
+            if (maxDelay > 0.0) {
+                //fraction of upkeep that can be paid
+                double supplyDelayReduction = Math.min(Math.min(0.5,getSupplyLevel()/(2*type.supplyUpkeep)),maxDelay);
+                timeUntilAttack-=supplyDelayReduction;
+                timeUntilMovement-=supplyDelayReduction;
+                decreaseSupplyLevel(2*supplyDelayReduction*type.supplyUpkeep);
             }
-        }*/
+        } else {
+            timeUntilAttack--;
+            timeUntilMovement--;
+        }
 
         if (timeUntilAttack < 0.0) {
             timeUntilAttack = 0.0;
@@ -527,6 +517,12 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             suicide();
         }
         
+        // perform attacks
+        if (attackSignal != null) {
+        	myGameWorld.visitSignal(attackSignal);
+        	attackSignal = null;
+        }
+        
         // perform movements (moving, spawning, mining)
         if (movementSignal != null) {
             myGameWorld.visitSignal(movementSignal);
@@ -544,11 +540,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             myGameWorld.visitSignal(researchSignal);
             researchSignal = null;
         }
-        
-        // perform attacks
-        if (attackSignal != null) {
-        	myGameWorld.visitSignal(attackSignal);
-        	attackSignal = null;
+
+        // bashers should bash()
+        if (type == RobotType.BASHER) {
+            myGameWorld.visitSignal(new BashSignal(this, getLocation()));
         }
     }
 
