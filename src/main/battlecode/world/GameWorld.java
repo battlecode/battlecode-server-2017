@@ -992,7 +992,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
         MapLocation targetLoc = s.getLoc();
 
-        double damage = attacker.type.attackPower;
+        // only MISSILES can self destruct this year
+        double damage = RobotType.MISSILE.attackPower;
         InternalRobot[] targets = getAllRobotsWithinRadiusSq(targetLoc, GameConstants.MISSILE_RADIUS_SQUARED);
         for (InternalRobot target : targets) {
             if (target.type == RobotType.MISSILE) {
