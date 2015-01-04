@@ -22,7 +22,7 @@ public interface GameConstants {
     public static final int MAP_MAX_WIDTH = 120;
 
     /** The minimum distance between spawn points on the map. */
-    // public static final int MIN_DISTANCE_BETWEEN_SPAWN_POINTS = 10; // NOT RELEVANT IN 2015
+    public static final int MIN_DISTANCE_BETWEEN_SPAWN_POINTS = 10; // NOT RELEVANT IN 2015
 
     // *********************************
     // ****** GAME PARAMETERS **********
