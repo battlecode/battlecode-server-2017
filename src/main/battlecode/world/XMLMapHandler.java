@@ -532,13 +532,13 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         int[][] intData = new int[map.length][];
-        double[][] floatData = new double[map.length][];
         for (int i = 0; i < map.length; i++) {
             intData[i] = new int[map[i].length];
-            floatData[i] = new double[map[i].length];
             for (int j = 0; j < map[i].length; j++) {
                 intData[i][j] = (int) map[i][j].floatData();
-                floatData[i][j] = map[i][j].floatData() / 1000;
+                if (mapTiles[i][j] == TerrainTile.VOID) {
+                    intData[i][j] = 0;
+                }
             }
         }
 
