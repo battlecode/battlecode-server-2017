@@ -62,6 +62,7 @@ The following is a visual summary of the units, the buildings, and the dependenc
 
 ![Image of Tech Tree]
 (https://github.com/battlecode/battlecode-server/edit/master/techtree.png)
+^ This picture will appear when the specs are public, I promise. It's the same as Max's picture on the Google doc.
 
 Structures Overview [bcd05]
 ----------
