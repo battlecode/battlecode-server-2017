@@ -177,9 +177,6 @@
             <taglet name="battlecode.doc.RobotDoc">
                 <path refid="classpath-libs"/>
             </taglet>
-            <taglet name="battlecode.doc.UpgradeDoc">
-                <path refid="classpath-libs"/>
-            </taglet>
         </javadoc>
     </target>
 
