@@ -151,7 +151,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public MapLocation[] senseTowerLocations(Team team) {
         ArrayList<MapLocation> locs = new ArrayList<MapLocation>();
         for (InternalRobot r: baseTowers.get(team)) {
-            locs.add(r.getLocation());
+            if (r.canExecuteCode()) {
+                locs.add(r.getLocation());
+            }
         }
         return locs.toArray(new MapLocation[locs.size()]);
     }
