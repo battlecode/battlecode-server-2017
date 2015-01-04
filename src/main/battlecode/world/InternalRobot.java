@@ -439,11 +439,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
 
         // generate supply
-        if (type == RobotType.SUPPLYDEPOT) {
-            increaseSupplyLevel(GameConstants.DEPOT_SUPPLY_GEN);
-        }
 		if (type == RobotType.HQ) {
-			increaseSupplyLevel(GameConstants.HQ_SUPPLY_GEN);
+            int numSupplyDepots = myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.SUPPLYDEPOT);
+			increaseSupplyLevel(GameConstants.SUPPLY_GEN_BASE * (GameConstants.SUPPLY_GEN_MULTIPLIER + Math.pow(numSupplyDepots, GameConstants.SUPPLY_GEN_EXPONENT)));
 		}
 
         // possibly convert building from inactive to active

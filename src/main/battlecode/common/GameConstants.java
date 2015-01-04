@@ -62,11 +62,10 @@ public interface GameConstants {
     /** The maximum distance over which supplies can be transferred. */
     public static final int SUPPLY_TRANSFER_RADIUS_SQUARED = 15;
 
-	/** The amount of supply a SUPPLYDEPOT generates each turn. */
-	public static final int DEPOT_SUPPLY_GEN = 100;
-	
-	/** The amount of supply a HQ generates each turn. */
-	public static final int HQ_SUPPLY_GEN = 200;
+    /** Constants for the HQ supply generation formula.  */
+    public static final double SUPPLY_GEN_BASE = 100;
+    public static final double SUPPLY_GEN_MULTIPLIER = 2;
+    public static final double SUPPLY_GEN_EXPONENT = 0.7;
 
     // *********************************
     // ****** MINING *******************
