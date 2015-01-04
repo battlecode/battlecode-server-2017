@@ -80,6 +80,10 @@ public enum RobotType {
         return isBuilding && this != TOWER && this != SUPPLYDEPOT;
     }
 
+    public boolean needsSupply() {
+        return supplyUpkeep > 0;
+    }
+
     RobotType(boolean isBuilding,
               RobotType spawnSource,
               RobotType dependency,
