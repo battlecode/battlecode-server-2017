@@ -116,12 +116,12 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getLocation();
     }
 
-    public double getTurnsUntilMovement() {
-        return robot.getTimeUntilMovement();
+    public double getCoreDelay() {
+        return robot.getCoreDelay();
     }
 
-    public double getTurnsUntilAttack() {
-        return robot.getTimeUntilAttack();
+    public double getWeaponDelay() {
+        return robot.getWeaponDelay();
     }
 
     public double getHealth() {
@@ -302,12 +302,20 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     // ***********************************
-    // ****** MOVEMENT METHODS ***********
+    // ****** READINESS METHODS **********
     // ***********************************
 
-    public boolean isMovementActive() {
-        return getTurnsUntilMovement() < 1;
+    public boolean isCoreReady() {
+        return getCoreDelay() < 1;
     }
+
+    public boolean isWeaponReady() {
+        return getWeaponDelay() < 1;
+    }
+
+    // ***********************************
+    // ****** MOVEMENT METHODS ***********
+    // ***********************************
 
     public boolean isPathable(RobotType type, MapLocation loc) {
         return gameWorld.canMove(loc, type);
@@ -321,8 +329,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return dir != null && dir != Direction.NONE && dir != Direction.OMNI;
     }
 
-    public void assertIsMovementActive() throws GameActionException {
-        if (!isMovementActive()) {
+    public void assertIsCoreReady() throws GameActionException {
+        if (!isCoreReady()) {
             throw new GameActionException(NOT_ACTIVE, "This robot has movement delay.");
         }
     }
@@ -350,7 +358,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void move(Direction d) throws GameActionException {
-        assertIsMovementActive();
+        assertIsCoreReady();
         assertIsMovingUnit();
         assertIsValidDirection(d);
         assertIsPathable(robot.type, getLocation().add(d));
@@ -365,10 +373,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ****** ATTACK METHODS *************
     // ***********************************
 
-    public boolean isAttackActive() {
-        return getTurnsUntilAttack() < 1;
-    }
-
     public boolean isAttackingUnit() {
         return robot.type.canAttack();
     }
@@ -378,8 +382,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return isAttackingUnit() && gameWorld.canAttackSquare(robot, loc);
     }
 
-    protected void assertIsAttackActive() throws GameActionException {
-        if (!isAttackActive())
+    protected void assertIsWeaponReady() throws GameActionException {
+        if (!isWeaponReady())
             throw new GameActionException(NOT_ACTIVE, "This robot has attack delay and cannot attack.");
     }
 
@@ -401,7 +405,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public void attackLocation(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
-        assertIsAttackActive();
+        assertIsWeaponReady();
         assertIsAttackingUnit();
         assertValidAttackLocation(loc);
 
@@ -460,7 +464,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertHasLearnedSkill(CommanderSkillType.FLASH);
 
         //is this kosher? i hope so
-        assertIsMovementActive();
+        assertIsCoreReady();
         assertIsPathable(robot.type, loc);
 
         robot.activateMovement(new CastSignal(robot, loc), robot.getLoadingDelayForType(), GameConstants.FLASH_MOVEMENT_DELAY);
@@ -557,7 +561,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void mine() throws GameActionException {
-        assertIsMovementActive();
+        assertIsCoreReady();
         assertIsMiningUnit();
         MapLocation loc = getLocation();
 		
@@ -668,7 +672,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (type == RobotType.COMMANDER) {
             assertNoCommander();
         }
-        assertIsMovementActive();
+        assertIsCoreReady();
 
         if (type.spawnSource != robot.type) {
             throw new GameActionException(CANT_DO_THAT_BRO, "This spawn can only be by a certain type");
@@ -722,7 +726,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertIsBuildingUnit();
         assertIsBuildable(type);
         assertHasDependencyFor(type);
-        assertIsMovementActive();
+        assertIsCoreReady();
 
         double cost = type.oreCost;
         assertHaveResource(cost);
@@ -771,7 +775,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public void researchUpgrade(Upgrade upgrade) throws GameActionException {
         assertIsResearchingUnit();
         assertNoUpgrade(upgrade);
-        assertIsMovementActive();
+        assertIsCoreReady();
         assertHaveResource(upgrade.oreCost / upgrade.numRounds);
         robot.activateResearch(new ResearchSignal(robot, upgrade), 1, 1);
     }

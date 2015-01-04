@@ -33,8 +33,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     protected volatile double myHealthLevel;
     protected volatile double mySupplyLevel;
-    private double timeUntilMovement;
-    private double timeUntilAttack;
+    private double coreDelay;
+    private double weaponDelay;
     private int missileCount;
 
     protected volatile long controlBits;
@@ -69,8 +69,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
 
         mySupplyLevel = 0.0;
-        timeUntilMovement = 0.0;
-        timeUntilAttack = 0.0;
+        coreDelay = 0.0;
+        weaponDelay = 0.0;
         missileCount = 0;
 
         controlBits = 0;
@@ -96,7 +96,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     // *********************************
 
     public RobotInfo getRobotInfo() {
-        return new RobotInfo(getID(), getTeam(), type, getLocation(), getTimeUntilMovement(), getTimeUntilAttack(), getHealthLevel(), getSupplyLevel(), getXP(), getMissileCount());
+        return new RobotInfo(getID(), getTeam(), type, getLocation(), getCoreDelay(), getWeaponDelay(), getHealthLevel(), getSupplyLevel(), getXP(), getMissileCount());
     }
 
     // *********************************
@@ -241,52 +241,52 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     // ****** DELAYS METHODS ***********
     // *********************************
 
-    public double getTimeUntilMovement() {
-        return timeUntilMovement;
+    public double getCoreDelay() {
+        return coreDelay;
     }
 
-    public double getTimeUntilAttack() {
-        return timeUntilAttack;
+    public double getWeaponDelay() {
+        return weaponDelay;
     }
 
-    public void addTimeUntilMovement(double time) {
-        timeUntilMovement += time;
+    public void addCoreDelay(double time) {
+        coreDelay += time;
     }
 
-    public void addTimeUntilAttack(double time) {
-        timeUntilAttack += time;
+    public void addWeaponDelay(double time) {
+        weaponDelay += time;
     }
 
     public void addCooldownDelay(double delay) {
-        timeUntilMovement = Math.max(timeUntilMovement, delay);
+        coreDelay = Math.max(coreDelay, delay);
     }
 
     public void addLoadingDelay(double delay) {
-        timeUntilAttack = Math.max(timeUntilAttack, delay);
+        weaponDelay = Math.max(weaponDelay, delay);
     }
 
     public void decrementDelays() {
         if (type.supplyUpkeep > 0) {
-            timeUntilAttack -= 0.5;
-            timeUntilMovement -= 0.5;
-            double maxDelay = Math.max(timeUntilAttack,timeUntilMovement);
+            weaponDelay -= 0.5;
+            coreDelay -= 0.5;
+            double maxDelay = Math.max(weaponDelay,coreDelay);
             if (maxDelay > 0.0) {
                 //fraction of upkeep that can be paid
                 double supplyDelayReduction = Math.min(Math.min(0.5,getSupplyLevel()/(2*type.supplyUpkeep)),maxDelay);
-                timeUntilAttack-=supplyDelayReduction;
-                timeUntilMovement-=supplyDelayReduction;
+                weaponDelay-=supplyDelayReduction;
+                coreDelay-=supplyDelayReduction;
                 decreaseSupplyLevel(2*supplyDelayReduction*type.supplyUpkeep);
             }
         } else {
-            timeUntilAttack--;
-            timeUntilMovement--;
+            weaponDelay--;
+            coreDelay--;
         }
 
-        if (timeUntilAttack < 0.0) {
-            timeUntilAttack = 0.0;
+        if (weaponDelay < 0.0) {
+            weaponDelay = 0.0;
         }
-        if (timeUntilMovement < 0.0) {
-            timeUntilMovement = 0.0;
+        if (coreDelay < 0.0) {
+            coreDelay = 0.0;
         }
     }
 
@@ -368,7 +368,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public void activateResearch(ResearchSignal s, double attackDelay, double movementDelay) {
         addLoadingDelay(attackDelay);
-        addTimeUntilMovement(movementDelay);
+        addCoreDelay(movementDelay);
 
         researchSignal = s;
     }
@@ -401,12 +401,12 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void activateMovement(Signal s, double attackDelay, double movementDelay) {
         movementSignal = s;
         addLoadingDelay(attackDelay);
-        addTimeUntilMovement(movementDelay);
+        addCoreDelay(movementDelay);
     }
     
     public void activateAttack(Signal s, double attackDelay, double movementDelay) {
         attackSignal = s;
-        addTimeUntilAttack(attackDelay);
+        addWeaponDelay(attackDelay);
         addCooldownDelay(movementDelay);
     }
 

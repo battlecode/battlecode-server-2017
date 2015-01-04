@@ -13,21 +13,21 @@ public class RobotInfo {
     public final Team team;
     public final RobotType type;
     public final MapLocation location;
-    public final double turnsUntilMovement;
-    public final double turnsUntilAttack;
+    public final double coreDelay;
+    public final double weaponDelay;
     public final double health;
     public final double supplyLevel;
     public final int xp;
     public final int missileCount;
 
-    public RobotInfo(int ID, Team team, RobotType type, MapLocation location, double turnsUntilMovement, double turnsUntilAttack, double health, double supplyLevel, int xp, int missileCount) {
+    public RobotInfo(int ID, Team team, RobotType type, MapLocation location, double coreDelay, double weaponDelay, double health, double supplyLevel, int xp, int missileCount) {
         super();
         this.ID = ID;
         this.team = team;
         this.type = type;
         this.location = location;
-        this.turnsUntilMovement = turnsUntilMovement;
-        this.turnsUntilAttack = turnsUntilAttack;
+        this.coreDelay = coreDelay;
+        this.weaponDelay = weaponDelay;
         this.health = health;
         this.supplyLevel = supplyLevel;
         this.xp = xp;

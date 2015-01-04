@@ -69,18 +69,18 @@ public interface RobotController {
     public MapLocation getLocation();
 
     /**
-     * Returns the number of turns until the unit can move again. If the result is less than 1, then the unit can move.
+     * Returns the number of turns until the unit can use a core action again. If the result is less than 1, then the unit can perform a core action.
      *
-     * @return the number of turns until the unit can move again.
+     * @return the number of turns until the unit can perform a core action.
      */
-    public double getTurnsUntilMovement();
+    public double getCoreDelay();
 
     /**
      * Returns the number of turns until the unit can attack again. If the result is less than 1, then the unit can attack.
      *
      * @return the number of turns until the unit can attack again.
      */
-    public double getTurnsUntilAttack();
+    public double getWeaponDelay();
 
     /**
      * Gets the robot's current health.
@@ -206,14 +206,25 @@ public interface RobotController {
     public RobotInfo[] senseNearbyRobots(MapLocation center, int radiusSquared, Team team);
 
     // ***********************************
-    // ****** MOVEMENT METHODS ***********
+    // ****** READINESS METHODS **********
     // ***********************************
 
     /**
-     * Returns whether the number of turns until movement is less than 1.
-     * @return whether the robot can perform a movement in this turn.
+     * Returns whether the core delay is less than 1.
+     * @return whether the robot can perform a core action in this turn.
      */
-    public boolean isMovementActive();
+    public boolean isCoreReady();
+
+    /**
+     * Returns whether the robot is able to attack in the current turn. Essentially, it checks whether the number of turns until attack is less than 1.
+     *
+     * @return whether the robot is able to attack in the current turn.
+     */
+    public boolean isWeaponReady();
+
+    // ***********************************
+    // ****** MOVEMENT METHODS ***********
+    // ***********************************
 
     /**
      * Returns whether a robot of the given type can move into the given location. Takes into account only the robot type and the terrain of the location, and whether the location is occupied. Does not take into account any sort of movement delays. Ignores whether the unit is a moving unit.
@@ -246,13 +257,6 @@ public interface RobotController {
     // ***********************************
     // ****** ATTACK METHODS *************
     // ***********************************
-
-    /**
-     * Returns whether the robot is able to attack in the current turn. Essentially, it checks whether the number of turns until attack is less than 1.
-     *
-     * @return whether the robot is able to attack in the current turn.
-     */
-    public boolean isAttackActive();
 
     /**
      * Returns whether the given location is within the robot's attack range. Does not take into account whether the robot is currently attacking.
