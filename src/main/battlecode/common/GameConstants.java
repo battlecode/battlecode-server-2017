@@ -105,8 +105,38 @@ public interface GameConstants {
     // ****** UNIT PROPERTIES **********
     // *********************************
 
-    /** The attack radius of a buffed HQ. */
-    public static final int ATTACK_RADIUS_SQUARED_BUFFED_HQ = 35;
+    /** The attack radius of a buffed HQ (5 towers). */
+    public static final int HQ_BUFFED_ATTACK_RADIUS_SQUARED = 35;
+
+    /** The fraction of damage taken per attack for a buffed HQ (1 tower). */
+    public static final double HQ_BUFFED_DAMAGE_RATIO_LEVEL_1 = 0.8;
+
+    /** The fraction of damage taken per attack for a 4-tower buffed HQ (4 towers). */
+    public static final double HQ_BUFFED_DAMAGE_RATIO_LEVEL_2 = 0.5;
+
+    /** The fraction of damage taken per attack for a 6-tower buffed HQ (6 towers). */
+    public static final double HQ_BUFFED_DAMAGE_RATIO_LEVEL_3 = 0.3;
+
+    /** The damage multiplier for a buffed HQ (3 towers). */
+    public static final double HQ_BUFFED_DAMAGE_MULTIPLIER_LEVEL_1 = 1.5;
+
+    /** The damage multiplier for a buffed HQ (6 towers). */
+    public static final double HQ_BUFFED_DAMAGE_MULTIPLIER_LEVEL_2 = 10.0;
+
+    /** The attack delay of a buffed HQ (5 towers). */
+    public static final int HQ_BUFFED_ATTACK_DELAY = 1;
+
+    /** The fraction of damage done by splash on a buffed HQ (5 towers). */
+    public static final double HQ_BUFFED_SPLASH_RATE = 0.5;
+
+    /** Splash radius of a buffed HQ (5 towers). */
+    public static final int HQ_BUFFED_SPLASH_RADIUS_SQUARED = 2;
+    
+    /** Bash radius of a basher. */
+    public static final int BASH_RADIUS_SQUARED = 2;
+
+    /** Missile explosion splash radius. */
+    public static final int MISSILE_RADIUS_SQUARED = 2;
 
     /** The rate at which a launcher spawns missiles. */
     public static final int MISSILE_SPAWN_FREQUENCY = 6;
@@ -115,19 +145,10 @@ public interface GameConstants {
     public static final double MISSILE_MAXIMUM_DAMAGE = 1.0;
 
     /** The maximum number of missiles a launcher can have at a time. */
-    public static final int MAX_MISSILE_COUNT = 6;
+    public static final int MISSILE_MAX_COUNT = 6;
 
     /** After this many turns, a missile automatically detonates. */
     public static final int MISSILE_LIFESPAN = 5;
-
-    /** Bash radius of a basher. */
-    public static final int BASH_RADIUS_SQUARED = 2;
-
-    /** Missile explosion splash radius. */
-    public static final int MISSILE_RADIUS_SQUARED = 2;
-
-    /** Splash radius of HQ with tower bonus. */
-    public static final int HQ_SPLASH_RADIUS_SQUARED = 2;
 
     // *********************************
     // ****** COMMANDER ***** **********

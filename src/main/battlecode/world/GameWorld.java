@@ -221,7 +221,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         int radius = ir.type.attackRadiusSquared;
         if (ir.type == RobotType.HQ && getActiveRobotTypeCount(ir.getTeam(), RobotType.TOWER) >= 2) {
-            radius = GameConstants.ATTACK_RADIUS_SQUARED_BUFFED_HQ;
+            radius = GameConstants.HQ_BUFFED_ATTACK_RADIUS_SQUARED;
         }
         return d <= radius;
     }
@@ -680,13 +680,13 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             } else if (attacker.type == RobotType.HQ) {
                 int towerCount = getActiveRobotTypeCount(attacker.getTeam(), RobotType.TOWER);
                 if (towerCount >= 6) {
-                    rate = 10.0;
+                    rate = GameConstants.HQ_BUFFED_DAMAGE_MULTIPLIER_LEVEL_2;
                 } else if (towerCount >= 3) {
-                    rate = 1.5;
+                    rate = GameConstants.HQ_BUFFED_DAMAGE_MULTIPLIER_LEVEL_1;
                 }
 
                 if (towerCount >= 5) {
-                    splashRadius = GameConstants.HQ_SPLASH_RADIUS_SQUARED;
+                    splashRadius = GameConstants.HQ_BUFFED_SPLASH_RADIUS_SQUARED;
                 }
             }
 
@@ -702,7 +702,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 if (target.getTeam() != attacker.getTeam()) {
                     double finalRate = rate;
                     if (!target.getLocation().equals(targetLoc) && attacker.type == RobotType.HQ) {
-                        finalRate *= 0.5; // splash is only 50% damage for HQ
+                        finalRate *= GameConstants.HQ_BUFFED_SPLASH_RATE; // splash is only 50% damage for HQ
                     }
                     double damage = (attacker.type.attackPower + underLeadership) * finalRate;
                     if (target.type == RobotType.MISSILE) {

@@ -59,7 +59,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         this.buildDelay = buildDelay;
 
         myHealthLevel = getMaxHealth();
-        if (type.isBuilding && type != RobotType.HQ && type != RobotType.TOWER) {
+        if (type.isBuildable()) {
             myHealthLevel /= 2.0;
         }
 
@@ -97,10 +97,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     // ****** BASIC METHODS ************
     // *********************************
 
+    public boolean isActive() {
+        return !type.isBuildable() || roundsAlive >= buildDelay;
+    }
+
     public boolean canExecuteCode() {
     	if (getHealthLevel() <= 0.0) return false;
-        if (type.isBuilding && type != RobotType.HQ && type != RobotType.TOWER && roundsAlive < buildDelay) return false;
-    	return true;
+    	return isActive();
     }
 
     public void setBytecodesUsed(int numBytecodes) {
@@ -117,14 +120,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public boolean movedThisTurn() {
         return this.movementSignal != null;
-    }
-
-    public boolean isActive() {
-        if (type.isBuilding && type != RobotType.HQ && type != RobotType.TOWER && roundsAlive < buildDelay) {
-            return false;
-        } else {
-            return true;
-        }
     }
 
     public int getXP() {
@@ -190,11 +185,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             if (type == RobotType.HQ) {
                 int towerCount = myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.TOWER);
                 if (towerCount >= 6) {
-                    rate = 0.3;
+                    rate = GameConstants.HQ_BUFFED_DAMAGE_RATIO_LEVEL_3;
                 } else if (towerCount >= 4) {
-                    rate = 0.5;
+                    rate = GameConstants.HQ_BUFFED_DAMAGE_RATIO_LEVEL_2;
                 } else if (towerCount >= 1) {
-                    rate = 0.8;
+                    rate = GameConstants.HQ_BUFFED_DAMAGE_RATIO_LEVEL_1;
                 }
             }
             changeHealthLevelFromAttack(-rate * baseAmount);
@@ -286,7 +281,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public int getAttackDelayForType() {
         if (type == RobotType.HQ && myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.TOWER) >= 5) {
-            return type.attackDelay / 2;
+            return GameConstants.HQ_BUFFED_ATTACK_DELAY;
         }
         return type.attackDelay;
     }
@@ -447,17 +442,17 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         // possibly convert building from inactive to active
         roundsAlive++;
         // after building is done, double health
-        if (type.isBuilding && roundsAlive == buildDelay && type != RobotType.HQ && type != RobotType.TOWER) {
+        if (type.isBuildable() && roundsAlive == buildDelay) {
             changeHealthLevel(getHealthLevel());
             // increase robot count
             myGameWorld.incrementRobotTypeCount(getTeam(), type);
-        } else if ((!type.isBuilding || type == RobotType.HQ || type == RobotType.TOWER) && roundsAlive == 1) {
+        } else if (!type.isBuildable() && roundsAlive == 1) {
             myGameWorld.incrementRobotTypeCount(getTeam(), type);
         }
 
         // produce missile
         if (roundsAlive % GameConstants.MISSILE_SPAWN_FREQUENCY == 0 && type == RobotType.LAUNCHER) {
-            missileCount = Math.min(missileCount + 1, GameConstants.MAX_MISSILE_COUNT);
+            missileCount = Math.min(missileCount + 1, GameConstants.MISSILE_MAX_COUNT);
         }
     	
         // commander regen
