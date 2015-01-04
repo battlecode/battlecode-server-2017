@@ -545,7 +545,7 @@ class XMLMapHandler extends DefaultHandler {
         GameMap gm = new GameMap(mapProperties, mapTiles, intData, mapName);
         GameWorld gw = new GameWorld(gm, teamA, teamB, teamMemory);
 
-        gw.reserveRandomIDs(100);
+        gw.reserveRandomIDs(99999);
 
         MapLocation origin = gm.getMapOrigin();
 
@@ -554,7 +554,8 @@ class XMLMapHandler extends DefaultHandler {
                 map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
         }
 
-        gw.endRandomIDs();
+        // by removing this line, you can no longer use IDs to determine execution order
+        //gw.endRandomIDs();
 
         return gw;
     }
