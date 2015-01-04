@@ -69,16 +69,16 @@ public interface RobotController {
     public MapLocation getLocation();
 
     /**
-     * Returns the number of turns until the unit can use a core action again. If the result is less than 1, then the unit can perform a core action.
+     * Returns the number of turns until the robot can use a core action again. If the result is strictly less than 1, then the robot can perform a core action.
      *
-     * @return the number of turns until the unit can perform a core action.
+     * @return the number of turns until the robot can perform a core action.
      */
     public double getCoreDelay();
 
     /**
-     * Returns the number of turns until the unit can attack again. If the result is less than 1, then the unit can attack.
+     * Returns the number of turns until the robot can attack again. If the result is strictly less than 1, then the robot can attack.
      *
-     * @return the number of turns until the unit can attack again.
+     * @return the number of turns until the robot can attack again.
      */
     public double getWeaponDelay();
 
@@ -90,23 +90,23 @@ public interface RobotController {
     public double getHealth();
 
     /**
-     * Gets the robot's current suplly level.
+     * Gets the robot's current supply level.
      *
-     * @return this robot's supply leve.
+     * @return this robot's supply level.
      */
     public double getSupplyLevel();
 
     /**
      * Gets the experience a robot has. Only meaningful for COMMANDER.
      *
-     * @return the number of XP the unit has.
+     * @return the number of XP the robot has.
      */
     public int getXP();
 
     /**
-     * Returns how many missiles the unit has. Only useful for launcher.
+     * Returns how many missiles the robot has. Only useful for LAUNCHER.
      *
-     * @return the number of missiles the unit has.
+     * @return the number of missiles the robot has.
      */
     public int getMissileCount();
 
@@ -121,7 +121,7 @@ public interface RobotController {
     public MapLocation senseHQLocation();
 
     /**
-     * Returns location of the enemy team's HQ.
+     * Returns location of the enemy team's HQ. Always returns the correct location.
      *
      * @return the enemy team's HQ location.
      */
@@ -134,8 +134,8 @@ public interface RobotController {
     public MapLocation[] senseTowerLocations();
 
     /**
-     * Returns the locations of enemy towers, unconstrained by sensor range or distance.
-     * @return an array of the locations of enemy towers.
+     * Returns the locations of surviving enemy towers, unconstrained by sensor range or distance. Always returns correct locations.
+     * @return an array of the locations of surviving enemy towers.
     */
     public MapLocation[] senseEnemyTowerLocations();
 
@@ -175,28 +175,28 @@ public interface RobotController {
     public RobotInfo senseRobotAtLocation(MapLocation loc) throws GameActionException;
 
     /** 
-     * Returns all robots of a given type nearby the robot.
+     * Returns all robots that can be sensed on the map.
      *
      * @see #senseNearbyRobots(MapLocation, int, Team).
      */
     public RobotInfo[] senseNearbyRobots();
 
     /**
-     * Returns all robots of a given type nearby the robot.
+     * Returns all robots that can be sensed within a certain radius of the robot.
      *
      * @see #senseNearbyRobots(MapLocation, int, Team).
      */
     public RobotInfo[] senseNearbyRobots(int radiusSquared);
     
     /**
-     * Returns all robots of a given type nearby the robot of a given team.
+     * Returns all robots of a given team that can be sensed within a certain radius of the robot.
      *
      * @see #senseNearbyRobot(MapLocation, int, Team).
      */
     public RobotInfo[] senseNearbyRobots(int radiusSquared, Team team);
     
     /**
-     * Senses all robots of a given type within a given search area specified by the parameters (constrainted by sensor range and distance).
+     * Returns all robots of a givin team that can be sensed within a certain radius of a specified location.
      *
      * @param center center of the given search radius.
      * @param radiusSquared return objects this distance away from the center.
@@ -210,7 +210,7 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Returns whether the core delay is less than 1.
+     * Returns whether the core delay is strictly less than 1.
      * @return whether the robot can perform a core action in this turn.
      */
     public boolean isCoreReady();
@@ -227,7 +227,8 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Returns whether a robot of the given type can move into the given location. Takes into account only the robot type and the terrain of the location, and whether the location is occupied. Does not take into account any sort of movement delays. Ignores whether the unit is a moving unit.
+     * Returns whether a robot of the given type can move into the given location. Takes into account only the robot type and the terrain of the location, 
+	 * and whether the location is occupied. Does not take into account any sort of movement delays. Ignores whether the robot is capable of movement or not.
      *
      * @param type the type of the robot.
      * @param loc the location to test.
@@ -238,7 +239,7 @@ public interface RobotController {
     /**
      * Tells whether this robot can move in the given direction. Takes into
      * account only the map terrain, positions of other robots, and the current robot's type (MISSILE and DRONE can move over VOID).
-     * Does not take into account whether this robot is currently active, but will only return true for moving units.
+     * Does not take into account whether this robot is currently active, but will only return true for units that are capable of movement.
      * Returns false for the OMNI and NONE directions.
      *
      * @return true if there are no robots or voids preventing this robot from
@@ -247,7 +248,7 @@ public interface RobotController {
     public boolean canMove(Direction dir);
 
     /**
-     * Move in the given direction if possible.
+     * Queues a move in the given direction to be performed at the end of this turn.
      *
      * @param dir the direction to move in.
      * @throws GameActionException if the robot cannot move in this direction.
@@ -259,7 +260,7 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Returns whether the given location is within the robot's attack range. Does not take into account whether the robot is currently attacking.
+     * Returns whether the given location is within the robot's attack range. Does not take into account whether the robot is currently attacking or has the delay to do so.
      *
      * @return true if the given location is within this robot's attack range.
      * Does not take into account whether the robot is currently attacking.
@@ -267,7 +268,7 @@ public interface RobotController {
     public boolean canAttackLocation(MapLocation loc);
 
     /**   
-     * Attacks the given location.
+     * Queues an attack on the given location to be performed at the end of this turn.
      *
      * @param loc the location to attack.
      * @throws GameActionException if the robot cannot attack the given square.
@@ -275,7 +276,7 @@ public interface RobotController {
     public void attackLocation(MapLocation loc) throws GameActionException;
 
     /**
-     * MISSILE ONLY. Attacks all surrounding enemies. Other units can call this but will just result in disintegration.
+     * MISSILE ONLY. Attacks all surrounding enemies. Other robots can call this but will just result in the same result as disintegrate().
      */
     public void explode() throws GameActionException;
 
@@ -284,7 +285,7 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Returns whether the team has a commander.
+     * Returns whether the team currently has a commander.
      *
      * @return whether the team has a commander.
      */
@@ -293,7 +294,7 @@ public interface RobotController {
     /**
      * Casts Flash at the given location.
      *
-     * @param loc the location to attack.
+     * @param loc the target location.
      * @throws GameActionException if the robot has not learned the spell or cannot cast at the given square.
      *
      */
@@ -308,7 +309,7 @@ public interface RobotController {
     public boolean hasLearnedSkill(CommanderSkillType skill) throws GameActionException;
 
     /**
-     * Returns the cooldown of FLASH.
+     * Returns the current cooldown of FLASH.
      *
      * @return the cooldown of FLASH.
      */
@@ -342,11 +343,11 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Transfers supplies to a robot in a nearby location. See GameConstants for maximum transfer distance. If you specify more supply than you own, all your supply will be transferred.
+     * Transfers supplies to a robot in a nearby location. See GameConstants for maximum transfer distance. If you specify more supply than the robot has, all its supply will be transferred.
      *
      * @param amount the amount of supply to transfer.
      * @param loc the location to transfer the supply to.
-     * @throws GameActionException if there is no one to transfer to, or if the distance is too much for a supply transfer.
+     * @throws GameActionException if there is no one to transfer to, or if the distance is too far for a supply transfer.
      */
     public void transferSupplies(int amount, MapLocation loc) throws GameActionException;
 
@@ -355,13 +356,14 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Returns whether the current unit can mine in the current round. This essentially checks whether the unit is a mining unit. Does not check the movement delay.
-     * @return whether the current unit can mine in the current round.
+     * Returns whether the current robot can mine in the current round. This essentially checks whether the robot is a mining unit. Does not check the movement delay.
+     * @return whether the current robot can mine in the current round.
      */
     public boolean canMine();
 
     /**
-     * Returns the amount of ore at a given location. If the location is out of sensor range, this returns the last known ore amount at that location. If the location is off the map or is void, then 0 is returned. If the location has never been in sensor range, then -1 is returned.
+     * Returns the amount of ore at a given location. If the location is out of sensor range, this returns the last known ore amount at that location. 
+	 * If the location is off the map or is void, then 0 is returned. If the location has never been in sensor range, then -1 is returned.
      *
      * @param loc the MapLocation to sense ore at.
      * @return the amount of ore at a given location. If the location is out of sensor range, then the last known ore amount is returned.
@@ -371,8 +373,8 @@ public interface RobotController {
     /**
      * Mines the current square for ore.
      *
-     * @throws GameActionException if the current unit is not one that can collect ore
-     * @throws GameActionException if there is currently movement delay and the unit cannot mine
+     * @throws GameActionException if the current robot is not one that can collect ore
+     * @throws GameActionException if there is currently movement delay and the robot cannot mine
      */
     public void mine() throws GameActionException;
 
@@ -381,7 +383,8 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * LAUNCHER ONLY. Returns whether the direction is valid for launching. The location must be on the map and unoccupied, and must not have already been launched to, and the launcher must not have moved already.
+     * LAUNCHER ONLY. Returns whether the direction is valid for launching. The location must be on the map and unoccupied, 
+	 * and must not have already been launched to during this turn, and the launcher must not have moved already during this turn.
      *
      * @param dir the direction to check.
      * @return whether the direction is valid for launching.
@@ -409,14 +412,14 @@ public interface RobotController {
     public DependencyProgress checkDependencyProgress(RobotType type);
 
     /**
-     * Checks to make sure you have the ore requirements to spawn, and that the right unit is trying to spawn.
+     * Checks to make sure you have the ore requirements to spawn, and that the structure can actually spawn the specified RobotType.
      * @param type the type to check.
      * @return whether the spawn requirements are met.
      */
     public boolean hasSpawnRequirements(RobotType type);
 
     /**
-     * Returns whether the current unit can spawn in the current round. This essentially checks whether the unit is the right spawning building, and makes sure that there is sufficient ore.
+     * Returns whether the current robot can spawn in the current round. Checks ore requirements, structure types, and that the given direction is not blocked.
      * @param dir the direction to spawn in.
      * @param type the type to spawn.
      * @return whether the spawn is valid.
@@ -425,18 +428,18 @@ public interface RobotController {
 
     /**
      * Queues a spawn action to be performed at the end of this robot's turn.
-     * When the action is executed, a new robot will be created adjacent to the HQ
-     * in the given direction.  The square must not already be occupied.
-     * The new robot is created and starts executing bytecodes immediately
+     * When the action is executed, a new unit will be created adjacent to the calling robot
+     * in the given direction. The square must not already be occupied.
+     * The new robot is created and starts executing bytecodes immediately.
      *
-     * @param dir the direction to spawn robot in.
+     * @param dir the direction to spawn the robot in.
      * @param type the robot type to spawn.
      * @throws GameActionException if bad.
      */
     public void spawn(Direction dir, RobotType type) throws GameActionException;
 
     /**
-     * Returns whether you have the ore and the dependencies to build the given robot. Makes sure you are a building unit.
+     * Returns whether you have the ore and the dependencies to build the given robot. Checks to make sure the robot can build structures..
      *
      * @param type the type to build.
      * @return whether the requirements to build are met.
@@ -444,8 +447,8 @@ public interface RobotController {
     public boolean hasBuildRequirements(RobotType type);
 
     /**
-     * Returns whether the unit can build a building of the given type in the given direction.
-     * Checks dependencies, ore costs, and whether the unit can build. Does not check if a robot is active. Checks to make sure that the direction of building is valid as well.
+     * Returns whether the robot can build a structure of the given type in the given direction.
+     * Checks dependencies, ore costs, whether the robot can build, and that the given direction is not blocked. Does not check if a robot has sufficiently low coreDelay or not.
      *
      * @param dir the direction to build in.
      * @param type the robot type to spawn.
@@ -454,7 +457,8 @@ public interface RobotController {
     public boolean canBuild(Direction dir, RobotType type);
    
     /**
-     * Builds a building in the given direction. The building will initially be inactive for a number of turns (during which this robot cannot move or attack). After several turns, the building will become active.
+     * Builds a structure in the given direction. The structure will initially be inactive for a number of turns (during which this robot cannot move or attack). 
+	 * After a number of turns, the structure will become active.
      *
      * @param dir the direction to bulid in.
      * @param type the type to build.
@@ -473,7 +477,7 @@ public interface RobotController {
     public void yield();
 
     /**
-     * Kills your robot and ends the current round. Never fails. Drops supplies on the ground.
+     * Kills your robot and ends the current round. Never fails.
      */
     public void disintegrate();
 
