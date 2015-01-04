@@ -714,17 +714,30 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 			// ERROR, should never happen
 		}
         
-        if (attacker.type != RobotType.BASHER) { // BashSignal is already handled
+        if (attacker.type != RobotType.BASHER) {
             addSignal(s);
         }
         removeDead();
     }
 
     public void visitBashSignal(BashSignal s) {
-        // bashing is actually just the equivalent of attacking, so we can use visitAttackSignal
-        visitAttackSignal(new AttackSignal(s.getRobotID(), s.getTargetLoc()));
+        InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
 
-        addSignal(s);
+        MapLocation targetLoc = s.getTargetLoc();
+        // first, we should see if we actually do any damage
+        InternalRobot[] targets = getAllRobotsWithinRadiusSq(targetLoc, GameConstants.BASH_RADIUS_SQUARED);
+
+        boolean attacked = false;
+        for (InternalRobot target : targets) {
+            if (target.getTeam() != attacker.getTeam()) {
+                attacked = true;
+            }
+        }
+
+        if (attacked) {
+            visitAttackSignal(new AttackSignal(s.getRobotID(), targetLoc));
+            addSignal(s);
+        }
     }
 
     public void visitBroadcastSignal(BroadcastSignal s) {
