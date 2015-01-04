@@ -58,6 +58,11 @@ All robots have a certain amount of HP (also known by hitpoints, health, life, o
 
 This year's game contains a wide variety of different robots. There are two major classes of robots: structures and units. The term 'robots' refers to both classes.
 
+The following is a visual summary of the units, the buildings, and the dependencies.
+
+![Image of Tech Tree]
+(https://github.com/battlecode/battlecode-server/edit/master/techtree.png)
+
 Structures Overview [bcd05]
 ----------
 
