@@ -342,29 +342,6 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Senses the amount of supply at a given location.
-     *
-     * @param loc the location to sense.
-     * @return the amount of supply at the location.
-     * @throws GameActionException if the location can't be sensed.
-     */
-    public double senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException;
-
-    /**
-     * Drops supplies to the current location the robot is standing on. If you specify more supply than you own, all your supply will be dropped.
-     *
-     * @param amount the amount of supply to drop.
-     */
-    public void dropSupplies(int amount) throws GameActionException;
-
-    /**
-     * Picks up supplies from the location the robot is standing on. If you specify more than the supply level on the square, all the supply will be picked up.
-     *
-     * @param amount the amount of supply to pick up.
-     */
-    public void pickUpSupplies(int amount) throws GameActionException;
-
-    /**
      * Transfers supplies to a robot in a nearby location. See GameConstants for maximum transfer distance. If you specify more supply than you own, all your supply will be transferred.
      *
      * @param amount the amount of supply to transfer.
@@ -372,13 +349,6 @@ public interface RobotController {
      * @throws GameActionException if there is no one to transfer to, or if the distance is too much for a supply transfer.
      */
     public void transferSupplies(int amount, MapLocation loc) throws GameActionException;
-
-    /**
-     * SUPPLYDEPOT ONLY. Transfers all supplies to HQ.
-     *
-     * @throws GameActionException if not a SUPPLYDEPOT.
-     */
-    public void transferSuppliesToHQ() throws GameActionException;
 
     // ***********************************
     // ****** MINING METHODS *************

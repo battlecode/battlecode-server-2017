@@ -247,17 +247,15 @@ public class GameMap implements GenericGameMap {
     public static class MapMemory {
         private final GameMap map;
         private final boolean[][] seen;
-        private final double[][] supplyLevel;
         private final double[][] oreMined;
 
         public MapMemory(GameMap map) {
             this.map = map;
             this.seen = new boolean[map.getWidth()][map.getHeight()];
-            this.supplyLevel = new double[map.getWidth()][map.getHeight()];
             this.oreMined = new double[map.getWidth()][map.getHeight()];
         }
 
-        public void rememberLocations(MapLocation loc, int radiusSquared, Map<MapLocation, Double> droppedSupplies, Map<MapLocation, Double> oreMinedMap) {
+        public void rememberLocations(MapLocation loc, int radiusSquared, Map<MapLocation, Double> oreMinedMap) {
             MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
             for (int i = 0; i < locs.length; i++) {
@@ -265,9 +263,6 @@ public class GameMap implements GenericGameMap {
                 int y = locs[i].y - map.mapOriginY;
                 if (x >= 0 && x < map.getWidth() && y >= 0 && y < map.getHeight()) {
                     seen[x][y] = true;
-                    if (droppedSupplies.containsKey(locs[i])) {
-                        supplyLevel[x][y] = droppedSupplies.get(locs[i]);
-                    }
                     if (oreMinedMap.containsKey(locs[i])) {
                         oreMined[x][y] = oreMinedMap.get(locs[i]);
                     }
@@ -299,18 +294,6 @@ public class GameMap implements GenericGameMap {
             }
         }
 
-        public Double recallSupplyLevel(MapLocation loc) {
-            int X = loc.x - map.mapOriginX;
-            int Y = loc.y - map.mapOriginY;
-
-            if (X < 0 || X >= map.getWidth() || Y < 0 || Y >= map.getHeight()) {
-                return 0.0;
-            } else if (seen[X][Y]) {
-                return supplyLevel[X][Y];
-            } else {
-                return -1.0;
-            }
-        }
         public double recallOreMined(MapLocation loc) {
             int X = loc.x - map.mapOriginX;
             int Y = loc.y - map.mapOriginY;

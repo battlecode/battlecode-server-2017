@@ -37,7 +37,6 @@ import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.IndicatorDotSignal;
 import battlecode.world.signal.IndicatorLineSignal;
 import battlecode.world.signal.IndicatorStringSignal;
-import battlecode.world.signal.LocationSupplyChangeSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.MovementSignal;
@@ -511,18 +510,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ****** SUPPLY METHODS *************
     // ***********************************
 
-    public double senseSupplyLevelAtLocation(MapLocation loc) throws GameActionException {
-        return gameWorld.senseSupplyLevel(getTeam(), loc);
-    }
-
-    public void dropSupplies(int amount) throws GameActionException {
-        robot.dropSupply(amount);
-    }
-
-    public void pickUpSupplies(int amount) throws GameActionException {
-        robot.pickUpSupply(amount);
-    }
-
     public void transferSupplies(int amount, MapLocation loc) throws GameActionException {
         if (loc.distanceSquaredTo(getLocation()) > GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Can't transfer supply that much distance.");
@@ -532,14 +519,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "No one to receive supply from transfer in that direction.");
         }
         robot.transferSupply(amount, obj);
-    }
-
-    public void transferSuppliesToHQ() throws GameActionException {
-        if (robot.type != RobotType.SUPPLYDEPOT) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only supply depot can transfer supplies to hq");
-        }
-
-        robot.transferSupply(Integer.MAX_VALUE, gameWorld.getBaseHQ(robot.getTeam()));
     }
 
     // ***********************************

@@ -40,18 +40,15 @@ import battlecode.world.signal.BytecodesUsedSignal;
 import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.ControlBitsSignal;
 import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.DropSupplySignal;
 import battlecode.world.signal.TeamOreSignal;
 import battlecode.world.signal.IndicatorDotSignal;
 import battlecode.world.signal.IndicatorLineSignal;
 import battlecode.world.signal.IndicatorStringSignal;
-import battlecode.world.signal.LocationSupplyChangeSignal;
 import battlecode.world.signal.LocationOreChangeSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.MovementOverrideSignal;
-import battlecode.world.signal.PickUpSupplySignal;
 import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.ResearchChangeSignal;
 import battlecode.world.signal.RobotInfoSignal;
@@ -79,7 +76,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     private final Map<MapLocation, InternalObject> gameObjectsByLoc = new HashMap<MapLocation, InternalObject>();
 
     private Map<MapLocation, Double> oreMined = new HashMap<MapLocation, Double>();
-    private Map<MapLocation, Double> droppedSupplies = new HashMap<MapLocation, Double>();
     private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<Team, GameMap.MapMemory>(Team.class);
 
     private Map<Team, Map<Integer, Integer>> radio = new EnumMap<Team, Map<Integer, Integer>>(Team.class);
@@ -408,39 +404,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     // *********************************
-    // ****** SUPPLY METHODS ***********
-    // *********************************
-
-    public double getSupplyLevel(MapLocation loc) {
-        if (droppedSupplies.containsKey(loc)) {
-            return droppedSupplies.get(loc);
-        } else {
-            return 0;
-        }
-    }
-
-    public double senseSupplyLevel(Team team, MapLocation loc) {
-        return mapMemory.get(team).recallSupplyLevel(loc);
-    }
-
-    public void changeSupplyLevel(MapLocation loc, double delta) {
-        double cur = 0;
-        if (droppedSupplies.containsKey(loc)) {
-            cur = droppedSupplies.get(loc);
-        }
-
-        cur += delta;
-
-        if (cur == 0) {
-            droppedSupplies.remove(loc);
-        } else {
-            droppedSupplies.put(loc, cur);
-        }
-
-        addSignal(new LocationSupplyChangeSignal(loc, cur));
-    }
-
-    // *********************************
     // ****** ORE METHODS **************
     // *********************************
 
@@ -650,7 +613,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         // update map memory
         for (int i = 0; i < gameObjects.length; i++) {
             InternalRobot ir = (InternalRobot) gameObjects[i];
-            mapMemory.get(ir.getTeam()).rememberLocations(ir.getLocation(), ir.type.sensorRadiusSquared, droppedSupplies, oreMined);
+            mapMemory.get(ir.getTeam()).rememberLocations(ir.getLocation(), ir.type.sensorRadiusSquared, oreMined);
         }
 
         // free ore
@@ -670,7 +633,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             {
                 // tiebreak by total tower health
                 // tiebreak by number of handwash stations
-
                 double towerDiff = 0.0;
                 InternalObject[] objs = getAllGameObjects();
                 for (InternalObject obj : objs) {
@@ -907,19 +869,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 int xpYield = r.type.oreCost;
                 ((InternalCommander)target).giveXP(xpYield);
             }
-
-            // drop supplies
-            changeSupplyLevel(loc, r.getSupplyLevel());
         }
-    }
-
-    public void visitDropSupplySignal(DropSupplySignal s) {
-        InternalRobot robot = (InternalRobot) getObjectByID(s.getID());
-        double amount = Math.min(s.getAmount(), robot.getSupplyLevel());
-
-        robot.decreaseSupplyLevel(amount);
-        changeSupplyLevel(robot.getLocation(), amount);
-        addSignal(s); // client doesn't need this
     }
 
     public void visitIndicatorDotSignal(IndicatorDotSignal s) {
@@ -970,15 +920,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
         r.setLocation(s.getNewLoc());
         addSignal(s);
-    }
-
-    public void visitPickUpSupplySignal(PickUpSupplySignal s) {
-        InternalRobot robot = (InternalRobot) getObjectByID(s.getID());
-        double amount = Math.min(s.getAmount(), getSupplyLevel(robot.getLocation()));
-
-        robot.increaseSupplyLevel(amount);
-        changeSupplyLevel(robot.getLocation(), -amount);
-        addSignal(s); // client doesn't need this
     }
     
     public void visitResearchSignal(ResearchSignal s) {

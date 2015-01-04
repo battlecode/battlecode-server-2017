@@ -20,8 +20,6 @@ import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.BashSignal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.DropSupplySignal;
-import battlecode.world.signal.PickUpSupplySignal;
 import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.SelfDestructSignal;
 import battlecode.world.signal.SpawnSignal;
@@ -334,14 +332,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     // *********************************
     // ****** SUPPLY METHODS ***********
     // *********************************
-
-    public void dropSupply(int amount) {
-        supplyActions.add(new DropSupplySignal(this, amount));
-    }
-
-    public void pickUpSupply(int amount) {
-        supplyActions.add(new PickUpSupplySignal(this, amount));
-    }
 
     public void transferSupply(int amount, InternalRobot target) {
         supplyActions.add(new TransferSupplySignal(this, target, amount));
