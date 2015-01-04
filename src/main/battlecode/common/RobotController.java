@@ -463,41 +463,6 @@ public interface RobotController {
     public void build(Direction dir, RobotType type) throws GameActionException;
 
     // ***********************************
-    // ****** UPGRADE METHODS ************
-    // ***********************************
-
-    /**
-     * Returns whether the unit can research the specific upgrade. Must be an HQ. Does not check the movement timer.
-     * @param upgrade the upgrade to check.
-     * @return whether the unit can research.
-     */
-    public boolean canResearch(Upgrade upgrade);
-
-    /**
-     * Checks whether a given upgrade has been researched and is available.
-     *
-     * @param upgrade the upgrade to check.
-     * @return whether a given upgrade is available.
-     */
-    public boolean hasUpgrade(Upgrade upgrade);
-
-    /**
-     * Researches the given upgrade for a turn.
-     *
-     * @param upgrade the upgrade to research.
-     * @throws GameActionException if can't research.
-     */
-    public void researchUpgrade(Upgrade upgrade) throws GameActionException;
-    
-    /**
-     * Checks the total number of rounds a given research has been researched
-     *
-     * @param upgrade the upgrade to check.
-     * @return how many turns have been spent on the upgrade.
-     */
-    public int checkResearchProgress(Upgrade upgrade);
-
-    // ***********************************
     // ****** OTHER ACTION METHODS *******
     // ***********************************
     

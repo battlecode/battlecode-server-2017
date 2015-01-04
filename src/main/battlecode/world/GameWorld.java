@@ -49,8 +49,6 @@ import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.MovementOverrideSignal;
-import battlecode.world.signal.ResearchSignal;
-import battlecode.world.signal.ResearchChangeSignal;
 import battlecode.world.signal.RobotInfoSignal;
 import battlecode.world.signal.SelfDestructSignal;
 import battlecode.world.signal.SpawnSignal;
@@ -621,7 +619,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         teamResources[Team.B.ordinal()] += GameConstants.HQ_ORE_INCOME;
         
         addSignal(new TeamOreSignal(teamResources));
-		addSignal(new ResearchChangeSignal(research));
 
         if (timeLimitReached() && winner == null) {
             InternalRobot HQA = baseHQs.get(Team.A);
@@ -922,13 +919,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         addSignal(s);
     }
     
-    public void visitResearchSignal(ResearchSignal s) {
-    	InternalRobot hq = (InternalRobot)getObjectByID(s.getRobotID());
-    	researchUpgrade(hq.getTeam(), s.getUpgrade());
-        adjustResources(hq.getTeam(), -s.getUpgrade().oreCost / s.getUpgrade().numRounds);
-    	addSignal(s);
-    }
-
     public void visitSelfDestructSignal(SelfDestructSignal s) {
         InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
         MapLocation targetLoc = s.getLoc();

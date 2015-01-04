@@ -64,10 +64,6 @@ public enum RobotType {
         return this == MINER || this == BEAVER;
     }
 
-    public boolean canResearch() {
-        return this == HQ;
-    }
-
     public boolean canLaunch() {
         return this == LAUNCHER;
     }

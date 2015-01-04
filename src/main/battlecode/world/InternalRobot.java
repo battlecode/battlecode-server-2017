@@ -20,7 +20,6 @@ import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.BashSignal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.SelfDestructSignal;
 import battlecode.world.signal.SpawnSignal;
 import battlecode.world.signal.TransferSupplySignal;
@@ -50,7 +49,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private Signal movementSignal;
     private Signal attackSignal;
     private Signal castSignal;
-    public ResearchSignal researchSignal;
 
     private int buildDelay;
 
@@ -86,7 +84,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         movementSignal = null;
         attackSignal = null;
         castSignal = null;
-        researchSignal = null;
     }
 
     // *********************************
@@ -351,17 +348,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void increaseSupplyLevel(double inc) {
         mySupplyLevel += inc;
     }
-    
-    // *********************************
-    // ****** RESEARCH METHODS *********
-    // *********************************
-
-    public void activateResearch(ResearchSignal s, double attackDelay, double movementDelay) {
-        addLoadingDelay(attackDelay);
-        addCoreDelay(movementDelay);
-
-        researchSignal = s;
-    }
 
     // *********************************
     // ****** BROADCAST METHODS ********
@@ -524,12 +510,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             myGameWorld.visitSignal(s);
         }
         missileLaunchActions.clear();
-
-        // perform research
-        if (researchSignal != null) {
-            myGameWorld.visitSignal(researchSignal);
-            researchSignal = null;
-        }
 
         // bashers should bash()
         if (type == RobotType.BASHER) {

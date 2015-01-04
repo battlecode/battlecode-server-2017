@@ -40,7 +40,6 @@ import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.MovementSignal;
-import battlecode.world.signal.ResearchSignal;
 import battlecode.world.signal.SpawnSignal;
 
 import com.google.common.base.Predicate;
@@ -716,51 +715,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         int delay = type.buildTurns;
         robot.activateMovement(
                 new BuildSignal(loc, type, robot.getTeam(), robot, delay), delay, delay);
-    }
-
-    //***********************************
-    //****** UPGRADE METHODS ************
-    //***********************************
-
-    public boolean isResearchingUnit() {
-        return robot.type.canResearch();
-    }
-
-    public void assertIsResearchingUnit() throws GameActionException {
-        if (!isResearchingUnit()) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only HQ can research.");
-        }
-    }
-
-    public boolean hasUpgrade(Upgrade upgrade) {
-        assertNotNull(upgrade);
-        return gameWorld.hasUpgrade(getTeam(), upgrade);
-    }
-
-    public void assertHaveUpgrade(Upgrade upgrade) throws GameActionException {
-        if (!gameWorld.hasUpgrade(getTeam(), upgrade))
-            throw new GameActionException(MISSING_UPGRADE, "You need the following upgrade: "+upgrade);
-    }
-
-    public void assertNoUpgrade(Upgrade upgrade) throws GameActionException {
-        if (gameWorld.hasUpgrade(getTeam(), upgrade))
-            throw new GameActionException(MISSING_UPGRADE, "You already have the following upgrade: "+upgrade);
-    }
-
-    public boolean canResearch(Upgrade upgrade) {
-        return isResearchingUnit() && !hasUpgrade(upgrade) && upgrade.oreCost / upgrade.numRounds <= getTeamOre();
-    }
-
-    public void researchUpgrade(Upgrade upgrade) throws GameActionException {
-        assertIsResearchingUnit();
-        assertNoUpgrade(upgrade);
-        assertIsCoreReady();
-        assertHaveResource(upgrade.oreCost / upgrade.numRounds);
-        robot.activateResearch(new ResearchSignal(robot, upgrade), 1, 1);
-    }
-    
-    public int checkResearchProgress(Upgrade upgrade) {
-        return gameWorld.getUpgradeProgress(getTeam(), upgrade);
     }
    
     // ***********************************
