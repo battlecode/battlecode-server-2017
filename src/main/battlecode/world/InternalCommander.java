@@ -11,7 +11,6 @@ import battlecode.common.RobotType;
 import battlecode.common.CommanderSkillType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
-import battlecode.common.Upgrade;
 import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
@@ -33,6 +32,7 @@ public class InternalCommander extends InternalRobot {
     public int getXP() {
         return xp;
     }
+
     public void giveXP(int amt) {
         xp += amt;
     }

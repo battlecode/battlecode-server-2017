@@ -12,7 +12,6 @@ import battlecode.common.RobotType;
 import battlecode.common.CommanderSkillType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
-import battlecode.common.Upgrade;
 import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
@@ -293,27 +292,15 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public int getMovementDelayForType() {
-        if (type == RobotType.BASHER && myGameWorld.hasUpgrade(getTeam(), Upgrade.REGENERATIVEMACHINERY)) {
-            return 1;
-        } else {
-            return type.movementDelay;
-        }
+        return type.movementDelay;
     }
 
     public int getLoadingDelayForType() {
-        if (type == RobotType.SOLDIER && myGameWorld.hasUpgrade(getTeam(), Upgrade.NEUROMORPHICS)) {
-            return 0;
-        } else {
-            return type.loadingDelay;
-        }
+        return type.loadingDelay;
     }
 
     public int getCooldownDelayForType() {
-        if (type == RobotType.SOLDIER && myGameWorld.hasUpgrade(getTeam(), Upgrade.NEUROMORPHICS)) {
-            return 0;
-        } else {
-            return type.cooldownDelay;
-        }
+        return type.cooldownDelay;
     }
 
     public double calculateMovementActionDelay(MapLocation from, MapLocation to, TerrainTile terrain) {
@@ -452,13 +439,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
 
         // generate supply
-        if ((type == RobotType.SOLDIER || type == RobotType.BASHER) && myGameWorld.hasUpgrade(getTeam(), Upgrade.CONTROLLEDECOPHAGY)) {
-            if (type == RobotType.SOLDIER) {
-                increaseSupplyLevel(5);
-            } else if (type == RobotType.BASHER) {
-                increaseSupplyLevel(10);
-            }
-        }
         if (type == RobotType.SUPPLYDEPOT) {
             increaseSupplyLevel(GameConstants.DEPOT_SUPPLY_GEN);
         }

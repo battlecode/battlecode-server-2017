@@ -27,7 +27,6 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
-import battlecode.common.Upgrade;
 import battlecode.engine.GenericController;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;

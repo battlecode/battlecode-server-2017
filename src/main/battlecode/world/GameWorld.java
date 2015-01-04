@@ -21,7 +21,6 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
-import battlecode.common.Upgrade;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.GenericWorld;
 import battlecode.engine.instrumenter.RobotDeathException;
@@ -78,9 +77,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     private Map<Team, Map<Integer, Integer>> radio = new EnumMap<Team, Map<Integer, Integer>>(Team.class);
 
-    private Map<Team, Set<Upgrade>> upgrades = new EnumMap<Team, Set<Upgrade>>(Team.class);
-    private Map<Team, Map<Upgrade, Integer>> research = new EnumMap<Team, Map<Upgrade, Integer>>(Team.class);
-
     private int[] numCommandersSpawned = new int[2];
     private Map<Team, InternalRobot> commanders = new EnumMap<Team, InternalRobot>(Team.class);
     private Map<Team, Map<CommanderSkillType, Integer>> skillCooldowns = new EnumMap<Team, Map<CommanderSkillType, Integer>>(Team.class);
@@ -100,11 +96,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         mapMemory.put(Team.A, new GameMap.MapMemory(gameMap));
         mapMemory.put(Team.B, new GameMap.MapMemory(gameMap));
         mapMemory.put(Team.NEUTRAL, new GameMap.MapMemory(gameMap));
-
-        research.put(Team.A, new EnumMap<Upgrade, Integer>(Upgrade.class));
-        research.put(Team.B, new EnumMap<Upgrade, Integer>(Upgrade.class));
-        upgrades.put(Team.A, EnumSet.noneOf(Upgrade.class));
-        upgrades.put(Team.B, EnumSet.noneOf(Upgrade.class));
 
         radio.put(Team.A, new HashMap<Integer, Integer>());
         radio.put(Team.B, new HashMap<Integer, Integer>());
@@ -445,39 +436,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public double resources(Team t) {
         return teamResources[t.ordinal()];
-    }
-
-    // *********************************
-    // ****** UPGRADES METHODS *********
-    // *********************************
-    
-    public void resetUpgrade(Team t, Upgrade u) {
-        research.get(t).put(u, 0);
-    }
-    
-    public void researchUpgrade(Team t, Upgrade u) {
-    	Integer i = research.get(t).get(u);
-    	if (i == null) i = 0;
-    	i = i+1;
-    	research.get(t).put(u, i);
-    	if (i == u.numRounds)
-    		addUpgrade(t, u);
-    	
-    	nextID += (randGen.nextDouble()<0.3) ? 1 : 0;
-    }
-    
-    public int getUpgradeProgress(Team t, Upgrade u) {
-    	Integer i = research.get(t).get(u);
-    	if (i == null) i = 0;
-    	return i;
-    }
-    
-    public boolean hasUpgrade(Team t, Upgrade upgrade) {
-    	return upgrades.get(t).contains(upgrade);
-    }
-    
-    public void addUpgrade(Team t, Upgrade upgrade) {
-        upgrades.get(t).add(upgrade);
     }
 
     // *********************************
@@ -893,11 +851,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             if (s.getMinerType() == RobotType.BEAVER) {
                 ore = Math.max(Math.min(GameConstants.BEAVER_MINE_MAX, baseOre / GameConstants.BEAVER_MINE_RATE), GameConstants.MINIMUM_MINE_AMOUNT);
             } else {
-                if (hasUpgrade(s.getMineTeam(), Upgrade.IMPROVEDMINING)) {
-                    ore = Math.max(Math.min(baseOre / GameConstants.MINER_MINE_RATE, GameConstants.MINER_MINE_MAX_UPGRADED), GameConstants.MINIMUM_MINE_AMOUNT);
-                } else {
-                    ore = Math.max(Math.min(baseOre / GameConstants.MINER_MINE_RATE, GameConstants.MINER_MINE_MAX), GameConstants.MINIMUM_MINE_AMOUNT);
-                }
+                ore = Math.max(Math.min(baseOre / GameConstants.MINER_MINE_RATE, GameConstants.MINER_MINE_MAX), GameConstants.MINIMUM_MINE_AMOUNT);
             }
         }
         ore = Math.min(ore, baseOre);
