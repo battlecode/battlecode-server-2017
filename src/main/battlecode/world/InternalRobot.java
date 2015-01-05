@@ -51,6 +51,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     private int buildDelay;
 
+    private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean("bc.engine.upkeep");
+
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
                          boolean spawnedRobot, int buildDelay) {
@@ -255,7 +257,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void decrementDelays() {
-        if (type.supplyUpkeep > 0) {
+        if (type.supplyUpkeep > 0 && upkeepEnabled) {
             weaponDelay -= 0.5;
             coreDelay -= 0.5;
             double maxDelay = Math.max(weaponDelay,coreDelay);
@@ -397,7 +399,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         decrementDelays(); // expends supply to decrement delays
 
         this.currentBytecodeLimit = type.bytecodeLimit;
-        if (type.supplyUpkeep > 0) {
+        if (type.supplyUpkeep > 0 && upkeepEnabled) {
             // decide how many bytecodes we'll be allowed
             this.currentBytecodeLimit = Math.max(type.bytecodeLimit / 2, Math.min(type.bytecodeLimit, GameConstants.FREE_BYTECODES + (int) (mySupplyLevel * GameConstants.BYTECODES_PER_SUPPLY)));
         }
@@ -411,7 +413,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         hasBeenAttacked = false;
 
         // remove supply from bytecode usage
-        if (type.supplyUpkeep > 0) {
+        if (type.supplyUpkeep > 0 && upkeepEnabled) {
             double supplyNeeded = Math.max(getBytecodesUsed() - GameConstants.FREE_BYTECODES, 0) / (double) GameConstants.BYTECODES_PER_SUPPLY;
             decreaseSupplyLevel(supplyNeeded);
         }
