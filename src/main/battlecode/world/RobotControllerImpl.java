@@ -3,7 +3,7 @@ package battlecode.world;
 import static battlecode.common.GameActionExceptionType.NOT_ACTIVE;
 import static battlecode.common.GameActionExceptionType.CANT_DO_THAT_BRO;
 import static battlecode.common.GameActionExceptionType.CANT_SENSE_THAT;
-import static battlecode.common.GameActionExceptionType.MISSING_UPGRADE;
+import static battlecode.common.GameActionExceptionType.MISSING_DEPENDENCY;
 import static battlecode.common.GameActionExceptionType.NOT_ENOUGH_RESOURCE;
 import static battlecode.common.GameActionExceptionType.NO_ROBOT_THERE;
 import static battlecode.common.GameActionExceptionType.OUT_OF_RANGE;
@@ -346,7 +346,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     protected void assertIsValidDirection(Direction d) {
         if (!isValidDirection(d)) {
-            throw new IllegalArgumentException("You cannot move in the direction NONE or OMNI or null.");
+            throw new IllegalArgumentException("You cannot move in the direction NONE, OMNI or in a null direction.");
         }
     }
 
@@ -393,7 +393,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     protected void assertIsAttackingUnit() throws GameActionException {
         if (!isAttackingUnit()) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Not attacking unit.");
+            throw new GameActionException(CANT_DO_THAT_BRO, "Not an attacking unit.");
         }
     }
 
@@ -414,7 +414,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertValidAttackLocation(loc);
 
         if (robot.type == RobotType.BASHER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers attack automatically.");
+            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers attack automatically, and cannot use attackLocation.");
         }
 
         robot.activateAttack(new AttackSignal(robot, loc), robot.getAttackDelayForType(), robot.getCooldownDelayForType());
@@ -521,7 +521,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
         InternalRobot obj = (InternalRobot) gameWorld.getObject(loc);
         if (obj == null) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "No one to receive supply from transfer in that direction.");
+            throw new GameActionException(CANT_DO_THAT_BRO, "No one to receive supply from transfer on that location.");
         }
         robot.transferSupply(amount, obj);
     }
@@ -693,7 +693,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public void assertHasDependencyFor(RobotType type) throws GameActionException {
         if (gameWorld.getActiveRobotTypeCount(getTeam(), type.dependency) == 0) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Missing depency for build of " + type);
+            throw new GameActionException(MISSING_DEPENDENCY, "Missing dependency for " + type);
         }
     }
 
