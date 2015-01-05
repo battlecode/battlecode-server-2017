@@ -257,9 +257,9 @@ public class Match extends Observable {
         double[] energon = stats.getTotalEnergon();
         int[] archons = stats.getNumArchons();
         if (dom == DominationFactor.DESTROYED)
-            sb.append("The winning team won by getting a lot of milk.");
+            sb.append("The winning team won by destruction.");
         else if (dom == DominationFactor.OWNED || dom == DominationFactor.BEAT)
-            sb.append("The winning team won by getting a lot of milk.");
+            sb.append("The winning team won by destruction.");
         else if (dom == DominationFactor.BARELY_BEAT)
             sb.append("The winning team won on tiebreakers.");
         else if (dom == DominationFactor.WON_BY_DUBIOUS_REASONS)
