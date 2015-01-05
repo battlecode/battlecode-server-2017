@@ -391,10 +391,10 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Gets the current progress of a dependency.
+     * Gets the current progress of a dependency (relevant for building structures).
      *
      * @param type the dependency to check.
-     * @return a DependencyProgress to check
+     * @return a DependencyProgress (DONE if the RobotType exists and is active on the map, INPROGRESS if the RobotType is not fully constructed, and NONE otherwise).
      */
     public DependencyProgress checkDependencyProgress(RobotType type);
 
@@ -426,7 +426,7 @@ public interface RobotController {
     public void spawn(Direction dir, RobotType type) throws GameActionException;
 
     /**
-     * Returns whether you have the ore and the dependencies to build the given robot. Checks to make sure the robot can build structures.
+     * Returns whether you have the ore and the dependencies to build the given robot, and that the robot can build structures.
      *
      * @param type the type to build.
      * @return whether the requirements to build are met.
