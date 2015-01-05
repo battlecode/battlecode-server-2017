@@ -717,6 +717,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                         damage = Math.min(damage, GameConstants.MISSILE_MAXIMUM_DAMAGE);
                     }
                     target.takeDamage(damage, attacker);
+
+                    // if you destroy a missile, then cause damage
+                    if (target.type == RobotType.MISSILE && target.getHealthLevel() <= 0) {
+                        visitSelfDestructSignal(new SelfDestructSignal(target, target.getLocation()));
+                    }
                 }
             }
 			break;
