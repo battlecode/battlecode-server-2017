@@ -22,8 +22,8 @@ Table of Contents [bcd00]
 16. Getting Help [bcd16]
 17. Disclaimers [bcd17]
 18. Appendix A: Javadocs and Game Constants [bcd18]
-20. Appendix C: In-depth Mechanics [bcd19]
-21. Changelog [bcd20]
+19. Appendix B: More In-depth Mechanics [bcd19]
+20. Changelog [bcd20]
 
 Plot [bcd01]
 --------
@@ -376,7 +376,7 @@ Units In-Depth [bcd15]
 | Miner     | Miner Factory   | 50 ore, 20 turns   | 8             | 50  | 3      | 5     | 2  | 2   | 2   | 1   |
 | Computer  | Tech. Institute | 10 ore, 25 turns   | 5             | 1   | n/a    | n/a   | 8  | n/a | n/a | n/a |
 | Soldier   | Barracks        | 60 ore, 15 turns   | 5             | 40  | 8      | 5     | 2  | 2   | 1   | 1   |
-| Basher    | Barracks        | 80 ore, 20 turns   | 6             | 64  | 5      | 2*    | 2  | 1   | 0   | 0   |
+| Basher    | Barracks        | 80 ore, 20 turns   | 6             | 50  | 4      | 2*    | 2  | 1   | 0   | 1   |
 | Drone     | Helipad         | 125 ore, 30 turns  | 5             | 70  | 8      | 10    | 1  | 3   | 0   | 0   |
 | Tank      | Tank Factory    | 250 ore, 50 turns  | 15            | 160 | 20     | 15    | 2  | 3   | 2   | 2   |
 | Commander | Training Field  | 100* ore, 80 turns | 5             | 120 | 10     | 10    | 2  | 1   | 0   | 0   |
@@ -447,11 +447,11 @@ The javadocs include the values of the game constants and robot attributes.
 
 Also included in the release is an example player, the `examplefuncsplayer`. It defines `RobotPlayer`, which is a class with a public static `run` method that takes one argument of type `battlecode.common.RobotController`. Whenever a new robot is created, the game calls the run method with the robots RobotController as its argument. If this method ever finishes, either because it returned or because of an uncaught exception, the robot dies and is removed from the game. You are encouraged to wrap your code in loops and exception handlers so that this does not happen.
 
-The RobotController argument to the RobotPlayer constructor is very important -- this is how you will control your robot. RobotController has methods for sensing (e.g. `senseRobotInfo(Robot)`) and performing actions (e.g., `move()`). If you're not sure how to get your robot to do something, the Javadocs for RobotController are a good place to start.
+The RobotController argument to the RobotPlayer constructor is very important -- this is how you will control your robot. RobotController has methods for sensing (e.g. `senseNearbyObjects`, `senseOre`, etc) and performing actions (e.g., `move()`, `attackLocation()`, etc). If you're not sure how to get your robot to do something, the Javadocs for RobotController are a good place to start.
 
-Notice the while(true) loop, which prevents the run method from returning. While the robot is alive, it will be continually cycling through this loop. The try/catch block inside the loop prevents the robot from throwing an uncaught exception and dying. 
+Notice the while(true) loop, which prevents the run method from returning. While the robot is alive, it will be continually cycling through this loop. The try/catch block inside the loop prevents the robot from throwing an uncaught exception and dying from it.
 
-Appendix B: In-depth Mechanics [bcd19]
+Appendix B: More In-depth Mechanics [bcd19]
 -------------------
 
 ### Team Memory
@@ -478,7 +478,7 @@ The following is a detailed list of a robot's execution order within a single tu
 
 ### Timing
 
-Each robot is allowed a certain amount of computation each round. Computation is measured in terms of Java bytecodes, the atomic instructions of compiled Java code. Individual bytecodes are simple instructions such as "subtract" or "get field", and a single line of code generally contains several bytecodes. (For details see http://en.wikipedia.org/wiki/Java_bytecode) Each round, every player runs a number of bytecodes determined by `GameConstants.BYTECODE_LIMIT`. When a robot hits the bytecode limit, its computation is paused while other robots get to do their computation for the same round or the next round. On the next round, the robot's computation is resumed exactly where it left off. Thus, to the robot's code, the round change is invisible. Nothing will jump out and shout at you when a round ends.
+Each robot is allowed a certain amount of computation each round. Computation is measured in terms of Java bytecodes, the atomic instructions of compiled Java code. Individual bytecodes are simple instructions such as "subtract" or "get field", and a single line of code generally contains several bytecodes. (For details see http://en.wikipedia.org/wiki/Java_bytecode) Each round, every player runs a number of bytecodes determined by `GameConstants.BYTECODE_LIMIT`. When a robot hits the bytecode limit, its computation is paused while other robots get to do their computation for the same round or the next round. On the next round, the robot's computation is resumed exactly where it left off. Thus, to the robot's code, the round change is invisible. Nothing will jump out and shout at the robot when a round ends.
 
 ### Monitoring
 
@@ -486,7 +486,7 @@ The Clock class provides a way to identify the current round ( `Clock.getRoundNu
 
 ### GameActionExceptions
 
-GameActionExceptions are thrown when an ability cannot be performed. It is often the result of uncertainty about the game world, or an unexpected round change in your code. Thus, you must write your player defensively and handle GameActionExceptions judiciously. You should also be prepared for any ability to fail and make sure that this has as little effect as possible on the control flow of your program.
+GameActionExceptions are thrown when something cannot be done. It is often the result of uncertainty about the game world, or an unexpected round change in your code. Thus, you must write your player defensively and handle GameActionExceptions judiciously. You should also be prepared for any ability to fail and make sure that this has as little effect as possible on the control flow of your program.
 
 Exceptions cause a bytecode penalty of 500 bytecodes.
 
