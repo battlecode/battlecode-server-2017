@@ -19,12 +19,11 @@ Table of Contents [bcd00]
 13. Actions and Delays [bcd13]
 14. Structures In-depth [bcd14]
 15. Units In-depth [bcd15]
-16. Writing a Player [bcd16]
-17. Getting Help [bcd17]
-18. Disclaimers [bcd18]
-19. Appendix A: Javadocs and Game Constants [bcd19]
-20. Appendix B: Tournaments & Course Credit [bcd20]
-21. Appendix C: In-depth Mechanics [bcd21]
+16. Getting Help [bcd16]
+17. Disclaimers [bcd17]
+18. Appendix A: Javadocs and Game Constants [bcd18]
+20. Appendix C: In-depth Mechanics [bcd19]
+21. Changelog [bcd20]
 
 Plot [bcd01]
 --------
@@ -425,74 +424,34 @@ Units In-Depth [bcd15]
 - MISSILEs have a bytecode limit of 500.
 - MISSILEs cannot write messages (but they can read them).
 
-Writing a Player [bcd16]
--------------
-
-### Introduction
-
-Your player program must reside in a Java package named `teamXXX`, where `XXX` is your three-digit team number, with leading zeros included. You may have whatever sub-packages you like. You must define `teamXXX.RobotPlayer`, which must have a public static `run` method that takes one argument of type `battlecode.common.RobotController`. Whenever a new robot is created, the game calls the run method with the robots RobotController as its argument. If this method ever finishes, either because it returned or because of an uncaught exception, the robot dies and is removed from the game. You are encouraged to wrap your code in loops and exception handlers so that this does not happen.
-
-### RobotController
-
-The RobotController argument to the RobotPlayer constructor is very important -- this is how you will control your robot. RobotController has methods for sensing (e.g. `senseRobotInfo(Robot)`) and performing actions (e.g., `move()`). If you're not sure how to get your robot to do something, the Javadocs for RobotController are a good place to start.
-
-### Example: examplefuncsplayer
-
-Refer to the released `examplefuncsplayer/RobotPlayer.java`.
-
-Notice the while(true) loop, which prevents the run method from returning. While the robot is alive, it will be continually cycling through this loop. The try/catch block inside the loop prevents the robot from throwing an uncaught exception and dying. 
-
-Getting Help [bcd17]
+Getting Help [bcd16]
 -------------
 
 We have both a forum (https://www.battlecode.org/contestants/forum/) and an IRC Channel (#battlecode on irc.freenode.net). Hang out and chat with us -- we're friendly!
 
-Disclaimers [bcd18]
+Disclaimers [bcd17]
 -------------
 
 We have done our best to test and balance the properties of the Battlecode world. Inevitably, however, we will need to make adjustments in the interest of having a fair competition that allows a variety of creative strategies. We will endeavor to keep these changes to a minimum, and release them as early as possible. All changes will be carefully documented in the Changelog.
 
 Despite our best efforts, there may be bugs or exploits that allow players to operate outside the spirit of the competition. Using such exploits for the tournament or scrimmage will result in immediate disqualification, at the discretion of the directors. Such exploits might include, but are not limited to, robot communication without broadcasts, bypassing the bytecode limit, or terminating the game engine. If you are not sure what qualifies as "in the spirit of the competition", ask the devs before submitting your code.
 
-Appendix A: Javadocs and Game Constants [bcd19]
+Appendix A: Javadocs and Other References [bcd18]
 ------------
 
 Javadocs can be found here (https://www.battlecode.org/contestants/releases/), included in the software distribution. Here, you'll find everything you need, as well as some helpful methods that might not be mentioned above.
 
 The javadocs include the values of the game constants and robot attributes.
 
-Appendix B: Tournaments & Course Credit [bcd20]
----------------------------
+### Sample Player
 
-There are five tournaments: the Sprint, Seeding, Qualifying, Final, and Newbie tournaments. Check the Calendar page for dates and locations. Here, we'll explain the mechanics of how the tournaments are run.
+Also included in the release is an example player, the `examplefuncsplayer`. It defines `RobotPlayer`, which is a class with a public static `run` method that takes one argument of type `battlecode.common.RobotController`. Whenever a new robot is created, the game calls the run method with the robots RobotController as its argument. If this method ever finishes, either because it returned or because of an uncaught exception, the robot dies and is removed from the game. You are encouraged to wrap your code in loops and exception handlers so that this does not happen.
 
-The Sprint Tournament is a single elimination tournament. Contestants are seeded based on scrimmage ranking, and play continues until there is only one undefeated team.
+The RobotController argument to the RobotPlayer constructor is very important -- this is how you will control your robot. RobotController has methods for sensing (e.g. `senseRobotInfo(Robot)`) and performing actions (e.g., `move()`). If you're not sure how to get your robot to do something, the Javadocs for RobotController are a good place to start.
 
-The Seeding Tournament is a double elimination tournament. Contestants are seeded based on scrimmage ranking, and play continues until there is only one undefeated team. The results of this tournament are used to determine seeds for the Qualifying and Newbie tournaments. Teams are ranked by the following criteria, in order:
+Notice the while(true) loop, which prevents the run method from returning. While the robot is alive, it will be continually cycling through this loop. The try/catch block inside the loop prevents the robot from throwing an uncaught exception and dying. 
 
-- Furthest round achieved
-- Bayesian Elo rating for the tournament (computed on a per-game basis, not a per-match basis)
-
-The Qualifying Tournament is a double elimination tournament (see e.g. http://en.wikipedia.org/wiki/Image:NSB-doubleelim-draw-2004.png). Play continues until there are a small number of teams remaining (historically this has been 16). These teams move on to the Final Tournament. Teams are seeded for the final tournament as follows:
-
-- The teams that did not lose a match receive the top half of the seeds.
-- Teams that did not lose a single game are ranked by their qualifying seeds.
-- The remaining teams are ranked by Bayesian Elo rating for the tournament (computed on a per-game basis).
-- The Final Tournament is another double elimination tournament. The Final Tournament starts with a blank state, i.e., any losses in the Qualifying Tournament are erased.
-
-The Newbie Tournament will run concurrently with the Qualifying Tournament. All teams consisting entirely of MIT students who have not participated in Battlecode before will automatically be entered into the Newbie tournament in addition to the other tournaments. The Newbie Tournament will progress until there are a small number of teams left in a double elimination format, and these teams will compete with each other at the Newbie Finals (with losses reset).
-
-In order to receive credit for the course, or to be eligible for the newbie tournament, you must register with an mit.edu e-mail address. If you already registered with a different e-mail address, please let us know.
-
-You can receive credit for the course by defeating the reference player. You must defeat Teh Devs in an unranked scrimmage on a certain set of maps. These maps will be announced approximately two weeks into the course. If your player beats the reference player, everyone on your team receives 6 credits.
-
-If your submission does not beat the reference player, then you can get credit an alternate way, by sending us a 2-page report on your player: its code design, how it works, an explanation of any AI paradigms you used, etc. We will look over your source code and your report, and if both show a significant amount of effort, thought, and good design techniques, we will give you 6 credits.
-
-We give prizes for the best strategy reports, so we encourage you to submit a report even if you defeat the reference player.
-
-Also, note that you are allowed to drop 6.147 (6.370) without penalty very late into IAP.
-
-Appendix C: In-depth Mechanics [bcd21]
+Appendix B: In-depth Mechanics [bcd19]
 -------------------
 
 ### Team Memory
@@ -604,3 +563,7 @@ String strategy = System.getProperty("bc.testing.team-a-strategy");
 Breakpoints allow you to pause the game engine's calculations. If breakpoints are enabled (see the software page), and a robot calls RobotController.breakpoint(), the game engine will stop computing at the end of the round. This gives you a chance to see exactly what's going on in the game when your robot hits a certain point in its code. You can resume the game engine's computation in the client, by hitting the "resume" button. If the match is being dumped straight to a file (i.e., there is no client to resume the game), breakpoints are ignored.
 
 Note that when a robot calls breakpoint(), computation will be stopped at the end of the round, not immediately when breakpoint() is called. Depending on the circumstances, you might want to use breakpoint(); yield(); instead.
+
+Changelog [bcd20]
+-------------------
+* 1.0.0 (1/5/2015) - Initial specs released
