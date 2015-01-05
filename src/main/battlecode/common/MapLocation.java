@@ -209,6 +209,15 @@ public final class MapLocation implements Serializable {
     }
 
     // TODO(axc): clean, since this is copied from GameWorld
+	/**
+	 * Returns an array of all MapLocations within a certain radius squared 
+	 * of a specified location.
+	 *
+	 * @param center the center of the search
+	 * @param radiusSquared the radius of the search
+	 * @return all MapLocations (both on the map and outside the map) within 
+	 * radiusSquared distance of center.
+	 */
     public static MapLocation[] getAllMapLocationsWithinRadiusSq(MapLocation center, int radiusSquared) {
         ArrayList<MapLocation> locations = new ArrayList<MapLocation>();
 

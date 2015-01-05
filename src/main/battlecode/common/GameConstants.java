@@ -154,23 +154,27 @@ public interface GameConstants {
     // ****** COMMANDER ***** **********
     // *********************************
 
+	/** The range inside which commanders gain xp for destroyed enemy units. **/
     public static final int XP_RANGE = 24;
 
+	/** The hp that a commander regenerates per turn. **/
     public static final double REGEN_RATE = 1.0;
-
+	
+	/** The xp required to activate the 'leadership' skill. **/
     public static final int XP_REQUIRED_LEADERSHIP = 1000;
+	
+	/** The xp required to activate the 'flash' skill. **/
     public static final int XP_REQUIRED_FLASH = 2000;
 
-    public static final int BURST_DELAY = 3;
-    public static final int BURST_RANGE = 35;
-    public static final int BURST_DAMAGE = 80;
-
+	/** The range of the 'leadership' skill. **/
     public static final int LEADERSHIP_RANGE = 15;
+	
+	/** The damage increase applied to all allied units within range of 'leadership' when the skill is active. **/
     public static final double LEADERSHIP_DAMAGE_BONUS = 1;
-
-    public static final int INTERVENTION_RANGE = 15;
-    public static final int INTERVENTION_LENGTH = 10;
-
+	
+	/** The range of the 'flash' skill. **/
     public static final int FLASH_RANGE = 15;
+	
+	/** Movement delay increase upon using the 'flash' skill. **/
     public static final double FLASH_MOVEMENT_DELAY = 1.0;
 }
