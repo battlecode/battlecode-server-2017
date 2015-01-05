@@ -524,6 +524,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             changeHealthLevel(getHealthLevel());
             // increase robot count
             myGameWorld.incrementRobotTypeCount(getTeam(), type);
+            myGameWorld.getRobotByID(myBuilder).clearBuilding();
             clearBuilding();
         } else if (!type.isBuildable() && roundsAlive == 1) {
             myGameWorld.incrementRobotTypeCount(getTeam(), type);

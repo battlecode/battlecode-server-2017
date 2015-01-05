@@ -13,18 +13,25 @@ public class RobotInfoSignal extends Signal {
     private static final long serialVersionUID = 6617731214077155785L;
 
     private final int robotID;
-    private final RobotInfo info;
+
+    public final double coreDelay;
+    public final double weaponDelay;
+    public final double health;
+    public final double supplyLevel;
+    public final int xp;
+    public final int missileCount;
 
     public RobotInfoSignal(int robotID, RobotInfo info) {
         this.robotID = robotID;
-        this.info = info;
+        this.coreDelay = info.coreDelay;
+        this.weaponDelay = info.weaponDelay;
+        this.health = info.health;
+        this.supplyLevel = info.supplyLevel;
+        this.xp = info.xp;
+        this.missileCount = info.missileCount;
     }
 
     public int getID() {
         return this.robotID;
-    }
-
-    public RobotInfo getRobotInfo() {
-        return this.info;
     }
 }
