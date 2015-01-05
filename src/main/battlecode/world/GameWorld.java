@@ -589,12 +589,17 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 !(setWinnerIfNonzero(HQA.getHealthLevel() - HQB.getHealthLevel(), DominationFactor.BARELY_BEAT)))
             {
                 // tiebreak by total tower health
-                // tiebreak by number of handwash stations
                 double towerDiff = 0.0;
+                double oreDiff = resources(Team.A) - resources(Team.B);
                 InternalObject[] objs = getAllGameObjects();
                 for (InternalObject obj : objs) {
                     if (obj instanceof InternalRobot) {
                         InternalRobot ir = (InternalRobot) obj;
+                        if (ir.getTeam() == Team.A) {
+                            oreDiff += ir.type.oreCost;
+                        } else {
+                            oreDiff -= ir.type.oreCost;
+                        }
                         if (ir.type == RobotType.TOWER) {
                             if (ir.getTeam() == Team.A) {
                                 towerDiff += ir.getHealthLevel();
@@ -605,8 +610,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                     }
                 }
 
+                // tiebreak by number of handwash stations
+                // total ore cost of units + ore stockpile
                 if ( !(setWinnerIfNonzero(towerDiff, DominationFactor.BARELY_BEAT )) &&
-                     !(setWinnerIfNonzero(getActiveRobotTypeCount(Team.A, RobotType.HANDWASHSTATION) - getActiveRobotTypeCount(Team.B, RobotType.HANDWASHSTATION), DominationFactor.WON_BY_DUBIOUS_REASONS)))
+                     !(setWinnerIfNonzero(getActiveRobotTypeCount(Team.A, RobotType.HANDWASHSTATION) - getActiveRobotTypeCount(Team.B, RobotType.HANDWASHSTATION), DominationFactor.WON_BY_DUBIOUS_REASONS)) &&
+                     !(setWinnerIfNonzero(oreDiff, DominationFactor.BARELY_BEAT )))
                 {
                     // just tiebreak by ID
                     if (HQA.getID() < HQB.getID())
