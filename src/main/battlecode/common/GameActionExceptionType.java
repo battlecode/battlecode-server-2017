@@ -10,13 +10,13 @@ public enum GameActionExceptionType {
      */
     INTERNAL_ERROR,
     /**
-     * Indicates when a robot tries to perform an action for which it does not have enough resource. Not used in 2014.
+     * Indicates when a robot tries to perform an action for which it does not have enough resources.
      */
     NOT_ENOUGH_RESOURCE,
     /**
-     * Indicates when a robot tries to perform an action for which it does not have the required upgrade.
+     * Indicates when a robot tries to perform an action for which it does not have the required dependency.
      */
-    MISSING_UPGRADE,
+    MISSING_DEPENDENCY,
     /**
      * Indicates when a robot tries to move into non-empty square.
      */
