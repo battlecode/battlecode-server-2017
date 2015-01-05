@@ -269,7 +269,8 @@ However, games must end in finite amounts of time, and hence each game only last
 2. HQ HP remaining
 3. Total HP of towers
 4. Number of handwash stations
-5. Team HQ ID
+5. Sum of ore stockpile plus ore costs of all surviving robots
+6. Team HQ ID
 
 Actions and Delays [bcd13]
 --------------
