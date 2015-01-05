@@ -241,7 +241,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             for (int y = minYPos; y <= maxYPos; y++) {
                 MapLocation loc = new MapLocation(x, y);
                 TerrainTile tile = gameMap.getTerrainTile(loc);
-                if (!tile.equals(TerrainTile.OFF_MAP) && loc.distanceSquaredTo(center) < radiusSquared)
+                if (!tile.equals(TerrainTile.OFF_MAP) && loc.distanceSquaredTo(center) <= radiusSquared)
                     locations.add(loc);
             }
         }
