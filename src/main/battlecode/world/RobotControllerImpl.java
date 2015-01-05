@@ -351,6 +351,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public boolean canMove(Direction dir) {
+        if (robot.type == RobotType.LAUNCHER && !robot.canLaunchMissileAtLocation(getLocation().add(dir))) {
+            return false;
+        }
         return isMovingUnit() && isValidDirection(dir) && isPathable(robot.type, getLocation().add(dir));
     }
 
@@ -359,6 +362,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertIsMovingUnit();
         assertIsValidDirection(d);
         assertIsPathable(robot.type, getLocation().add(d));
+
+        if (robot.type == RobotType.LAUNCHER && !robot.canLaunchMissileAtLocation(getLocation().add(d))) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "LAUNCHER launched MISSILE there already and cannot move there.");
+        }
 
         double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()));
 
