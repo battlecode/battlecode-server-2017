@@ -359,7 +359,7 @@ Structures In-depth [bcd14]
 | Training Field       | Tech. Institute | 200 ore, 100 turns | Spawns Commander               |
 | Tank Factory         | Barracks        | 500 ore, 100 turns | Spawns Tanks                   |
 | Aerospace Lab        | Helipad         | 500 ore, 100 turns | Spawns Launchers               |
-| Handwash Station     | None            | 200 ore, 100 turns | Sanitation                       |
+| Handwash Station     | None            | 200 ore, 100 turns | Sanitation                     |
 
 
 Units In-Depth [bcd15]

@@ -224,11 +224,9 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 
     private void visitMethodInsnNode(MethodInsnNode n) {
     	
-    	// This will probably need to be fixed if support for jruby/jython/closure, etc. is to be added-back in
-    	// When do you so, it's probably necessary to make sure both the bootstrap method & the actual dynamic target are
-    	// instrumented properly. Otherwise you could probably do some crazy shit by stuffing all your computations into the bootstrap
     	if(n.getOpcode() == INVOKE_DYNAMIC_INSN) {
-    		throw new RuntimeException("Invoke Dynamic probably not instrumented correctly by Battlecode Engine. Plz don't use for now");
+	    // TODO: Handle Invoke Dynamic correctly to add support for jruby/jython/etc. Checking submissions on CS for any disqualifications from this.
+	    //throw new RuntimeException("Invoke Dynamic probably not instrumented correctly by Battlecode Engine. Plz don't use for now");
     	}
     	
         if (n.name.equals("hashCode") && n.desc.equals("()I") && n.getOpcode() != INVOKESTATIC) {
