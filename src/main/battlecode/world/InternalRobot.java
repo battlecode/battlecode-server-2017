@@ -409,18 +409,18 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
         // resetting stuff
         hasBeenAttacked = false;
-        
-        // broadcasts
-        if (broadcasted) myGameWorld.visitSignal(new BroadcastSignal(this, broadcastMap));
-        
-    	broadcastMap = new HashMap<Integer, Integer>();
-        broadcasted = false;
 
         // remove supply from bytecode usage
         if (type.supplyUpkeep > 0) {
             double supplyNeeded = Math.max(getBytecodesUsed() - GameConstants.FREE_BYTECODES, 0) / (double) GameConstants.BYTECODES_PER_SUPPLY;
             decreaseSupplyLevel(supplyNeeded);
         }
+
+        // broadcasts
+        if (broadcasted) myGameWorld.visitSignal(new BroadcastSignal(this, broadcastMap));
+        
+    	broadcastMap = new HashMap<Integer, Integer>();
+        broadcasted = false;
 
         // perform supply actions
         for (Signal s : supplyActions) {
@@ -432,22 +432,28 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         if (type != RobotType.HQ && type != RobotType.SUPPLYDEPOT) {
             mySupplyLevel *= (1 - GameConstants.SUPPLY_DECAY);
         }
+        
+        // perform attacks
+        if (attackSignal != null) {
+        	myGameWorld.visitSignal(attackSignal);
+        	attackSignal = null;
+        }
 
-        // generate supply
-		if (type == RobotType.HQ) {
-            int numSupplyDepots = myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.SUPPLYDEPOT);
-			increaseSupplyLevel(GameConstants.SUPPLY_GEN_BASE * (GameConstants.SUPPLY_GEN_MULTIPLIER + Math.pow(numSupplyDepots, GameConstants.SUPPLY_GEN_EXPONENT)));
-		}
+        // launch missiles
+        for (SpawnSignal s : missileLaunchActions) {
+            myGameWorld.visitSignal(s);
+        }
+        missileLaunchActions.clear();
+        
+        // perform movements (moving, spawning, mining)
+        if (movementSignal != null) {
+            myGameWorld.visitSignal(movementSignal);
+            movementSignal = null;
+        }
 
-        // possibly convert building from inactive to active
-        roundsAlive++;
-        // after building is done, double health
-        if (type.isBuildable() && roundsAlive == buildDelay) {
-            changeHealthLevel(getHealthLevel());
-            // increase robot count
-            myGameWorld.incrementRobotTypeCount(getTeam(), type);
-        } else if (!type.isBuildable() && roundsAlive == 1) {
-            myGameWorld.incrementRobotTypeCount(getTeam(), type);
+        // bashers should bash()
+        if (type == RobotType.BASHER) {
+            myGameWorld.visitSignal(new BashSignal(this, getLocation()));
         }
 
         // produce missile
@@ -465,28 +471,22 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             setSelfDestruct();
             suicide();
         }
-        
-        // perform attacks
-        if (attackSignal != null) {
-        	myGameWorld.visitSignal(attackSignal);
-        	attackSignal = null;
-        }
-        
-        // perform movements (moving, spawning, mining)
-        if (movementSignal != null) {
-            myGameWorld.visitSignal(movementSignal);
-            movementSignal = null;
-        }
 
-        // launch missiles
-        for (SpawnSignal s : missileLaunchActions) {
-            myGameWorld.visitSignal(s);
-        }
-        missileLaunchActions.clear();
+        // generate supply
+		if (type == RobotType.HQ) {
+            int numSupplyDepots = myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.SUPPLYDEPOT);
+			increaseSupplyLevel(GameConstants.SUPPLY_GEN_BASE * (GameConstants.SUPPLY_GEN_MULTIPLIER + Math.pow(numSupplyDepots, GameConstants.SUPPLY_GEN_EXPONENT)));
+		}
 
-        // bashers should bash()
-        if (type == RobotType.BASHER) {
-            myGameWorld.visitSignal(new BashSignal(this, getLocation()));
+        // possibly convert building from inactive to active
+        roundsAlive++;
+        // after building is done, double health
+        if (type.isBuildable() && roundsAlive == buildDelay) {
+            changeHealthLevel(getHealthLevel());
+            // increase robot count
+            myGameWorld.incrementRobotTypeCount(getTeam(), type);
+        } else if (!type.isBuildable() && roundsAlive == 1) {
+            myGameWorld.incrementRobotTypeCount(getTeam(), type);
         }
     }
 
