@@ -5,14 +5,11 @@ import org.apache.commons.lang.StringUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-// We don't want contestants to be able to subclass MapLocation because
-// that would allow them to pass arbitrary data structures in messages
-
 /**
  * This class is an immutable representation of two-dimensional coordinates
  * in the battlecode world.
  */
-public final class MapLocation implements Serializable {
+public final class MapLocation implements Serializable, Comparable<MapLocation> {
 
     private static final long serialVersionUID = -8945913587066072824L;
     /**
@@ -36,6 +33,20 @@ public final class MapLocation implements Serializable {
         this.x = x;
         this.y = y;
 
+    }
+
+    /**
+     * A comparison function for MapLocations. Smaller rows go first, with ties broken by smaller columns.
+     *
+     * @param other the MapLocation to compare to.
+     * @return whether this MapLocation goes before the other one.
+     */
+    public int compareTo(MapLocation other) {
+        if (x != other.x) {
+            return x - other.x;
+        } else {
+            return y - other.y;
+        }
     }
 
     /**

@@ -2,6 +2,7 @@ package battlecode.world;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -155,6 +156,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 locs.add(r.getLocation());
             }
         }
+
+        Collections.sort(locs);
+        if (team == Team.B) {
+            Collections.reverse(locs);
+        }
+            
         return locs.toArray(new MapLocation[locs.size()]);
     }
 
