@@ -4,8 +4,6 @@ package battlecode.common;
  * Struct that stores basic information that was 'sensed' of another Robot. This
  * info is ephemeral and there is no guarantee any of it will remain the same
  * between rounds.
- *
- * @author Teh Devs
  */
 public class RobotInfo {
 

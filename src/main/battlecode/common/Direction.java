@@ -6,7 +6,7 @@ package battlecode.common;
  * and each of diagonals (northwest, southwest, northeast, southeast).
  * There is also NONE, representing no direction, and OMNI, representing
  * all directions.
- *
+ * <p>
  * Since Direction is a Java 1.5 enum, you can use it in <code>switch</code>
  * statements, it has all the standard enum methods (<code>valueOf</code>,
  * <code>values</code>, etc.), and you can safely use <code>==</code> for

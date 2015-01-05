@@ -3,7 +3,7 @@ package battlecode.common;
 /**
  * This enum represents the team of a GameObject; each GameObject has
  * exactly one team. Robots are either on team A or B.
- *
+ * <p>
  * Since Team is a Java 1.5 enum, you can use it in <code>switch</code>
  * statements, it has all the standard enum methods (<code>valueOf</code>,
  * <code>values</code>, etc.), and you can safely use <code>==</code> for
