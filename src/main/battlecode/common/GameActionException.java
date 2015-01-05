@@ -3,10 +3,10 @@ package battlecode.common;
 /**
  * An exception caused by a robot's interaction with the game world.  For instance, trying to move
  * a robot into an occupied square will cause a <code>GameActionException</code> to be thrown.
- * <p/>
+ *
  * Each <code>GameActionException</code> has a type that roughly identifies what
  * caused the exception.
- * <p/>
+ *
  * In addition to <code>GameActionException</code>,
  * some robot functions can throw the unchecked exceptions
  * {@link IllegalStateException} and {@link IllegalArgumentException}.
@@ -25,6 +25,8 @@ public class GameActionException extends Exception {
 
     /**
      * Creates a GameActionException with the given type and message.
+     * @param type the type of the GameActionException.
+     * @param message the error message.
      */
     public GameActionException(GameActionExceptionType type, String message) {
         super(message);

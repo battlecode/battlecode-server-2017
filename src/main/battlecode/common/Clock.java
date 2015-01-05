@@ -17,6 +17,7 @@ public class Clock {
     /**
      * Returns the number of bytecodes the current robot has executed since the beginning
      * of the current round.
+     * @return the number of bytecodes the current robot has executed since the beginning of the current round.
      */
     public static int getBytecodeNum() {
         return RobotMonitor.getBytecodeNum();
@@ -24,6 +25,7 @@ public class Clock {
 
     /**
      * Returns the current round number, where round 0 is the first round of the match.
+     * @return the current round number, where 0 is the first round of the match.
      */
     public static int getRoundNum() {
         return Engine.getRoundNum();
@@ -31,6 +33,7 @@ public class Clock {
 
     /**
      * Returns the number of bytecodes this robot has left in this round.
+     * @return the number of bytecodes this robot has left in this round.
      */
     public static int getBytecodesLeft() {
         return RobotMonitor.getBytecodesLeft();

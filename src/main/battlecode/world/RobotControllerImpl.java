@@ -552,7 +552,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 		robot.activateMovement(new MineSignal(loc, getTeam(), getType()), GameConstants.MINING_LOADING_DELAY, GameConstants.MINING_MOVEMENT_DELAY);
     }
 
-    public double senseOre(MapLocation loc) throws GameActionException {
+    public double senseOre(MapLocation loc) {
         return gameWorld.senseOre(getTeam(), loc);
     }   
 

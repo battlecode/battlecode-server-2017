@@ -121,7 +121,7 @@ public interface RobotController {
     public MapLocation senseHQLocation();
 
     /**
-     * Returns location of the enemy team's HQ. Always returns the correct location.
+     * Returns location of the enemy team's HQ (unconstrained by sensor range or distance).
      *
      * @return the enemy team's HQ location.
      */
@@ -134,7 +134,7 @@ public interface RobotController {
     public MapLocation[] senseTowerLocations();
 
     /**
-     * Returns the locations of surviving enemy towers, unconstrained by sensor range or distance. Always returns correct locations.
+     * Returns the locations of surviving enemy towers, unconstrained by sensor range or distance.
      * @return an array of the locations of surviving enemy towers.
     */
     public MapLocation[] senseEnemyTowerLocations();
@@ -148,7 +148,7 @@ public interface RobotController {
     public TerrainTile senseTerrainTile(MapLocation loc);
 
     /**
-     * Returns true if the given location is within the robot's sensor range.
+     * Returns true if the given location is within the robot's sensor range, or within the sensor range of some ally.
      *
      * @param loc the location to check.
      * @return whether the given location is within the robot's sensor range.
@@ -176,22 +176,22 @@ public interface RobotController {
 
     /** 
      * Returns all robots that can be sensed on the map.
-     *
-     * @see #senseNearbyRobots(MapLocation, int, Team).
+     * @return array of class type of game objects.
      */
     public RobotInfo[] senseNearbyRobots();
 
     /**
      * Returns all robots that can be sensed within a certain radius of the robot.
-     *
-     * @see #senseNearbyRobots(MapLocation, int, Team).
+     * @param radiusSquared return objects this distance away from the center.
+     * @return array of class type of game objects.
      */
     public RobotInfo[] senseNearbyRobots(int radiusSquared);
     
     /**
      * Returns all robots of a given team that can be sensed within a certain radius of the robot.
-     *
-     * @see #senseNearbyRobot(MapLocation, int, Team).
+     * @param radiusSquared return objects this distance away from the center.
+     * @param team filter game objects by the given team. If null is passed, objects from all teams are returned.
+     * @return array of class type of game objects.
      */
     public RobotInfo[] senseNearbyRobots(int radiusSquared, Team team);
     
@@ -242,6 +242,7 @@ public interface RobotController {
      * Does not take into account whether this robot is currently active, but will only return true for units that are capable of movement.
      * Returns false for the OMNI and NONE directions.
      *
+     * @param dir the direction to move in.
      * @return true if there are no robots or voids preventing this robot from
      *         moving in the given direction; false otherwise.
      */
@@ -262,6 +263,7 @@ public interface RobotController {
     /**
      * Returns whether the given location is within the robot's attack range. Does not take into account whether the robot is currently attacking or has the delay to do so.
      *
+     * @param loc the location to attempt to attack.
      * @return true if the given location is within this robot's attack range.
      * Does not take into account whether the robot is currently attacking.
      */
@@ -277,6 +279,7 @@ public interface RobotController {
 
     /**
      * MISSILE ONLY. Attacks all surrounding enemies. Other robots can call this but will just result in the same result as disintegrate().
+     * @throws GameActionException if the robot cannot explode.
      */
     public void explode() throws GameActionException;
 
@@ -296,7 +299,6 @@ public interface RobotController {
      *
      * @param loc the target location.
      * @throws GameActionException if the robot has not learned the spell or cannot cast at the given square.
-     *
      */
     public void castFlash(MapLocation loc) throws GameActionException;
 
@@ -305,6 +307,7 @@ public interface RobotController {
      *
      * @param skill the skill being checked.
      * @return whether the robot has that skill.
+     * @throws GameActionException if there is no commander.
      */
     public boolean hasLearnedSkill(CommanderSkillType skill) throws GameActionException;
 
@@ -312,6 +315,7 @@ public interface RobotController {
      * Returns the current cooldown of FLASH.
      *
      * @return the cooldown of FLASH.
+     * @throws GameActionException if there is no commander.
      */
     public int getFlashCooldown() throws GameActionException;
 
@@ -368,13 +372,13 @@ public interface RobotController {
      * @param loc the MapLocation to sense ore at.
      * @return the amount of ore at a given location. If the location is out of sensor range, then the last known ore amount is returned.
      */
-    public double senseOre(MapLocation loc) throws GameActionException;
+    public double senseOre(MapLocation loc);
 
     /**
      * Mines the current square for ore.
      *
      * @throws GameActionException if the current robot is not one that can collect ore
-     * @throws GameActionException if there is currently movement delay and the robot cannot mine
+     * @throws GameActionException if there is currently movement delay and if the robot cannot mine
      */
     public void mine() throws GameActionException;
 
@@ -392,7 +396,7 @@ public interface RobotController {
     public boolean canLaunch(Direction dir);
 
     /**
-     * LAUNCHER ONLY. Launches a missile in the given direction.
+     * LAUNCHER ONLY. Launches a missile in the given direction. You cannot launch if you have already moved in the given turn.
      *
      * @param dir the direction to launch a missile.
      * @throws GameActionException if not enough missiles or otherwise can't attack.
@@ -434,7 +438,7 @@ public interface RobotController {
      *
      * @param dir the direction to spawn the robot in.
      * @param type the robot type to spawn.
-     * @throws GameActionException if bad.
+     * @throws GameActionException if the spawn is bad.
      */
     public void spawn(Direction dir, RobotType type) throws GameActionException;
 
@@ -462,7 +466,7 @@ public interface RobotController {
      *
      * @param dir the direction to bulid in.
      * @param type the type to build.
-     * @throws GameActionException if bad.
+     * @throws GameActionException if the build is bad.
      */
     public void build(Direction dir, RobotType type) throws GameActionException;
 
@@ -546,8 +550,7 @@ public interface RobotController {
      * gameplay (aside from the number of bytecodes executed to call this
      * method).
      *
-     * @param stringIndex the index of the indicator string to set. Must satisfy
-     *                    <code>stringIndex >= 0 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS</code>.
+     * @param stringIndex the index of the indicator string to set. Must be between 0 and GameConstants.NUMBER_OF_INDICATOR_STRINGS.
      * @param newString  the value to which the indicator string should be set.
      */
     public void setIndicatorString(int stringIndex, String newString);

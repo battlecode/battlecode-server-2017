@@ -52,7 +52,6 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
     /**
      * Two MapLocations are regarded as equal iff
      * their coordinates are the same.
-     * <p/>
      * {@inheritDoc}
      */
     @Override
@@ -202,6 +201,7 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      *
      * @param dx the amount to translate in the x direction
      * @param dy the amount to translate in the y direction
+     * @return the new MapLocation that is the translated version of the original.
      */
     public final MapLocation add(int dx, int dy) {
         return new MapLocation(x + dx, y + dy);
@@ -219,7 +219,6 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
         return this.add(direction.opposite());
     }
 
-    // TODO(axc): clean, since this is copied from GameWorld
 	/**
 	 * Returns an array of all MapLocations within a certain radius squared 
 	 * of a specified location.
@@ -242,7 +241,7 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
         for (int x = minXPos; x <= maxXPos; x++) {
             for (int y = minYPos; y <= maxYPos; y++) {
                 MapLocation loc = new MapLocation(x, y);
-                if (loc.distanceSquaredTo(center) <= radiusSquared) // TODO(axc): this is DIFFERENT from other variant
+                if (loc.distanceSquaredTo(center) <= radiusSquared)
                     locations.add(loc);
             }
         }
