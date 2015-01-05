@@ -12,8 +12,8 @@ public enum TerrainTile {
     NORMAL, VOID, UNKNOWN, OFF_MAP;
 
     /**
-     * Returns <code>true</code> if robots at the given
-     * height can traverse this terrain tile.
+     * Returns <code>true</code> if robots
+     * can traverse this terrain tile.
      *
      * @return whether the tile is traversible.
      */
