@@ -14,6 +14,8 @@ public enum TerrainTile {
     /**
      * Returns <code>true</code> if robots at the given
      * height can traverse this terrain tile.
+     *
+     * @return whether the tile is traversible.
      */
     public boolean isTraversable() {
         switch (this) {

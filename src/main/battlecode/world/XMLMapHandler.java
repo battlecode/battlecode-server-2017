@@ -743,9 +743,9 @@ class XMLMapHandler extends DefaultHandler {
             warn.warn("The round limit is too large.");
 
         // make sure HQs are far enough apart
-        if (Math.sqrt((baseBy - baseAy) * (baseBy - baseAy) + (baseBx - baseAx) * (baseBx - baseAx)) < GameConstants.MIN_DISTANCE_BETWEEN_SPAWN_POINTS) {
-            warn.warn("The HQs are too close together.");
-        }
+        //if (Math.sqrt((baseBy - baseAy) * (baseBy - baseAy) + (baseBx - baseAx) * (baseBx - baseAx)) < GameConstants.MIN_DISTANCE_BETWEEN_SPAWN_POINTS) {
+        //    warn.warn("The HQs are too close together.");
+        //}
 
         return warn.legal;
     }

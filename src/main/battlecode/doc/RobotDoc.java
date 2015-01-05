@@ -68,7 +68,7 @@ public class RobotDoc implements Taglet {
             } else if (rt == RobotType.TOWER) {
                     append(builder, "Type", "Tower");
             } else if (rt.isBuilding) {
-                    append(builder, "Type", "Building"); 
+                    append(builder, "Type", "Structures"); 
             } else {
                     append(builder, "Type", "Unit");
             }
