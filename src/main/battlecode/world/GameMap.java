@@ -58,13 +58,32 @@ public class GameMap implements GenericGameMap {
     private final String mapName;
 
     /**
+     * The maximum ore that was available on as quare to begin with.
+     */
+    private int maxInitialOre;
+
+    /**
      * Represents the various integer properties a GameMap
      * can have.
      */
     static enum MapProperties {
         WIDTH, HEIGHT, SEED, MAX_ROUNDS
     }
-
+    private void calculateMaxInitialOre() {
+	this.maxInitialOre = 0;
+	for (int i = 0; i < this.mapWidth; i++) {
+	    for (int j = 0; j < this.mapHeight; j++) {
+		int tileOre = this.mapInitialOre[i][j];
+		if (tileOre > maxInitialOre) {
+		    maxInitialOre = tileOre;
+		}
+	    }
+	}
+    }
+    public int getMaxInitialOre() {
+	return maxInitialOre;
+    }
+    
     public GameMap(GameMap gm) {
         this.mapWidth = gm.mapWidth;
         this.mapHeight = gm.mapHeight;
@@ -74,11 +93,14 @@ public class GameMap implements GenericGameMap {
             System.arraycopy(gm.mapTiles[i], 0, this.mapTiles[i], 0, this.mapHeight);
             System.arraycopy(gm.mapInitialOre[i], 0, this.mapInitialOre[i], 0, this.mapHeight);
         }
+
         this.mapOriginX = gm.mapOriginX;
         this.mapOriginY = gm.mapOriginY;
         this.seed = gm.seed;
         this.maxRounds = gm.maxRounds;
         this.mapName = gm.mapName;
+
+	calculateMaxInitialOre();
     }
 
     /**
@@ -122,6 +144,8 @@ public class GameMap implements GenericGameMap {
         this.mapInitialOre = mapInitialOre;
 
         this.mapName = mapName;
+	
+	calculateMaxInitialOre();
     }
 
     /**
