@@ -780,6 +780,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
         totalRobotTypeCount.get(robot.getTeam()).put(robot.type, currentCount + 1);
 
+        // add myBuilder and myBuilding
+        robot.setMyBuilder(parent.getID());
+        parent.setMyBuilding(robot.getID());
+
         //addSignal(s); //client doesn't need this one
     }
     
@@ -847,6 +851,19 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 int xpYield = r.type.oreCost;
                 ((InternalCommander)target).giveXP(xpYield);
             }
+
+            // if it's a building, free the builder
+            if (r.getMyBuilder() >= 0) {
+                InternalRobot builder = getRobotByID(r.getMyBuilder());
+                builder.clearBuilding(); // also reset delays
+            }
+
+            // if it's a builder, destroy the building
+            if (r.getMyBuilding() >= 0) {
+                InternalRobot building = getRobotByID(r.getMyBuilding());
+                building.clearBuilding();
+                building.prepareDeath();
+           }
         }
     }
 

@@ -52,6 +52,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private int buildDelay;
 
     private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean("bc.engine.upkeep");
+    private int myBuilder, myBuilding;
+    private boolean forceDeath;
 
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
@@ -85,6 +87,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         movementSignal = null;
         attackSignal = null;
         castSignal = null;
+
+        myBuilder = -1;
+        myBuilding = -1;
+        forceDeath = false;
     }
 
     // *********************************
@@ -143,6 +149,33 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public boolean hasBeenAttacked() {
         return hasBeenAttacked;
+    }
+
+    public void setMyBuilding(int id) {
+        myBuilding = id;
+    }
+
+    public int getMyBuilding() {
+        return myBuilding;
+    }
+
+    public void setMyBuilder(int id) {
+        myBuilder = id;
+    }
+
+    public int getMyBuilder() {
+        return myBuilder;
+    }
+
+    public void clearBuilding() {
+        myBuilding = -1;
+        myBuilder = -1;
+        coreDelay = 0;
+        weaponDelay = 0;
+    }
+
+    public void prepareDeath() {
+        forceDeath = true;
     }
 
     // *********************************
@@ -257,7 +290,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void decrementDelays() {
-        if (type.supplyUpkeep > 0 && upkeepEnabled) {
+        if (type.supplyUpkeep > 0 && upkeepEnabled && myBuilding < 0) {
             weaponDelay -= 0.5;
             coreDelay -= 0.5;
             double maxDelay = Math.max(weaponDelay,coreDelay);
@@ -396,6 +429,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void processBeginningOfTurn() {
+        if (forceDeath) {
+            takeDamage(2 * myHealthLevel);
+        }
+
         decrementDelays(); // expends supply to decrement delays
 
         this.currentBytecodeLimit = type.bytecodeLimit;
@@ -487,6 +524,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             changeHealthLevel(getHealthLevel());
             // increase robot count
             myGameWorld.incrementRobotTypeCount(getTeam(), type);
+            clearBuilding();
         } else if (!type.isBuildable() && roundsAlive == 1) {
             myGameWorld.incrementRobotTypeCount(getTeam(), type);
         }
