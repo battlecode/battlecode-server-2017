@@ -385,7 +385,7 @@ Units In-Depth [bcd15]
 
 ### Unique unit properties:
 #### BEAVER:
-- Can mine at a rate of min(n/20,2) ore per turn.
+- Can mine at a rate of min(n/20,2) ore per turn, where n is the amount of ore on their location.
 - Can build structures.
 
 #### COMPUTER:
@@ -395,7 +395,7 @@ Units In-Depth [bcd15]
 - Attacks hit all enemy units within range 2. Each BASHER attacks automatically at the end of every turn, after any movement (if the BASHER moves, the attack hits enemies around the location the BASHER moves to, rather than the location it started in).
 
 #### MINER:
-- Can mine at a rate of min(n/4,3) ore per turn.
+- Can mine at a rate of min(n/4,3) ore per turn, where n is the amount of ore on their location.
 
 #### DRONE:
 - Can move onto VOID terrain.
