@@ -133,7 +133,7 @@ Units refer to all robots that can move. Each unit must be spawned at an appropr
 #### BEAVER
 The BEAVER is a versatile starting unit that can do it all.
 - Spawned at HQ
-- Only unit that can built structures
+- Only unit that can build structures
 - One of two units that can mine ore
 - Has a weak attack at short range
 - Frequently hosed
