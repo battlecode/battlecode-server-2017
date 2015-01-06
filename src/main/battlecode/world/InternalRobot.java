@@ -107,7 +107,16 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     // *********************************
 
     public RobotInfo getRobotInfo() {
-        return new RobotInfo(getID(), getTeam(), type, getLocation(), getCoreDelay(), getWeaponDelay(), getHealthLevel(), getSupplyLevel(), getXP(), getMissileCount());
+        MapLocation myBuilderLocation = null;
+        if (myBuilder >= 0) {
+            myBuilderLocation = myGameWorld.getRobotByID(myBuilder).getLocation();
+        }
+        MapLocation myBuildingLocation = null;
+        if (myBuilding >= 0) {
+            myBuildingLocation = myGameWorld.getRobotByID(myBuilding).getLocation();
+        }
+
+        return new RobotInfo(getID(), getTeam(), type, getLocation(), getCoreDelay(), getWeaponDelay(), getHealthLevel(), getSupplyLevel(), getXP(), getMissileCount(), myBuilderLocation, myBuildingLocation);
     }
 
     public int getRoundsAlive() {

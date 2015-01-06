@@ -258,12 +258,18 @@ public class Match extends Observable {
         int[] archons = stats.getNumArchons();
         if (dom == DominationFactor.DESTROYED)
             sb.append("The winning team won by destruction.");
-        else if (dom == DominationFactor.OWNED || dom == DominationFactor.BEAT)
-            sb.append("The winning team won by destruction.");
+        else if (dom == DominationFactor.PWNED)
+            sb.append("The winning team won on tiebreakers (more towers remaining).");
+        else if (dom == DominationFactor.OWNED)
+            sb.append("The winning team won on tiebreakers (more HQ health).");
+        else if (dom == DominationFactor.BEAT)
+            sb.append("The winning team won on tiebreakers (more TOWER health).");
         else if (dom == DominationFactor.BARELY_BEAT)
-            sb.append("The winning team won on tiebreakers.");
+            sb.append("The winning team won due to superior sanitation.");
+        else if (dom == DominationFactor.BARELY_BARELY_BEAT)
+            sb.append("The winning team won on tiebreakers (more total ore value).");
         else if (dom == DominationFactor.WON_BY_DUBIOUS_REASONS)
-            sb.append("Team " + getWinner() + " won by default.");
+            sb.append("Team " + getWinner() + " won arbitrarily.");
 
         return sb.toString();
     }

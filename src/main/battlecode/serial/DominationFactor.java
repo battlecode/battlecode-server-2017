@@ -5,27 +5,31 @@ package battlecode.serial;
  */
 public enum DominationFactor {
     /**
-     * Beat via a HANDWASHSTATION count or by team ID.
+     * Team HQ ID win (tiebreak 6).
      */
     WON_BY_DUBIOUS_REASONS,
     /**
-     * Beat by tiebreaks.
+     * Win by more ore stockpile + ore of surviving robots (tiebreak 5).
+     */
+    BARELY_BARELY_BEAT,
+    /**
+     * Win by superior sanitation (tiebreak 4).
      */
     BARELY_BEAT,
     /**
-     * Beat by destroying enemy HQ.
+     * Win by more total tower HP (tiebreak 3).
      */
     BEAT,
     /**
-     * N/A
+     * Win by more HQ HP (tiebreak 2).
      */
     OWNED,
     /**
-     * N/A
+     * Win by more towers remaining (tiebreak 1).
      */
     PWNED,
     /**
-     * N/A
+     * Win by destroying enemy HQ.
      */
     DESTROYED;
 }

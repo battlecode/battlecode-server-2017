@@ -599,8 +599,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             InternalRobot HQB = baseHQs.get(Team.B);
             // tiebreak by number of towers
             // tiebreak by hq energon level
-            if (!(setWinnerIfNonzero(getActiveRobotTypeCount(Team.A, RobotType.TOWER) - getActiveRobotTypeCount(Team.B, RobotType.TOWER), DominationFactor.BARELY_BEAT)) &&
-                !(setWinnerIfNonzero(HQA.getHealthLevel() - HQB.getHealthLevel(), DominationFactor.BARELY_BEAT)))
+            if (!(setWinnerIfNonzero(getActiveRobotTypeCount(Team.A, RobotType.TOWER) - getActiveRobotTypeCount(Team.B, RobotType.TOWER), DominationFactor.PWNED)) &&
+                !(setWinnerIfNonzero(HQA.getHealthLevel() - HQB.getHealthLevel(), DominationFactor.OWNED)))
             {
                 // tiebreak by total tower health
                 double towerDiff = 0.0;
@@ -626,9 +626,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
                 // tiebreak by number of handwash stations
                 // total ore cost of units + ore stockpile
-                if ( !(setWinnerIfNonzero(towerDiff, DominationFactor.BARELY_BEAT )) &&
-                     !(setWinnerIfNonzero(getActiveRobotTypeCount(Team.A, RobotType.HANDWASHSTATION) - getActiveRobotTypeCount(Team.B, RobotType.HANDWASHSTATION), DominationFactor.WON_BY_DUBIOUS_REASONS)) &&
-                     !(setWinnerIfNonzero(oreDiff, DominationFactor.BARELY_BEAT )))
+                if ( !(setWinnerIfNonzero(towerDiff, DominationFactor.BEAT )) &&
+                     !(setWinnerIfNonzero(getActiveRobotTypeCount(Team.A, RobotType.HANDWASHSTATION) - getActiveRobotTypeCount(Team.B, RobotType.HANDWASHSTATION), DominationFactor.BARELY_BEAT)) &&
+                     !(setWinnerIfNonzero(oreDiff, DominationFactor.BARELY_BARELY_BEAT )))
                 {
                     // just tiebreak by ID
                     if (HQA.getID() < HQB.getID())
@@ -868,7 +868,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 gameStats.setUnitKilled(r.getTeam(), currentRound);
             }
             if (r.type == RobotType.HQ) {
-            	setWinner(r.getTeam().opponent(), DominationFactor.BEAT);
+            	setWinner(r.getTeam().opponent(), DominationFactor.DESTROYED);
             }
             if (r.type == RobotType.COMMANDER) {
                 commanders.put(r.getTeam(), null);

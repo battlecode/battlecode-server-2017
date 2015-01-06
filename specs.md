@@ -478,7 +478,7 @@ The following is a detailed list of a robot's execution order within a single tu
 
 ### Timing
 
-Each robot is allowed a certain amount of computation each round. Computation is measured in terms of Java bytecodes, the atomic instructions of compiled Java code. Individual bytecodes are simple instructions such as "subtract" or "get field", and a single line of code generally contains several bytecodes. (For details see http://en.wikipedia.org/wiki/Java_bytecode) Each round, every player runs a number of bytecodes determined by `GameConstants.BYTECODE_LIMIT`. When a robot hits the bytecode limit, its computation is paused while other robots get to do their computation for the same round or the next round. On the next round, the robot's computation is resumed exactly where it left off. Thus, to the robot's code, the round change is invisible. Nothing will jump out and shout at the robot when a round ends.
+Each robot is allowed a certain amount of computation each round. Computation is measured in terms of Java bytecodes, the atomic instructions of compiled Java code. Individual bytecodes are simple instructions such as "subtract" or "get field", and a single line of code generally contains several bytecodes. (For details see http://en.wikipedia.org/wiki/Java_bytecode) Each round, every player runs a number of bytecodes determined by the robot's individual properties. When a robot hits the bytecode limit, its computation is paused while other robots get to do their computation for the same round or the next round. On the next round, the robot's computation is resumed exactly where it left off. Thus, to the robot's code, the round change is invisible. Nothing will jump out and shout at the robot when a round ends.
 
 ### Monitoring
 
@@ -567,5 +567,8 @@ Note that when a robot calls breakpoint(), computation will be stopped at the en
 Changelog [bcd20]
 -------------------
 * 1.0.0 (1/5/2015) - Initial specs released
-* 1.0.1 (1/6/2015) - Small client/engine bug fixes and optimizations. Fixed specs typos. BACKWARDS INCOMPATIBLE.
-    * senseOre() and senseTerrainTile() work properly on round 1.
+* 1.0.1 (1/6/2015) - Small client/engine bug fixes and changes. Fixed specs typos. BACKWARDS INCOMPATIBLE.
+    * `RobotInfo` now tells you information about whether a robot is building something or being built.
+    * `senseOre()`, `senseTerrainTile()`, and `disintegrate()` work properly on round 1.
+    * More meaningful game over messages.
+    * Changes to maps rift.xml and noeffort.xml.

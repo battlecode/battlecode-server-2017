@@ -15,10 +15,28 @@ public class RobotInfo {
     public final double weaponDelay;
     public final double health;
     public final double supplyLevel;
+
+    /**
+     * COMMANDER only.
+     */
     public final int xp;
+
+    /**
+     * LAUNCHER only.
+     */
     public final int missileCount;
 
-    public RobotInfo(int ID, Team team, RobotType type, MapLocation location, double coreDelay, double weaponDelay, double health, double supplyLevel, int xp, int missileCount) {
+    /**
+     * For structures being built, this will be the location of the unit building the structure (null if N/A).
+     */
+    public final MapLocation builder;
+
+    /**
+     * For units that are building a structure, this will be the location of the structure being built (null if N/A).
+     */
+    public final MapLocation buildingLocation;
+
+    public RobotInfo(int ID, Team team, RobotType type, MapLocation location, double coreDelay, double weaponDelay, double health, double supplyLevel, int xp, int missileCount, MapLocation builder, MapLocation buildingLocation) {
         super();
         this.ID = ID;
         this.team = team;
@@ -30,6 +48,8 @@ public class RobotInfo {
         this.supplyLevel = supplyLevel;
         this.xp = xp;
         this.missileCount = missileCount;
+        this.builder = builder;
+        this.buildingLocation = buildingLocation;
     }
 
     public int hashCode() {
