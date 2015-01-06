@@ -91,6 +91,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         myBuilder = -1;
         myBuilding = -1;
         forceDeath = false;
+
+        if (!type.isBuildable()) {
+            myGameWorld.incrementRobotTypeCount(getTeam(), type);
+        }
     }
 
     // *********************************
@@ -132,8 +136,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public int getXP() {
         if (type == RobotType.COMMANDER) {
-            System.out.println(this);
-            System.out.println( (InternalCommander)this);
             return ((InternalCommander)this).getXP();
         }
         return 0;
@@ -415,6 +417,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void suicide() {
 		if (didSelfDestruct) {
             (new SelfDestructSignal(this, getLocation())).accept(myGameWorld);
+            didSelfDestruct = false;
         }
         (new DeathSignal(this)).accept(myGameWorld);
     }
@@ -504,7 +507,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         if (type == RobotType.COMMANDER && ((InternalCommander)this).hasSkill(CommanderSkillType.REGENERATION)) {
            this.changeHealthLevel(GameConstants.REGEN_RATE); 
         }
-
+		
         // missiles should die automatically
 		if (type == RobotType.MISSILE && roundsAlive >= GameConstants.MISSILE_LIFESPAN) {
 			setSelfDestruct();
@@ -526,8 +529,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             myGameWorld.incrementRobotTypeCount(getTeam(), type);
             myGameWorld.getRobotByID(myBuilder).clearBuilding();
             clearBuilding();
-        } else if (!type.isBuildable() && roundsAlive == 1) {
-            myGameWorld.incrementRobotTypeCount(getTeam(), type);
         }
     }
 
