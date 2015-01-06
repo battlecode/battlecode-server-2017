@@ -331,12 +331,12 @@ Structures In-depth [bcd14]
 - The HQ produces 100*(2+supplyDepots^0.7) supply per turn, which is added to its supply amount.
 - The HQ can spawn BEAVERs.
 - Based on the number of friendly towers, the HQ gains certain buffs:
-1 tower: HQ takes 80% damage.
-2 towers: HQ range increases to 35.
-3 towers: HQ does 150% damage.
-4 towers: HQ takes 50% damage (overrides the 1-tower buff)
-5 towers: HQ attack delay is halved (to 1) and gains 50% splash damage within a range of 2, which only damages enemies.
-6 towers: HQ takes 30% damage and does 1000% damage.
+ - 1 tower: HQ takes 80% damage.
+ - 2 towers: HQ range increases to 35.
+ - 3 towers: HQ does 150% damage.
+ - 4 towers: HQ takes 50% damage (overrides the 1-tower buff)
+ - 5 towers: HQ attack delay is halved (to 1) and gains 50% splash damage within a range of 2, which only damages enemies.
+ - 6 towers: HQ takes 30% damage and does 1000% damage.
 
 #### TOWER
 - Towers have 1000 hp, 8 attack, and 1 attack delay. Attack range is 24 units^2.
@@ -468,12 +468,12 @@ The following is a detailed list of a robot's execution order within a single tu
 2. Robot executes player code until the total number of bytecodes executed exceeds the robot's allotted amount, with supply restrictions taken into account.
 3. Supply is subtracted based on how many bytecodes were used.
 4. Channels are updated with new broadcasts (if any).
-5. Actions are performed:
-    a. Supply is transferred between units.
-    b. Attacks happen, except for BASHER attacks.
-    c. Missiles are launched (LAUNCHER only).
-    d. Core actions (moving, mining, spawning, or building) happen.
-    e. Basher attacks (BASHER only).
+5. Actions are performed in this order:
+    - Supply is transferred between units.
+    - Attacks happen, except for BASHER attacks.
+    - Missiles are launched (LAUNCHER only).
+    - Core actions (moving, mining, spawning, or building) happen.
+    - Basher attacks (BASHER only).
 6. End-of-turn events: missile production, supply generation, commander health regeneration, and missile deaths.
 
 ### Timing
