@@ -553,6 +553,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public double senseOre(MapLocation loc) {
+        if (canSense(loc)) {
+            return gameWorld.getOre(loc);
+        }
         return gameWorld.senseOre(getTeam(), loc);
     }   
 
