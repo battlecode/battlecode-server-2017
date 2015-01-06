@@ -413,7 +413,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void suicide() {
-        if (didSelfDestruct) {
+		if (didSelfDestruct) {
             (new SelfDestructSignal(this, getLocation())).accept(myGameWorld);
         }
         (new DeathSignal(this)).accept(myGameWorld);
@@ -445,7 +445,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @Override
     public void processEndOfTurn() {
         super.processEndOfTurn();
-
+		
         // resetting stuff
         hasBeenAttacked = false;
 
@@ -506,11 +506,11 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
 
         // missiles should die automatically
-        if (type == RobotType.MISSILE && roundsAlive >= GameConstants.MISSILE_LIFESPAN) {
-            setSelfDestruct();
+		if (type == RobotType.MISSILE && roundsAlive >= GameConstants.MISSILE_LIFESPAN) {
+			setSelfDestruct();
             suicide();
         }
-
+		
         // generate supply
 		if (type == RobotType.HQ) {
             int numSupplyDepots = myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.SUPPLYDEPOT);
