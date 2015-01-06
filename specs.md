@@ -567,3 +567,5 @@ Note that when a robot calls breakpoint(), computation will be stopped at the en
 Changelog [bcd20]
 -------------------
 * 1.0.0 (1/5/2015) - Initial specs released
+* 1.0.1 (1/6/2015) - Small client/engine bug fixes and optimizations. Fixed specs typos. BACKWARDS INCOMPATIBLE.
+    * senseOre() and senseTerrainTile() work properly on round 1.
