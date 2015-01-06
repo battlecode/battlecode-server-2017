@@ -41,18 +41,21 @@ import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.ControlBitsSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.TeamOreSignal;
+import battlecode.world.signal.HealthChangeSignal;
 import battlecode.world.signal.IndicatorDotSignal;
 import battlecode.world.signal.IndicatorLineSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.LocationOreChangeSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
+import battlecode.world.signal.MissileCountSignal;
 import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.MovementOverrideSignal;
 import battlecode.world.signal.RobotInfoSignal;
 import battlecode.world.signal.SelfDestructSignal;
 import battlecode.world.signal.SpawnSignal;
 import battlecode.world.signal.TransferSupplySignal;
+import battlecode.world.signal.XPSignal;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -451,6 +454,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     // ****** TERRAIN METHODS **********
     // *********************************
 
+    public TerrainTile getMapTerrain(MapLocation loc) {
+        return gameMap.getTerrainTile(loc);
+    }
+
     public TerrainTile senseMapTerrain(Team team, MapLocation loc) {
         return mapMemory.get(team).recallTerrain(loc);
     }
@@ -644,20 +651,31 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public Signal[] getAllSignals(boolean includeBytecodesUsedSignal) {
-        ArrayList<InternalRobot> allRobots = null;
-        if (includeBytecodesUsedSignal)
-            allRobots = new ArrayList<InternalRobot>();
+        ArrayList<InternalRobot> allRobots = new ArrayList<InternalRobot>();
         for (InternalObject obj : gameObjectsByID.values()) {
             if (!(obj instanceof InternalRobot))
                 continue;
             InternalRobot ir = (InternalRobot) obj;
-            signals.add(new RobotInfoSignal(ir.getID(), ir.getRobotInfo()));
-            if (includeBytecodesUsedSignal)
-                allRobots.add(ir);
+            allRobots.add(ir);
+
+            if (ir.type == RobotType.COMMANDER) {
+                signals.add(new XPSignal(ir.getID(), ir.getXP()));
+            }
+
+            if (ir.type == RobotType.LAUNCHER && ir.missileCountChanged()) {
+                signals.add(new MissileCountSignal(ir.getID(), ir.getMissileCount()));
+                ir.clearMissileCountChanged();
+            }
         }
 
+        InternalRobot[] robots = allRobots.toArray(new InternalRobot[]{});
         if (includeBytecodesUsedSignal) {
-        	signals.add(new BytecodesUsedSignal(allRobots.toArray(new InternalRobot[]{})));
+        	signals.add(new BytecodesUsedSignal(robots));
+        }
+        signals.add(new RobotInfoSignal(robots));
+        HealthChangeSignal healthChange = new HealthChangeSignal(robots);
+        if (healthChange.getRobotIDs().length > 0) {
+            signals.add(healthChange);
         }
 
         return signals.toArray(new Signal[signals.size()]);

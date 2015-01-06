@@ -159,6 +159,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public TerrainTile senseTerrainTile(MapLocation loc) {
         assertNotNull(loc);
+        if (canSense(loc)) {
+            return gameWorld.getMapTerrain(loc);
+        }
         return gameWorld.senseMapTerrain(getTeam(), loc);
     }
 

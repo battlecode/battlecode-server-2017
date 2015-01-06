@@ -38,6 +38,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     int currentBytecodeLimit;
     private volatile int bytecodesUsed;
     protected volatile boolean hasBeenAttacked;
+    private boolean healthChanged;
+    private boolean missileCountChanged;
     private boolean didSelfDestruct;
     private boolean broadcasted;
     private volatile HashMap<Integer, Integer> broadcastMap;
@@ -77,6 +79,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         currentBytecodeLimit = type.bytecodeLimit;
         bytecodesUsed = 0;
         hasBeenAttacked = false;
+        healthChanged = true;
+        missileCountChanged = true;
+        
         didSelfDestruct = false;
         broadcasted = false;
         broadcastMap = new HashMap<Integer, Integer>();
@@ -103,6 +108,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public RobotInfo getRobotInfo() {
         return new RobotInfo(getID(), getTeam(), type, getLocation(), getCoreDelay(), getWeaponDelay(), getHealthLevel(), getSupplyLevel(), getXP(), getMissileCount());
+    }
+
+    public int getRoundsAlive() {
+        return roundsAlive;
     }
 
     // *********************************
@@ -153,6 +162,22 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return hasBeenAttacked;
     }
 
+    public void clearHealthChanged() {
+        healthChanged = false;
+    }
+
+    public boolean healthChanged() {
+        return healthChanged;
+    }
+
+    public void clearMissileCountChanged() {
+        missileCountChanged = false;
+    }
+
+    public boolean missileCountChanged() {
+        return missileCountChanged;
+    }
+
     public void setMyBuilding(int id) {
         myBuilding = id;
     }
@@ -186,6 +211,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public void decrementMissileCount() {
         missileCount--;
+        missileCountChanged = true;
     }
 
     public int getMissileCount() {
@@ -214,6 +240,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void takeDamage(double baseAmount) {
+        healthChanged = true;
         if (baseAmount < 0) {
             changeHealthLevel(-baseAmount);
         } else {
@@ -235,16 +262,19 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     
     public void takeDamage(double amt, InternalRobot source) {
         if (!(getTeam() == Team.NEUTRAL)) {
+            healthChanged = true;
             takeDamage(amt);
         }
     }
     
     public void changeHealthLevelFromAttack(double amount) {
+        healthChanged = true;
         hasBeenAttacked = true;
         changeHealthLevel(amount);
     }
 
     public void changeHealthLevel(double amount) {
+        healthChanged = true;
         myHealthLevel += amount;
         if (myHealthLevel > getMaxHealth()) {
             myHealthLevel = getMaxHealth();
@@ -501,6 +531,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         // produce missile
         if (roundsAlive % GameConstants.MISSILE_SPAWN_FREQUENCY == 0 && type == RobotType.LAUNCHER) {
             missileCount = Math.min(missileCount + 1, GameConstants.MISSILE_MAX_COUNT);
+            missileCountChanged = true;
         }
     	
         // commander regen
