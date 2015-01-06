@@ -65,7 +65,7 @@ This year's game contains a wide variety of different robots. There are two majo
 The following is a visual summary of the units, the structures, and the dependencies.
 
 ![Image of Tech Tree]
-(https://github.com/battlecode/battlecode-server/edit/master/techtree.png)
+(https://github.com/battlecode/battlecode-server/blob/master/techtree.png)
 
 Structures Overview [bcd05]
 ----------

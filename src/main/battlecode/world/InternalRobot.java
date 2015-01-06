@@ -136,8 +136,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public int getXP() {
         if (type == RobotType.COMMANDER) {
-            System.out.println(this);
-            System.out.println( (InternalCommander)this);
             return ((InternalCommander)this).getXP();
         }
         return 0;
@@ -417,7 +415,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void suicide() {
-        if (didSelfDestruct) {
+		if (didSelfDestruct) {
             (new SelfDestructSignal(this, getLocation())).accept(myGameWorld);
             didSelfDestruct = false;
         }
@@ -509,13 +507,13 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         if (type == RobotType.COMMANDER && ((InternalCommander)this).hasSkill(CommanderSkillType.REGENERATION)) {
            this.changeHealthLevel(GameConstants.REGEN_RATE); 
         }
-
+		
         // missiles should die automatically
         if (type == RobotType.MISSILE && roundsAlive >= GameConstants.MISSILE_LIFESPAN) {
             setSelfDestruct();
             suicide();
         }
-
+		
         // generate supply
 		if (type == RobotType.HQ) {
             int numSupplyDepots = myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.SUPPLYDEPOT);
