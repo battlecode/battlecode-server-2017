@@ -133,7 +133,7 @@ Units refer to all robots that can move. Each unit must be spawned at an appropr
 #### BEAVER
 The BEAVER is a versatile starting unit that can do it all.
 - Spawned at HQ
-- Only unit that can built structures
+- Only unit that can build structures
 - One of two units that can mine ore
 - Has a weak attack at short range
 - Frequently hosed
@@ -331,12 +331,12 @@ Structures In-depth [bcd14]
 - The HQ produces 100*(2+supplyDepots^0.7) supply per turn, which is added to its supply amount.
 - The HQ can spawn BEAVERs.
 - Based on the number of friendly towers, the HQ gains certain buffs:
-1 tower: HQ takes 80% damage.
-2 towers: HQ range increases to 35.
-3 towers: HQ does 150% damage.
-4 towers: HQ takes 50% damage (overrides the 1-tower buff)
-5 towers: HQ attack delay is halved (to 1) and gains 50% splash damage within a range of 2, which only damages enemies.
-6 towers: HQ takes 30% damage and does 1000% damage.
+ - 1 tower: HQ takes 80% damage.
+ - 2 towers: HQ range increases to 35.
+ - 3 towers: HQ does 150% damage.
+ - 4 towers: HQ takes 50% damage (overrides the 1-tower buff)
+ - 5 towers: HQ attack delay is halved (to 1) and gains 50% splash damage within a range of 2, which only damages enemies.
+ - 6 towers: HQ takes 30% damage and does 1000% damage.
 
 #### TOWER
 - Towers have 1000 hp, 8 attack, and 1 attack delay. Attack range is 24 units^2.
@@ -385,7 +385,7 @@ Units In-Depth [bcd15]
 
 ### Unique unit properties:
 #### BEAVER:
-- Can mine at a rate of min(n/20,2) ore per turn.
+- Can mine at a rate of min(n/20,2) ore per turn, where n is the amount of ore on their location.
 - Can build structures.
 
 #### COMPUTER:
@@ -395,7 +395,7 @@ Units In-Depth [bcd15]
 - Attacks hit all enemy units within range 2. Each BASHER attacks automatically at the end of every turn, after any movement (if the BASHER moves, the attack hits enemies around the location the BASHER moves to, rather than the location it started in).
 
 #### MINER:
-- Can mine at a rate of min(n/4,3) ore per turn.
+- Can mine at a rate of min(n/4,3) ore per turn, where n is the amount of ore on their location.
 
 #### DRONE:
 - Can move onto VOID terrain.
@@ -468,12 +468,12 @@ The following is a detailed list of a robot's execution order within a single tu
 2. Robot executes player code until the total number of bytecodes executed exceeds the robot's allotted amount, with supply restrictions taken into account.
 3. Supply is subtracted based on how many bytecodes were used.
 4. Channels are updated with new broadcasts (if any).
-5. Actions are performed:
-    a. Supply is transferred between units.
-    b. Attacks happen, except for BASHER attacks.
-    c. Missiles are launched (LAUNCHER only).
-    d. Core actions (moving, mining, spawning, or building) happen.
-    e. Basher attacks (BASHER only).
+5. Actions are performed in this order:
+    - Supply is transferred between units.
+    - Attacks happen, except for BASHER attacks.
+    - Missiles are launched (LAUNCHER only).
+    - Core actions (moving, mining, spawning, or building) happen.
+    - Basher attacks (BASHER only).
 6. End-of-turn events: missile production, supply generation, commander health regeneration, and missile deaths.
 
 ### Timing

@@ -478,7 +478,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @Override
     public void processEndOfTurn() {
         super.processEndOfTurn();
-
+		
         // resetting stuff
         hasBeenAttacked = false;
 
@@ -540,8 +540,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
 		
         // missiles should die automatically
-        if (type == RobotType.MISSILE && roundsAlive >= GameConstants.MISSILE_LIFESPAN) {
-            setSelfDestruct();
+		if (type == RobotType.MISSILE && roundsAlive >= GameConstants.MISSILE_LIFESPAN) {
+			setSelfDestruct();
             suicide();
         }
 		
