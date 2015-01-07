@@ -230,7 +230,7 @@ Each unit type has a certain 'supply upkeep' associated with it. Roughly put, a 
 
 In addition, using more than 2000 bytecodes in a single turn will cost the unit 0.001 supply per extra bytecode.
 
-Units that have no supply faces two penalties. First, it will only be able to act (move, mine, and/or attack) roughly half as fast as it would with supply. Second, its bytecode limit is halved to 5000. Structures have no supply upkeep and never face penalties from lacking supply.
+Units that have no supply faces two penalties. First, it will only be able to act (move, mine, and/or attack) roughly half as fast as it would with supply. Second, its bytecode limit is halved to 5000. Structures have no supply upkeep and never face penalties from lacking supply. A unit with no supply is marked with a white square on the client.
 
 Messaging [bcd09]
 ---------------
