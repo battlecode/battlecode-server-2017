@@ -282,18 +282,22 @@ Certain robot actions cannot be performed multiple times in a single turn or sho
 
 #### Attacking
 Attacking can only be done when the robot's weapon delay is <1 (which can be checked using the `isWeaponReady()` method), and can be performed by calling the `attackLocation()` method. This deals damage to the unit on the targeted square. Bashers automatically attack all adjacent enemies after movement.
+This increases core delay up to the robot type's COOLDOWN_DELAY and increases weapon delay up to the robot's ATTACK_DELAY.
 
 #### Moving
 Moving can only be done when the robot's core delay is <1 (which can be checked using the `isCoreReady()` method), and can be performed by calling the `move()` method. This moves the unit in the specified direction. If you wish to check whether a move is valid, you can use the `canMove()` method.
+This increases core delay up to the robot type's MOVEMENT_DELAY and increases weapon delay up to the robot's LOADING_DELAY.
 
 #### Mining
 Only BEAVERs and MINERs can mine, and only when the robot's core delay is <1 (`isCoreReady()`). It can be performed by calling the `mine()` method. This reduces the amount of ore on the robot's square by a certain value (see the section on Ore) and increases the player's stockpile by that value.
+This increases core delay up to the robot type's MOVEMENT_DELAY and increases weapon delay up to the robot's LOADING_DELAY (the same delay as movement).
 
 #### Spawning
 Certain structures can spawn certain units, but only when the structure's coreDelay is <1 (`isCoreReady()`). Spawning can be performed by calling the `spawn()` method. This deducts the ore cost of the unit from the player's stockpile, then creates one unit of the specified type in the specified direction. The structure's core delay is increased by the turn cost of the spawned unit type. The `hasSpawnRequirements()` and `canSpawn()` methods can be used to check whether a spawn action is legal.
+This increases core delay by the turn cost of the unit spawned.
 
 #### Building
-Only BEAVERs can build, and only when the robot's core delay is <1 (`isCoreReady()`). When `build()` is called, several things happen. The ore cost of the structure is deducted from the player's stockpile. The BEAVER is put in a 'constructing' state for a certain number of turns, during which it cannot perform any above action but can compute. An incomplete structure is also created in the specified direction, which starts with 50 HP (half of building max HP). This incomplete structure cannot compute or perform any actions. The number of turns for construction depends on the type of structure being built. 
+Only BEAVERs can build, and only when the robot's core delay is <1 (`isCoreReady()`). When `build()` is called, several things happen. The ore cost of the structure is deducted from the player's stockpile. The BEAVER is put in a 'constructing' state for a certain number of turns, during which it cannot perform any above action but can compute. An incomplete structure is also created in the specified direction, which starts with 50 HP (half of building max HP). This incomplete structure cannot compute or perform any actions. The number of turns for construction depends on the type of structure being built.
 
 After the required number of turns, the structure will become complete, and its HP will double. The BEAVER will be also be able to perform other actions again. The `hasBuildRequirements()`, `canBuild()`, and `checkDependencyProgress()` methods can be used to check whether a build action is legal.
 
