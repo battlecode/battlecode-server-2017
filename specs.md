@@ -578,7 +578,7 @@ Changelog [bcd20]
     * More meaningful game over messages.
     * Changes to some of the maps (notably, onetower only has one tower now).
     * You can no longer steal supply from other units.
-* 1.0.2 (1/?/2014) - Engine bug fixes, client improvements, and small specs clarifications.
-    * HashSet, TreeSet, and other java.util classes work properly now.
+* 1.0.2 (1/7/2015) - Engine bug fixes, client improvements, and small specs clarifications.
+    * `HashSet`, `TreeSet`, and other `java.util` classes work properly now.
     * Client replays tell you more information about who won.
-    * A few additional methods now have a fixed Bytecode cost (in Math, String, StringBuffer, and StringBuilder).
+    * A few additional methods now have a fixed Bytecode cost (in `Math`, `StrictMath`, `String`, `StringBuffer`, and `StringBuilder`).
