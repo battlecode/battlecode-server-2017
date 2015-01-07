@@ -570,6 +570,6 @@ Changelog [bcd20]
 * 1.0.1 (1/6/2015) - Client/engine bug fixes and changes. Fixed specs typos. BACKWARDS INCOMPATIBLE.
     * `RobotInfo` now tells you information about whether a robot is building something or being built.
     * `senseOre()`, `senseTerrainTile()`, and `disintegrate()` work properly on round 0.
-    * Fix bug with sensor radius checking, and if you sense off the map.
+    * Fix bug with sensor radius checking, and fixed sensing off the map.
     * More meaningful game over messages.
     * Changes to some of the maps.
