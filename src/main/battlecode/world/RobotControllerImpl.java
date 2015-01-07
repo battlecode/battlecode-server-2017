@@ -173,7 +173,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
        
         for (InternalObject o : gameWorld.allObjects()) {
-            if ((Robot.class.isInstance(o)) && (o.getTeam() == robot.getTeam() && loc.distanceSquaredTo(o.getLocation()) <= sensorRadius)) {
+            if ((Robot.class.isInstance(o)) && (o.getTeam() == robot.getTeam() && loc.distanceSquaredTo(o.getLocation()) <= ((InternalRobot)o).type.sensorRadiusSquared)) {
                 return true;
             }
         }
