@@ -47,7 +47,7 @@ Major Mechanics for 2015 [bcd03]
 - Each robot also has an individual 'supply' count. A robot's supply decreases as it performs actions or runs code. Robots without supply will still be able to perform actions and/or run code, but with penalties to action frequency and/or bytecode limit.
 - Robots have two delay timers, a weapon delay and a core delay (for all non-attack actions). However, attacking and moving are not completely separate, as performing an attack may also increase core delay, and vice versa.
 - To communicate between robots, you can post and read integers to and from a team-shared array.
-- The layout and details of the map are not initially revealed. However, robots know the location of allied and enemy HQs and TOWERs.
+- The layout and details of the map are not initially revealed. All MapLocations are offset by the same random amount. However, robots know the location of allied and enemy HQs and TOWERs.
 
 Robot Overview [bcd04]
 --------------
@@ -240,7 +240,7 @@ Each team has a size-65536 array of ints that can be broadcasted to and read fro
 Maps and Terrain [bcd10]
 --------------
 
-Maps for this year's competition will be rectangular grids whose dimensions may be from 30x30 to 120x120. Each square of the grid will either be VOID or non-VOID (most units cannot move onto VOID squares, and structures cannot be built there).
+Maps for this year's competition will be rectangular grids whose dimensions may be from 30x30 to 120x120. Each square of the grid will either be VOID or non-VOID (most units cannot move onto VOID squares, and structures cannot be built there). All MapLocations are offset by the same random amount.
 
 One HQ per team and up to six TOWERs per team will be pre-placed on non-VOID squares of each map. None of these starting structures will be in attack range of any enemy starting structure.
 
