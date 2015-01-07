@@ -576,4 +576,5 @@ Changelog [bcd20]
     * `senseOre()`, `senseTerrainTile()`, and `disintegrate()` work properly on round 0.
     * Fix bug with sensor radius checking, and fixed sensing off the map.
     * More meaningful game over messages.
-    * Changes to some of the maps.
+    * Changes to some of the maps (notably, onetower only has one tower now).
+    * You can no longer steal supply from other units.
