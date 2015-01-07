@@ -519,6 +519,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
 
     public void transferSupplies(int amount, MapLocation loc) throws GameActionException {
+        if (amount < 0) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Stealing supply is not very nice.");
+        }
+
         if (loc.distanceSquaredTo(getLocation()) > GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Can't transfer supply that much distance.");
         }
