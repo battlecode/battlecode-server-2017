@@ -272,11 +272,16 @@ public class GameMap implements GenericGameMap {
         private final GameMap map;
         private final boolean[][] seen;
         private final double[][] oreMined;
+        private final int OFFSET = 50;
 
         public MapMemory(GameMap map) {
             this.map = map;
-            this.seen = new boolean[map.getWidth()][map.getHeight()];
-            this.oreMined = new double[map.getWidth()][map.getHeight()];
+            this.seen = new boolean[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
+            this.oreMined = new double[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
+        }
+
+        private boolean validLoc(int x, int y) {
+            return x >= -OFFSET && x < map.getWidth() + OFFSET && y >= -OFFSET && y < map.getHeight() + OFFSET;
         }
 
         public void rememberLocations(MapLocation loc, int radiusSquared, Map<MapLocation, Double> oreMinedMap) {
@@ -285,10 +290,10 @@ public class GameMap implements GenericGameMap {
             for (int i = 0; i < locs.length; i++) {
                 int x = locs[i].x - map.mapOriginX;
                 int y = locs[i].y - map.mapOriginY;
-                if (x >= 0 && x < map.getWidth() && y >= 0 && y < map.getHeight()) {
-                    seen[x][y] = true;
+                if (validLoc(x, y)) {
+                    seen[x + OFFSET][y + OFFSET] = true;
                     if (oreMinedMap.containsKey(locs[i])) {
-                        oreMined[x][y] = oreMinedMap.get(locs[i]);
+                        oreMined[x + OFFSET][y + OFFSET] = oreMinedMap.get(locs[i]);
                     }
                 }
             }
@@ -298,20 +303,15 @@ public class GameMap implements GenericGameMap {
             int X = loc.x - map.mapOriginX;
             int Y = loc.y - map.mapOriginY;
 
-            if (X >= 0 && X < map.getWidth() && Y >= 0 && Y < map.getHeight() && seen[X][Y]) {
-                return seen[X][Y];
+            if (validLoc(X, Y)) {
+                return seen[X + OFFSET][Y + OFFSET];
             } else {
                 return false;
             }
         }
 
         public TerrainTile recallTerrain(MapLocation loc) {
-            int X = loc.x - map.mapOriginX;
-            int Y = loc.y - map.mapOriginY;
-
-            if (X < 0 || X >= map.getWidth() || Y < 0 || Y >= map.getHeight()) {
-                return TerrainTile.OFF_MAP;
-            } else if (seen[X][Y]) {
+            if (seenBefore(loc)) {
                 return map.getTerrainTile(loc);
             } else {
                 return TerrainTile.UNKNOWN;
@@ -322,10 +322,8 @@ public class GameMap implements GenericGameMap {
             int X = loc.x - map.mapOriginX;
             int Y = loc.y - map.mapOriginY;
 
-            if (X < 0 || X >= map.getWidth() || Y < 0 || Y >= map.getHeight()) {
-                return 0.0;
-            } else if (seen[X][Y]) {
-                return oreMined[X][Y];
+            if (seenBefore(loc)) {
+                return oreMined[X + OFFSET][Y + OFFSET];
             } else {
                 return -1.0;
             }
