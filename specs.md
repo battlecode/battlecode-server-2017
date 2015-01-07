@@ -571,4 +571,4 @@ Changelog [bcd20]
     * `RobotInfo` now tells you information about whether a robot is building something or being built.
     * `senseOre()`, `senseTerrainTile()`, and `disintegrate()` work properly on round 1.
     * More meaningful game over messages.
-    * Changes to maps rift.xml and noeffort.xml.
+    * Changes to some of the maps.
