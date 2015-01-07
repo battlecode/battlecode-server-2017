@@ -522,7 +522,7 @@ String.replaceFirst
 String.split
 ```
 
-The function `System.arraycopy` costs one bytecode for each element copied. All other functions have a fixed bytecode cost. These costs are listed in the `MethodCosts.txt` file. The bytecode costs of battlecode.common functions are also listed in the javadoc.
+The function `System.arraycopy` costs one bytecode for each element copied. All other functions have a fixed bytecode cost. These costs are listed in the `MethodCosts.txt` file. Methods not listed are free. The bytecode costs of battlecode.common functions are also listed in the javadoc.
 
 ### Memory Usage
 
@@ -578,3 +578,7 @@ Changelog [bcd20]
     * More meaningful game over messages.
     * Changes to some of the maps (notably, onetower only has one tower now).
     * You can no longer steal supply from other units.
+* 1.0.2 (1/?/2014) - Engine bug fixes, client improvements, and small specs clarifications.
+    * HashSet, TreeSet, and other java.util classes work properly now.
+    * Client replays tell you more information about who won.
+    * A few additional methods now have a fixed Bytecode cost (in Math, String, StringBuffer, and StringBuilder).
