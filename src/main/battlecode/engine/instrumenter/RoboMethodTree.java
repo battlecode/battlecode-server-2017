@@ -30,6 +30,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 
     // all the exception handlers we've seen in the code
     private final Set<LabelNode> exceptionHandlers = new HashSet<LabelNode>();
+    private final Set<LabelNode> tryCatchStarts = new HashSet<LabelNode>();
 
     private static final Set<String> instrumentedStringFuncs = new HashSet<String>();
 
@@ -149,6 +150,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 
     private void visitTryCatchBlockNode(TryCatchBlockNode n) {
         exceptionHandlers.add(n.handler);
+        tryCatchStarts.add(n.start);
         if (n.type != null) {
             n.type = classReference(n.type);
         }
@@ -164,7 +166,14 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 
     private void addRobotDeathHandler() {
         LabelNode robotDeathLabel = new LabelNode(new Label());
-        tryCatchBlocks.add(0, new TryCatchBlockNode(startLabel, robotDeathLabel, robotDeathLabel, "java/lang/VirtualMachineError"));
+        LabelNode firstTryCatch = null;
+        for(AbstractInsnNode node : instructions.toArray()) {
+            if(node.getType()==AbstractInsnNode.LABEL&&tryCatchStarts.contains((LabelNode)node)) {
+                firstTryCatch = (LabelNode)node;
+                break;
+            }
+        }
+        tryCatchBlocks.add(0, new TryCatchBlockNode(firstTryCatch, robotDeathLabel, robotDeathLabel, "java/lang/VirtualMachineError"));
         instructions.add(robotDeathLabel);
         instructions.add(new FrameNode(F_FULL, 0, new Object[0], 1, new Object[]{"java/lang/VirtualMachineError"}));
         instructions.add(new InsnNode(ATHROW));
@@ -223,12 +232,12 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
     }
 
     private void visitMethodInsnNode(MethodInsnNode n) {
-    	
-    	if(n.getOpcode() == INVOKE_DYNAMIC_INSN) {
-	    // TODO: Handle Invoke Dynamic correctly to add support for jruby/jython/etc. Checking submissions on CS for any disqualifications from this.
-	    //throw new RuntimeException("Invoke Dynamic probably not instrumented correctly by Battlecode Engine. Plz don't use for now");
-    	}
-    	
+        
+        if(n.getOpcode() == INVOKE_DYNAMIC_INSN) {
+        // TODO: Handle Invoke Dynamic correctly to add support for jruby/jython/etc. Checking submissions on CS for any disqualifications from this.
+        //throw new RuntimeException("Invoke Dynamic probably not instrumented correctly by Battlecode Engine. Plz don't use for now");
+        }
+        
         if (n.name.equals("hashCode") && n.desc.equals("()I") && n.getOpcode() != INVOKESTATIC) {
             bytecodeCtr++;
             endOfBasicBlock(n);
