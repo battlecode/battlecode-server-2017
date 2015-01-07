@@ -253,13 +253,13 @@ Naturally, each map will be symmetric by either a reflection or a rotation.
 Sensing [bcd11]
 ---------------
 
-Info on robots in sight range of any allied unit can be sensed (so vision is shared between robots). The locations of allied and enemy HQs are known along with the location of all allied and enemy TOWERs.
+Info on robots in sight range of any allied unit can be sensed (so vision is shared between robots). The locations of allied and enemy HQs are known along with the location of all allied and enemy TOWERs. You are always able to sense all of your allied robots.
 
 HQ and TOWERs can see all locations within square radius 35, while all other robots have sight ranges of 24.
 
 The terrain type and ore amount of a map square cannot be sensed until that map square has been within sight range of an allied unit. The ore amount sensed on a map square will return the ore amount on the square during the last time that map square was within allied sight range - meaning that enemy mining activity cannot be sensed from far away.
 
-Sensing info on a robot includes the robot's location, delays, its supply levels, its type, its health, and more. See the `RobotInfo` Java documentation for more details, as well as the `senseNearbyRobots()` method.
+Sensing info on a robot includes the robot's location, delays, its supply levels, its type, its health, whether it is building something, its missile count, and more. See the `RobotInfo` Java documentation for more details, as well as the `senseNearbyRobots()` method.
 
 Victory and Tiebreaks [bcd12]
 ---------------
@@ -578,7 +578,6 @@ Changelog [bcd20]
     * More meaningful game over messages.
     * Changes to some of the maps (notably, onetower only has one tower now).
     * You can no longer steal supply from other units.
-* 1.0.2 (1/7/2015) - Engine bug fixes, client improvements, and small specs clarifications.
+* 1.0.2 (1/7/2015) - Engine bug fixes, small client improvements, and small specs clarifications.
     * `HashSet`, `TreeSet`, and other `java.util` classes work properly now.
-    * Client replays tell you more information about who won.
     * A few additional methods now have a fixed Bytecode cost (in `Math`, `StrictMath`, `String`, `StringBuffer`, and `StringBuilder`).
