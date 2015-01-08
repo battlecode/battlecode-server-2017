@@ -545,13 +545,23 @@ class XMLMapHandler extends DefaultHandler {
         GameMap gm = new GameMap(mapProperties, mapTiles, intData, mapName);
         GameWorld gw = new GameWorld(gm, teamA, teamB, teamMemory);
 
-        gw.reserveRandomIDs(99999);
+        gw.reserveRandomIDs(32000);
 
         MapLocation origin = gm.getMapOrigin();
 
         for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[i].length; j++)
-                map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
+            for (int j = 0; j < map[i].length; j++) {
+                if (map[i][j] instanceof NodeData) {
+                    map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
+                }
+            }
+        }
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[i].length; j++) {
+                if (!(map[i][j] instanceof NodeData)) {
+                    map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
+                }
+            }
         }
 
         // by removing this line, you can no longer use IDs to determine execution order
