@@ -149,7 +149,7 @@ public interface RobotController {
     public boolean isLocationOccupied(MapLocation loc) throws GameActionException;
 
     /**
-     * Returns the robot at the given location, or <code>null</code>
+     * Returns the robot at the given location, or <code>null</code>.
      * if there is no object there.
      *
      * @param loc the location to check.
@@ -159,17 +159,17 @@ public interface RobotController {
     public RobotInfo senseRobotAtLocation(MapLocation loc) throws GameActionException;
 
     /**
-     * Returns true if the given robot is within the robot's sensor range
-     * @param id the ID of the robot to query
-     * @return whether the given robot is within the robot's sensor range
+     * Returns true if the given robot is within the robot's sensor range.
+     * @param id the ID of the robot to query.
+     * @return whether the given robot is within the robot's sensor range.
      */
     public boolean canSenseRobot(int id);
 
     /**
      * Senses information about a particular robot given its ID.
-     * @param id the ID of the robot to query
-     * @return a RobotInfo object for the sensed robot
-     * @throws GameActionException if the robot cannot be sensed (for example, if it doesn't exist or is out of sight range)
+     * @param id the ID of the robot to query.
+     * @return a RobotInfo object for the sensed robot.
+     * @throws GameActionException if the robot cannot be sensed (for example, if it doesn't exist or is out of sight range).
      */
     public RobotInfo senseRobot(int id) throws GameActionException;
 
