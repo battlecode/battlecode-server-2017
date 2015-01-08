@@ -213,7 +213,7 @@ Ore [bcd07]
 
 'Ore' is the main resource of the game. Each team has a certain stockpile of ore, and spawning units and building structure deducts ore from the team stockpile. Unit and structure costs depend on the unit or structure type.
 
-Each location of each map has some non-negative (possibly zero) amount of ore on it, which can be mined by BEAVERs and MINERs standing on that location by calling the `mine()` method. If the amount of ore on a location is n, BEAVERs mine min(2,n/20) per `mine()` call while MINERs mine min(3,n/4) per `mine()` call. Mining reduces the amount of ore on the robot's location and adds that amount to the player's stockpile.
+Each location of each map has some non-negative (possibly zero) amount of ore on it, which can be mined by BEAVERs and MINERs standing on that location by calling the `mine()` method. If the amount of ore on a location is n, BEAVERs mine max(min(2,n/20),0.2) per `mine()` call while MINERs mine max(min(3,n/4),0.2) per `mine()` call (ore on a square cannot be mined below 0). This may be easier to understand explained as 'n/20, but upper-bounded by 2 and lower-bounded by 0.2' for BEAVERs and 'n/4, but upper-bounded by 3 and lower-bounded by 0.2' for MINERs. Mining reduces the amount of ore on the robot's location and adds that amount to the player's stockpile.
 
 Players start the game with 500 ore, and each team automatically receives 5 ore per turn before any mining income.
 
@@ -314,7 +314,7 @@ Each type of unit has an associated fixed movement delay and fixed attack delay.
 #### Details version
 The rest of this section details the exact implementation of delays. It may be complicated and is not fully necessary for writing a bot.
 
-Each individual robot has two changing delay counters: a core delay and a weapon delay. Delays are doubles that represent some amount of time that must pass before an action can be taken. Weapon delay pertains to the action of attacking, while core delay pertains to all other actions (mining, spawning, building, and moving). Specifically, actions cannot be performed unless the associated delay is <1. Both delay counters decrease by a base of 0.5 per turn, but can be further reduced by an additional 0.5 per turn if the robot has enough supply to pay its supply upkeep (this happens automatically). Therefore, a supplied robot can act about twice as often as an unsupplied robot.
+Each individual robot has two changing delay counters: a core delay and a weapon delay. Delays are doubles that represent some amount of time that must pass before an action can be taken. Weapon delay pertains to the action of attacking, while core delay pertains to all other actions (mining, spawning, building, and moving). Specifically, actions cannot be performed unless the associated delay is <1. Both delay counters decrease by a base of 0.5 per turn, but can be further reduced by an additional 0.5 per turn if the robot has enough supply to pay its supply upkeep (this happens automatically). Therefore, a supplied robot can act about twice as often as an unsupplied robot. The way LAUNCHERs generate missiles works the same way - each time a LAUNCHER generates a missile, it gains 6 weapon delay, and the weapon delay must be <1 in order for a LAUNCHER to generate a missile. Note that actually launching a missile is independent of weapon delay.
 
 Delays increase when actions are performed. Naturally, attacking increases weapon delay and moving/mining/spawning increases core delay. Attacking increases the weapon delay of the robot by the ATTACK_DELAY of the unit type. Similarly, moving or mining increases the core delay of the robot by the MOVEMENT_DELAY of the unit type (1.4*MOVEMENT_DELAY if the movement was in a diagonal direction). However, attacking can also increase core delay up to the COOLDOWN_DELAY of the unit type, and moving or mining can increase the attack delay of the robot up to the LOADING_DELAY of the unit type. This means that attacking and movement are not completely independent of each other, and that units must wait some turns after attacking in order to move, or vice versa.
 
@@ -389,7 +389,7 @@ Units In-Depth [bcd15]
 
 ### Unique unit properties:
 #### BEAVER:
-- Can mine at a rate of min(n/20,2) ore per turn, where n is the amount of ore on their location.
+- Can mine at a rate of max(min(n/20,2),0.2) ore per turn, where n is the amount of ore on their location.
 - Can build structures.
 
 #### COMPUTER:
@@ -399,7 +399,7 @@ Units In-Depth [bcd15]
 - Attacks hit all enemy units within range 2. Each BASHER attacks automatically at the end of every turn, after any movement (if the BASHER moves, the attack hits enemies around the location the BASHER moves to, rather than the location it started in).
 
 #### MINER:
-- Can mine at a rate of min(n/4,3) ore per turn, where n is the amount of ore on their location.
+- Can mine at a rate of max(min(n/4,3),0.2) ore per turn, where n is the amount of ore on their location.
 
 #### DRONE:
 - Can move onto VOID terrain.
@@ -413,9 +413,9 @@ Units In-Depth [bcd15]
  - Flash - (10 turn cooldown, gained at 2000 xp) - Teleports to any valid location within 5 range.
  
 #### LAUNCHER:
-- Cannot attack directly.
-- Automatically generates MISSILEs that can be launched. A LAUNCHER gains one MISSILE every 6 turns and can store up to 6. 
-- Launching a missile in a direction subtracts one from the LAUNCHER's missile count and creates a MISSILE unit in the square in that direction.
+- Cannot attack directly. A LAUNCHER's weapon delay is associated with the amount of time it needs to generate a new MISSILE.
+- Automatically generates MISSILEs that can be launched. A LAUNCHER gains one MISSILE every 6 turns if supplied or one MISSILE every 12 turns if unsupplied, and can store up to 6. 
+- Launching a missile in a direction subtracts one from the LAUNCHER's missile count and creates a MISSILE unit in the square in that direction. Missiles can be launched regardless of weapon or core delay.
 - The `canLaunch()` method is there to help check if a launch is valid.
 - LAUNCHERs can move and launch missiles in the same turn, but `launchMissile()` must be called before `move()`.
 
@@ -578,6 +578,8 @@ Changelog [bcd20]
     * More meaningful game over messages.
     * Changes to some of the maps (notably, onetower only has one tower now).
     * You can no longer steal supply from other units.
-* 1.0.2 (1/7/2015) - Engine bug fixes, small client improvements, and small specs clarifications.
+* 1.0.2 (1/7/2015) - Engine bug fixes, specs clarifications, and minor gameplay changes.
     * `HashSet`, `TreeSet`, and other `java.util` classes work properly now.
     * A few additional methods now have a fixed Bytecode cost (in `Math`, `StrictMath`, `String`, `StringBuffer`, and `StringBuilder`).
+    * The amount of ore mined per turn used to be lower-bounded by the MINIMUM_MINING_AMOUNT game constant, which was not in the specs. We have decided to keep this functionality, but the MINIMUM_MINING_AMOUNT has been reduced from 1 to 0.2. The specs have been changed to reflect this.
+    * LAUNCHERs now gain new missiles at approximately half the original rate (once every 12 turns rather than once every 6 turns) when they have no supply. In addition, the LAUNCHER's weapon delay now tracks the amount of time it will need to generate the next MISSILE. Note that launching a missile is independent of this weapon delay, and that building a MISSILE happens automatically. This is explained in the specs.
