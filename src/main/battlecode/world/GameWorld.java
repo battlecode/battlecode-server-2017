@@ -242,6 +242,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         int radius = (int) Math.sqrt(radiusSquared);
 
+	radius = Math.min(radius, Math.max(GameConstants.MAP_MAX_HEIGHT, GameConstants.MAP_MAX_WIDTH));
+
         int minXPos = center.x - radius;
         int maxXPos = center.x + radius;
         int minYPos = center.y - radius;
