@@ -242,7 +242,7 @@ Each team has a size-65536 array of ints that can be broadcasted to and read fro
 Maps and Terrain [bcd10]
 --------------
 
-Maps for this year's competition will be rectangular grids whose dimensions may be from 30x30 to 120x120. Each square of the grid will either be VOID or non-VOID (most units cannot move onto VOID squares, and structures cannot be built there). All MapLocations are offset by the same random amount.
+Maps for this year's competition will be rectangular grids whose dimensions may be from 30x30 to 120x120. Each square of the grid will either be VOID or non-VOID (most units cannot move onto VOID squares, and structures cannot be built there). Coordinates on the map are represented by `MapLocation` objects, which hold the x and y coordinates of the location. All `MapLocation`s are offset by the same random amount.
 
 One HQ per team and up to six TOWERs per team will be pre-placed on non-VOID squares of each map. None of these starting structures will be in attack range of any enemy starting structure.
 
@@ -255,13 +255,13 @@ Naturally, each map will be symmetric by either a reflection or a rotation.
 Sensing [bcd11]
 ---------------
 
-Info on robots in sight range of any allied unit can be sensed (so vision is shared between robots). The locations of allied and enemy HQs are known along with the location of all allied and enemy TOWERs. You are always able to sense all of your allied robots.
+Info on robots in sight range of ANY allied unit can be sensed (so vision is shared between robots). The locations of allied and enemy HQs are known along with the location of all allied and enemy TOWERs. You are always able to sense all of your allied robots.
 
-HQ and TOWERs can see all locations within square radius 35, while all other robots have sight ranges of 24.
+HQ and TOWERs can see all locations within square radius 35, while all other robots have sight ranges of 24 (square radius).
 
 The terrain type and ore amount of a map square cannot be sensed until that map square has been within sight range of an allied unit. The ore amount sensed on a map square will return the ore amount on the square during the last time that map square was within allied sight range - meaning that enemy mining activity cannot be sensed from far away.
 
-Sensing info on a robot includes the robot's location, delays, its supply levels, its type, its health, whether it is building something, its missile count, and more. See the `RobotInfo` Java documentation for more details, as well as the `senseNearbyRobots()` method.
+Sensing info on a robot includes the robot's location, delays, its supply levels, its type, its health, whether it is building something, its missile count, and more. See the `RobotInfo` Java documentation for more details, as well as the `senseNearbyRobots()` method. There are a number of other useful sensing methods which are mentioned in the documentation.
 
 Victory and Tiebreaks [bcd12]
 ---------------
@@ -388,6 +388,8 @@ Units In-Depth [bcd15]
 | Commander | Training Field  | 100* ore, 80 turns | 5             | 120 | 10     | 10    | 2  | 1   | 0   | 0   |
 | Launcher  | Aerospace Lab   | 400 ore, 100 turns | 25            | 400 | n/a    | n/a   | 4  | 6*  | n/a | n/a |
 | Missile   | Launcher        | 6 turns            | 0             | 3*  | 20     | 2*    | 1  | 0   | 0   | 0   |
+
+All ranges are expressed as squared radius. A square radius of X includes all locations within a Euclidean distance of sqrt(X).
 
 ### Unique unit properties:
 #### BEAVER:
@@ -585,3 +587,6 @@ Changelog [bcd20]
     * A few additional methods now have a fixed Bytecode cost (in `Math`, `StrictMath`, `String`, `StringBuffer`, and `StringBuilder`).
     * The amount of ore mined per turn used to be lower-bounded by the MINIMUM_MINING_AMOUNT game constant, which was not in the specs. We have decided to keep this functionality, but the MINIMUM_MINING_AMOUNT has been reduced from 1 to 0.2. The specs have been changed to reflect this.
     * LAUNCHERs now gain new missiles at approximately half the original rate (once every 12 turns rather than once every 6 turns) when they have no supply. In addition, the LAUNCHER's weapon delay now tracks the amount of time it will need to generate the next MISSILE. Note that launching a missile is independent of this weapon delay, and that building a MISSILE happens automatically. This is explained in the specs.
+* 1.0.3 (1/8/2015) - Engine bug fix. Client improvements.
+    * `HashSet`, `TreeSet`, and other `java.util` classes work properly now on Java 7.
+    * Added methods `canSenseRobot` and `senseRobot` to help get information about a robot given just its ID.

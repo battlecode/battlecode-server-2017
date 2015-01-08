@@ -218,6 +218,23 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
     }
 
+    public boolean canSenseRobot(int id) {
+        InternalRobot obj = (InternalRobot) gameWorld.getObjectByID(id);
+        if (obj == null) {
+            return false;
+        }
+        return canSense(obj);
+    }
+
+    public RobotInfo senseRobot(int id) throws GameActionException {
+        InternalRobot obj = (InternalRobot) gameWorld.getObjectByID(id);
+        if (obj != null && canSense(obj)) {
+            return obj.getRobotInfo();
+        } else {
+            throw new GameActionException(CANT_SENSE_THAT, "Could not sense robot with given ID. It might be out of sight range or it might not exist.");
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type) {
         Predicate<InternalObject> p = new Predicate<InternalObject>() {
