@@ -470,7 +470,7 @@ Official matches will usually be sets of multiple games. Each team can save a sm
 
 ### Execution Order
 
-The game is comprised of a number of rounds. During each round, all robots get a turn in the order they were spawned. Newly spawned robots will have a turn on the same round they were created.
+The game is comprised of a number of rounds. During each round, all robots get a turn in the order they were spawned, starting with the two HQs. Newly spawned robots will have a turn on the same round they were created.
 
 The following is a detailed list of a robot's execution order within a single turn. If it dies halfway through, the remainder of the list does not get executed. In particular, note that changes to a robot's state do not happen while player code is being executed. All actions instead get sent to an action queue, and they are executed after the player code is run. For example, if a SOLDIER calls move() and then getLocation(), it will not reflect the location of the robot yet.
 
