@@ -256,6 +256,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
             n.name = usingFastHash ? "fastHashCode" : "hashCode";
             n.owner = "battlecode/engine/instrumenter/lang/ObjectHashCode";
             n.desc = "(ILjava/lang/Object;Ljava/lang/Class;)I";
+            n.itf = false;
             n.setOpcode(INVOKESTATIC);
             return;
         }
