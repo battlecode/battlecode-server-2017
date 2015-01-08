@@ -538,8 +538,9 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
 
         // produce missile
-        if (roundsAlive % GameConstants.MISSILE_SPAWN_FREQUENCY == 0 && type == RobotType.LAUNCHER) {
-            missileCount = Math.min(missileCount + 1, GameConstants.MISSILE_MAX_COUNT);
+        if (type == RobotType.LAUNCHER && weaponDelay < 1 && missileCount + 1 <= GameConstants.MISSILE_MAX_COUNT) {
+            missileCount++;
+            addWeaponDelay(GameConstants.MISSILE_SPAWN_FREQUENCY);
             missileCountChanged = true;
         }
     	

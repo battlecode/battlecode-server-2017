@@ -75,7 +75,7 @@ public interface GameConstants {
     public static final int HQ_ORE_INCOME = 5;
 
     /** The minimum amount that is mined on a square with no ore. */
-    public static final int MINIMUM_MINE_AMOUNT = 1;
+    public static final double MINIMUM_MINE_AMOUNT = 0.2;
 
     /** The maximum amount of ore that a BEAVER can mine. */
     public static final int BEAVER_MINE_MAX = 2;
