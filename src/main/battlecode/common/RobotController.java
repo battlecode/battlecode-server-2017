@@ -149,7 +149,7 @@ public interface RobotController {
     public boolean isLocationOccupied(MapLocation loc) throws GameActionException;
 
     /**
-     * Returns the robot at the given location, or <code>null</code>.
+     * Returns the robot at the given location, or <code>null</code>
      * if there is no object there.
      *
      * @param loc the location to check.
