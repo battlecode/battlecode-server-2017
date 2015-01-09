@@ -224,7 +224,7 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
 	 * of a specified location.
 	 *
 	 * @param center the center of the search
-	 * @param radiusSquared the radius of the search
+	 * @param radiusSquared the radius of the search (will be capped at the maximum map dimensions if the argument is too large)
 	 * @return all MapLocations (both on the map and outside the map) within 
 	 * radiusSquared distance of center.
 	 */
@@ -232,6 +232,7 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
         ArrayList<MapLocation> locations = new ArrayList<MapLocation>();
 
         int radius = (int) Math.sqrt(radiusSquared);
+        radius = Math.min(radius, Math.max(GameConstants.MAP_MAX_HEIGHT, GameConstants.MAP_MAX_WIDTH));
 
         int minXPos = center.x - radius;
         int maxXPos = center.x + radius;

@@ -236,8 +236,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         ArrayList<MapLocation> locations = new ArrayList<MapLocation>();
 
         int radius = (int) Math.sqrt(radiusSquared);
-
-	radius = Math.min(radius, Math.max(GameConstants.MAP_MAX_HEIGHT, GameConstants.MAP_MAX_WIDTH));
+        radius = Math.min(radius, Math.max(GameConstants.MAP_MAX_HEIGHT, GameConstants.MAP_MAX_WIDTH));
 
         int minXPos = center.x - radius;
         int maxXPos = center.x + radius;

@@ -192,13 +192,16 @@
     </target>
 
     <target name="unittest" depends="compiletest">
-        <junit printsummary="true" timeout="${test.timeout}" filtertrace="off">
+        <junit printsummary="withOutAndErr" timeout="${test.timeout}" filtertrace="off">
             <classpath refid="classpath-libs"/>
             <classpath>
                 <pathelement location="${pkg.build.dir}"/>
             </classpath>
             <classpath>
                 <pathelement location="${test.build.dir}"/>
+            </classpath>
+            <classpath>
+                <pathelement location="${player.build.dir}"/>
             </classpath>
 
             <formatter type="plain"/>

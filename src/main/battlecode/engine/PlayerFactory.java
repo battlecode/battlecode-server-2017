@@ -23,6 +23,11 @@ public class PlayerFactory {
 
     public static void loadPlayer(GenericController rc, String teamName) {
 
+        // This should only happen in the unit tests
+        if (teamName.length() == 0) {
+            return;
+        }
+
         // now, we instantiate and instrument the player's class
         Class playerClass;
         try {
