@@ -97,8 +97,16 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         myBuilding = -1;
         forceDeath = false;
 
+        // Update GameWorld stuff
+        if (type == RobotType.COMMANDER) {
+            myGameWorld.putCommander(this);
+            myGameWorld.incrementCommandersSpawned(getTeam());
+        }
+
+        myGameWorld.incrementTotalRobotTypeCount(getTeam(), type);
+
         if (!type.isBuildable()) {
-            myGameWorld.incrementRobotTypeCount(getTeam(), type);
+            myGameWorld.incrementActiveRobotTypeCount(getTeam(), type);
         }
     }
 
@@ -567,8 +575,10 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         if (type.isBuildable() && roundsAlive == buildDelay) {
             changeHealthLevel(getHealthLevel());
             // increase robot count
-            myGameWorld.incrementRobotTypeCount(getTeam(), type);
-            myGameWorld.getRobotByID(myBuilder).clearBuilding();
+            myGameWorld.incrementActiveRobotTypeCount(getTeam(), type);
+            if (myBuilder >= 0) {
+                myGameWorld.getRobotByID(myBuilder).clearBuilding();
+            }
             clearBuilding();
         }
     }

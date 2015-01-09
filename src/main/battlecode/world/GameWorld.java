@@ -109,11 +109,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         totalRobotTypeCount.put(Team.A, new EnumMap<RobotType, Integer>(RobotType.class));
         totalRobotTypeCount.put(Team.B, new EnumMap<RobotType, Integer>(RobotType.class));
 
-        totalRobotTypeCount.get(Team.A).put(RobotType.HQ, 1);
-        totalRobotTypeCount.get(Team.B).put(RobotType.HQ, 1);
-        totalRobotTypeCount.get(Team.A).put(RobotType.TOWER, 6);
-        totalRobotTypeCount.get(Team.B).put(RobotType.TOWER, 6);
-
         baseTowers.put(Team.A, new HashSet<InternalRobot>());
         baseTowers.put(Team.B, new HashSet<InternalRobot>());
 
@@ -389,7 +384,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
     }
 
-    public void incrementRobotTypeCount(Team team, RobotType type) {
+    public void incrementActiveRobotTypeCount(Team team, RobotType type) {
         if (activeRobotTypeCount.get(team).containsKey(type)) {
             activeRobotTypeCount.get(team).put(type, activeRobotTypeCount.get(team).get(type) + 1);
         } else {
@@ -403,6 +398,14 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             return totalRobotTypeCount.get(team).get(type);
         } else {
             return 0;
+        }
+    }
+
+    public void incrementTotalRobotTypeCount(Team team, RobotType type) {
+        if (totalRobotTypeCount.get(team).containsKey(type)) {
+            totalRobotTypeCount.get(team).put(type, totalRobotTypeCount.get(team).get(type) + 1);
+        } else {
+            totalRobotTypeCount.get(team).put(type, 1);
         }
     }
 
@@ -470,6 +473,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public boolean hasCommander(Team t) {
         return getActiveRobotTypeCount(t, RobotType.COMMANDER) > 0;
+    }
+
+    public void putCommander(InternalRobot robot) {
+        commanders.put(robot.getTeam(), robot);
     }
 
     public InternalRobot getCommander(Team t) {
@@ -805,12 +812,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         
         //note: this also adds the signal
         InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent, s.getDelay());
-        
-        Integer currentCount = totalRobotTypeCount.get(robot.getTeam()).get(robot.type);
-        if (currentCount == null) {
-            currentCount = 0;
-        }
-        totalRobotTypeCount.get(robot.getTeam()).put(robot.type, currentCount + 1);
 
         // add myBuilder and myBuilding
         robot.setMyBuilder(parent.getID());
@@ -984,20 +985,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         
         //note: this also adds the signal
         InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(), loc, s.getTeam(), parent, s.getDelay());
-
-        if (s.getType() == RobotType.COMMANDER) {
-            commanders.put(robot.getTeam(), robot);
-        }
-        
-        Integer currentCount = totalRobotTypeCount.get(robot.getTeam()).get(robot.type);
-        if (currentCount == null) {
-            currentCount = 0;
-        }
-        totalRobotTypeCount.get(robot.getTeam()).put(robot.type, currentCount + 1);
-
-        if (robot.type == RobotType.COMMANDER) {
-            incrementCommandersSpawned(robot.getTeam());
-        }
 
         //addSignal(s); //client doesn't need this one
     }
