@@ -65,7 +65,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         this.buildDelay = buildDelay;
 
         myHealthLevel = getMaxHealth();
-        if (type.isBuildable()) {
+        if (type.isBuildable() && buildDelay > 0) {
             myHealthLevel /= 2.0;
         }
 
