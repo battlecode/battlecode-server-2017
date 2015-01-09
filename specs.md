@@ -305,7 +305,7 @@ Only BEAVERs can build, and only when the robot's core delay is <1 (`isCoreReady
 
 After the required number of turns, the structure will become complete, and its HP will double. The BEAVER will be also be able to perform other actions again. The `hasBuildRequirements()`, `canBuild()`, and `checkDependencyProgress()` methods can be used to check whether a build action is legal.
 
-If the BEAVER destroyed while it is building a structure, the structure will also be destroyed. If the structure is destroyed during construction, then the BEAVER will be free to do other things.
+If the BEAVER is destroyed while it is building a structure, the structure will also be destroyed. If the structure is destroyed during construction, then the BEAVER will be free to do other things.
 
 #### Exploding
 Only MISSILEs can explode. When `explode()` is called, the missile is immediately destroyed, and 20 damage is dealt to all adjacent units (regardless of team).
