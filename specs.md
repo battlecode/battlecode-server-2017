@@ -239,7 +239,7 @@ Units that have no supply faces two penalties. First, it will only be able to ac
 Messaging [bcd09]
 ---------------
 
-Each team has a size-65536 array of ints that can be broadcasted to and read from. These arrays are private, so message jamming and interference is impossible between teams. All robots (except for MISSILEs) can broadcast to the message array, and all robots can read from the array.
+Each team has a size-65536 array of ints that can be broadcasted to and read from. These arrays are private, so message jamming and interference is impossible between teams. All robots (except for MISSILEs) can broadcast to the message array, and all robots can read from the array. The initial value of every element in the array is 0.
 
 Maps and Terrain [bcd10]
 --------------
