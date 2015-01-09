@@ -105,7 +105,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
         myGameWorld.incrementTotalRobotTypeCount(getTeam(), type);
 
-        if (!type.isBuildable()) {
+        if (!type.isBuildable() || buildDelay == 0) {
             myGameWorld.incrementActiveRobotTypeCount(getTeam(), type);
         }
     }

@@ -477,16 +477,15 @@ The game is comprised of a number of rounds. During each round, all robots get a
 The following is a detailed list of a robot's execution order within a single turn. If it dies halfway through, the remainder of the list does not get executed. In particular, note that changes to a robot's state do not happen while player code is being executed. All actions instead get sent to an action queue, and they are executed after the player code is run. For example, if a SOLDIER calls move() and then getLocation(), it will not reflect the location of the robot yet.
 
 1. Robot's core and weapon delays are decremented, and the robot's supply upkeep is paid.
-2. Robot executes player code until the total number of bytecodes executed exceeds the robot's allotted amount, with supply restrictions taken into account.
+2. Robot executes player code until the total number of bytecodes executed exceeds the robot's allotted amount, with supply restrictions taken into account. Broadcasts happen immediately.
 3. Supply is subtracted based on how many bytecodes were used.
-4. Channels are updated with new broadcasts (if any).
-5. Actions are performed in this order:
+4. Actions are performed in this order:
     - Supply is transferred between units.
     - Attacks happen, except for BASHER attacks.
     - Missiles are launched (LAUNCHER only).
     - Core actions (moving, mining, spawning, or building) happen.
     - Basher attacks (BASHER only).
-6. End-of-turn events: missile production, supply generation, commander health regeneration, and missile deaths.
+5. End-of-turn events: missile production, supply generation, commander health regeneration, and missile deaths.
 
 ### Timing
 
@@ -591,9 +590,10 @@ Changelog [bcd20]
     * A few additional methods now have a fixed Bytecode cost (in `Math`, `StrictMath`, `String`, `StringBuffer`, and `StringBuilder`).
     * The amount of ore mined per turn used to be lower-bounded by the MINIMUM_MINING_AMOUNT game constant, which was not in the specs. We have decided to keep this functionality, but the MINIMUM_MINING_AMOUNT has been reduced from 1 to 0.2. The specs have been changed to reflect this.
     * LAUNCHERs now gain new missiles at approximately half the original rate (once every 12 turns rather than once every 6 turns) when they have no supply. In addition, the LAUNCHER's weapon delay now tracks the amount of time it will need to generate the next MISSILE. Note that launching a missile is independent of this weapon delay, and that building a MISSILE happens automatically. This is explained in the specs.
-* 1.0.3 (1/8/2015) - Engine bug fixes and small changes. Client improvements. Minor specs clarifications.
+* 1.0.3 (1/9/2015) - Engine bug fixes and small changes. Client improvements. Minor specs clarifications.
     * `HashSet`, `TreeSet`, and other `java.util` classes work properly now on Java 7.
     * Disable missile broadcasts to be consistent with specs.
     * Added methods `canSenseRobot` and `senseRobot` to help get information about a robot given just its ID.
     * Robot IDs range from 1 to 32000.
     * In any round, HQs always execute before other units.
+    * Clarify that broadcasts happen immediately, unlike in past years.
