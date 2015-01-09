@@ -323,7 +323,7 @@ public interface RobotController {
     // ***********************************
     
     /**
-     * Broadcasts a message to the global message board to be written at the end of the robot's turn.
+     * Broadcasts a message to the global message board.
      *
      * @param channel the channel to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>.
      * @param data one int's worth of data to write.
