@@ -590,7 +590,7 @@ Changelog [bcd20]
     * A few additional methods now have a fixed Bytecode cost (in `Math`, `StrictMath`, `String`, `StringBuffer`, and `StringBuilder`).
     * The amount of ore mined per turn used to be lower-bounded by the MINIMUM_MINING_AMOUNT game constant, which was not in the specs. We have decided to keep this functionality, but the MINIMUM_MINING_AMOUNT has been reduced from 1 to 0.2. The specs have been changed to reflect this.
     * LAUNCHERs now gain new missiles at approximately half the original rate (once every 12 turns rather than once every 6 turns) when they have no supply. In addition, the LAUNCHER's weapon delay now tracks the amount of time it will need to generate the next MISSILE. Note that launching a missile is independent of this weapon delay, and that building a MISSILE happens automatically. This is explained in the specs.
-* 1.0.3 (1/9/2015) - Engine bug fixes and small changes. Client improvements. Minor specs clarifications.
+* 1.0.3 (1/10/2015) - Engine bug fixes and small changes. Client improvements. Minor specs clarifications.
     * `HashSet`, `TreeSet`, and other `java.util` classes work properly now on Java 7.
     * Disable missile broadcasts to be consistent with specs.
     * Added methods `canSenseRobot` and `senseRobot` to help get information about a robot given just its ID.

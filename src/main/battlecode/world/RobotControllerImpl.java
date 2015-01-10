@@ -408,7 +408,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     protected void assertIsWeaponReady() throws GameActionException {
         if (!isWeaponReady())
-            throw new GameActionException(NOT_ACTIVE, "This robot has weapon delay and cannot attack.");
+            throw new GameActionException(NOT_ACTIVE, "This robot has weapon delay and cannot attack. " + getWeaponDelay());
     }
 
     protected void assertIsAttackingUnit() throws GameActionException {
