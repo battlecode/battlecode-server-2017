@@ -166,6 +166,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public boolean canSense(MapLocation loc) {
+        return gameWorld.canSense(getTeam(), loc);
+        /*
         int sensorRadius = robot.type.sensorRadiusSquared;
 
         if (robot.myLocation.distanceSquaredTo(loc) <= sensorRadius) {
@@ -178,6 +180,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             }
         }
         return false;
+        */
     }
     
     public boolean canSense(InternalObject obj) {

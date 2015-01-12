@@ -108,6 +108,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         if (!type.isBuildable() || buildDelay == 0) {
             myGameWorld.incrementActiveRobotTypeCount(getTeam(), type);
         }
+
+        myGameWorld.updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
     }
 
     // *********************************
@@ -455,6 +457,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void setLocation(MapLocation loc) {
     	MapLocation oldloc = getLocation();
         super.setLocation(loc);
+        myGameWorld.updateMapMemoryRemove(getTeam(), oldloc, type.sensorRadiusSquared);
+        myGameWorld.updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
     }
 
     public void setSelfDestruct() {
