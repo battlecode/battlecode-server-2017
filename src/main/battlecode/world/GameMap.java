@@ -268,47 +268,23 @@ public class GameMap implements GenericGameMap {
         return new MapLocation(mapOriginX, mapOriginY);
     }
 
-    // TODO: this shouldn't be named MapMemory
     public static class MapMemory {
         private final GameMap map;
-
-        /** Represents how many units are currently able to sense a given location. */
-        private final int[][] currentCount;
-
-        /** Represents whether a certain location was ever in sensor range. */
         private final boolean[][] seen;
-
-        /** Represents the amount of ore mined when the location was last in sensor range. */
         private final double[][] oreMined;
-
-        /** It's important to keep track of OFF_MAP squares so we have this buffer around the map. */
         private final int OFFSET = 50;
 
         public MapMemory(GameMap map) {
             this.map = map;
-            this.currentCount = new int[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
             this.seen = new boolean[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
             this.oreMined = new double[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
         }
 
-        // x and y are locations relative to the origin
         private boolean validLoc(int x, int y) {
             return x >= -OFFSET && x < map.getWidth() + OFFSET && y >= -OFFSET && y < map.getHeight() + OFFSET;
         }
 
-        public void removeLocation(MapLocation loc, int radiusSquared) {
-            MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
-
-            for (int i = 0; i < locs.length; i++) {
-                int x = locs[i].x - map.mapOriginX;
-                int y = locs[i].y - map.mapOriginY;
-                if (validLoc(x, y)) {
-                    currentCount[x + OFFSET][y + OFFSET]--;
-                }
-            }
-        }
-
-        public void rememberLocation(MapLocation loc, int radiusSquared, Map<MapLocation, Double> oreMinedMap) {
+        public void rememberLocations(MapLocation loc, int radiusSquared, Map<MapLocation, Double> oreMinedMap) {
             MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
             for (int i = 0; i < locs.length; i++) {
@@ -316,21 +292,9 @@ public class GameMap implements GenericGameMap {
                 int y = locs[i].y - map.mapOriginY;
                 if (validLoc(x, y)) {
                     seen[x + OFFSET][y + OFFSET] = true;
-                    currentCount[x + OFFSET][y + OFFSET]++;
-                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && oreMinedMap.containsKey(locs[i])) {
+                    if (oreMinedMap.containsKey(locs[i])) {
                         oreMined[x + OFFSET][y + OFFSET] = oreMinedMap.get(locs[i]);
                     }
-                }
-            }
-        }
-
-        /** When a location gets mined, we'll update map memory if it's currently in sight. */
-        public void updateLocation(MapLocation loc, double oreMinedNew) {
-            if (canSense(loc)) {
-                int x = loc.x - map.mapOriginX;
-                int y = loc.y - map.mapOriginY;
-                if (validLoc(x, y)) {
-                    oreMined[x + OFFSET][y + OFFSET] = oreMinedNew;
                 }
             }
         }
@@ -341,17 +305,6 @@ public class GameMap implements GenericGameMap {
 
             if (validLoc(X, Y)) {
                 return seen[X + OFFSET][Y + OFFSET];
-            } else {
-                return false;
-            }
-        }
-
-        public boolean canSense(MapLocation loc) {
-            int X = loc.x - map.mapOriginX;
-            int Y = loc.y - map.mapOriginY;
-
-            if (validLoc(X, Y)) {
-                return currentCount[X + OFFSET][Y + OFFSET] > 0;
             } else {
                 return false;
             }

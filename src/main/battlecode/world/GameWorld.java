@@ -216,18 +216,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     // ****** MISC UTILITIES ***********
     // *********************************
 
-    public boolean canSense(Team team, MapLocation loc) {
-        return mapMemory.get(team).canSense(loc);
-    }
-
-    public void updateMapMemoryAdd(Team team, MapLocation loc, int radiusSquared) {
-        mapMemory.get(team).rememberLocation(loc, radiusSquared, oreMined);
-    }
-
-    public void updateMapMemoryRemove(Team team, MapLocation loc, int radiusSquared) {
-        mapMemory.get(team).removeLocation(loc, radiusSquared);
-    }
-
     public boolean canMove(MapLocation loc, RobotType type) {
         return (gameMap.getTerrainTile(loc).isTraversable() || gameMap.getTerrainTile(loc) == TerrainTile.VOID && (type == RobotType.DRONE || type == RobotType.MISSILE)) && (gameObjectsByLoc.get(loc) == null);
     }
@@ -603,12 +591,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         removeDead();
 
         // update map memory
-        /*
         for (int i = 0; i < gameObjects.length; i++) {
             InternalRobot ir = (InternalRobot) gameObjects[i];
             mapMemory.get(ir.getTeam()).rememberLocations(ir.getLocation(), ir.type.sensorRadiusSquared, oreMined);
         }
-        */
 
         // free ore
         teamResources[Team.A.ordinal()] += GameConstants.HQ_ORE_INCOME;
@@ -909,9 +895,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 InternalRobot building = getRobotByID(r.getMyBuilding());
                 building.clearBuilding();
                 building.prepareDeath();
-            }
-
-            updateMapMemoryRemove(r.getTeam(), r.getLocation(), r.type.sensorRadiusSquared);
+           }
         }
     }
 
@@ -945,10 +929,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         ore = Math.min(ore, baseOre);
         mineOre(loc, ore);
         adjustResources(s.getMineTeam(), ore);
-
-        mapMemory.get(Team.A).updateLocation(loc, oreMined.get(loc));
-        mapMemory.get(Team.B).updateLocation(loc, oreMined.get(loc));
-
     	addSignal(s);
     }
 
@@ -962,7 +942,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public void visitMovementOverrideSignal(MovementOverrideSignal s) {
         InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
         r.setLocation(s.getNewLoc());
-
         addSignal(s);
     }
     
