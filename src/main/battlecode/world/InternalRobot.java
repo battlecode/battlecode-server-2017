@@ -55,7 +55,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean("bc.engine.upkeep");
     private int myBuilder, myBuilding;
-    private boolean forceDeath;
 
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
@@ -95,7 +94,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
         myBuilder = -1;
         myBuilding = -1;
-        forceDeath = false;
 
         // Update GameWorld stuff
         if (type == RobotType.COMMANDER) {
@@ -216,10 +214,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         myBuilder = -1;
         coreDelay = 0;
         weaponDelay = 0;
-    }
-
-    public void prepareDeath() {
-        forceDeath = true;
     }
 
     // *********************************
@@ -479,10 +473,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void processBeginningOfTurn() {
-        if (forceDeath) {
-            takeDamage(2 * myHealthLevel);
-        }
-
         decrementDelays(); // expends supply to decrement delays
 
         this.currentBytecodeLimit = type.bytecodeLimit;

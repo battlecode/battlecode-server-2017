@@ -361,7 +361,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void removeDead() {
         boolean current = false;
-        for (InternalRobot r : deadRobots) {
+        while (deadRobots.size() > 0) {
+            InternalRobot r = deadRobots.remove(deadRobots.size() - 1);
             if (r.getID() == RobotMonitor.getCurrentRobotID())
                 current = true;
             visitSignal(new DeathSignal(r));
@@ -894,7 +895,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             if (r.getMyBuilding() >= 0) {
                 InternalRobot building = getRobotByID(r.getMyBuilding());
                 building.clearBuilding();
-                building.prepareDeath();
+                building.takeDamage(2 * building.getHealthLevel());
            }
         }
     }
