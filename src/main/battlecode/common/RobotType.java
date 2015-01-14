@@ -3,7 +3,7 @@ package battlecode.common;
 import java.util.ArrayList;
 
 /**
- * Contains details on various attributes of the different robots.
+ * Contains details on various attributes of the different robots. All of this information is in the specs in a more organized form.
  */
 public enum RobotType {
 
@@ -18,6 +18,9 @@ public enum RobotType {
     TRAININGFIELD        (true, null, TECHNOLOGYINSTITUTE, 200, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
     TANKFACTORY          (true, null,            BARRACKS, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
     MINERFACTORY         (true, null,                  HQ, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
+    /**
+     * Sanitation is important.
+     */
     HANDWASHSTATION      (true, null,                  HQ, 200, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
     AEROSPACELAB         (true, null,             HELIPAD, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
 
@@ -36,50 +39,149 @@ public enum RobotType {
 
     //  isbuilding, spawn-source, build-dep, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
 
+    /**
+     * Whether this robot is a structure (or building). Structures are the units that cannot move.
+     */
     public final boolean isBuilding;
+
+    /**
+     * For units, this is the structure that spawns it. For non-spawnable robots, this is null.
+     */
     public final RobotType spawnSource;
+
+    /**
+     * For structures, this is the pre-requisite structure needed to build this structure (null if not applicable or if there is no dependency).
+     */
     public final RobotType dependency;
+
+    /**
+     * Ore cost for building or spawning.
+     */
     public final int oreCost;
+
+    /**
+     * Number of turns to spawn or build.
+     */
     public final int buildTurns;
+
+    /**
+     * Base supply upkeep (not including bytecode supply upkeep).
+     */
     public final int supplyUpkeep;
+
+    /**
+     * Maximum health for the robot.
+     */
     public final double maxHealth;
+
+    /**
+     * Base damage per attack.
+     */
     public final double attackPower;
+
+    /**
+     * Range^2 for an attack.
+     */
     public final int attackRadiusSquared;
+
+    /**
+     * Movement delay: the amount of contribution to core delay from a movement.
+     */
     public final int movementDelay;
+
+    /**
+     * Attack delay: the amount of contribution to weapon delay from an attack.
+     */
     public final int attackDelay;
+
+    /**
+     * Loading delay: the amount of contribution to weapon delay from a movement.
+     */
     public final int loadingDelay;
+
+    /**
+     * Cooldown delay: the amount of contribution to core delay from an attack.
+     */
     public final int cooldownDelay;
+
+    /**
+     * Range^2 for sensing.
+     */
     public final int sensorRadiusSquared;
+
+    /**
+     * Base bytecode limit of this robot (halved if the robot does not have sufficient supply upkeep).
+     */
     public final int bytecodeLimit;
 
+    /**
+     * Returns whether the robot can attack.
+     *
+     * @return whether the robot can attack.
+     */
     public boolean canAttack() {
         return attackPower > 0;
     }
 
+    /**
+     * Returns whether the robot can move.
+     *
+     * @return whether the robot can move.
+     */
     public boolean canMove() {
         return !isBuilding;
     }
 
+    /**
+     * Returns whether the robot can mine.
+     *
+     * @return whether the robot can mine.
+     */
     public boolean canMine() {
         return this == MINER || this == BEAVER;
     }
 
+    /**
+     * Returns whether the robot can launch missiles.
+     *
+     * @return whether the robot can launch missiles.
+     */
     public boolean canLaunch() {
         return this == LAUNCHER;
     }
 
+    /**
+     * Returns whether the robot can build.
+     *
+     * @return whether the robot can build.
+     */
     public boolean canBuild() {
         return this == BEAVER;
     }
 
+    /**
+     * Returns whether the robot is buildable.
+     *
+     * @return whether the robot is buildable.
+     */
     public boolean isBuildable() {
         return isBuilding && this != HQ && this != TOWER;
     }
 
+    /**
+     * Returns whether the robot can spawn.
+     *
+     * @return whether the robot can spawn.
+     */
     public boolean canSpawn() {
         return isBuilding && this != TOWER && this != SUPPLYDEPOT;
     }
 
+    /**
+     * Returns whether the robot uses supply.
+     *
+     * @return whether the robot uses supply.
+     */
     public boolean needsSupply() {
         return supplyUpkeep > 0;
     }

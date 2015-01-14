@@ -102,7 +102,7 @@ public interface GameConstants {
     // ****** UNIT PROPERTIES **********
     // *********************************
 
-    /** The attack radius of a buffed HQ (5 towers). */
+    /** The attack radius of a buffed HQ (2 towers). */
     public static final int HQ_BUFFED_ATTACK_RADIUS_SQUARED = 35;
 
     /** The fraction of damage taken per attack for a buffed HQ (1 tower). */

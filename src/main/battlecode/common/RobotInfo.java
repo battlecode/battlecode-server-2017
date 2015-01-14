@@ -7,22 +7,53 @@ package battlecode.common;
  */
 public class RobotInfo {
 
+    /**
+     * The unique ID of the robot.
+     */
     public final int ID;
+
+    /**
+     * The Team that the robot is on.
+     */
     public final Team team;
+
+    /**
+     * The type of the robot.
+     */
     public final RobotType type;
+
+    /**
+     * The current location of the robot.
+     */
     public final MapLocation location;
+
+    /**
+     * The current core delay of the robot.
+     */
     public final double coreDelay;
+
+    /**
+     * The current weapon delay of the robot.
+     */
     public final double weaponDelay;
+
+    /**
+     * The current health of the robot.
+     */
     public final double health;
+
+    /**
+     * The current supply level of the robot.
+     */
     public final double supplyLevel;
 
     /**
-     * COMMANDER only.
+     * The XP of the robot. COMMANDER only.
      */
     public final int xp;
 
     /**
-     * LAUNCHER only.
+     * The missile count of the robot. LAUNCHER only.
      */
     public final int missileCount;
 
