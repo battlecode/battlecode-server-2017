@@ -579,7 +579,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertIsMiningUnit();
         MapLocation loc = getLocation();
 		
-		robot.activateMovement(new MineSignal(loc, getTeam(), getType()), GameConstants.MINING_LOADING_DELAY, GameConstants.MINING_MOVEMENT_DELAY);
+		robot.activateMovement(new MineSignal(loc, getID()), GameConstants.MINING_LOADING_DELAY, GameConstants.MINING_MOVEMENT_DELAY);
     }
 
     public double senseOre(MapLocation loc) {

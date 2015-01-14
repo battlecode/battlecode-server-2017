@@ -919,8 +919,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     	MapLocation loc = s.getMineLoc();
         double baseOre = getOre(loc);
         double ore = 0;
+        InternalRobot r = (InternalRobot) getObjectByID(s.getMinerID());
         if (baseOre > 0) {
-            if (s.getMinerType() == RobotType.BEAVER) {
+            if (r.type == RobotType.BEAVER) {
                 ore = Math.max(Math.min(GameConstants.BEAVER_MINE_MAX, baseOre / GameConstants.BEAVER_MINE_RATE), GameConstants.MINIMUM_MINE_AMOUNT);
             } else {
                 ore = Math.max(Math.min(baseOre / GameConstants.MINER_MINE_RATE, GameConstants.MINER_MINE_MAX), GameConstants.MINIMUM_MINE_AMOUNT);
@@ -928,7 +929,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
         ore = Math.min(ore, baseOre);
         mineOre(loc, ore);
-        adjustResources(s.getMineTeam(), ore);
+        adjustResources(r.getTeam(), ore);
     	addSignal(s);
     }
 
