@@ -155,13 +155,16 @@ public interface GameConstants {
     public static final int XP_RANGE = 24;
 
 	/** The hp that a commander regenerates per turn. **/
-    public static final double REGEN_RATE = 1.0;
+    public static final double REGEN_RATE = 2.0;
 	
 	/** The xp required to activate the 'leadership' skill. **/
-    public static final int XP_REQUIRED_LEADERSHIP = 1000;
-	
+    public static final int XP_REQUIRED_LEADERSHIP = 500;
+
 	/** The xp required to activate the 'flash' skill. **/
-    public static final int XP_REQUIRED_FLASH = 2000;
+    public static final int XP_REQUIRED_FLASH = 1000;
+
+    /** The xp required to activate the 'heavy hands' skill. **/
+    public static final int XP_REQUIRED_HEAVY_HANDS = 1500;
 
 	/** The range of the 'leadership' skill. **/
     public static final int LEADERSHIP_RANGE = 15;
@@ -174,4 +177,10 @@ public interface GameConstants {
 	
 	/** Movement delay increase upon using the 'flash' skill. **/
     public static final double FLASH_MOVEMENT_DELAY = 1.0;
+	
+	/** Movement delay incurred by using the 'heavy hands' skill. **/
+    public static final double HEAVY_HANDS_MOVEMENT_DELAY = 4.0;
+	
+	/** Attack delay incurred by using the 'heavy hands' skill. **/
+    public static final double HEAVY_HANDS_ATTACK_DELAY = 4.0;
 }

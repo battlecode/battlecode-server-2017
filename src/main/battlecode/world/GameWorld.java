@@ -516,6 +516,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         else if (sk == CommanderSkillType.FLASH) {
             return ((InternalCommander)commander).getXP() >= GameConstants.XP_REQUIRED_FLASH;
         }
+        else if (sk == CommanderSkillType.HEAVY_HANDS) {
+            return ((InternalCommander)commander).getXP() >= GameConstants.XP_REQUIRED_HEAVY_HANDS;
+        }
         return false;
     }
 
@@ -749,6 +752,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                     double damage = (attacker.type.attackPower + underLeadership) * finalRate;
                     if (target.type == RobotType.MISSILE) {
                         damage = Math.min(damage, GameConstants.MISSILE_MAXIMUM_DAMAGE);
+                    }
+                    if (attacker.type == RobotType.COMMANDER && hasSkill(attacker.getTeam(), CommanderSkillType.HEAVY_HANDS)) {
+                        target.addCoreDelay(GameConstants.HEAVY_HANDS_MOVEMENT_DELAY);
+                        target.addWeaponDelay(GameConstants.HEAVY_HANDS_ATTACK_DELAY);
                     }
                     target.takeDamage(damage, attacker);
 
