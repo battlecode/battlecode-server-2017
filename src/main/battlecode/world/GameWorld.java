@@ -216,6 +216,18 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     // ****** MISC UTILITIES ***********
     // *********************************
 
+    public boolean canSense(Team team, MapLocation loc) {
+        return mapMemory.get(team).canSense(loc);
+    }
+
+    public void updateMapMemoryAdd(Team team, MapLocation loc, int radiusSquared) {
+        mapMemory.get(team).rememberLocation(loc, radiusSquared, oreMined);
+    }
+
+    public void updateMapMemoryRemove(Team team, MapLocation loc, int radiusSquared) {
+        mapMemory.get(team).removeLocation(loc, radiusSquared);
+    }
+
     public boolean canMove(MapLocation loc, RobotType type) {
         return (gameMap.getTerrainTile(loc).isTraversable() || gameMap.getTerrainTile(loc) == TerrainTile.VOID && (type == RobotType.DRONE || type == RobotType.MISSILE)) && (gameObjectsByLoc.get(loc) == null);
     }
@@ -492,16 +504,16 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 		return numCommandersSpawned[t.ordinal()];
     }
 
+    public void updateSkillCooldown(Team t, CommanderSkillType c, int cooldown) {
+        Map<CommanderSkillType, Integer> m = skillCooldowns.get(t);
+        m.put(c, cooldown);
+    }
+
     public int getSkillCooldown(Team t, CommanderSkillType c) {
         Map<CommanderSkillType, Integer> m = skillCooldowns.get(t);
 
         if (m.get(c) == null) return 0;
         return m.get(c);
-    }
-
-    public void castFlash(Team t, MapLocation m) {
-        //TODO(npinsker): error handling for this is done when the signal is visited -- is this good practice?
-        addSignal(new CastSignal(getCommander(t), m));
     }
 
     public boolean hasSkill(Team t, CommanderSkillType sk) {
@@ -592,10 +604,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         removeDead();
 
         // update map memory
+        /*
         for (int i = 0; i < gameObjects.length; i++) {
             InternalRobot ir = (InternalRobot) gameObjects[i];
             mapMemory.get(ir.getTeam()).rememberLocations(ir.getLocation(), ir.type.sensorRadiusSquared, oreMined);
         }
+        */
 
         // free ore
         teamResources[Team.A.ordinal()] += GameConstants.HQ_ORE_INCOME;
@@ -735,7 +749,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             double underLeadership = 0;
             InternalRobot commander = getCommander(attacker.getTeam());
             if (commander != null && hasSkill(attacker.getTeam(), CommanderSkillType.LEADERSHIP) && commander.getLocation().distanceSquaredTo(attacker.getLocation()) <= GameConstants.LEADERSHIP_RANGE) {
-                underLeadership = GameConstants.LEADERSHIP_DAMAGE_BONUS;
+                if (commander.getXP() >= GameConstants.XP_REQUIRED_LEADERSHIP_LEVEL_2) {
+                    underLeadership = GameConstants.LEADERSHIP_DAMAGE_BONUS_LEVEL_2;
+                } else {
+                    underLeadership = GameConstants.LEADERSHIP_DAMAGE_BONUS;
+                }
             }
 
             InternalRobot[] targets = getAllRobotsWithinRadiusSq(targetLoc, splashRadius);
@@ -754,7 +772,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
                     // if you destroy a missile, then cause damage
                     if (target.type == RobotType.MISSILE && target.getHealthLevel() <= 0) {
-                        visitSelfDestructSignal(new SelfDestructSignal(target, target.getLocation()));
+                        visitSelfDestructSignal(new SelfDestructSignal(target, target.getLocation(), 0.5));
                     }
                 }
             }
@@ -820,15 +838,15 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         //addSignal(s); //client doesn't need this one
     }
     
+    // Right now this is always FLASH
     public void visitCastSignal(CastSignal s) {
-        //TODO(npinsker): finish this...
         InternalRobot commander = (InternalRobot) getObjectByID(s.getRobotID());
 
         MapLocation currentLoc = commander.getLocation(), targetLoc = s.getTargetLoc();
 
-        if (currentLoc.distanceSquaredTo(targetLoc) <= GameConstants.FLASH_RANGE && canMove(targetLoc, commander.type)) {
-            commander.setLocation(targetLoc);
-        }
+        updateSkillCooldown(commander.getTeam(), CommanderSkillType.FLASH, GameConstants.FLASH_COOLDOWN);
+
+        commander.setLocation(targetLoc);
 	
         addSignal(s);
     }
@@ -888,7 +906,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             // if it's a building, free the builder
             if (r.getMyBuilder() >= 0) {
                 InternalRobot builder = getRobotByID(r.getMyBuilder());
-                builder.clearBuilding(); // also reset delays
+                builder.clearBuildingAndFree(); // also reset delays
             }
 
             // if it's a builder, destroy the building
@@ -896,7 +914,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 InternalRobot building = getRobotByID(r.getMyBuilding());
                 building.clearBuilding();
                 building.takeDamage(2 * building.getHealthLevel());
-           }
+            }
+
+            updateMapMemoryRemove(r.getTeam(), r.getLocation(), r.type.sensorRadiusSquared);
         }
     }
 
@@ -931,6 +951,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         ore = Math.min(ore, baseOre);
         mineOre(loc, ore);
         adjustResources(r.getTeam(), ore);
+
+        mapMemory.get(Team.A).updateLocation(loc, oreMined.get(loc));
+        mapMemory.get(Team.B).updateLocation(loc, oreMined.get(loc));
+
     	addSignal(s);
     }
 
@@ -944,6 +968,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     public void visitMovementOverrideSignal(MovementOverrideSignal s) {
         InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
         r.setLocation(s.getNewLoc());
+
         addSignal(s);
     }
     
@@ -952,7 +977,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         MapLocation targetLoc = s.getLoc();
 
         // only MISSILES can self destruct this year
-        double damage = RobotType.MISSILE.attackPower;
+        double damage = RobotType.MISSILE.attackPower * s.getDamageFactor();
         InternalRobot[] targets = getAllRobotsWithinRadiusSq(targetLoc, GameConstants.MISSILE_RADIUS_SQUARED);
         for (InternalRobot target : targets) {
             if (target.type == RobotType.MISSILE) {

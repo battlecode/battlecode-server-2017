@@ -137,6 +137,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return robot.getMissileCount();
     }
 
+    public boolean isBuildingSomething() {
+        return robot.getMyBuilding() >= 0;
+    }
+
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
@@ -166,6 +170,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public boolean canSense(MapLocation loc) {
+        return gameWorld.canSense(getTeam(), loc);
+        /*
         int sensorRadius = robot.type.sensorRadiusSquared;
 
         if (robot.myLocation.distanceSquaredTo(loc) <= sensorRadius) {
@@ -178,6 +184,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             }
         }
         return false;
+        */
     }
     
     public boolean canSense(InternalObject obj) {
@@ -387,10 +394,15 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             throw new GameActionException(CANT_DO_THAT_BRO, "LAUNCHER launched MISSILE there already and cannot move there.");
         }
 
-        double delay = robot.calculateMovementActionDelay(getLocation(), getLocation().add(d), senseTerrainTile(getLocation()));
+        double factor1 = (d.isDiagonal() ? GameConstants.DIAGONAL_DELAY_MULTIPLIER : 1.0);
+        double factor2 = 1.0;
+        if (robot.type == RobotType.DRONE && gameWorld.getMapTerrain(getLocation().add(d)) == TerrainTile.VOID) {
+            factor1 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
+            factor2 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
+        }
 
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-                true, (int) delay), robot.getLoadingDelayForType(), delay);
+                true, (int) (robot.getMovementDelayForType() * factor1)), robot.getLoadingDelayForType() * factor2, robot.getMovementDelayForType() * factor1);
     }
 
     // ***********************************
@@ -486,6 +498,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
 
         assertHasLearnedSkill(CommanderSkillType.FLASH);
+        if (loc.distanceSquaredTo(robot.getLocation()) >= GameConstants.FLASH_RANGE) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "New location is too far to cast FLASH.");
+        }
+
+        if (getFlashCooldown() > 0) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Cannot cast flash until cooldown hits 0.");
+        }
 
         //is this kosher? i hope so
         assertIsCoreReady();
@@ -497,9 +516,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public int getFlashCooldown() throws GameActionException {
         assertHasCommander();
 
-        if (!hasLearnedSkill(CommanderSkillType.FLASH)) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Cannot call getFlashCooldown without having learned Flash.");
+        if (robot.type != RobotType.COMMANDER) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only Commanders can cast Flash.");
         }
+        assertHasLearnedSkill(CommanderSkillType.FLASH);
 
         return gameWorld.getSkillCooldown(robot.getTeam(), CommanderSkillType.FLASH);
     }

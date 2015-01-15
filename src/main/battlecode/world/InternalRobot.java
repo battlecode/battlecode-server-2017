@@ -44,6 +44,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     private boolean broadcasted;
     private volatile HashMap<Integer, Integer> broadcastMap;
     private int roundsAlive;
+    private boolean justClearedBuilding;
     
     private ArrayList<Signal> supplyActions;
     private ArrayList<SpawnSignal> missileLaunchActions;
@@ -85,6 +86,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         broadcasted = false;
         broadcastMap = new HashMap<Integer, Integer>();
         roundsAlive = 0;
+        justClearedBuilding = false;
     
         supplyActions = new ArrayList<Signal>();
         missileLaunchActions = new ArrayList<SpawnSignal>();
@@ -106,6 +108,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         if (!type.isBuildable() || buildDelay == 0) {
             myGameWorld.incrementActiveRobotTypeCount(getTeam(), type);
         }
+
+        myGameWorld.updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
     }
 
     // *********************************
@@ -212,8 +216,20 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void clearBuilding() {
         myBuilding = -1;
         myBuilder = -1;
-        coreDelay = 0;
-        weaponDelay = 0;
+        justClearedBuilding = true;
+    }
+
+    public void clearBuildingAndFree() {
+        clearBuilding();
+        justClearedBuilding = false;
+
+        int amountToDecrement = (int) coreDelay;
+        coreDelay -= amountToDecrement;
+        weaponDelay -= amountToDecrement;
+
+        if (weaponDelay < 0) {
+            weaponDelay = 0;
+        }
     }
 
     // *********************************
@@ -333,7 +349,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     }
 
     public void decrementDelays() {
-        if (type.supplyUpkeep > 0 && upkeepEnabled && myBuilding < 0) {
+        if (type.supplyUpkeep > 0 && upkeepEnabled && myBuilding < 0 && !justClearedBuilding) {
             weaponDelay -= 0.5;
             coreDelay -= 0.5;
             double maxDelay = Math.max(weaponDelay,coreDelay);
@@ -348,6 +364,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
             weaponDelay--;
             coreDelay--;
         }
+
+        justClearedBuilding = false;
 
         if (weaponDelay < 0.0) {
             weaponDelay = 0.0;
@@ -449,6 +467,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     public void setLocation(MapLocation loc) {
     	MapLocation oldloc = getLocation();
         super.setLocation(loc);
+        myGameWorld.updateMapMemoryRemove(getTeam(), oldloc, type.sensorRadiusSquared);
+        myGameWorld.updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
     }
 
     public void setSelfDestruct() {
@@ -485,6 +505,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @Override
     public void processEndOfTurn() {
         super.processEndOfTurn();
+
+        roundsAlive++;
 		
         // resetting stuff
         hasBeenAttacked = false;
@@ -560,7 +582,6 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 		}
 
         // possibly convert building from inactive to active
-        roundsAlive++;
         // after building is done, double health
         if (type.isBuildable() && roundsAlive == buildDelay) {
             changeHealthLevel(getHealthLevel());

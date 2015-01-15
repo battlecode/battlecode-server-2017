@@ -49,6 +49,9 @@ public interface GameConstants {
     /** Bytecodes executed per unit of supply. */
     public static final int BYTECODES_PER_SUPPLY = 1000;
 
+    /** Maximum towers that can appear on a map (per team). */
+    public static final int NUMBER_OF_TOWERS_MAX = 6;
+
     // *********************************
     // ****** SUPPLY *******************
     // *********************************
@@ -62,7 +65,7 @@ public interface GameConstants {
     /** Constants for the HQ supply generation formula.  */
     public static final double SUPPLY_GEN_BASE = 100;
     public static final double SUPPLY_GEN_MULTIPLIER = 2;
-    public static final double SUPPLY_GEN_EXPONENT = 0.7;
+    public static final double SUPPLY_GEN_EXPONENT = 0.6;
 
     // *********************************
     // ****** MINING *******************
@@ -78,13 +81,13 @@ public interface GameConstants {
     public static final double MINIMUM_MINE_AMOUNT = 0.2;
 
     /** The maximum amount of ore that a BEAVER can mine. */
-    public static final int BEAVER_MINE_MAX = 2;
+    public static final double BEAVER_MINE_MAX = 2;
 
     /** The fraction of ore that a BEAVER gets from a square. */
     public static final int BEAVER_MINE_RATE = 20; // means 1/20
 
     /** The maximum amount of ore that a MINER can mine. */
-    public static final int MINER_MINE_MAX = 3;
+    public static final double MINER_MINE_MAX = 2.5;
 
     /** The maximum amount of ore that an upgraded MINER can mine. */
     public static final int MINER_MINE_MAX_UPGRADED = 4;
@@ -142,10 +145,16 @@ public interface GameConstants {
     public static final double MISSILE_MAXIMUM_DAMAGE = 1.0;
 
     /** The maximum number of missiles a launcher can have at a time. */
-    public static final int MISSILE_MAX_COUNT = 6;
+    public static final int MISSILE_MAX_COUNT = 5;
 
     /** After this many turns, a missile automatically detonates. */
     public static final int MISSILE_LIFESPAN = 5;
+
+    /** The factor that the delays are multiplied by when a DRONE travels on a void. */
+    public static final double DRONE_VOID_DELAY_MULTIPLIER = 2.0;
+
+    /** The factor that delays are multiplied by when a unit moves diagonally. */
+    public static final double DIAGONAL_DELAY_MULTIPLIER = 1.4;
 
     // *********************************
     // ****** COMMANDER ***** **********
@@ -157,21 +166,28 @@ public interface GameConstants {
 	/** The hp that a commander regenerates per turn. **/
     public static final double REGEN_RATE = 1.0;
 	
+	/** The xp required to activate the 'flash' skill. **/
+    public static final int XP_REQUIRED_FLASH = 0;
+	
 	/** The xp required to activate the 'leadership' skill. **/
     public static final int XP_REQUIRED_LEADERSHIP = 1000;
-	
-	/** The xp required to activate the 'flash' skill. **/
-    public static final int XP_REQUIRED_FLASH = 2000;
+
+	/** The xp required for double the `leadership` skill. **/
+    public static final int XP_REQUIRED_LEADERSHIP_LEVEL_2 = 2000;
 
 	/** The range of the 'leadership' skill. **/
-    public static final int LEADERSHIP_RANGE = 15;
+    public static final int LEADERSHIP_RANGE = 24;
 	
 	/** The damage increase applied to all allied units within range of 'leadership' when the skill is active. **/
     public static final double LEADERSHIP_DAMAGE_BONUS = 1;
+    public static final double LEADERSHIP_DAMAGE_BONUS_LEVEL_2 = 2;
 	
 	/** The range of the 'flash' skill. **/
-    public static final int FLASH_RANGE = 15;
+    public static final int FLASH_RANGE = 10;
 	
 	/** Movement delay increase upon using the 'flash' skill. **/
     public static final double FLASH_MOVEMENT_DELAY = 1.0;
+
+	/** Minimum number of turns that must elapse before casting FLASH **/
+    public static final int FLASH_COOLDOWN = 10;
 }

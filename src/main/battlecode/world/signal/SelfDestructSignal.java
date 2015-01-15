@@ -23,9 +23,18 @@ public class SelfDestructSignal extends Signal {
      */
     public final MapLocation loc;
 
+    public double damageFactor;
+
     public SelfDestructSignal(InternalRobot robot, MapLocation loc) {
         this.robotID = robot.getID();
         this.loc = loc;
+        this.damageFactor = 1.0;
+    }
+
+    public SelfDestructSignal(InternalRobot robot, MapLocation loc, double damageFactor) {
+        this.robotID = robot.getID();
+        this.loc = loc;
+        this.damageFactor = damageFactor;
     }
     /**
      * Returns the ID of the robot that just attacked.
@@ -43,5 +52,9 @@ public class SelfDestructSignal extends Signal {
      */
     public MapLocation getLoc() {
         return loc;
+    }
+
+    public double getDamageFactor() {
+        return damageFactor;
     }
 }

@@ -94,6 +94,13 @@ public interface RobotController {
      */
     public int getMissileCount();
 
+    /**
+     * Returns whether this robot is currently building anything.
+     *
+     * @return whether this robot is currently building anything.
+     */
+    public boolean isBuildingSomething();
+
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
