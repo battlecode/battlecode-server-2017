@@ -177,7 +177,7 @@ public interface GameConstants {
     public static final double IMPROVED_LEADERSHIP_DAMAGE_BONUS = 2;
 	
 	/** The range of the 'flash' skill. **/
-    public static final int FLASH_RANGE_SQUARED = 36;
+    public static final int FLASH_RANGE_SQUARED = 10;
 	
 	/** Movement delay increase upon using the 'flash' skill. **/
     public static final double FLASH_MOVEMENT_DELAY = 1.0;
