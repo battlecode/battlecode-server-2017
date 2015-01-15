@@ -379,7 +379,7 @@ Units In-Depth [bcd15]
 
 #### All units
 - Units all have bytecode limits of 10000 and 24 sight range (units^2), except for COMPUTER, which has a 20000 bytecode limit.
-- All units except the COMPUTER and LAUNCHER can attack. The BASHER attacks automatically, however, which is different from other units.
+- All units except the COMPUTER and LAUNCHER can attack. The BASHER attacks automatically (regardless of attack delay), however, which is different from other units.
 - All units except for the MISSILE can send messages.
 
 | Name      | Spawned From    | Cost               | Supply Upkeep | HP  | Attack | Range | MD | AD  | LD  | CD  |
@@ -407,6 +407,7 @@ All ranges are expressed as squared radius. A square radius of X includes all lo
 
 #### BASHER:
 - Attacks hit all enemy units within range 2. Each BASHER attacks automatically at the end of every turn, after any movement (if the BASHER moves, the attack hits enemies around the location the BASHER moves to, rather than the location it started in).
+- Attacks every turn regardless of attack delay.
 
 #### MINER:
 - Can mine at a rate of max(min(n/4,2.5),0.2) ore per turn, where n is the amount of ore on their location.
@@ -616,4 +617,4 @@ Changelog [bcd20]
         * Commander: increase health to 200; increase flash range to 10; increase leadership range to 24; make flash innate; make leadership improve at 2000xp to grant 2 extra damage; add heavy hands ability to add up to 3 core and weapon delay upon attacks; regen is 2.
         * Missile: a missile that is destroyed by enemy attacks will only do half damage.
         * Structures: increase helipad turn cost to 100; increase supply depot turn cost to 40; decrease supply generation formula to 100*(2+supply_depots^0.6).
-* 1.1.1 (1/15/2015) - Clarify in specs that heavy hands does not affect TOWER, HQ, and COMMANDER. Fix exploit with `isPathable()`. COMMANDER regen rate back down to 1. Correctly not reward XP for enemy building deaths.
+* 1.1.1 (1/15/2015) - Clarify in specs that Commander Heavy Hands does not affect TOWER, HQ, and COMMANDER. Fix exploit with `isPathable()`. COMMANDER regen rate back down to 1. Correctly not reward XP for enemy structure deaths.
