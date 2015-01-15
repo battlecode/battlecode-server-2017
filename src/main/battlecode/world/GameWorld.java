@@ -906,7 +906,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             // give XP
             MapLocation loc = r.getLocation();
             InternalRobot target = getCommander(r.getTeam().opponent());
-            if (target != null && target.getLocation().distanceSquaredTo(loc) <= GameConstants.XP_RANGE) {
+            if (target != null && target.getLocation().distanceSquaredTo(loc) <= GameConstants.XP_RANGE && !r.type.isBuilding) {
                 int xpYield = r.type.oreCost;
                 ((InternalCommander)target).giveXP(xpYield);
             }
