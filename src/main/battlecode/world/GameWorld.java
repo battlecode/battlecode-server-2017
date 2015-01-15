@@ -737,8 +737,13 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
             double underLeadership = 0;
             InternalRobot commander = getCommander(attacker.getTeam());
-            if (commander != null && hasSkill(attacker.getTeam(), CommanderSkillType.LEADERSHIP) && commander.getLocation().distanceSquaredTo(attacker.getLocation()) <= GameConstants.LEADERSHIP_RANGE) {
-                underLeadership = GameConstants.LEADERSHIP_DAMAGE_BONUS;
+            if (commander != null && hasSkill(attacker.getTeam(), CommanderSkillType.LEADERSHIP) && commander.getLocation().distanceSquaredTo(attacker.getLocation()) <= GameConstants.LEADERSHIP_RANGE_SQUARED) {
+                if (((InternalCommander)commander).getXP() >= GameConstants.XP_REQUIRED_IMPROVED_LEADERSHIP) {
+                    underLeadership = GameConstants.IMPROVED_LEADERSHIP_DAMAGE_BONUS;
+                }
+                else {
+                    underLeadership = GameConstants.LEADERSHIP_DAMAGE_BONUS;
+                }
             }
 
             InternalRobot[] targets = getAllRobotsWithinRadiusSq(targetLoc, splashRadius);
@@ -833,7 +838,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         MapLocation currentLoc = commander.getLocation(), targetLoc = s.getTargetLoc();
 
-        if (currentLoc.distanceSquaredTo(targetLoc) <= GameConstants.FLASH_RANGE && canMove(targetLoc, commander.type)) {
+        if (currentLoc.distanceSquaredTo(targetLoc) <= GameConstants.FLASH_RANGE_SQUARED && canMove(targetLoc, commander.type)) {
             commander.setLocation(targetLoc);
         }
 	

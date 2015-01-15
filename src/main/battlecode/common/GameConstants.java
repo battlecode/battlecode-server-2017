@@ -158,29 +158,33 @@ public interface GameConstants {
     public static final double REGEN_RATE = 2.0;
 	
 	/** The xp required to activate the 'leadership' skill. **/
-    public static final int XP_REQUIRED_LEADERSHIP = 500;
+    public static final int XP_REQUIRED_LEADERSHIP = 1000;
+
+	/** The xp required to activate the 'leadership' skill. **/
+    public static final int XP_REQUIRED_IMPROVED_LEADERSHIP = 2000;
 
 	/** The xp required to activate the 'flash' skill. **/
-    public static final int XP_REQUIRED_FLASH = 1000;
+    public static final int XP_REQUIRED_FLASH = 0;
 
     /** The xp required to activate the 'heavy hands' skill. **/
     public static final int XP_REQUIRED_HEAVY_HANDS = 1500;
 
 	/** The range of the 'leadership' skill. **/
-    public static final int LEADERSHIP_RANGE = 15;
+    public static final int LEADERSHIP_RANGE_SQUARED = 24;
 	
 	/** The damage increase applied to all allied units within range of 'leadership' when the skill is active. **/
     public static final double LEADERSHIP_DAMAGE_BONUS = 1;
+    public static final double IMPROVED_LEADERSHIP_DAMAGE_BONUS = 2;
 	
 	/** The range of the 'flash' skill. **/
-    public static final int FLASH_RANGE = 15;
+    public static final int FLASH_RANGE_SQUARED = 36;
 	
 	/** Movement delay increase upon using the 'flash' skill. **/
     public static final double FLASH_MOVEMENT_DELAY = 1.0;
 	
 	/** Movement delay incurred by using the 'heavy hands' skill. **/
-    public static final double HEAVY_HANDS_MOVEMENT_DELAY = 4.0;
+    public static final double HEAVY_HANDS_MOVEMENT_DELAY = 3.0;
 	
 	/** Attack delay incurred by using the 'heavy hands' skill. **/
-    public static final double HEAVY_HANDS_ATTACK_DELAY = 4.0;
+    public static final double HEAVY_HANDS_ATTACK_DELAY = 3.0;
 }
