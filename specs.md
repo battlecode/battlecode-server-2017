@@ -485,7 +485,7 @@ The following is a detailed list of a robot's execution order within a single tu
     - Supply is transferred between units.
     - Attacks happen, except for BASHER attacks.
     - Missiles are launched (LAUNCHER only).
-    - Core actions (moving, mining, spawning, or building) happen.
+    - Core actions (moving, mining, spawning, or building) happen. Commander FLASH happens here.
     - Basher attacks (BASHER only).
 5. End-of-turn events: missile production, supply generation, commander health regeneration, and missile deaths.
 
@@ -615,4 +615,4 @@ Changelog [bcd20]
         * Commander: increase health to 200; increase flash range to 10; increase leadership range to 24; make flash innate; make leadership improve at 2000xp to grant 2 extra damage; add heavy hands ability to add up to 3 core and weapon delay upon attacks; regen is 2.
         * Missile: a missile that is destroyed by enemy attacks will only do half damage.
         * Structures: increase helipad turn cost to 100; increase supply depot turn cost to 40; decrease supply generation formula to 100*(2+supply_depots^0.6).
-* 1.1.1 (1/15/2015) - Clarify in specs that heavy hands does not affect TOWER, HQ, and COMMANDER. Fix exploit with `isPathable()`. COMMANDER regen rate back down to 1.
+* 1.1.1 (1/15/2015) - Clarify in specs that heavy hands does not affect TOWER, HQ, and COMMANDER. Fix exploit with `isPathable()`. COMMANDER regen rate back down to 1. Correctly not reward XP for enemy building deaths.
