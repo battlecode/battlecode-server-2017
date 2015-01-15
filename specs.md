@@ -597,3 +597,17 @@ Changelog [bcd20]
     * Robot IDs range from 1 to 32000.
     * In any round, HQs always execute before other units.
     * Clarify that broadcasts happen immediately, unlike in past years.
+* 1.1.0 (1/14/2015) - Post-Sprint release. Engine bug fixes. Gameplay changes. Client improvements.
+    * MapLocation.getAllMapLocationsWithinRadiusSq can no longer be called with arguments greater than 35.
+    * As seen in the Sprint Tournament, drones were not balanced very well compared to other units. Therefore, drones have been improved in several ways:
+        * Drone hp has been slightly increased to 90
+        * Drones no longer have supply upkeep
+        * Drone attack delay has been reduced to 1
+        * Drones now have the Commander 'flash' skill initially available to them
+        * Drones no longer cost ore to produce
+        * Drones now gain the same buffs as the HQ depending on the number of allied towers standing
+    * In addition, handwash stations were relatively ignored and needed improvements. These changes are designed to cement handwash stations as bastions of cleanliness and sanitation.
+        * The 'number of handwash stations' tiebreaker is now the first tiebreaker checked
+        * Robots (including structures) adjacent to a handwash station no longer take damage
+        * Handwash stations no longer take damage
+        * Calling the RobotController resign() method from a handwash station now causes your opponent to resign instead

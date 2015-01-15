@@ -221,10 +221,10 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
 
 	/**
 	 * Returns an array of all MapLocations within a certain radius squared 
-	 * of a specified location.
+	 * of a specified location (cannot be called with radiusSquared greater than 35).
 	 *
 	 * @param center the center of the search
-	 * @param radiusSquared the radius of the search (will be capped at the maximum map dimensions if the argument is too large)
+	 * @param radiusSquared the radius of the search, which must be at most 35.
 	 * @return all MapLocations (both on the map and outside the map) within 
 	 * radiusSquared distance of center.
 	 */
@@ -232,7 +232,10 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
         ArrayList<MapLocation> locations = new ArrayList<MapLocation>();
 
         int radius = (int) Math.sqrt(radiusSquared);
-        radius = Math.min(radius, Math.max(GameConstants.MAP_MAX_HEIGHT, GameConstants.MAP_MAX_WIDTH));
+
+        if (radius > 35) {
+            throw new IllegalArgumentException("radiusSquared argument for getAllMapLocationsWithinRadiusSq cannot be greater than 35. However, since Battlecode is open source, you are free to use the source code to this method to implement it yourself.");
+        }    
 
         int minXPos = center.x - radius;
         int maxXPos = center.x + radius;
