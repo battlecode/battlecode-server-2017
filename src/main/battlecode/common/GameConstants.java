@@ -164,30 +164,39 @@ public interface GameConstants {
     public static final int XP_RANGE = 24;
 
 	/** The hp that a commander regenerates per turn. **/
-    public static final double REGEN_RATE = 1.0;
-	
+    public static final double REGEN_RATE = 2.0;
+
 	/** The xp required to activate the 'flash' skill. **/
     public static final int XP_REQUIRED_FLASH = 0;
 	
 	/** The xp required to activate the 'leadership' skill. **/
     public static final int XP_REQUIRED_LEADERSHIP = 1000;
 
-	/** The xp required for double the `leadership` skill. **/
-    public static final int XP_REQUIRED_LEADERSHIP_LEVEL_2 = 2000;
+    /** The xp required to activate the 'heavy hands' skill. **/
+    public static final int XP_REQUIRED_HEAVY_HANDS = 1500;
+
+	/** The xp required to activate the 'leadership' skill. **/
+    public static final int XP_REQUIRED_IMPROVED_LEADERSHIP = 2000;
 
 	/** The range of the 'leadership' skill. **/
-    public static final int LEADERSHIP_RANGE = 24;
+    public static final int LEADERSHIP_RANGE_SQUARED = 24;
 	
 	/** The damage increase applied to all allied units within range of 'leadership' when the skill is active. **/
     public static final double LEADERSHIP_DAMAGE_BONUS = 1;
-    public static final double LEADERSHIP_DAMAGE_BONUS_LEVEL_2 = 2;
+    public static final double IMPROVED_LEADERSHIP_DAMAGE_BONUS = 2;
+
+    /** Cooldown for the FLASH skill (minimum number of turns between each usage of FLASH). */
+    public static final int FLASH_COOLDOWN = 10;
 	
 	/** The range of the 'flash' skill. **/
-    public static final int FLASH_RANGE = 10;
+    public static final int FLASH_RANGE_SQUARED = 10;
 	
 	/** Movement delay increase upon using the 'flash' skill. **/
     public static final double FLASH_MOVEMENT_DELAY = 1.0;
-
-	/** Minimum number of turns that must elapse before casting FLASH **/
-    public static final int FLASH_COOLDOWN = 10;
+	
+	/** Movement delay incurred by using the 'heavy hands' skill. **/
+    public static final double HEAVY_HANDS_MOVEMENT_DELAY = 3.0;
+	
+	/** Attack delay incurred by using the 'heavy hands' skill. **/
+    public static final double HEAVY_HANDS_ATTACK_DELAY = 3.0;
 }

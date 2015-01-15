@@ -498,7 +498,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
 
         assertHasLearnedSkill(CommanderSkillType.FLASH);
-        if (loc.distanceSquaredTo(robot.getLocation()) >= GameConstants.FLASH_RANGE) {
+        if (loc.distanceSquaredTo(robot.getLocation()) >= GameConstants.FLASH_RANGE_SQUARED) {
             throw new GameActionException(CANT_DO_THAT_BRO, "New location is too far to cast FLASH.");
         }
 

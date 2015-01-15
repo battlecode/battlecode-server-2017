@@ -528,6 +528,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         else if (sk == CommanderSkillType.FLASH) {
             return ((InternalCommander)commander).getXP() >= GameConstants.XP_REQUIRED_FLASH;
         }
+        else if (sk == CommanderSkillType.HEAVY_HANDS) {
+            return ((InternalCommander)commander).getXP() >= GameConstants.XP_REQUIRED_HEAVY_HANDS;
+        }
         return false;
     }
 
@@ -748,10 +751,11 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
             double underLeadership = 0;
             InternalRobot commander = getCommander(attacker.getTeam());
-            if (commander != null && hasSkill(attacker.getTeam(), CommanderSkillType.LEADERSHIP) && commander.getLocation().distanceSquaredTo(attacker.getLocation()) <= GameConstants.LEADERSHIP_RANGE) {
-                if (commander.getXP() >= GameConstants.XP_REQUIRED_LEADERSHIP_LEVEL_2) {
-                    underLeadership = GameConstants.LEADERSHIP_DAMAGE_BONUS_LEVEL_2;
-                } else {
+            if (commander != null && hasSkill(attacker.getTeam(), CommanderSkillType.LEADERSHIP) && commander.getLocation().distanceSquaredTo(attacker.getLocation()) <= GameConstants.LEADERSHIP_RANGE_SQUARED) {
+                if (((InternalCommander)commander).getXP() >= GameConstants.XP_REQUIRED_IMPROVED_LEADERSHIP) {
+                    underLeadership = GameConstants.IMPROVED_LEADERSHIP_DAMAGE_BONUS;
+                }
+                else {
                     underLeadership = GameConstants.LEADERSHIP_DAMAGE_BONUS;
                 }
             }
@@ -767,6 +771,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                     double damage = (attacker.type.attackPower + underLeadership) * finalRate;
                     if (target.type == RobotType.MISSILE) {
                         damage = Math.min(damage, GameConstants.MISSILE_MAXIMUM_DAMAGE);
+                    }
+                    if (attacker.type == RobotType.COMMANDER && hasSkill(attacker.getTeam(), CommanderSkillType.HEAVY_HANDS) && (target.type != RobotType.COMMANDER && target.type != RobotType.TOWER && target.type != RobotType.HQ)) {
+                        target.addCooldownDelay(GameConstants.HEAVY_HANDS_MOVEMENT_DELAY);
+                        target.addLoadingDelay(GameConstants.HEAVY_HANDS_ATTACK_DELAY);
                     }
                     target.takeDamage(damage, attacker);
 
@@ -847,7 +855,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         updateSkillCooldown(commander.getTeam(), CommanderSkillType.FLASH, GameConstants.FLASH_COOLDOWN);
 
         commander.setLocation(targetLoc);
-	
+
         addSignal(s);
     }
     
