@@ -758,9 +758,9 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                     if (target.type == RobotType.MISSILE) {
                         damage = Math.min(damage, GameConstants.MISSILE_MAXIMUM_DAMAGE);
                     }
-                    if (attacker.type == RobotType.COMMANDER && hasSkill(attacker.getTeam(), CommanderSkillType.HEAVY_HANDS)) {
-                        target.addCoreDelay(GameConstants.HEAVY_HANDS_MOVEMENT_DELAY);
-                        target.addWeaponDelay(GameConstants.HEAVY_HANDS_ATTACK_DELAY);
+                    if (attacker.type == RobotType.COMMANDER && hasSkill(attacker.getTeam(), CommanderSkillType.HEAVY_HANDS) && (target.type != RobotType.COMMANDER && target.type != RobotType.TOWER && target.type != RobotType.HQ)) {
+                        target.addCooldownDelay(GameConstants.HEAVY_HANDS_MOVEMENT_DELAY);
+                        target.addLoadingDelay(GameConstants.HEAVY_HANDS_ATTACK_DELAY);
                     }
                     target.takeDamage(damage, attacker);
 
