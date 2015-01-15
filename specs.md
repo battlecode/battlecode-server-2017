@@ -420,7 +420,7 @@ All ranges are expressed as squared radius. A square radius of X includes all lo
  - Regenerate (passive) - The commander automatically gains 2 health per turn.
  - Flash - (10 turn cooldown) - Teleports to any valid location within 10 range.
  - Leadership (passive, gained at 1000 xp) - All allied units within range 24 deal 1 additional damage. If the COMMANDER has 2000xp, the additional damage is 2 instead of 1.
- - Heavy Hands (gained at 1000 xp) - COMMANDER attacks set the target's weapon and core delays to 3, if the delays are below 3.
+ - Heavy Hands (gained at 1500 xp) - COMMANDER attacks set the target's weapon and core delays to 3, if the delays are below 3.
  
 #### LAUNCHER:
 - Cannot attack directly. A LAUNCHER's weapon delay is associated with the amount of time it needs to generate a new MISSILE.
