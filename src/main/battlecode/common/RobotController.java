@@ -235,6 +235,7 @@ public interface RobotController {
     /**
      * Returns whether a robot of the given type can move into the given location, without taking any sort of delays into account. Takes into account only the robot type and the terrain of the location, 
 	 * and whether the location is occupied. Does not take into account any sort of core delays. Ignores whether the robot is capable of movement or not.
+     * Always returns false for locations out of sight range.
      *
      * @param type the type of the robot.
      * @param loc the location to test.

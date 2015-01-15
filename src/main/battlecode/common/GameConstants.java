@@ -164,7 +164,7 @@ public interface GameConstants {
     public static final int XP_RANGE = 24;
 
 	/** The hp that a commander regenerates per turn. **/
-    public static final double REGEN_RATE = 2.0;
+    public static final double REGEN_RATE = 1.0;
 
 	/** The xp required to activate the 'flash' skill. **/
     public static final int XP_REQUIRED_FLASH = 0;

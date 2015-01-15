@@ -341,8 +341,15 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ****** MOVEMENT METHODS ***********
     // ***********************************
 
-    public boolean isPathable(RobotType type, MapLocation loc) {
+    public boolean isPathableInternal(RobotType type, MapLocation loc) {
         return gameWorld.canMove(loc, type);
+    }
+
+    public boolean isPathable(RobotType type, MapLocation loc) {
+        if (!canSense(loc)) {
+            return false;
+        }
+        return isPathableInternal(type, loc);
     }
 
     public boolean isMovingUnit() {
@@ -360,7 +367,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void assertIsPathable(RobotType type, MapLocation loc) throws GameActionException {
-        if (!isPathable(type, loc)) {
+        if (!isPathableInternal(type, loc)) {
             throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move robot of given type to that location.");
         }
     }
@@ -381,7 +388,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         if (robot.type == RobotType.LAUNCHER && !robot.canLaunchMissileAtLocation(getLocation().add(dir))) {
             return false;
         }
-        return isMovingUnit() && isValidDirection(dir) && isPathable(robot.type, getLocation().add(dir));
+        return isMovingUnit() && isValidDirection(dir) && isPathableInternal(robot.type, getLocation().add(dir));
     }
 
     public void move(Direction d) throws GameActionException {
@@ -643,7 +650,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public boolean canLaunch(Direction dir) {
         MapLocation loc = getLocation().add(dir);
-        return isLaunchingUnit() && isPathable(RobotType.MISSILE, loc) && !robot.movedThisTurn() && robot.getMissileCount() > 0 && robot.canLaunchMissileAtLocation(loc);
+        return isLaunchingUnit() && isPathableInternal(RobotType.MISSILE, loc) && !robot.movedThisTurn() && robot.getMissileCount() > 0 && robot.canLaunchMissileAtLocation(loc);
     }
 
     public void launchMissile(Direction dir) throws GameActionException {
@@ -701,7 +708,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public boolean canSpawn(Direction dir, RobotType type) {
         MapLocation loc = getLocation().add(dir);
-        return isPathable(robot.type, loc) && hasSpawnRequirements(type);
+        return isPathableInternal(robot.type, loc) && hasSpawnRequirements(type);
     }
 
     public void spawn(Direction dir, RobotType type) throws GameActionException {
@@ -756,7 +763,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public boolean canBuild(Direction dir, RobotType type) {
         MapLocation loc = getLocation().add(dir);
-        return isPathable(type, loc) && hasBuildRequirements(type);
+        return isPathableInternal(type, loc) && hasBuildRequirements(type);
     }
     
     public void build(Direction dir, RobotType type) throws GameActionException {
