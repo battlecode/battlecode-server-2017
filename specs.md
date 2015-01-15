@@ -152,6 +152,7 @@ The COMPUTER is a unit that can be used for extra computing power.
 - Extremely low hp
 - No attack
 - Moves very slowly
+- Higher bytecode limit
 
 #### SOLDIER
 The SOLDIER is a basic, generic combat unit.
@@ -170,7 +171,7 @@ The BASHER is a unit that attacks all enemies in melee range.
 #### DRONE
 The DRONE is a fast and mobile unit.
 - Spawned at Helipad
-- Has a mediocre attack range
+- Has a mediocre attack at short range
 - Moves quickly
 - Can move over VOID terrain (but at half its normal speed)
 
@@ -419,7 +420,7 @@ All ranges are expressed as squared radius. A square radius of X includes all lo
 - The commander also has skills.
  - Regenerate (passive) - The commander automatically gains 1 health per turn.
  - Flash - (10 turn cooldown) - Teleports to any valid location within 10 range.
- - Leadership (passive, gained at 1000 xp) - All allied units within range 24 deal 1 additional damage. If the COMMANDER has 2000xp, the additional damage is 2 instead of 1.
+ - Leadership (passive, gained at 1000 xp) - All allied units within range 24 deal 1 additional damage. If the COMMANDER has 2000 xp, the additional damage is 2 instead of 1.
  - Heavy Hands (gained at 1500 xp) - COMMANDER attacks set the target's weapon and core delays to 3, if the delays are below 3. Does not work on enemy TOWER, COMMANDER, or HQ.
  
 #### LAUNCHER:
