@@ -227,15 +227,16 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
 	 * @param radiusSquared the radius of the search, which must be at most 35.
 	 * @return all MapLocations (both on the map and outside the map) within 
 	 * radiusSquared distance of center.
+     * @throws IllegalArgumentException if the radiusSquared is greater than 35 or is negative.
 	 */
     public static MapLocation[] getAllMapLocationsWithinRadiusSq(MapLocation center, int radiusSquared) {
         ArrayList<MapLocation> locations = new ArrayList<MapLocation>();
 
-        int radius = (int) Math.sqrt(radiusSquared);
-
-        if (radius > 35) {
-            throw new IllegalArgumentException("radiusSquared argument for getAllMapLocationsWithinRadiusSq cannot be greater than 35. However, since Battlecode is open source, you are free to use the source code to this method to implement it yourself.");
+        if (radiusSquared > 35 || radiusSquared < 0) {
+            throw new IllegalArgumentException("radiusSquared argument for getAllMapLocationsWithinRadiusSq cannot be greater than 35 or negative. However, since Battlecode is open source, you are free to use the source code of this method to implement it yourself.");
         }    
+
+        int radius = (int) Math.sqrt(radiusSquared);
 
         int minXPos = center.x - radius;
         int maxXPos = center.x + radius;
