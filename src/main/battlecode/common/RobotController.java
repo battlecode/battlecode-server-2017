@@ -353,7 +353,7 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Transfers supplies to a robot in a nearby location (queued for the end of the round). If you specify more supply than the robot has, all its supply will be transferred.
+     * Transfers supplies to a robot in a nearby location (queued for the end of the turn). If you specify more supply than the robot has, all its supply will be transferred.
      *
      * @param amount the amount of supply to transfer.
      * @param loc the location to transfer the supply to.
@@ -467,7 +467,7 @@ public interface RobotController {
     public boolean canBuild(Direction dir, RobotType type);
    
     /**
-     * Builds a structure in the given direction, queued for the end of the round. The structure will initially be inactive for a number of turns (during which this robot cannot move or attack). 
+     * Builds a structure in the given direction, queued for the end of the turn. The structure will initially be inactive for a number of turns (during which this robot cannot move or attack). 
 	 * After a number of turns, the structure will become active.
      *
      * @param dir the direction to bulid in.

@@ -284,7 +284,9 @@ However, games must end in finite amounts of time, and hence each game only last
 Actions and Delays [bcd13]
 --------------
 
-Certain robot actions cannot be performed multiple times in a single turn or short period of time. These actions are:
+Certain robot actions cannot be performed multiple times in a single turn or short period of time. In general, all actions are queued and happen at the end of the turn, but changes to robot delays happen immediately when the methods are called. The exceptions are exploding and disintegrating, which happen immediately.
+
+The actions are:
 
 #### Attacking
 Attacking can only be done when the robot's weapon delay is <1 (which can be checked using the `isWeaponReady()` method), and can be performed by calling the `attackLocation()` method. This deals damage to the unit on the targeted square. Bashers automatically attack all adjacent enemies after movement.
@@ -478,12 +480,12 @@ Official matches will usually be sets of multiple games. Each team can save a sm
 
 The game is comprised of a number of rounds. During each round, all robots get a turn in the order they were spawned, starting with the two HQs. Newly spawned robots will have a turn on the same round they were created.
 
-The following is a detailed list of a robot's execution order within a single turn. If it dies halfway through, the remainder of the list does not get executed. In particular, note that changes to a robot's state do not happen while player code is being executed. All actions instead get sent to an action queue, and they are executed after the player code is run. For example, if a SOLDIER calls move() and then getLocation(), it will not reflect the location of the robot yet.
+The following is a detailed list of a robot's execution order within a single turn. If it dies halfway through, the remainder of the list does not get executed. In particular, note that changes to a robot's state (via actions) do not happen while player code is being executed. All actions instead get sent to an action queue, and they are executed after the player code is run. For example, if a SOLDIER calls move() and then getLocation(), it will not reflect the location of the robot yet. However, changes to weapon and core delay happen immediately after action methods are called, so isCoreReady() and isWeaponReady() will always reflect whether certain actions can still be performed in a turn.
 
 1. Robot's core and weapon delays are decremented, and the robot's supply upkeep is paid.
-2. Robot executes player code until the total number of bytecodes executed exceeds the robot's allotted amount, with supply restrictions taken into account. Broadcasts happen immediately.
+2. Robot executes player code until the total number of bytecodes executed exceeds the robot's allotted amount, with supply restrictions taken into account. The following things happen immediately: changes in weapon delay and core delay, broadcasts, explosions, and disintegrating.
 3. Supply is subtracted based on how many bytecodes were used.
-4. Actions are performed in this order:
+4. Actions (queued) are performed in this order:
     - Supply is transferred between units.
     - Attacks happen, except for BASHER attacks.
     - Missiles are launched (LAUNCHER only).
