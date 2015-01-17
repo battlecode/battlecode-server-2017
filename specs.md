@@ -625,3 +625,4 @@ Changelog [bcd20]
     * Clarifications for Heavy Hands.
     * Bug fix: COMMANDERs can Flash a distance of 10 (units^2) now.
     * Bug fix: MISSILEs destroyed by other MISSILEs (either team) will properly explode now with half damage.
+* 1.1.3 (1/17/2015) - Bug fix: no more "zombie" MISSILEs (exploded MISSILEs that do not disappear from the client).

@@ -91,6 +91,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     // robots to remove from the game at end of turn
     private List<InternalRobot> deadRobots = new ArrayList<InternalRobot>();
+    private boolean removingDead = false;
 
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldTeamMemory) {
@@ -117,6 +118,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         skillCooldowns.put(Team.A, new EnumMap<CommanderSkillType, Integer>(CommanderSkillType.class));
         skillCooldowns.put(Team.B, new EnumMap<CommanderSkillType, Integer>(CommanderSkillType.class));
+
+        removingDead = false;
     }
 
     public void setHQ(InternalRobot r, Team t) {
@@ -372,6 +375,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public void removeDead() {
+        removingDead = true;
         boolean current = false;
         while (deadRobots.size() > 0) {
             InternalRobot r = deadRobots.remove(deadRobots.size() - 1);
@@ -379,6 +383,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 current = true;
             visitSignal(new DeathSignal(r));
         }
+        removingDead = false;
         if (current)
             throw new RobotDeathException();
     }
@@ -866,6 +871,13 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         addSignal(s);
     }
 
+
+    // TODO: this might need some reorganization
+    // right now, visitDeathSignal is often called from removeDead
+    // and visitDeathSignal might trigger new robot deaths
+    // which gets complicated, because it might call removeDead again.
+    // there's various hacks in place to deal with this but it's all really messy
+    // and for the same robot visitDeathSignal might get called multiple times.
     public void visitDeathSignal(DeathSignal s) {
         if (!running) {
             // All robots emit death signals after the game
@@ -1015,7 +1027,10 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
 
         addSignal(s);
-        removeDead();
+
+        if (!removingDead) {
+            removeDead();
+        }
     }
 
     @SuppressWarnings("unchecked")
