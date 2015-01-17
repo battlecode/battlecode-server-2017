@@ -423,8 +423,8 @@ All ranges are expressed as squared radius. A square radius of X includes all lo
 - The commander also has skills.
  - Regenerate (passive) - The commander automatically gains 1 health per turn.
  - Flash - (10 turn cooldown) - Teleports to any valid location within 10 range.
- - Leadership (passive, gained at 1000 xp) - All allied units within range 24 deal 1 additional damage. If the COMMANDER has 2000 xp, the additional damage is 2 instead of 1.
- - Heavy Hands (gained at 1500 xp) - COMMANDER attacks set the target's weapon and core delays to 3, if the delays are below 3. Does not work on enemy TOWER, COMMANDER, or HQ.
+ - Leadership (passive, gained at 1000 xp) - All allied units within range 24 deal 1 additional damage. If the COMMANDER has 2000 xp, the additional damage is 2 instead of 1. MISSILEs are not boosted.
+ - Heavy Hands (gained at 1500 xp) - COMMANDER attacks set the target's weapon and core delays to 3, if the delays are below 3. Does not work on enemy TOWER, COMMANDER, or HQ. It will prevent LAUNCHERs from generating new MISSILEs but does not stop them from launching existing MISSILEs. BASHER attacks will not be affected, nor will MISSILE explosions.
  
 #### LAUNCHER:
 - Cannot attack directly. A LAUNCHER's weapon delay is associated with the amount of time it needs to generate a new MISSILE.
@@ -617,6 +617,10 @@ Changelog [bcd20]
         * Launcher: decrease max missile storage to 5; decrease health to 300.
         * Computer: decrease supply upkeep to 2; increase bytecode limit to 20000.
         * Commander: increase health to 200; increase flash range to 10; increase leadership range to 24; make flash innate; make leadership improve at 2000xp to grant 2 extra damage; add heavy hands ability to add up to 3 core and weapon delay upon attacks; regen is 2.
-        * Missile: a missile that is destroyed by enemy attacks will only do half damage.
+        * Missile: a missile that is destroyed by attacks will only do half damage.
         * Structures: increase helipad turn cost to 100; increase supply depot turn cost to 40; decrease supply generation formula to 100*(2+supply_depots^0.6).
 * 1.1.1 (1/15/2015) - Clarify in specs that Commander Heavy Hands does not affect TOWER, HQ, and COMMANDER. Fix exploit with `isPathable()`. COMMANDER regen rate back down to 1. Correctly not reward XP for enemy structure deaths.
+* 1.1.2 (1/16/2015) - Bug fixes.
+    * Clarify that changes in core and weapon delay happen immediately even though the corresponding actions are queued for the end of a turn.
+    * Bug fix: COMMANDERs can Flash a distance of 10 (units^2) now.
+    * Bug fix: MISSILEs destroyed by other MISSILEs (either team) will properly explode now with half damage.

@@ -475,11 +475,15 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         didSelfDestruct = true;
     }
 
+    public void unsetSelfDestruct() {
+        didSelfDestruct = false;
+    }
+
+    public boolean didSelfDestruct() {
+        return didSelfDestruct;
+    }
+
     public void suicide() {
-		if (didSelfDestruct) {
-            (new SelfDestructSignal(this, getLocation())).accept(myGameWorld);
-            didSelfDestruct = false;
-        }
         (new DeathSignal(this)).accept(myGameWorld);
     }
 

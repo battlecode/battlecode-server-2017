@@ -780,7 +780,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
                     // if you destroy a missile, then cause damage
                     if (target.type == RobotType.MISSILE && target.getHealthLevel() <= 0) {
-                        visitSelfDestructSignal(new SelfDestructSignal(target, target.getLocation(), 0.5));
+                        target.setSelfDestruct();
                     }
                 }
             }
@@ -878,7 +878,6 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         if (obj != null) {
             removeObject(obj);
-            addSignal(s);
         }
         if (obj instanceof InternalRobot) {
             InternalRobot r = (InternalRobot) obj;
@@ -925,6 +924,20 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             }
 
             updateMapMemoryRemove(r.getTeam(), r.getLocation(), r.type.sensorRadiusSquared);
+
+            // self destruct
+            if (r.type == RobotType.MISSILE) {
+                if (r.didSelfDestruct()) {
+                    if (r.getHealthLevel() <= 0) {
+                        visitSelfDestructSignal(new SelfDestructSignal(r, r.getLocation(), 0.5));
+                    } else {
+                        visitSelfDestructSignal(new SelfDestructSignal(r, r.getLocation()));
+                    }
+                }
+            }
+        }
+        if (obj != null) {
+            addSignal(s);
         }
     }
 
@@ -982,6 +995,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     
     public void visitSelfDestructSignal(SelfDestructSignal s) {
         InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
+
         MapLocation targetLoc = s.getLoc();
 
         // only MISSILES can self destruct this year
@@ -993,9 +1007,15 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             } else {
                 target.takeDamage(damage, attacker);
             }
+
+            // if you destroy a missile, then cause damage
+            if (target.type == RobotType.MISSILE && target.getHealthLevel() <= 0) {
+                target.setSelfDestruct();
+            }
         }
 
         addSignal(s);
+        removeDead();
     }
 
     @SuppressWarnings("unchecked")
