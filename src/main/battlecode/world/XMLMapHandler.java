@@ -658,6 +658,7 @@ class XMLMapHandler extends DefaultHandler {
 
     public boolean isTournamentLegal() {
         LegalityWarning warn = new LegalityWarning();
+
         int x, y, mx, my;
         SymbolData d, md;
         boolean baseBad = false;
@@ -677,19 +678,26 @@ class XMLMapHandler extends DefaultHandler {
         if (!symA && !symB && !symC && !symD && !symE) {
             warn.warnf("Map is not symmetric in any way!");
         }
+
+        ArrayList<MapLocation> teamATowers = new ArrayList<MapLocation>();
+        ArrayList<MapLocation> teamBTowers = new ArrayList<MapLocation>();
+
         int grounds = 0, gx = 0, gy = 0;
-        int nodes = 0, baseAx = -1, baseAy = -1, baseBx = -1, baseBy = -1;
+        int baseAx = -1, baseAy = -1, baseBx = -1, baseBy = -1;
         for (y = 0; y < mapHeight; y++) {
             for (x = 0; x < mapWidth; x++) {
                 d = map[x][y];
                 if (d instanceof RobotData) {
                     RobotData rd = (RobotData) d;
                     switch (rd.type) {
+                        case TOWER:
+                            if (rd.team == Team.A) teamATowers.add(new MapLocation(x, y));
+                            else if (rd.team == Team.B) teamBTowers.add(new MapLocation(x, y));
+                            break;
                         default:
                             warn.warnUnit(rd);
                     }
                 } else if (d instanceof NodeData) {
-                    nodes++;
                     if (((NodeData) d).team == Team.A) {
                         if (baseAx != -1) {
                             warn.warn("Team A has more than one HQ.");
@@ -718,7 +726,12 @@ class XMLMapHandler extends DefaultHandler {
 
         if (baseAx == -1) {
             baseBad = true;
-            warn.warn("Team A does not have a HQ.");
+            warn.warn("The HQs are missing");
+        }
+
+        // make sure teams don't have more than 6 towers
+        if (teamATowers.size() > GameConstants.NUMBER_OF_TOWERS_MAX) {
+            warn.warn("Too many towers!");
         }
 
         // check that the ground squares are connected
@@ -726,36 +739,43 @@ class XMLMapHandler extends DefaultHandler {
             warn.warn("There are no land squares on the entire map!");
         } else {
             FloodFill ff = new FloodFill(baseAx, baseAy);
-            ff.size(); // calculate the flood fill
+            int s = ff.size(); // calculate the flood fill
 
-            // we just want the HQs to be reachable from each other
-            if (!ff.reachable(baseBx, baseBy)) {
-                warn.warn("The two HQs are not connected!");
+            if (s != grounds) {
+                warn.warn("Some tiles are not reachable!");
             }
         }
-        // check for walls that are passable diagonally
-        // these aren't illegal, but we try to avoid them
-        for (y = 1; y < mapHeight; y++)
-            for (x = 1; x < mapWidth; x++) {
-                TerrainTile ul = map[x - 1][y - 1].tile();
-                TerrainTile ur = map[x][y - 1].tile();
-                TerrainTile dl = map[x - 1][y].tile();
-                TerrainTile dr = map[x][y].tile();
-                if (ul == TerrainTile.VOID && dr == TerrainTile.VOID && ur == TerrainTile.NORMAL && dl == TerrainTile.NORMAL)
-                    System.err.format("Warning: diagonal passageway at %d, %d\n", x - 1, y);
-                if (ul == TerrainTile.NORMAL && dr == TerrainTile.NORMAL && ur == TerrainTile.VOID && dl == TerrainTile.VOID)
-                    System.err.format("Warning: diagonal passageway at %d, %d\n", x, y);
+
+        // make sure no two things are in attack range
+        MapLocation HQA = new MapLocation(baseAx, baseAy);
+        MapLocation HQB = new MapLocation(baseBx, baseBy);
+        if (HQA.distanceSquaredTo(HQB) <= GameConstants.HQ_BUFFED_ATTACK_RADIUS_SQUARED) {
+            warn.warn("The HQs are too close together.");
+        }
+
+        for (MapLocation towerA : teamATowers) {
+            for (MapLocation towerB : teamBTowers) {
+                if (towerA.distanceSquaredTo(towerB) <= RobotType.TOWER.attackRadiusSquared) {
+                    warn.warn("Some towers are too close together.");
+                }
+                if (towerB.distanceSquaredTo(HQA) <= GameConstants.HQ_BUFFED_ATTACK_RADIUS_SQUARED) {
+                    warn.warn("Team A can attack team B towers from the start.");
+                }
             }
+            if (towerA.distanceSquaredTo(HQB) <= GameConstants.HQ_BUFFED_ATTACK_RADIUS_SQUARED) {
+                    warn.warn("Team B can attack team A towers from the start.");
+                }
+        }
+
+        // TODO: weird cases in which all the NORMAL tiles are connected but not actually reachable because
+        // some units are blocking the locations. For example, it's possible to surround an HQ with 6 towers and
+        // 2 VOIDs to make it impossible to actually do anything.
+
         int rounds = mapProperties.get(MapProperties.MAX_ROUNDS);
         if (rounds < GameConstants.ROUND_MIN_LIMIT)
             warn.warn("The round limit is too small.");
         else if (rounds > GameConstants.ROUND_MAX_LIMIT)
             warn.warn("The round limit is too large.");
-
-        // make sure HQs are far enough apart
-        //if (Math.sqrt((baseBy - baseAy) * (baseBy - baseAy) + (baseBx - baseAx) * (baseBx - baseAx)) < GameConstants.MIN_DISTANCE_BETWEEN_SPAWN_POINTS) {
-        //    warn.warn("The HQs are too close together.");
-        //}
 
         return warn.legal;
     }
@@ -810,6 +830,7 @@ class XMLMapHandler extends DefaultHandler {
     }
 
     public static void main(String[] s) {
+        System.out.println("Checking maps for tournament legality...");
         String mapPath = Config.getGlobalConfig().get("bc.game.map-path");
         for (String str : s) {
             isTournamentLegal(str, mapPath);
