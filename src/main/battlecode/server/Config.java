@@ -68,6 +68,7 @@ public class Config {
         defaults.setProperty("bc.game.maps", "glass");
         defaults.setProperty("bc.game.map-path", "maps");
         defaults.setProperty("bc.game.state", "0,0");
+        defaults.setProperty("bc.game.allow-air-units", "true");
 
 
         defaults.setProperty("bc.dialog.skip", "false");

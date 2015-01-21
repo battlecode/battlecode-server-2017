@@ -30,6 +30,7 @@ import battlecode.common.TerrainTile;
 import battlecode.engine.GenericController;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
+import battlecode.server.Config;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.BuildSignal;
 import battlecode.world.signal.CastSignal;
@@ -46,21 +47,20 @@ import com.google.common.collect.Iterables;
 
 
 /*
-TODO:
-- tweak player
--specs & software page?
-- performance tips
-- figure out why it's not deterministic
+ TODO:
+ - tweak player
+ -specs & software page?
+ - performance tips
+ - figure out why it's not deterministic
 
-- optimize
-- non-constant java.util costs
-- player's navigation class, and specs about it
-- fix execute action hack w/ robotmonitor ??
-- fix playerfactory/spawnsignal hack??
-- better suicide() ??
-- pare down GW, GWviewer methods; add engine.getallsignals?
-*/
-
+ - optimize
+ - non-constant java.util costs
+ - player's navigation class, and specs about it
+ - fix execute action hack w/ robotmonitor ??
+ - fix playerfactory/spawnsignal hack??
+ - better suicide() ??
+ - pare down GW, GWviewer methods; add engine.getallsignals?
+ */
 public class RobotControllerImpl extends ControllerShared implements RobotController, GenericController {
 
     public RobotControllerImpl(GameWorld gw, InternalRobot r) {
@@ -74,7 +74,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // *********************************
     // ****** GLOBAL QUERY METHODS *****
     // *********************************
-
     public int getMapWidth() {
         return robot.myGameWorld.getGameMap().getWidth();
     }
@@ -86,17 +85,16 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public double getTeamOre() {
         return gameWorld.resources(getTeam());
     }
-    
+
     public void assertHaveResource(double amount) throws GameActionException {
         if (amount > gameWorld.resources(getTeam())) {
             throw new GameActionException(NOT_ENOUGH_RESOURCE, "You do not have enough ORE to do that.");
         }
     }
-    
+
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************
-
     public int getID() {
         return robot.getID();
     }
@@ -128,7 +126,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public double getSupplyLevel() {
         return robot.getSupplyLevel();
     }
-    
+
     public int getXP() {
         return robot.getXP();
     }
@@ -144,11 +142,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
-
     public MapLocation senseHQLocation() {
         return gameWorld.getBaseHQ(getTeam()).getLocation();
     }
-    
+
     public MapLocation senseEnemyHQLocation() {
         return gameWorld.getBaseHQ(getTeam().opponent()).getLocation();
     }
@@ -172,21 +169,21 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public boolean canSense(MapLocation loc) {
         return gameWorld.canSense(getTeam(), loc);
         /*
-        int sensorRadius = robot.type.sensorRadiusSquared;
+         int sensorRadius = robot.type.sensorRadiusSquared;
 
-        if (robot.myLocation.distanceSquaredTo(loc) <= sensorRadius) {
-            return true;
-        }
+         if (robot.myLocation.distanceSquaredTo(loc) <= sensorRadius) {
+         return true;
+         }
        
-        for (InternalObject o : gameWorld.allObjects()) {
-            if ((Robot.class.isInstance(o)) && (o.getTeam() == robot.getTeam() && loc.distanceSquaredTo(o.getLocation()) <= ((InternalRobot)o).type.sensorRadiusSquared)) {
-                return true;
-            }
-        }
-        return false;
-        */
+         for (InternalObject o : gameWorld.allObjects()) {
+         if ((Robot.class.isInstance(o)) && (o.getTeam() == robot.getTeam() && loc.distanceSquaredTo(o.getLocation()) <= ((InternalRobot)o).type.sensorRadiusSquared)) {
+         return true;
+         }
+         }
+         return false;
+         */
     }
-    
+
     public boolean canSense(InternalObject obj) {
         return obj.exists() && (obj.getTeam() == getTeam() || canSense(obj.getLocation()));
     }
@@ -265,13 +262,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public RobotInfo[] senseNearbyRobots() {
         return getRobotsFromGameObjects(senseNearbyGameObjects(Robot.class));
     }
-    
+
     @SuppressWarnings("unchecked")
     public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type, final int radiusSquared) {
         Predicate<InternalObject> p = new Predicate<InternalObject>() {
             public boolean apply(InternalObject o) {
-                return o.myLocation.distanceSquaredTo(robot.myLocation) <= radiusSquared 
-                        && canSense(o) && (type.isInstance(o)) && (!o.equals(robot));
+                return o.myLocation.distanceSquaredTo(robot.myLocation) <= radiusSquared
+                    && canSense(o) && (type.isInstance(o)) && (!o.equals(robot));
             }
         };
         return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
@@ -289,8 +286,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         Predicate<InternalObject> p = new Predicate<InternalObject>() {
             public boolean apply(InternalObject o) {
                 return o.myLocation.distanceSquaredTo(robot.myLocation) <= radiusSquared
-                        && o.getTeam() == team
-                        && canSense(o) && (type.isInstance(o)) && (!o.equals(robot));
+                    && o.getTeam() == team
+                    && canSense(o) && (type.isInstance(o)) && (!o.equals(robot));
             }
         };
         return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
@@ -306,7 +303,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             Predicate<InternalObject> p = new Predicate<InternalObject>() {
                 public boolean apply(InternalObject o) {
                     return o.myLocation.distanceSquaredTo(center) <= radiusSquared
-                            && canSense(o) && (type.isInstance(o)) && (!o.equals(robot));
+                        && canSense(o) && (type.isInstance(o)) && (!o.equals(robot));
                 }
             };
             return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
@@ -314,8 +311,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         Predicate<InternalObject> p = new Predicate<InternalObject>() {
             public boolean apply(InternalObject o) {
                 return o.myLocation.distanceSquaredTo(center) <= radiusSquared
-                        && o.getTeam() == team
-                        && canSense(o) && (type.isInstance(o)) && (!o.equals(robot));
+                    && o.getTeam() == team
+                    && canSense(o) && (type.isInstance(o)) && (!o.equals(robot));
             }
         };
         return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
@@ -328,7 +325,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
     // ****** READINESS METHODS **********
     // ***********************************
-
     public boolean isCoreReady() {
         return getCoreDelay() < 1;
     }
@@ -340,7 +336,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
     // ****** MOVEMENT METHODS ***********
     // ***********************************
-
     public boolean isPathableInternal(RobotType type, MapLocation loc) {
         return gameWorld.canMove(loc, type);
     }
@@ -409,13 +404,12 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
 
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-                true, (int) (robot.getMovementDelayForType() * factor1)), robot.getLoadingDelayForType() * factor2, robot.getMovementDelayForType() * factor1);
+            true, (int) (robot.getMovementDelayForType() * factor1)), robot.getLoadingDelayForType() * factor2, robot.getMovementDelayForType() * factor1);
     }
 
     // ***********************************
     // ****** ATTACK METHODS *************
     // ***********************************
-
     public boolean isAttackingUnit() {
         return robot.type.canAttack();
     }
@@ -469,7 +463,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     //***********************************
     //****** COMMANDER METHODS **********
     //***********************************
-
     public boolean hasCommander() {
         return gameWorld.hasCommander(robot.getTeam());
     }
@@ -534,26 +527,25 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
     // ****** BROADCAST METHODS **********
     // ***********************************
-
     public boolean hasBroadcasted() {
         return robot.hasBroadcasted();
     }
-    
+
     public void broadcast(int channel, int data) throws GameActionException {
-        if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
+        if (channel < 0 || channel > GameConstants.BROADCAST_MAX_CHANNELS)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to " + GameConstants.BROADCAST_MAX_CHANNELS + ", inclusive");
 
         if (robot.type == RobotType.MISSILE) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Missiles cannot broadcast.");
         }
-        
+
         robot.addBroadcast(channel, data);
     }
-    
+
     @Override
     public int readBroadcast(int channel) throws GameActionException {
-        if (channel<0 || channel>GameConstants.BROADCAST_MAX_CHANNELS)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to "+GameConstants.BROADCAST_MAX_CHANNELS+", inclusive");
+        if (channel < 0 || channel > GameConstants.BROADCAST_MAX_CHANNELS)
+            throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to " + GameConstants.BROADCAST_MAX_CHANNELS + ", inclusive");
 
         Integer queued = robot.getQueuedBroadcastFor(channel);
         if (queued != null) {
@@ -567,7 +559,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
     // ****** SUPPLY METHODS *************
     // ***********************************
-
     public void transferSupplies(int amount, MapLocation loc) throws GameActionException {
         if (amount < 0) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Stealing supply is not very nice.");
@@ -586,7 +577,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
     // ****** MINING METHODS *************
     // ***********************************
-
     public boolean isMiningUnit() {
         return robot.type.canMine();
     }
@@ -605,8 +595,8 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertIsCoreReady();
         assertIsMiningUnit();
         MapLocation loc = getLocation();
-		
-		robot.activateMovement(new MineSignal(loc, getID()), GameConstants.MINING_LOADING_DELAY, GameConstants.MINING_MOVEMENT_DELAY);
+
+        robot.activateMovement(new MineSignal(loc, getID()), GameConstants.MINING_LOADING_DELAY, GameConstants.MINING_MOVEMENT_DELAY);
     }
 
     public double senseOre(MapLocation loc) {
@@ -614,12 +604,11 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
             return gameWorld.getOre(loc);
         }
         return gameWorld.senseOre(getTeam(), loc);
-    }   
+    }
 
     // ***********************************
     // ****** LAUNCHER *******************
     // ***********************************
-
     public boolean isLaunchingUnit() {
         return robot.type.canLaunch();
     }
@@ -669,7 +658,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
     // ****** BUILDING/SPAWNING **********
     // ***********************************
-
     public DependencyProgress checkDependencyProgress(RobotType type) {
         if (gameWorld.getActiveRobotTypeCount(robot.getTeam(), type) > 0) {
             return DependencyProgress.DONE;
@@ -712,6 +700,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void spawn(Direction dir, RobotType type) throws GameActionException {
+        Config options = Config.getGlobalConfig();
         assertIsSpawningUnit();
         if (type == RobotType.COMMANDER) {
             assertNoCommander();
@@ -720,6 +709,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
         if (type.spawnSource != robot.type) {
             throw new GameActionException(CANT_DO_THAT_BRO, "This spawn can only be by a certain type");
+        }
+
+        if (!options.getBoolean("bc.game.allow-air-units") && type == RobotType.DRONE) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Game config doesn't allow spawning air units.");
         }
 
         MapLocation loc = getLocation().add(dir);
@@ -732,7 +725,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         assertHaveResource(cost);
 
         robot.activateMovement(
-                new SpawnSignal(loc, type, robot.getTeam(), robot, 0), 0, type.buildTurns);
+            new SpawnSignal(loc, type, robot.getTeam(), robot, 0), 0, type.buildTurns);
     }
 
     public boolean isBuildingUnit() {
@@ -765,7 +758,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         MapLocation loc = getLocation().add(dir);
         return isPathableInternal(type, loc) && hasBuildRequirements(type);
     }
-    
+
     public void build(Direction dir, RobotType type) throws GameActionException {
         assertIsBuildingUnit();
         assertIsBuildable(type);
@@ -780,13 +773,12 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
         int delay = type.buildTurns;
         robot.activateMovement(
-                new BuildSignal(loc, type, robot.getTeam(), robot, delay), delay, delay);
+            new BuildSignal(loc, type, robot.getTeam(), robot, delay), delay, delay);
     }
-   
+
     // ***********************************
     // ****** OTHER ACTION METHODS *******
     // ***********************************
-
     public void yield() {
         RobotMonitor.endRunner();
     }
@@ -794,7 +786,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     public void disintegrate() {
         throw new RobotDeathException();
     }
-    
+
     public void resign() {
         for (InternalObject obj : gameWorld.getAllGameObjects())
             if ((obj instanceof InternalRobot) && obj.getTeam() == robot.getTeam())
@@ -805,7 +797,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
     // ******** MISC. METHODS ************
     // ***********************************
-
     public void setTeamMemory(int index, long value) {
         gameWorld.setTeamMemory(robot.getTeam(), index, value);
     }
@@ -822,7 +813,6 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // ***********************************
     // ******** DEBUG METHODS ************
     // ***********************************
-
     public void setIndicatorString(int stringIndex, String newString) {
         if (stringIndex >= 0 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS)
             (new IndicatorStringSignal(robot, stringIndex, newString)).accept(gameWorld);
@@ -830,13 +820,13 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public void setIndicatorDot(MapLocation loc, int red, int green, int blue) {
         assertNotNull(loc);
-        new IndicatorDotSignal(robot,loc,red,green,blue).accept(gameWorld);
+        new IndicatorDotSignal(robot, loc, red, green, blue).accept(gameWorld);
     }
 
     public void setIndicatorLine(MapLocation from, MapLocation to, int red, int green, int blue) {
         assertNotNull(from);
         assertNotNull(to);
-        new IndicatorLineSignal(robot,from,to,red,green,blue).accept(gameWorld);
+        new IndicatorLineSignal(robot, from, to, red, green, blue).accept(gameWorld);
     }
 
     public long getControlBits() {
