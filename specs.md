@@ -438,7 +438,7 @@ All ranges are expressed as squared radius. A square radius of X includes all lo
 - MISSILEs only have 3 hp, but only take 1 damage from any attack.
 - MISSILEs are automatically destroyed at the end of their fifth turn after spawning.
 - MISSILEs can destroy themselves with `explode()`.
-- When a MISSILE is destroyed, it hits all adjacent robots for 20 damage (with friendly fire). If a MISSILE is destroyed by attacks, then the damage dealt is halved.
+- When a MISSILE is destroyed, it hits all adjacent robots for 18 damage (with friendly fire). If a MISSILE is destroyed by attacks, then the damage dealt is halved.
 - MISSILEs have a bytecode limit of 500.
 - MISSILEs cannot write messages (but they can read them).
 
