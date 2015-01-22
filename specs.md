@@ -199,7 +199,7 @@ The LAUNCHER is a unit that can generate and launch MISSILEs.
 - Very high HP
 - No attack
 - Moves slowly
-- Generates a MISSILE every 6 turns and can store up to 5
+- Generates a MISSILE every 8 turns and can store up to 5
 - Super cool
 
 #### MISSILE
@@ -272,7 +272,7 @@ Victory and Tiebreaks [bcd12]
 
 A team whose HQ is destroyed immediately loses (and conversely, a team who destroys the opponent HQ immediately wins!).
 
-However, games must end in finite amounts of time, and hence each game only lasts 2000 turns. If neither HQ is destroyed by the end of turn 2000, the winner will be determined by a series of tiebreaks. These tiebreaks, in order of their application, are:
+However, games must end in finite amounts of time, and hence each game only lasts for a number of turns in the range [2000, 3333] (which you can query using `getRoundLimit()`). If neither HQ is destroyed by the end of the last round, the winner will be determined by a series of tiebreaks. These tiebreaks, in order of their application, are:
 
 1. Number of towers remaining
 2. HQ HP remaining
@@ -389,13 +389,13 @@ Units In-Depth [bcd15]
 | Beaver    | HQ              | 100 ore, 20 turns  | 10            | 30  | 4      | 5     | 2  | 2   | 1   | 1   |
 | Miner     | Miner Factory   | 60 ore, 20 turns   | 8             | 50  | 3      | 5     | 2  | 2   | 2   | 1   |
 | Computer  | Tech. Institute | 10 ore, 25 turns   | 2             | 1   | n/a    | n/a   | 8  | n/a | n/a | n/a |
-| Soldier   | Barracks        | 60 ore, 15 turns   | 5             | 40  | 4      | 5     | 2  | 1   | 1   | 1   |
+| Soldier   | Barracks        | 60 ore, 16 turns   | 5             | 40  | 4      | 8     | 2  | 1   | 1   | 1   |
 | Basher    | Barracks        | 80 ore, 20 turns   | 6             | 64  | 4      | 2*    | 2  | 1   | 0   | 1   |
 | Drone     | Helipad         | 125 ore, 30 turns  | 10            | 70  | 8      | 5     | 1  | 3   | 1   | 1   |
-| Tank      | Tank Factory    | 250 ore, 50 turns  | 15            | 160 | 20     | 15    | 2  | 3   | 2   | 2   |
-| Commander | Training Field  | 100* ore, 80 turns | 5             | 200 | 10     | 10    | 2  | 1   | 0   | 0   |
-| Launcher  | Aerospace Lab   | 400 ore, 100 turns | 25            | 300 | n/a    | n/a   | 4  | 6*  | n/a | n/a |
-| Missile   | Launcher        | 6 turns            | 0             | 3*  | 20     | 2*    | 1  | 0   | 0   | 0   |
+| Tank      | Tank Factory    | 250 ore, 50 turns  | 15            | 144 | 20     | 15    | 2  | 3   | 2   | 2   |
+| Commander | Training Field  | 100* ore, 200 turns| 15            | 200 | 6      | 10    | 2  | 1   | 0   | 0   |
+| Launcher  | Aerospace Lab   | 400 ore, 100 turns | 25            | 200 | n/a    | n/a   | 4  | 6*  | n/a | n/a |
+| Missile   | Launcher        | 6 turns            | 0             | 3*  | 18     | 2*    | 1  | 0   | 0   | 0   |
 
 All ranges are expressed as squared radius. A square radius of X includes all locations within a Euclidean distance of sqrt(X).
 
@@ -422,13 +422,13 @@ All ranges are expressed as squared radius. A square radius of X includes all lo
 - Each enemy unit (not structures) that dies within 24 range of him rewards him experience equal to the ore cost of the enemy unit.
 - The commander also has skills.
  - Regenerate (passive) - The commander automatically gains 1 health per turn.
- - Flash - (10 turn cooldown) - Teleports to any valid location within 10 range.
+ - Flash - (20 turn cooldown) - Teleports to any valid location within 10 range. Can only be used when you have no core delay, and adds a movement delay of 1.
  - Leadership (passive, gained at 1000 xp) - All allied units within range 24 deal 1 additional damage. If the COMMANDER has 2000 xp, the additional damage is 2 instead of 1. MISSILEs are not boosted.
  - Heavy Hands (gained at 1500 xp) - COMMANDER attacks set the target's weapon and core delays to 3, if the delays are below 3. Does not work on enemy TOWER, COMMANDER, or HQ. It will prevent LAUNCHERs from generating new MISSILEs but does not stop them from launching existing MISSILEs. BASHER attacks will not be affected, nor will MISSILE explosions (but both will be disabled from moving).
  
 #### LAUNCHER:
 - Cannot attack directly. A LAUNCHER's weapon delay is associated with the amount of time it needs to generate a new MISSILE.
-- Automatically generates MISSILEs that can be launched. A LAUNCHER gains one MISSILE every 6 turns if supplied or one MISSILE every 12 turns if unsupplied, and can store up to 5. 
+- Automatically generates MISSILEs that can be launched. A LAUNCHER gains one MISSILE every 8 turns if supplied or one MISSILE every 16 turns if unsupplied, and can store up to 5. 
 - Launching a missile in a direction subtracts one from the LAUNCHER's missile count and creates a MISSILE unit in the square in that direction. Missiles can be launched regardless of weapon or core delay.
 - The `canLaunch()` method is there to help check if a launch is valid.
 - LAUNCHERs can move and launch missiles in the same turn, but `launchMissile()` must be called before `move()`.
@@ -626,3 +626,11 @@ Changelog [bcd20]
     * Bug fix: COMMANDERs can Flash a distance of 10 (units^2) now.
     * Bug fix: MISSILEs destroyed by other MISSILEs (either team) will properly explode now with half damage.
 * 1.1.3 (1/17/2015) - Bug fix: no more "zombie" MISSILEs (exploded MISSILEs that do not disappear from the client).
+* 1.2.0 (1/22/2015) - Post-Seeding release. New maps. Additional client toggle options. Gameplay changes.
+    * Important: not all games will have a 2000 turn round limit. This round limit will now vary depending on the map but will always be in the range [2000, 3333]. For a given map, you can query the round limit by using `getRoundLimit()`. Generally, only larger maps will have larger round limits. We have released a few maps with changed round limits (marked by "extended" in the map name).
+    * Balance changes:
+        * Launcher: decrease health to 200; increase turns to generate a missile to 8 (16 if unsupplied).
+        * Missile: decrease attack power to 18 (9 if destroyed by attack).
+        * Commander: decrease attack power to 6; increase supply upkeep to 15; increase turn cost to 200; increase Flash cooldown to 20.
+        * Tank: decrease health to 144.
+        * Soldier: increase attack range to 8; increase turn cost to 16.

@@ -14,6 +14,13 @@ public interface RobotController {
     // *********************************
 
     /**
+     * Gets the number of rounds in the game. After this many rounds, if neither team has destroyed the enemy HQ, then the tiebreakers will be used.
+     *
+     * @return the number of rounds in the game.
+     */
+    public int getRoundLimit();
+
+    /**
      * Gets the team's total ore.
      *
      * @return the team's total ore.

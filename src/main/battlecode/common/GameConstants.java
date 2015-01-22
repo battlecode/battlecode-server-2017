@@ -29,7 +29,7 @@ public interface GameConstants {
     public static final int ROUND_MIN_LIMIT = 2000;
     
     /** The maximum possible round at which the game may be forced to end */
-    public static final int ROUND_MAX_LIMIT = 2000;
+    public static final int ROUND_MAX_LIMIT = 3333;
     
     /** The number of longs that your team can remember between games. */
     public static final int TEAM_MEMORY_LENGTH = 32;
@@ -89,7 +89,7 @@ public interface GameConstants {
     /** The maximum amount of ore that a MINER can mine. */
     public static final double MINER_MINE_MAX = 2.5;
 
-    /** The maximum amount of ore that an upgraded MINER can mine. */
+    /** The maximum amount of ore that an upgraded MINER can mine (NOT USED!). */
     public static final int MINER_MINE_MAX_UPGRADED = 4;
 
     /** The fraction of ore that a MINER gets from a square. */
@@ -139,7 +139,7 @@ public interface GameConstants {
     public static final int MISSILE_RADIUS_SQUARED = 2;
 
     /** The rate at which a launcher spawns missiles. */
-    public static final int MISSILE_SPAWN_FREQUENCY = 6;
+    public static final int MISSILE_SPAWN_FREQUENCY = 8;
 
     /** Maximum damage a missile can take. */
     public static final double MISSILE_MAXIMUM_DAMAGE = 1.0;
@@ -186,7 +186,7 @@ public interface GameConstants {
     public static final double IMPROVED_LEADERSHIP_DAMAGE_BONUS = 2;
 
     /** Cooldown for the FLASH skill (minimum number of turns between each usage of FLASH). */
-    public static final int FLASH_COOLDOWN = 10;
+    public static final int FLASH_COOLDOWN = 20;
 	
 	/** The range of the 'flash' skill. **/
     public static final int FLASH_RANGE_SQUARED = 10;

@@ -27,14 +27,14 @@ public enum RobotType {
 	//isbuilding, spawn-source, build-dep, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
     BEAVER      (false,                  HQ, null, 100,  20, 10,  30,  4,  5, 2, 2, 1, 1, 24, 10000),
     COMPUTER    (false, TECHNOLOGYINSTITUTE, null,  10,  25,  2,   1,  0,  0, 8, 0, 0, 0, 24, 20000),
-    SOLDIER     (false,            BARRACKS, null,  60,  15,  5,  40,  4,  5, 2, 1, 1, 1, 24, 10000),
+    SOLDIER     (false,            BARRACKS, null,  60,  16,  5,  40,  4,  8, 2, 1, 1, 1, 24, 10000),
     BASHER      (false,            BARRACKS, null,  80,  20,  6,  64,  4,  2, 2, 1, 0, 1, 24, 10000),
     MINER       (false,        MINERFACTORY, null,  60,  20,  8,  50,  3,  5, 2, 2, 2, 1, 24, 10000),
     DRONE       (false,             HELIPAD, null, 125,  30, 10,  70,  8,  5, 1, 3, 1, 1, 24, 10000),
-    TANK        (false,         TANKFACTORY, null, 250,  50, 15, 160, 20, 15, 2, 3, 2, 2, 24, 10000),
-    COMMANDER   (false,       TRAININGFIELD, null, 100,  80,  5, 200, 10, 10, 2, 1, 0, 0, 24, 10000),
-    LAUNCHER    (false,        AEROSPACELAB, null, 400, 100, 25, 300,  0,  0, 4, 0, 0, 0, 24, 10000),
-    MISSILE     (false,            LAUNCHER, null,   0,   6,  0,   3, 20,  2, 1, 0, 0, 0, 24,   500),
+    TANK        (false,         TANKFACTORY, null, 250,  50, 15, 144, 20, 15, 2, 3, 2, 2, 24, 10000),
+    COMMANDER   (false,       TRAININGFIELD, null, 100, 200, 15, 200,  6, 10, 2, 1, 0, 0, 24, 10000),
+    LAUNCHER    (false,        AEROSPACELAB, null, 400, 100, 25, 200,  0,  0, 4, 0, 0, 0, 24, 10000),
+    MISSILE     (false,            LAUNCHER, null,   0,   6,  0,   3, 18,  2, 1, 0, 0, 0, 24,   500),
     ;
 
     //  isbuilding, spawn-source, build-dep, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit

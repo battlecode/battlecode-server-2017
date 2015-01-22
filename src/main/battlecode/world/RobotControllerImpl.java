@@ -74,6 +74,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // *********************************
     // ****** GLOBAL QUERY METHODS *****
     // *********************************
+    public int getRoundLimit() {
+        return robot.myGameWorld.getGameMap().getMaxRounds();
+    }
+
     public int getMapWidth() {
         return robot.myGameWorld.getGameMap().getWidth();
     }
