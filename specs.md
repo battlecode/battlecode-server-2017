@@ -199,7 +199,7 @@ The LAUNCHER is a unit that can generate and launch MISSILEs.
 - Very high HP
 - No attack
 - Moves slowly
-- Generates a MISSILE every 8 turns and can store up to 5
+- Generates a MISSILE every 6 turns and can store up to 5
 - Super cool
 
 #### MISSILE
@@ -394,8 +394,8 @@ Units In-Depth [bcd15]
 | Drone     | Helipad         | 125 ore, 30 turns  | 10            | 70  | 8      | 5     | 1  | 3   | 1   | 1   |
 | Tank      | Tank Factory    | 250 ore, 50 turns  | 15            | 144 | 20     | 15    | 2  | 3   | 2   | 2   |
 | Commander | Training Field  | 100* ore, 200 turns| 15            | 200 | 6      | 10    | 2  | 1   | 0   | 0   |
-| Launcher  | Aerospace Lab   | 400 ore, 100 turns | 25            | 200 | n/a    | n/a   | 4  | 8*  | n/a | n/a |
-| Missile   | Launcher        | 8 turns            | 0             | 3*  | 18     | 2*    | 1  | 0   | 0   | 0   |
+| Launcher  | Aerospace Lab   | 400 ore, 100 turns | 25            | 300 | n/a    | n/a   | 4  | 8*  | n/a | n/a |
+| Missile   | Launcher        | 8 turns            | 0             | 3*  | 20     | 2*    | 1  | 0   | 0   | 0   |
 
 All ranges are expressed as squared radius. A square radius of X includes all locations within a Euclidean distance of sqrt(X).
 
@@ -428,7 +428,7 @@ All ranges are expressed as squared radius. A square radius of X includes all lo
  
 #### LAUNCHER:
 - Cannot attack directly. A LAUNCHER's weapon delay is associated with the amount of time it needs to generate a new MISSILE.
-- Automatically generates MISSILEs that can be launched. A LAUNCHER gains one MISSILE every 8 turns if supplied or one MISSILE every 16 turns if unsupplied, and can store up to 5. 
+- Automatically generates MISSILEs that can be launched. A LAUNCHER gains one MISSILE every 6 turns if supplied or one MISSILE every 12 turns if unsupplied, and can store up to 5. 
 - Launching a missile in a direction subtracts one from the LAUNCHER's missile count and creates a MISSILE unit in the square in that direction. Missiles can be launched regardless of weapon or core delay.
 - The `canLaunch()` method is there to help check if a launch is valid.
 - LAUNCHERs can move and launch missiles in the same turn, but `launchMissile()` must be called before `move()`.
@@ -629,7 +629,6 @@ Changelog [bcd20]
 * 1.2.0 (1/22/2015) - Post-Seeding release. New maps. Additional client toggle options. Gameplay changes.
     * Important: not all games will have a 2000 turn round limit. This round limit will now vary depending on the map but will always be in the range [2000, 3000]. For a given map, you can query the round limit by using `getRoundLimit()`. Generally, only larger maps will have larger round limits. We have released a few maps with changed round limits (marked by "extended" in the map name).
     * Balance changes:
-        * Launcher: decrease health to 200; increase turns to generate a missile to 8 (16 if unsupplied).
         * Missile: decrease attack power to 18 (9 if destroyed by attack).
         * Commander: decrease attack power to 6; increase supply upkeep to 15; increase turn cost to 200; increase Flash cooldown to 20.
         * Tank: decrease health to 144.

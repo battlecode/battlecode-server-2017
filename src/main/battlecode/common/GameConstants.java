@@ -139,7 +139,7 @@ public interface GameConstants {
     public static final int MISSILE_RADIUS_SQUARED = 2;
 
     /** The rate at which a launcher spawns missiles. */
-    public static final int MISSILE_SPAWN_FREQUENCY = 8;
+    public static final int MISSILE_SPAWN_FREQUENCY = 6;
 
     /** Maximum damage a missile can take. */
     public static final double MISSILE_MAXIMUM_DAMAGE = 1.0;

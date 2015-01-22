@@ -33,8 +33,8 @@ public enum RobotType {
     DRONE       (false,             HELIPAD, null, 125,  30, 10,  70,  8,  5, 1, 3, 1, 1, 24, 10000),
     TANK        (false,         TANKFACTORY, null, 250,  50, 15, 144, 20, 15, 2, 3, 2, 2, 24, 10000),
     COMMANDER   (false,       TRAININGFIELD, null, 100, 200, 15, 200,  6, 10, 2, 1, 0, 0, 24, 10000),
-    LAUNCHER    (false,        AEROSPACELAB, null, 400, 100, 25, 200,  0,  0, 4, 0, 0, 0, 24, 10000),
-    MISSILE     (false,            LAUNCHER, null,   0,   6,  0,   3, 18,  2, 1, 0, 0, 0, 24,   500),
+    LAUNCHER    (false,        AEROSPACELAB, null, 400, 100, 25, 300,  0,  0, 4, 0, 0, 0, 24, 10000),
+    MISSILE     (false,            LAUNCHER, null,   0,   6,  0,   3, 20,  2, 1, 0, 0, 0, 24,   500),
     ;
 
     //  isbuilding, spawn-source, build-dep, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
