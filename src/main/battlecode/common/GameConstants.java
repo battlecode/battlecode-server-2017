@@ -29,7 +29,7 @@ public interface GameConstants {
     public static final int ROUND_MIN_LIMIT = 2000;
     
     /** The maximum possible round at which the game may be forced to end */
-    public static final int ROUND_MAX_LIMIT = 3333;
+    public static final int ROUND_MAX_LIMIT = 3000;
     
     /** The number of longs that your team can remember between games. */
     public static final int TEAM_MEMORY_LENGTH = 32;

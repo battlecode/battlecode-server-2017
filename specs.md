@@ -180,8 +180,8 @@ The COMMANDER is a strong unit with special abilities.
 - Spawned at Training Field
 - Each team can only control one COMMANDER at a time
 - Ore cost doubles for each friendly COMMANDER that has been produced
-- High HP
-- Has a strong attack at decent range
+- Very high HP
+- Has a mediocre attack at decent range
 - Has special abilities
 - Gains experience from nearby defeated enemy units
 - More details below
@@ -272,7 +272,7 @@ Victory and Tiebreaks [bcd12]
 
 A team whose HQ is destroyed immediately loses (and conversely, a team who destroys the opponent HQ immediately wins!).
 
-However, games must end in finite amounts of time, and hence each game only lasts for a number of turns in the range [2000, 3333] (which you can query using `getRoundLimit()`). If neither HQ is destroyed by the end of the last round, the winner will be determined by a series of tiebreaks. These tiebreaks, in order of their application, are:
+However, games must end in finite amounts of time, and hence each game only lasts for a number of turns in the range 2000 to 3000, inclusive, depending on the map (which you can query using `getRoundLimit()`). If neither HQ is destroyed by the end of the last round, the winner will be determined by a series of tiebreaks. These tiebreaks, in order of their application, are:
 
 1. Number of towers remaining
 2. HQ HP remaining
@@ -324,7 +324,7 @@ Each type of unit has an associated fixed movement delay and fixed attack delay.
 #### Details version
 The rest of this section details the exact implementation of delays. It may be complicated and is not fully necessary for writing a bot.
 
-Each individual robot has two changing delay counters: a core delay and a weapon delay. Delays are doubles that represent some amount of time that must pass before an action can be taken. Weapon delay pertains to the action of attacking, while core delay pertains to all other actions (mining, spawning, building, and moving). Specifically, actions cannot be performed unless the associated delay is <1. Both delay counters decrease by a base of 0.5 per turn, but can be further reduced by an additional 0.5 per turn if the robot has enough supply to pay its supply upkeep (this happens automatically). Therefore, a supplied robot can act about twice as often as an unsupplied robot. The way LAUNCHERs generate missiles works the same way - each time a LAUNCHER generates a missile, it gains 6 weapon delay, and the weapon delay must be <1 in order for a LAUNCHER to generate a missile. Note that actually launching a missile is independent of weapon delay.
+Each individual robot has two changing delay counters: a core delay and a weapon delay. Delays are doubles that represent some amount of time that must pass before an action can be taken. Weapon delay pertains to the action of attacking, while core delay pertains to all other actions (mining, spawning, building, and moving). Specifically, actions cannot be performed unless the associated delay is <1. Both delay counters decrease by a base of 0.5 per turn, but can be further reduced by an additional 0.5 per turn if the robot has enough supply to pay its supply upkeep (this happens automatically). Therefore, a supplied robot can act about twice as often as an unsupplied robot. The way LAUNCHERs generate missiles works the same way - each time a LAUNCHER generates a missile, it gains 8 weapon delay, and the weapon delay must be <1 in order for a LAUNCHER to generate a missile. Note that actually launching a missile is independent of weapon delay.
 
 Delays increase when actions are performed. Naturally, attacking increases weapon delay and moving/mining/spawning increases core delay. Attacking increases the weapon delay of the robot by the ATTACK_DELAY of the unit type. Similarly, moving or mining increases the core delay of the robot by the MOVEMENT_DELAY of the unit type (1.4*MOVEMENT_DELAY if the movement was in a diagonal direction). However, attacking can also increase core delay up to the COOLDOWN_DELAY of the unit type, and moving or mining can increase the attack delay of the robot up to the LOADING_DELAY of the unit type. This means that attacking and movement are not completely independent of each other, and that units must wait some turns after attacking in order to move, or vice versa.
 
@@ -394,8 +394,8 @@ Units In-Depth [bcd15]
 | Drone     | Helipad         | 125 ore, 30 turns  | 10            | 70  | 8      | 5     | 1  | 3   | 1   | 1   |
 | Tank      | Tank Factory    | 250 ore, 50 turns  | 15            | 144 | 20     | 15    | 2  | 3   | 2   | 2   |
 | Commander | Training Field  | 100* ore, 200 turns| 15            | 200 | 6      | 10    | 2  | 1   | 0   | 0   |
-| Launcher  | Aerospace Lab   | 400 ore, 100 turns | 25            | 200 | n/a    | n/a   | 4  | 6*  | n/a | n/a |
-| Missile   | Launcher        | 6 turns            | 0             | 3*  | 18     | 2*    | 1  | 0   | 0   | 0   |
+| Launcher  | Aerospace Lab   | 400 ore, 100 turns | 25            | 200 | n/a    | n/a   | 4  | 8*  | n/a | n/a |
+| Missile   | Launcher        | 8 turns            | 0             | 3*  | 18     | 2*    | 1  | 0   | 0   | 0   |
 
 All ranges are expressed as squared radius. A square radius of X includes all locations within a Euclidean distance of sqrt(X).
 
@@ -627,7 +627,7 @@ Changelog [bcd20]
     * Bug fix: MISSILEs destroyed by other MISSILEs (either team) will properly explode now with half damage.
 * 1.1.3 (1/17/2015) - Bug fix: no more "zombie" MISSILEs (exploded MISSILEs that do not disappear from the client).
 * 1.2.0 (1/22/2015) - Post-Seeding release. New maps. Additional client toggle options. Gameplay changes.
-    * Important: not all games will have a 2000 turn round limit. This round limit will now vary depending on the map but will always be in the range [2000, 3333]. For a given map, you can query the round limit by using `getRoundLimit()`. Generally, only larger maps will have larger round limits. We have released a few maps with changed round limits (marked by "extended" in the map name).
+    * Important: not all games will have a 2000 turn round limit. This round limit will now vary depending on the map but will always be in the range [2000, 3000]. For a given map, you can query the round limit by using `getRoundLimit()`. Generally, only larger maps will have larger round limits. We have released a few maps with changed round limits (marked by "extended" in the map name).
     * Balance changes:
         * Launcher: decrease health to 200; increase turns to generate a missile to 8 (16 if unsupplied).
         * Missile: decrease attack power to 18 (9 if destroyed by attack).
