@@ -370,7 +370,7 @@ Structures In-depth [bcd14]
 | Technology Institute | None            | 200 ore, 50 turns  | Spawns Computers               |
 | Barracks             | None            | 300 ore, 50 turns  | Spawns Soldiers and Bashers    |
 | Helipad              | None            | 300 ore, 100 turns | Spawns Drones                  |
-| Training Field       | Tech. Institute | 200 ore, 100 turns | Spawns Commander               |
+| Training Field       | Tech. Institute | 200 ore, 200 turns | Spawns Commander               |
 | Tank Factory         | Barracks        | 500 ore, 100 turns | Spawns Tanks                   |
 | Aerospace Lab        | Helipad         | 500 ore, 100 turns | Spawns Launchers               |
 | Handwash Station     | None            | 200 ore, 100 turns | Sanitation                     |
@@ -389,7 +389,7 @@ Units In-Depth [bcd15]
 | Beaver    | HQ              | 100 ore, 20 turns  | 10            | 30  | 4      | 5     | 2  | 2   | 1   | 1   |
 | Miner     | Miner Factory   | 60 ore, 20 turns   | 8             | 50  | 3      | 5     | 2  | 2   | 2   | 1   |
 | Computer  | Tech. Institute | 10 ore, 25 turns   | 2             | 1   | n/a    | n/a   | 8  | n/a | n/a | n/a |
-| Soldier   | Barracks        | 60 ore, 16 turns   | 5             | 40  | 4      | 8     | 2  | 1   | 1   | 1   |
+| Soldier   | Barracks        | 60 ore, 20 turns   | 5             | 40  | 4      | 8     | 2  | 1   | 1   | 1   |
 | Basher    | Barracks        | 80 ore, 20 turns   | 6             | 64  | 4      | 2*    | 2  | 1   | 0   | 1   |
 | Drone     | Helipad         | 125 ore, 30 turns  | 10            | 70  | 8      | 5     | 1  | 3   | 1   | 1   |
 | Tank      | Tank Factory    | 250 ore, 50 turns  | 15            | 144 | 20     | 15    | 2  | 3   | 2   | 2   |
