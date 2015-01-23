@@ -634,3 +634,6 @@ Changelog [bcd20]
         * Commander: decrease attack power to 6; increase supply upkeep to 15; increase turn cost to 200; increase Flash cooldown to 20.
         * Tank: decrease health to 144.
         * Soldier: increase attack range to 8; increase turn cost to 16.
+* 1.2.1 (1/23/2015) - Balance changes.
+    * Training field turn cost increased from 100 to 200.
+    * Soldier turn cost increased from 16 to 20.

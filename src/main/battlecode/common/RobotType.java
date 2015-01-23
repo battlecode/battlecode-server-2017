@@ -15,7 +15,7 @@ public enum RobotType {
     TECHNOLOGYINSTITUTE  (true, null,                  HQ, 200,  50, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
     BARRACKS             (true, null,                  HQ, 300,  50, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
     HELIPAD              (true, null,                  HQ, 300, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
-    TRAININGFIELD        (true, null, TECHNOLOGYINSTITUTE, 200, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
+    TRAININGFIELD        (true, null, TECHNOLOGYINSTITUTE, 200, 200, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
     TANKFACTORY          (true, null,            BARRACKS, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
     MINERFACTORY         (true, null,                  HQ, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
     /**
@@ -27,7 +27,7 @@ public enum RobotType {
 	//isbuilding, spawn-source, build-dep, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
     BEAVER      (false,                  HQ, null, 100,  20, 10,  30,  4,  5, 2, 2, 1, 1, 24, 10000),
     COMPUTER    (false, TECHNOLOGYINSTITUTE, null,  10,  25,  2,   1,  0,  0, 8, 0, 0, 0, 24, 20000),
-    SOLDIER     (false,            BARRACKS, null,  60,  16,  5,  40,  4,  8, 2, 1, 1, 1, 24, 10000),
+    SOLDIER     (false,            BARRACKS, null,  60,  20,  5,  40,  4,  8, 2, 1, 1, 1, 24, 10000),
     BASHER      (false,            BARRACKS, null,  80,  20,  6,  64,  4,  2, 2, 1, 0, 1, 24, 10000),
     MINER       (false,        MINERFACTORY, null,  60,  20,  8,  50,  3,  5, 2, 2, 2, 1, 24, 10000),
     DRONE       (false,             HELIPAD, null, 125,  30, 10,  70,  8,  5, 1, 3, 1, 1, 24, 10000),
