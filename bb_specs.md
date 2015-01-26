@@ -25,6 +25,7 @@ The following details are tentative but will be finalized by the end of Monday, 
 All rules will be the same as the regular Battlecode, except:
 - No drones can be spawned.
 - You will be scored based on how quickly you destroy the enemy HQ. Destroying towers will give partial credit.
+- Maps will be challenging to navigate and might not be symmetric.
 - There is no upper bound to the round limit (it might be well over 3000).
 - Your opponent will be a bot that does not spawn any units, but might attack with TOWERs and HQ.
 
