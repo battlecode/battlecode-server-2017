@@ -7,7 +7,7 @@ Intro
 ---------------
 Have any of you been working a bit too hard trying to perfect that A* routine? Or perhaps you already have the best run and gun routines no opponents can handle, and you're looking for the next challenge. Perhaps your team has even given up on eternal glory.
 
-Well, no matter where you are in your 4 week Battlecode career, we have a new refreshing challenge just for you. Bloomberg wants to see if you can navigate their challenge maps, and is giving out a sponsor prize for anyone who can get close. You can expect their challenge map to have some of the hardest terrain, the most dead ends, and a guarantee that naïve bugging code will just not work. If you can navigate their map all the way to the enemy HQ the fastest and destroy it, though, you can be assured a spot on that pedestal of eternal glory.
+Well, no matter where you are in your 4 week Battlecode career, we have a new refreshing challenge just for you. Bloomberg wants to see if you can navigate their challenge maps, and is giving out a sponsor prize for anyone who can get close. You can expect their challenge maps to have some of the hardest terrain, the most dead ends, and a guarantee that naïve bugging code will just not work. If you can navigate their map all the way to the enemy HQ the fastest and destroy it, though, you can be assured a spot on that pedestal of eternal glory.
 
 Oh and in case you were wondering, we've heard that there were some pretty heavy winds on the Bloomberg maps, and drones seems to be careening wildly out of control. And that HQ, well, it seems to have some crazy attacks and regeneration stats.
 
