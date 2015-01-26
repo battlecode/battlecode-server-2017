@@ -1,6 +1,8 @@
 Battlecode Bloomberg Prize
 ==============================
 
+The Bloomberg Prize will be awarded to the team that wins a special competition with an emphasis on awesome navigation.
+
 Intro
 ---------------
 Have any of you been working a bit too hard trying to perfect that A* routine? Or perhaps you already have the best run and gun routines no opponents can handle, and you're looking for the next challenge. Perhaps your team has even given up on eternal glory.
@@ -13,6 +15,8 @@ How to Enter
 ---------------
 
 To enter this tournament, upload a bot on Thursday, 1/29. The submission window will be open all day (Eastern time). If you do not upload anything we will use your regular tournament submission.
+
+The prize will be awarded by Bloomberg during the Battlecode Final Tournament on 1/31.
 
 Details
 ---------------
