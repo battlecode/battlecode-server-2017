@@ -174,7 +174,7 @@ public enum RobotType {
      * @return whether the robot can spawn.
      */
     public boolean canSpawn() {
-        return isBuilding && this != TOWER && this != SUPPLYDEPOT && this != HANDWASHSTATION;
+        return isBuilding && this != TOWER && this != SUPPLYDEPOT;
     }
 
     /**

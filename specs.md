@@ -637,5 +637,3 @@ Changelog [bcd20]
 * 1.2.1 (1/23/2015) - Balance changes.
     * Training field turn cost increased from 100 to 200.
     * Soldier turn cost increased from 16 to 20.
-* 1.2.2 (1/26/2015) - Tiny changes
-    * RobotType's `canSpawn()` correctly returns false for HANDWASHSTATION.
