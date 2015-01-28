@@ -659,6 +659,8 @@ class XMLMapHandler extends DefaultHandler {
     public boolean isTournamentLegal() {
         LegalityWarning warn = new LegalityWarning();
 
+        int maxOre = 0;
+
         int x, y, mx, my;
         SymbolData d, md;
         boolean baseBad = false;
@@ -666,6 +668,8 @@ class XMLMapHandler extends DefaultHandler {
         boolean symA = true, symB = true, symC = mapHeight == mapWidth, symD = mapHeight == mapWidth, symE = true;
         for (y = 0; y < mapHeight; y++) {
             for (x = 0; x < mapWidth; x++) {
+                maxOre = Math.max(maxOre, (int) map[x][y].floatData());
+
                 symA = symA && (map[x][y].equalsMirror(map[x][mapHeight - y - 1]));
                 symB = symB && (map[x][y].equalsMirror(map[mapWidth - x - 1][y]));
                 if (mapWidth == mapHeight) {
@@ -677,6 +681,10 @@ class XMLMapHandler extends DefaultHandler {
         }
         if (!symA && !symB && !symC && !symD && !symE) {
             warn.warnf("Map is not symmetric in any way!");
+        }
+
+        if (maxOre < 10) {
+            warn.warn("The max ore on any tile is less than 10.");
         }
 
         ArrayList<MapLocation> teamATowers = new ArrayList<MapLocation>();
