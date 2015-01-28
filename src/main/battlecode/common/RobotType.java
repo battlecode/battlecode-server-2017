@@ -7,34 +7,36 @@ import java.util.ArrayList;
  */
 public enum RobotType {
 
-    //  isbuilding, spawn-source, build-dep, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
-    HQ          (true, null, null, 0, 0, 0, 2000, 24, 24, 0, 2, 0, 0, 35, 10000),    
-    TOWER       (true, null, null, 0, 0, 0, 1000, 8, 24, 0, 1, 0, 0, 35,  2000),
+    // last one is strength weight
 
-    SUPPLYDEPOT          (true, null,                  HQ, 100,  40, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
-    TECHNOLOGYINSTITUTE  (true, null,                  HQ, 200,  50, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
-    BARRACKS             (true, null,                  HQ, 300,  50, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
-    HELIPAD              (true, null,                  HQ, 300, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
-    TRAININGFIELD        (true, null, TECHNOLOGYINSTITUTE, 200, 200, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
-    TANKFACTORY          (true, null,            BARRACKS, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
-    MINERFACTORY         (true, null,                  HQ, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
+    //  isbuilding, spawn-source, build-dep, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
+    HQ          (true, null, null, 0, 0, 0, 2000, 24, 24, 0, 2, 0, 0, 35, 10000, 0),    
+    TOWER       (true, null, null, 0, 0, 0, 1000, 8, 24, 0, 1, 0, 0, 35,  2000, 0),
+
+    SUPPLYDEPOT          (true, null,                  HQ, 100,  40, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
+    TECHNOLOGYINSTITUTE  (true, null,                  HQ, 200,  50, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
+    BARRACKS             (true, null,                  HQ, 300,  50, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
+    HELIPAD              (true, null,                  HQ, 300, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
+    TRAININGFIELD        (true, null, TECHNOLOGYINSTITUTE, 200, 200, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
+    TANKFACTORY          (true, null,            BARRACKS, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
+    MINERFACTORY         (true, null,                  HQ, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
     /**
      * Sanitation is important.
      */
-    HANDWASHSTATION      (true, null,                  HQ, 200, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
-    AEROSPACELAB         (true, null,             HELIPAD, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000),
+    HANDWASHSTATION      (true, null,                  HQ, 200, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
+    AEROSPACELAB         (true, null,             HELIPAD, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
 
 	//isbuilding, spawn-source, build-dep, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
-    BEAVER      (false,                  HQ, null, 100,  20, 10,  30,  4,  5, 2, 2, 1, 1, 24, 10000),
-    COMPUTER    (false, TECHNOLOGYINSTITUTE, null,  10,  25,  2,   1,  0,  0, 8, 0, 0, 0, 24, 20000),
-    SOLDIER     (false,            BARRACKS, null,  60,  20,  5,  40,  4,  8, 2, 1, 1, 1, 24, 10000),
-    BASHER      (false,            BARRACKS, null,  80,  20,  6,  64,  4,  2, 2, 1, 0, 1, 24, 10000),
-    MINER       (false,        MINERFACTORY, null,  60,  20,  8,  50,  3,  5, 2, 2, 2, 1, 24, 10000),
-    DRONE       (false,             HELIPAD, null, 125,  30, 10,  70,  8,  5, 1, 3, 1, 1, 24, 10000),
-    TANK        (false,         TANKFACTORY, null, 250,  50, 15, 144, 20, 15, 2, 3, 2, 2, 24, 10000),
-    COMMANDER   (false,       TRAININGFIELD, null, 100, 200, 15, 200,  6, 10, 2, 1, 0, 0, 24, 10000),
-    LAUNCHER    (false,        AEROSPACELAB, null, 400, 100, 25, 200,  0,  0, 4, 0, 0, 0, 24, 10000),
-    MISSILE     (false,            LAUNCHER, null,   0,   6,  0,   3, 18,  2, 1, 0, 0, 0, 24,   500),
+    BEAVER      (false,                  HQ, null, 100,  20, 10,  30,  4,  5, 2, 2, 1, 1, 24, 10000, 2),
+    COMPUTER    (false, TECHNOLOGYINSTITUTE, null,  10,  25,  2,   1,  0,  0, 8, 0, 0, 0, 24, 20000, 0),
+    SOLDIER     (false,            BARRACKS, null,  60,  20,  5,  40,  4,  8, 2, 1, 1, 1, 24, 10000, 6),
+    BASHER      (false,            BARRACKS, null,  80,  20,  6,  64,  4,  2, 2, 1, 0, 1, 24, 10000, 8),
+    MINER       (false,        MINERFACTORY, null,  60,  20,  8,  50,  3,  5, 2, 2, 2, 1, 24, 10000, 3),
+    DRONE       (false,             HELIPAD, null, 125,  30, 10,  70,  8,  5, 1, 3, 1, 1, 24, 10000, 10),
+    TANK        (false,         TANKFACTORY, null, 250,  50, 15, 144, 20, 15, 2, 3, 2, 2, 24, 10000, 20),
+    COMMANDER   (false,       TRAININGFIELD, null, 100, 200, 15, 200,  6, 10, 2, 1, 0, 0, 24, 10000, 40),
+    LAUNCHER    (false,        AEROSPACELAB, null, 400, 100, 25, 200,  0,  0, 4, 0, 0, 0, 24, 10000, 35),
+    MISSILE     (false,            LAUNCHER, null,   0,   6,  0,   3, 18,  2, 1, 0, 0, 0, 24,   500, 0),
     ;
 
     //  isbuilding, spawn-source, build-dep, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
@@ -113,6 +115,11 @@ public enum RobotType {
      * Base bytecode limit of this robot (halved if the robot does not have sufficient supply upkeep).
      */
     public final int bytecodeLimit;
+
+    /**
+     * How relatively strong the unit is. This number isn't really meaningful and is just used for part of the client.
+     */
+    public final int strengthWeight;
 
     /**
      * Returns whether the robot can attack.
@@ -200,7 +207,8 @@ public enum RobotType {
               int loadingDelay,
               int cooldownDelay,
               int sensorRadiusSquared,
-              int bytecodeLimit) {
+              int bytecodeLimit,
+              int strengthWeight) {
         this.isBuilding = isBuilding;
         this.spawnSource = spawnSource;
         this.dependency = dependency;
@@ -216,5 +224,6 @@ public enum RobotType {
         this.cooldownDelay = cooldownDelay;
         this.sensorRadiusSquared = sensorRadiusSquared;
         this.bytecodeLimit = bytecodeLimit;
+        this.strengthWeight = strengthWeight;
     }
 }
