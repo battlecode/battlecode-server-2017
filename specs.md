@@ -638,3 +638,4 @@ Changelog [bcd20]
     * Training field turn cost increased from 100 to 200.
     * Soldier turn cost increased from 16 to 20.
 * 1.2.2 (2/1/2015) - Post-finals release. Release new maps.
+* 1.2.3 (2/17/2015) - Add a forgotten map. Release compiled version of referenceplayer.
