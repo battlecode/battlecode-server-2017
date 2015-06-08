@@ -3,6 +3,7 @@ Battlecode Bloomberg Prize
 
 The Bloomberg Prize will be awarded to the team that wins a special competition with an emphasis on awesome navigation.
 
+
 Intro
 ---------------
 Have any of you been working a bit too hard trying to perfect that A* routine? Or perhaps you already have the best run and gun routines no opponents can handle, and you're looking for the next challenge. Perhaps your team has even given up on eternal glory.
