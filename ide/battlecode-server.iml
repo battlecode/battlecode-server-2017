@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="IvyIDEA" name="IvyIDEA">
+      <configuration ivyFile="$BATTLECODE_SERVER_LOC$/ivy.xml" useProjectSettings="true" useCustomIvySettings="true" ivySettingsFile="" onlyResolveSelectedConfigs="false">
+        <propertiesSettings>
+          <propertiesFiles includeProjectLevelPropertiesFiles="true" />
+        </propertiesSettings>
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$BATTLECODE_SERVER_LOC$">
+      <sourceFolder url="file://$BATTLECODE_SERVER_LOC$/src/test" isTestSource="false" />
+      <sourceFolder url="file://$BATTLECODE_SERVER_LOC$/src/main" isTestSource="false" />
+      <sourceFolder url="file://$BATTLECODE_SERVER_LOC$/lib" type="java-resource" />
+      <excludeFolder url="file://$BATTLECODE_SERVER_LOC$/build" />
+      <excludeFolder url="file://$MODULE_DIR$" />
+      <excludeFolder url="file://$BATTLECODE_SERVER_LOC$/lib" />
+      <excludeFolder url="file://$BATTLECODE_SERVER_LOC$/testreport" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library name="IvyIDEA">
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.commons/commons-lang3/jars/commons-lang3-3.4.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/commons-cli/commons-cli/jars/commons-cli-1.3.1.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/commons-io/commons-io/jars/commons-io-2.4.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/com.google.guava/guava/bundles/guava-18.0.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.ow2.asm/asm/jars/asm-5.0.4.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.ow2.asm/asm-tree/jars/asm-tree-5.0.4.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/com.thoughtworks.xstream/xstream/jars/xstream-1.4.8.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/xpp3/xpp3_min/jars/xpp3_min-1.1.4c.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/junit/junit/jars/junit-4.12.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.hamcrest/hamcrest-core/jars/hamcrest-core-1.3.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.hibernate/hibernate-search/jars/hibernate-search-3.1.0.GA.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.commons/commons-lang3/javadocs/commons-lang3-3.4-javadoc.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/commons-cli/commons-cli/javadocs/commons-cli-1.3.1-javadoc.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/com.google.guava/guava/javadocs/guava-18.0-javadoc.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.ow2.asm/asm/javadocs/asm-5.0.4-javadoc.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.ow2.asm/asm-tree/javadocs/asm-tree-5.0.4-javadoc.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/com.thoughtworks.xstream/xstream/javadocs/xstream-1.4.8-javadoc.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/xpp3/xpp3_min/javadocs/xpp3_min-1.1.4c-javadoc.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/junit/junit/javadocs/junit-4.12-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.apache.commons/commons-lang3/sources/commons-lang3-3.4-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/commons-cli/commons-cli/sources/commons-cli-1.3.1-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/com.google.guava/guava/sources/guava-18.0-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.ow2.asm/asm/sources/asm-5.0.4-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.ow2.asm/asm-tree/sources/asm-tree-5.0.4-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/com.thoughtworks.xstream/xstream/sources/xstream-1.4.8-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/xpp3/xpp3_min/sources/xpp3_min-1.1.4c-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/junit/junit/sources/junit-4.12-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.ivy2/cache/org.hibernate/hibernate-search/sources/hibernate-search-3.1.0.GA-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+  </component>
+</module>
