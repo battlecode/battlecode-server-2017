@@ -28,6 +28,17 @@ You have to build the server before the client. This process builds both. You ne
 
 Enjoy your new build!
 
+IDE Configuration
+-----------------
+There are included project files for Eclipse and IntelliJ in the `ide/` folder.
+First, you'll need the Apache Ivy plugin for your chosen platform:
+* [Eclipse: Apache IvyDE<sup>TM</sup>](http://ant.apache.org/ivy/ivyde/download.cgi)
+* [IntelliJ: IvyIDEA](https://plugins.jetbrains.com/plugin/?id=3612)
+
+Then, import the project (the `ide/` folder for Eclipse or the `ide/ide.ipr`
+file for IntelliJ), and you should be good to go! If anything doesn't work,
+open an issue.
+
 Basic Guide to the Codebase
 ---------------------------
 
