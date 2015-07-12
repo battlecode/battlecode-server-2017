@@ -89,7 +89,9 @@
 
     <target name="retrieve" depends="init,init-ivy">
         <ivy:settings file="ivyconf.xml"/>
-        <ivy:retrieve/>
+        <ivy:retrieve pattern="lib/[artifact]-[revision].[ext]" conf="compile"/>
+        <ivy:retrieve pattern="lib/src/[artifact]-[revision](-[classifier]).[ext]" conf="sources"/>
+        <ivy:retrieve pattern="lib/doc/[artifact]-[revision](-[classifier]).[ext]" conf="javadoc"/>
     </target>
 
     <target name="init">
@@ -107,6 +109,11 @@
         <delete file="${build.jar}"/>
         <delete file="${test.build.jar}"/>
         <delete file="${test.report.file}.xml"/>
+    </target>
+
+    <target name="clean-deps">
+        <ivy:settings file="ivyconf.xml"/>
+        <ivy:cleancache/>
     </target>
 
     <target name="compile"
