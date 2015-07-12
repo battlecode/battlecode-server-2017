@@ -159,7 +159,7 @@
             description="Build the jar (with dependencies included)."
             depends="compile">
         <jar jarfile="${pkg.build.jar}" basedir="${pkg.build.dir}">
-            <zipgroupfileset dir="${lib.dir}" excludes="battlecode-*, junit-*"/>
+            <zipgroupfileset dir="${lib.dir}" excludes="battlecode-*,junit-*" includes="*.jar"/>
         </jar>
     </target>
 
