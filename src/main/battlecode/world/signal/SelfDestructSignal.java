@@ -3,6 +3,7 @@ package battlecode.world.signal;
 import battlecode.common.MapLocation;
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Signifies that a robot just attacked
@@ -10,6 +11,9 @@ import battlecode.world.InternalRobot;
  * @author adamd
  */
 public class SelfDestructSignal extends Signal {
+
+    @JsonProperty("type")
+    private String getTypeForJson() { return "SelfDestruct"; }
 
     private static final long serialVersionUID = 8064711239305833273L;
 

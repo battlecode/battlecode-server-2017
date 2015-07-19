@@ -10,6 +10,9 @@ import battlecode.world.InternalObject;
  */
 public class DeathSignal extends Signal {
 
+    @JsonProperty("type")
+    private String getTypeForJson() { return "Death"; }
+
     private static final long serialVersionUID = 8518453257317948520L;
 
     /**

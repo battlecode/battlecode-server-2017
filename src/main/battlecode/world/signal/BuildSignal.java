@@ -6,6 +6,7 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Signifies that a robot was just spawned
@@ -13,6 +14,9 @@ import battlecode.world.InternalRobot;
  * @author adamd
  */
 public class BuildSignal extends Signal {
+
+    @JsonProperty("type")
+    private String getTypeForJson() { return "Build"; }
 
     private static final long serialVersionUID = -5655877873179815892L;
 

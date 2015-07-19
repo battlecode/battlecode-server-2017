@@ -3,6 +3,7 @@ package battlecode.world.signal;
 import battlecode.engine.signal.Signal;
 import battlecode.common.RobotInfo;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Signifies the RobotInfo associated with each robot.
@@ -10,6 +11,9 @@ import battlecode.world.InternalRobot;
  * @author axc
  */
 public class RobotInfoSignal extends Signal {
+
+    @JsonProperty("type")
+    private String getTypeForJson() { return "RobotInfo"; }
 
     private static final long serialVersionUID = 6617731214077155785L;
 

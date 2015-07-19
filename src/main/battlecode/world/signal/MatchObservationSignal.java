@@ -2,6 +2,7 @@ package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Creates an observation to be displayed in transcribed matches
@@ -9,6 +10,9 @@ import battlecode.world.InternalRobot;
  * @author jmstein
  */
 public class MatchObservationSignal extends Signal {
+
+    @JsonProperty("type")
+    private String getTypeForJson() { return "MatchObservation"; }
 
     private static final long serialVersionUID = -8277652765201239399L;
 

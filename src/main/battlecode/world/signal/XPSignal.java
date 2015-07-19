@@ -2,8 +2,12 @@ package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class XPSignal extends Signal {
+
+    @JsonProperty("type")
+    private String getTypeForJson() { return "XP"; }
 
     private static final long serialVersionUID = 6612331359077155789L;
 

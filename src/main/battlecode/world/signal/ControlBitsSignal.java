@@ -1,8 +1,12 @@
 package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ControlBitsSignal extends Signal {
+
+    @JsonProperty("type")
+    private String getTypeForJson() { return "ControlBits"; }
 
     private static final long serialVersionUID = -4229507739170593943L;
 
