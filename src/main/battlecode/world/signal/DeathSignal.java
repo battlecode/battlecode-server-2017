@@ -2,6 +2,7 @@ package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalObject;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Signifies that an object has died somewhere.
