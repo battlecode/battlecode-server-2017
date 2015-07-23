@@ -22,9 +22,12 @@
     <!-- ivy thinks xstream depends on 6 different xml parsers and 3 optional packages but we only need xpp3 -->
     <dependency org="com.thoughtworks.xstream" name="xstream" rev="1.4.8" transitive="false"/>
     <dependency org="xpp3" name="xpp3_min" rev="1.1.4c"/>
-    <dependency org="junit" name="junit" rev="4.12"/>
     <!-- we only use WeakIdentityHashMap which doesn't depend on anything-->
     <dependency org="org.hibernate" name="hibernate-search" rev="3.1.0.GA" transitive="false"/>
+
+    <!-- testing! -->
+    <dependency org="junit" name="junit" rev="4.12"/>
+    <dependency org="org.mockito" name="mockito-all" rev="1.9.5"/>
 
     <!-- rad new server stuff -->
     <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.5.4"/>
