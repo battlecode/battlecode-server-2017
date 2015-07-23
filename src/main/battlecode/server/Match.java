@@ -81,7 +81,6 @@ public class Match extends Observable {
      * match creation time!
      */
     public void initialize() {
-
         boolean breakpointsEnabled = options.getBoolean("bc.engine.breakpoints");
         this.bytecodesUsedEnabled =
                 options.getBoolean("bc.engine.bytecodes-used");
@@ -146,7 +145,9 @@ public class Match extends Observable {
 
         // Serialize the newly modified GameWorld.
         return new RoundDelta(
-                gameWorldViewer.getAllSignals(this.bytecodesUsedEnabled));
+                gameWorldViewer.getAllSignals(this.bytecodesUsedEnabled),
+                getRoundNumber()
+        );
     }
 
     /**

@@ -13,9 +13,9 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Runs matches. Specifically, this class forms a pipeline connecting match and
- * configuraiton parameters to the game engine and engine output to an abstract
- * match data sink.
+ * Runs matches. Specifically, this class forms a pipeline connecting user
+ * commands and configuration parameters to the game engine and engine output
+ * to abstract match data sinks.
  */
 public class Server implements Observer, Runnable {
 
@@ -70,8 +70,7 @@ public class Server implements Observer, Runnable {
      * operation.
      */
     public static enum Mode {
-        HEADLESS, LOCAL, TCP, SCRIMMAGE, TOURNAMENT, TESTS, AUTOTEST, MATCH, PIPE, BADGEREVIEW
-
+        HEADLESS, LOCAL, TCP, SCRIMMAGE, TOURNAMENT, TESTS, AUTOTEST, MATCH, PIPE, BADGEREVIEW, WEBSOCKET
     }
 
     /**
@@ -314,7 +313,8 @@ public class Server implements Observer, Runnable {
 
         if (Mode.HEADLESS.equals(mode) || Mode.SCRIMMAGE.equals(mode)
                 || Mode.TOURNAMENT.equals(mode) || Mode.TESTS.equals(mode)
-                || Mode.AUTOTEST.equals(mode) || Mode.MATCH.equals(mode)) {
+                || Mode.AUTOTEST.equals(mode) || Mode.MATCH.equals(mode)
+                || Mode.WEBSOCKET.equals(mode)) {
             this.state = State.RUNNING;
             this.runUntil = Integer.MAX_VALUE;
         }
