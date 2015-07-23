@@ -62,7 +62,7 @@ public class XMLMapHandlerTest {
         return handler.createGameWorld("", "", teamMemory);
     }
 
-    @Test(timeout=1000)
+    @Test(timeout=2000)
     // This map is actually not always legal due to random void generation
     public void testBasic() throws IOException {
         System.out.println("begin test basic");

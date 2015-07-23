@@ -3,6 +3,7 @@ package battlecode.world.signal;
 import battlecode.common.MapLocation;
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Signifies that a robot has moved.
@@ -10,6 +11,9 @@ import battlecode.world.InternalRobot;
  * @author Matt
  */
 public class MovementSignal extends Signal {
+
+    @JsonProperty("type")
+    private String getTypeForJson() { return "Movement"; }
 
     private static final long serialVersionUID = -6853620834787044985L;
 

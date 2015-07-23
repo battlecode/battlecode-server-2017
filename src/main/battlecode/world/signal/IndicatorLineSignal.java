@@ -4,8 +4,12 @@ import battlecode.common.MapLocation;
 import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class IndicatorLineSignal extends Signal {
+
+    @JsonProperty("type")
+    private String getTypeForJson() { return "IndicatorLine"; }
 
     public final int robotID;
     public final Team team;

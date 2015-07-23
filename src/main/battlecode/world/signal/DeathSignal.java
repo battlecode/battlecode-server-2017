@@ -2,6 +2,7 @@ package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalObject;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Signifies that an object has died somewhere.
@@ -9,6 +10,9 @@ import battlecode.world.InternalObject;
  * @author Matt
  */
 public class DeathSignal extends Signal {
+
+    @JsonProperty("type")
+    private String getTypeForJson() { return "Death"; }
 
     private static final long serialVersionUID = 8518453257317948520L;
 

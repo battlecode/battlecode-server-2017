@@ -212,6 +212,7 @@
             </classpath>
 
             <formatter type="plain"/>
+            <formatter type="plain" usefile="false"/>
 
             <batchtest todir="${test.report.dir}">
                 <fileset dir="${test.src.dir}">

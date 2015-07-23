@@ -23,4 +23,8 @@ public class RunNotification implements Notification {
     public <R> R accept(NotificationHandler<R> handler) {
         return handler.visitRunNotification(this);
     }
+
+    public boolean equals(final Object o) {
+        return o instanceof RunNotification && ((RunNotification)o).rounds == this.rounds;
+    }
 }

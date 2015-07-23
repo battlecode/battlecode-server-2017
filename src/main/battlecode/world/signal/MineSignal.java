@@ -4,8 +4,12 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MineSignal extends Signal {
+
+    @JsonProperty("type")
+    private String getTypeForJson() { return "Mine"; }
 	
 	
 	private static final long serialVersionUID = -4303228382203951149L;

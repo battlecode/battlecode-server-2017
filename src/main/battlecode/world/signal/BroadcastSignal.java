@@ -5,6 +5,7 @@ import java.util.HashMap;
 import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Signifies that a robot has broadcast a message.
@@ -12,6 +13,9 @@ import battlecode.world.InternalRobot;
  * @author Matt
  */
 public class BroadcastSignal extends Signal {
+
+    @JsonProperty("type")
+    private String getTypeForJson() { return "Broadcast"; }
 
     private static final long serialVersionUID = 8603786984259160822L;
 

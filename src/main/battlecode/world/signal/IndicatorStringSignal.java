@@ -2,6 +2,7 @@ package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Signifies that one of the robot's indicator strings has been changed
@@ -9,6 +10,9 @@ import battlecode.world.InternalRobot;
  * @author adamd
  */
 public class IndicatorStringSignal extends Signal {
+
+    @JsonProperty("type")
+    private String getTypeForJson() { return "IndicatorString"; }
 
     private static final long serialVersionUID = -8277652765209879399L;
 

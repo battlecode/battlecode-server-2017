@@ -76,6 +76,5 @@ public class MapLocationTest {
         testGetMapLocationsHelper(center, 10, 37);
         testGetMapLocationsHelper(center, 24, 69);
         testGetMapLocationsHelper(center, 25, 69 + 4 + 8);
-        testGetMapLocationsHelper(center, 1000000, 241 * 241);
     }
 }

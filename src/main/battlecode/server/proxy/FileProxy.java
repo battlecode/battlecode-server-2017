@@ -44,11 +44,11 @@ public class FileProxy extends Proxy {
      * @param fileName The name of the file to write to.
      * @throws IOException if the file cannot be opened or written to.
      */
-    FileProxy(String fileName) throws IOException {
+    public FileProxy(String fileName) throws IOException {
         this(fileName, false);
     }
 
-    protected FileProxy(String fileName, boolean buffered) throws IOException {
+    public FileProxy(String fileName, boolean buffered) throws IOException {
         super();
 
         this.buffered = buffered;

@@ -9,16 +9,21 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * All of the Signals that happen in a round.
+ */
 public class RoundDelta implements Serializable {
 
     private static final long serialVersionUID = 1667367676711924140L;
     private Signal[] signals;
 
-    public RoundDelta() {
-    }
+    public int roundNum;
 
-    public RoundDelta(Signal[] signals) {
+    public RoundDelta() {}
+
+    public RoundDelta(final Signal[] signals, final int roundNum) {
         this.signals = signals;
+        this.roundNum = roundNum;
         foldIndicatorSignals();
     }
 

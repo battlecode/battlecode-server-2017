@@ -1,8 +1,12 @@
 package battlecode.analysis;
 
 import battlecode.engine.signal.Signal;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AwesomenessSignal extends Signal {
+
+    @JsonProperty("type")
+    private String getTypeForJson() { return "Awesomeness"; }
     private static final long serialVersionUID = -5655877873179815593L;
 
     // Tweak to desired average awesomeness for relativeAwesomeness calculation

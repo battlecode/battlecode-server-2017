@@ -17,13 +17,13 @@ public abstract class Controller extends Observable {
      *
      * @throws IOException if the controller source cannot start
      */
-    public abstract void start() throws IOException;
+    public void start() throws IOException {}
+
 
     /**
      * Used for a controller to clean up any resources it may have used.
      *
      * @throws IOException if the controller source cannot stop
      */
-    public abstract void finish() throws IOException;
-
+    public void finish() throws IOException {}
 }
