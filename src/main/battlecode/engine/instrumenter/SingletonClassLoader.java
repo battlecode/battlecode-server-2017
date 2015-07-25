@@ -33,9 +33,9 @@ class SingletonClassLoader extends InstrumentingClassLoader {
                if(name.startsWith("hardplayer/"))
                try {
                    java.io.File file = new java.io.File("classes/"+name+".class");
-                   java.io.FileOutputStream stream = new java.io.FileOutputStream(file);
-                   stream.write(classBytes);
-                   stream.close();
+                   java.io.FileOutputStream gzipWriter = new java.io.FileOutputStream(file);
+                   gzipWriter.write(classBytes);
+                   gzipWriter.close();
                } catch(Exception e) { }
                */
 

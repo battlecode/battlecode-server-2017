@@ -1,4 +1,4 @@
-package battlecode.server.proxy;
+package battlecode.server.serializer;
 
 import battlecode.common.MapLocation;
 import battlecode.common.TerrainTile;
@@ -22,10 +22,12 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.*;
 import java.util.zip.GZIPInputStream;
 
-public class XStreamProxy extends Proxy {
+/**
+ * Created by james on 7/24/15.
+ */
+public class XStreamSerializer implements Serializer {
+    static private XStream xstream;
 
-    OutputStream stream;
-    static XStream xstream;
 
     public static class IntArrayConverter implements SingleValueConverter {
 
@@ -282,91 +284,27 @@ public class XStreamProxy extends Proxy {
         return xstream;
     }
 
-    public XStreamProxy(OutputStream stream) {
-        this.stream = stream;
+    public XStreamSerializer() {}
+
+    @Override
+    public void serialize(final OutputStream output, final Object message) throws IOException {
+        // TODO check how expensive this is
+        final ObjectOutputStream wrappedOutput = getXStream().createObjectOutputStream(output);
+        wrappedOutput.writeObject(message);
+        wrappedOutput.flush();
     }
 
-    public void writeObject(Object o) throws IOException {
-        // XStream object output streams do not support reset
-        output.writeObject(o);
-    }
-
-    protected OutputStream getOutputStream() throws IOException {
-        return getXStream().createObjectOutputStream(stream);
-    }
-
-    // In "compute and view match synchronously" mode, we can get
-    // stuck if we don't flush every round
-    public void writeStats(RoundStats stats) throws IOException {
-        writeObject(stats);
-        output.flush();
-    }
-
-    public void writeFooter(MatchFooter footer) throws IOException {
-        writeObject(footer);
-        output.flush();
-    }
-
-    static private final int EX_USAGE = 64;
-    static private final int EX_DATAERR = 65;
-    static private final int EX_IOERR = 74;
-
-    public static void usage() {
-        System.err.println("Usage: XStreamProxy [-z] [file]");
-        System.exit(EX_USAGE);
-    }
-
-    public static void main(String[] args) {
-        Options options = new Options();
-        options.addOption("z", "gzip", false, "open a gzip compressed file");
-        CommandLine cl = null;
+    @Override
+    public Object deserialize(InputStream input) throws IOException {
+        // TODO check how expensive this is
+        final ObjectInputStream wrappedInput = getXStream().createObjectInputStream(input);
+        final Object result;
         try {
-            cl = new GnuParser().parse(options, args);
-        } catch (ParseException e) {
-            usage();
-            return;
+            result = wrappedInput.readObject();
+        } catch (final ClassNotFoundException e) {
+            throw new IOException(e);
         }
-        XStreamProxy proxy = null;
-        try {
-            InputStream stream;
-            switch (cl.getArgs().length) {
-                case 0:
-                    stream = System.in;
-                    break;
-                case 1:
-                    stream = new FileInputStream(cl.getArgs()[0]);
-                    break;
-                default:
-                    usage();
-                    return;
-            }
-            if (cl.hasOption('z'))
-                stream = new GZIPInputStream(stream);
-            proxy = new XStreamProxy(System.out);
-            System.out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-            proxy.open();
-            ObjectInputStream input = new ObjectInputStream(stream);
-            while (true) {
-                proxy.writeObject(input.readObject());
-            }
-        } catch (EOFException e) {
-            try {
-                proxy.close();
-            } catch (IOException e2) {
-                e2.printStackTrace();
-                System.exit(EX_IOERR);
-            }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            System.exit(EX_DATAERR);
-        } catch (IOException e) {
-            e.printStackTrace();
-            if (e instanceof StreamCorruptedException ||
-                    e.getMessage().equals("Not in GZIP format"))
-                System.exit(EX_DATAERR);
-            else
-                System.exit(EX_IOERR);
-        }
+        return result;
     }
-
 }
+

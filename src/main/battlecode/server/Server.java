@@ -77,7 +77,9 @@ public class Server implements Observer, Runnable {
     /**
      * Initializes a new server.
      *
-     * @param args    the command line arguments that the server should use
+     * @param options the configuration to use
+     * @param mode the mode to run the server in
+     * @param controller the controller to use
      * @param proxies the proxies to use for this server
      */
     public Server(Config options, Mode mode, Controller controller,
@@ -281,8 +283,7 @@ public class Server implements Observer, Runnable {
         controller.start();
 
         for (Proxy p : this.proxies) {
-            debug("starting proxy " + p.getClass().getSimpleName());
-            p.open();
+            debug("using proxy " + p.getClass().getSimpleName());
         }
     }
 
@@ -294,8 +295,8 @@ public class Server implements Observer, Runnable {
             if (round != null) {
                 try {
                     for (Proxy p : proxies) {
-                        p.writeRound(round);
-                        p.writeStats(stats);
+                        p.writeObject(round);
+                        p.writeObject(stats);
                     }
                 } catch (IOException e) {
                     ErrorReporter.report(e, false);
@@ -311,7 +312,6 @@ public class Server implements Observer, Runnable {
      * running the game in a separate thread.
      */
     private void runMatch(Match match) throws Exception {
-
         if (Mode.HEADLESS.equals(mode) || Mode.SCRIMMAGE.equals(mode)
                 || Mode.TOURNAMENT.equals(mode) || Mode.TESTS.equals(mode)
                 || Mode.AUTOTEST.equals(mode) || Mode.MATCH.equals(mode)) {
@@ -336,7 +336,7 @@ public class Server implements Observer, Runnable {
         MatchHeader header = match.getHeader();
         ExtensibleMetadata exHeader = match.getHeaderMetadata();
         for (Proxy p : proxies) {
-            p.writeHeader(header);
+            p.writeObject(header);
             p.writeObject(exHeader);
         }
 
@@ -405,7 +405,7 @@ public class Server implements Observer, Runnable {
 
         for (Proxy p : proxies) {
             p.writeObject(gameStats);
-            p.writeFooter(footer);
+            p.writeObject(footer);
         }
 
         this.state = State.FINISHED;

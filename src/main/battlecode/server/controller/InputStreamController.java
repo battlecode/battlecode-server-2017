@@ -1,37 +1,39 @@
 package battlecode.server.controller;
 
 import battlecode.server.Server;
+import battlecode.server.serializer.Serializer;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
+import java.io.InputStream;
 
 /**
- * This class is used to provide a means of controlling the server over TCP. New
- * matches are started using a request packet, and matches are stopped and start
- * using control bytes. See Protocol for definitions of these bytes.
+ * This class is used to provide a means of controlling the server through a standard InputStream.
+ * The input stream could be stdin, a file, a socket, whatever.
  */
-class TCPController extends Controller {
+public final class InputStreamController extends Controller {
 
-    protected ObjectInputStream input = null;
-
-    /**
-     * The runnable that listens for TCP data.
-     */
-    private TCPControllerListener listener;
+    protected final InputStream input;
+    protected final Serializer serializer;
 
     /**
-     * The thread on which to listen for data from the client.
+     * The runnable that listens for input.
      */
-    private Thread listenerThread;
+    private final InputStreamListener listener;
 
     /**
-     * Creates a new TCPController using the given properties.
-     *
-     * @param socket the client socket to listen on
+     * The thread on which to listen for data.
      */
-    TCPController(ObjectInputStream input) {
+    private final Thread listenerThread;
+
+    /**
+     * Creates a new InputStreamController using the given properties.
+     */
+    public InputStreamController(final InputStream input, final Serializer serializer) {
         this.input = input;
+        this.serializer = serializer;
+        this.listener = new InputStreamListener();
+        this.listenerThread = new Thread(listener);
+        this.listenerThread.setDaemon(true);
     }
 
     /**
@@ -40,11 +42,7 @@ class TCPController extends Controller {
      * {@inheritDoc}
      */
     public void start() throws IOException {
-
         // Start listening on a new thread.
-        this.listener = new TCPControllerListener(input);
-        this.listenerThread = new Thread(listener);
-        this.listenerThread.setDaemon(true);
         this.listenerThread.start();
 
         try {
@@ -67,27 +65,11 @@ class TCPController extends Controller {
      * A Runnable that listens for data from the controller and calls the
      * appropriate methods to handle the data (namely Server.update()).
      */
-    public class TCPControllerListener implements Runnable {
-
-        /**
-         * The input stream for deserializing objects from the network.
-         */
-        private ObjectInput input;
-
+    private class InputStreamListener implements Runnable {
         /**
          * Whether or not the controller is listening.
          */
         private boolean isRunning = true;
-
-        /**
-         * Creates a listener on the given socket.
-         *
-         * @param socket the socket to listen for objects on
-         * @throws IOException if the socket couldn't be used for listening
-         */
-        public TCPControllerListener(ObjectInputStream input) throws IOException {
-            this.input = input;
-        }
 
         /**
          * Closes the connection and stops listening for control data.
@@ -112,19 +94,14 @@ class TCPController extends Controller {
         public void run() {
             while (isRunning) {
                 try {
-                    Object data = input.readObject();
-                    //System.out.println(data);
-                    //System.out.println(battlecode.server.proxy.XStreamProxy.getXStream().toXML(data));
+                    final Object data = serializer.deserialize(input);
+
                     setChanged();
                     notifyObservers(data);
                     clearChanged();
                 } catch (IOException e) {
                     if (isRunning)
-                        Server.error("error getting data from client: "
-                                + e.getMessage());
-                } catch (ClassNotFoundException e) {
-                    Server.error("error getting data from client: "
-                            + e.getMessage());
+                        Server.error("error getting data from client: " + e.getMessage());
                 }
             }
         }
