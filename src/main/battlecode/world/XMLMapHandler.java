@@ -814,7 +814,7 @@ class XMLMapHandler extends DefaultHandler {
             return null;
         }
 
-        // Create an input gzipWriter from the file.
+        // Create an input stream from the file.
         if (!mapPath.endsWith("/"))
             mapPath += "/";
         String fileName = mapPath + mapName + ".xml";

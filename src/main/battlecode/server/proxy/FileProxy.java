@@ -23,12 +23,12 @@ public class FileProxy implements Proxy {
     protected final Serializer serializer;
 
     /**
-     * The gzipWriter to use to write to the temporary file.
+     * The stream to use to write to the temporary file.
      */
     protected final OutputStream fileWriter;
 
     /**
-     * The gzipWriter used to gzip the input before writing to the temporary.
+     * The stream used to gzip the input before writing to the temporary.
      */
     protected final OutputStream gzipWriter;
 
