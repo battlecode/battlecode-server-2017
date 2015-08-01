@@ -23,11 +23,12 @@ import java.io.*;
 import java.util.zip.GZIPInputStream;
 
 /**
+ * Serialize things to XML, with XStream.
+ *
  * Created by james on 7/24/15.
  */
 public class XStreamSerializer implements Serializer {
     static private XStream xstream;
-
 
     public static class IntArrayConverter implements SingleValueConverter {
 
