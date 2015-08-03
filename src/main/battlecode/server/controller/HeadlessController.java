@@ -9,7 +9,7 @@ import java.io.IOException;
  * Adapts match parameters from a set of properties (i.e., the configuration
  * file or command line).
  */
-class HeadlessController extends Controller {
+public class HeadlessController extends Controller {
 
     /**
      * The match data for the headless match.
@@ -21,8 +21,7 @@ class HeadlessController extends Controller {
      *
      * @param options the properties to use for getting the map and teams.
      */
-    HeadlessController(Config options) {
-
+    public HeadlessController(Config options) {
         configInfo = new MatchInfo(
                 options.get("bc.game.team-a"),
                 options.get("bc.game.team-b"),

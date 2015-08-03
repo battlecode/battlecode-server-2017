@@ -66,7 +66,7 @@ public class GameMap implements GenericGameMap {
      * Represents the various integer properties a GameMap
      * can have.
      */
-    static enum MapProperties {
+    public enum MapProperties {
         WIDTH, HEIGHT, SEED, MAX_ROUNDS
     }
     private void calculateMaxInitialOre() {
@@ -110,7 +110,7 @@ public class GameMap implements GenericGameMap {
      * @param mapProperties      a map of MapProperties to their integer values containing dimensions, etc.
      * @param mapTiles           a matrix of TerrainTypes representing the map
      */
-    GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, int[][] mapInitialOre, String mapName) {
+    public GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, int[][] mapInitialOre, String mapName) {
         if (mapProperties.containsKey(MapProperties.WIDTH))
             this.mapWidth = mapProperties.get(MapProperties.WIDTH);
         else

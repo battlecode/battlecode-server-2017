@@ -212,6 +212,7 @@
             </classpath>
 
             <formatter type="plain"/>
+            <formatter type="plain" usefile="false"/> <!-- another logger to print output to terminal -->
 
             <batchtest todir="${test.report.dir}">
                 <fileset dir="${test.src.dir}">
@@ -221,4 +222,5 @@
         </junit>
     </target>
 
+    <target name="test" depends="unittest" />
 </project>
