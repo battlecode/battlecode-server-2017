@@ -30,7 +30,7 @@ public class Engine {
         this.garbageCollectRounds = options.getInt("bc.engine.gc-rounds");
         this.breakpointsEnabled = options.getBoolean("bc.engine.breakpoints");
         GenericWorld tempGameWorld = null;
-        //InternalObject.resetIDs();
+        //InternalRobot.resetIDs();
         IndividualClassLoader.reset();
         Scheduler.reset();
         RobotMonitor.reset();

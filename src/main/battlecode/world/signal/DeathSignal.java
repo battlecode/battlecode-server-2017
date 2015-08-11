@@ -1,7 +1,7 @@
 package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
-import battlecode.world.InternalObject;
+import battlecode.world.InternalRobot;
 
 /**
  * Signifies that an object has died somewhere.
@@ -23,7 +23,7 @@ public class DeathSignal extends Signal {
      *
      * @param object the object that has died
      */
-    public DeathSignal(InternalObject object) {
+    public DeathSignal(InternalRobot object) {
         this.objectID = object.getID();
     }
 
