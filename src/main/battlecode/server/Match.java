@@ -4,7 +4,7 @@ import battlecode.common.GameConstants;
 import battlecode.common.Team;
 import battlecode.engine.Engine;
 import battlecode.engine.GameState;
-import battlecode.engine.GameWorldViewer;
+import battlecode.engine.GenericWorld;
 import battlecode.engine.signal.Signal;
 import battlecode.serial.*;
 
@@ -26,9 +26,9 @@ public class Match extends Observable {
     private Engine engine;
 
     /**
-     * The GameWorldViewer for getting signals.
+     * The GenericWorld for getting signals.
      */
-    private GameWorldViewer gameWorldViewer;
+    private GenericWorld gameWorldViewer;
 
     /**
      * The MatchInfo from which this match was created.

@@ -54,7 +54,7 @@ public class Engine {
         Scheduler.start();
     }
 
-    public GameWorldViewer getGameWorldViewer() {
+    public GenericWorld getGameWorldViewer() {
         return gameWorld;
     }
 
