@@ -26,7 +26,7 @@ public enum GameActionExceptionType {
      */
     NOT_ACTIVE,
     /**
-     * Indicates when a robot tries to sense a <code>GameObject</code> that is no longer existant or no longer
+     * Indicates when a robot tries to sense a Robot that is no longer existant or no longer
      * in this robot's sensor range.
      */
     CANT_SENSE_THAT,

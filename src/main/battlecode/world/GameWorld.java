@@ -1,16 +1,7 @@
 package battlecode.world;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import battlecode.common.Clock;
 import battlecode.common.CommanderSkillType;
@@ -64,7 +55,20 @@ import com.google.common.collect.Iterables;
  * The primary implementation of the GameWorld interface for
  * containing and modifying the game map and the objects on it.
  */
-public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld {
+public class GameWorld implements GenericWorld {
+    protected int currentRound;  // do we need this here?? -- yes
+    protected boolean running = true;  // do we need this here?? -- yes
+    protected boolean wasBreakpointHit = false;
+    protected Team winner = null;
+    protected final String teamAName;
+    protected final String teamBName;
+    protected final Random randGen;
+    protected int nextID;
+    protected final ArrayList<Signal> signals;
+    protected final long[][] teamMemory;
+    protected final long[][] oldTeamMemory;
+    protected final Map<Integer, InternalRobot> gameObjectsByID;
+    protected final ArrayList<Integer> randomIDs = new ArrayList<Integer>();
 
     private final GameMap gameMap;
     private RoundStats roundStats = null;    // stats for each round; new object is created for each round
@@ -74,7 +78,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     private Map<Team, InternalRobot> baseHQs = new EnumMap<Team, InternalRobot>(Team.class);
     private Map<Team, Set<InternalRobot>> baseTowers = new EnumMap<Team, Set<InternalRobot>>(Team.class);
-    private final Map<MapLocation, InternalObject> gameObjectsByLoc = new HashMap<MapLocation, InternalObject>();
+    private final Map<MapLocation, InternalRobot> gameObjectsByLoc = new HashMap<MapLocation, InternalRobot>();
 
     private Map<MapLocation, Double> oreMined = new HashMap<MapLocation, Double>();
     private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<Team, GameMap.MapMemory>(Team.class);
@@ -95,7 +99,16 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, String teamA, String teamB, long[][] oldTeamMemory) {
-        super(gm.getSeed(), teamA, teamB, oldTeamMemory);
+        currentRound = -1;
+        teamAName = teamA;
+        teamBName = teamB;
+        gameObjectsByID = new LinkedHashMap<Integer, InternalRobot>();
+        signals = new ArrayList<Signal>();
+        randGen = new Random(gm.getSeed());
+        nextID = 1;
+        teamMemory = new long[2][oldTeamMemory[0].length];
+        this.oldTeamMemory = oldTeamMemory;
+
         gameMap = gm;
 
         mapMemory.put(Team.A, new GameMap.MapMemory(gameMap));
@@ -166,12 +179,12 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return locs.toArray(new MapLocation[locs.size()]);
     }
 
-    public InternalObject getObject(MapLocation loc) {
+    public InternalRobot getObject(MapLocation loc) {
         return gameObjectsByLoc.get(loc);
     }
 
-    public <T extends InternalObject> T getObjectOfType(MapLocation loc, Class<T> cl) {
-        InternalObject o = getObject(loc);
+    public <T extends InternalRobot> T getObjectOfType(MapLocation loc, Class<T> cl) {
+        InternalRobot o = getObject(loc);
         if (cl.isInstance(o))
             return cl.cast(o);
         else
@@ -179,26 +192,27 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     public InternalRobot getRobot(MapLocation loc) {
-        InternalObject obj = getObject(loc);
+        InternalRobot obj = getObject(loc);
         if (obj instanceof InternalRobot)
             return (InternalRobot) obj;
         else
             return null;
     }
     
-    public Collection<InternalObject> allObjects() {
+    public Collection<InternalRobot> allObjects() {
         return gameObjectsByID.values();
     }
 
-    public InternalObject[] getAllGameObjects() {
-        return gameObjectsByID.values().toArray(new InternalObject[gameObjectsByID.size()]);
+    public InternalRobot[] getAllGameObjects() {
+        return gameObjectsByID.values().toArray(new InternalRobot[gameObjectsByID.size()]);
     }
 
     public InternalRobot getRobotByID(int id) {
-        return (InternalRobot) getObjectByID(id);
+        InternalRobot r = getObjectByID(id);
+        return r;
     }
 
-    public boolean exists(InternalObject o) {
+    public boolean exists(InternalRobot o) {
         return gameObjectsByID.containsKey(o.getID());
     }
 
@@ -215,10 +229,92 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         return gameStats;
     }
 
+    public String getTeamName(Team t) {
+        switch (t) {
+            case A:
+                return teamAName;
+            case B:
+                return teamBName;
+            case NEUTRAL:
+                return "neutralplayer";
+            default:
+                return null;
+        }
+    }
+
+    public Team getWinner() {
+        return winner;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public long[][] getTeamMemory() {
+        return teamMemory;
+    }
+
+    public long[][] getOldTeamMemory() {
+        return oldTeamMemory;
+    }
+
+    public void setTeamMemory(Team t, int index, long state) {
+        teamMemory[t.ordinal()][index] = state;
+    }
+
+    public void setTeamMemory(Team t, int index, long state, long mask) {
+        long n = teamMemory[t.ordinal()][index];
+        n &= ~mask;
+        n |= (state & mask);
+        teamMemory[t.ordinal()][index] = n;
+    }
+
+    public int getCurrentRound() {
+        return currentRound;
+    }
+
+
+    public InternalRobot getObjectByID(int id) {
+        return gameObjectsByID.get(id);
+    }
+
     // *********************************
     // ****** MISC UTILITIES ***********
     // *********************************
 
+    public void addSignal(Signal s) {
+        signals.add(s);
+    }
+
+    public void clearAllSignals() {
+        signals.clear();
+    }
+
+    public void notifyBreakpoint() {
+        wasBreakpointHit = true;
+    }
+
+    public boolean wasBreakpointHit() {
+        return wasBreakpointHit;
+    }
+
+    public void reserveRandomIDs(int num) {
+        while (num > 0) {
+            randomIDs.add(nextID++);
+            num--;
+        }
+        Collections.shuffle(randomIDs, randGen);
+    }
+
+    public int nextID() {
+        if (randomIDs.isEmpty())
+        {
+        	int ret = nextID;
+        	nextID += randGen.nextInt(3)+1;
+            return ret;
+        } else
+            return randomIDs.remove(randomIDs.size() - 1);
+    }
     public boolean canSense(Team team, MapLocation loc) {
         return mapMemory.get(team).canSense(loc);
     }
@@ -293,7 +389,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         ArrayList<InternalRobot> robots = new ArrayList<InternalRobot>();
 
-        for (InternalObject o : gameObjectsByID.values()) {
+        for (InternalRobot o : gameObjectsByID.values()) {
             if (!(o instanceof InternalRobot))
                 continue;
             if (o.getLocation() != null && o.getLocation().distanceSquaredTo(center) <= radiusSquared)
@@ -307,8 +403,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     // ****** ENGINE ACTIONS ***********
     // *********************************
 
-    // should only be called by the InternalObject constructor
-    public void notifyAddingNewObject(InternalObject o) {
+    // should only be called by the InternalRobot constructor
+    public void notifyAddingNewObject(InternalRobot o) {
         if (gameObjectsByID.containsKey(o.getID()))
             return;
         gameObjectsByID.put(o.getID(), o);
@@ -318,8 +414,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     }
 
     // TODO: move stuff to here
-    // should only be called by InternalObject.setLocation
-    public void notifyMovingObject(InternalObject o, MapLocation oldLoc, MapLocation newLoc) {
+    // should only be called by InternalRobot.setLocation
+    public void notifyMovingObject(InternalRobot o, MapLocation oldLoc, MapLocation newLoc) {
         if (oldLoc != null) {
             if (gameObjectsByLoc.get(oldLoc) != o) {
                 ErrorReporter.report("Internal Error: invalid oldLoc in notifyMovingObject");
@@ -332,7 +428,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         }
     }
 
-    public void removeObject(InternalObject o) {
+    public void removeObject(InternalRobot o) {
         if (o.getLocation() != null) {
             MapLocation loc = o.getLocation();
             if (gameObjectsByLoc.get(loc) == o)
@@ -391,7 +487,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
     // *********************************
     // ****** COUNTING ROBOTS **********
     // *********************************
-    
+
+
     // only returns active robots
     public int getActiveRobotTypeCount(Team team, RobotType type) {
         if (activeRobotTypeCount.get(team).containsKey(type)) {
@@ -557,7 +654,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
         wasBreakpointHit = false;
         
         // process all gameobjects
-        InternalObject[] gameObjects = new InternalObject[gameObjectsByID.size()];
+        InternalRobot[] gameObjects = new InternalRobot[gameObjectsByID.size()];
         gameObjects = gameObjectsByID.values().toArray(gameObjects);
         for (int i = 0; i < gameObjects.length; i++) {
             gameObjects[i].processBeginningOfRound();
@@ -604,7 +701,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public void processEndOfRound() {
         // process all gameobjects
-        InternalObject[] gameObjects = new InternalObject[gameObjectsByID.size()];
+        InternalRobot[] gameObjects = new InternalRobot[gameObjectsByID.size()];
         gameObjects = gameObjectsByID.values().toArray(gameObjects);
         for (int i = 0; i < gameObjects.length; i++) {
             gameObjects[i].processEndOfRound();
@@ -636,8 +733,8 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
                 // tiebreak by total tower health
                 double towerDiff = 0.0;
                 double oreDiff = resources(Team.A) - resources(Team.B);
-                InternalObject[] objs = getAllGameObjects();
-                for (InternalObject obj : objs) {
+                InternalRobot[] objs = getAllGameObjects();
+                for (InternalRobot obj : objs) {
                     if (obj instanceof InternalRobot) {
                         InternalRobot ir = (InternalRobot) obj;
                         if (ir.getTeam() == Team.A) {
@@ -672,7 +769,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
         if (winner != null) {
             running = false;
-            for (InternalObject o : gameObjectsByID.values()) {
+            for (InternalRobot o : gameObjectsByID.values()) {
                 if (o instanceof InternalRobot)
                     RobotMonitor.killRobot(o.getID());
             }
@@ -683,7 +780,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
 
     public Signal[] getAllSignals(boolean includeBytecodesUsedSignal) {
         ArrayList<InternalRobot> allRobots = new ArrayList<InternalRobot>();
-        for (InternalObject obj : gameObjectsByID.values()) {
+        for (InternalRobot obj : gameObjectsByID.values()) {
             if (!(obj instanceof InternalRobot))
                 continue;
             InternalRobot ir = (InternalRobot) obj;
@@ -886,7 +983,7 @@ public class GameWorld extends BaseWorld<InternalObject> implements GenericWorld
             return;
         }
         int ID = s.getObjectID();
-        InternalObject obj = getObjectByID(ID);
+        InternalRobot obj = getObjectByID(ID);
 
         if (obj != null) {
             removeObject(obj);

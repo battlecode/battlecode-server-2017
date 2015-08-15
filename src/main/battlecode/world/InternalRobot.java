@@ -2,9 +2,7 @@ package battlecode.world;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
-import battlecode.common.Direction;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
@@ -15,17 +13,20 @@ import battlecode.common.TerrainTile;
 import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
-import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.BashSignal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.SelfDestructSignal;
 import battlecode.world.signal.SpawnSignal;
 import battlecode.world.signal.TransferSupplySignal;
 
-public class InternalRobot extends InternalObject implements Robot, GenericRobot {
-
+public class InternalRobot implements GenericRobot {
     public final RobotType type;
+
+    private final int myID;
+    private Team myTeam;
+
+    protected volatile MapLocation myLocation;
+    protected final GameWorld myGameWorld;
 
     protected volatile double myHealthLevel;
     protected volatile double mySupplyLevel;
@@ -60,7 +61,12 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
                          boolean spawnedRobot, int buildDelay) {
-        super(gw, loc, t);
+
+        myID = gw.nextID();
+        myTeam = t;
+        myGameWorld = gw;
+        myLocation = loc;
+        gw.notifyAddingNewObject(this);
         this.type = type;
         this.buildDelay = buildDelay;
 
@@ -112,6 +118,17 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         myGameWorld.updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        return o != null && (o instanceof InternalRobot) && ((InternalRobot) o).getID() == myID;
+    }
+
+    @Override
+    public int hashCode() {
+        return myID;
+    }
+
     // *********************************
     // ****** QUERY METHODS ************
     // *********************************
@@ -133,6 +150,40 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         return roundsAlive;
     }
 
+    public int getID() {
+        return myID;
+    }
+
+    protected void setTeam(Team newTeam) {
+        myTeam = newTeam;
+    }
+
+    public Team getTeam() {
+        return myTeam;
+    }
+
+    public MapLocation getLocation() {
+        return myLocation;
+    }
+
+    public GameWorld getGameWorld() {
+        return myGameWorld;
+    }
+
+    public boolean exists() {
+        return myGameWorld.exists(this);
+    }
+
+    public InternalRobot container() {
+        return null;
+    }
+
+    public MapLocation sensedLocation() {
+        if (container() != null)
+            return container().sensedLocation();
+        else
+            return getLocation();
+    }
     // *********************************
     // ****** BASIC METHODS ************
     // *********************************
@@ -466,7 +517,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
 
     public void setLocation(MapLocation loc) {
     	MapLocation oldloc = getLocation();
-        super.setLocation(loc);
+        myGameWorld.notifyMovingObject(this, myLocation, loc);
+        myLocation = loc;
         myGameWorld.updateMapMemoryRemove(getTeam(), oldloc, type.sensorRadiusSquared);
         myGameWorld.updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
     }
@@ -491,9 +543,8 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
     // ****** GAMEPLAY METHODS *********
     // *********************************
 
-    @Override
+    // should be called at the beginning of every round
     public void processBeginningOfRound() {
-        super.processBeginningOfRound();
     }
 
     public void processBeginningOfTurn() {
@@ -506,10 +557,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
     }
 
-    @Override
     public void processEndOfTurn() {
-        super.processEndOfTurn();
-
         roundsAlive++;
 		
         // resetting stuff
@@ -598,10 +646,7 @@ public class InternalRobot extends InternalObject implements Robot, GenericRobot
         }
     }
 
-    @Override
-    public void processEndOfRound() {
-        super.processEndOfRound();
-    }
+    public void processEndOfRound() {}
 
     // *********************************
     // ****** MISC. METHODS ************

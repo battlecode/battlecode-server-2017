@@ -1,12 +1,34 @@
 package battlecode.engine;
 
+import battlecode.common.Team;
+import battlecode.engine.signal.Signal;
 import battlecode.engine.signal.SignalHandler;
+import battlecode.serial.GameStats;
+import battlecode.serial.GenericGameMap;
+import battlecode.serial.RoundStats;
 
 /**
  * An interface that includes the part of the game world that isn't expected to change
  * from year to year.
  */
-public interface GenericWorld extends GameWorldViewer, SignalHandler {
+public interface GenericWorld extends SignalHandler {
+    public int getCurrentRound();
+
+    public int getMapSeed();
+
+    public GenericGameMap getGameMap();
+
+    public String getTeamName(Team t);
+
+    public Team getWinner();
+
+    public boolean isRunning();
+
+    public Signal[] getAllSignals(boolean includeBytecodesUsedSignal);
+
+    public RoundStats getRoundStats();
+
+    public GameStats getGameStats();
 
     public void beginningOfExecution(int id);
 

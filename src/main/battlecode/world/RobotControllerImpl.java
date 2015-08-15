@@ -8,11 +8,7 @@ import static battlecode.common.GameActionExceptionType.NOT_ENOUGH_RESOURCE;
 import static battlecode.common.GameActionExceptionType.NO_ROBOT_THERE;
 import static battlecode.common.GameActionExceptionType.OUT_OF_RANGE;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
 
 import battlecode.common.CommanderSkillType;
@@ -61,14 +57,26 @@ import com.google.common.collect.Iterables;
  - better suicide() ??
  - pare down GW, GWviewer methods; add engine.getallsignals?
  */
-public class RobotControllerImpl extends ControllerShared implements RobotController, GenericController {
+public final class RobotControllerImpl implements RobotController, GenericController {
+    private GameWorld gameWorld;
+    private InternalRobot robot;
 
     public RobotControllerImpl(GameWorld gw, InternalRobot r) {
-        super(gw, r);
+        gameWorld = gw;
+        robot = r;
     }
+
+    // *********************************
+    // ******** INTERNAL METHODS *******
+    // *********************************
 
     public int hashCode() {
         return robot.getID();
+    }
+
+    private static void assertNotNull(Object o) {
+        if (o == null)
+            throw new NullPointerException("Argument has an invalid null value");
     }
 
     // *********************************
@@ -99,6 +107,10 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************
+    public InternalRobot getRobot() {
+        return robot;
+    }
+
     public int getID() {
         return robot.getID();
     }
@@ -172,23 +184,9 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
 
     public boolean canSense(MapLocation loc) {
         return gameWorld.canSense(getTeam(), loc);
-        /*
-         int sensorRadius = robot.type.sensorRadiusSquared;
-
-         if (robot.myLocation.distanceSquaredTo(loc) <= sensorRadius) {
-         return true;
-         }
-       
-         for (InternalObject o : gameWorld.allObjects()) {
-         if ((Robot.class.isInstance(o)) && (o.getTeam() == robot.getTeam() && loc.distanceSquaredTo(o.getLocation()) <= ((InternalRobot)o).type.sensorRadiusSquared)) {
-         return true;
-         }
-         }
-         return false;
-         */
     }
 
-    public boolean canSense(InternalObject obj) {
+    public boolean canSense(InternalRobot obj) {
         return obj.exists() && (obj.getTeam() == getTeam() || canSense(obj.getLocation()));
     }
 
@@ -198,7 +196,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
     }
 
-    public void assertCanSense(InternalObject obj) throws GameActionException {
+    public void assertCanSense(InternalRobot obj) throws GameActionException {
         if (!canSense(obj)) {
             throw new GameActionException(CANT_SENSE_THAT, "That object is not within the robot's sensor range.");
         }
@@ -243,88 +241,40 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type) {
-        Predicate<InternalObject> p = new Predicate<InternalObject>() {
-            public boolean apply(InternalObject o) {
-                return canSense(o) && (type.isInstance(o)) && (!o.equals(robot));
-            }
-        };
-        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
-    }
+    // Note: A radius^2 < 0 will return all visible robots on the map;
+    // A null team will return robots of any team.
+    public RobotInfo[] senseNearbyRobots(final MapLocation center, final int radiusSquared, final Team team) {
+        final Collection<InternalRobot> allRobots = gameWorld.allObjects();
+        final List<RobotInfo> robots = new ArrayList<>();
 
-    // USE THIS METHOD CAREFULLY
-    public <T extends GameObject> RobotInfo[] getRobotsFromGameObjects(T[] array) {
-        RobotInfo[] robots = new RobotInfo[array.length];
-        for (int i = 0; i < robots.length; ++i) {
-            InternalRobot ir = (InternalRobot) array[i];
-            robots[i] = ir.getRobotInfo();
+        final boolean useRadius = radiusSquared >= 0;
+        final boolean useTeam = team != null;
+
+        for (final InternalRobot o : allRobots) {
+            if (!canSense(o)) continue;
+            if (o.equals(robot)) continue;
+            if (useRadius && o.myLocation.distanceSquaredTo(center) > radiusSquared) continue;
+            if (useTeam && o.getTeam() != team) continue;
+
+            robots.add(((InternalRobot)o).getRobotInfo());
         }
-        return robots;
+
+        return robots.toArray(new RobotInfo[0]);
     }
 
     public RobotInfo[] senseNearbyRobots() {
-        return getRobotsFromGameObjects(senseNearbyGameObjects(Robot.class));
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type, final int radiusSquared) {
-        Predicate<InternalObject> p = new Predicate<InternalObject>() {
-            public boolean apply(InternalObject o) {
-                return o.myLocation.distanceSquaredTo(robot.myLocation) <= radiusSquared
-                    && canSense(o) && (type.isInstance(o)) && (!o.equals(robot));
-            }
-        };
-        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
+        return senseNearbyRobots(-1);
     }
 
     public RobotInfo[] senseNearbyRobots(int radiusSquared) {
-        return getRobotsFromGameObjects(senseNearbyGameObjects(Robot.class, radiusSquared));
+        return senseNearbyRobots(radiusSquared, null);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type, final int radiusSquared, final Team team) {
-        if (team == null) {
-            return senseNearbyGameObjects(type, radiusSquared);
-        }
-        Predicate<InternalObject> p = new Predicate<InternalObject>() {
-            public boolean apply(InternalObject o) {
-                return o.myLocation.distanceSquaredTo(robot.myLocation) <= radiusSquared
-                    && o.getTeam() == team
-                    && canSense(o) && (type.isInstance(o)) && (!o.equals(robot));
-            }
-        };
-        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
+    public RobotInfo[] senseNearbyRobots(final int radiusSquared, final Team team) {
+        return senseNearbyRobots(robot.myLocation, radiusSquared, team);
     }
 
-    public RobotInfo[] senseNearbyRobots(int radiusSquared, Team team) {
-        return getRobotsFromGameObjects(senseNearbyGameObjects(Robot.class, radiusSquared, team));
-    }
 
-    @SuppressWarnings("unchecked")
-    public <T extends GameObject> T[] senseNearbyGameObjects(final Class<T> type, final MapLocation center, final int radiusSquared, final Team team) {
-        if (team == null) {
-            Predicate<InternalObject> p = new Predicate<InternalObject>() {
-                public boolean apply(InternalObject o) {
-                    return o.myLocation.distanceSquaredTo(center) <= radiusSquared
-                        && canSense(o) && (type.isInstance(o)) && (!o.equals(robot));
-                }
-            };
-            return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
-        }
-        Predicate<InternalObject> p = new Predicate<InternalObject>() {
-            public boolean apply(InternalObject o) {
-                return o.myLocation.distanceSquaredTo(center) <= radiusSquared
-                    && o.getTeam() == team
-                    && canSense(o) && (type.isInstance(o)) && (!o.equals(robot));
-            }
-        };
-        return Iterables.toArray((Iterable<T>) Iterables.filter(gameWorld.allObjects(), p), type);
-    }
-
-    public RobotInfo[] senseNearbyRobots(MapLocation center, int radiusSquared, Team team) {
-        return getRobotsFromGameObjects(senseNearbyGameObjects(Robot.class, center, radiusSquared, team));
-    }
 
     // ***********************************
     // ****** READINESS METHODS **********
@@ -377,7 +327,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         }
     }
 
-    protected void assertIsValidDirection(Direction d) {
+    private void assertIsValidDirection(Direction d) {
         if (!isValidDirection(d)) {
             throw new IllegalArgumentException("You cannot move in the direction NONE, OMNI or in a null direction.");
         }
@@ -423,18 +373,18 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
         return isAttackingUnit() && gameWorld.canAttackSquare(robot, loc);
     }
 
-    protected void assertIsWeaponReady() throws GameActionException {
+    private void assertIsWeaponReady() throws GameActionException {
         if (!isWeaponReady())
             throw new GameActionException(NOT_ACTIVE, "This robot has weapon delay and cannot attack. " + getWeaponDelay());
     }
 
-    protected void assertIsAttackingUnit() throws GameActionException {
+    private void assertIsAttackingUnit() throws GameActionException {
         if (!isAttackingUnit()) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Not an attacking unit.");
         }
     }
 
-    protected void assertValidAttackLocation(MapLocation loc) throws GameActionException {
+    private void assertValidAttackLocation(MapLocation loc) throws GameActionException {
         if (!isValidAttackLocation(loc)) {
             throw new GameActionException(OUT_OF_RANGE, "That location is out of this robot's attack range");
         }
@@ -792,7 +742,7 @@ public class RobotControllerImpl extends ControllerShared implements RobotContro
     }
 
     public void resign() {
-        for (InternalObject obj : gameWorld.getAllGameObjects())
+        for (InternalRobot obj : gameWorld.getAllGameObjects())
             if ((obj instanceof InternalRobot) && obj.getTeam() == robot.getTeam())
                 gameWorld.notifyDied((InternalRobot) obj);
         gameWorld.removeDead();
