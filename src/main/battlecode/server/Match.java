@@ -28,7 +28,7 @@ public class Match extends Observable {
     /**
      * The GenericWorld for getting signals.
      */
-    private GenericWorld gameWorldViewer;
+    private GenericWorld gameWorld;
 
     /**
      * The MatchInfo from which this match was created.
@@ -72,7 +72,7 @@ public class Match extends Observable {
         this.count = count;
 
         this.engine = null;
-        this.gameWorldViewer = null;
+        this.gameWorld = null;
     }
 
     /**
@@ -93,8 +93,8 @@ public class Match extends Observable {
                 mapPath, this.state);
 
         // Get the viewer from the engine.
-        this.gameWorldViewer = engine.getGameWorldViewer();
-        assert this.gameWorldViewer != null;
+        this.gameWorld = engine.getGameWorld();
+        assert this.gameWorld != null;
     }
 
     /**
@@ -107,7 +107,7 @@ public class Match extends Observable {
      */
     public Signal[] alter(Signal signal) {
         if (engine.receiveSignal(signal))
-            return gameWorldViewer.getAllSignals(false);
+            return gameWorld.getAllSignals(false);
         else
             return new Signal[0];
     }
@@ -146,7 +146,7 @@ public class Match extends Observable {
 
         // Serialize the newly modified GameWorld.
         return new RoundDelta(
-                gameWorldViewer.getAllSignals(this.bytecodesUsedEnabled));
+                gameWorld.getAllSignals(this.bytecodesUsedEnabled));
     }
 
     /**
@@ -155,7 +155,7 @@ public class Match extends Observable {
      * @return round stats from the engine
      */
     public RoundStats getStats() {
-        return gameWorldViewer.getRoundStats();
+        return gameWorld.getRoundStats();
     }
 
     /**
@@ -164,7 +164,7 @@ public class Match extends Observable {
      * @return game stats from the engine
      */
     public GameStats getGameStats() {
-        return gameWorldViewer.getGameStats();
+        return gameWorld.getGameStats();
     }
 
     /**
@@ -173,7 +173,7 @@ public class Match extends Observable {
      * @return this match's header
      */
     public MatchHeader getHeader() {
-        return new MatchHeader(gameWorldViewer.getGameMap(), state, number,
+        return new MatchHeader(gameWorld.getGameMap(), state, number,
                 count);
     }
 
@@ -197,7 +197,7 @@ public class Match extends Observable {
      * @return this match's footer
      */
     public MatchFooter getFooter() {
-        return new MatchFooter(gameWorldViewer.getWinner(),
+        return new MatchFooter(gameWorld.getWinner(),
                 getComputedTeamMemory());
     }
 
@@ -210,7 +210,7 @@ public class Match extends Observable {
     public Team getWinner() {
         if (hasMoreRounds())
             return null;
-        return gameWorldViewer.getWinner();
+        return gameWorld.getWinner();
     }
 
     /**
@@ -251,7 +251,7 @@ public class Match extends Observable {
         sb.append(" wins (round " + getRoundNumber() + ")");
 
         sb.append("\nReason: ");
-        GameStats stats = gameWorldViewer.getGameStats();
+        GameStats stats = gameWorld.getGameStats();
         DominationFactor dom = stats.getDominationFactor();
         double[] points = stats.getTotalPoints();
         double[] energon = stats.getTotalEnergon();
@@ -301,7 +301,7 @@ public class Match extends Observable {
      */
     public void finish() {
         this.computedTeamMemory = this.engine.getTeamMemory();
-        this.gameWorldViewer = null;
+        this.gameWorld = null;
         this.engine = null;
     }
 
