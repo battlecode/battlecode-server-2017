@@ -19,6 +19,8 @@ import static org.objectweb.asm.tree.AbstractInsnNode.*;
 
 public class RoboMethodTree extends MethodNode implements Opcodes {
 
+	private List<TryCatchBlockNode> tryCatchBlocks; // We shouldn't have to do this (it's in MethodNode), but it gets rid of warnings?
+	
     private final String methodName;
     private final String teamPackageName;
     private final String className;    // the class to which this method belongs
@@ -448,6 +450,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 
     }
 
+    @SuppressWarnings("unchecked")	// n.local and n.stack are both supposed to be List<Object>, but they aren't for some reason?
     private void visitFrameNode(FrameNode n) {
         replaceVars(n.local);
         replaceVars(n.stack);
