@@ -447,7 +447,6 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
                 l.set(i, classReference((String) l.get(i)));
             }
         }
-
     }
 
     @SuppressWarnings("unchecked")	// n.local and n.stack are both supposed to be List<Object>, but they aren't for some reason?

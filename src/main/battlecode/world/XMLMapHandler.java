@@ -518,7 +518,7 @@ class XMLMapHandler extends DefaultHandler {
 
     public GameWorld createGameWorld(String teamA, String teamB, long[][] teamMemory) {
 
-        System.out.println("Creating a game%%%%%%%%%");
+        System.out.println("Creating a game"); // Now with 100% fewer percent signs (did those serve a purpose?)
 
         //if (!isTournamentLegal()) {
             //fail("Map is not legal!", "Fix it.");
