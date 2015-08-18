@@ -18,8 +18,6 @@ import java.util.Set;
 import static org.objectweb.asm.tree.AbstractInsnNode.*;
 
 public class RoboMethodTree extends MethodNode implements Opcodes {
-
-	private List<TryCatchBlockNode> tryCatchBlocks; // We shouldn't have to do this (it's in MethodNode), but it gets rid of warnings?
 	
     private final String methodName;
     private final String teamPackageName;
@@ -165,7 +163,8 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
             n = n.getNext();
         return n;
     }
-
+    
+    @SuppressWarnings("unchecked")	// This is to fix the warning from the add() to tryCatchBlocks
     private void addRobotDeathHandler() {
         LabelNode robotDeathLabel = new LabelNode(new Label());
         LabelNode firstTryCatch = null;
@@ -180,7 +179,8 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
         instructions.add(new FrameNode(F_FULL, 0, new Object[0], 1, new Object[]{"java/lang/VirtualMachineError"}));
         instructions.add(new InsnNode(ATHROW));
     }
-
+    
+    @SuppressWarnings("unchecked")	// This is to fix the warning from the add() to tryCatchBlocks
     private void addDebugHandler() {
         LabelNode debugEndLabel = new LabelNode(new Label());
         tryCatchBlocks.add(new TryCatchBlockNode(startLabel, debugEndLabel, debugEndLabel, null));
