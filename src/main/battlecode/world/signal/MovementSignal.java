@@ -33,9 +33,13 @@ public class MovementSignal extends Signal {
     /**
      * Creates a signal for a robot movement.
      *
-     * @param robot           the robot that is moving
-     * @param newLoc          the robot's new location
-     * @param isMovingForward whether the robot got to the new location by moving forward or backward
+     * @param robot
+     *            the robot that is moving
+     * @param newLoc
+     *            the robot's new location
+     * @param isMovingForward
+     *            whether the robot got to the new location by moving forward or
+     *            backward
      */
     public MovementSignal(InternalRobot robot, MapLocation newLoc, boolean isMovingForward) {
         this(robot, newLoc, isMovingForward, 0);
@@ -44,9 +48,13 @@ public class MovementSignal extends Signal {
     /**
      * Creates a signal for a robot movement.
      *
-     * @param robot           the robot that is moving
-     * @param newLoc          the robot's new location
-     * @param isMovingForward whether the robot got to the new location by moving forward or backward
+     * @param robot
+     *            the robot that is moving
+     * @param newLoc
+     *            the robot's new location
+     * @param isMovingForward
+     *            whether the robot got to the new location by moving forward or
+     *            backward
      */
     public MovementSignal(InternalRobot robot, MapLocation newLoc, boolean isMovingForward, int delay) {
         this.robotID = robot.getID();

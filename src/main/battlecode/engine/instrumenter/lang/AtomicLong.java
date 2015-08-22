@@ -22,7 +22,8 @@ public class AtomicLong {
 
     public boolean compareAndSet(long expect, long update) {
         boolean b = (l == expect);
-        if (b) l = update;
+        if (b)
+            l = update;
         return b;
     }
 

@@ -1,21 +1,33 @@
 package battlecode.world;
 
-import battlecode.common.*;
-import battlecode.engine.ErrorReporter;
-import battlecode.server.Config;
-import battlecode.world.GameMap.MapProperties;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.*;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.helpers.DefaultHandler;
+
+import battlecode.common.GameConstants;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotType;
+import battlecode.common.Team;
+import battlecode.common.TerrainTile;
+import battlecode.engine.ErrorReporter;
+import battlecode.server.Config;
+import battlecode.world.GameMap.MapProperties;
 
 /**
- * This class is the actual SAX handler that responds
- * to element and character data events.
+ * This class is the actual SAX handler that responds to element and character
+ * data events.
  */
 class XMLMapHandler extends DefaultHandler {
 
@@ -109,7 +121,7 @@ class XMLMapHandler extends DefaultHandler {
                 chassis = RobotType.valueOf(stype);
                 Team team = Team.valueOf(getRequired(att, "team"));
                 String smine = getOptional(att, "mine");
-                Team mine = smine==null ? null : Team.valueOf(smine);
+                Team mine = smine == null ? null : Team.valueOf(smine);
                 return new RobotData(chassis, team, mine);
             }
         };
@@ -140,9 +152,9 @@ class XMLMapHandler extends DefaultHandler {
         public void createGameObject(GameWorld world, MapLocation loc) {
             InternalRobot robot = GameWorldFactory.createPlayer(world, type, loc, team, null, false, 0);
 
-	    if (this.type == RobotType.TOWER) {
-		world.addTower(robot, this.team);
-	    }
+            if (this.type == RobotType.TOWER) {
+                world.addTower(robot, this.team);
+            }
         }
 
         public boolean equalsMirror(SymbolData data) {
@@ -170,7 +182,7 @@ class XMLMapHandler extends DefaultHandler {
             public NodeData create(Attributes att) {
                 Team team = Team.valueOf(getRequired(att, "team"));
                 String smine = getOptional(att, "mine");
-                Team mine = smine==null ? null : Team.valueOf(smine);
+                Team mine = smine == null ? null : Team.valueOf(smine);
                 return new NodeData(team, mine);
             }
         };
@@ -200,7 +212,7 @@ class XMLMapHandler extends DefaultHandler {
         public void createGameObject(GameWorld world, MapLocation loc) {
             if (team == Team.NEUTRAL) {
             } else {
-            	InternalRobot r = GameWorldFactory.createPlayer(world, RobotType.HQ, loc, team, null, false, 0);
+                InternalRobot r = GameWorldFactory.createPlayer(world, RobotType.HQ, loc, team, null, false, 0);
                 world.setHQ(r, team);
             }
         }
@@ -210,7 +222,7 @@ class XMLMapHandler extends DefaultHandler {
                 return false;
             }
             NodeData d = (NodeData) data;
-            return mine == ((NodeData)data).mine && d.value == value;
+            return mine == ((NodeData) data).mine && d.value == value;
         }
 
         public SymbolData copy() {
@@ -245,7 +257,7 @@ class XMLMapHandler extends DefaultHandler {
         for (RobotType ch : RobotType.values()) {
             factories.put(ch.name(), RobotData.factory);
         }
-        //factories.put("ENCAMPMENT", NodeData.factory);
+        // factories.put("ENCAMPMENT", NodeData.factory);
         factories.put("HQ", NodeData.factory);
     }
 
@@ -261,11 +273,13 @@ class XMLMapHandler extends DefaultHandler {
     }
 
     /**
-     * This method validates a given attribute, returning its value
-     * if it is present and failing if it does not.
+     * This method validates a given attribute, returning its value if it is
+     * present and failing if it does not.
      *
-     * @param attributes the SAX Attributes instance
-     * @param property   the property to check for
+     * @param attributes
+     *            the SAX Attributes instance
+     * @param property
+     *            the property to check for
      * @return the String value of the specified attribute
      */
     private static String getRequired(Attributes attributes, String property) {
@@ -273,7 +287,8 @@ class XMLMapHandler extends DefaultHandler {
         String result = getOptional(attributes, property);
 
         if (result == null) {
-            fail("node missing required attribute '" + property + "'", "Check that all the nodes in the map file have all their required attributes.\n");
+            fail("node missing required attribute '" + property + "'",
+                    "Check that all the nodes in the map file have all their required attributes.\n");
             return null;
         } else
             return result;
@@ -281,13 +296,15 @@ class XMLMapHandler extends DefaultHandler {
     }
 
     /**
-     * This method returns the value of an attribute without
-     * validating its existence.
+     * This method returns the value of an attribute without validating its
+     * existence.
      *
-     * @param attributes the SAX Attributes instance
-     * @param property   the property to get the value of
-     * @return the String value of the specified attribute, or
-     *         <code>null</code> if it doesn't exist
+     * @param attributes
+     *            the SAX Attributes instance
+     * @param property
+     *            the property to get the value of
+     * @return the String value of the specified attribute, or <code>null</code>
+     *         if it doesn't exist
      */
     private static String getOptional(Attributes attributes, String property) {
 
@@ -300,18 +317,19 @@ class XMLMapHandler extends DefaultHandler {
     }
 
     /**
-     * This method validates that an XML element is the
-     * current parent element (i.e. is on the top of the
-     * stack); if it isn't, it fails.
+     * This method validates that an XML element is the current parent element
+     * (i.e. is on the top of the stack); if it isn't, it fails.
      *
-     * @param qName the name of the parent element to check for
+     * @param qName
+     *            the name of the parent element to check for
      */
     private void requireElement(String child, String parent) {
         if (!xmlStack.getLast().equals(parent))
-            fail("<" + child + "> allowed only as a child of <" + parent + ">", "Make sure that all nodes in the map file have the right parent nodes, according to the map file specs.\n");
+            fail("<" + child + "> allowed only as a child of <" + parent + ">",
+                    "Make sure that all nodes in the map file have the right parent nodes, according to the map file specs.\n");
     }
 
-    //private String theme = null;
+    // private String theme = null;
 
     /**
      * {@inheritDoc}
@@ -324,29 +342,33 @@ class XMLMapHandler extends DefaultHandler {
 
             // Ensure that the <map> element is the document root.
             if (xmlStack.size() > 0)
-                fail("<map> must be the root element of the map document", "Check that <map> is the root node.\nCheck that <map> occurs nowhere else in the map file.\n");
-            
-            if ("false".equals(getOptional(attributes, "constraints")))
-            {
-//            	special map, don't check size constraints
+                fail("<map> must be the root element of the map document",
+                        "Check that <map> is the root node.\nCheck that <map> occurs nowhere else in the map file.\n");
+
+            if ("false".equals(getOptional(attributes, "constraints"))) {
+                // special map, don't check size constraints
                 mapHeight = Integer.parseInt(getRequired(attributes, "height"));
                 mapWidth = Integer.parseInt(getRequired(attributes, "width"));
-            } else
-            {
-            	// Check the bounds of the map height.
+            } else {
+                // Check the bounds of the map height.
                 mapHeight = Integer.parseInt(getRequired(attributes, "height"));
                 if (mapHeight < GameConstants.MAP_MIN_HEIGHT || mapHeight > GameConstants.MAP_MAX_HEIGHT)
-                    fail("map height '" + mapHeight + "' exceeds limits", "Check that the map file defines a height that is consistent with GameConstants.MAP_MAX_HEIGHT (" + GameConstants.MAP_MAX_HEIGHT + ") and GameConstants.MAP_MIN_HEIGHT (" + GameConstants.MAP_MIN_HEIGHT + ").\n");
+                    fail("map height '" + mapHeight + "' exceeds limits",
+                            "Check that the map file defines a height that is consistent with GameConstants.MAP_MAX_HEIGHT ("
+                                    + GameConstants.MAP_MAX_HEIGHT + ") and GameConstants.MAP_MIN_HEIGHT ("
+                                    + GameConstants.MAP_MIN_HEIGHT + ").\n");
 
                 // Check the bounds of the map width.
                 mapWidth = Integer.parseInt(getRequired(attributes, "width"));
                 if (mapWidth < GameConstants.MAP_MIN_WIDTH || mapWidth > GameConstants.MAP_MAX_WIDTH)
-                    fail("map width '" + mapWidth + "' exceeds limits", "Check that the map file defines a width that is consistent with GameConstants.MAP_MAX_WIDTH and GameConstants.MAP_MIN_WIDTH.\n");
+                    fail("map width '" + mapWidth + "' exceeds limits",
+                            "Check that the map file defines a width that is consistent with GameConstants.MAP_MAX_WIDTH and GameConstants.MAP_MIN_WIDTH.\n");
             }
 
-            /* String result;
-            result = getOptional(attributes,"theme");
-            if (result != null) theme = result; */
+            /*
+             * String result; result = getOptional(attributes,"theme"); if
+             * (result != null) theme = result;
+             */
 
             // Update the map properties Map.
             mapProperties.put(MapProperties.HEIGHT, mapHeight);
@@ -371,9 +393,10 @@ class XMLMapHandler extends DefaultHandler {
             if (result != null)
                 mapProperties.put(MapProperties.MAX_ROUNDS, Integer.parseInt(result));
 
-            //result = getOptional(attributes, "points");
-            //if (result != null)
-            //    mapProperties.put(MapProperties.MIN_POINTS, Integer.parseInt(result));
+            // result = getOptional(attributes, "points");
+            // if (result != null)
+            // mapProperties.put(MapProperties.MIN_POINTS,
+            // Integer.parseInt(result));
 
         } else if (qName.equals("symbols")) {
 
@@ -385,12 +408,14 @@ class XMLMapHandler extends DefaultHandler {
 
             String character = getRequired(attributes, "character");
             if (character.length() != 1)
-                fail("invalid 'character' attribute '" + character + "' -- 'character' must have length 1", "Check that all 'character' attributes are just one character.\n");
+                fail("invalid 'character' attribute '" + character + "' -- 'character' must have length 1",
+                        "Check that all 'character' attributes are just one character.\n");
 
             String type = getRequired(attributes, "type");
             SymbolDataFactory factory = factories.get(type);
             if (factory == null) {
-                fail("invalid symbol type '" + type + "'", "Check that all symbol nodes have a type attribute defined in the map file specs.\n");
+                fail("invalid symbol type '" + type + "'",
+                        "Check that all symbol nodes have a type attribute defined in the map file specs.\n");
                 return;
             }
 
@@ -422,11 +447,12 @@ class XMLMapHandler extends DefaultHandler {
             MapLocation locB = MapLocation.valueOf(getRequired(attributes, "to"));
             String onedir = getOptional(attributes, "oneway");
             if (onedir != null)
-                nodeLinks.add(new MapLocation[]{locA, locB, null});
+                nodeLinks.add(new MapLocation[] { locA, locB, null });
             else
-                nodeLinks.add(new MapLocation[]{locA, locB});
+                nodeLinks.add(new MapLocation[] { locA, locB });
         } else {
-            //fail("unrecognized map element '<" + qName + ">'", "Check that all nodes are spelled correctly.\n");
+            // fail("unrecognized map element '<" + qName + ">'", "Check that
+            // all nodes are spelled correctly.\n");
         }
 
         // Put this element on the XML element stack.
@@ -439,7 +465,8 @@ class XMLMapHandler extends DefaultHandler {
     @Override
     public void characters(char[] ch, int start, int length) {
 
-        // Only parse if we're in "data" or "height" -- ignores comments and other junk.
+        // Only parse if we're in "data" or "height" -- ignores comments and
+        // other junk.
         if (!xmlStack.getLast().equals("data"))
             return;
 
@@ -448,9 +475,10 @@ class XMLMapHandler extends DefaultHandler {
             for (int i = start; i < length; i++) {
                 // if it isn't whitespace, fail
                 if (!Character.isWhitespace(ch[i]) && ch[i] != '\n')
-                    fail("the <data> node has too many rows", "Check that the number of rows is consistent with the 'height' attribute of <map>.\n");
+                    fail("the <data> node has too many rows",
+                            "Check that the number of rows is consistent with the 'height' attribute of <map>.\n");
             }
-            return;        // if it is whitespace, just ignore it
+            return; // if it is whitespace, just ignore it
         }
 
         // Parse each character into TerrainTypes.
@@ -463,7 +491,8 @@ class XMLMapHandler extends DefaultHandler {
             // if it's whitespace, check dataSoFar
             if ((c == '\n' || c == ' ') && dataSoFar.length() > 0) {
                 if (!symbolMap.containsKey(dataSoFar.charAt(0)))
-                    fail("unrecognized symbol in map: '" + c + "'", "Check that '" + c + "' is defined as one of the symbols in the map file. DEBUG: '" + dataSoFar + "'\n");
+                    fail("unrecognized symbol in map: '" + c + "'", "Check that '" + c
+                            + "' is defined as one of the symbols in the map file. DEBUG: '" + dataSoFar + "'\n");
 
                 map[currentCol][currentRow] = symbolMap.get(dataSoFar.charAt(0)).copy();
                 if (dataSoFar.substring(1).trim().equals("")) {
@@ -482,7 +511,8 @@ class XMLMapHandler extends DefaultHandler {
             if (c == '\n') {
                 if (currentRow != -1) {
                     if (currentCol < mapWidth)
-                        fail("row " + currentRow + " in <data> has too few characters", "Check that the number of characters in each row is consistent with the 'width' attribute of <map>.\n");
+                        fail("row " + currentRow + " in <data> has too few characters",
+                                "Check that the number of characters in each row is consistent with the 'width' attribute of <map>.\n");
                 }
                 currentRow++;
                 currentCol = 0;
@@ -490,9 +520,11 @@ class XMLMapHandler extends DefaultHandler {
                 continue;
             }
             if (currentRow < 0)
-                fail("spurious character in <data> node", "Check that the first row of map characters starts on the line after <data><![CDATA[ (see example maps).\n");
+                fail("spurious character in <data> node",
+                        "Check that the first row of map characters starts on the line after <data><![CDATA[ (see example maps).\n");
             if (currentCol >= mapWidth)
-                fail("row " + currentRow + " in <data> has too many characters", "Check that the number of characters in each row is consistent with the 'width' attribute of <map>.\n");
+                fail("row " + currentRow + " in <data> has too many characters",
+                        "Check that the number of characters in each row is consistent with the 'width' attribute of <map>.\n");
         }
 
         typesHaveBeenSet = true;
@@ -508,7 +540,8 @@ class XMLMapHandler extends DefaultHandler {
         // check that we got enough rows in <data>
         if (qName.equals("data")) {
             if (currentRow < mapHeight)
-                fail("the <data> node has too few rows", "Check that the number of rows is consistent with the 'height' attribute of <map>.\n");
+                fail("the <data> node has too few rows",
+                        "Check that the number of rows is consistent with the 'height' attribute of <map>.\n");
         }
 
         // Pop an element off the stack.
@@ -518,11 +551,13 @@ class XMLMapHandler extends DefaultHandler {
 
     public GameWorld createGameWorld(String teamA, String teamB, long[][] teamMemory) {
 
-        System.out.println("Creating a game"); // Now with 100% fewer percent signs (did those serve a purpose?)
+        System.out.println("Creating a game"); // Now with 100% fewer percent
+                                               // signs (did those serve a
+                                               // purpose?)
 
-        //if (!isTournamentLegal()) {
-            //fail("Map is not legal!", "Fix it.");
-        //}
+        // if (!isTournamentLegal()) {
+        // fail("Map is not legal!", "Fix it.");
+        // }
 
         TerrainTile[][] mapTiles = new TerrainTile[map.length][];
         for (int i = 0; i < map.length; i++) {
@@ -564,15 +599,17 @@ class XMLMapHandler extends DefaultHandler {
             }
         }
 
-        // by removing this line, you can no longer use IDs to determine execution order
-        //gw.endRandomIDs();
+        // by removing this line, you can no longer use IDs to determine
+        // execution order
+        // gw.endRandomIDs();
 
         return gw;
     }
 
     public void checkNodeLink(MapLocation l) {
         if (!(map[l.x][l.y] instanceof NodeData)) {
-            fail(String.format("Nodelink contains %d,%d but there is no node there", l.x, l.y), "Make sure the nodelink data is correct.");
+            fail(String.format("Nodelink contains %d,%d but there is no node there", l.x, l.y),
+                    "Make sure the nodelink data is correct.");
         }
     }
 
@@ -586,7 +623,7 @@ class XMLMapHandler extends DefaultHandler {
     private static void fail(String reason, String thingsToTry) {
         ErrorReporter.report("Malformed map file: " + reason, thingsToTry);
         RuntimeException e = new IllegalArgumentException();
-        //e.printStackTrace();
+        // e.printStackTrace();
         throw e;
     }
 
@@ -635,7 +672,6 @@ class XMLMapHandler extends DefaultHandler {
             return marked.contains(new MapLocation(x, y));
         }
     }
-
 
     public static class LegalityWarning {
 
@@ -698,12 +734,14 @@ class XMLMapHandler extends DefaultHandler {
                 if (d instanceof RobotData) {
                     RobotData rd = (RobotData) d;
                     switch (rd.type) {
-                        case TOWER:
-                            if (rd.team == Team.A) teamATowers.add(new MapLocation(x, y));
-                            else if (rd.team == Team.B) teamBTowers.add(new MapLocation(x, y));
-                            break;
-                        default:
-                            warn.warnUnit(rd);
+                    case TOWER:
+                        if (rd.team == Team.A)
+                            teamATowers.add(new MapLocation(x, y));
+                        else if (rd.team == Team.B)
+                            teamBTowers.add(new MapLocation(x, y));
+                        break;
+                    default:
+                        warn.warnUnit(rd);
                     }
                 } else if (d instanceof NodeData) {
                     if (((NodeData) d).team == Team.A) {
@@ -771,12 +809,14 @@ class XMLMapHandler extends DefaultHandler {
                 }
             }
             if (towerA.distanceSquaredTo(HQB) <= GameConstants.HQ_BUFFED_ATTACK_RADIUS_SQUARED) {
-                    warn.warn("Team B can attack team A towers from the start.");
-                }
+                warn.warn("Team B can attack team A towers from the start.");
+            }
         }
 
-        // TODO: weird cases in which all the NORMAL tiles are connected but not actually reachable because
-        // some units are blocking the locations. For example, it's possible to surround an HQ with 6 towers and
+        // TODO: weird cases in which all the NORMAL tiles are connected but not
+        // actually reachable because
+        // some units are blocking the locations. For example, it's possible to
+        // surround an HQ with 6 towers and
         // 2 VOIDs to make it impossible to actually do anything.
 
         int rounds = mapProperties.get(MapProperties.MAX_ROUNDS);
@@ -822,7 +862,8 @@ class XMLMapHandler extends DefaultHandler {
         try {
             file = new FileInputStream(fileName);
         } catch (FileNotFoundException e) {
-            fail("can't load '" + fileName + "' because of an exception:\n" + e.getMessage(), "Check that the map name is spelled correctly.\nCheck that the map file is located in the right directory.\nCheck that the map file isn't in use by another application.\n");
+            fail("can't load '" + fileName + "' because of an exception:\n" + e.getMessage(),
+                    "Check that the map name is spelled correctly.\nCheck that the map file is located in the right directory.\nCheck that the map file isn't in use by another application.\n");
             return null;
         }
 
@@ -831,7 +872,8 @@ class XMLMapHandler extends DefaultHandler {
             parser.parse(file, handler);
         } catch (Exception e) {
             e.printStackTrace();
-            fail("can't load '" + fileName + "' beacause of an exception:\n" + e.getMessage(), "Check that the map is valid XML.\n");
+            fail("can't load '" + fileName + "' beacause of an exception:\n" + e.getMessage(),
+                    "Check that the map is valid XML.\n");
             return null;
         }
         return handler;

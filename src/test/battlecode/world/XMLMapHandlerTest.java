@@ -1,18 +1,22 @@
 package battlecode.world;
 
-import java.io.PrintWriter;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import java.util.Random;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Random;
+
 import org.junit.Test;
 
-import battlecode.common.*;
+import battlecode.common.GameConstants;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotType;
+import battlecode.common.Team;
+import battlecode.common.TerrainTile;
 
 // Right now this only makes sure that the GOOD maps load properly.
 // There are no tests for BAD maps.
@@ -20,7 +24,8 @@ public class XMLMapHandlerTest {
     public final String MAP_NAME = "map";
     public final String MAP_PATH = "src/test/battlecode/world/maps/";
 
-    public void writeMapToFile(int width, int height, int rounds, int seed, char normal, char voidtile, char hqa, char hqb, char towera, char towerb, char[][] terrain, int[][] ore) throws IOException {
+    public void writeMapToFile(int width, int height, int rounds, int seed, char normal, char voidtile, char hqa,
+            char hqb, char towera, char towerb, char[][] terrain, int[][] ore) throws IOException {
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(MAP_PATH + MAP_NAME + ".xml")), true);
         out.printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         out.printf("<map height=\"%d\" width=\"%d\">\n", height, width);
@@ -62,7 +67,7 @@ public class XMLMapHandlerTest {
         return handler.createGameWorld("", "", teamMemory);
     }
 
-    @Test(timeout=1000)
+    @Test(timeout = 1000)
     // This map is actually not always legal due to random void generation
     public void testBasic() throws IOException {
         System.out.println("begin test basic");

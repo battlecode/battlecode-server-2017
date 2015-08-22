@@ -3,7 +3,8 @@ package battlecode.engine.instrumenter.lang;
 import java.util.Random;
 
 /**
- * A wrapper for java.util.Random, that uses the map seed in place of system time for the default Random constructor
+ * A wrapper for java.util.Random, that uses the map seed in place of system
+ * time for the default Random constructor
  *
  * @author adamd
  */
@@ -22,7 +23,8 @@ public class RoboRandom extends Random {
     }
 
     /**
-     * Sets the seed used for the default Random cosntructor.  Should be called at the beginning of each game.
+     * Sets the seed used for the default Random cosntructor. Should be called
+     * at the beginning of each game.
      */
     public static void setMapSeed(long seed) {
         mapSeed = seed;

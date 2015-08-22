@@ -28,7 +28,8 @@ public class BroadcastSignal extends Signal {
     /**
      * Creates a signal for a robot broadcast.
      *
-     * @param robot the robot that broadcast the message
+     * @param robot
+     *            the robot that broadcast the message
      */
     public BroadcastSignal(InternalRobot robot, HashMap<Integer, Integer> broadcastMap) {
         this.robotID = robot.getID();

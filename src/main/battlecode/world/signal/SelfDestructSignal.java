@@ -36,6 +36,7 @@ public class SelfDestructSignal extends Signal {
         this.loc = loc;
         this.damageFactor = damageFactor;
     }
+
     /**
      * Returns the ID of the robot that just attacked.
      *

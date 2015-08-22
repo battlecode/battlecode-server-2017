@@ -1,10 +1,9 @@
 package battlecode.engine.scheduler;
 
-import battlecode.engine.ErrorReporter;
-import battlecode.engine.instrumenter.RobotMonitor;
-
 import java.util.concurrent.locks.LockSupport;
 
+import battlecode.engine.ErrorReporter;
+import battlecode.engine.instrumenter.RobotMonitor;
 
 public class Scheduler {
 
@@ -54,9 +53,8 @@ public class Scheduler {
     }
 
     /**
-     * Removes the current thread from the scheduler.
-     * Should be called right before the thread exits.
-     * n
+     * Removes the current thread from the scheduler. Should be called right
+     * before the thread exits. n
      */
     public static void die() {
         ScheduledThread last = current.prev;
@@ -67,16 +65,15 @@ public class Scheduler {
     }
 
     /**
-     * Wakes up the next thread.  Should be followed by a
-     * call to endTurn().
+     * Wakes up the next thread. Should be followed by a call to endTurn().
      */
     private static void wakeupNext() {
         LockSupport.unpark(current.thread);
     }
 
     /**
-     * Ends this thread's turn, but does not wake up the next thread.
-     * New robot threads should call this immediately after starting.
+     * Ends this thread's turn, but does not wake up the next thread. New robot
+     * threads should call this immediately after starting.
      */
     public static void endTurn() {
         // we need do-while rather than while in case the current thread
@@ -87,23 +84,22 @@ public class Scheduler {
         RobotMonitor.switchRunner(current.data);
     }
 
-    //static private volatile long enterTime;
-    //static public volatile long timeInScheduler;
+    // static private volatile long enterTime;
+    // static public volatile long timeInScheduler;
 
     /**
      * Ends this thread's turn and wakes up the next thread.
      */
     public static void passToNextThread() {
-        //enterTime = System.nanoTime();
+        // enterTime = System.nanoTime();
         startNextThread();
         endTurn();
-        //timeInScheduler+=System.nanoTime()-enterTime;
+        // timeInScheduler+=System.nanoTime()-enterTime;
     }
 
     /**
-     * Starts the next thread without parking this one.  Used
-     * by the engine so it can write the match to disk while
-     * robots are running.
+     * Starts the next thread without parking this one. Used by the engine so it
+     * can write the match to disk while robots are running.
      */
     public static void startNextThread() {
         current = current.next;

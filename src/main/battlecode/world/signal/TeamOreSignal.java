@@ -12,7 +12,7 @@ public class TeamOreSignal extends Signal {
     public final double[] ore;
 
     public TeamOreSignal(double[] ore) {
-    	this.ore = Arrays.copyOf(ore, ore.length);
+        this.ore = Arrays.copyOf(ore, ore.length);
     }
 
     /**

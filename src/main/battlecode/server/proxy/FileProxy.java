@@ -1,19 +1,24 @@
 package battlecode.server.proxy;
 
-import battlecode.serial.notification.Notification;
-import battlecode.server.Server;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOError;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
-import battlecode.server.serializer.Serializer;
 import org.apache.commons.io.FileUtils;
+
+import battlecode.serial.notification.Notification;
+import battlecode.server.Server;
+import battlecode.server.serializer.Serializer;
 
 /**
  * This class represents a "connection" to a file. It allows match data to be
  * written to disk so that it may be read later.
  *
- * Note that it writes to a temporary file, which it moves into place when finished.
+ * Note that it writes to a temporary file, which it moves into place when
+ * finished.
  */
 public class FileProxy implements Proxy {
 
@@ -46,9 +51,12 @@ public class FileProxy implements Proxy {
      * Creates a new FileProxy that utilizes the file given by the specified
      * filename.
      *
-     * @param fileName The name of the file to write to.
-     * @param serializer The serializer to use.
-     * @throws IOException if the file cannot be opened or written to.
+     * @param fileName
+     *            The name of the file to write to.
+     * @param serializer
+     *            The serializer to use.
+     * @throws IOException
+     *             if the file cannot be opened or written to.
      */
     public FileProxy(String fileName, Serializer serializer) throws IOException {
         // Create directories if necessary.
@@ -56,8 +64,7 @@ public class FileProxy implements Proxy {
         if (!file.exists() && file.getParentFile() != null)
             file.getParentFile().mkdirs();
 
-        this.temp = File.createTempFile("battlecode", ".tmp", new File(
-                System.getProperty("java.io.tmpdir")));
+        this.temp = File.createTempFile("battlecode", ".tmp", new File(System.getProperty("java.io.tmpdir")));
         temp.deleteOnExit();
 
         this.fileWriter = new FileOutputStream(temp);
@@ -78,7 +85,7 @@ public class FileProxy implements Proxy {
             file.delete();
         try {
             FileUtils.moveFile(temp, file);
-        } catch(final IOError e) {
+        } catch (final IOError e) {
             Server.warn("unable to rename match file");
         }
     }

@@ -1,14 +1,21 @@
 package battlecode.server;
 
+import java.util.Observable;
+
 import battlecode.common.GameConstants;
 import battlecode.common.Team;
 import battlecode.engine.Engine;
 import battlecode.engine.GameState;
 import battlecode.engine.GenericWorld;
 import battlecode.engine.signal.Signal;
-import battlecode.serial.*;
-
-import java.util.Observable;
+import battlecode.serial.DominationFactor;
+import battlecode.serial.ExtensibleMetadata;
+import battlecode.serial.GameStats;
+import battlecode.serial.MatchFooter;
+import battlecode.serial.MatchHeader;
+import battlecode.serial.MatchInfo;
+import battlecode.serial.RoundDelta;
+import battlecode.serial.RoundStats;
 
 //import battlecode.tournament.TournamentType;
 //import battlecode.tournament.Match.Type;
@@ -58,11 +65,12 @@ public class Match extends Observable {
     /**
      * Creates a new match with the given parameters and options.
      *
-     * @param info    the teams and map to use when running this match
-     * @param options options relevant to match creation (i.e., default map path)
+     * @param info
+     *            the teams and map to use when running this match
+     * @param options
+     *            options relevant to match creation (i.e., default map path)
      */
-    public Match(MatchInfo info, String map, Config options, int number,
-                 int count) {
+    public Match(MatchInfo info, String map, Config options, int number, int count) {
 
         this.info = info;
         this.map = map;
@@ -83,14 +91,12 @@ public class Match extends Observable {
     public void initialize() {
 
         boolean breakpointsEnabled = options.getBoolean("bc.engine.breakpoints");
-        this.bytecodesUsedEnabled =
-                options.getBoolean("bc.engine.bytecodes-used");
+        this.bytecodesUsedEnabled = options.getBoolean("bc.engine.bytecodes-used");
 
         String mapPath = options.get("bc.game.map-path");
 
         // Create a new engine.
-        this.engine = new Engine(info.getTeamA(), info.getTeamB(), map,
-                mapPath, this.state);
+        this.engine = new Engine(info.getTeamA(), info.getTeamB(), map, mapPath, this.state);
 
         // Get the viewer from the engine.
         this.gameWorld = engine.getGameWorld();
@@ -101,7 +107,8 @@ public class Match extends Observable {
      * Sends a signal directly to the game engine, possibly altering the match
      * state.
      *
-     * @param signal the signal to send to the engine
+     * @param signal
+     *            the signal to send to the engine
      * @return the signals that represent the effect of the alteration, or an
      *         empty signal array if there was no effect
      */
@@ -145,8 +152,7 @@ public class Match extends Observable {
             return null;
 
         // Serialize the newly modified GameWorld.
-        return new RoundDelta(
-                gameWorld.getAllSignals(this.bytecodesUsedEnabled));
+        return new RoundDelta(gameWorld.getAllSignals(this.bytecodesUsedEnabled));
     }
 
     /**
@@ -173,8 +179,7 @@ public class Match extends Observable {
      * @return this match's header
      */
     public MatchHeader getHeader() {
-        return new MatchHeader(gameWorld.getGameMap(), state, number,
-                count);
+        return new MatchHeader(gameWorld.getGameMap(), state, number, count);
     }
 
     /**
@@ -197,8 +202,7 @@ public class Match extends Observable {
      * @return this match's footer
      */
     public MatchFooter getFooter() {
-        return new MatchFooter(gameWorld.getWinner(),
-                getComputedTeamMemory());
+        return new MatchFooter(gameWorld.getWinner(), getComputedTeamMemory());
     }
 
     /**
@@ -232,16 +236,16 @@ public class Match extends Observable {
         String teamName;
 
         switch (getWinner()) {
-            case A:
-                teamName = info.getTeamA() + " (A)";
-                break;
+        case A:
+            teamName = info.getTeamA() + " (A)";
+            break;
 
-            case B:
-                teamName = info.getTeamB() + " (B)";
-                break;
+        case B:
+            teamName = info.getTeamB() + " (B)";
+            break;
 
-            default:
-                teamName = "nobody";
+        default:
+            teamName = "nobody";
         }
 
         StringBuilder sb = new StringBuilder();
@@ -285,7 +289,8 @@ public class Match extends Observable {
     public long[][] getComputedTeamMemory() {
         if (computedTeamMemory == null)
             return this.engine.getTeamMemory();
-        else return computedTeamMemory;
+        else
+            return computedTeamMemory;
     }
 
     /**
@@ -307,8 +312,7 @@ public class Match extends Observable {
 
     @Override
     public String toString() {
-        String teams = String.format("%s vs. %s on %s", info.getTeamA(), info
-                .getTeamB(), map);
+        String teams = String.format("%s vs. %s on %s", info.getTeamA(), info.getTeamB(), map);
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < (50 - teams.length()) / 2; i++)
@@ -318,7 +322,8 @@ public class Match extends Observable {
         return sb.toString();
     }
 
-    // Match file IO is pretty performance intensive so we want to do it while robots are
+    // Match file IO is pretty performance intensive so we want to do it while
+    // robots are
     // running if possible.
     public void setIOCallback(Runnable callback) {
         engine.setIOCallback(callback);

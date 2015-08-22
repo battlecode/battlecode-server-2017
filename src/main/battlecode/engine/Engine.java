@@ -30,7 +30,7 @@ public class Engine {
         this.garbageCollectRounds = options.getInt("bc.engine.gc-rounds");
         this.breakpointsEnabled = options.getBoolean("bc.engine.breakpoints");
         GenericWorld tempGameWorld = null;
-        //InternalRobot.resetIDs();
+        // InternalRobot.resetIDs();
         IndividualClassLoader.reset();
         Scheduler.reset();
         RobotMonitor.reset();
@@ -79,11 +79,12 @@ public class Engine {
             gameWorld.processEndOfRound();
             if (!gameWorld.isRunning()) {
                 // Let all of the threads return so we don't leak
-                // memory.  GameWorld has already told RobotMonitor
+                // memory. GameWorld has already told RobotMonitor
                 // to kill all the robots;
-                //System.out.println("Trying to clean up robots");
+                // System.out.println("Trying to clean up robots");
                 Scheduler.passToNextThread();
-                //System.out.println("Time spent in scheduler: "+(Scheduler.timeInScheduler*1.E-9));
+                // System.out.println("Time spent in scheduler:
+                // "+(Scheduler.timeInScheduler*1.E-9));
             }
         } catch (Exception e) {
             ErrorReporter.report(e);
@@ -98,7 +99,8 @@ public class Engine {
     /**
      * TODO: update this, since energon change signal breaks this
      *
-     * @return true if the gamestate may have changed, false if the gamestate did not change
+     * @return true if the gamestate may have changed, false if the gamestate
+     *         did not change
      */
     public boolean receiveSignal(Signal s) {
         gameWorld.clearAllSignals();

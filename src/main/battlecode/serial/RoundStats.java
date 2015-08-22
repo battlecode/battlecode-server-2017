@@ -1,8 +1,8 @@
 package battlecode.serial;
 
-import battlecode.common.Team;
-
 import java.io.Serializable;
+
+import battlecode.common.Team;
 
 // Stub for compatibility with last year's Proxy interface.
 public class RoundStats implements Serializable {
@@ -11,7 +11,7 @@ public class RoundStats implements Serializable {
     private final double[] points;
 
     public RoundStats(double aPoints, double bPoints) {
-        points = new double[]{aPoints, bPoints};
+        points = new double[] { aPoints, bPoints };
     }
 
     public double getPoints(Team team) {

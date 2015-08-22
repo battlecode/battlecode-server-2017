@@ -20,9 +20,9 @@ public class SilencedPrintStream extends PrintStream {
         return theInstance;
     }
 
-    //************************
-    //*** PRINT METHODS ***
-    //************************
+    // ************************
+    // *** PRINT METHODS ***
+    // ************************
 
     public void print(boolean b) {
     }
@@ -51,9 +51,9 @@ public class SilencedPrintStream extends PrintStream {
     public void print(String s) {
     }
 
-    //***************************
-    //*** PRINTLN METHODS ***
-    //***************************
+    // ***************************
+    // *** PRINTLN METHODS ***
+    // ***************************
 
     public void println(boolean b) {
     }
@@ -82,9 +82,9 @@ public class SilencedPrintStream extends PrintStream {
     public void println(String s) {
     }
 
-    //*************************
-    //*** MISCELLANEOUS ***
-    //*************************
+    // *************************
+    // *** MISCELLANEOUS ***
+    // *************************
 
     public PrintStream append(char c) {
         return this;
@@ -124,4 +124,3 @@ public class SilencedPrintStream extends PrintStream {
     }
 
 }
-

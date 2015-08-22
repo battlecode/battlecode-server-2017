@@ -26,8 +26,10 @@ public class BashSignal extends Signal {
     /**
      * Creates a signal for a robot bash.
      *
-     * @param robot     the robot that attacked
-     * @param targetLoc the location that the robot attacked
+     * @param robot
+     *            the robot that attacked
+     * @param targetLoc
+     *            the location that the robot attacked
      */
     public BashSignal(InternalRobot robot, MapLocation targetLoc) {
         this.robotID = robot.getID();

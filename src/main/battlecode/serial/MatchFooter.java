@@ -1,8 +1,8 @@
 package battlecode.serial;
 
-import battlecode.common.Team;
-
 import java.io.Serializable;
+
+import battlecode.common.Team;
 
 public class MatchFooter implements Serializable {
 

@@ -26,8 +26,10 @@ public class AttackSignal extends Signal {
     /**
      * Creates a signal for a robot attack.
      *
-     * @param robot     the robot that attacked
-     * @param targetLoc the location that the robot attacked
+     * @param robot
+     *            the robot that attacked
+     * @param targetLoc
+     *            the location that the robot attacked
      */
     public AttackSignal(InternalRobot robot, MapLocation targetLoc) {
         this.robotID = robot.getID();

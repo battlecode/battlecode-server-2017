@@ -1,23 +1,33 @@
 package battlecode.engine.instrumenter;
 
-import battlecode.engine.ErrorReporter;
-import org.objectweb.asm.*;
+import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
 
 import java.io.IOException;
 import java.util.HashSet;
 
-import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Attribute;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+
+import battlecode.engine.ErrorReporter;
 
 /**
- * This class transitively reads all interfaces and superclasses implemented or extended by a given class.  After visiting a class, one can call getInterfaces()
- * to get all interfaces/classes transitively implemented/extended by the visited class.  A single instance of InterfaceReader can be used more than once
- * in this fashion.
+ * This class transitively reads all interfaces and superclasses implemented or
+ * extended by a given class. After visiting a class, one can call
+ * getInterfaces() to get all interfaces/classes transitively
+ * implemented/extended by the visited class. A single instance of
+ * InterfaceReader can be used more than once in this fashion.
  *
  * @author adamd
  */
 class InterfaceReader extends ClassVisitor {
 
-    // this will store the final result of which interfaces are transitively implemented
+    // this will store the final result of which interfaces are transitively
+    // implemented
     private String[] interfaces = null;
 
     public InterfaceReader() {
@@ -30,7 +40,9 @@ class InterfaceReader extends ClassVisitor {
         try {
             cr = new ClassReader(className);
         } catch (IOException ioe) {
-            ErrorReporter.report("Can't find the class \"" + className + "\", and this wasn't caught until the MethodData stage.", true);
+            ErrorReporter.report(
+                    "Can't find the class \"" + className + "\", and this wasn't caught until the MethodData stage.",
+                    true);
             throw new InstrumentationException();
         }
         InterfaceReader ir = new InterfaceReader();
@@ -39,7 +51,8 @@ class InterfaceReader extends ClassVisitor {
     }
 
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        // first, put all interfaces/classes directly implemented/extended by the given class into result
+        // first, put all interfaces/classes directly implemented/extended by
+        // the given class into result
         HashSet<String> result = new HashSet<String>();
         for (String i : interfaces) {
             result.add(i);
@@ -47,15 +60,19 @@ class InterfaceReader extends ClassVisitor {
         if (superName != null)
             result.add(superName);
 
-        // now, for each element of result, use an InterfaceReader on it, so we recursively get all interfaces/classes transitively implemented/extended
-        // by the given class.  The results will be stored in result2.
+        // now, for each element of result, use an InterfaceReader on it, so we
+        // recursively get all interfaces/classes transitively
+        // implemented/extended
+        // by the given class. The results will be stored in result2.
         HashSet<String> result2 = new HashSet<String>();
         for (String i : result) {
             ClassReader cr;
             try {
                 cr = new ClassReader(i);
             } catch (IOException ioe) {
-                ErrorReporter.report("Can't find the class \"" + i + "\", and this wasn't caught until the InterfaceReader stage.", true);
+                ErrorReporter.report(
+                        "Can't find the class \"" + i + "\", and this wasn't caught until the InterfaceReader stage.",
+                        true);
                 continue;
             }
             InterfaceReader ir = new InterfaceReader();
@@ -66,7 +83,7 @@ class InterfaceReader extends ClassVisitor {
         }
         result2.addAll(result);
 
-        this.interfaces = result2.toArray(new String[]{});
+        this.interfaces = result2.toArray(new String[] {});
     }
 
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
@@ -96,9 +113,9 @@ class InterfaceReader extends ClassVisitor {
     public void visitSource(String source, String debug) {
     }
 
-
     /**
-     * Returns all interfaces/classes transitively implemented/extended by the most recently visited class
+     * Returns all interfaces/classes transitively implemented/extended by the
+     * most recently visited class
      */
     public String[] getInterfaces() {
         return interfaces;

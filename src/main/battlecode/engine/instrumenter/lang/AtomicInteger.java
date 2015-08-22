@@ -21,7 +21,8 @@ public class AtomicInteger {
 
     public boolean compareAndSet(int expect, int update) {
         boolean b = (l == expect);
-        if (b) l = update;
+        if (b)
+            l = update;
         return b;
     }
 

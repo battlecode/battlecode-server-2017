@@ -25,9 +25,12 @@ public class MatchObservationSignal extends Signal {
     /**
      * Creates a signal for a robot whose indicator string has just changed
      *
-     * @param robot        the robot whose indicator string just changed
-     * @param stringNumber indicates which of the robot's indicator strings was changed
-     * @param observation  the value of the new indicator string
+     * @param robot
+     *            the robot whose indicator string just changed
+     * @param stringNumber
+     *            indicates which of the robot's indicator strings was changed
+     * @param observation
+     *            the value of the new indicator string
      */
     public MatchObservationSignal(InternalRobot robot, String observation) {
         this.robotID = robot.getID();

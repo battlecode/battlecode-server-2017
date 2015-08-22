@@ -1,14 +1,14 @@
 package battlecode.engine.instrumenter.lang;
 
+import java.io.PrintStream;
+
 import battlecode.engine.Engine;
 import battlecode.engine.instrumenter.RobotMonitor;
 
-import java.io.PrintStream;
-
-
 /**
- * RoboPrintStream is a wrapper for java.lang.System.out that prepends a string identifying the current robot to
- * all outputted strings.  Also, RoboPrintStream will silence all output if the robot should be silenced.
+ * RoboPrintStream is a wrapper for java.lang.System.out that prepends a string
+ * identifying the current robot to all outputted strings. Also, RoboPrintStream
+ * will silence all output if the robot should be silenced.
  *
  * @author adamd
  */
@@ -28,9 +28,9 @@ public class RoboPrintStream extends PrintStream {
         return theInstance;
     }
 
-    //************************
-    //*** PRINT METHODS ***
-    //************************
+    // ************************
+    // *** PRINT METHODS ***
+    // ************************
 
     public void print(boolean b) {
         printHelper(String.valueOf(b));
@@ -68,9 +68,9 @@ public class RoboPrintStream extends PrintStream {
         printHelper(s);
     }
 
-    //***************************
-    //*** PRINTLN METHODS ***
-    //***************************
+    // ***************************
+    // *** PRINTLN METHODS ***
+    // ***************************
 
     public void println(boolean b) {
         printlnHelper(String.valueOf(b));
@@ -112,9 +112,9 @@ public class RoboPrintStream extends PrintStream {
         printlnHelper("");
     }
 
-    //*************************
-    //*** MISCELLANEOUS ***
-    //*************************
+    // *************************
+    // *** MISCELLANEOUS ***
+    // *************************
 
     public PrintStream append(char c) {
         this.printHelper(String.valueOf(c));
@@ -160,9 +160,9 @@ public class RoboPrintStream extends PrintStream {
         this.printHelper(String.valueOf((char) b));
     }
 
-    //**************************
-    //*** HELPER METHODS ***
-    //**************************
+    // **************************
+    // *** HELPER METHODS ***
+    // **************************
 
     public void changeRobot() {
         header = null;

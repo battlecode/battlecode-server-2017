@@ -1,13 +1,13 @@
 package battlecode.serial;
 
-import battlecode.engine.signal.Signal;
-import battlecode.world.signal.IndicatorStringSignal;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import battlecode.engine.signal.Signal;
+import battlecode.world.signal.IndicatorStringSignal;
 
 public class RoundDelta implements Serializable {
 

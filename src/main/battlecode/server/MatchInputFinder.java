@@ -61,9 +61,8 @@ public class MatchInputFinder {
      */
     private static class MapFileFilter implements Filter {
         public boolean accept(File pathname) {
-            if (pathname.isDirectory() ||
-                    ("maps".equals(pathname.getParentFile().getName()) &&
-                            pathname.getName().endsWith(".xml")))
+            if (pathname.isDirectory()
+                    || ("maps".equals(pathname.getParentFile().getName()) && pathname.getName().endsWith(".xml")))
                 return true;
             return false;
         }
@@ -74,18 +73,19 @@ public class MatchInputFinder {
     }
 
     /**
-     * Constructs a MatchInputFinder that searches the Java classpath
-     * and the default map path (from the configuration file).
+     * Constructs a MatchInputFinder that searches the Java classpath and the
+     * default map path (from the configuration file).
      */
     public MatchInputFinder() {
-        this(new String[]{"maps"});
+        this(new String[] { "maps" });
     }
 
     /**
-     * Constructs a MatchInputFinder that searches the Java claspath
-     * and the given map path.
+     * Constructs a MatchInputFinder that searches the Java claspath and the
+     * given map path.
      *
-     * @param mapPaths the paths to search for maps
+     * @param mapPaths
+     *            the paths to search for maps
      */
     public MatchInputFinder(String[] mapPaths) {
 
@@ -105,8 +105,8 @@ public class MatchInputFinder {
      * Finds maps and teams on the local machine using the Java classpath and
      * map paths.
      *
-     * @return an array of String arrays, where element 0 is an array of
-     *         team names and element 1 is an array of map names
+     * @return an array of String arrays, where element 0 is an array of team
+     *         names and element 1 is an array of map names
      */
     public String[][] findMatchInputsLocally() {
         String[][] inputs = new String[2][];
@@ -119,10 +119,13 @@ public class MatchInputFinder {
      * A generic directory search over a set of paths using a file filter that
      * returns an array of matching names.
      *
-     * @param paths  the set of paths to search
-     * @param filter the filter to use while searching
-     * @param parent whether or not to add the immediate parent directory when
-     *               searching
+     * @param paths
+     *            the set of paths to search
+     * @param filter
+     *            the filter to use while searching
+     * @param parent
+     *            whether or not to add the immediate parent directory when
+     *            searching
      * @return a String array containing the matched file's names
      */
     private String[] findResourcesLocally(String[] paths, Filter filter, boolean parent) {
@@ -142,15 +145,19 @@ public class MatchInputFinder {
     }
 
     /**
-     * Searches the given directory, adding to the given list of matches made
-     * by the given filter. This method will recurse on directories it
-     * encounters until it has searched the entire tree.
+     * Searches the given directory, adding to the given list of matches made by
+     * the given filter. This method will recurse on directories it encounters
+     * until it has searched the entire tree.
      *
-     * @param dir    the directory to search
-     * @param found  the list to which matching file names are added
-     * @param filter the name of the filter to use
-     * @param parent whether or not to add the parent directories of matching
-     *               files to the found list
+     * @param dir
+     *            the directory to search
+     * @param found
+     *            the list to which matching file names are added
+     * @param filter
+     *            the name of the filter to use
+     * @param parent
+     *            whether or not to add the parent directories of matching files
+     *            to the found list
      */
     private void searchPath(File dir, List<String> found, FileFilter filter, boolean parent) {
 

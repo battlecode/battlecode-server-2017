@@ -14,20 +14,21 @@ TODO:
  */
 public class GameWorldFactory {
 
-    public static GameWorld createGameWorld(String teamA, String teamB, String mapName, String mapPath, long[][] teamMemory) throws IllegalArgumentException {
+    public static GameWorld createGameWorld(String teamA, String teamB, String mapName, String mapPath,
+            long[][] teamMemory) throws IllegalArgumentException {
         XMLMapHandler handler = XMLMapHandler.loadMap(mapName, mapPath);
 
         return handler.createGameWorld(teamA, teamB, teamMemory);
     }
 
-    public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, boolean wakeDelay, int buildDelay) {
+    public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t,
+            InternalRobot parent, boolean wakeDelay, int buildDelay) {
 
         // first, make the robot
         InternalRobot robot;
         if (type == RobotType.COMMANDER) {
             robot = new InternalCommander(gw, type, loc, t, wakeDelay, buildDelay);
-        }
-        else {
+        } else {
             robot = new InternalRobot(gw, type, loc, t, wakeDelay, buildDelay);
         }
 
@@ -36,7 +37,8 @@ public class GameWorldFactory {
     }
 
     // defaults to wakeDelay = true
-    public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t, InternalRobot parent, int buildDelay) {
+    public static InternalRobot createPlayer(GameWorld gw, RobotType type, MapLocation loc, Team t,
+            InternalRobot parent, int buildDelay) {
         return createPlayer(gw, type, loc, t, parent, true, buildDelay);
     }
 

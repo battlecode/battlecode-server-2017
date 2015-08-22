@@ -1,7 +1,6 @@
 package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
-import battlecode.common.RobotInfo;
 import battlecode.world.InternalRobot;
 
 /**
@@ -18,9 +17,9 @@ public class RobotInfoSignal extends Signal {
     private final double[] coreDelays;
     private final double[] weaponDelays;
     private final double[] supplyLevels;
-    //public final double health;
-    //public final int xp;
-    //public final int missileCount;
+    // public final double health;
+    // public final int xp;
+    // public final int missileCount;
 
     public RobotInfoSignal(InternalRobot[] robots) {
         robotIDs = new int[robots.length];

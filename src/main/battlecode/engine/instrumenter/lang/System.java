@@ -1,17 +1,18 @@
 package battlecode.engine.instrumenter.lang;
 
-import battlecode.engine.instrumenter.RobotMonitor;
-import battlecode.server.Config;
-
 import java.io.InputStream;
 import java.io.PrintStream;
 
+import battlecode.engine.instrumenter.RobotMonitor;
+import battlecode.server.Config;
+
 /**
- * A Wrapper for java.lang.System that supports only arraycopy and System.out.  battlecode.engine.instrumenter.lang.System.out is
- * implemented as a RoboPrintStream, so only a subset of its methods may be implemented.
+ * A Wrapper for java.lang.System that supports only arraycopy and System.out.
+ * battlecode.engine.instrumenter.lang.System.out is implemented as a
+ * RoboPrintStream, so only a subset of its methods may be implemented.
  * <p/>
- * The battlecode instrumenter should (sneakily) replace any references to java.lang.System with references to
- * battlecode.lang.System.
+ * The battlecode instrumenter should (sneakily) replace any references to
+ * java.lang.System with references to battlecode.lang.System.
  *
  * @author adamd
  */
@@ -52,12 +53,10 @@ public final class System {
     };
 
     /*
-     public static long currentTimeMillis() {
-         return battlecode.common.GameConstants.BYTECODE_LIMIT*battlecode.engine.Engine.getRoundNum()+RobotMonitor.getBytecodeNum();
-     }
-
-     public static long nanoTime() {
-         return currentTimeMillis()*1000000;
-     }
+     * public static long currentTimeMillis() { return
+     * battlecode.common.GameConstants.BYTECODE_LIMIT*battlecode.engine.Engine.
+     * getRoundNum()+RobotMonitor.getBytecodeNum(); }
+     * 
+     * public static long nanoTime() { return currentTimeMillis()*1000000; }
      */
 }

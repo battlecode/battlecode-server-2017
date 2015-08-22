@@ -13,17 +13,20 @@ public interface Serializer {
     /**
      * Write an object.
      *
-     * @param output  the stream to write to.
-     * @param message the object to write.
+     * @param output
+     *            the stream to write to.
+     * @param message
+     *            the object to write.
      * @throws IOException
      */
     void serialize(final OutputStream output, final Object message) throws IOException;
 
     /**
-     * Read an object.
-     * Note that this BLOCKS the calling thread until an object is read!
+     * Read an object. Note that this BLOCKS the calling thread until an object
+     * is read!
      *
-     * @param input the stream to read from.
+     * @param input
+     *            the stream to read from.
      */
     Object deserialize(final InputStream input) throws IOException;
 }

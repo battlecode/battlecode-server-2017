@@ -1,5 +1,11 @@
 package battlecode.server;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.LinkedList;
+import java.util.List;
+
 import battlecode.server.controller.Controller;
 import battlecode.server.controller.HeadlessController;
 import battlecode.server.controller.InputStreamController;
@@ -9,12 +15,6 @@ import battlecode.server.proxy.Proxy;
 import battlecode.server.serializer.JavaSerializer;
 import battlecode.server.serializer.Serializer;
 import battlecode.server.serializer.XStreamSerializer;
-
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.LinkedList;
-import java.util.List;
 
 public class Main {
 
@@ -146,17 +146,17 @@ public class Main {
         String saveFile = options.get("bc.server.save-file");
 
         switch (mode) {
-            case HEADLESS:
-                runHeadless(options, saveFile);
-                break;
-            case TCP:
-                runTCP(options, saveFile);
-                break;
-            case PIPE:
-                runPipe(options, saveFile);
-                break;
-            default:
-                return false;
+        case HEADLESS:
+            runHeadless(options, saveFile);
+            break;
+        case TCP:
+            runTCP(options, saveFile);
+            break;
+        case PIPE:
+            runPipe(options, saveFile);
+            break;
+        default:
+            return false;
         }
 
         return true;

@@ -8,8 +8,8 @@ import battlecode.serial.GenericGameMap;
 import battlecode.serial.RoundStats;
 
 /**
- * An interface that includes the part of the game world that isn't expected to change
- * from year to year.
+ * An interface that includes the part of the game world that isn't expected to
+ * change from year to year.
  */
 public interface GenericWorld extends SignalHandler {
     public int getCurrentRound();

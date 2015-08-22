@@ -17,7 +17,7 @@ public class AwesomenessSignal extends Signal {
 
     public AwesomenessSignal(float totalAwesomeness, float centerX, float centerY, float radius) {
         this.totalAwesomeness = totalAwesomeness;
-        //relativeAwesomeness = relativeAwesomeness(totalAwesomeness);
+        // relativeAwesomeness = relativeAwesomeness(totalAwesomeness);
         this.centerX = centerX;
         this.centerY = centerY;
         this.radius = radius;
@@ -25,7 +25,7 @@ public class AwesomenessSignal extends Signal {
 
     public void updateAwesomeness(float totalAwesomeness) {
         this.totalAwesomeness = totalAwesomeness;
-        //relativeAwesomeness = relativeAwesomeness(totalAwesomeness);
+        // relativeAwesomeness = relativeAwesomeness(totalAwesomeness);
     }
 
     public void renormalize(float aveAwesomeness) {

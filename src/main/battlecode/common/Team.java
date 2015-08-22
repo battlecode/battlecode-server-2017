@@ -1,8 +1,8 @@
 package battlecode.common;
 
 /**
- * This enum represents the team of a Robot; each Robot has
- * exactly one team. Robots are either on team A or B.
+ * This enum represents the team of a Robot; each Robot has exactly one team.
+ * Robots are either on team A or B.
  * <p>
  * Since Team is a Java 1.5 enum, you can use it in <code>switch</code>
  * statements, it has all the standard enum methods (<code>valueOf</code>,
@@ -16,17 +16,16 @@ public enum Team {
     /**
      * Determines the team that is the opponent of this team.
      *
-     * @return the opponent of this team, or NEUTRAL if this team
-     *         is NEUTRAL
+     * @return the opponent of this team, or NEUTRAL if this team is NEUTRAL
      */
     public Team opponent() {
         switch (this) {
-            case A:
-                return B;
-            case B:
-                return A;
-            default:
-                return NEUTRAL;
+        case A:
+            return B;
+        case B:
+            return A;
+        default:
+            return NEUTRAL;
         }
     }
 }

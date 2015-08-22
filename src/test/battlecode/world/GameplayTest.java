@@ -1,12 +1,19 @@
 package battlecode.world;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.EnumMap;
 import java.util.StringTokenizer;
 
-import battlecode.common.*;
+import org.junit.Test;
+
+import battlecode.common.GameConstants;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotType;
+import battlecode.common.Team;
+import battlecode.common.TerrainTile;
 
 // Tests a bunch of gameplay scenarios and RobotController
 public class GameplayTest {
@@ -26,9 +33,10 @@ public class GameplayTest {
             if (map[0].charAt(i) == ' ') {
                 width++;
             }
-        } 
+        }
 
-        EnumMap<GameMap.MapProperties, Integer> props = new EnumMap<GameMap.MapProperties, Integer>(GameMap.MapProperties.class);
+        EnumMap<GameMap.MapProperties, Integer> props = new EnumMap<GameMap.MapProperties, Integer>(
+                GameMap.MapProperties.class);
         props.put(GameMap.MapProperties.MAX_ROUNDS, 2000);
         props.put(GameMap.MapProperties.SEED, 1337);
 
@@ -75,7 +83,7 @@ public class GameplayTest {
         InternalRobot hqa_bot = new InternalRobot(world, RobotType.HQ, origin, Team.A, false, 0);
         RobotControllerImpl hqa = new RobotControllerImpl(world, hqa_bot);
         world.setHQ(hqa_bot, Team.A);
-        
+
         InternalRobot hqb_bot = new InternalRobot(world, RobotType.HQ, origin.add(1, 0), Team.B, false, 0);
         RobotControllerImpl hqb = new RobotControllerImpl(world, hqb_bot);
         world.setHQ(hqb_bot, Team.B);
@@ -135,7 +143,7 @@ public class GameplayTest {
         start(hqb_bot);
         assertEquals(hqb.getTeamOre(), 500.0, EPSILON);
         end(hqb_bot);
-    
+
         end(world);
 
         start(world);
@@ -146,7 +154,7 @@ public class GameplayTest {
         start(hqb_bot);
         assertEquals(hqb.getTeamOre(), 505.0, EPSILON);
         end(hqb_bot);
-    
+
         end(world);
 
         start(world);
@@ -157,7 +165,7 @@ public class GameplayTest {
         start(hqb_bot);
         assertEquals(hqb.getTeamOre(), 510.0, EPSILON);
         end(hqb_bot);
-    
+
         end(world);
     }
 
@@ -214,7 +222,7 @@ public class GameplayTest {
             start(towerb_bot[i]);
             end(towerb_bot[i]);
         }
-    
+
         end(world);
     }
 }

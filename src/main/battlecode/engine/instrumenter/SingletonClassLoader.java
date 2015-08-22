@@ -1,13 +1,14 @@
 package battlecode.engine.instrumenter;
 
-import battlecode.engine.ErrorReporter;
-
 import java.util.HashMap;
 import java.util.Map;
 
+import battlecode.engine.ErrorReporter;
+
 class SingletonClassLoader extends InstrumentingClassLoader {
 
-    // caches the classes that have been loaded and designated as reusable, to speed up future attempts to load them
+    // caches the classes that have been loaded and designated as reusable, to
+    // speed up future attempts to load them
     private final Map<String, Class> loadedReusableClasses = new HashMap<String, Class>();
 
     protected SingletonClassLoader() {
@@ -21,7 +22,7 @@ class SingletonClassLoader extends InstrumentingClassLoader {
         // this is the class we'll return
         Class finishedClass = null;
 
-        //System.out.println("loadClass "+name);
+        // System.out.println("loadClass "+name);
 
         if (loadedReusableClasses.containsKey(name))
             finishedClass = loadedReusableClasses.get(name);
@@ -30,19 +31,25 @@ class SingletonClassLoader extends InstrumentingClassLoader {
             classBytes = instrument(name, false, "");
 
             /*
-               if(name.startsWith("hardplayer/"))
-               try {
-                   java.io.File file = new java.io.File("classes/"+name+".class");
-                   java.io.FileOutputStream stream = new java.io.FileOutputStream(file);
-                   stream.write(classBytes);
-                   stream.close();
-               } catch(Exception e) { }
-               */
+             * if(name.startsWith("hardplayer/")) try { java.io.File file = new
+             * java.io.File("classes/"+name+".class"); java.io.FileOutputStream
+             * stream = new java.io.FileOutputStream(file);
+             * stream.write(classBytes); stream.close(); } catch(Exception e) {
+             * }
+             */
 
             finishedClass = saveAndDefineClass(name, classBytes);
         } else {
-            finishedClass = Class.forName(name.replace('/', '.'));    // TODO: should change this to explicitly use the parent classloader?
-            // since it shouldn't be instrumented, it defaults to being reusable, and so we cache the defined class
+            finishedClass = Class.forName(name.replace('/', '.')); // TODO:
+                                                                   // should
+                                                                   // change
+                                                                   // this to
+                                                                   // explicitly
+                                                                   // use the
+                                                                   // parent
+                                                                   // classloader?
+            // since it shouldn't be instrumented, it defaults to being
+            // reusable, and so we cache the defined class
             loadedReusableClasses.put(name, finishedClass);
         }
 
