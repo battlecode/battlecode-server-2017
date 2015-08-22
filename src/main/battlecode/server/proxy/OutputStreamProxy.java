@@ -1,9 +1,9 @@
 package battlecode.server.proxy;
 
-import battlecode.server.serializer.Serializer;
-
 import java.io.IOException;
 import java.io.OutputStream;
+
+import battlecode.server.serializer.Serializer;
 
 /**
  * A proxy that writes to a given output stream, and closes the output stream

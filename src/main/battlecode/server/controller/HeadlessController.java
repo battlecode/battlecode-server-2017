@@ -1,9 +1,9 @@
 package battlecode.server.controller;
 
+import java.io.IOException;
+
 import battlecode.serial.MatchInfo;
 import battlecode.server.Config;
-
-import java.io.IOException;
 
 /**
  * Adapts match parameters from a set of properties (i.e., the configuration
@@ -19,14 +19,12 @@ public class HeadlessController extends Controller {
     /**
      * Creates a headless controller using config/command-line properties.
      *
-     * @param options the properties to use for getting the map and teams.
+     * @param options
+     *            the properties to use for getting the map and teams.
      */
     public HeadlessController(Config options) {
-        configInfo = new MatchInfo(
-                options.get("bc.game.team-a"),
-                options.get("bc.game.team-b"),
-                options.get("bc.game.maps").split(",")
-        );
+        configInfo = new MatchInfo(options.get("bc.game.team-a"), options.get("bc.game.team-b"),
+                options.get("bc.game.maps").split(","));
     }
 
     /**

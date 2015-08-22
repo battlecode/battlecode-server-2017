@@ -1,26 +1,29 @@
 package battlecode.server.serializer;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.ConversionException;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.SingleValueConverter;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+
 import battlecode.common.MapLocation;
 import battlecode.common.TerrainTile;
 import battlecode.engine.signal.Signal;
 import battlecode.serial.ExtensibleMetadata;
-import battlecode.serial.MatchFooter;
 import battlecode.serial.RoundDelta;
-import battlecode.serial.RoundStats;
 import battlecode.world.GameMap;
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.converters.*;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.*;
-import java.util.zip.GZIPInputStream;
 
 /**
  * Serialize things to XML, with XStream.
@@ -135,13 +138,11 @@ public class XStreamSerializer implements Serializer {
             return cls.equals(RoundDelta.class);
         }
 
-        public void marshal(Object value, HierarchicalStreamWriter writer,
-                            MarshallingContext context) {
+        public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
             context.convertAnother(((RoundDelta) value).getSignals());
         }
 
-        public Object unmarshal(HierarchicalStreamReader reader,
-                                UnmarshallingContext context) {
+        public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
             RoundDelta rd = new RoundDelta();
             rd.setSignals((Signal[]) context.convertAnother(rd, Signal[].class));
             return rd;
@@ -155,8 +156,7 @@ public class XStreamSerializer implements Serializer {
             return cls.equals(ExtensibleMetadata.class);
         }
 
-        public void marshal(Object value, HierarchicalStreamWriter writer,
-                            MarshallingContext context) {
+        public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
             ExtensibleMetadata metadata = (ExtensibleMetadata) value;
             for (String s : metadata.keySet()) {
                 Object o = metadata.get(s, null);
@@ -167,8 +167,7 @@ public class XStreamSerializer implements Serializer {
             }
         }
 
-        public Object unmarshal(HierarchicalStreamReader reader,
-                                UnmarshallingContext context) {
+        public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
             ExtensibleMetadata metadata = new ExtensibleMetadata();
             int i;
             String name, value;
@@ -191,12 +190,10 @@ public class XStreamSerializer implements Serializer {
             return true;
         }
 
-        public void marshal(Object value, HierarchicalStreamWriter writer,
-                            MarshallingContext context) {
+        public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
         }
 
-        public Object unmarshal(HierarchicalStreamReader reader,
-                                UnmarshallingContext context) {
+        public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
 
             return null;
         }
@@ -208,8 +205,7 @@ public class XStreamSerializer implements Serializer {
             return cls.equals(TerrainTile[][].class);
         }
 
-        public void marshal(Object value, HierarchicalStreamWriter writer,
-                            MarshallingContext context) {
+        public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
             // The map tiles are in column major order
             TerrainTile[][] tiles = (TerrainTile[][]) value;
             StringBuilder builder = new StringBuilder();
@@ -226,22 +222,22 @@ public class XStreamSerializer implements Serializer {
             writer.setValue(builder.toString());
         }
 
-        public Object unmarshal(HierarchicalStreamReader reader,
-                                UnmarshallingContext context) throws ConversionException {
+        public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
+                throws ConversionException {
             String[] rows = StringUtils.split(reader.getValue());
             TerrainTile[][] tiles = new TerrainTile[rows[0].length()][];
             for (int x = 0; x < rows[0].length(); x++) {
                 tiles[x] = new TerrainTile[rows.length];
                 for (int y = 0; y < rows.length; y++) {
                     switch (rows[y].charAt(x)) {
-                        case '#':
-                            tiles[x][y] = TerrainTile.VOID;
-                            break;
-                        case '.':
-                            tiles[x][y] = TerrainTile.NORMAL;
-                            break;
-                        default:
-                            throw new ConversionException("Illegal character in InternalTerrainTile [][].");
+                    case '#':
+                        tiles[x][y] = TerrainTile.VOID;
+                        break;
+                    case '.':
+                        tiles[x][y] = TerrainTile.NORMAL;
+                        break;
+                    default:
+                        throw new ConversionException("Illegal character in InternalTerrainTile [][].");
                     }
                 }
             }
@@ -251,7 +247,8 @@ public class XStreamSerializer implements Serializer {
     }
 
     static protected void initXStream() {
-        if (xstream != null) return;
+        if (xstream != null)
+            return;
         xstream = new XStream() {
             public void reset() {
             }
@@ -285,7 +282,8 @@ public class XStreamSerializer implements Serializer {
         return xstream;
     }
 
-    public XStreamSerializer() {}
+    public XStreamSerializer() {
+    }
 
     @Override
     public void serialize(final OutputStream output, final Object message) throws IOException {
@@ -308,4 +306,3 @@ public class XStreamSerializer implements Serializer {
         return result;
     }
 }
-

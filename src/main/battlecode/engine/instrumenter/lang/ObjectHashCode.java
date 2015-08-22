@@ -1,10 +1,11 @@
 package battlecode.engine.instrumenter.lang;
 
-import battlecode.engine.ErrorReporter;
-import org.hibernate.search.util.WeakIdentityHashMap;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
+
+import org.hibernate.search.util.WeakIdentityHashMap;
+
+import battlecode.engine.ErrorReporter;
 
 public class ObjectHashCode {
 
@@ -43,7 +44,7 @@ public class ObjectHashCode {
     }
 
     // Assumes that if hashCode and System.identityHashCode are
-    // the same then hashCode has been reimplemented.  Chance
+    // the same then hashCode has been reimplemented. Chance
     // of a collision is 1 in 2^32.
     static public int fastHashCode(int hash, Object o, Class<?> cl) {
         int idHash = java.lang.System.identityHashCode(o);
@@ -56,9 +57,8 @@ public class ObjectHashCode {
         Boolean b = usesOHC.get(cl);
         if (b == null) {
             Method hashCodeMethod = cl.getMethod("hashCode");
-            b = hashCodeMethod.equals(enumHashCode) ||
-                    hashCodeMethod.equals(objectHashCode) ||
-                    hashCodeMethod.equals(characterHashCode);
+            b = hashCodeMethod.equals(enumHashCode) || hashCodeMethod.equals(objectHashCode)
+                    || hashCodeMethod.equals(characterHashCode);
             usesOHC.put(cl, b);
         }
         return b;

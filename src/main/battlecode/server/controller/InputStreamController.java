@@ -1,14 +1,15 @@
 package battlecode.server.controller;
 
-import battlecode.server.Server;
-import battlecode.server.serializer.Serializer;
-
 import java.io.IOException;
 import java.io.InputStream;
 
+import battlecode.server.Server;
+import battlecode.server.serializer.Serializer;
+
 /**
- * This class is used to provide a means of controlling the server through a standard InputStream.
- * The input stream could be stdin, a file, a socket, whatever.
+ * This class is used to provide a means of controlling the server through a
+ * standard InputStream. The input stream could be stdin, a file, a socket,
+ * whatever.
  */
 public final class InputStreamController extends Controller {
 
@@ -74,7 +75,8 @@ public final class InputStreamController extends Controller {
         /**
          * Closes the connection and stops listening for control data.
          *
-         * @throws IOException if the connection couldn't be closed
+         * @throws IOException
+         *             if the connection couldn't be closed
          */
         public void terminate() throws IOException {
             isRunning = false;

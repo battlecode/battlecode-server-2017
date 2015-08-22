@@ -1,13 +1,18 @@
 package battlecode.server.serializer;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 
 /**
  * Created by james on 7/24/15.
  */
 public final class JavaSerializer implements Serializer {
 
-    public JavaSerializer() {}
+    public JavaSerializer() {
+    }
 
     @Override
     public void serialize(final OutputStream output, final Object message) throws IOException {

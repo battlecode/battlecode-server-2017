@@ -1,15 +1,16 @@
 package battlecode.world;
 
-import static battlecode.common.GameActionExceptionType.NOT_ACTIVE;
 import static battlecode.common.GameActionExceptionType.CANT_DO_THAT_BRO;
 import static battlecode.common.GameActionExceptionType.CANT_SENSE_THAT;
 import static battlecode.common.GameActionExceptionType.MISSING_DEPENDENCY;
+import static battlecode.common.GameActionExceptionType.NOT_ACTIVE;
 import static battlecode.common.GameActionExceptionType.NOT_ENOUGH_RESOURCE;
-import static battlecode.common.GameActionExceptionType.NO_ROBOT_THERE;
 import static battlecode.common.GameActionExceptionType.OUT_OF_RANGE;
 
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import battlecode.common.CommanderSkillType;
 import battlecode.common.DependencyProgress;
@@ -37,10 +38,6 @@ import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.SpawnSignal;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-
 
 /*
  TODO:
@@ -237,7 +234,8 @@ public final class RobotControllerImpl implements RobotController, GenericContro
         if (obj != null && canSense(obj)) {
             return obj.getRobotInfo();
         } else {
-            throw new GameActionException(CANT_SENSE_THAT, "Could not sense robot with given ID. It might be out of sight range or it might not exist.");
+            throw new GameActionException(CANT_SENSE_THAT,
+                    "Could not sense robot with given ID. It might be out of sight range or it might not exist.");
         }
     }
 
@@ -251,12 +249,16 @@ public final class RobotControllerImpl implements RobotController, GenericContro
         final boolean useTeam = team != null;
 
         for (final InternalRobot o : allRobots) {
-            if (!canSense(o)) continue;
-            if (o.equals(robot)) continue;
-            if (useRadius && o.myLocation.distanceSquaredTo(center) > radiusSquared) continue;
-            if (useTeam && o.getTeam() != team) continue;
+            if (!canSense(o))
+                continue;
+            if (o.equals(robot))
+                continue;
+            if (useRadius && o.myLocation.distanceSquaredTo(center) > radiusSquared)
+                continue;
+            if (useTeam && o.getTeam() != team)
+                continue;
 
-            robots.add(((InternalRobot)o).getRobotInfo());
+            robots.add(((InternalRobot) o).getRobotInfo());
         }
 
         return robots.toArray(new RobotInfo[0]);
@@ -273,8 +275,6 @@ public final class RobotControllerImpl implements RobotController, GenericContro
     public RobotInfo[] senseNearbyRobots(final int radiusSquared, final Team team) {
         return senseNearbyRobots(robot.myLocation, radiusSquared, team);
     }
-
-
 
     // ***********************************
     // ****** READINESS METHODS **********
@@ -317,7 +317,8 @@ public final class RobotControllerImpl implements RobotController, GenericContro
 
     public void assertIsPathable(RobotType type, MapLocation loc) throws GameActionException {
         if (!isPathableInternal(type, loc)) {
-            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Cannot move robot of given type to that location.");
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE,
+                    "Cannot move robot of given type to that location.");
         }
     }
 
@@ -347,7 +348,8 @@ public final class RobotControllerImpl implements RobotController, GenericContro
         assertIsPathable(robot.type, getLocation().add(d));
 
         if (robot.type == RobotType.LAUNCHER && !robot.canLaunchMissileAtLocation(getLocation().add(d))) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "LAUNCHER launched MISSILE there already and cannot move there.");
+            throw new GameActionException(CANT_DO_THAT_BRO,
+                    "LAUNCHER launched MISSILE there already and cannot move there.");
         }
 
         double factor1 = (d.isDiagonal() ? GameConstants.DIAGONAL_DELAY_MULTIPLIER : 1.0);
@@ -357,8 +359,10 @@ public final class RobotControllerImpl implements RobotController, GenericContro
             factor2 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
         }
 
-        robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-            true, (int) (robot.getMovementDelayForType() * factor1)), robot.getLoadingDelayForType() * factor2, robot.getMovementDelayForType() * factor1);
+        robot.activateMovement(
+                new MovementSignal(robot, getLocation().add(d), true,
+                        (int) (robot.getMovementDelayForType() * factor1)),
+                robot.getLoadingDelayForType() * factor2, robot.getMovementDelayForType() * factor1);
     }
 
     // ***********************************
@@ -375,7 +379,8 @@ public final class RobotControllerImpl implements RobotController, GenericContro
 
     private void assertIsWeaponReady() throws GameActionException {
         if (!isWeaponReady())
-            throw new GameActionException(NOT_ACTIVE, "This robot has weapon delay and cannot attack. " + getWeaponDelay());
+            throw new GameActionException(NOT_ACTIVE,
+                    "This robot has weapon delay and cannot attack. " + getWeaponDelay());
     }
 
     private void assertIsAttackingUnit() throws GameActionException {
@@ -401,10 +406,12 @@ public final class RobotControllerImpl implements RobotController, GenericContro
         assertValidAttackLocation(loc);
 
         if (robot.type == RobotType.BASHER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers attack automatically, and cannot use attackLocation.");
+            throw new GameActionException(CANT_DO_THAT_BRO,
+                    "Bashers attack automatically, and cannot use attackLocation.");
         }
 
-        robot.activateAttack(new AttackSignal(robot, loc), robot.getAttackDelayForType(), robot.getCooldownDelayForType());
+        robot.activateAttack(new AttackSignal(robot, loc), robot.getAttackDelayForType(),
+                robot.getCooldownDelayForType());
     }
 
     public void explode() throws GameActionException {
@@ -414,9 +421,9 @@ public final class RobotControllerImpl implements RobotController, GenericContro
         throw new RobotDeathException();
     }
 
-    //***********************************
-    //****** COMMANDER METHODS **********
-    //***********************************
+    // ***********************************
+    // ****** COMMANDER METHODS **********
+    // ***********************************
     public boolean hasCommander() {
         return gameWorld.hasCommander(robot.getTeam());
     }
@@ -460,11 +467,12 @@ public final class RobotControllerImpl implements RobotController, GenericContro
             throw new GameActionException(CANT_DO_THAT_BRO, "Cannot cast flash until cooldown hits 0.");
         }
 
-        //is this kosher? i hope so
+        // is this kosher? i hope so
         assertIsCoreReady();
         assertIsPathable(robot.type, loc);
 
-        robot.activateMovement(new CastSignal(robot, loc), robot.getLoadingDelayForType(), GameConstants.FLASH_MOVEMENT_DELAY);
+        robot.activateMovement(new CastSignal(robot, loc), robot.getLoadingDelayForType(),
+                GameConstants.FLASH_MOVEMENT_DELAY);
     }
 
     public int getFlashCooldown() throws GameActionException {
@@ -487,7 +495,8 @@ public final class RobotControllerImpl implements RobotController, GenericContro
 
     public void broadcast(int channel, int data) throws GameActionException {
         if (channel < 0 || channel > GameConstants.BROADCAST_MAX_CHANNELS)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to " + GameConstants.BROADCAST_MAX_CHANNELS + ", inclusive");
+            throw new GameActionException(CANT_DO_THAT_BRO,
+                    "Can only use radio channels from 0 to " + GameConstants.BROADCAST_MAX_CHANNELS + ", inclusive");
 
         if (robot.type == RobotType.MISSILE) {
             throw new GameActionException(CANT_DO_THAT_BRO, "Missiles cannot broadcast.");
@@ -499,7 +508,8 @@ public final class RobotControllerImpl implements RobotController, GenericContro
     @Override
     public int readBroadcast(int channel) throws GameActionException {
         if (channel < 0 || channel > GameConstants.BROADCAST_MAX_CHANNELS)
-            throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to " + GameConstants.BROADCAST_MAX_CHANNELS + ", inclusive");
+            throw new GameActionException(CANT_DO_THAT_BRO,
+                    "Can only use radio channels from 0 to " + GameConstants.BROADCAST_MAX_CHANNELS + ", inclusive");
 
         Integer queued = robot.getQueuedBroadcastFor(channel);
         if (queued != null) {
@@ -550,7 +560,8 @@ public final class RobotControllerImpl implements RobotController, GenericContro
         assertIsMiningUnit();
         MapLocation loc = getLocation();
 
-        robot.activateMovement(new MineSignal(loc, getID()), GameConstants.MINING_LOADING_DELAY, GameConstants.MINING_MOVEMENT_DELAY);
+        robot.activateMovement(new MineSignal(loc, getID()), GameConstants.MINING_LOADING_DELAY,
+                GameConstants.MINING_MOVEMENT_DELAY);
     }
 
     public double senseOre(MapLocation loc) {
@@ -587,13 +598,15 @@ public final class RobotControllerImpl implements RobotController, GenericContro
 
     public void assertCanLaunchAtLocation(MapLocation loc) throws GameActionException {
         if (!robot.canLaunchMissileAtLocation(loc)) {
-            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Missile already launched in that direction.");
+            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE,
+                    "Missile already launched in that direction.");
         }
     }
 
     public boolean canLaunch(Direction dir) {
         MapLocation loc = getLocation().add(dir);
-        return isLaunchingUnit() && isPathableInternal(RobotType.MISSILE, loc) && !robot.movedThisTurn() && robot.getMissileCount() > 0 && robot.canLaunchMissileAtLocation(loc);
+        return isLaunchingUnit() && isPathableInternal(RobotType.MISSILE, loc) && !robot.movedThisTurn()
+                && robot.getMissileCount() > 0 && robot.canLaunchMissileAtLocation(loc);
     }
 
     public void launchMissile(Direction dir) throws GameActionException {
@@ -678,8 +691,7 @@ public final class RobotControllerImpl implements RobotController, GenericContro
         }
         assertHaveResource(cost);
 
-        robot.activateMovement(
-            new SpawnSignal(loc, type, robot.getTeam(), robot, 0), 0, type.buildTurns);
+        robot.activateMovement(new SpawnSignal(loc, type, robot.getTeam(), robot, 0), 0, type.buildTurns);
     }
 
     public boolean isBuildingUnit() {
@@ -705,7 +717,9 @@ public final class RobotControllerImpl implements RobotController, GenericContro
     }
 
     public boolean hasBuildRequirements(RobotType type) {
-        return isBuildingUnit() && type.isBuildable() && gameWorld.getActiveRobotTypeCount(getTeam(), type.dependency) > 0 && type.oreCost <= gameWorld.resources(getTeam());
+        return isBuildingUnit() && type.isBuildable()
+                && gameWorld.getActiveRobotTypeCount(getTeam(), type.dependency) > 0
+                && type.oreCost <= gameWorld.resources(getTeam());
     }
 
     public boolean canBuild(Direction dir, RobotType type) {
@@ -726,8 +740,7 @@ public final class RobotControllerImpl implements RobotController, GenericContro
         assertIsPathable(type, loc);
 
         int delay = type.buildTurns;
-        robot.activateMovement(
-            new BuildSignal(loc, type, robot.getTeam(), robot, delay), delay, delay);
+        robot.activateMovement(new BuildSignal(loc, type, robot.getTeam(), robot, delay), delay, delay);
     }
 
     // ***********************************

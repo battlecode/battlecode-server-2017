@@ -6,13 +6,16 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 
 /**
- * A signal handler that delegates to other signal handling methods, which it discovers
- * automatically.  The following criteria are used for determining if a method should handle signals:
+ * A signal handler that delegates to other signal handling methods, which it
+ * discovers automatically. The following criteria are used for determining if a
+ * method should handle signals:
  * <p/>
- * - If the method has a {@link DiscoverSignal} annotation, that is respected.
- * - Otherwise, a method is discovered if it is public, its name starts with "visit", and it takes a single
- * parameter that is a subclass of {@link Signal} (but not Signal itself).
- * Currently it uses reflection, which is kind of inelegant and slow (but probably not slow enough to matter).  I guess we could avoid reflection and instead create classes on the fly.
+ * - If the method has a {@link DiscoverSignal} annotation, that is respected. -
+ * Otherwise, a method is discovered if it is public, its name starts with
+ * "visit", and it takes a single parameter that is a subclass of {@link Signal}
+ * (but not Signal itself). Currently it uses reflection, which is kind of
+ * inelegant and slow (but probably not slow enough to matter). I guess we could
+ * avoid reflection and instead create classes on the fly.
  */
 public class AutoSignalHandler implements SignalHandler {
 
@@ -33,7 +36,8 @@ public class AutoSignalHandler implements SignalHandler {
     protected void discoverMethods(Class cls) {
         synchronized (metaMap) {
             methodMap = metaMap.get(cls);
-            if (methodMap != null) return;
+            if (methodMap != null)
+                return;
             assert Modifier.isPublic(cls.getModifiers());
             methodMap = new HashMap<Class, Method>();
             for (Method method : cls.getMethods()) {
@@ -43,12 +47,10 @@ public class AutoSignalHandler implements SignalHandler {
                 if (annotation != null)
                     shouldAdd = annotation.value();
                 else
-                    shouldAdd = method.getName().startsWith("visit") &&
-                            parameters.length == 1 &&
-                            Signal.class.isAssignableFrom(parameters[0]) &&
-                            !parameters[0].equals(Signal.class);
+                    shouldAdd = method.getName().startsWith("visit") && parameters.length == 1
+                            && Signal.class.isAssignableFrom(parameters[0]) && !parameters[0].equals(Signal.class);
                 if (shouldAdd) {
-                    //System.out.println("Adding signal handler "+method);
+                    // System.out.println("Adding signal handler "+method);
                     Method old = methodMap.put(parameters[0], method);
                     assert old == null;
                 }
@@ -81,8 +83,7 @@ public class AutoSignalHandler implements SignalHandler {
                         handleException(e);
                 }
             cls = cls.getSuperclass();
-        }
-        while (Signal.class.isAssignableFrom(cls));
+        } while (Signal.class.isAssignableFrom(cls));
     }
 
 }

@@ -1,11 +1,11 @@
 package battlecode.server.controller;
 
-import battlecode.server.Config;
-import battlecode.server.proxy.Proxy;
-
 import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
+
+import battlecode.server.Config;
+import battlecode.server.proxy.Proxy;
 
 public class LocalController extends Controller implements Observer {
 
@@ -16,7 +16,7 @@ public class LocalController extends Controller implements Observer {
     }
 
     public void start() throws IOException {
-        //proxy.addObserver(this);
+        // proxy.addObserver(this);
     }
 
     public void finish() throws IOException {

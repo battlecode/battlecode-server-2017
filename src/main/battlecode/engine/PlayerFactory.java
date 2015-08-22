@@ -31,13 +31,16 @@ public class PlayerFactory {
         // now, we instantiate and instrument the player's class
         Class playerClass;
         try {
-            // The classloaders ignore silenced now - RobotMonitor takes care of it
+            // The classloaders ignore silenced now - RobotMonitor takes care of
+            // it
             ClassLoader icl = new IndividualClassLoader(teamName, _debugMethodsEnabled, false, true);
             playerClass = icl.loadClass(teamName + ".RobotPlayer");
-            //~ System.out.println("PF done loading");
+            // ~ System.out.println("PF done loading");
         } catch (InstrumentationException ie) {
-            // if we get an InstrumentationException, then the error should have been reported, so we just kill the robot
-            System.out.println("[Engine] Error during instrumentation of " + rc.getRobot().toString() + ".\n[Engine] Robot will self-destruct in 3...2...1...");
+            // if we get an InstrumentationException, then the error should have
+            // been reported, so we just kill the robot
+            System.out.println("[Engine] Error during instrumentation of " + rc.getRobot().toString()
+                    + ".\n[Engine] Robot will self-destruct in 3...2...1...");
             rc.getRobot().suicide();
             return;
         } catch (Exception e) {

@@ -18,20 +18,20 @@ public class DeathSignal extends Signal {
     private final int objectID;
 
     /**
-     * Creates a signal representing the death of
-     * the specified object.
+     * Creates a signal representing the death of the specified object.
      *
-     * @param object the object that has died
+     * @param object
+     *            the object that has died
      */
     public DeathSignal(InternalRobot object) {
         this.objectID = object.getID();
     }
 
     /**
-     * Creates a signal representing the death of
-     * the specified object.
+     * Creates a signal representing the death of the specified object.
      *
-     * @param objectID the ID of the object that died
+     * @param objectID
+     *            the ID of the object that died
      */
     public DeathSignal(int objectID) {
         this.objectID = objectID;

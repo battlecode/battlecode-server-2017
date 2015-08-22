@@ -1,20 +1,14 @@
 package battlecode.world;
 
-import battlecode.common.Direction;
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotType;
-import battlecode.common.TerrainTile;
-import battlecode.serial.GenericGameMap;
-
-import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.Map;
 import java.util.Random;
 
+import battlecode.common.MapLocation;
+import battlecode.common.TerrainTile;
+import battlecode.serial.GenericGameMap;
+
 /**
- * The class represents the map in the game world on which
- * objects interact.
+ * The class represents the map in the game world on which objects interact.
  */
 public class GameMap implements GenericGameMap {
 
@@ -63,27 +57,28 @@ public class GameMap implements GenericGameMap {
     private int maxInitialOre;
 
     /**
-     * Represents the various integer properties a GameMap
-     * can have.
+     * Represents the various integer properties a GameMap can have.
      */
     public enum MapProperties {
         WIDTH, HEIGHT, SEED, MAX_ROUNDS
     }
+
     private void calculateMaxInitialOre() {
-	this.maxInitialOre = 0;
-	for (int i = 0; i < this.mapWidth; i++) {
-	    for (int j = 0; j < this.mapHeight; j++) {
-		int tileOre = this.mapInitialOre[i][j];
-		if (tileOre > maxInitialOre) {
-		    maxInitialOre = tileOre;
-		}
-	    }
-	}
+        this.maxInitialOre = 0;
+        for (int i = 0; i < this.mapWidth; i++) {
+            for (int j = 0; j < this.mapHeight; j++) {
+                int tileOre = this.mapInitialOre[i][j];
+                if (tileOre > maxInitialOre) {
+                    maxInitialOre = tileOre;
+                }
+            }
+        }
     }
+
     public int getMaxInitialOre() {
-	return maxInitialOre;
+        return maxInitialOre;
     }
-    
+
     public GameMap(GameMap gm) {
         this.mapWidth = gm.mapWidth;
         this.mapHeight = gm.mapHeight;
@@ -100,17 +95,21 @@ public class GameMap implements GenericGameMap {
         this.maxRounds = gm.maxRounds;
         this.mapName = gm.mapName;
 
-	calculateMaxInitialOre();
+        calculateMaxInitialOre();
     }
 
     /**
      * Creates a new GameMap from the given properties, tiles, and territory
      * locations.
      *
-     * @param mapProperties      a map of MapProperties to their integer values containing dimensions, etc.
-     * @param mapTiles           a matrix of TerrainTypes representing the map
+     * @param mapProperties
+     *            a map of MapProperties to their integer values containing
+     *            dimensions, etc.
+     * @param mapTiles
+     *            a matrix of TerrainTypes representing the map
      */
-    public GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, int[][] mapInitialOre, String mapName) {
+    public GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, int[][] mapInitialOre,
+            String mapName) {
         if (mapProperties.containsKey(MapProperties.WIDTH))
             this.mapWidth = mapProperties.get(MapProperties.WIDTH);
         else
@@ -131,21 +130,21 @@ public class GameMap implements GenericGameMap {
         else
             this.maxRounds = GAME_DEFAULT_MAX_ROUNDS;
 
-        //if (mapProperties.containsKey(MapProperties.MIN_POINTS))
-        //	this.minPoints = mapProperties.get(MapProperties.MIN_POINTS);
-        //else this.minPoints = GAME_DEFAULT_MIN_POINTS;
+        // if (mapProperties.containsKey(MapProperties.MIN_POINTS))
+        // this.minPoints = mapProperties.get(MapProperties.MIN_POINTS);
+        // else this.minPoints = GAME_DEFAULT_MIN_POINTS;
 
         Random rand = new Random(this.seed);
         this.mapOriginX = rand.nextInt(32001) - 16000;
         this.mapOriginY = rand.nextInt(32001) - 16000;
-        
+
         this.mapTiles = mapTiles;
 
         this.mapInitialOre = mapInitialOre;
 
         this.mapName = mapName;
-	
-	calculateMaxInitialOre();
+
+        calculateMaxInitialOre();
     }
 
     /**
@@ -171,13 +170,15 @@ public class GameMap implements GenericGameMap {
     }
 
     /**
-     * Determines whether or not the location at the specified
-     * unshifted coordinates is on the map.
+     * Determines whether or not the location at the specified unshifted
+     * coordinates is on the map.
      *
-     * @param x the (shifted) x-coordinate of the location
-     * @param y the (shifted) y-coordinate of the location
-     * @return true if the given coordinates are on the map,
-     *         false if they're not
+     * @param x
+     *            the (shifted) x-coordinate of the location
+     * @param y
+     *            the (shifted) y-coordinate of the location
+     * @return true if the given coordinates are on the map, false if they're
+     *         not
      */
     private boolean onTheMap(int x, int y) {
         return (x >= mapOriginX && y >= mapOriginY && x < mapOriginX + mapWidth && y < mapOriginY + mapHeight);
@@ -186,22 +187,21 @@ public class GameMap implements GenericGameMap {
     /**
      * Determines whether or not the specified location is on the map.
      *
-     * @param location the MapLocation to test
-     * @return true if the given location is on the map,
-     *         false if it's not
+     * @param location
+     *            the MapLocation to test
+     * @return true if the given location is on the map, false if it's not
      */
     public boolean onTheMap(MapLocation location) {
         return onTheMap(location.x, location.y);
     }
 
     /**
-     * Determines the type of the terrain on the map at the
-     * given location.
+     * Determines the type of the terrain on the map at the given location.
      *
-     * @param location the MapLocation to test
-     * @return the TerrainTile at the given location
-     *         of the map, and TerrainTile.OFF_MAP if the given location is
-     *         off the map.
+     * @param location
+     *            the MapLocation to test
+     * @return the TerrainTile at the given location of the map, and
+     *         TerrainTile.OFF_MAP if the given location is off the map.
      */
     public TerrainTile getTerrainTile(MapLocation location) {
         if (!onTheMap(location))
@@ -220,10 +220,10 @@ public class GameMap implements GenericGameMap {
     }
 
     /**
-     * Determines the amount of ore on the map at the
-     * given location.
+     * Determines the amount of ore on the map at the given location.
      *
-     * @param location the MapLocation to test
+     * @param location
+     *            the MapLocation to test
      * @return the amount of ore in the given location, or 0 if off the map
      */
     public int getInitialOre(MapLocation location) {
@@ -272,16 +272,25 @@ public class GameMap implements GenericGameMap {
     public static class MapMemory {
         private final GameMap map;
 
-        /** Represents how many units are currently able to sense a given location. */
+        /**
+         * Represents how many units are currently able to sense a given
+         * location.
+         */
         private final int[][] currentCount;
 
         /** Represents whether a certain location was ever in sensor range. */
         private final boolean[][] seen;
 
-        /** Represents the amount of ore mined when the location was last in sensor range. */
+        /**
+         * Represents the amount of ore mined when the location was last in
+         * sensor range.
+         */
         private final double[][] oreMined;
 
-        /** It's important to keep track of OFF_MAP squares so we have this buffer around the map. */
+        /**
+         * It's important to keep track of OFF_MAP squares so we have this
+         * buffer around the map.
+         */
         private final int OFFSET = 50;
 
         public MapMemory(GameMap map) {
@@ -324,7 +333,10 @@ public class GameMap implements GenericGameMap {
             }
         }
 
-        /** When a location gets mined, we'll update map memory if it's currently in sight. */
+        /**
+         * When a location gets mined, we'll update map memory if it's currently
+         * in sight.
+         */
         public void updateLocation(MapLocation loc, double oreMinedNew) {
             if (canSense(loc)) {
                 int x = loc.x - map.mapOriginX;

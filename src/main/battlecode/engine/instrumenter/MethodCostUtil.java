@@ -1,7 +1,6 @@
 package battlecode.engine.instrumenter;
 
-import battlecode.engine.ErrorReporter;
-import org.objectweb.asm.ClassReader;
+import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -11,10 +10,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
+import org.objectweb.asm.ClassReader;
+
+import battlecode.engine.ErrorReporter;
 
 /**
- * MethodCostUtil is a singleton used for looking up MethodData associated with some methods.
+ * MethodCostUtil is a singleton used for looking up MethodData associated with
+ * some methods.
  * <p/>
  *
  * @author adamd
@@ -25,17 +27,20 @@ public class MethodCostUtil {
     }
 
     /**
-     * This is a map from method names (in the format 'ClassName/methodName'), to the MethodData associated with each method.
+     * This is a map from method names (in the format 'ClassName/methodName'),
+     * to the MethodData associated with each method.
      */
     private final static Map<String, MethodData> methodCosts;
 
     /**
-     * This is a map from binary class names, to all the classes/interfaces that the class transitively implements/extends.
+     * This is a map from binary class names, to all the classes/interfaces that
+     * the class transitively implements/extends.
      */
     private final static Map<String, String[]> interfacesMap;
 
     /**
-     * A struct that stores data about a method -- what its lookup bytecode cost is, and whether it should end the basic block or not.
+     * A struct that stores data about a method -- what its lookup bytecode cost
+     * is, and whether it should end the basic block or not.
      */
     public static class MethodData {
         public final int cost;
@@ -59,7 +64,8 @@ public class MethodCostUtil {
                 StringTokenizer st = new StringTokenizer(line);
                 if (st.countTokens() != 3)
                     ClassReferenceUtil.fileLoadError("MethodCosts.txt");
-                methodCosts.put(st.nextToken(), new MethodData(Integer.parseInt(st.nextToken()), Boolean.parseBoolean(st.nextToken())));
+                methodCosts.put(st.nextToken(),
+                        new MethodData(Integer.parseInt(st.nextToken()), Boolean.parseBoolean(st.nextToken())));
             }
         } catch (IOException e) {
             ClassReferenceUtil.fileLoadError("MethodCosts.txt");
@@ -73,10 +79,14 @@ public class MethodCostUtil {
     }
 
     /**
-     * Returns the MethodData associated with the given method, or null if no MethodData exists for the given method.
+     * Returns the MethodData associated with the given method, or null if no
+     * MethodData exists for the given method.
      *
-     * @param className  the binary name of the class to which the given method belongns
-     * @param methodName the name of the given class
+     * @param className
+     *            the binary name of the class to which the given method
+     *            belongns
+     * @param methodName
+     *            the name of the given class
      */
     public static MethodData getMethodData(String className, String methodName) {
         if (className.charAt(0) == '[')
@@ -94,8 +104,10 @@ public class MethodCostUtil {
             try {
                 cr = new ClassReader(className);
             } catch (IOException ioe) {
-                ErrorReporter.report("Can't find the class \"" + className + "\", and this wasn't caught until the MethodData stage.", true);
-                // this isn't all that bad an error, so don't throw an InstrumentationException
+                ErrorReporter.report("Can't find the class \"" + className
+                        + "\", and this wasn't caught until the MethodData stage.", true);
+                // this isn't all that bad an error, so don't throw an
+                // InstrumentationException
                 return null;
             }
             InterfaceReader ir = new InterfaceReader();
@@ -112,6 +124,5 @@ public class MethodCostUtil {
 
         return null;
     }
-
 
 }

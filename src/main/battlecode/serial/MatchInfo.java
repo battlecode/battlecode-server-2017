@@ -17,7 +17,7 @@ public class MatchInfo implements Serializable {
     }
 
     public MatchInfo(String teamA, String teamB, String mapName) {
-        this(teamA, teamB, new String[]{mapName});
+        this(teamA, teamB, new String[] { mapName });
     }
 
     public String[] getMaps() {

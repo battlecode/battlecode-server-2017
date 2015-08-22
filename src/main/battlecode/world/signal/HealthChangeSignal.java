@@ -27,7 +27,8 @@ public class HealthChangeSignal extends Signal {
         health = new double[nChangedHealth];
         int curIndex = 0;
         for (int i = 0; i < robots.length; i++) {
-            if (robots[i].healthChanged() || robots[i].getRoundsAlive() <= 2) { // TODO(axc) clean
+            if (robots[i].healthChanged() || robots[i].getRoundsAlive() <= 2) { // TODO(axc)
+                                                                                // clean
                 robotIDs[curIndex] = robots[i].getID();
                 health[curIndex] = robots[i].getHealthLevel();
                 robots[i].clearHealthChanged();

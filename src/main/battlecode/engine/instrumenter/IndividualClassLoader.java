@@ -1,25 +1,34 @@
 package battlecode.engine.instrumenter;
 
-import battlecode.engine.ErrorReporter;
+import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
-import java.io.IOException;
-import java.util.*;
-
-import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
+import battlecode.engine.ErrorReporter;
 
 public class IndividualClassLoader extends InstrumentingClassLoader {
     private boolean retryLoad;
-    private final static String[] disallowedPlayerPackages = {"java/", "battlecode/", "sun/"};
+    private final static String[] disallowedPlayerPackages = { "java/", "battlecode/", "sun/" };
 
     // caches the binary format of classes that have been instrumented
-    // the values are byte arrays, not Classes, because each instance of InstrumentingClassLoader should define its own class,
-    // even if another InstrumentingClassLoader has already loaded a class from the same class file
+    // the values are byte arrays, not Classes, because each instance of
+    // InstrumentingClassLoader should define its own class,
+    // even if another InstrumentingClassLoader has already loaded a class from
+    // the same class file
     private final static Map<String, byte[]> instrumentedClasses = new HashMap<String, byte[]>();
 
-    // caches the names of teams with errors, so that if a class is loaded for that team, it immediately throws an exception
-    private final static Set<String> teamsWithErrors = Collections.newSetFromMap(new IdentityHashMap<String, Boolean>());
+    // caches the names of teams with errors, so that if a class is loaded for
+    // that team, it immediately throws an exception
+    private final static Set<String> teamsWithErrors = Collections
+            .newSetFromMap(new IdentityHashMap<String, Boolean>());
 
     // the name of the team this InstrumentingClassLoader is loading
     private final String teamPackageName;
@@ -32,16 +41,21 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 
     static SingletonClassLoader singletonLoader = new SingletonClassLoader();
 
-    public IndividualClassLoader(String teamPackageName, boolean debugMethodsEnabled, boolean silenced, boolean retry) throws InstrumentationException {
+    public IndividualClassLoader(String teamPackageName, boolean debugMethodsEnabled, boolean silenced, boolean retry)
+            throws InstrumentationException {
         super(silenced, debugMethodsEnabled, singletonLoader);
-	retryLoad = retry;
+        retryLoad = retry;
         checkSettings();
 
-        // check that the package we're trying to load isn't contained in a disallowed package
+        // check that the package we're trying to load isn't contained in a
+        // disallowed package
         String teamNameSlash = teamPackageName + "/";
         for (String sysName : disallowedPlayerPackages) {
             if (teamNameSlash.startsWith(sysName)) {
-                ErrorReporter.report("Invalid package name: \"" + teamPackageName + "\"\nPlayer packages cannot be contained in system packages (e.g., java., battlecode.)", false);
+                ErrorReporter.report(
+                        "Invalid package name: \"" + teamPackageName
+                                + "\"\nPlayer packages cannot be contained in system packages (e.g., java., battlecode.)",
+                        false);
                 throw new InstrumentationException();
             }
         }
@@ -73,21 +87,22 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
             // this is the class we'll return
             Class finishedClass = null;
 
-            //System.out.println("loadClass "+name);
+            // System.out.println("loadClass "+name);
 
             if (instrumentedClasses.containsKey(name)) {
                 byte[] classBytes = instrumentedClasses.get(name);
                 finishedClass = defineClass(null, classBytes, 0, classBytes.length);
-            } else if (name.equals("battlecode/engine/instrumenter/lang/ObjectHashCode") ||
-                    name.equals("battlecode/engine/instrumenter/lang/InstrumentableFunctions")) {
+            } else if (name.equals("battlecode/engine/instrumenter/lang/ObjectHashCode")
+                    || name.equals("battlecode/engine/instrumenter/lang/InstrumentableFunctions")) {
                 // We want each robot to have its own copy of this class
                 // so that it isn't possible to send messages by calling
-                // hashCode repeatedly.  But we don't want to instrument it.
+                // hashCode repeatedly. But we don't want to instrument it.
                 ClassReader cr = null;
                 try {
                     cr = new ClassReader(name);
                 } catch (IOException ioe) {
-                    ErrorReporter.report("Can't find the class \"" + name + "\"", "Make sure the team name is spelled correctly.\nMake sure the .class files are in the right directory (teams/teamname/*.class)");
+                    ErrorReporter.report("Can't find the class \"" + name + "\"",
+                            "Make sure the team name is spelled correctly.\nMake sure the .class files are in the right directory (teams/teamname/*.class)");
                     throw new InstrumentationException();
                 }
                 ClassWriter cw = new ClassWriter(cr, COMPUTE_MAXS);
@@ -95,24 +110,25 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                 finishedClass = saveAndDefineClass(name, cw.toByteArray());
             } else if (name.startsWith(teamPackageName)) {
                 byte[] classBytes = null;
-		boolean retry = true;
-		while(retry) {
-		    if(!retryLoad)
-			retry = false;
-		    try {
-			classBytes = instrument(name, true, teamPackageName);
-			//dumpToFile(name,classBytes);
-			retry = false;
-		    } catch (InstrumentationException ie) {			
-			if(!retryLoad) {
-			    teamsWithErrors.add(teamPackageName);
-			    throw ie;
-			} else {
-			    try {
-				Thread.sleep(10000);
-			    } catch(Exception e) {}
-			}
-		    }
+                boolean retry = true;
+                while (retry) {
+                    if (!retryLoad)
+                        retry = false;
+                    try {
+                        classBytes = instrument(name, true, teamPackageName);
+                        // dumpToFile(name,classBytes);
+                        retry = false;
+                    } catch (InstrumentationException ie) {
+                        if (!retryLoad) {
+                            teamsWithErrors.add(teamPackageName);
+                            throw ie;
+                        } else {
+                            try {
+                                Thread.sleep(10000);
+                            } catch (Exception e) {
+                            }
+                        }
+                    }
                 }
 
                 finishedClass = saveAndDefineClass(name, classBytes);
@@ -125,14 +141,15 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                 byte[] classBytes;
                 try {
                     classBytes = instrument(name, false, teamPackageName);
-                    //dumpToFile(name,classBytes);
+                    // dumpToFile(name,classBytes);
                 } catch (InstrumentationException ie) {
                     teamsWithErrors.add(teamPackageName);
                     throw ie;
                 }
                 finishedClass = saveAndDefineClass(name, classBytes);
             } else if (name.startsWith("forbidden/")) {
-                ErrorReporter.report("Illegal class: " + name.substring(10) + "\nThis class cannot be referenced by player " + teamPackageName, false);
+                ErrorReporter.report("Illegal class: " + name.substring(10)
+                        + "\nThis class cannot be referenced by player " + teamPackageName, false);
                 throw new InstrumentationException();
             } else {
                 try {

@@ -1,13 +1,13 @@
 package battlecode.engine;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
 import battlecode.common.Clock;
 import battlecode.common.RobotController;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.scheduler.Scheduler;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 /*
 RobotRunnable is a wrapper for a player's main class.  It is basically a Runnable, whose run method both instantiates the player's
@@ -28,7 +28,10 @@ class RobotRunnable implements Runnable {
     }
 
     public static void warnRunFunctionMissing(String specificMessage) {
-        ErrorReporter.report(specificMessage + "\nYour player must have a function\npublic static void RobotPlayer.run(RobotController rc)", false);
+        ErrorReporter.report(
+                specificMessage
+                        + "\nYour player must have a function\npublic static void RobotPlayer.run(RobotController rc)",
+                false);
     }
 
     public static boolean causedByRobotDeath(Throwable t) {
@@ -40,12 +43,12 @@ class RobotRunnable implements Runnable {
         return false;
     }
 
-    // instantiates the class passed to the RobotRunnable constructor, and runs its run method
+    // instantiates the class passed to the RobotRunnable constructor, and runs
+    // its run method
     public void run() {
         Method m;
 
-        runbot:
-        try {
+        runbot: try {
             Scheduler.endTurn();
             try {
                 m = myPlayerClass.getMethod("run", RobotController.class);
@@ -64,12 +67,14 @@ class RobotRunnable implements Runnable {
 
             m.invoke(null, myRobotController);
 
-            System.out.println("[Engine] Robot " + myRobotController.getRobot() + " died on round "+Clock.getRoundNum()+" because its run method returned");
+            System.out.println("[Engine] Robot " + myRobotController.getRobot() + " died on round "
+                    + Clock.getRoundNum() + " because its run method returned");
         } catch (Throwable t) {
             while ((t instanceof InvocationTargetException) || (t instanceof ExceptionInInitializerError))
                 t = t.getCause();
             if (!causedByRobotDeath(t)) {
-                System.out.println("[Engine] Robot " + myRobotController.getRobot() + " died on round "+Clock.getRoundNum()+" because of:");
+                System.out.println("[Engine] Robot " + myRobotController.getRobot() + " died on round "
+                        + Clock.getRoundNum() + " because of:");
                 t.printStackTrace();
             }
         }

@@ -24,7 +24,8 @@ public abstract class RPCServer implements Runnable {
     /**
      * Creates an RPC server that listens on the default port.
      *
-     * @throws IOException if there was a problem listening on the port
+     * @throws IOException
+     *             if there was a problem listening on the port
      */
     public RPCServer() throws IOException {
         this(DEFAULT_PORT);
@@ -33,8 +34,10 @@ public abstract class RPCServer implements Runnable {
     /**
      * Creates an RPC server that listens on the given port.
      *
-     * @param port the port to listen on
-     * @throws IOException if there was a problem listening on the port
+     * @param port
+     *            the port to listen on
+     * @throws IOException
+     *             if there was a problem listening on the port
      */
     public RPCServer(int port) throws IOException {
         socket = new ServerSocket(port);
@@ -43,15 +46,16 @@ public abstract class RPCServer implements Runnable {
     /**
      * Processes the argument from the RPC client.
      *
-     * @param arg the argument sent by the client
+     * @param arg
+     *            the argument sent by the client
      * @return the result of the method call to be passed back to the client
      */
     public abstract Object handler(Object arg);
 
     /**
      * Runs the server. This method listens for incoming connections
-     * continually. When it gets one, it waits for an input argument, passes
-     * it to handler(), and returns the result to the client.
+     * continually. When it gets one, it waits for an input argument, passes it
+     * to handler(), and returns the result to the client.
      * <p/>
      * Note: in this RPC implementation, the client always terminates the
      * connection.

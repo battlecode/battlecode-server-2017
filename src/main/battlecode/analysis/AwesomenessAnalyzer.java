@@ -1,5 +1,24 @@
 package battlecode.analysis;
 
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.zip.GZIPInputStream;
+
+import javax.swing.JFileChooser;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.engine.signal.Signal;
@@ -9,16 +28,11 @@ import battlecode.server.proxy.FileProxy;
 import battlecode.server.proxy.Proxy;
 import battlecode.server.serializer.XStreamSerializer;
 import battlecode.world.GameMap;
-import battlecode.world.signal.*;
-import org.apache.commons.cli.*;
-
-import javax.swing.*;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.zip.GZIPInputStream;
+import battlecode.world.signal.AttackSignal;
+import battlecode.world.signal.DeathSignal;
+import battlecode.world.signal.IndicatorStringSignal;
+import battlecode.world.signal.MovementSignal;
+import battlecode.world.signal.SpawnSignal;
 
 public class AwesomenessAnalyzer {
     private static final float TOWER_AWESOMENESS = 500;
@@ -38,7 +52,6 @@ public class AwesomenessAnalyzer {
 
     private String filename;
     private ArrayList<GameData> games;
-
 
     private static Options options() {
         Options options = new Options();
@@ -81,12 +94,12 @@ public class AwesomenessAnalyzer {
         // TODO CORY FIX IT
         public void transform(RobotType type) {
             this.type = type;
-//            if (type.equals(RobotType.ARCHON))
-//                robotAwesomeness = ARCHON_AWESOMENESS_MULTIPLIER;
-//                //else if(type.equals(RobotType.WOUT))
-//                //	robotAwesomeness=WOUT_AWESOMENESS_MULTIPLIER;
-//            else
-                robotAwesomeness = 1.f;
+            // if (type.equals(RobotType.ARCHON))
+            // robotAwesomeness = ARCHON_AWESOMENESS_MULTIPLIER;
+            // //else if(type.equals(RobotType.WOUT))
+            // // robotAwesomeness=WOUT_AWESOMENESS_MULTIPLIER;
+            // else
+            robotAwesomeness = 1.f;
         }
 
         public void resetCountDown() {
@@ -153,14 +166,15 @@ public class AwesomenessAnalyzer {
                 // we care more about getting the right camera
                 // angle when there is more stuff going on
                 dist = s.totalAwesomeness * s.totalAwesomeness * (x * x + y * y + r * r / 2.) / (s.radius * s.radius);
-                //System.out.println(dist);
+                // System.out.println(dist);
                 if (dist > farthestDist) {
                     farthestDist = dist;
                     farthest = i;
                 }
             }
 
-            //System.out.println("reduceJitter "+begin+"-"+end+" farthestDist "+farthestDist);
+            // System.out.println("reduceJitter "+begin+"-"+end+" farthestDist
+            // "+farthestDist);
 
             if (farthest == -1) {
                 for (i = begin + 1; i < end; i++) {
@@ -268,91 +282,66 @@ public class AwesomenessAnalyzer {
                 s.totalAwesomeness = old1[i];
                 s.centerX = oldX[i] / old1[i] + xOffset;
                 s.centerY = oldY[i] / old1[i] + yOffset;
-                //System.out.println(old1[i]+" "+oldX[i]+" "+oldY[i]+" "+oldR2[i]);
-                s.radius = RADIUS_IN_STDEVS * (float) Math.sqrt((oldR2[i] - (oldX[i] * oldX[i] + oldY[i] * oldY[i]) / old1[i]) / old1[i]);
+                // System.out.println(old1[i]+" "+oldX[i]+" "+oldY[i]+"
+                // "+oldR2[i]);
+                s.radius = RADIUS_IN_STDEVS
+                        * (float) Math.sqrt((oldR2[i] - (oldX[i] * oldX[i] + oldY[i] * oldY[i]) / old1[i]) / old1[i]);
             }
 
             /*
-                 for(i=0;i<stats.size();i++) {
-                 System.out.println(i+" "+stats.get(i).radius);
-                 }
-               */
+             * for(i=0;i<stats.size();i++) { System.out.println(i+" "
+             * +stats.get(i).radius); }
+             */
 
             reduceJitter(0, stats.size() - 1);
 
             /*
-                 for(i=0;i<stats.size();i++) {
-                 System.out.println(i+" "+stats.get(i).radius);
-                 }
-               */
+             * for(i=0;i<stats.size();i++) { System.out.println(i+" "
+             * +stats.get(i).radius); }
+             */
 
             /*
-
-                 float total = 0.0f;
-                 float min = Float.MAX_VALUE;
-                 float max = Float.MIN_VALUE;
-                 int awesomeRound = 0;
-
-                 final int LOOK_BACK = 5;
-                 final int LOOK_FORWARD = 10;
-                 final AwesomenessSignal[] rounds = new AwesomenessSignal[stats.size()];
-                 stats.toArray(rounds);
-                 for (int i = 0; i < rounds.length; i++) {
-                 int n = 0;
-                 float sum = 0;
-                 float centerXSum = 0;
-                 float centerYSum = 0;
-                 float radiusSum = 0;
-
-                 // Sum elements before i
-                 for (int j = i - LOOK_BACK; j < i; j++) {
-                 if (j >= 0) {
-                 n++;
-                 AwesomenessSignal s = rounds[j];
-                 float awesomeness = s.totalAwesomeness;
-                 sum += awesomeness;
-                 centerXSum += s.centerX * awesomeness;
-                 centerYSum += s.centerY * awesomeness;
-                 radiusSum += s.radius * awesomeness;
-                 }
-                 }
-
-                 // Sum elements after i
-                 for (int j = i + 1; j <= i + LOOK_FORWARD && j < rounds.length; j++) {
-                 n++;
-                 AwesomenessSignal s = rounds[j];
-                 float awesomeness = s.totalAwesomeness;
-                 sum += awesomeness;
-                 centerXSum += s.centerX * awesomeness;
-                 centerYSum += s.centerY * awesomeness;
-                 radiusSum += s.radius * awesomeness;
-                 }
-
-                 // Weight current value higher than others
-                 AwesomenessSignal s = rounds[i];
-                 float newAwesomeness = (sum + s.totalAwesomeness * n) / (2 * n);
-                 s.updateAwesomeness(newAwesomeness);
-                 s.centerX = (centerXSum + s.centerX * sum) / (2 * sum);
-                 s.centerY = (centerYSum + s.centerY * sum) / (2 * sum);
-                 s.radius = (radiusSum + s.radius * sum) / (2 * sum);
-
-                 total += newAwesomeness;
-                 if (newAwesomeness < min)
-                 min = newAwesomeness;
-                 if (newAwesomeness > max) {
-                 max = newAwesomeness;
-                 awesomeRound = i;
-                 }
-                 }
-
-                 //System.out.println("Smooth: " + total + " " + totalAwesomeness + " " + min + " " + max);
-                 //System.out.println("AwesomeRound: " + (awesomeRound + 1));
-
-                 for(int i=0;i<stats.size();i++) {
-                 System.out.println(i+" "+stats.get(i).radius);
-                 }
-
-               */
+             * 
+             * float total = 0.0f; float min = Float.MAX_VALUE; float max =
+             * Float.MIN_VALUE; int awesomeRound = 0;
+             * 
+             * final int LOOK_BACK = 5; final int LOOK_FORWARD = 10; final
+             * AwesomenessSignal[] rounds = new AwesomenessSignal[stats.size()];
+             * stats.toArray(rounds); for (int i = 0; i < rounds.length; i++) {
+             * int n = 0; float sum = 0; float centerXSum = 0; float centerYSum
+             * = 0; float radiusSum = 0;
+             * 
+             * // Sum elements before i for (int j = i - LOOK_BACK; j < i; j++)
+             * { if (j >= 0) { n++; AwesomenessSignal s = rounds[j]; float
+             * awesomeness = s.totalAwesomeness; sum += awesomeness; centerXSum
+             * += s.centerX * awesomeness; centerYSum += s.centerY *
+             * awesomeness; radiusSum += s.radius * awesomeness; } }
+             * 
+             * // Sum elements after i for (int j = i + 1; j <= i + LOOK_FORWARD
+             * && j < rounds.length; j++) { n++; AwesomenessSignal s =
+             * rounds[j]; float awesomeness = s.totalAwesomeness; sum +=
+             * awesomeness; centerXSum += s.centerX * awesomeness; centerYSum +=
+             * s.centerY * awesomeness; radiusSum += s.radius * awesomeness; }
+             * 
+             * // Weight current value higher than others AwesomenessSignal s =
+             * rounds[i]; float newAwesomeness = (sum + s.totalAwesomeness * n)
+             * / (2 * n); s.updateAwesomeness(newAwesomeness); s.centerX =
+             * (centerXSum + s.centerX * sum) / (2 * sum); s.centerY =
+             * (centerYSum + s.centerY * sum) / (2 * sum); s.radius = (radiusSum
+             * + s.radius * sum) / (2 * sum);
+             * 
+             * total += newAwesomeness; if (newAwesomeness < min) min =
+             * newAwesomeness; if (newAwesomeness > max) { max = newAwesomeness;
+             * awesomeRound = i; } }
+             * 
+             * //System.out.println("Smooth: " + total + " " + totalAwesomeness
+             * + " " + min + " " + max); //System.out.println("AwesomeRound: " +
+             * (awesomeRound + 1));
+             * 
+             * for(int i=0;i<stats.size();i++) { System.out.println(i+" "
+             * +stats.get(i).radius); }
+             * 
+             */
 
         }
 
@@ -362,12 +351,12 @@ public class AwesomenessAnalyzer {
 
             // Insert awesomeness stats into RoundDelta
             int statNum = 0;
-            for (ListIterator<Object> iter = output.listIterator(); iter.hasNext(); ) {
+            for (ListIterator<Object> iter = output.listIterator(); iter.hasNext();) {
                 Object round = iter.next();
                 if (round instanceof RoundDelta) {
                     RoundDelta rd = (RoundDelta) round;
-                    //iter.add(stats.get(statNum++));
-                    //Signal[] oldSignals = rd.getSignals();
+                    // iter.add(stats.get(statNum++));
+                    // Signal[] oldSignals = rd.getSignals();
                     Signal[] oldSignals = stripIndicatorStrings(rd.getSignals());
                     final int len = oldSignals.length;
                     Signal[] newSignals = new Signal[len + 1];
@@ -425,7 +414,7 @@ public class AwesomenessAnalyzer {
             centerY = origin.y + halfHeight;
             radius = (float) Math.sqrt(halfWidth * halfWidth + halfHeight * halfHeight);
 
-            hulls = new ConvexHullData[]{new ConvexHullData(), new ConvexHullData()};
+            hulls = new ConvexHullData[] { new ConvexHullData(), new ConvexHullData() };
         }
 
         private class ConvexHullData {
@@ -545,7 +534,7 @@ public class AwesomenessAnalyzer {
             // Enforce min radius
             if (radius < 4) {
                 radius = 4;
-                //System.err.println("Warning: Std dev too small: " + radius);
+                // System.err.println("Warning: Std dev too small: " + radius);
             }
 
             // Enforce max radius
@@ -553,7 +542,7 @@ public class AwesomenessAnalyzer {
                 radius = this.radius;
             }
 
-            //System.out.println(sum);
+            // System.out.println(sum);
             totalAwesomeness += sum;
             return new AwesomenessSignal(sum, centerX, centerY, radius);
         }
@@ -562,7 +551,8 @@ public class AwesomenessAnalyzer {
     public void analyze() {
         ObjectInputStream input = null;
         try {
-            input = XStreamSerializer.getXStream().createObjectInputStream(new GZIPInputStream(new FileInputStream(filename)));
+            input = XStreamSerializer.getXStream()
+                    .createObjectInputStream(new GZIPInputStream(new FileInputStream(filename)));
         } catch (Exception e) {
             System.err.println("Error: couldn't open match file " + filename);
             e.printStackTrace();
@@ -570,7 +560,6 @@ public class AwesomenessAnalyzer {
         }
 
         System.out.println("Analyzing: " + filename);
-
 
         try {
             GameData gameData = new GameData();
@@ -636,8 +625,8 @@ public class AwesomenessAnalyzer {
         AwesomenessAnalyzer analyzer = new AwesomenessAnalyzer(file);
         analyzer.analyze();
         analyzer.smoothStats();
-        //for (int i = 0; i < 16; i++)
-        //	  analyzer.smoothStats();
+        // for (int i = 0; i < 16; i++)
+        // analyzer.smoothStats();
         analyzer.dumpFile();
     }
 
@@ -659,13 +648,15 @@ public class AwesomenessAnalyzer {
             if (children == null) {
                 // Either dir does not exist or is not a directory
             } else {
-                for (int i = 0; i < children.length; i++) { // Get filename of file or directory
+                for (int i = 0; i < children.length; i++) { // Get filename of
+                                                            // file or directory
                     String filename = children[i];
                     File file = new File(directory + "/" + filename);
-                    //String type = chooser.getTypeDescription(file);
-                    //System.out.println(directory + "/" + filename + " " + type);
+                    // String type = chooser.getTypeDescription(file);
+                    // System.out.println(directory + "/" + filename + " " +
+                    // type);
                     if (filename.endsWith(".rms"))
-                    //if(type.compareTo("RMS File")==0)
+                    // if(type.compareTo("RMS File")==0)
                     {
                         System.out.println("is an rms file");
                         analyze(file.getAbsolutePath());

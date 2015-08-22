@@ -22,9 +22,11 @@ public class ExtensibleMetadata implements Serializable {
     }
 
     /**
-     * @param key          the key whose associated value is to be returned
-     * @param defaultValue the value to return if there's no value in the map for
-     *                     {@code key}
+     * @param key
+     *            the key whose associated value is to be returned
+     * @param defaultValue
+     *            the value to return if there's no value in the map for
+     *            {@code key}
      * @return the value associated with key if it exists, else
      *         {@code defaultValue}
      */

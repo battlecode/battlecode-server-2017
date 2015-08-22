@@ -3,8 +3,7 @@ package battlecode.serial.notification;
 import java.io.ObjectStreamException;
 
 /**
- * Represents a notification that the running server should pause the
- * match.
+ * Represents a notification that the running server should pause the match.
  */
 public class PauseNotification implements Notification {
 

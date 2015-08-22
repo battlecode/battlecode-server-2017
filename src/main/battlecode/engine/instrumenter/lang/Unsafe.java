@@ -3,7 +3,7 @@ package battlecode.engine.instrumenter.lang;
 import java.lang.reflect.Field;
 
 /**
- * Do-nothing replacement for sun.misc.Unsafe.  Used by Random.
+ * Do-nothing replacement for sun.misc.Unsafe. Used by Random.
  */
 public class Unsafe {
 

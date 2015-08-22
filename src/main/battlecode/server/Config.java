@@ -1,13 +1,18 @@
 package battlecode.server;
 
-import org.apache.commons.cli.*;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 /**
  * Represents a game configuration as provided by configuration files and
@@ -70,9 +75,7 @@ public class Config {
         defaults.setProperty("bc.game.state", "0,0");
         defaults.setProperty("bc.game.allow-air-units", "true");
 
-
         defaults.setProperty("bc.dialog.skip", "false");
-
 
         // Command-line options.
         options = new Options();
@@ -109,22 +112,23 @@ public class Config {
     /**
      * Creates a new Config instance from the given command-line args.
      *
-     * @param args the command-line arguments to add to the configuration
+     * @param args
+     *            the command-line arguments to add to the configuration
      */
     public Config(String[] args) {
 
         // Set up local properties instance.
         properties = new Properties(defaults);
 
-        for (Enumeration propertyNames = System.getProperties().propertyNames(); propertyNames.hasMoreElements(); ) {
+        for (Enumeration propertyNames = System.getProperties().propertyNames(); propertyNames.hasMoreElements();) {
             String s = (String) propertyNames.nextElement();
             if (s.startsWith("bc.")) {
                 properties.setProperty(s, System.getProperty(s));
-//                System.out.println(s + " " + System.getProperty(s));
+                // System.out.println(s + " " + System.getProperty(s));
             }
             if (s.startsWith("drw.")) {
                 properties.setProperty(s, System.getProperty(s));
-//            	System.out.println(s + " " + System.getProperty(s));
+                // System.out.println(s + " " + System.getProperty(s));
             }
         }
 
@@ -135,7 +139,8 @@ public class Config {
      * Processes command-line arguments, converting them to properties and
      * adding them to the local options.
      *
-     * @param args the set of command-line arguments to process
+     * @param args
+     *            the set of command-line arguments to process
      */
     private void addArgs(String[] args) {
 
@@ -193,7 +198,8 @@ public class Config {
     /**
      * Gets a configuration from this set of options.
      *
-     * @param key the option to get
+     * @param key
+     *            the option to get
      * @return that option's value
      */
     public String get(String key) {

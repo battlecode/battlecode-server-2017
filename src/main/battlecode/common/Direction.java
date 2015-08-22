@@ -3,9 +3,8 @@ package battlecode.common;
 /**
  * This enumeration represents a direction from one MapLocation to another.
  * There is a direction for each of the cardinals (north, south, east, west),
- * and each of diagonals (northwest, southwest, northeast, southeast).
- * There is also NONE, representing no direction, and OMNI, representing
- * all directions.
+ * and each of diagonals (northwest, southwest, northeast, southeast). There is
+ * also NONE, representing no direction, and OMNI, representing all directions.
  * <p>
  * Since Direction is a Java 1.5 enum, you can use it in <code>switch</code>
  * statements, it has all the standard enum methods (<code>valueOf</code>,
@@ -14,21 +13,13 @@ package battlecode.common;
  */
 public enum Direction {
 
-    NORTH(0, -1),
-    NORTH_EAST(1, -1),
-    EAST(1, 0),
-    SOUTH_EAST(1, 1),
-    SOUTH(0, 1),
-    SOUTH_WEST(-1, 1),
-    WEST(-1, 0),
-    NORTH_WEST(-1, -1),
-    /**
-     * No direction.
-     */
-    NONE(0, 0),
-    /**
-     * All directions.
-     */
+    NORTH(0, -1), NORTH_EAST(1, -1), EAST(1, 0), SOUTH_EAST(1, 1), SOUTH(0, 1), SOUTH_WEST(-1, 1), WEST(-1,
+            0), NORTH_WEST(-1, -1), /**
+                                     * No direction.
+                                     */
+    NONE(0, 0), /**
+                 * All directions.
+                 */
     OMNI(0, 0);
     public final int dx, dy;
 
@@ -50,8 +41,8 @@ public enum Direction {
     /**
      * Computes the direction opposite this one.
      *
-     * @return the direction pointing in the opposite direction
-     *         to this one, or NONE if it's NONE, or OMNI if it's OMNI
+     * @return the direction pointing in the opposite direction to this one, or
+     *         NONE if it's NONE, or OMNI if it's OMNI
      */
     public Direction opposite() {
         if (ordinal() >= 8) {
@@ -61,8 +52,8 @@ public enum Direction {
     }
 
     /**
-     * Computes the direction 45 degrees to the left (counter-clockwise)
-     * of this one.
+     * Computes the direction 45 degrees to the left (counter-clockwise) of this
+     * one.
      *
      * @return the direction 45 degrees left of this one, or NONE if it's NONE,
      *         or OMNI if it's OMNI
@@ -78,8 +69,7 @@ public enum Direction {
     }
 
     /**
-     * Computes the direction 45 degrees to the right (clockwise)
-     * of this one.
+     * Computes the direction 45 degrees to the right (clockwise) of this one.
      *
      * @return the direction 45 degrees right of this one, or NONE if it's NONE,
      *         or OMNI if it's OMNI

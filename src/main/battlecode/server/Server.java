@@ -1,16 +1,31 @@
 package battlecode.server;
 
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Queue;
+
 import battlecode.common.Team;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.GameState;
 import battlecode.engine.signal.Signal;
-import battlecode.serial.*;
-import battlecode.serial.notification.*;
+import battlecode.serial.ExtensibleMetadata;
+import battlecode.serial.GameStats;
+import battlecode.serial.MatchFooter;
+import battlecode.serial.MatchHeader;
+import battlecode.serial.MatchInfo;
+import battlecode.serial.RoundDelta;
+import battlecode.serial.RoundStats;
+import battlecode.serial.notification.Notification;
+import battlecode.serial.notification.NotificationHandler;
+import battlecode.serial.notification.PauseNotification;
+import battlecode.serial.notification.ResumeNotification;
+import battlecode.serial.notification.RunNotification;
+import battlecode.serial.notification.StartNotification;
 import battlecode.server.controller.Controller;
 import battlecode.server.proxy.Proxy;
-
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Runs matches. Specifically, this class forms a pipeline connecting match and
@@ -77,13 +92,16 @@ public class Server implements Observer, Runnable {
     /**
      * Initializes a new server.
      *
-     * @param options the configuration to use
-     * @param mode the mode to run the server in
-     * @param controller the controller to use
-     * @param proxies the proxies to use for this server
+     * @param options
+     *            the configuration to use
+     * @param mode
+     *            the mode to run the server in
+     * @param controller
+     *            the controller to use
+     * @param proxies
+     *            the proxies to use for this server
      */
-    public Server(Config options, Mode mode, Controller controller,
-                  Proxy... proxies) {
+    public Server(Config options, Mode mode, Controller controller, Proxy... proxies) {
         this.matches = new LinkedList<Match>();
         this.finished = new LinkedList<Match>();
 
@@ -135,8 +153,7 @@ public class Server implements Observer, Runnable {
                 for (String map : info.getMaps()) {
                     if (map.endsWith(".xml"))
                         map = map.substring(0, map.indexOf('.'));
-                    Match match = new Match(info, map, this.options,
-                            matchNumber++, matchCount);
+                    Match match = new Match(info, map, this.options, matchNumber++, matchCount);
                     match.addObserver(this);
                     debug("queuing match " + match);
                     matches.add(match);
@@ -169,8 +186,7 @@ public class Server implements Observer, Runnable {
     /**
      * Handles notifications; dispatched to by update().
      */
-    private class ServerNotificationHandler implements
-            NotificationHandler<Void> {
+    private class ServerNotificationHandler implements NotificationHandler<Void> {
 
         public Void visitPauseNotification(PauseNotification n) {
             state = State.PAUSED;
@@ -224,8 +240,7 @@ public class Server implements Observer, Runnable {
         while (!matches.isEmpty()) {
             Match match = matches.peek();
             if (!finished.isEmpty())
-                match.setInitialTeamMemory(finished.getLast()
-                        .getComputedTeamMemory());
+                match.setInitialTeamMemory(finished.getLast().getComputedTeamMemory());
 
             try {
                 debug("running match " + match);
@@ -241,8 +256,10 @@ public class Server implements Observer, Runnable {
 
                 match.finish();
 
-                // Allow best of three scrimmages -- single game scrims should still work fine
-                //TODO:This "win mode" should probably be something from the database
+                // Allow best of three scrimmages -- single game scrims should
+                // still work fine
+                // TODO:This "win mode" should probably be something from the
+                // database
                 if (mode == Mode.TOURNAMENT || mode == Mode.SCRIMMAGE || mode == Mode.AUTOTEST || mode == Mode.MATCH) {
                     if (aWins == 2 || bWins == 2)
                         break;
@@ -275,7 +292,8 @@ public class Server implements Observer, Runnable {
      * Sets up a new series of matches. Blocks until the matches have been set
      * up.
      *
-     * @throws IOException if a match could not be setup
+     * @throws IOException
+     *             if a match could not be setup
      */
     private void setupMatches() throws IOException {
 
@@ -312,9 +330,8 @@ public class Server implements Observer, Runnable {
      * running the game in a separate thread.
      */
     private void runMatch(Match match) throws Exception {
-        if (Mode.HEADLESS.equals(mode) || Mode.SCRIMMAGE.equals(mode)
-                || Mode.TOURNAMENT.equals(mode) || Mode.TESTS.equals(mode)
-                || Mode.AUTOTEST.equals(mode) || Mode.MATCH.equals(mode)) {
+        if (Mode.HEADLESS.equals(mode) || Mode.SCRIMMAGE.equals(mode) || Mode.TOURNAMENT.equals(mode)
+                || Mode.TESTS.equals(mode) || Mode.AUTOTEST.equals(mode) || Mode.MATCH.equals(mode)) {
             this.state = State.RUNNING;
             this.runUntil = Integer.MAX_VALUE;
         }
@@ -360,33 +377,33 @@ public class Server implements Observer, Runnable {
             // If not paused/stopped:
             switch (this.state) {
 
-                case RUNNING:
+            case RUNNING:
 
-                    if (match.getRoundNumber() == runUntil) {
-                        Thread.sleep(25);
-                        break;
-                    }
+                if (match.getRoundNumber() == runUntil) {
+                    Thread.sleep(25);
+                    break;
+                }
 
-                    callback.round = match.getRound();
-                    if (callback.round == null)
-                        break;
-
-                    if (count++ == throttleCount) {
-                        if (doYield)
-                            Thread.yield();
-                        else if (doSleep)
-                            Thread.sleep(1);
-                        count = 0;
-                    }
-
-                    // Compute stats bytes.
-                    callback.stats = match.getStats();
-
+                callback.round = match.getRound();
+                if (callback.round == null)
                     break;
 
-                case PAUSED:
-                    Thread.sleep(250);
-                    break;
+                if (count++ == throttleCount) {
+                    if (doYield)
+                        Thread.yield();
+                    else if (doSleep)
+                        Thread.sleep(1);
+                    count = 0;
+                }
+
+                // Compute stats bytes.
+                callback.stats = match.getStats();
+
+                break;
+
+            case PAUSED:
+                Thread.sleep(250);
+                break;
             }
         }
 
@@ -419,7 +436,8 @@ public class Server implements Observer, Runnable {
      * This method is used to display error messages. Invoking it terminates the
      * program.
      *
-     * @param msg the error message to display
+     * @param msg
+     *            the error message to display
      */
     public static void fail(String msg) {
         System.err.printf("[server:FATAL] %s\n", msg);
@@ -430,7 +448,8 @@ public class Server implements Observer, Runnable {
      * This method is used to display non-fatal error messages, issuing a
      * RuntimeException instead of terminating the Server.
      *
-     * @param msg the error message to display
+     * @param msg
+     *            the error message to display
      */
     public static void error(String msg) {
         System.err.printf("[server:ERROR] %s\n", msg);
@@ -440,7 +459,8 @@ public class Server implements Observer, Runnable {
     /**
      * This method is used to display warning messages with formatted output.
      *
-     * @param msg the warning message to display
+     * @param msg
+     *            the warning message to display
      */
     public static void warn(String msg) {
         System.err.printf("[server:WARNING] %s\n", msg);
@@ -450,7 +470,8 @@ public class Server implements Observer, Runnable {
      * This method is used to display "official" formatted messages from the
      * server.
      *
-     * @param msg the message to display
+     * @param msg
+     *            the message to display
      */
     public static void say(String msg) {
         System.out.printf("[server] %s\n", msg);
@@ -460,7 +481,8 @@ public class Server implements Observer, Runnable {
      * This method is used to display debugging messages with formatted output.
      * Cannot be used statically.
      *
-     * @param msg the debug message to display
+     * @param msg
+     *            the debug message to display
      */
     public void debug(String msg) {
         if (options.getBoolean("bc.server.debug"))

@@ -1,13 +1,13 @@
 package battlecode.serial;
 
-import battlecode.common.Team;
-
 import java.io.Serializable;
 
+import battlecode.common.Team;
+
 /**
- * Used to keep track of various statistics in a given
- * battlecode match.  These should be stats that don't change from round
- * to round, but rather are given only at the end of the match.
+ * Used to keep track of various statistics in a given battlecode match. These
+ * should be stats that don't change from round to round, but rather are given
+ * only at the end of the match.
  * <p/>
  * excitement factor currently isn't calculated in the engine
  */
