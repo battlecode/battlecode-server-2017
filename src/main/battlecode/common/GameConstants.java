@@ -71,11 +71,11 @@ public interface GameConstants {
     // ****** MINING *******************
     // *********************************
 
-    /** The amount of ore a team starts the game with. */
-    public static final int ORE_INITIAL_AMOUNT = 500;
+    /** The amount of parts a team starts the game with. */
+    public static final int PARTS_INITIAL_AMOUNT = 200;
 
-    /** The amount of ore the HQ gets for free each turn. */
-    public static final int HQ_ORE_INCOME = 5;
+    /** The amount of parts each Archon generates each turn. */
+    public static final int ARCHON_PART_INCOME = 1;
 
     /** The minimum amount that is mined on a square with no ore. */
     public static final double MINIMUM_MINE_AMOUNT = 0.2;
