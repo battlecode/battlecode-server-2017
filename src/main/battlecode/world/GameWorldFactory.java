@@ -24,12 +24,12 @@ public class GameWorldFactory {
 
         // first, make the robot
         InternalRobot robot;
-        if (type == RobotType.COMMANDER) {
-            robot = new InternalCommander(gw, type, loc, t, wakeDelay, buildDelay);
-        }
-        else {
+//        if (type == RobotType.COMMANDER) {
+//            robot = new InternalCommander(gw, type, loc, t, wakeDelay, buildDelay);
+//        }
+//        else {
             robot = new InternalRobot(gw, type, loc, t, wakeDelay, buildDelay);
-        }
+//        }
 
         loadPlayer(gw, robot, t, parent, buildDelay);
         return robot;

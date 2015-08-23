@@ -29,10 +29,11 @@ public class InternalRobot implements GenericRobot {
     protected final GameWorld myGameWorld;
 
     protected volatile double myHealthLevel;
-    protected volatile double mySupplyLevel;
+//    protected volatile double mySupplyLevel;
     private double coreDelay;
     private double weaponDelay;
-    private int missileCount;
+    private int infectedTurns;
+//    private int missileCount;
 
     protected volatile long controlBits;
 
@@ -71,14 +72,15 @@ public class InternalRobot implements GenericRobot {
         this.buildDelay = buildDelay;
 
         myHealthLevel = getMaxHealth();
-        if (type.isBuildable() && buildDelay > 0) {
+        if (type.isBuildable() && buildDelay > 0) { // What is this for?
             myHealthLevel /= 2.0;
         }
 
-        mySupplyLevel = 0.0;
+ //       mySupplyLevel = 0.0;
         coreDelay = 0.0;
         weaponDelay = 0.0;
-        missileCount = 0;
+ //       missileCount = 0;
+        infectedTurns = 0;
 
         controlBits = 0;
 
@@ -104,10 +106,10 @@ public class InternalRobot implements GenericRobot {
         myBuilding = -1;
 
         // Update GameWorld stuff
-        if (type == RobotType.COMMANDER) {
-            myGameWorld.putCommander(this);
-            myGameWorld.incrementCommandersSpawned(getTeam());
-        }
+//        if (type == RobotType.COMMANDER) {
+//            myGameWorld.putCommander(this);
+//            myGameWorld.incrementCommandersSpawned(getTeam());
+//        }
 
         myGameWorld.incrementTotalRobotTypeCount(getTeam(), type);
 
@@ -143,7 +145,7 @@ public class InternalRobot implements GenericRobot {
             myBuildingLocation = myGameWorld.getRobotByID(myBuilding).getLocation();
         }
 
-        return new RobotInfo(getID(), getTeam(), type, getLocation(), getCoreDelay(), getWeaponDelay(), getHealthLevel(), getSupplyLevel(), getXP(), getMissileCount(), myBuilderLocation, myBuildingLocation);
+        return new RobotInfo(getID(), getTeam(), type, getLocation(), getCoreDelay(), getWeaponDelay(), getHealthLevel(), getInfectedTurns(), myBuilderLocation, myBuildingLocation);
     }
 
     public int getRoundsAlive() {
@@ -213,12 +215,12 @@ public class InternalRobot implements GenericRobot {
         return this.movementSignal != null;
     }
 
-    public int getXP() {
-        if (type == RobotType.COMMANDER) {
-            return ((InternalCommander)this).getXP();
-        }
-        return 0;
-    }
+//    public int getXP() {
+//        if (type == RobotType.COMMANDER) {
+//            return ((InternalCommander)this).getXP();
+//        }
+//        return 0;
+//    }
 
     public void setControlBits(long l) {
         controlBits = l;
@@ -240,13 +242,13 @@ public class InternalRobot implements GenericRobot {
         return healthChanged;
     }
 
-    public void clearMissileCountChanged() {
-        missileCountChanged = false;
-    }
-
-    public boolean missileCountChanged() {
-        return missileCountChanged;
-    }
+//    public void clearMissileCountChanged() {
+//        missileCountChanged = false;
+//    }
+//
+//    public boolean missileCountChanged() {
+//        return missileCountChanged;
+//    }
 
     public void setMyBuilding(int id) {
         myBuilding = id;
@@ -284,30 +286,58 @@ public class InternalRobot implements GenericRobot {
     }
 
     // *********************************
+    // ****** ZOMBIE METHODS ***********
+    // *********************************    
+    
+    public int getInfectedTurns(){
+    	return infectedTurns;
+    }
+    
+    public boolean isInfected(){
+    	return infectedTurns > 0;
+    }
+    
+    public void setInfectedCounter(int turns){
+    	infectedTurns = turns;
+    }
+    
+    public void processBeingInfected(){
+    	if(isInfected()){
+    		takeDamage(2);
+    		infectedTurns--;
+    	}
+    }
+    
+    public void turnIntoZombie(){
+    	// TODO: Kill self and spawn zombie OR turn into zombie?
+    }
+    
+    
+    // *********************************
     // ****** MISSILE METHODS **********
     // *********************************
-
-    public void decrementMissileCount() {
-        missileCount--;
-        missileCountChanged = true;
-    }
-
-    public int getMissileCount() {
-        return missileCount;
-    }
-
-    public boolean canLaunchMissileAtLocation(MapLocation loc) {
-        for (SpawnSignal s : missileLaunchActions) {
-            if (s.getLoc().equals(loc)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public void launchMissile(MapLocation loc) {
-        missileLaunchActions.add(new SpawnSignal(loc, RobotType.MISSILE, getTeam(), this, 0));
-    }
+//
+//    public void decrementMissileCount() {
+//        missileCount--;
+//        missileCountChanged = true;
+//    }
+//
+//    public int getMissileCount() {
+//        return missileCount;
+//    }
+//
+//    public boolean canLaunchMissileAtLocation(MapLocation loc) {
+//        for (SpawnSignal s : missileLaunchActions) {
+//            if (s.getLoc().equals(loc)) {
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
+//
+//    public void launchMissile(MapLocation loc) {
+//        missileLaunchActions.add(new SpawnSignal(loc, RobotType.MISSILE, getTeam(), this, 0));
+//    }
 
     // *********************************
     // ****** HEALTH METHODS ***********
@@ -324,16 +354,16 @@ public class InternalRobot implements GenericRobot {
         } else {
             // HQ has a tower boost
             double rate = 1.0;
-            if (type == RobotType.HQ) {
-                int towerCount = myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.TOWER);
-                if (towerCount >= 6) {
-                    rate = GameConstants.HQ_BUFFED_DAMAGE_RATIO_LEVEL_3;
-                } else if (towerCount >= 4) {
-                    rate = GameConstants.HQ_BUFFED_DAMAGE_RATIO_LEVEL_2;
-                } else if (towerCount >= 1) {
-                    rate = GameConstants.HQ_BUFFED_DAMAGE_RATIO_LEVEL_1;
-                }
-            }
+//            if (type == RobotType.HQ) {
+//                int towerCount = myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.TOWER);
+//                if (towerCount >= 6) {
+//                    rate = GameConstants.HQ_BUFFED_DAMAGE_RATIO_LEVEL_3;
+//                } else if (towerCount >= 4) {
+//                    rate = GameConstants.HQ_BUFFED_DAMAGE_RATIO_LEVEL_2;
+//                } else if (towerCount >= 1) {
+//                    rate = GameConstants.HQ_BUFFED_DAMAGE_RATIO_LEVEL_1;
+//                }
+//            }
             changeHealthLevelFromAttack(-rate * baseAmount);
         }
     }
@@ -364,7 +394,12 @@ public class InternalRobot implements GenericRobot {
     }
 
     public void processLethalDamage() {
-        myGameWorld.notifyDied(this);
+    	if(isInfected()){
+    		turnIntoZombie();
+    	} else {
+    		// TODO: Increase rubble
+    		myGameWorld.notifyDied(this);
+    	}
     }
 
     public double getMaxHealth() {
@@ -400,21 +435,21 @@ public class InternalRobot implements GenericRobot {
     }
 
     public void decrementDelays() {
-        if (type.supplyUpkeep > 0 && upkeepEnabled && myBuilding < 0 && !justClearedBuilding) {
-            weaponDelay -= 0.5;
-            coreDelay -= 0.5;
-            double maxDelay = Math.max(weaponDelay,coreDelay);
-            if (maxDelay > 0.0) {
-                //fraction of upkeep that can be paid
-                double supplyDelayReduction = Math.min(Math.min(0.5,getSupplyLevel()/(2*type.supplyUpkeep)),maxDelay);
-                weaponDelay-=supplyDelayReduction;
-                coreDelay-=supplyDelayReduction;
-                decreaseSupplyLevel(2*supplyDelayReduction*type.supplyUpkeep);
-            }
-        } else {
+//        if (type.supplyUpkeep > 0 && upkeepEnabled && myBuilding < 0 && !justClearedBuilding) {
+//            weaponDelay -= 0.5;
+//            coreDelay -= 0.5;
+//            double maxDelay = Math.max(weaponDelay,coreDelay);
+//            if (maxDelay > 0.0) {
+//                //fraction of upkeep that can be paid
+//                double supplyDelayReduction = Math.min(Math.min(0.5,getSupplyLevel()/(2*type.supplyUpkeep)),maxDelay);
+//                weaponDelay-=supplyDelayReduction;
+//                coreDelay-=supplyDelayReduction;
+//                decreaseSupplyLevel(2*supplyDelayReduction*type.supplyUpkeep);
+//            }
+//        } else {
             weaponDelay--;
             coreDelay--;
-        }
+//        }
 
         justClearedBuilding = false;
 
@@ -426,22 +461,22 @@ public class InternalRobot implements GenericRobot {
         }
     }
 
-    public int getAttackDelayForType() {
-        if (type == RobotType.HQ && myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.TOWER) >= 5) {
-            return GameConstants.HQ_BUFFED_ATTACK_DELAY;
-        }
+    public double getAttackDelayForType() {
+//        if (type == RobotType.HQ && myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.TOWER) >= 5) {
+//            return GameConstants.HQ_BUFFED_ATTACK_DELAY;
+//        }
         return type.attackDelay;
     }
 
-    public int getMovementDelayForType() {
+    public double getMovementDelayForType() {
         return type.movementDelay;
     }
 
-    public int getLoadingDelayForType() {
-        return type.loadingDelay;
-    }
+//    public int getLoadingDelayForType() {
+//        return type.loadingDelay;
+//    }
 
-    public int getCooldownDelayForType() {
+    public double getCooldownDelayForType() {
         return type.cooldownDelay;
     }
 
@@ -459,24 +494,24 @@ public class InternalRobot implements GenericRobot {
     // ****** SUPPLY METHODS ***********
     // *********************************
 
-    public void transferSupply(int amount, InternalRobot target) {
-        supplyActions.add(new TransferSupplySignal(this, target, amount));
-    }
-
-    public double getSupplyLevel() {
-        return mySupplyLevel;
-    }
-
-    public void decreaseSupplyLevel(double dec) {
-        mySupplyLevel -= dec;
-        if (mySupplyLevel < 0) {
-            mySupplyLevel = 0;
-        }
-    }
-
-    public void increaseSupplyLevel(double inc) {
-        mySupplyLevel += inc;
-    }
+//    public void transferSupply(int amount, InternalRobot target) {
+//        supplyActions.add(new TransferSupplySignal(this, target, amount));
+//    }
+//
+//    public double getSupplyLevel() {
+//        return mySupplyLevel;
+//    }
+//
+//    public void decreaseSupplyLevel(double dec) {
+//        mySupplyLevel -= dec;
+//        if (mySupplyLevel < 0) {
+//            mySupplyLevel = 0;
+//        }
+//    }
+//
+//    public void increaseSupplyLevel(double inc) {
+//        mySupplyLevel += inc;
+//    }
 
     // *********************************
     // ****** BROADCAST METHODS ********
@@ -551,10 +586,10 @@ public class InternalRobot implements GenericRobot {
         decrementDelays(); // expends supply to decrement delays
 
         this.currentBytecodeLimit = type.bytecodeLimit;
-        if (type.supplyUpkeep > 0 && upkeepEnabled) {
-            // decide how many bytecodes we'll be allowed
-            this.currentBytecodeLimit = Math.max(type.bytecodeLimit / 2, Math.min(type.bytecodeLimit, GameConstants.FREE_BYTECODES + (int) (mySupplyLevel * GameConstants.BYTECODES_PER_SUPPLY)));
-        }
+//        if (type.supplyUpkeep > 0 && upkeepEnabled) {
+//            // decide how many bytecodes we'll be allowed
+//            this.currentBytecodeLimit = Math.max(type.bytecodeLimit / 2, Math.min(type.bytecodeLimit, GameConstants.FREE_BYTECODES + (int) (mySupplyLevel * GameConstants.BYTECODES_PER_SUPPLY)));
+//        }
     }
 
     public void processEndOfTurn() {
@@ -564,10 +599,10 @@ public class InternalRobot implements GenericRobot {
         hasBeenAttacked = false;
 
         // remove supply from bytecode usage
-        if (type.supplyUpkeep > 0 && upkeepEnabled) {
-            double supplyNeeded = Math.max(getBytecodesUsed() - GameConstants.FREE_BYTECODES, 0) / (double) GameConstants.BYTECODES_PER_SUPPLY;
-            decreaseSupplyLevel(supplyNeeded);
-        }
+//        if (type.supplyUpkeep > 0 && upkeepEnabled) {
+//            double supplyNeeded = Math.max(getBytecodesUsed() - GameConstants.FREE_BYTECODES, 0) / (double) GameConstants.BYTECODES_PER_SUPPLY;
+//            decreaseSupplyLevel(supplyNeeded);
+//        }
 
         // broadcasts
         if (broadcasted) myGameWorld.visitSignal(new BroadcastSignal(this, broadcastMap));
@@ -582,9 +617,9 @@ public class InternalRobot implements GenericRobot {
         supplyActions.clear();
 
         // supply decay
-        if (type != RobotType.HQ && type != RobotType.SUPPLYDEPOT) {
-            mySupplyLevel *= (1 - GameConstants.SUPPLY_DECAY);
-        }
+//        if (type != RobotType.HQ && type != RobotType.SUPPLYDEPOT) {
+//            mySupplyLevel *= (1 - GameConstants.SUPPLY_DECAY);
+//        }
         
         // perform attacks
         if (attackSignal != null) {
@@ -605,45 +640,46 @@ public class InternalRobot implements GenericRobot {
         }
 
         // bashers should bash()
-        if (type == RobotType.BASHER) {
-            myGameWorld.visitSignal(new BashSignal(this, getLocation()));
-        }
+//        if (type == RobotType.BASHER) {
+//            myGameWorld.visitSignal(new BashSignal(this, getLocation()));
+//        }
 
         // produce missile
-        if (type == RobotType.LAUNCHER && weaponDelay < 1 && missileCount + 1 <= GameConstants.MISSILE_MAX_COUNT) {
-            missileCount++;
-            addWeaponDelay(GameConstants.MISSILE_SPAWN_FREQUENCY);
-            missileCountChanged = true;
-        }
+//        if (type == RobotType.LAUNCHER && weaponDelay < 1 && missileCount + 1 <= GameConstants.MISSILE_MAX_COUNT) {
+//            missileCount++;
+//            addWeaponDelay(GameConstants.MISSILE_SPAWN_FREQUENCY);
+//            missileCountChanged = true;
+//        }
     	
-        // commander regen
-        if (type == RobotType.COMMANDER && ((InternalCommander)this).hasSkill(CommanderSkillType.REGENERATION)) {
-           this.changeHealthLevel(GameConstants.REGEN_RATE); 
-        }
+//        // commander regen
+//        if (type == RobotType.COMMANDER && ((InternalCommander)this).hasSkill(CommanderSkillType.REGENERATION)) {
+//           this.changeHealthLevel(GameConstants.REGEN_RATE); 
+//        }
 		
         // missiles should die automatically
-		if (type == RobotType.MISSILE && roundsAlive >= GameConstants.MISSILE_LIFESPAN) {
-			setSelfDestruct();
-            suicide();
-        }
+//		if (type == RobotType.MISSILE && roundsAlive >= GameConstants.MISSILE_LIFESPAN) {
+//			setSelfDestruct();
+//            suicide();
+//        }
 		
         // generate supply
-		if (type == RobotType.HQ) {
-            int numSupplyDepots = myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.SUPPLYDEPOT);
-			increaseSupplyLevel(GameConstants.SUPPLY_GEN_BASE * (GameConstants.SUPPLY_GEN_MULTIPLIER + Math.pow(numSupplyDepots, GameConstants.SUPPLY_GEN_EXPONENT)));
-		}
+//		if (type == RobotType.HQ) {
+//            int numSupplyDepots = myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.SUPPLYDEPOT);
+//			increaseSupplyLevel(GameConstants.SUPPLY_GEN_BASE * (GameConstants.SUPPLY_GEN_MULTIPLIER + Math.pow(numSupplyDepots, GameConstants.SUPPLY_GEN_EXPONENT)));
+//		}
 
         // possibly convert building from inactive to active
         // after building is done, double health
-        if (type.isBuildable() && roundsAlive == buildDelay) {
-            changeHealthLevel(getHealthLevel());
-            // increase robot count
-            myGameWorld.incrementActiveRobotTypeCount(getTeam(), type);
-            if (myBuilder >= 0) {
-                myGameWorld.getRobotByID(myBuilder).clearBuilding();
-            }
-            clearBuilding();
-        }
+        
+//        if (type.isBuildable() && roundsAlive == buildDelay) {
+//            changeHealthLevel(getHealthLevel());
+//            // increase robot count
+//            myGameWorld.incrementActiveRobotTypeCount(getTeam(), type);
+//            if (myBuilder >= 0) {
+//                myGameWorld.getRobotByID(myBuilder).clearBuilding();
+//            }
+//            clearBuilding();
+//        }
     }
 
     public void processEndOfRound() {}

@@ -10,11 +10,11 @@ public enum RobotType {
     // last one is strength weight
     //  isbuilding, iszombie, infectTurns, spawn-source, build-dep, part cost, turns cost, hp, attack, range, movement delay, attack delay, cooldown delay, sight range, bytecode limit, zombieType, strWeight
     ZOMBIEDEN		(true,  false, 0,  null,   0,  0,  5000, 0,  0,    0,   0, 0, 0,  0,     0, null),
-	STANDARDZOMBIE	(false, true,  10, null,   0,  0,  50,   3,  2,    2,   1, 1, 0,  0,     0, null),
+    STANDARDZOMBIE	(false, true,  10, null,   0,  0,  50,   3,  2,    2,   1, 1, 0,  0,     0, null),
     RANGEDZOMBIE	(false, true,  10, null,   0,  0,  50,   3,  13,   1.4, 0, 1, 0,  0,     0, null),
     FASTZOMBIE		(false, true,  10, null,   0,  0,  40,   4,  2,    2,   2, 1, 0,  0,     0, null),
     BIGZOMBIE		(false, true,  10, null,   0,  0,  250,  50, 2,    2,   1, 1, 0,  0,     0, null),
-	ARCHON          (false,	false, 0,  null,   0,  0,  1000, 0,  24,   2,   1, 1, 35, 20000, 0, BIGZOMBIE),  
+    ARCHON			(false,	false, 0,  null,   0,  0,  1000, 0,  24,   2,   1, 1, 35, 20000, 0, BIGZOMBIE),  
     SCOUT			(false, false, 0,  ARCHON, 25, 15, 100,  0,  0,    1.4, 0, 1, 53, 20000, 0, FASTZOMBIE),
     SOLDIER			(false, false, 0,  ARCHON, 10, 25, 50,   4,  13,   2,   2, 1, 24, 10000, 0, STANDARDZOMBIE),
     GUARD			(false, false, 0,  ARCHON, 10, 25, 120,  2,  24,   2,   1, 1, 24, 10000, 0, STANDARDZOMBIE),
