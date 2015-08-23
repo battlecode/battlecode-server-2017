@@ -139,18 +139,6 @@ public final class RobotControllerImpl implements RobotController, GenericContro
         return robot.getHealthLevel();
     }
 
-    public double getSupplyLevel() {
-        return robot.getSupplyLevel();
-    }
-
-    public int getXP() {
-        return robot.getXP();
-    }
-
-    public int getMissileCount() {
-        return robot.getMissileCount();
-    }
-
     public boolean isBuildingSomething() {
         return robot.getMyBuilding() >= 0;
     }
@@ -158,21 +146,6 @@ public final class RobotControllerImpl implements RobotController, GenericContro
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
-    public MapLocation senseHQLocation() {
-        return gameWorld.getBaseHQ(getTeam()).getLocation();
-    }
-
-    public MapLocation senseEnemyHQLocation() {
-        return gameWorld.getBaseHQ(getTeam().opponent()).getLocation();
-    }
-
-    public MapLocation[] senseTowerLocations() {
-        return gameWorld.senseTowerLocations(getTeam());
-    }
-
-    public MapLocation[] senseEnemyTowerLocations() {
-        return gameWorld.senseTowerLocations(getTeam().opponent());
-    }
 
     public TerrainTile senseTerrainTile(MapLocation loc) {
         assertNotNull(loc);
@@ -334,9 +307,6 @@ public final class RobotControllerImpl implements RobotController, GenericContro
     }
 
     public boolean canMove(Direction dir) {
-        if (robot.type == RobotType.LAUNCHER && !robot.canLaunchMissileAtLocation(getLocation().add(dir))) {
-            return false;
-        }
         return isMovingUnit() && isValidDirection(dir) && isPathableInternal(robot.type, getLocation().add(dir));
     }
 
@@ -346,19 +316,15 @@ public final class RobotControllerImpl implements RobotController, GenericContro
         assertIsValidDirection(d);
         assertIsPathable(robot.type, getLocation().add(d));
 
-        if (robot.type == RobotType.LAUNCHER && !robot.canLaunchMissileAtLocation(getLocation().add(d))) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "LAUNCHER launched MISSILE there already and cannot move there.");
-        }
-
         double factor1 = (d.isDiagonal() ? GameConstants.DIAGONAL_DELAY_MULTIPLIER : 1.0);
         double factor2 = 1.0;
-        if (robot.type == RobotType.DRONE && gameWorld.getMapTerrain(getLocation().add(d)) == TerrainTile.VOID) {
-            factor1 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
-            factor2 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
-        }
+//        if (robot.type == RobotType.DRONE && gameWorld.getMapTerrain(getLocation().add(d)) == TerrainTile.VOID) {
+//            factor1 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
+//            factor2 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
+//        } TODO: Will we have flying units?
 
         robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-            true, (int) (robot.getMovementDelayForType() * factor1)), robot.getLoadingDelayForType() * factor2, robot.getMovementDelayForType() * factor1);
+            true, (int) (robot.getMovementDelayForType() * factor1)), robot.getCooldownDelayForType() * factor2, robot.getMovementDelayForType() * factor1);
     }
 
     // ***********************************
@@ -391,7 +357,7 @@ public final class RobotControllerImpl implements RobotController, GenericContro
     }
 
     public boolean canAttackLocation(MapLocation loc) {
-        return isAttackingUnit() && isValidAttackLocation(loc) && robot.type != RobotType.BASHER;
+        return isAttackingUnit() && isValidAttackLocation(loc);
     }
 
     public void attackLocation(MapLocation loc) throws GameActionException {
@@ -400,83 +366,13 @@ public final class RobotControllerImpl implements RobotController, GenericContro
         assertIsAttackingUnit();
         assertValidAttackLocation(loc);
 
-        if (robot.type == RobotType.BASHER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Bashers attack automatically, and cannot use attackLocation.");
-        }
-
         robot.activateAttack(new AttackSignal(robot, loc), robot.getAttackDelayForType(), robot.getCooldownDelayForType());
     }
 
     public void explode() throws GameActionException {
-        if (robot.type == RobotType.MISSILE) {
-            robot.setSelfDestruct();
-        }
         throw new RobotDeathException();
     }
 
-    //***********************************
-    //****** COMMANDER METHODS **********
-    //***********************************
-    public boolean hasCommander() {
-        return gameWorld.hasCommander(robot.getTeam());
-    }
-
-    public void assertHasCommander() throws GameActionException {
-        if (!hasCommander()) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Cannot call without a Commander.");
-        }
-    }
-
-    public void assertNoCommander() throws GameActionException {
-        if (hasCommander()) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Already have a Commander.");
-        }
-    }
-
-    public boolean hasLearnedSkill(CommanderSkillType skill) throws GameActionException {
-        assertHasCommander();
-        return gameWorld.hasSkill(robot.getTeam(), skill);
-    }
-
-    public void assertHasLearnedSkill(CommanderSkillType skill) throws GameActionException {
-        if (!hasLearnedSkill(skill)) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Not enough XP for that skill.");
-        }
-    }
-
-    public void castFlash(MapLocation loc) throws GameActionException {
-        assertNotNull(loc);
-
-        if (robot.type != RobotType.COMMANDER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only Commanders can cast Flash.");
-        }
-
-        assertHasLearnedSkill(CommanderSkillType.FLASH);
-        if (loc.distanceSquaredTo(robot.getLocation()) > GameConstants.FLASH_RANGE_SQUARED) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "New location is too far to cast FLASH.");
-        }
-
-        if (getFlashCooldown() > 0) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Cannot cast flash until cooldown hits 0.");
-        }
-
-        //is this kosher? i hope so
-        assertIsCoreReady();
-        assertIsPathable(robot.type, loc);
-
-        robot.activateMovement(new CastSignal(robot, loc), robot.getLoadingDelayForType(), GameConstants.FLASH_MOVEMENT_DELAY);
-    }
-
-    public int getFlashCooldown() throws GameActionException {
-        assertHasCommander();
-
-        if (robot.type != RobotType.COMMANDER) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only Commanders can cast Flash.");
-        }
-        assertHasLearnedSkill(CommanderSkillType.FLASH);
-
-        return gameWorld.getSkillCooldown(robot.getTeam(), CommanderSkillType.FLASH);
-    }
 
     // ***********************************
     // ****** BROADCAST METHODS **********
@@ -488,10 +384,6 @@ public final class RobotControllerImpl implements RobotController, GenericContro
     public void broadcast(int channel, int data) throws GameActionException {
         if (channel < 0 || channel > GameConstants.BROADCAST_MAX_CHANNELS)
             throw new GameActionException(CANT_DO_THAT_BRO, "Can only use radio channels from 0 to " + GameConstants.BROADCAST_MAX_CHANNELS + ", inclusive");
-
-        if (robot.type == RobotType.MISSILE) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Missiles cannot broadcast.");
-        }
 
         robot.addBroadcast(channel, data);
     }
@@ -510,104 +402,6 @@ public final class RobotControllerImpl implements RobotController, GenericContro
         return m;
     }
 
-    // ***********************************
-    // ****** SUPPLY METHODS *************
-    // ***********************************
-    public void transferSupplies(int amount, MapLocation loc) throws GameActionException {
-        if (amount < 0) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Stealing supply is not very nice.");
-        }
-
-        if (loc.distanceSquaredTo(getLocation()) > GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Can't transfer supply that much distance.");
-        }
-        InternalRobot obj = (InternalRobot) gameWorld.getObject(loc);
-        if (obj == null) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "No one to receive supply from transfer on that location.");
-        }
-        robot.transferSupply(amount, obj);
-    }
-
-    // ***********************************
-    // ****** MINING METHODS *************
-    // ***********************************
-    public boolean isMiningUnit() {
-        return robot.type.canMine();
-    }
-
-    public boolean canMine() {
-        return isMiningUnit();
-    }
-
-    public void assertIsMiningUnit() throws GameActionException {
-        if (!isMiningUnit()) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Cannot mine.");
-        }
-    }
-
-    public void mine() throws GameActionException {
-        assertIsCoreReady();
-        assertIsMiningUnit();
-        MapLocation loc = getLocation();
-
-        robot.activateMovement(new MineSignal(loc, getID()), GameConstants.MINING_LOADING_DELAY, GameConstants.MINING_MOVEMENT_DELAY);
-    }
-
-    public double senseOre(MapLocation loc) {
-        if (canSense(loc)) {
-            return gameWorld.getOre(loc);
-        }
-        return gameWorld.senseOre(getTeam(), loc);
-    }
-
-    // ***********************************
-    // ****** LAUNCHER *******************
-    // ***********************************
-    public boolean isLaunchingUnit() {
-        return robot.type.canLaunch();
-    }
-
-    public void assertIsLaunchingUnit() throws GameActionException {
-        if (!isLaunchingUnit()) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Must be launcher.");
-        }
-    }
-
-    public void assertHaveMissiles() throws GameActionException {
-        if (robot.getMissileCount() == 0) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "No missiles.");
-        }
-    }
-
-    public void assertDidNotMoveYet() throws GameActionException {
-        if (robot.movedThisTurn()) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Launchers can't move and launch in the same turn.");
-        }
-    }
-
-    public void assertCanLaunchAtLocation(MapLocation loc) throws GameActionException {
-        if (!robot.canLaunchMissileAtLocation(loc)) {
-            throw new GameActionException(GameActionExceptionType.CANT_MOVE_THERE, "Missile already launched in that direction.");
-        }
-    }
-
-    public boolean canLaunch(Direction dir) {
-        MapLocation loc = getLocation().add(dir);
-        return isLaunchingUnit() && isPathableInternal(RobotType.MISSILE, loc) && !robot.movedThisTurn() && robot.getMissileCount() > 0 && robot.canLaunchMissileAtLocation(loc);
-    }
-
-    public void launchMissile(Direction dir) throws GameActionException {
-        assertIsLaunchingUnit();
-        assertHaveMissiles();
-        assertDidNotMoveYet();
-
-        MapLocation loc = getLocation().add(dir);
-        assertIsPathable(RobotType.MISSILE, loc);
-        assertCanLaunchAtLocation(loc);
-
-        robot.decrementMissileCount();
-        robot.launchMissile(loc);
-    }
 
     // ***********************************
     // ****** BUILDING/SPAWNING **********
@@ -633,15 +427,11 @@ public final class RobotControllerImpl implements RobotController, GenericContro
     }
 
     public boolean hasSpawnRequirements(RobotType type) {
-        if (!isSpawningUnit() || type == RobotType.COMMANDER && hasCommander()) {
+        if (!isSpawningUnit()) {
             return false;
         }
 
-        double cost = type.oreCost;
-        if (type == RobotType.COMMANDER) {
-            cost *= (1 << Math.min(gameWorld.getCommandersSpawned(robot.getTeam()), 8));
-        }
-        if (cost > gameWorld.resources(getTeam())) {
+        if (type.partCost > gameWorld.resources(getTeam())) {
             return false;
         }
 
@@ -654,28 +444,22 @@ public final class RobotControllerImpl implements RobotController, GenericContro
     }
 
     public void spawn(Direction dir, RobotType type) throws GameActionException {
-        Config options = Config.getGlobalConfig();
         assertIsSpawningUnit();
-        if (type == RobotType.COMMANDER) {
-            assertNoCommander();
-        }
+
         assertIsCoreReady();
 
         if (type.spawnSource != robot.type) {
             throw new GameActionException(CANT_DO_THAT_BRO, "This spawn can only be by a certain type");
         }
 
-        if (!options.getBoolean("bc.game.allow-air-units") && type == RobotType.DRONE) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Game config doesn't allow spawning air units.");
-        }
+//        if (!options.getBoolean("bc.game.allow-air-units") && type == RobotType.DRONE) {
+//            throw new GameActionException(CANT_DO_THAT_BRO, "Game config doesn't allow spawning air units.");
+//        } TODO: Will we have flying units?
 
         MapLocation loc = getLocation().add(dir);
         assertIsPathable(type, loc);
 
-        double cost = type.oreCost;
-        if (type == RobotType.COMMANDER) {
-            cost *= (1 << Math.min(gameWorld.getCommandersSpawned(robot.getTeam()), 8));
-        }
+        double cost = type.partCost;
         assertHaveResource(cost);
 
         robot.activateMovement(
@@ -698,14 +482,9 @@ public final class RobotControllerImpl implements RobotController, GenericContro
         }
     }
 
-    public void assertHasDependencyFor(RobotType type) throws GameActionException {
-        if (gameWorld.getActiveRobotTypeCount(getTeam(), type.dependency) == 0) {
-            throw new GameActionException(MISSING_DEPENDENCY, "Missing dependency for " + type);
-        }
-    }
 
     public boolean hasBuildRequirements(RobotType type) {
-        return isBuildingUnit() && type.isBuildable() && gameWorld.getActiveRobotTypeCount(getTeam(), type.dependency) > 0 && type.oreCost <= gameWorld.resources(getTeam());
+        return isBuildingUnit() && type.isBuildable() && type.partCost <= gameWorld.resources(getTeam());
     }
 
     public boolean canBuild(Direction dir, RobotType type) {
@@ -716,10 +495,9 @@ public final class RobotControllerImpl implements RobotController, GenericContro
     public void build(Direction dir, RobotType type) throws GameActionException {
         assertIsBuildingUnit();
         assertIsBuildable(type);
-        assertHasDependencyFor(type);
         assertIsCoreReady();
 
-        double cost = type.oreCost;
+        double cost = type.partCost;
         assertHaveResource(cost);
 
         MapLocation loc = getLocation().add(dir);

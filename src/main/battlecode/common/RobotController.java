@@ -81,27 +81,6 @@ public interface RobotController {
     public double getHealth();
 
     /**
-     * Gets the robot's current supply level.
-     *
-     * @return this robot's supply level.
-     */
-    public double getSupplyLevel();
-
-    /**
-     * Gets the experience a robot has. Only meaningful for COMMANDER.
-     *
-     * @return the number of XP the robot has.
-     */
-    public int getXP();
-
-    /**
-     * Returns how many missiles the robot has. Only useful for LAUNCHER.
-     *
-     * @return the number of missiles the robot has.
-     */
-    public int getMissileCount();
-
-    /**
      * Returns whether this robot is currently building anything.
      *
      * @return whether this robot is currently building anything.
@@ -112,30 +91,30 @@ public interface RobotController {
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
     
-    /**
-     * Returns location of the allied team's HQ (unconstrained by sensor range or distance).
-     * @return the team's HQ location.
-     */
-    public MapLocation senseHQLocation();
-
-    /**
-     * Returns location of the enemy team's HQ (unconstrained by sensor range or distance).
-     *
-     * @return the enemy team's HQ location.
-     */
-    public MapLocation senseEnemyHQLocation();
-
-    /**
-     * Returns the locations of your own towers, unconstrained by sensor range or distance.
-     * @return an array of the locations of your living towers.
-    */
-    public MapLocation[] senseTowerLocations();
-
-    /**
-     * Returns the locations of surviving enemy towers, unconstrained by sensor range or distance.
-     * @return an array of the locations of living enemy towers.
-    */
-    public MapLocation[] senseEnemyTowerLocations();
+//    /**
+//     * Returns location of the allied team's HQ (unconstrained by sensor range or distance).
+//     * @return the team's HQ location.
+//     */
+//    public MapLocation senseHQLocation();
+//
+//    /**
+//     * Returns location of the enemy team's HQ (unconstrained by sensor range or distance).
+//     *
+//     * @return the enemy team's HQ location.
+//     */
+//    public MapLocation senseEnemyHQLocation();
+//
+//    /**
+//     * Returns the locations of your own towers, unconstrained by sensor range or distance.
+//     * @return an array of the locations of your living towers.
+//    */
+//    public MapLocation[] senseTowerLocations();
+//
+//    /**
+//     * Returns the locations of surviving enemy towers, unconstrained by sensor range or distance.
+//     * @return an array of the locations of living enemy towers.
+//    */
+//    public MapLocation[] senseEnemyTowerLocations();
 
     /**
      * Senses the terrain at the given location. Returns TerrainTile.UNKNOWN for a terrain tile that has never been in sensor range.
@@ -297,41 +276,6 @@ public interface RobotController {
      */
     public void explode() throws GameActionException;
 
-    // ***********************************
-    // ****** COMMANDER METHODS **********
-    // ***********************************
-
-    /**
-     * Returns whether the team currently has a commander.
-     *
-     * @return whether the team has a commander.
-     */
-    public boolean hasCommander();
-
-    /**
-     * Casts Flash at the given location (COMMANDER only).
-     *
-     * @param loc the target location.
-     * @throws GameActionException if the robot has not learned the spell or cannot cast at the given square.
-     */
-    public void castFlash(MapLocation loc) throws GameActionException;
-
-    /**
-     * Returns whether the robot has learned a skill (only relevant if used by a COMMANDER).
-     *
-     * @param skill the skill being checked.
-     * @return whether the robot has that skill.
-     * @throws GameActionException if there is no commander.
-     */
-    public boolean hasLearnedSkill(CommanderSkillType skill) throws GameActionException;
-
-    /**
-     * Returns the current cooldown of FLASH (COMMANDER only).
-     *
-     * @return the cooldown of FLASH.
-     * @throws GameActionException if there is no commander.
-     */
-    public int getFlashCooldown() throws GameActionException;
 
     // ***********************************
     // ****** BROADCAST METHODS **********
@@ -355,66 +299,6 @@ public interface RobotController {
      */
     public int readBroadcast(int channel) throws GameActionException;
 
-    // ***********************************
-    // ****** SUPPLY METHODS *************
-    // ***********************************
-
-    /**
-     * Transfers supplies to a robot in a nearby location (queued for the end of the turn). If you specify more supply than the robot has, all its supply will be transferred.
-     *
-     * @param amount the amount of supply to transfer.
-     * @param loc the location to transfer the supply to.
-     * @throws GameActionException if there is no one to transfer to, or if the distance is too far for a supply transfer.
-     */
-    public void transferSupplies(int amount, MapLocation loc) throws GameActionException;
-
-    // ***********************************
-    // ****** MINING METHODS *************
-    // ***********************************
-
-    /**
-     * Returns whether the robot is able to mine, without taking delays into account. This only checks whether the robot is a mining unit. Does not check the core delay.
-     * @return whether the robot is able to mine.
-     */
-    public boolean canMine();
-
-    /**
-     * Returns the amount of ore at a given location (to within sensor capabilities). If the location is out of sensor range, this returns the last known ore amount at that location. 
-	 * If the location is off the map or is void, then 0 is returned. If the location has never been in sensor range, then -1 is returned.
-     *
-     * @param loc the MapLocation to sense ore at.
-     * @return the amount of ore at a given location. If the location is out of sensor range, then the last known ore amount is returned.
-     */
-    public double senseOre(MapLocation loc);
-
-    /**
-     * Mines the current square for ore.
-     *
-     * @throws GameActionException if the current robot is not one that can collect ore
-     * @throws GameActionException if there is currently movement delay and if the robot cannot mine
-     */
-    public void mine() throws GameActionException;
-
-    // ***********************************
-    // ****** LAUNCHER *******************
-    // ***********************************
-
-    /**
-     * Returns whether the direction is valid for launching (LAUNCHER only). The location must be on the map and unoccupied, 
-	 * and must not have already been launched to during this turn, and the launcher must not have moved already during this turn.
-     *
-     * @param dir the direction to check.
-     * @return whether the direction is valid for launching.
-     */
-    public boolean canLaunch(Direction dir);
-
-    /**
-     * Launches a missile in the given direction (LAUNCHER only). You cannot launch if you have already moved in the given turn.
-     *
-     * @param dir the direction to launch a missile.
-     * @throws GameActionException if not enough missiles or otherwise can't attack.
-     */
-    public void launchMissile(Direction dir) throws GameActionException;
 
     // ***********************************
     // ****** BUILDING/SPAWNING **********
