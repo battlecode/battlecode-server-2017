@@ -41,22 +41,12 @@ public class RobotInfo {
      * The current health of the robot.
      */
     public final double health;
-
+    
     /**
-     * The current supply level of the robot.
+     * The number of turns this robot will remain infected (including current)
      */
-    public final double supplyLevel;
-
-    /**
-     * The XP of the robot. COMMANDER only.
-     */
-    public final int xp;
-
-    /**
-     * The missile count of the robot. LAUNCHER only.
-     */
-    public final int missileCount;
-
+    public final int infectedTurns;
+    
     /**
      * For structures being built, this will be the location of the unit building the structure (null if N/A).
      */
@@ -67,7 +57,7 @@ public class RobotInfo {
      */
     public final MapLocation buildingLocation;
 
-    public RobotInfo(int ID, Team team, RobotType type, MapLocation location, double coreDelay, double weaponDelay, double health, double supplyLevel, int xp, int missileCount, MapLocation builder, MapLocation buildingLocation) {
+    public RobotInfo(int ID, Team team, RobotType type, MapLocation location, double coreDelay, double weaponDelay, double health, int infectedTurns, MapLocation builder, MapLocation buildingLocation) {
         super();
         this.ID = ID;
         this.team = team;
@@ -76,9 +66,7 @@ public class RobotInfo {
         this.coreDelay = coreDelay;
         this.weaponDelay = weaponDelay;
         this.health = health;
-        this.supplyLevel = supplyLevel;
-        this.xp = xp;
-        this.missileCount = missileCount;
+        this.infectedTurns = infectedTurns;
         this.builder = builder;
         this.buildingLocation = buildingLocation;
     }
