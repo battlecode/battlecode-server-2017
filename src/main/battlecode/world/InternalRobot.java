@@ -29,11 +29,9 @@ public class InternalRobot implements GenericRobot {
     protected final GameWorld myGameWorld;
 
     protected volatile double myHealthLevel;
-//    protected volatile double mySupplyLevel;
     private double coreDelay;
     private double weaponDelay;
     private int infectedTurns;
-//    private int missileCount;
 
     protected volatile long controlBits;
 
@@ -41,7 +39,6 @@ public class InternalRobot implements GenericRobot {
     private volatile int bytecodesUsed;
     protected volatile boolean hasBeenAttacked;
     private boolean healthChanged;
-    private boolean missileCountChanged;
     private boolean didSelfDestruct;
     private boolean broadcasted;
     private volatile HashMap<Integer, Integer> broadcastMap;
@@ -76,10 +73,8 @@ public class InternalRobot implements GenericRobot {
             myHealthLevel /= 2.0;
         }
 
- //       mySupplyLevel = 0.0;
         coreDelay = 0.0;
         weaponDelay = 0.0;
- //       missileCount = 0;
         infectedTurns = 0;
 
         controlBits = 0;
@@ -88,7 +83,6 @@ public class InternalRobot implements GenericRobot {
         bytecodesUsed = 0;
         hasBeenAttacked = false;
         healthChanged = true;
-        missileCountChanged = true;
         
         didSelfDestruct = false;
         broadcasted = false;
@@ -104,12 +98,6 @@ public class InternalRobot implements GenericRobot {
 
         myBuilder = -1;
         myBuilding = -1;
-
-        // Update GameWorld stuff
-//        if (type == RobotType.COMMANDER) {
-//            myGameWorld.putCommander(this);
-//            myGameWorld.incrementCommandersSpawned(getTeam());
-//        }
 
         myGameWorld.incrementTotalRobotTypeCount(getTeam(), type);
 
@@ -215,13 +203,6 @@ public class InternalRobot implements GenericRobot {
         return this.movementSignal != null;
     }
 
-//    public int getXP() {
-//        if (type == RobotType.COMMANDER) {
-//            return ((InternalCommander)this).getXP();
-//        }
-//        return 0;
-//    }
-
     public void setControlBits(long l) {
         controlBits = l;
     }
@@ -241,14 +222,6 @@ public class InternalRobot implements GenericRobot {
     public boolean healthChanged() {
         return healthChanged;
     }
-
-//    public void clearMissileCountChanged() {
-//        missileCountChanged = false;
-//    }
-//
-//    public boolean missileCountChanged() {
-//        return missileCountChanged;
-//    }
 
     public void setMyBuilding(int id) {
         myBuilding = id;
