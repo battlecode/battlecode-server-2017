@@ -17,7 +17,6 @@ public class RobotInfoSignal extends Signal {
 
     private final double[] coreDelays;
     private final double[] weaponDelays;
-    private final double[] supplyLevels;
     //public final double health;
     //public final int xp;
     //public final int missileCount;
@@ -26,21 +25,15 @@ public class RobotInfoSignal extends Signal {
         robotIDs = new int[robots.length];
         weaponDelays = new double[robots.length];
         coreDelays = new double[robots.length];
-        supplyLevels = new double[robots.length];
         for (int i = 0; i < robots.length; i++) {
             robotIDs[i] = robots[i].getID();
             weaponDelays[i] = robots[i].getWeaponDelay();
             coreDelays[i] = robots[i].getCoreDelay();
-            supplyLevels[i] = robots[i].getSupplyLevel();
         }
     }
 
     public int[] getRobotIDs() {
         return robotIDs;
-    }
-
-    public double[] getSupplyLevels() {
-        return supplyLevels;
     }
 
     public double[] getCoreDelays() {

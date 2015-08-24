@@ -55,11 +55,6 @@ public enum RobotType {
     public final int buildTurns;
 
     /**
-     * Base supply upkeep (not including bytecode supply upkeep).
-     */
-    //public final int supplyUpkeep;
-
-    /**
      * Maximum health for the robot.
      */
     public final double maxHealth;

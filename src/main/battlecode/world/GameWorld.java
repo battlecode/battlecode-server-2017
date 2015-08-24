@@ -152,14 +152,6 @@ public class GameWorld implements GenericWorld {
         removingDead = false;
     }
 
-    public void setHQ(InternalRobot r, Team t) {
-        baseHQs.put(t, r);
-    }
-
-    public void addTower(InternalRobot tower, Team t) {
-        baseTowers.get(t).add(tower);
-    }
-
     // *********************************
     // ****** BASIC MAP METHODS ********
     // *********************************
@@ -174,10 +166,6 @@ public class GameWorld implements GenericWorld {
 
     public GameMap getGameMap() {
         return gameMap;
-    }
-
-    public InternalRobot getBaseHQ(Team t) {
-        return baseHQs.get(t);
     }
 
     public MapLocation[] senseTowerLocations(Team team) {
