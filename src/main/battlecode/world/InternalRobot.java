@@ -31,7 +31,8 @@ public class InternalRobot implements GenericRobot {
     protected volatile double myHealthLevel;
     private double coreDelay;
     private double weaponDelay;
-    private int infectedTurns;
+    private int zombieInfectedTurns;
+    private int viperInfectedTurns;
 
     protected volatile long controlBits;
 
@@ -76,7 +77,8 @@ public class InternalRobot implements GenericRobot {
 
         coreDelay = 0.0;
         weaponDelay = 0.0;
-        infectedTurns = 0;
+        zombieInfectedTurns = 0;
+        viperInfectedTurns = 0;
 
         controlBits = 0;
 
@@ -139,7 +141,7 @@ public class InternalRobot implements GenericRobot {
 
         return new RobotInfo(getID(), getTeam(), type, getLocation(),
                 getCoreDelay(), getWeaponDelay(), getHealthLevel(),
-                getInfectedTurns(), myBuilderLocation, myBuildingLocation);
+                getZombieInfectedTurns(),getViperInfectedTurns(), myBuilderLocation, myBuildingLocation);
     }
 
     public int getRoundsAlive() {
@@ -270,22 +272,33 @@ public class InternalRobot implements GenericRobot {
     // ****** ZOMBIE METHODS ***********
     // *********************************
 
-    public int getInfectedTurns() {
-        return infectedTurns;
+    public int getZombieInfectedTurns() {
+        return zombieInfectedTurns;
     }
-
+    
+    public int getViperInfectedTurns() {
+        return viperInfectedTurns;
+    }
+    
     public boolean isInfected() {
-        return infectedTurns > 0;
+        return (zombieInfectedTurns > 0 || viperInfectedTurns > 0);
     }
 
-    public void setInfectedCounter(int turns) {
-        infectedTurns = turns;
+    public void setInfected(InternalRobot attacker) {
+        if (attacker.type == RobotType.VIPER) {
+            viperInfectedTurns = attacker.type.infectTurns;
+        } else if (attacker.type.isZombie) {
+            zombieInfectedTurns = attacker.type.infectTurns;
+        }
     }
 
     public void processBeingInfected() {
-        if (isInfected()) {
-            takeDamage(2);
-            infectedTurns--;
+        if (viperInfectedTurns > 0) {
+            takeDamage(GameConstants.VIPER_INFECTION_DAMAGE);
+            viperInfectedTurns--;
+        }
+        if (zombieInfectedTurns > 0) {
+            zombieInfectedTurns--;
         }
     }
 

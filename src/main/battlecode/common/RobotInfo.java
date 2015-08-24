@@ -43,9 +43,14 @@ public class RobotInfo {
     public final double health;
     
     /**
-     * The number of turns this robot will remain infected (including current)
+     * The number of turns this robot will remain infected with a Zombie infection
      */
-    public final int infectedTurns;
+    public final int zombieInfectedTurns;
+    
+    /**
+     * The number of turns this robot will remain infected with a Viper infection
+     */
+    public final int viperInfectedTurns;
     
     /**
      * For structures being built, this will be the location of the unit building the structure (null if N/A).
@@ -57,7 +62,7 @@ public class RobotInfo {
      */
     public final MapLocation buildingLocation;
 
-    public RobotInfo(int ID, Team team, RobotType type, MapLocation location, double coreDelay, double weaponDelay, double health, int infectedTurns, MapLocation builder, MapLocation buildingLocation) {
+    public RobotInfo(int ID, Team team, RobotType type, MapLocation location, double coreDelay, double weaponDelay, double health, int zombieInfectedTurns, int viperInfectedTurns, MapLocation builder, MapLocation buildingLocation) {
         super();
         this.ID = ID;
         this.team = team;
@@ -66,7 +71,8 @@ public class RobotInfo {
         this.coreDelay = coreDelay;
         this.weaponDelay = weaponDelay;
         this.health = health;
-        this.infectedTurns = infectedTurns;
+        this.zombieInfectedTurns = zombieInfectedTurns;
+        this.viperInfectedTurns = viperInfectedTurns;
         this.builder = builder;
         this.buildingLocation = buildingLocation;
     }

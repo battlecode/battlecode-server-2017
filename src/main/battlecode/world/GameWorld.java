@@ -776,22 +776,26 @@ public class GameWorld implements GenericWorld {
         case FASTZOMBIE:
         case RANGEDZOMBIE:
         case BIGZOMBIE:
-            rate = 1.0; // TODO: Replace with outbreak multiplier
         case SCOUT:
         case SOLDIER:
         case GUARD:
-            // TODO: Add guard bonus against zombies
         case VIPER:
         case TURRET:
             int splashRadius = 0;
 
             InternalRobot[] targets = getAllRobotsWithinRadiusSq(targetLoc,
-                    splashRadius); // TODO: If we're sure we aren't doing
-                                   // splash, possibly modify this to make it
-                                   // more efficient
+                    splashRadius);
 
             for (InternalRobot target : targets) {
                 if (target.getTeam() != attacker.getTeam()) {
+
+                    if (attacker.type == RobotType.GUARD
+                            && target.type.isZombie)
+                        rate = GameConstants.GUARD_ZOMBIE_MULTIPLIER;
+
+                    if (attacker.type.canInfect() && target.type.isInfectable())
+                        target.setInfected(attacker);
+
                     double damage = (attacker.type.attackPower) * rate;
                     target.takeDamage(damage, attacker);
                 }

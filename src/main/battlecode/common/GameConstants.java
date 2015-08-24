@@ -155,7 +155,13 @@ public interface GameConstants {
 
     /** After this many turns, a missile automatically detonates. */
     public static final int MISSILE_LIFESPAN = 5;
-
+   
+    /** Guard's attack is scaled by this when attacking a Zombie opponent. */
+    public static final double GUARD_ZOMBIE_MULTIPLIER = 1.5;
+    
+    /** Damage a robot receives from a Viper's infection per turn */
+    public static final double VIPER_INFECTION_DAMAGE = 2;
+    
     /**
      * The factor that the delays are multiplied by when a DRONE travels on a
      * void.
