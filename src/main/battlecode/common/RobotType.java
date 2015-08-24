@@ -128,6 +128,15 @@ public enum RobotType {
     }
 
     /**
+     * Returns whether the robot is infected when attacked by a robot that infects.
+     *
+     * @return whether the robot is infected when attacked by a robot that infects.
+     */
+    public boolean isInfectable() {
+        return !isZombie && this != ZOMBIEDEN;
+    }
+
+    /**
      * Returns whether the robot can move.
      *
      * @return whether the robot can move.
@@ -162,7 +171,7 @@ public enum RobotType {
     public boolean canSpawn() { // Update later
         return false;//return isBuilding && this != TOWER && this != SUPPLYDEPOT;
     }
-
+    
     RobotType(boolean isBuilding,
               boolean isZombie,
               int infectTurns,
