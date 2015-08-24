@@ -49,8 +49,8 @@ public interface GameConstants {
     /** Bytecodes executed per unit of supply. */
     public static final int BYTECODES_PER_SUPPLY = 1000;
 
-    /** Maximum towers that can appear on a map (per team). */
-    public static final int NUMBER_OF_TOWERS_MAX = 6;
+    /** Maximum archons that can appear on a map (per team). */
+    public static final int NUMBER_OF_ARCHONS_MAX = 6;
 
     // *********************************
     // ****** SUPPLY *******************

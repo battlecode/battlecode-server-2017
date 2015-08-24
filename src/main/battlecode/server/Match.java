@@ -259,15 +259,11 @@ public class Match extends Observable {
         if (dom == DominationFactor.DESTROYED)
             sb.append("The winning team won by destruction.");
         else if (dom == DominationFactor.PWNED)
-            sb.append("The winning team won on tiebreakers (more towers remaining).");
+            sb.append("The winning team won on tiebreakers (more Archons remaining).");
         else if (dom == DominationFactor.OWNED)
-            sb.append("The winning team won on tiebreakers (more HQ health).");
-        else if (dom == DominationFactor.BEAT)
-            sb.append("The winning team won on tiebreakers (more TOWER health).");
+            sb.append("The winning team won on tiebreakers (more Archon health).");
         else if (dom == DominationFactor.BARELY_BEAT)
-            sb.append("The winning team won due to superior sanitation.");
-        else if (dom == DominationFactor.BARELY_BARELY_BEAT)
-            sb.append("The winning team won on tiebreakers (more total ore value).");
+            sb.append("The winning team won on tiebreakers (more Parts)");
         else if (dom == DominationFactor.WON_BY_DUBIOUS_REASONS)
             sb.append("Team " + getWinner() + " won arbitrarily.");
 
