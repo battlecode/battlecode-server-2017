@@ -159,6 +159,7 @@ class XMLMapHandler extends DefaultHandler {
         }
     }
 
+    // Current implementation does not use this (Keeps HQ (Archons) as RobotData)
     private static class NodeData implements SymbolData {
 
         public static final SymbolDataFactory factory = new SymbolDataFactory() {
@@ -195,7 +196,7 @@ class XMLMapHandler extends DefaultHandler {
 
         public void createGameObject(GameWorld world, MapLocation loc) {
             if (team == Team.NEUTRAL) {
-            } else { //TODO: I probably messed something up here, check here if problems occur
+            } else {
             	InternalRobot r = GameWorldFactory.createPlayer(world, RobotType.ARCHON, loc, team, null, false, 0);
             }
         }
@@ -459,7 +460,6 @@ class XMLMapHandler extends DefaultHandler {
             if ((c == '\n' || c == ' ') && dataSoFar.length() > 0) {
                 if (!symbolMap.containsKey(dataSoFar.charAt(0)))
                     fail("unrecognized symbol in map: '" + c + "'", "Check that '" + c + "' is defined as one of the symbols in the map file. DEBUG: '" + dataSoFar + "'\n");
-
                 map[currentCol][currentRow] = symbolMap.get(dataSoFar.charAt(0)).copy();
                 if (dataSoFar.substring(1).trim().equals("")) {
                     map[currentCol][currentRow].setValue(0);
@@ -681,53 +681,28 @@ class XMLMapHandler extends DefaultHandler {
         ArrayList<MapLocation> teamAArchons = new ArrayList<MapLocation>();
         ArrayList<MapLocation> teamBArchons = new ArrayList<MapLocation>();
 
-        int grounds = 0, gx = 0, gy = 0;
-    //    int baseAx = -1, baseAy = -1, baseBx = -1, baseBy = -1;
+        int grounds = 0;
         for (y = 0; y < mapHeight; y++) {
             for (x = 0; x < mapWidth; x++) {
                 d = map[x][y];
                 if (d instanceof RobotData) {
                     RobotData rd = (RobotData) d;
                     switch (rd.type) {
-                        case ARCHON: //TODO: Archon starting locations
+                        case ARCHON:
                             if (rd.team == Team.A) teamAArchons.add(new MapLocation(x, y));
                             else if (rd.team == Team.B) teamBArchons.add(new MapLocation(x, y));
                             break;
                         default:
-                            warn.warnUnit(rd);
+                            warn.warnUnit(rd); // Should only start with Archons
                     }
-//                } else if (d instanceof NodeData) {
-//                    if (((NodeData) d).team == Team.A) {
-//                        if (baseAx != -1) {
-//                            warn.warn("Team A has more than one HQ.");
-//                            baseBad = true;
-//                        } else {
-//                            baseAx = x;
-//                            baseAy = y;
-//                        }
-//                    } else if (((NodeData) d).team == Team.B) {
-//                        if (baseBx != -1) {
-//                            warn.warn("Team B has more than one HQ.");
-//                            baseBad = true;
-//                        } else {
-//                            baseBx = x;
-//                            baseBy = y;
-//                        }
-//                    }// TODO: Delete commented sections when done
                 }
                 if (d.tile() == TerrainTile.NORMAL) {
                     grounds++;
-                    gx = x;
-                    gy = y;
                 }
             }
         }
-
-//        if (baseAx == -1) {
-//            baseBad = true;
-//            warn.warn("The HQs are missing");
-//        }
-           
+        
+        
         if (teamAArchons.size() == 0) {
             warn.warn("No Archons!");
         }
@@ -745,33 +720,8 @@ class XMLMapHandler extends DefaultHandler {
 //
 //            if (s != grounds) {
 //                warn.warn("Some tiles are not reachable!");
-//            } TODO: Reimplement Floodfill after we decide what critera to make about whether everything has to be reachable or not
+//            } // TODO: Reimplement if we decide to add void squares
         }
-
-        // make sure no two things are in attack range
-//        MapLocation HQA = new MapLocation(baseAx, baseAy);
-//        MapLocation HQB = new MapLocation(baseBx, baseBy);
-//        if (HQA.distanceSquaredTo(HQB) <= GameConstants.HQ_BUFFED_ATTACK_RADIUS_SQUARED) {
-//            warn.warn("The HQs are too close together.");
-//        }
-//
-//        for (MapLocation towerA : teamAArchons) {
-//            for (MapLocation towerB : teamBTowers) {
-//                if (towerA.distanceSquaredTo(towerB) <= RobotType.TOWER.attackRadiusSquared) {
-//                    warn.warn("Some towers are too close together.");
-//                }
-//                if (towerB.distanceSquaredTo(HQA) <= GameConstants.HQ_BUFFED_ATTACK_RADIUS_SQUARED) {
-//                    warn.warn("Team A can attack team B towers from the start.");
-//                }
-//            }
-//            if (towerA.distanceSquaredTo(HQB) <= GameConstants.HQ_BUFFED_ATTACK_RADIUS_SQUARED) {
-//                    warn.warn("Team B can attack team A towers from the start.");
-//                }
-//        }
-
-        // TODO: weird cases in which all the NORMAL tiles are connected but not actually reachable because
-        // some units are blocking the locations. For example, it's possible to surround an HQ with 6 towers and
-        // 2 VOIDs to make it impossible to actually do anything.
 
         int rounds = mapProperties.get(MapProperties.MAX_ROUNDS);
         if (rounds < GameConstants.ROUND_MIN_LIMIT)
