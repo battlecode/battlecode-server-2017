@@ -11,7 +11,7 @@ package battlecode.common;
  */
 public enum Team {
 
-    A, B, NEUTRAL;
+    A, B, NEUTRAL, ZOMBIE;
 
     /**
      * Determines the team that is the opponent of this team.
