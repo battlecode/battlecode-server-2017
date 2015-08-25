@@ -292,7 +292,7 @@ public class InternalRobot implements GenericRobot {
         }
     }
 
-    public void processBeingInfected() {
+    public void processBeingInfected() { // TODO: Call this somewhere where it runs for each robot every turn
         if (viperInfectedTurns > 0) {
             takeDamage(GameConstants.VIPER_INFECTION_DAMAGE);
             viperInfectedTurns--;

@@ -860,8 +860,8 @@ public class GameWorld implements GenericWorld {
                 RobotType zombieType = r.type.turnsInto; // Type of Zombie this unit turns into
                 
                 // Create new Zombie
-                InternalRobot robot = GameWorldFactory.createPlayer(this, zombieType,
-                        r.getLocation(), Team.ZOMBIE, r, 0);
+                InternalRobot robot = GameWorldFactory.createZombiePlayer(this, zombieType,
+                        r.getLocation(), Team.ZOMBIE, r, 0); // TODO: Figure out Runnable and get that working
             }
 
             // TODO: Make these apply to the current game

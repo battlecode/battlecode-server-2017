@@ -29,4 +29,8 @@ public enum Team {
                 return NEUTRAL;
         }
     }
+    
+    public boolean isPlayer() {
+        return this == A || this == B;
+    }
 }
