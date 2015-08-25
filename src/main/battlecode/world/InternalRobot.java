@@ -302,10 +302,6 @@ public class InternalRobot implements GenericRobot {
         }
     }
 
-    public void turnIntoZombie() {
-        // TODO: Kill self and spawn zombie OR turn into zombie?
-    }
-
     // *********************************
     // ****** HEALTH METHODS ***********
     // *********************************
@@ -349,12 +345,7 @@ public class InternalRobot implements GenericRobot {
     }
 
     public void processLethalDamage() {
-        if (isInfected()) {
-            turnIntoZombie();
-        } else {
-            // TODO: Increase rubble
-            myGameWorld.notifyDied(this);
-        }
+        myGameWorld.notifyDied(this);   // myGameWorld checks if infected and creates zombie
     }
 
     public double getMaxHealth() {

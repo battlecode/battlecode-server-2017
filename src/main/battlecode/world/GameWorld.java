@@ -77,9 +77,7 @@ public class GameWorld implements GenericWorld {
 
     private double[] teamResources = new double[2];
 
-    private Map<Team, InternalRobot> baseHQs = new EnumMap<Team, InternalRobot>(
-            Team.class);
-    private Map<Team, Set<InternalRobot>> baseTowers = new EnumMap<Team, Set<InternalRobot>>(
+    private Map<Team, Set<InternalRobot>> baseArchons = new EnumMap<Team, Set<InternalRobot>>(
             Team.class);
     private final Map<MapLocation, InternalRobot> gameObjectsByLoc = new HashMap<MapLocation, InternalRobot>();
 
@@ -88,12 +86,6 @@ public class GameWorld implements GenericWorld {
             Team.class);
 
     private Map<Team, Map<Integer, Integer>> radio = new EnumMap<Team, Map<Integer, Integer>>(
-            Team.class);
-
-    private int[] numCommandersSpawned = new int[2];
-    private Map<Team, InternalRobot> commanders = new EnumMap<Team, InternalRobot>(
-            Team.class);
-    private Map<Team, Map<CommanderSkillType, Integer>> skillCooldowns = new EnumMap<Team, Map<CommanderSkillType, Integer>>(
             Team.class);
 
     // a count for each robot type per team for tech tree checks and for tower
@@ -138,16 +130,11 @@ public class GameWorld implements GenericWorld {
         totalRobotTypeCount.put(Team.B, new EnumMap<RobotType, Integer>(
                 RobotType.class));
 
-        baseTowers.put(Team.A, new HashSet<InternalRobot>());
-        baseTowers.put(Team.B, new HashSet<InternalRobot>());
+        baseArchons.put(Team.A, new HashSet<InternalRobot>());
+        baseArchons.put(Team.B, new HashSet<InternalRobot>());
 
         adjustResources(Team.A, GameConstants.PARTS_INITIAL_AMOUNT);
         adjustResources(Team.B, GameConstants.PARTS_INITIAL_AMOUNT);
-
-        skillCooldowns.put(Team.A, new EnumMap<CommanderSkillType, Integer>(
-                CommanderSkillType.class));
-        skillCooldowns.put(Team.B, new EnumMap<CommanderSkillType, Integer>(
-                CommanderSkillType.class));
 
         removingDead = false;
     }
@@ -166,22 +153,6 @@ public class GameWorld implements GenericWorld {
 
     public GameMap getGameMap() {
         return gameMap;
-    }
-
-    public MapLocation[] senseTowerLocations(Team team) {
-        ArrayList<MapLocation> locs = new ArrayList<MapLocation>();
-        for (InternalRobot r : baseTowers.get(team)) {
-            if (exists(r)) {
-                locs.add(r.getLocation());
-            }
-        }
-
-        Collections.sort(locs);
-        if (team == Team.B) {
-            Collections.reverse(locs);
-        }
-
-        return locs.toArray(new MapLocation[locs.size()]);
     }
 
     public InternalRobot getObject(MapLocation loc) {
@@ -493,6 +464,9 @@ public class GameWorld implements GenericWorld {
             InternalRobot r = deadRobots.remove(deadRobots.size() - 1);
             if (r.getID() == RobotMonitor.getCurrentRobotID())
                 current = true;
+            if(r.isInfected()){
+                // TODO: Turn into zombie
+            }
             visitSignal(new DeathSignal(r));
         }
         removingDead = false;
@@ -857,7 +831,6 @@ public class GameWorld implements GenericWorld {
         }
         if (obj instanceof InternalRobot) {
             InternalRobot r = (InternalRobot) obj;
-
             RobotMonitor.killRobot(ID);
 
             // update robot counting
@@ -881,6 +854,14 @@ public class GameWorld implements GenericWorld {
                     setWinner(r.getTeam().opponent(),
                             DominationFactor.DESTROYED);
                 }
+            }
+            // if it was an infected robot, create a Zombie in its place.
+            if (r.isInfected()) {
+                RobotType zombieType = r.type.turnsInto; // Type of Zombie this unit turns into
+                
+                // Create new Zombie
+                InternalRobot robot = GameWorldFactory.createPlayer(this, zombieType,
+                        r.getLocation(), Team.ZOMBIE, r, 0);
             }
 
             // TODO: Make these apply to the current game
