@@ -43,8 +43,13 @@ public class GameWorldFactory {
             InternalRobot parent, int buildDelay) {
         gw.addSignal(new SpawnSignal(robot, parent, buildDelay));
         RobotControllerImpl rc = new RobotControllerImpl(gw, robot);
-        String teamName = gw.getTeamName(t);
-        PlayerFactory.loadPlayer(rc, teamName);
+        if(rc.getTeam() == Team.ZOMBIE){
+            PlayerFactory.loadZombiePlayer(rc);
+        } else {
+            String teamName = gw.getTeamName(t);
+            PlayerFactory.loadPlayer(rc, teamName);
+        }
     }
+    
 
 }
