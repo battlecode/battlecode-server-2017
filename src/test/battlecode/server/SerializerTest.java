@@ -10,10 +10,7 @@ import battlecode.serial.notification.PauseNotification;
 import battlecode.serial.notification.ResumeNotification;
 import battlecode.serial.notification.RunNotification;
 import battlecode.serial.notification.StartNotification;
-import battlecode.server.serializer.JavaSerializerFactory;
-import battlecode.server.serializer.Serializer;
-import battlecode.server.serializer.SerializerFactory;
-import battlecode.server.serializer.XStreamSerializerFactory;
+import battlecode.server.serializer.*;
 import battlecode.world.GameMap;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
@@ -109,6 +106,11 @@ public class SerializerTest {
     @Test
     public void testXStreamRoundTrip() throws IOException {
         testRoundTrip(new XStreamSerializerFactory());
+    }
+
+    @Test
+    public void testJsonRoundTrip() throws IOException {
+        testRoundTrip(new JsonSerializerFactory());
     }
 
     /**
