@@ -147,13 +147,20 @@ public final class RobotControllerImpl implements RobotController,
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
-
-    public TerrainTile senseTerrainTile(MapLocation loc) {
+    public int senseRubble(MapLocation loc) {
         assertNotNull(loc);
         if (canSense(loc)) {
-            return gameWorld.getMapTerrain(loc);
+            return gameWorld.getRubble(loc);
         }
-        return gameWorld.senseMapTerrain(getTeam(), loc);
+        return gameWorld.senseRubble(getTeam(), loc);
+    }
+    
+    public int senseParts(MapLocation loc) {
+        assertNotNull(loc);
+        if (canSense(loc)) {
+            return gameWorld.getRubble(loc);
+        }
+        return gameWorld.senseRubble(getTeam(), loc);
     }
 
     public boolean canSense(MapLocation loc) {

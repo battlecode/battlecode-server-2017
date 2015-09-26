@@ -81,7 +81,9 @@ public class GameWorld implements GenericWorld {
             Team.class);
     private final Map<MapLocation, InternalRobot> gameObjectsByLoc = new HashMap<MapLocation, InternalRobot>();
 
-    private Map<MapLocation, Double> oreMined = new HashMap<MapLocation, Double>();
+    private Map<MapLocation, Integer> partsMap = new HashMap<MapLocation, Integer>();
+    private Map<MapLocation, Integer> rubbleMap = new HashMap<MapLocation, Integer>();
+     
     private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<Team, GameMap.MapMemory>(
             Team.class);
 
@@ -297,7 +299,7 @@ public class GameWorld implements GenericWorld {
     }
 
     public void updateMapMemoryAdd(Team team, MapLocation loc, int radiusSquared) {
-        mapMemory.get(team).rememberLocation(loc, radiusSquared, oreMined);
+        mapMemory.get(team).rememberLocation(loc, radiusSquared, partsMap, rubbleMap);
     }
 
     public void updateMapMemoryRemove(Team team, MapLocation loc,
@@ -338,8 +340,7 @@ public class GameWorld implements GenericWorld {
         for (int x = minXPos; x <= maxXPos; x++) {
             for (int y = minYPos; y <= maxYPos; y++) {
                 MapLocation loc = new MapLocation(x, y);
-                TerrainTile tile = gameMap.getTerrainTile(loc);
-                if (!tile.equals(TerrainTile.OFF_MAP)
+                if (gameMap.onTheMap(loc)
                         && loc.distanceSquaredTo(center) <= radiusSquared)
                     locations.add(loc);
             }
@@ -513,38 +514,46 @@ public class GameWorld implements GenericWorld {
             totalRobotTypeCount.get(team).put(type, 1);
         }
     }
-
+    
     // *********************************
-    // ****** ORE METHODS **************
+    // ****** RUBBLE METHODS **********
     // *********************************
-    // TODO: Replace all ORE methods with PARTS methods
-    public double getOre(MapLocation loc) {
-        double mined = 0.0;
-        if (oreMined.containsKey(loc)) {
-            mined = oreMined.get(loc);
-        }
-        return gameMap.getInitialOre(loc) - mined;
+    public int getRubble(MapLocation loc) {
+        return rubbleMap.get(loc);
+    }
+    
+    public int senseRubble(Team team, MapLocation loc) {
+        return mapMemory.get(team).recallRubble(loc);
+    }
+    
+    public void alterRubble(MapLocation loc, int amount) {
+        rubbleMap.put(loc, rubbleMap.get(loc)+amount);
     }
 
-    public double senseOre(Team team, MapLocation loc) {
-        double res = mapMemory.get(team).recallOreMined(loc);
-        if (res < 0) {
-            return res;
-        } else {
-            return gameMap.getInitialOre(loc) - res;
-        }
+    // *********************************
+    // ****** PARTS METHODS ************
+    // *********************************
+    public int getParts(MapLocation loc) {
+        return partsMap.get(loc);
     }
 
-    public void mineOre(MapLocation loc, double amount) {
-        double cur = 0;
+    public int senseParts(Team team, MapLocation loc) {
+        return mapMemory.get(team).recallParts(loc);
+    }
+
+    public int takeParts(MapLocation loc) { // Remove parts from location
+        int prevVal = partsMap.get(loc);
+        partsMap.put(loc,0);
+        return prevVal;
+      /*  double cur = 0;
         if (oreMined.containsKey(loc)) {
             cur = oreMined.get(loc);
         }
         oreMined.put(loc, cur + amount);
-        addSignal(new LocationOreChangeSignal(loc, cur + amount));
+        addSignal(new LocationOreChangeSignal(loc, cur + amount));*/
     }
 
-    protected boolean spendResources(Team t, double amount) {
+    protected boolean spendResources(Team t, int amount) {
         if (teamResources[t.ordinal()] >= amount) {
             teamResources[t.ordinal()] -= amount;
             return true;
@@ -552,24 +561,12 @@ public class GameWorld implements GenericWorld {
             return false;
     }
 
-    protected void adjustResources(Team t, double amount) {
+    protected void adjustResources(Team t, int amount) {
         teamResources[t.ordinal()] += amount;
     }
 
     public double resources(Team t) {
         return teamResources[t.ordinal()];
-    }
-
-    // *********************************
-    // ****** TERRAIN METHODS **********
-    // *********************************
-
-    public TerrainTile getMapTerrain(MapLocation loc) {
-        return gameMap.getTerrainTile(loc);
-    }
-
-    public TerrainTile senseMapTerrain(Team team, MapLocation loc) {
-        return mapMemory.get(team).recallTerrain(loc);
     }
 
     // *********************************
@@ -788,7 +785,7 @@ public class GameWorld implements GenericWorld {
             loc = s.getLoc();
         }
 
-        double cost = (int) s.getType().partCost;
+        int cost = s.getType().partCost;
         adjustResources(s.getTeam(), -cost);
 
         // note: this also adds the signal
@@ -905,7 +902,8 @@ public class GameWorld implements GenericWorld {
     public void visitMovementSignal(MovementSignal s) {
         InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
         r.setLocation(s.getNewLoc());
-        // TODO: Make this take any parts that were placed on this square
+        int newParts = takeParts(r.getLocation());
+        //TODO: Add taken parts to the team's total
         addSignal(s);
     }
 
@@ -929,7 +927,7 @@ public class GameWorld implements GenericWorld {
             loc = s.getLoc();
         }
 
-        double cost = (int) s.getType().partCost;
+        int cost = s.getType().partCost;
 
         adjustResources(s.getTeam(), -cost);
 

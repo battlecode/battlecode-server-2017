@@ -134,7 +134,7 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         public TerrainTile tile() {
-            return TerrainTile.NORMAL;
+            return TerrainTile.RUBBLE;
         }
 
         public void createGameObject(GameWorld world, MapLocation loc) {
@@ -160,7 +160,7 @@ class XMLMapHandler extends DefaultHandler {
     }
 
     // Current implementation does not use this (Keeps HQ (Archons) as RobotData)
-    private static class NodeData implements SymbolData {
+ /*   private static class NodeData implements SymbolData {
 
         public static final SymbolDataFactory factory = new SymbolDataFactory() {
 
@@ -214,7 +214,7 @@ class XMLMapHandler extends DefaultHandler {
             n.setValue(this.value);
             return n;
         }
-    }
+    }*/
 
     private class SymbolTile {
 
@@ -234,15 +234,13 @@ class XMLMapHandler extends DefaultHandler {
     private static final Map<String, SymbolDataFactory> factories = new HashMap<String, SymbolDataFactory>();
     private final ArrayList<SymbolTile> objectsToCreate = new ArrayList<SymbolTile>();
 
-    private ArrayList<MapLocation[]> nodeLinks = new ArrayList<MapLocation[]>();
-
     static {
         factories.put("TERRAIN", TerrainData.factory);
         for (RobotType ch : RobotType.values()) {
             factories.put(ch.name(), RobotData.factory);
         }
         //factories.put("ENCAMPMENT", NodeData.factory);
-        factories.put("HQ", NodeData.factory);
+        //factories.put("HQ", NodeData.factory); //TODO: cleanup
     }
 
     /**
@@ -410,17 +408,6 @@ class XMLMapHandler extends DefaultHandler {
 
             // The actual map data will be parsed by characters()...
 
-        } else if (qName.equals("nodelinks")) {
-            requireElement(qName, "map");
-        } else if (qName.equals("nodelink")) {
-            requireElement(qName, "nodelinks");
-            MapLocation locA = MapLocation.valueOf(getRequired(attributes, "from"));
-            MapLocation locB = MapLocation.valueOf(getRequired(attributes, "to"));
-            String onedir = getOptional(attributes, "oneway");
-            if (onedir != null)
-                nodeLinks.add(new MapLocation[]{locA, locB, null});
-            else
-                nodeLinks.add(new MapLocation[]{locA, locB});
         } else {
             //fail("unrecognized map element '<" + qName + ">'", "Check that all nodes are spelled correctly.\n");
         }
@@ -513,7 +500,7 @@ class XMLMapHandler extends DefaultHandler {
 
     public GameWorld createGameWorld(String teamA, String teamB, long[][] teamMemory) {
 
-        System.out.println("Creating a game%%%%%%%%%");
+        System.out.println("Creating a game");
 
         //if (!isTournamentLegal()) {
             //fail("Map is not legal!", "Fix it.");
@@ -526,25 +513,31 @@ class XMLMapHandler extends DefaultHandler {
                 mapTiles[i][j] = map[i][j].tile();
         }
 
-        int[][] intData = new int[map.length][];
+        int[][] rubbleData = new int[map.length][];
+        int[][] partsData = new int[map.length][];
         for (int i = 0; i < map.length; i++) {
-            intData[i] = new int[map[i].length];
+            rubbleData[i] = new int[map[i].length];
+            partsData[i] = new int[map[i].length];
             for (int j = 0; j < map[i].length; j++) {
-                intData[i][j] = (int) map[i][j].floatData();
-                if (mapTiles[i][j] == TerrainTile.VOID) {
-                    intData[i][j] = 0;
+                //If a standard tile, use float data as rubble. If a parts tile, use as parts
+                if(mapTiles[i][j] == TerrainTile.PARTS) {
+                    rubbleData[i][j] = 0;
+                    partsData[i][j] = (int) map[i][j].floatData();
+                } else {
+                    rubbleData[i][j] = (int) map[i][j].floatData();
+                    partsData[i][j] = 0;
                 }
             }
         }
 
-        GameMap gm = new GameMap(mapProperties, mapTiles, intData, mapName);
+        GameMap gm = new GameMap(mapProperties, rubbleData, partsData, mapName);
         GameWorld gw = new GameWorld(gm, teamA, teamB, teamMemory);
 
         gw.reserveRandomIDs(32000);
 
         MapLocation origin = gm.getMapOrigin();
 
-        for (int i = 0; i < map.length; i++) {
+ /*       for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
                 if (map[i][j] instanceof NodeData) {
                     map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
@@ -557,22 +550,17 @@ class XMLMapHandler extends DefaultHandler {
                     map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
                 }
             }
+        }*/ //TODO: cleanup
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[i].length; j++) {
+                map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
+            }
         }
 
         // by removing this line, you can no longer use IDs to determine execution order
         //gw.endRandomIDs();
 
         return gw;
-    }
-
-    public void checkNodeLink(MapLocation l) {
-        if (!(map[l.x][l.y] instanceof NodeData)) {
-            fail(String.format("Nodelink contains %d,%d but there is no node there", l.x, l.y), "Make sure the nodelink data is correct.");
-        }
-    }
-
-    public boolean isNode(MapLocation l) {
-        return map[l.x][l.y] instanceof NodeData;
     }
 
     /**
@@ -584,53 +572,6 @@ class XMLMapHandler extends DefaultHandler {
         //e.printStackTrace();
         throw e;
     }
-
-    class FloodFill {
-
-        Stack<MapLocation> queue;
-        Set<MapLocation> marked;
-        int n_marked;
-
-        public FloodFill(int x, int y) {
-            queue = new Stack<MapLocation>();
-            marked = new HashSet<MapLocation>();
-            add(x, y);
-        }
-
-        public int size() {
-            MapLocation loc;
-            while (!queue.isEmpty()) {
-                loc = queue.pop();
-                add(loc.x + 1, loc.y);
-                add(loc.x - 1, loc.y);
-                add(loc.x, loc.y + 1);
-                add(loc.x, loc.y - 1);
-                add(loc.x - 1, loc.y + 1);
-                add(loc.x - 1, loc.y - 1);
-                add(loc.x + 1, loc.y - 1);
-                add(loc.x + 1, loc.y + 1);
-            }
-            return n_marked;
-        }
-
-        public void add(int x, int y) {
-            if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight)
-                return;
-            if (map[x][y].tile() != TerrainTile.NORMAL)
-                return;
-            MapLocation loc = new MapLocation(x, y);
-            if (marked.contains(loc))
-                return;
-            queue.push(loc);
-            marked.add(loc);
-            n_marked++;
-        }
-
-        public boolean reachable(int x, int y) {
-            return marked.contains(new MapLocation(x, y));
-        }
-    }
-
 
     public static class LegalityWarning {
 
@@ -681,7 +622,6 @@ class XMLMapHandler extends DefaultHandler {
         ArrayList<MapLocation> teamAArchons = new ArrayList<MapLocation>();
         ArrayList<MapLocation> teamBArchons = new ArrayList<MapLocation>();
 
-        int grounds = 0;
         for (y = 0; y < mapHeight; y++) {
             for (x = 0; x < mapWidth; x++) {
                 d = map[x][y];
@@ -692,12 +632,11 @@ class XMLMapHandler extends DefaultHandler {
                             if (rd.team == Team.A) teamAArchons.add(new MapLocation(x, y));
                             else if (rd.team == Team.B) teamBArchons.add(new MapLocation(x, y));
                             break;
+                        case ZOMBIEDEN:
+                            break;
                         default:
                             warn.warnUnit(rd); // Should only start with Archons
                     }
-                }
-                if (d.tile() == TerrainTile.NORMAL) {
-                    grounds++;
                 }
             }
         }
@@ -709,18 +648,6 @@ class XMLMapHandler extends DefaultHandler {
 
         if (teamAArchons.size() > GameConstants.NUMBER_OF_ARCHONS_MAX) {
             warn.warn("Too many Archons!");
-        }
-
-        // check that the ground squares are connected
-        if (grounds == 0) {
-            warn.warn("There are no land squares on the entire map!");
-        } else {
-//            FloodFill ff = new FloodFill(baseAx, baseAy);
-//            int s = ff.size(); // calculate the flood fill
-//
-//            if (s != grounds) {
-//                warn.warn("Some tiles are not reachable!");
-//            } // TODO: Reimplement if we decide to add void squares
         }
 
         int rounds = mapProperties.get(MapProperties.MAX_ROUNDS);
