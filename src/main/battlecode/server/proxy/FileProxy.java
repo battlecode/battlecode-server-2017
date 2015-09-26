@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.zip.GZIPOutputStream;
 
 import battlecode.server.serializer.Serializer;
+import battlecode.server.serializer.SerializerFactory;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -47,10 +48,10 @@ public class FileProxy implements Proxy {
      * filename.
      *
      * @param fileName The name of the file to write to.
-     * @param serializer The serializer to use.
+     * @param serializerFactory The serializerFactory to create a serializer with.
      * @throws IOException if the file cannot be opened or written to.
      */
-    public FileProxy(String fileName, Serializer serializer) throws IOException {
+    public FileProxy(String fileName, SerializerFactory serializerFactory) throws IOException {
         // Create directories if necessary.
         this.file = new File(fileName);
         if (!file.exists() && file.getParentFile() != null)
@@ -63,11 +64,13 @@ public class FileProxy implements Proxy {
         this.fileWriter = new FileOutputStream(temp);
         this.gzipWriter = new GZIPOutputStream(fileWriter);
 
-        this.serializer = serializer;
+        this.serializer = serializerFactory.createSerializer(gzipWriter, null);
     }
 
     @Override
     public void close() throws IOException {
+        serializer.close();
+
         gzipWriter.flush();
         fileWriter.flush();
         gzipWriter.close();
@@ -87,6 +90,6 @@ public class FileProxy implements Proxy {
     public void writeObject(final Object message) throws IOException {
         if (message instanceof Notification)
             return;
-        serializer.serialize(gzipWriter, message);
+        serializer.serialize(message);
     }
 }

@@ -7,7 +7,7 @@ import battlecode.serial.MatchHeader;
 import battlecode.serial.RoundDelta;
 import battlecode.server.proxy.FileProxy;
 import battlecode.server.proxy.Proxy;
-import battlecode.server.serializer.XStreamSerializer;
+import battlecode.server.serializer.XStreamSerializerFactory;
 import battlecode.world.GameMap;
 import battlecode.world.signal.*;
 import org.apache.commons.cli.*;
@@ -562,7 +562,7 @@ public class AwesomenessAnalyzer {
     public void analyze() {
         ObjectInputStream input = null;
         try {
-            input = XStreamSerializer.getXStream().createObjectInputStream(new GZIPInputStream(new FileInputStream(filename)));
+            input = XStreamSerializerFactory.getXStream().createObjectInputStream(new GZIPInputStream(new FileInputStream(filename)));
         } catch (Exception e) {
             System.err.println("Error: couldn't open match file " + filename);
             e.printStackTrace();
@@ -618,7 +618,7 @@ public class AwesomenessAnalyzer {
 
     public void dumpFile() {
         try {
-            Proxy output = new FileProxy(filename + ".analyzed", new XStreamSerializer());
+            Proxy output = new FileProxy(filename + ".analyzed", new XStreamSerializerFactory());
             for (GameData game : games) {
                 game.renormalize();
                 for (Object data : game.getOutput()) {

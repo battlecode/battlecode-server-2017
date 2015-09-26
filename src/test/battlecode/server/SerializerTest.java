@@ -10,18 +10,17 @@ import battlecode.serial.notification.PauseNotification;
 import battlecode.serial.notification.ResumeNotification;
 import battlecode.serial.notification.RunNotification;
 import battlecode.serial.notification.StartNotification;
-import battlecode.server.serializer.JavaSerializer;
+import battlecode.server.serializer.JavaSerializerFactory;
 import battlecode.server.serializer.Serializer;
-import battlecode.server.serializer.XStreamSerializer;
+import battlecode.server.serializer.SerializerFactory;
+import battlecode.server.serializer.XStreamSerializerFactory;
 import battlecode.world.GameMap;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
 import battlecode.world.signal.*;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -103,35 +102,49 @@ public class SerializerTest {
     };
 
     @Test
-    public void testJavaRoundTrip() {
-        testRoundTrip(new JavaSerializer());
+    public void testJavaRoundTrip() throws IOException {
+        testRoundTrip(new JavaSerializerFactory());
     }
 
     @Test
-    public void testXStreamRoundTrip() {
-        testRoundTrip(new XStreamSerializer());
+    public void testXStreamRoundTrip() throws IOException {
+        testRoundTrip(new XStreamSerializerFactory());
     }
 
-    public void testRoundTrip(final Serializer serializer) {
-        final ByteArrayOutputStream output = new ByteArrayOutputStream();
-        for (final Object message : serializeableObjects) {
-            output.reset();
-            try {
-                serializer.serialize(output, message);
-            } catch (final IOException e) {
-                fail("Couldn't serialize object of class: " + message.getClass().getCanonicalName() + ": " + e);
-            }
+    /**
+     * Runs all the objects we're going to serialize through a serializer-deserializer pair.
+     *
+     * @param serializerFactory The factory to create serializers with.
+     * @throws IOException
+     */
+    public void testRoundTrip(final SerializerFactory serializerFactory) throws IOException {
 
-            final ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        final Serializer serializer = serializerFactory.createSerializer(output, null);
+        for (int i = 0; i < serializeableObjects.length; i++) {
+            try {
+                serializer.serialize(serializeableObjects[i]);
+            } catch (final IOException e) {
+                fail("Couldn't serialize object of class: " + serializeableObjects[i].getClass().getCanonicalName() + ": " + e);
+            }
+        }
+        serializer.close();
+        output.close();
+
+        final ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
+        final Serializer deserializer = serializerFactory.createSerializer(null, input);
+
+        for (int i = 0; i < serializeableObjects.length; i++) {
             final Object result;
             try {
-                result = serializer.deserialize(input);
+                result = deserializer.deserialize();
             } catch (final IOException e) {
-                fail("Couldn't deserialize object of class: " + message.getClass().getCanonicalName() + ": " + e);
+                fail("Couldn't deserialize object of class: " + serializeableObjects[i].getClass().getCanonicalName() + ": " + e);
                 return; // To satisfy "might not have been initialized"
             }
 
-            // TODO assertEquals(message, result);
+            // TODO assertEquals(serializeableObjects[i], result);
             // For this to work, we'll need to override Object.equals on any class we want to serialize.
         }
     }

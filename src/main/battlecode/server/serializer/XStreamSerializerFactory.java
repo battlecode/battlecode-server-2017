@@ -27,7 +27,7 @@ import java.util.zip.GZIPInputStream;
  *
  * Created by james on 7/24/15.
  */
-public class XStreamSerializer implements Serializer {
+public class XStreamSerializerFactory implements SerializerFactory {
     static private XStream xstream;
 
     public static class IntArrayConverter implements SingleValueConverter {
@@ -285,27 +285,26 @@ public class XStreamSerializer implements Serializer {
         return xstream;
     }
 
-    public XStreamSerializer() {}
-
     @Override
-    public void serialize(final OutputStream output, final Object message) throws IOException {
-        // TODO check how expensive this is
-        final ObjectOutputStream wrappedOutput = getXStream().createObjectOutputStream(output);
-        wrappedOutput.writeObject(message);
-        wrappedOutput.flush();
-    }
-
-    @Override
-    public Object deserialize(InputStream input) throws IOException {
-        // TODO check how expensive this is
-        final ObjectInputStream wrappedInput = getXStream().createObjectInputStream(input);
-        final Object result;
-        try {
-            result = wrappedInput.readObject();
-        } catch (final ClassNotFoundException e) {
-            throw new IOException(e);
+    public Serializer createSerializer(final OutputStream output, final InputStream input) throws IOException {
+        final ObjectOutputStream wrappedOutput;
+        if (output != null) {
+            wrappedOutput = getXStream().createObjectOutputStream(output);
+        } else {
+            wrappedOutput = null;
         }
-        return result;
+
+        final ObjectInputStream wrappedInput;
+        if (input != null) {
+            wrappedInput = getXStream().createObjectInputStream(input);
+        } else {
+            wrappedInput = null;
+        }
+
+        return new StandardSerializer(
+                wrappedOutput,
+                wrappedInput
+        );
     }
 }
 
