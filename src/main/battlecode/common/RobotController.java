@@ -94,14 +94,24 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Senses the terrain at the given location. Returns TerrainTile.UNKNOWN for
-     * a terrain tile that has never been in sensor range.
+     * Senses the rubble at the given location. Returns -1 for a location
+     * outside sensor range.
      *
      * @param loc
      *            the location to check.
-     * @return the TerrainTile at the location.
+     * @return the amount of rubble at the location
      */
-    public TerrainTile senseTerrainTile(MapLocation loc);
+    public int senseRubble(MapLocation loc);
+    
+    /**
+     * Senses the parts at the given location. Returns -1 for a location
+     * outside sensor range.
+     *
+     * @param loc
+     *            the location to check.
+     * @return the amount of parts at the location
+     */   
+    public int senseParts(MapLocation loc);
 
     /**
      * Returns true if the given location is within the robot's sensor range, or

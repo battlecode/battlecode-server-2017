@@ -9,7 +9,7 @@ package battlecode.common;
  */
 public enum TerrainTile {
 
-    NORMAL, VOID, UNKNOWN, OFF_MAP;
+    RUBBLE,PARTS,OFF_MAP;
 
     /**
      * Returns <code>true</code> if robots
@@ -17,7 +17,7 @@ public enum TerrainTile {
      *
      * @return whether the tile is traversible.
      */
-    public boolean isTraversable() {
+    /*public boolean isTraversable() {
         switch (this) {
             case VOID:
                 return false;
@@ -28,5 +28,7 @@ public enum TerrainTile {
             default:
                 return false;
         }
-    }
+    }*/ //TODO: Remove this file entirely after cleaning outside things
+    
+    
 }
