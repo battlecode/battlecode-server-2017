@@ -367,7 +367,7 @@ public interface RobotController {
     public DependencyProgress checkDependencyProgress(RobotType type);
 
     /**
-     * Checks to make sure you have the ore requirements to spawn, and that the
+     * Checks to make sure you have the part requirements to spawn, and that the
      * structure can actually spawn the specified RobotType.
      * 
      * @param type
