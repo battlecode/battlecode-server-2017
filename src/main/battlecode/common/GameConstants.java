@@ -53,53 +53,21 @@ public interface GameConstants {
     public static final int NUMBER_OF_ARCHONS_MAX = 6;
 
     // *********************************
-    // ****** SUPPLY *******************
+    // ****** PARTS *******************
     // *********************************
 
-    /** The rate at which supply decays each turn. */
-    public static final double SUPPLY_DECAY = 0.00;
-
-    /** The maximum distance over which supplies can be transferred. */
-    public static final int SUPPLY_TRANSFER_RADIUS_SQUARED = 15;
-
-    /** Constants for the HQ supply generation formula. */
-    public static final double SUPPLY_GEN_BASE = 100;
-    public static final double SUPPLY_GEN_MULTIPLIER = 2;
-    public static final double SUPPLY_GEN_EXPONENT = 0.6;
+    /** The amount that each team starts with */
+    public static final int PARTS_INITIAL_AMOUNT = 1000;
+    
+    /** The part income per turn per archon */
+    public static final int ARCHON_PART_INCOME = 10;
 
     // *********************************
-    // ****** MINING *******************
+    // ****** RUBBLE *******************
     // *********************************
 
-    /** The amount of parts a team starts the game with. */
-    public static final int PARTS_INITIAL_AMOUNT = 200;
-
-    /** The amount of parts each Archon generates each turn. */
-    public static final int ARCHON_PART_INCOME = 1;
-
-    /** The minimum amount that is mined on a square with no ore. */
-    public static final double MINIMUM_MINE_AMOUNT = 0.2;
-
-    /** The maximum amount of ore that a BEAVER can mine. */
-    public static final double BEAVER_MINE_MAX = 2;
-
-    /** The fraction of ore that a BEAVER gets from a square. */
-    public static final int BEAVER_MINE_RATE = 20; // means 1/20
-
-    /** The maximum amount of ore that a MINER can mine. */
-    public static final double MINER_MINE_MAX = 2.5;
-
-    /** The maximum amount of ore that an upgraded MINER can mine (NOT USED!). */
-    public static final int MINER_MINE_MAX_UPGRADED = 4;
-
-    /** The fraction of ore that a MINER gets from a square. */
-    public static final int MINER_MINE_RATE = 4; // means 1/4
-
-    /** The movement delay gained from mining. */
-    public static final int MINING_MOVEMENT_DELAY = 2;
-
-    /** The loading delay from mining. */
-    public static final int MINING_LOADING_DELAY = 1;
+    /** The threshold of rubble that robots (except SCOUTs) can't move through */
+    public static final int RUBBLE_OBSTRUCTION_THRESH = 100;
 
     // *********************************
     // ****** UNIT PROPERTIES **********
