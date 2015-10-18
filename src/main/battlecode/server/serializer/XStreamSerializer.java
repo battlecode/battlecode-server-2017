@@ -211,16 +211,16 @@ public class XStreamSerializer implements Serializer {
         public void marshal(Object value, HierarchicalStreamWriter writer,
                             MarshallingContext context) {
             // The map tiles are in column major order
-            TerrainTile[][] tiles = (TerrainTile[][]) value;
+            TerrainTile[][] tiles = (TerrainTile[][]) value; // 
             StringBuilder builder = new StringBuilder();
             for (int y = 0; y < tiles[0].length; y++) {
                 builder.append('\n');
                 for (int x = 0; x < tiles.length; x++) {
-                    if (tiles[x][y] == TerrainTile.NORMAL) {
+                    //if (tiles[x][y] == TerrainTile.NORMAL) {
                         builder.append('.');
-                    } else { // VOID
-                        builder.append('#');
-                    }
+                    //} else { // VOID
+                    //    builder.append('#');
+                    //} // TODO: Delete this after we know how terrain will be
                 }
             }
             writer.setValue(builder.toString());
@@ -235,10 +235,10 @@ public class XStreamSerializer implements Serializer {
                 for (int y = 0; y < rows.length; y++) {
                     switch (rows[y].charAt(x)) {
                         case '#':
-                            tiles[x][y] = TerrainTile.VOID;
+                            tiles[x][y] = TerrainTile.RUBBLE;
                             break;
                         case '.':
-                            tiles[x][y] = TerrainTile.NORMAL;
+                            tiles[x][y] = TerrainTile.RUBBLE;
                             break;
                         default:
                             throw new ConversionException("Illegal character in InternalTerrainTile [][].");

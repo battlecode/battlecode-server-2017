@@ -159,63 +159,6 @@ class XMLMapHandler extends DefaultHandler {
         }
     }
 
-    // Current implementation does not use this (Keeps HQ (Archons) as RobotData)
- /*   private static class NodeData implements SymbolData {
-
-        public static final SymbolDataFactory factory = new SymbolDataFactory() {
-
-            public NodeData create(Attributes att) {
-                Team team = Team.valueOf(getRequired(att, "team"));
-                String smine = getOptional(att, "mine");
-                Team mine = smine==null ? null : Team.valueOf(smine);
-                return new NodeData(team, mine);
-            }
-        };
-
-        public final Team team;
-        public final Team mine;
-        public double value;
-
-        public NodeData(Team t, Team mine) {
-            team = t;
-            this.mine = mine;
-            this.value = -1;
-        }
-
-        public void setValue(double value) {
-            this.value = value;
-        }
-
-        public double floatData() {
-            return this.value;
-        }
-
-        public TerrainTile tile() {
-            return TerrainTile.NORMAL;
-        }
-
-        public void createGameObject(GameWorld world, MapLocation loc) {
-            if (team == Team.NEUTRAL) {
-            } else {
-            	InternalRobot r = GameWorldFactory.createPlayer(world, RobotType.ARCHON, loc, team, null, false, 0);
-            }
-        }
-
-        public boolean equalsMirror(SymbolData data) {
-            if (!(data instanceof NodeData)) {
-                return false;
-            }
-            NodeData d = (NodeData) data;
-            return mine == ((NodeData)data).mine && d.value == value;
-        }
-
-        public SymbolData copy() {
-            NodeData n = new NodeData(this.team, this.mine);
-            n.setValue(this.value);
-            return n;
-        }
-    }*/
-
     private class SymbolTile {
 
         SymbolData data;

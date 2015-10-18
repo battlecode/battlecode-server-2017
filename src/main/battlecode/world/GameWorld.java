@@ -308,12 +308,9 @@ public class GameWorld implements GenericWorld {
     }
 
     public boolean canMove(MapLocation loc, RobotType type) {
-        // return (gameMap.getTerrainTile(loc).isTraversable() ||
-        // gameMap.getTerrainTile(loc) == TerrainTile.VOID && (type ==
-        // RobotType.DRONE || type == RobotType.MISSILE)) &&
-        // (gameObjectsByLoc.get(loc) == null);
-        // TODO: Fix when rubble is implemented
-        return true;
+        return (gameMap.onTheMap(loc) &&
+                (rubbleMap.get(loc) < GameConstants.RUBBLE_OBSTRUCTION_THRESH || type == RobotType.SCOUT) &&
+                gameObjectsByLoc.get(loc) == null);
     }
 
     protected boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
@@ -465,10 +462,7 @@ public class GameWorld implements GenericWorld {
             InternalRobot r = deadRobots.remove(deadRobots.size() - 1);
             if (r.getID() == RobotMonitor.getCurrentRobotID())
                 current = true;
-            if(r.isInfected()){
-                // TODO: Turn into zombie
-            }
-            visitSignal(new DeathSignal(r));
+            visitSignal(new DeathSignal(r)); // If infected, also turns into zombie
         }
         removingDead = false;
         if (current)
@@ -903,7 +897,7 @@ public class GameWorld implements GenericWorld {
         InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
         r.setLocation(s.getNewLoc());
         int newParts = takeParts(r.getLocation());
-        //TODO: Add taken parts to the team's total
+        adjustResources(r.getTeam(), newParts);
         addSignal(s);
     }
 
