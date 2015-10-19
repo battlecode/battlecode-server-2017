@@ -25,7 +25,7 @@ public class RobotMonitor {
     // the RobotData for the currently running robot
     public volatile static RobotData currentRobotData;
 
-    private static boolean[] silenced = new boolean[2];
+    private static boolean[] silenced = new boolean[4];
 
     private static int debugLevel;
     private static int bytecodeLimit;
@@ -57,6 +57,8 @@ public class RobotMonitor {
         Config options = Config.getGlobalConfig();
         silenced[0] = options.getBoolean("bc.engine.silence-a");
         silenced[1] = options.getBoolean("bc.engine.silence-b");
+        silenced[2] = options.getBoolean("bc.engine.silence-c");
+        silenced[3] = options.getBoolean("bc.engine.silence-d");
         DEBUG_BYTECODES = options.getInt("bc.engine.debug-max-bytecodes");
     }
 

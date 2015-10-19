@@ -119,6 +119,7 @@ public class GameWorld implements GenericWorld {
         mapMemory.put(Team.A, new GameMap.MapMemory(gameMap));
         mapMemory.put(Team.B, new GameMap.MapMemory(gameMap));
         mapMemory.put(Team.NEUTRAL, new GameMap.MapMemory(gameMap));
+        mapMemory.put(Team.ZOMBIE, new GameMap.MapMemory(gameMap));
 
         radio.put(Team.A, new HashMap<Integer, Integer>());
         radio.put(Team.B, new HashMap<Integer, Integer>());
@@ -127,9 +128,17 @@ public class GameWorld implements GenericWorld {
                 RobotType.class));
         activeRobotTypeCount.put(Team.B, new EnumMap<RobotType, Integer>(
                 RobotType.class));
+        activeRobotTypeCount.put(Team.NEUTRAL, new EnumMap<RobotType, Integer>(
+                RobotType.class));
+        activeRobotTypeCount.put(Team.ZOMBIE, new EnumMap<RobotType, Integer>(
+                RobotType.class));
         totalRobotTypeCount.put(Team.A, new EnumMap<RobotType, Integer>(
                 RobotType.class));
         totalRobotTypeCount.put(Team.B, new EnumMap<RobotType, Integer>(
+                RobotType.class));
+        totalRobotTypeCount.put(Team.NEUTRAL, new EnumMap<RobotType, Integer>(
+                RobotType.class));
+        totalRobotTypeCount.put(Team.ZOMBIE, new EnumMap<RobotType, Integer>(
                 RobotType.class));
 
         baseArchons.put(Team.A, new HashSet<InternalRobot>());
