@@ -20,7 +20,7 @@ import battlecode.world.signal.SpawnSignal;
 import battlecode.world.signal.TransferSupplySignal;
 
 public class InternalRobot implements GenericRobot {
-    public final RobotType type;
+    public RobotType type;
 
     private final int myID;
     private Team myTeam;
@@ -481,6 +481,14 @@ public class InternalRobot implements GenericRobot {
     public void suicide() {
         (new DeathSignal(this)).accept(myGameWorld);
     }
+    
+    public void transform(RobotType newType) {
+        myGameWorld.decrementActiveRobotTypeCount(getTeam(), type);
+        type = newType;
+        myGameWorld.incrementTotalRobotTypeCount(getTeam(), newType);
+        coreDelay += 10;
+        weaponDelay += 10;
+    }
 
     // *********************************
     // ****** GAMEPLAY METHODS *********
@@ -540,7 +548,9 @@ public class InternalRobot implements GenericRobot {
     // *********************************
     // ****** MISC. METHODS ************
     // *********************************
-
+    
+    
+    
     @Override
     public String toString() {
         return String.format("%s:%s#%d", getTeam(), type, getID());

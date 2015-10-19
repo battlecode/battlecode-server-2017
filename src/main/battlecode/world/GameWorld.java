@@ -499,6 +499,12 @@ public class GameWorld implements GenericWorld {
             activeRobotTypeCount.get(team).put(type, 1);
         }
     }
+    
+    // decrement from active robots (used during TTM <-> Turret transform)
+    public void decrementActiveRobotTypeCount(Team team, RobotType type) {
+        Integer currentCount = activeRobotTypeCount.get(team).get(type);
+        activeRobotTypeCount.get(team).put(type,currentCount - 1);
+    }
 
     // returns active and inactive robots
     public int getTotalRobotTypeCount(Team team, RobotType type) {

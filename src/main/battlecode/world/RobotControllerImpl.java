@@ -357,6 +357,22 @@ public final class RobotControllerImpl implements RobotController,
                 robot.getCooldownDelayForType() * factor2,
                 robot.getMovementDelayForType() * factor1);
     }
+    
+    // ***********************************
+    // ****** TTM/TURRET METHODS *********
+    // ***********************************
+    
+    public void pack() {
+        if(robot.type.equals(RobotType.TURRET)) {
+            robot.transform(RobotType.TTM);
+        }
+    }
+    
+    public void uppack() {
+        if(robot.type.equals(RobotType.TTM)) {
+            robot.transform(RobotType.TURRET);
+        }
+    }
 
     // ***********************************
     // ****** ATTACK METHODS *************
