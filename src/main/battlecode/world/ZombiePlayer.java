@@ -1,4 +1,7 @@
-package battlecode.engine;
+package ZombiePlayer;
+// This is intentionally not put in a Battlecode package, because our
+// instrumenter explicitly disallows player classes to be part of a Battlecode
+// package.
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -8,7 +11,7 @@ import battlecode.common.RobotInfo;
 import battlecode.common.Team;
 
 public class ZombiePlayer {
-    public void run(RobotController rc) throws GameActionException{
+    public static void run(RobotController rc) throws GameActionException{
         switch (rc.getType()) {
         case ZOMBIEDEN:
             // TODO: Add zombie den behavior

@@ -34,7 +34,7 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 
     public IndividualClassLoader(String teamPackageName, boolean debugMethodsEnabled, boolean silenced, boolean retry) throws InstrumentationException {
         super(silenced, debugMethodsEnabled, singletonLoader);
-	retryLoad = retry;
+        retryLoad = retry;
         checkSettings();
 
         // check that the package we're trying to load isn't contained in a disallowed package
@@ -47,7 +47,6 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
         }
 
         this.teamPackageName = teamPackageName.intern();
-
     }
 
     private void dumpToFile(String name, byte[] bytes) {

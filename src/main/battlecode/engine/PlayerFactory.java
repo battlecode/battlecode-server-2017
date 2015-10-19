@@ -3,8 +3,8 @@ package battlecode.engine;
 import battlecode.engine.instrumenter.IndividualClassLoader;
 import battlecode.engine.instrumenter.InstrumentationException;
 import battlecode.engine.scheduler.ScheduledRunnable;
-import battlecode.engine.ZombiePlayer;
 import battlecode.server.Config;
+import java.lang.instrument.*;
 
 /*
 TODO:
@@ -53,13 +53,12 @@ public class PlayerFactory {
     }
     
     public static void loadZombiePlayer(GenericController rc) {
-
         // instantiate and instrument the ZombiePlayer class
         Class playerClass;
         try {
             // The classloaders ignore silenced now - RobotMonitor takes care of it
-            ClassLoader icl = new IndividualClassLoader("ZombiePlaer", _debugMethodsEnabled, false, true);
-            playerClass = icl.loadClass("ZombiePlayer");
+            ClassLoader icl = new IndividualClassLoader("ZombiePlayer", _debugMethodsEnabled, false, true);
+            playerClass = icl.loadClass("ZombiePlayer.ZombiePlayer");
             //~ System.out.println("PF done loading");
         } catch (InstrumentationException ie) {
             // if we get an InstrumentationException, then the error should have been reported, so we just kill the robot
