@@ -5,6 +5,7 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.TerrainTile;
+import battlecode.common.ZombieCount;
 import battlecode.serial.GenericGameMap;
 
 import java.util.Arrays;
@@ -58,6 +59,11 @@ public class GameMap implements GenericGameMap {
     private final String mapName;
 
     /**
+     * The zombie spawn schedule for the map
+     */
+    private final ZombieSpawnSchedule zSchedule;
+
+    /**
      * Represents the various integer properties a GameMap
      * can have.
      */
@@ -80,6 +86,7 @@ public class GameMap implements GenericGameMap {
         this.seed = gm.seed;
         this.maxRounds = gm.maxRounds;
         this.mapName = gm.mapName;
+        this.zSchedule = gm.zSchedule;
     }
 
     /**
@@ -89,7 +96,7 @@ public class GameMap implements GenericGameMap {
      * @param mapProperties      a map of MapProperties to their integer values containing dimensions, etc.
      * @param mapTiles           a matrix of TerrainTypes representing the map
      */
-    public GameMap(Map<MapProperties, Integer> mapProperties, int[][] mapInitialRubble, int[][] mapInitialParts, String mapName) {
+    public GameMap(Map<MapProperties, Integer> mapProperties, int[][] mapInitialRubble, int[][] mapInitialParts, ZombieSpawnSchedule zSchedule, String mapName) {
         if (mapProperties.containsKey(MapProperties.WIDTH))
             this.mapWidth = mapProperties.get(MapProperties.WIDTH);
         else
@@ -121,6 +128,9 @@ public class GameMap implements GenericGameMap {
         this.mapInitialRubble = mapInitialRubble;
 
         this.mapInitialParts = mapInitialParts;
+
+        this.zSchedule = zSchedule;
+
         this.mapName = mapName;
     }
 
@@ -231,6 +241,10 @@ public class GameMap implements GenericGameMap {
 
     public int getSeed() {
         return seed;
+    }
+
+    public ZombieCount[] getZombieSpawnSchedule(int round) {
+        return zSchedule.getScheduleForRound(round).toArray(new ZombieCount[0]);
     }
 
     /**
