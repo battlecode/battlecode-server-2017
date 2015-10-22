@@ -190,6 +190,7 @@ class XMLMapHandler extends DefaultHandler {
      * Used to pass to the GameMap constructor.
      */
     private Map<MapProperties, Integer> mapProperties = new HashMap<MapProperties, Integer>();
+    private ZombieSpawnSchedule zSchedule = new ZombieSpawnSchedule();
     private int currentRow = 0;
     private int currentCol = 0;
 
@@ -312,6 +313,15 @@ class XMLMapHandler extends DefaultHandler {
             //if (result != null)
             //    mapProperties.put(MapProperties.MIN_POINTS, Integer.parseInt(result));
 
+        } else if (qName.equals("zombies")) {
+            requireElement(qName, "map");
+
+            String type = getRequired(attributes, "type");
+            String count = getRequired(attributes, "count");
+            String round = getRequired(attributes, "round");
+
+            // TODO might want better error handling here
+            zSchedule.add(Integer.parseInt(round), RobotType.valueOf(type), Integer.parseInt(count));
         } else if (qName.equals("symbols")) {
 
             requireElement(qName, "map");
@@ -473,7 +483,7 @@ class XMLMapHandler extends DefaultHandler {
             }
         }
 
-        GameMap gm = new GameMap(mapProperties, rubbleData, partsData, mapName);
+        GameMap gm = new GameMap(mapProperties, rubbleData, partsData, zSchedule, mapName);
         GameWorld gw = new GameWorld(gm, teamA, teamB, teamMemory);
 
         gw.reserveRandomIDs(32000);

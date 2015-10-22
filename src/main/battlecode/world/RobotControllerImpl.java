@@ -23,6 +23,7 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TerrainTile;
+import battlecode.common.ZombieCount;
 import battlecode.engine.GenericController;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
@@ -103,6 +104,11 @@ public final class RobotControllerImpl implements RobotController,
             throw new GameActionException(NOT_ENOUGH_RESOURCE,
                     "You do not have enough ORE to do that.");
         }
+    }
+
+    public ZombieCount[] getZombieSpawnSchedule(int round) {
+        // TODO consider disabling this for not zombie dens
+        return gameWorld.getGameMap().getZombieSpawnSchedule(round);
     }
 
     // *********************************

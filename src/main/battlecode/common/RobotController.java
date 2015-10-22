@@ -27,6 +27,13 @@ public interface RobotController {
      */
     public double getTeamOre();
 
+    /**
+     * Returns the zombie spawn schedule for the map. Only works on zombie dens. NOT AVAILABLE TO COMPETITORS?
+     *
+     * @return the zombie spawn schedule.
+     */
+    public ZombieCount[] getZombieSpawnSchedule(int round);
+
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************

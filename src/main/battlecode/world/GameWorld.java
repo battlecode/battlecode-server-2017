@@ -75,7 +75,7 @@ public class GameWorld implements GenericWorld {
                                           // created for each round
     private final GameStats gameStats = new GameStats(); // end-of-game stats
 
-    private double[] teamResources = new double[2];
+    private double[] teamResources = new double[4];
 
     private Map<Team, Set<InternalRobot>> baseArchons = new EnumMap<Team, Set<InternalRobot>>(
             Team.class);
@@ -318,7 +318,7 @@ public class GameWorld implements GenericWorld {
 
     public boolean canMove(MapLocation loc, RobotType type) {
         return (gameMap.onTheMap(loc) &&
-                (rubbleMap.get(loc) < GameConstants.RUBBLE_OBSTRUCTION_THRESH || type == RobotType.SCOUT) &&
+                (!rubbleMap.containsKey(loc) || rubbleMap.get(loc) < GameConstants.RUBBLE_OBSTRUCTION_THRESH || type == RobotType.SCOUT) &&
                 gameObjectsByLoc.get(loc) == null);
     }
 
@@ -551,7 +551,7 @@ public class GameWorld implements GenericWorld {
     }
 
     public int takeParts(MapLocation loc) { // Remove parts from location
-        int prevVal = partsMap.get(loc);
+        int prevVal = partsMap.containsKey(loc) ? partsMap.get(loc) : 0;
         partsMap.put(loc,0);
         return prevVal;
       /*  double cur = 0;
