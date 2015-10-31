@@ -536,14 +536,14 @@ public final class RobotControllerImpl implements RobotController,
     public void assertIsBuildingUnit() throws GameActionException {
         if (!isBuildingUnit()) {
             throw new GameActionException(CANT_DO_THAT_BRO,
-                    "Only BEAVER can build");
+                    "Only ARCHON can build");
         }
     }
 
     public void assertIsBuildable(RobotType type) throws GameActionException {
         if (!type.isBuildable()) {
             throw new GameActionException(CANT_DO_THAT_BRO,
-                    "Can only build buildings");
+                    "Unit type not buildable");
         }
     }
 

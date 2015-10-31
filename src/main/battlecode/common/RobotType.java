@@ -154,8 +154,8 @@ public enum RobotType {
      *
      * @return whether the robot is buildable.
      */
-    public boolean isBuildable() { // Update later
-        return false;//isBuilding && this != HQ && this != TOWER;
+    public boolean isBuildable() {
+        return spawnSource == ARCHON;
     }
 
     /**
