@@ -4,7 +4,6 @@ import battlecode.common.Direction;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
-import battlecode.common.TerrainTile;
 import battlecode.common.ZombieCount;
 import battlecode.serial.GenericGameMap;
 

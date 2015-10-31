@@ -8,6 +8,8 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.junit.Ignore;
+
 /**
  * TestGame holds a GameWorld and contains utility methods to spawn units and execute rounds. The main purpose is to
  * make it easier to write tests for RobotController.
@@ -17,6 +19,7 @@ import java.util.function.Function;
  * TestGame around this GameMap and spawn some units. Then, we use the turn method to execute RobotController commands.
  * During these turns, we have asserts to test that the behaviors are correct.
  */
+@Ignore
 public class TestGame {
     /** The game world that everything is based on. */
     private GameWorld world;
@@ -74,24 +77,13 @@ public class TestGame {
      * @return the ID of the robot spawned
      */
     public int spawn(int x, int y, RobotType type, Team team) {
-        InternalRobot robot;
-        if (type == RobotType.COMMANDER) {
-            robot = new InternalCommander(this.world, type, new MapLocation(x, y), team, false, 0);
-        } else {
-            robot = new InternalRobot(this.world, type, new MapLocation(x, y), team, false, 0);
-        }
+        InternalRobot robot = new InternalRobot(this.world, type, new MapLocation(x, y), team, false, 0);
 
         RobotControllerImpl rc = new RobotControllerImpl(world, robot);
 
         int id = robot.getID();
         robots.put(id, robot);
         rcs.put(id, rc);
-
-        if (type == RobotType.HQ) {
-            world.setHQ(robot, team);
-        } else if (type == RobotType.TOWER) {
-            world.addTower(robot, team);
-        }
 
         return id;
     }

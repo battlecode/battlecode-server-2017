@@ -19,6 +19,10 @@ import java.util.*;
  */
 class XMLMapHandler extends DefaultHandler {
 
+    public enum TerrainTile {
+        RUBBLE, PARTS, OFF_MAP;
+    }
+
     /**
      * Implements a stack for keeping track of XML elements.
      */
