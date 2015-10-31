@@ -316,6 +316,13 @@ class XMLMapHandler extends DefaultHandler {
             String count = getRequired(attributes, "count");
             String round = getRequired(attributes, "round");
 
+        } else if (qName.equals("zombies")) {
+            requireElement(qName, "map");
+
+            String type = getRequired(attributes, "type");
+            String count = getRequired(attributes, "count");
+            String round = getRequired(attributes, "round");
+
             // TODO might want better error handling here
             zSchedule.add(Integer.parseInt(round), RobotType.valueOf(type), Integer.parseInt(count));
         } else if (qName.equals("symbols")) {
@@ -449,7 +456,7 @@ class XMLMapHandler extends DefaultHandler {
 
     public GameWorld createGameWorld(String teamA, String teamB, long[][] teamMemory) {
 
-        System.out.println("Creating a game"); // Now with 100% fewer percent signs (did those serve a purpose?)
+        System.out.println("Creating a game");
 
         //if (!isTournamentLegal()) {
             //fail("Map is not legal!", "Fix it.");
