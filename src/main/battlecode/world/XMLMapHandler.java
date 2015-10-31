@@ -316,13 +316,6 @@ class XMLMapHandler extends DefaultHandler {
             String count = getRequired(attributes, "count");
             String round = getRequired(attributes, "round");
 
-        } else if (qName.equals("zombies")) {
-            requireElement(qName, "map");
-
-            String type = getRequired(attributes, "type");
-            String count = getRequired(attributes, "count");
-            String round = getRequired(attributes, "round");
-
             // TODO might want better error handling here
             zSchedule.add(Integer.parseInt(round), RobotType.valueOf(type), Integer.parseInt(count));
         } else if (qName.equals("symbols")) {
