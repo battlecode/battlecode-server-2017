@@ -89,13 +89,6 @@ public interface RobotController {
      */
     public double getHealth();
 
-    /**
-     * Returns whether this robot is currently building anything.
-     *
-     * @return whether this robot is currently building anything.
-     */
-    public boolean isBuildingSomething();
-
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
@@ -249,23 +242,6 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Returns whether a robot of the given type can move into the given
-     * location, without taking any sort of delays into account. Takes into
-     * account only the robot type and the terrain of the location, and whether
-     * the location is occupied. Does not take into account any sort of core
-     * delays. Ignores whether the robot is capable of movement or not. Always
-     * returns false for locations out of sight range.
-     *
-     * @param type
-     *            the type of the robot.
-     * @param loc
-     *            the location to test.
-     * @return true if a robot of the given type can be placed onto the given
-     *         location on this turn.
-     */
-    public boolean isPathable(RobotType type, MapLocation loc);
-
-    /**
      * Tells whether this robot can move in the given direction, without taking
      * any sort of delays into account. Takes into account only the map terrain,
      * positions of other robots, and the current robot's type (MISSILE and
@@ -319,15 +295,6 @@ public interface RobotController {
      */
     public void attackLocation(MapLocation loc) throws GameActionException;
 
-    /**
-     * Attacks all surrounding enemies (MISSILE only). Other robots can call
-     * this but will just result in the same result as disintegrate().
-     * 
-     * @throws GameActionException
-     *             if the robot cannot explode.
-     */
-    public void explode() throws GameActionException;
-
     // ***********************************
     // ****** BROADCAST METHODS **********
     // ***********************************
@@ -360,57 +327,6 @@ public interface RobotController {
     // ***********************************
     // ****** BUILDING/SPAWNING **********
     // ***********************************
-
-    /**
-     * Gets the current progress of a dependency (relevant for building
-     * structures).
-     *
-     * @param type
-     *            the dependency to check.
-     * @return a DependencyProgress (DONE if the RobotType exists and is active
-     *         on the map, INPROGRESS if the RobotType is not fully constructed,
-     *         and NONE otherwise).
-     */
-    public DependencyProgress checkDependencyProgress(RobotType type);
-
-    /**
-     * Checks to make sure you have the part requirements to spawn, and that the
-     * structure can actually spawn the specified RobotType.
-     * 
-     * @param type
-     *            the type to check.
-     * @return whether the spawn requirements are met.
-     */
-    public boolean hasSpawnRequirements(RobotType type);
-
-    /**
-     * Returns whether the spawn action is valid, without taking delays into
-     * account. Checks ore requirements, structure types, and that the given
-     * direction is not blocked.
-     * 
-     * @param dir
-     *            the direction to spawn in.
-     * @param type
-     *            the type to spawn.
-     * @return whether the spawn is valid.
-     */
-    public boolean canSpawn(Direction dir, RobotType type);
-
-    /**
-     * Queues a spawn action to be performed at the end of this robot's turn.
-     * When the action is executed, a new unit will be created adjacent to the
-     * calling robot in the given direction. The square must not already be
-     * occupied. The new robot is created and starts executing bytecodes
-     * immediately.
-     *
-     * @param dir
-     *            the direction to spawn the robot in.
-     * @param type
-     *            the robot type to spawn.
-     * @throws GameActionException
-     *             if the spawn is bad.
-     */
-    public void spawn(Direction dir, RobotType type) throws GameActionException;
 
     /**
      * Returns whether you have the ore and the dependencies to build the given

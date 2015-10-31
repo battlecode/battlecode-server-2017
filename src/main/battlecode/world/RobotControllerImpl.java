@@ -22,7 +22,6 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import battlecode.common.TerrainTile;
 import battlecode.common.ZombieCount;
 import battlecode.engine.GenericController;
 import battlecode.engine.instrumenter.RobotDeathException;
@@ -144,10 +143,6 @@ public final class RobotControllerImpl implements RobotController,
 
     public double getHealth() {
         return robot.getHealthLevel();
-    }
-
-    public boolean isBuildingSomething() {
-        return robot.getMyBuilding() >= 0;
     }
 
     // ***********************************

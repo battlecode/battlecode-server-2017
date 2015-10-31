@@ -12,7 +12,6 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import battlecode.common.TerrainTile;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.GenericWorld;
 import battlecode.engine.instrumenter.RobotDeathException;
@@ -801,10 +800,6 @@ public class GameWorld implements GenericWorld {
         InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(),
                 loc, s.getTeam(), parent, s.getDelay());
 
-        // add myBuilder and myBuilding
-        robot.setMyBuilder(parent.getID());
-        parent.setMyBuilding(robot.getID());
-
         // addSignal(s); //client doesn't need this one
     }
 
@@ -868,20 +863,6 @@ public class GameWorld implements GenericWorld {
                 // Create new Zombie
                 InternalRobot robot = GameWorldFactory.createPlayer(this, zombieType,
                         r.getLocation(), Team.ZOMBIE, r, 0); // TODO: Figure out Runnable and get that working
-            }
-
-            // TODO: Make these apply to the current game
-            // if it's a building, free the builder
-            if (r.getMyBuilder() >= 0) {
-                InternalRobot builder = getRobotByID(r.getMyBuilder());
-                builder.clearBuildingAndFree(); // also reset delays
-            }
-
-            // if it's a builder, destroy the building
-            if (r.getMyBuilding() >= 0) {
-                InternalRobot building = getRobotByID(r.getMyBuilding());
-                building.clearBuilding();
-                building.takeDamage(2 * building.getHealthLevel());
             }
 
             updateMapMemoryRemove(r.getTeam(), r.getLocation(),

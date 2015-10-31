@@ -9,7 +9,6 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.CommanderSkillType;
 import battlecode.common.Team;
-import battlecode.common.TerrainTile;
 import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
@@ -44,7 +43,6 @@ public class InternalRobot implements GenericRobot {
     private boolean broadcasted;
     private volatile HashMap<Integer, Integer> broadcastMap;
     private int roundsAlive;
-    private boolean justClearedBuilding;
 
     private ArrayList<Signal> supplyActions;
     private ArrayList<SpawnSignal> missileLaunchActions;
@@ -56,7 +54,6 @@ public class InternalRobot implements GenericRobot {
 
     private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean(
             "bc.engine.upkeep");
-    private int myBuilder, myBuilding;
 
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
@@ -91,16 +88,12 @@ public class InternalRobot implements GenericRobot {
         broadcasted = false;
         broadcastMap = new HashMap<Integer, Integer>();
         roundsAlive = 0;
-        justClearedBuilding = false;
 
         supplyActions = new ArrayList<Signal>();
         missileLaunchActions = new ArrayList<SpawnSignal>();
         movementSignal = null;
         attackSignal = null;
         castSignal = null;
-
-        myBuilder = -1;
-        myBuilding = -1;
 
         myGameWorld.incrementTotalRobotTypeCount(getTeam(), type);
 
@@ -128,20 +121,9 @@ public class InternalRobot implements GenericRobot {
     // *********************************
 
     public RobotInfo getRobotInfo() {
-        MapLocation myBuilderLocation = null;
-        if (myBuilder >= 0) {
-            myBuilderLocation = myGameWorld.getRobotByID(myBuilder)
-                    .getLocation();
-        }
-        MapLocation myBuildingLocation = null;
-        if (myBuilding >= 0) {
-            myBuildingLocation = myGameWorld.getRobotByID(myBuilding)
-                    .getLocation();
-        }
-
         return new RobotInfo(getID(), getTeam(), type, getLocation(),
                 getCoreDelay(), getWeaponDelay(), getHealthLevel(),
-                getZombieInfectedTurns(),getViperInfectedTurns(), myBuilderLocation, myBuildingLocation);
+                getZombieInfectedTurns(),getViperInfectedTurns());
     }
 
     public int getRoundsAlive() {
@@ -231,41 +213,6 @@ public class InternalRobot implements GenericRobot {
 
     public boolean healthChanged() {
         return healthChanged;
-    }
-
-    public void setMyBuilding(int id) {
-        myBuilding = id;
-    }
-
-    public int getMyBuilding() {
-        return myBuilding;
-    }
-
-    public void setMyBuilder(int id) {
-        myBuilder = id;
-    }
-
-    public int getMyBuilder() {
-        return myBuilder;
-    }
-
-    public void clearBuilding() {
-        myBuilding = -1;
-        myBuilder = -1;
-        justClearedBuilding = true;
-    }
-
-    public void clearBuildingAndFree() {
-        clearBuilding();
-        justClearedBuilding = false;
-
-        int amountToDecrement = (int) coreDelay;
-        coreDelay -= amountToDecrement;
-        weaponDelay -= amountToDecrement;
-
-        if (weaponDelay < 0) {
-            weaponDelay = 0;
-        }
     }
 
     // *********************************
@@ -384,8 +331,6 @@ public class InternalRobot implements GenericRobot {
         weaponDelay--;
         coreDelay--;
 
-        justClearedBuilding = false;
-
         if (weaponDelay < 0.0) {
             weaponDelay = 0.0;
         }
@@ -407,7 +352,7 @@ public class InternalRobot implements GenericRobot {
     }
 
     public double calculateMovementActionDelay(MapLocation from,
-            MapLocation to, TerrainTile terrain) {
+            MapLocation to) {
         double base = 1;
         if (from.distanceSquaredTo(to) <= 1) {
             base = getMovementDelayForType();
