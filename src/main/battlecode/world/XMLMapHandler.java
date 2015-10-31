@@ -182,8 +182,6 @@ class XMLMapHandler extends DefaultHandler {
         for (RobotType ch : RobotType.values()) {
             factories.put(ch.name(), RobotData.factory);
         }
-        //factories.put("ENCAMPMENT", NodeData.factory);
-        //factories.put("HQ", NodeData.factory); //TODO: cleanup
     }
 
     /**
@@ -294,7 +292,6 @@ class XMLMapHandler extends DefaultHandler {
             map = new SymbolData[mapWidth][mapHeight];
 
         } else if (qName.equals("game")) {
-
             // Ensure that <game> only occurs under <map>.
             requireElement(qName, "map");
 
@@ -308,10 +305,12 @@ class XMLMapHandler extends DefaultHandler {
             result = getOptional(attributes, "rounds");
             if (result != null)
                 mapProperties.put(MapProperties.MAX_ROUNDS, Integer.parseInt(result));
+        } else if (qName.equals("zombies")) {
+            requireElement(qName, "map");
 
-            //result = getOptional(attributes, "points");
-            //if (result != null)
-            //    mapProperties.put(MapProperties.MIN_POINTS, Integer.parseInt(result));
+            String type = getRequired(attributes, "type");
+            String count = getRequired(attributes, "count");
+            String round = getRequired(attributes, "round");
 
         } else if (qName.equals("zombies")) {
             requireElement(qName, "map");
