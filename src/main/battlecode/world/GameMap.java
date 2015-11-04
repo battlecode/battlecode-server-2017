@@ -116,10 +116,6 @@ public class GameMap implements GenericGameMap {
         else
             this.maxRounds = GAME_DEFAULT_MAX_ROUNDS;
 
-        //if (mapProperties.containsKey(MapProperties.MIN_POINTS))
-        //	this.minPoints = mapProperties.get(MapProperties.MIN_POINTS);
-        //else this.minPoints = GAME_DEFAULT_MIN_POINTS;
-
         Random rand = new Random(this.seed);
         this.mapOriginX = rand.nextInt(32001) - 16000;
         this.mapOriginY = rand.nextInt(32001) - 16000;

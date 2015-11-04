@@ -146,7 +146,7 @@ public enum RobotType {
      * @return whether the robot can build.
      */
     public boolean canBuild() {
-        return this == ARCHON;
+        return this == ARCHON || this == ZOMBIEDEN;
     }
 
     /**
@@ -155,7 +155,7 @@ public enum RobotType {
      * @return whether the robot is buildable.
      */
     public boolean isBuildable() {
-        return spawnSource == ARCHON;
+        return spawnSource == ARCHON || spawnSource == ZOMBIEDEN;
     }
 
     /**

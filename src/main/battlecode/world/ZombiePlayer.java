@@ -35,8 +35,8 @@ public class ZombiePlayer {
                         int i = (int) (Math.random() * 8);
 
                         for (int j = 0; j < 8; ++j) {
-                            if (rc.canSpawn(dirs[(i + j) % 8], next)) {
-                                rc.spawn(dirs[(i + j) % 8], next);
+                            if (rc.canBuild(dirs[(i + j) % 8], next)) {
+                                rc.build(dirs[(i + j) % 8], next);
                                 zombies.poll();
                                 spawned = true;
                                 break;

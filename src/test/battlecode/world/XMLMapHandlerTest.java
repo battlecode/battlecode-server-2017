@@ -14,8 +14,6 @@ import org.junit.Test;
 
 import battlecode.common.*;
 
-// Right now this only makes sure that the GOOD maps load properly.
-// There are no tests for BAD maps.
 public class XMLMapHandlerTest {
     public final String MAP_NAME = "map";
     public final String MAP_PATH = "src/test/battlecode/world/maps/";
@@ -129,15 +127,15 @@ public class XMLMapHandlerTest {
             }
         }
 
-        TerrainTile[][] mapTerrain = map.getTerrainMatrix();
+        TerrainType[][] mapTerrain = map.getTerrainMatrix();
         int orx = map.getMapOrigin().x;
         int ory = map.getMapOrigin().y;
         for (int i = 0; i < height; ++i) {
             for (int j = 0; j < width; ++j) {
                 if (terrain[i][j] == voidtile) {
-                    assertEquals(mapTerrain[j][i], TerrainTile.VOID);
+                    assertEquals(mapTerrain[j][i], TerrainType.VOID);
                 } else {
-                    assertEquals(mapTerrain[j][i], TerrainTile.NORMAL);
+                    assertEquals(mapTerrain[j][i], TerrainType.NORMAL);
                 }
                 if (terrain[i][j] == hqa || terrain[i][j] == hqb) {
                     Team team = terrain[i][j] == hqa ? Team.A : Team.B;

@@ -348,7 +348,7 @@ public final class RobotControllerImpl implements RobotController,
                 : 1.0);
         double factor2 = 1.0;
         // if (robot.type == RobotType.DRONE &&
-        // gameWorld.getMapTerrain(getLocation().add(d)) == TerrainTile.VOID) {
+        // gameWorld.getMapTerrain(getLocation().add(d)) == TerrainType.VOID) {
         // factor1 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
         // factor2 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
         // } TODO: Will we have flying units?
