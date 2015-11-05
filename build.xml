@@ -208,7 +208,7 @@
     </target>
 
     <target name="unittest" depends="compiletest">
-        <junit printsummary="withOutAndErr" timeout="${test.timeout}" filtertrace="off" haltonfailure="on">
+        <junit printsummary="withOutAndErr" timeout="${test.timeout}" filtertrace="off">
             <classpath refid="classpath-libs"/>
             <classpath>
                 <pathelement location="${pkg.build.dir}"/>
@@ -225,7 +225,7 @@
 
             <batchtest todir="${test.report.dir}">
                 <fileset dir="${test.src.dir}">
-                    <include name="**/*Test*.java"/>
+                    <include name="**/*Test.java"/>
                 </fileset>
             </batchtest>
         </junit>
