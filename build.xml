@@ -199,7 +199,7 @@
     </target>
 
     <target name="unittest" depends="compiletest">
-        <junit printsummary="withOutAndErr" timeout="${test.timeout}" filtertrace="off">
+        <junit printsummary="withOutAndErr" timeout="${test.timeout}" filtertrace="off" haltonfailure="on">
             <classpath refid="classpath-libs"/>
             <classpath>
                 <pathelement location="${pkg.build.dir}"/>
