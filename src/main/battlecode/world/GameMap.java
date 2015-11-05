@@ -5,10 +5,8 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.TerrainTile;
-import battlecode.serial.GenericGameMap;
 
-import java.util.Arrays;
-import java.util.EnumMap;
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Random;
 
@@ -16,7 +14,7 @@ import java.util.Random;
  * The class represents the map in the game world on which
  * objects interact.
  */
-public class GameMap implements GenericGameMap {
+public class GameMap implements Serializable {
 
     private static final long serialVersionUID = -2068896916199851260L;
     /**

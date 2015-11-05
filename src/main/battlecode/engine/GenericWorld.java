@@ -4,8 +4,8 @@ import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
 import battlecode.engine.signal.SignalHandler;
 import battlecode.serial.GameStats;
-import battlecode.serial.GenericGameMap;
 import battlecode.serial.RoundStats;
+import battlecode.world.GameMap;
 
 /**
  * An interface that includes the part of the game world that isn't expected to change
@@ -16,7 +16,7 @@ public interface GenericWorld extends SignalHandler {
 
     public int getMapSeed();
 
-    public GenericGameMap getGameMap();
+    public GameMap getGameMap();
 
     public String getTeamName(Team t);
 
