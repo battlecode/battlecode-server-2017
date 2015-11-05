@@ -4,6 +4,8 @@
         xmlns:ivy="antlib:org.apache.ivy.ant"
         default="compile">
 
+    <property environment="env"/>
+
     <property file="build.conf.local"/>
 
     <property name="rootname" value="battlecode-server"/>
@@ -34,12 +36,12 @@
     <property name="test.timeout" value="900000"/>
     <property name="test.build.dir" value="${build.dir}/tests"/>
     <property name="test.build.jar" value="${basedir}/${rootname}-test.jar"/>
-    <condition property="test.report.dir" value="${env.CIRCLE_TEST_REPORTS}" else="testreport">
+    <condition property="test.report.dir" value="${env.CIRCLE_TEST_REPORTS}/junit" else="testreport">
         <!-- If we're running on CircleCI, write out xml junit reports where they want us to. -->
         <isset property="env.CIRCLE_TEST_REPORTS"/>
     </condition>
 
-    <property name="test.report.dir" value="testreport"/>
+
     <property name="instr.build.dir" value="${build.dir}/instrumented-classes"/>
     <property name="instr.datafile" value="${build.dir}/cobertura.ser"/>
 
