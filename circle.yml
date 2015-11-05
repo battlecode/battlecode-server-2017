@@ -1,0 +1,16 @@
+machine:
+    java:
+        version:
+            oraclejdk8
+
+dependencies:
+    pre:
+        - "ant download-ivy"
+        - "ant init-ivy"
+        - "ant retrieve"
+    cache_directories:
+        - "lib"
+
+test:
+    override:
+        - "ant test"
