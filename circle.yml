@@ -1,3 +1,5 @@
+# Configuration for CircleCI.
+
 machine:
     java:
         version:
@@ -5,11 +7,9 @@ machine:
 
 dependencies:
     pre:
-        - "ant download-ivy"
-        - "ant init-ivy"
         - "ant retrieve"
     cache_directories:
-        - "lib"
+        - "~/.ant/lib"
 
 test:
     override:
