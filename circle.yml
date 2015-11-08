@@ -1,0 +1,16 @@
+# Configuration for CircleCI.
+
+machine:
+    java:
+        version:
+            oraclejdk8
+
+dependencies:
+    pre:
+        - "ant retrieve"
+    cache_directories:
+        - "~/.ant/lib"
+
+test:
+    override:
+        - "ant test"

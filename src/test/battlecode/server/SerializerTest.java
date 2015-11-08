@@ -3,7 +3,6 @@ package battlecode.server;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import battlecode.common.TerrainTile;
 import battlecode.engine.signal.Signal;
 import battlecode.serial.*;
 import battlecode.serial.notification.PauseNotification;
@@ -14,6 +13,7 @@ import battlecode.server.serializer.*;
 import battlecode.world.GameMap;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
+import battlecode.world.ZombieSpawnSchedule;
 import battlecode.world.signal.*;
 import org.junit.Test;
 
@@ -31,23 +31,29 @@ public class SerializerTest {
     static {
         properties.put(GameMap.MapProperties.HEIGHT, 3);
         properties.put(GameMap.MapProperties.WIDTH, 3);
-        properties.put(GameMap.MapProperties.MAX_ROUNDS, 2000);
+        properties.put(GameMap.MapProperties.ROUNDS, 2000);
         properties.put(GameMap.MapProperties.SEED, 12345);
     }
 
-    static final TerrainTile[][] tiles = new TerrainTile[][]{
-            new TerrainTile[] {TerrainTile.NORMAL, TerrainTile.OFF_MAP, TerrainTile.VOID},
-            new TerrainTile[] {TerrainTile.NORMAL, TerrainTile.UNKNOWN, TerrainTile.VOID},
-            new TerrainTile[] {TerrainTile.NORMAL, TerrainTile.VOID, TerrainTile.VOID},
+    static final ZombieSpawnSchedule zSchedule = new ZombieSpawnSchedule();
+    static {
+        zSchedule.add(5, RobotType.RANGEDZOMBIE, 10);
+        zSchedule.add(10, RobotType.FASTZOMBIE, 4);
+    }
+
+    static final int[][] parts = new int[][] {
+            new int[] {10, 11, 12},
+            new int[] {13, 14, 15},
+            new int[] {16, 17, 18},
     };
 
-    static final int[][] ores = new int[][] {
+    static final int[][] rubble = new int[][] {
             new int[] {0, 1, 2},
             new int[] {3, 4, 5},
             new int[] {6, 7, 8},
     };
 
-    static final GameMap gameMap = new GameMap(properties, tiles, ores, "Test Map");
+    static final GameMap gameMap = new GameMap(properties, rubble, parts, zSchedule, "Test Map");
 
     static final long[][] teamMemories = new long[][] {
             new long[] {1, 2, 3, 4, 5},
@@ -56,7 +62,7 @@ public class SerializerTest {
 
     static final GameWorld gameWorld = new GameWorld(gameMap, "Team 1", "Team 2", teamMemories);
 
-    static final InternalRobot robot = new InternalRobot(gameWorld, RobotType.DRONE, new MapLocation(0,0), Team.A, false, 0);
+    static final InternalRobot robot = new InternalRobot(gameWorld, RobotType.ARCHON, new MapLocation(0,0), Team.A, false, 0);
 
     // An array with a sample object from every type of thing we could ever want to serialize / deserialize.
     static final Object[] serializeableObjects = new Object[]{
@@ -94,7 +100,7 @@ public class SerializerTest {
             new MatchFooter(Team.A, teamMemories),
             new RoundStats(100, 100),
             new GameStats(),
-            DominationFactor.BARELY_BARELY_BEAT,
+            DominationFactor.BARELY_BEAT,
             new ExtensibleMetadata()
     };
 
