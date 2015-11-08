@@ -35,7 +35,7 @@ public class SerializerTest {
     static {
         properties.put(GameMap.MapProperties.HEIGHT, 3);
         properties.put(GameMap.MapProperties.WIDTH, 3);
-        properties.put(GameMap.MapProperties.MAX_ROUNDS, 2000);
+        properties.put(GameMap.MapProperties.ROUNDS, 2000);
         properties.put(GameMap.MapProperties.SEED, 12345);
     }
 

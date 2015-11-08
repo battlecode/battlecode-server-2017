@@ -1,13 +1,7 @@
 package battlecode.world;
 
 import java.util.*;
-import java.util.Map.Entry;
 
-import battlecode.common.Clock;
-import battlecode.common.CommanderSkillType;
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.GameActionExceptionType;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
@@ -23,11 +17,9 @@ import battlecode.serial.DominationFactor;
 import battlecode.serial.GameStats;
 import battlecode.serial.RoundStats;
 import battlecode.world.signal.AttackSignal;
-import battlecode.world.signal.BashSignal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.BuildSignal;
 import battlecode.world.signal.BytecodesUsedSignal;
-import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.ControlBitsSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.TeamOreSignal;
@@ -35,20 +27,11 @@ import battlecode.world.signal.HealthChangeSignal;
 import battlecode.world.signal.IndicatorDotSignal;
 import battlecode.world.signal.IndicatorLineSignal;
 import battlecode.world.signal.IndicatorStringSignal;
-import battlecode.world.signal.LocationOreChangeSignal;
 import battlecode.world.signal.MatchObservationSignal;
-import battlecode.world.signal.MineSignal;
-import battlecode.world.signal.MissileCountSignal;
 import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.MovementOverrideSignal;
 import battlecode.world.signal.RobotInfoSignal;
-import battlecode.world.signal.SelfDestructSignal;
 import battlecode.world.signal.SpawnSignal;
-import battlecode.world.signal.TransferSupplySignal;
-import battlecode.world.signal.XPSignal;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 
 /**
  * The primary implementation of the GameWorld interface for containing and
@@ -612,7 +595,7 @@ public class GameWorld implements GenericWorld {
     }
 
     public boolean timeLimitReached() {
-        return currentRound >= gameMap.getMaxRounds() - 1;
+        return currentRound >= gameMap.getRounds() - 1;
     }
 
     public void processEndOfRound() {

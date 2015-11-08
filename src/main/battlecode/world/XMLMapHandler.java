@@ -49,10 +49,10 @@ class XMLMapHandler extends DefaultHandler {
      */
     private SymbolData[][] map = null;
     /**
-     * A mapping from a character to a map element type. These will be used in
+     * A mapping from a string to a map element type. These will be used in
      * each XML file to specify the contents of each map cell.
      */
-    private Map<Character, SymbolData> symbolMap = new HashMap<>();
+    private Map<String, SymbolData> symbolMap = new HashMap<>();
     /**
      * The width of the map.
      */
@@ -488,7 +488,7 @@ class XMLMapHandler extends DefaultHandler {
 
             result = getOptional(attributes, "rounds");
             if (result != null)
-                mapProperties.put(MapProperties.MAX_ROUNDS, Integer.parseInt
+                mapProperties.put(MapProperties.ROUNDS, Integer.parseInt
                         (result));
         } else if (qName.equals("zombies")) {
             requireElement(qName, "map");
@@ -519,10 +519,6 @@ class XMLMapHandler extends DefaultHandler {
             requireElement(qName, "symbols");
 
             String character = getRequired(attributes, "character");
-            if (character.length() != 1)
-                fail("invalid 'character' attribute '" + character + "' -- " +
-                        "'character' must have length 1", "Check that all " +
-                        "'character' attributes are just one character.\n");
 
             String type = getRequired(attributes, "type");
             SymbolDataFactory factory = factories.get(type);
@@ -542,7 +538,7 @@ class XMLMapHandler extends DefaultHandler {
                 return;
             }
 
-            symbolMap.put(character.charAt(0), data);
+            symbolMap.put(character, data);
         } else if (qName.equals("data")) {
             // Ensure that <data> only occurs under <map>.
             requireElement(qName, "map");
@@ -592,17 +588,28 @@ class XMLMapHandler extends DefaultHandler {
                 continue;
             // if it's whitespace, check dataSoFar
             if ((c == '\n' || c == ' ') && dataSoFar.length() > 0) {
-                if (!symbolMap.containsKey(dataSoFar.charAt(0)))
-                    fail("unrecognized symbol in map: '" + c + "'", "Check " +
-                            "that '" + c + "' is defined as one of the " +
+                // Each map cell will be represented by a sequence of letters
+                // followed by an optional sequence of digits.
+                String letters = "";
+                int letterIdx = 0;
+                while (letterIdx < dataSoFar.length() && Character.isLetter
+                        (dataSoFar.charAt(letterIdx))) {
+                    letters += dataSoFar.charAt(letterIdx);
+                    letterIdx++;
+                }
+
+                if (!symbolMap.containsKey(letters))
+                    fail("unrecognized symbol in map: '" + letters + "'",
+                            "Check " +
+                            "that '" + letters + "' is defined as one of the " +
                             "symbols in the map file.\n");
-                map[currentCol][currentRow] = symbolMap.get(dataSoFar.charAt
-                        (0)).copy();
-                if (dataSoFar.substring(1).trim().equals("")) {
+
+                map[currentCol][currentRow] = symbolMap.get(letters).copy();
+                if (dataSoFar.substring(letterIdx).trim().equals("")) {
                     map[currentCol][currentRow].setValue(0);
                 } else {
                     map[currentCol][currentRow].setValue(Integer.parseInt
-                            (dataSoFar.substring(1)));
+                            (dataSoFar.substring(letterIdx)));
                 }
 
                 currentCol++;
@@ -815,7 +822,7 @@ class XMLMapHandler extends DefaultHandler {
             warn.warn("Too many Archons!");
         }
 
-        int rounds = mapProperties.get(MapProperties.MAX_ROUNDS);
+        int rounds = mapProperties.get(MapProperties.ROUNDS);
         if (rounds < GameConstants.ROUND_MIN_LIMIT)
             warn.warn("The round limit is too small.");
         else if (rounds > GameConstants.ROUND_MAX_LIMIT)
@@ -885,7 +892,7 @@ class XMLMapHandler extends DefaultHandler {
             parser.parse(file, handler);
         } catch (Exception e) {
             e.printStackTrace();
-            fail("can't load '" + fileName + "' beacause of an exception:\n"
+            fail("can't load '" + fileName + "' because of an exception:\n"
                     + e.getMessage(), "Check that the map is valid XML.\n");
             return null;
         }

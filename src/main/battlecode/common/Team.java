@@ -20,7 +20,7 @@ public enum Team {
      */
     B,
     /**
-     * Unused.
+     * Neutral robots.
      */
     NEUTRAL,
     /**

@@ -3,15 +3,11 @@ package battlecode.world;
 import static battlecode.common.GameActionExceptionType.NOT_ACTIVE;
 import static battlecode.common.GameActionExceptionType.CANT_DO_THAT_BRO;
 import static battlecode.common.GameActionExceptionType.CANT_SENSE_THAT;
-import static battlecode.common.GameActionExceptionType.MISSING_DEPENDENCY;
 import static battlecode.common.GameActionExceptionType.NOT_ENOUGH_RESOURCE;
-import static battlecode.common.GameActionExceptionType.NO_ROBOT_THERE;
 import static battlecode.common.GameActionExceptionType.OUT_OF_RANGE;
 
 import java.util.*;
-import java.util.Map.Entry;
 
-import battlecode.common.CommanderSkillType;
 import battlecode.common.DependencyProgress;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -26,20 +22,14 @@ import battlecode.common.ZombieCount;
 import battlecode.engine.GenericController;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
-import battlecode.server.Config;
 import battlecode.world.signal.AttackSignal;
 import battlecode.world.signal.BuildSignal;
-import battlecode.world.signal.CastSignal;
 import battlecode.world.signal.IndicatorDotSignal;
 import battlecode.world.signal.IndicatorLineSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.MatchObservationSignal;
-import battlecode.world.signal.MineSignal;
 import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.SpawnSignal;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 
 /*
  TODO:
@@ -83,7 +73,7 @@ public final class RobotControllerImpl implements RobotController,
     // ****** GLOBAL QUERY METHODS *****
     // *********************************
     public int getRoundLimit() {
-        return robot.myGameWorld.getGameMap().getMaxRounds();
+        return robot.myGameWorld.getGameMap().getRounds();
     }
 
     public int getMapWidth() {
