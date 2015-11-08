@@ -9,7 +9,6 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.CommanderSkillType;
 import battlecode.common.Team;
-import battlecode.common.TerrainTile;
 import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
@@ -20,7 +19,7 @@ import battlecode.world.signal.SpawnSignal;
 import battlecode.world.signal.TransferSupplySignal;
 
 public class InternalRobot implements GenericRobot {
-    public final RobotType type;
+    public RobotType type;
 
     private final int myID;
     private Team myTeam;
@@ -29,10 +28,10 @@ public class InternalRobot implements GenericRobot {
     protected final GameWorld myGameWorld;
 
     protected volatile double myHealthLevel;
-    protected volatile double mySupplyLevel;
     private double coreDelay;
     private double weaponDelay;
-    private int missileCount;
+    private int zombieInfectedTurns;
+    private int viperInfectedTurns;
 
     protected volatile long controlBits;
 
@@ -40,13 +39,11 @@ public class InternalRobot implements GenericRobot {
     private volatile int bytecodesUsed;
     protected volatile boolean hasBeenAttacked;
     private boolean healthChanged;
-    private boolean missileCountChanged;
     private boolean didSelfDestruct;
     private boolean broadcasted;
     private volatile HashMap<Integer, Integer> broadcastMap;
     private int roundsAlive;
-    private boolean justClearedBuilding;
-    
+
     private ArrayList<Signal> supplyActions;
     private ArrayList<SpawnSignal> missileLaunchActions;
     private Signal movementSignal;
@@ -55,12 +52,12 @@ public class InternalRobot implements GenericRobot {
 
     private int buildDelay;
 
-    private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean("bc.engine.upkeep");
-    private int myBuilder, myBuilding;
+    private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean(
+            "bc.engine.upkeep");
 
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
-                         boolean spawnedRobot, int buildDelay) {
+            boolean spawnedRobot, int buildDelay) {
 
         myID = gw.nextID();
         myTeam = t;
@@ -71,14 +68,14 @@ public class InternalRobot implements GenericRobot {
         this.buildDelay = buildDelay;
 
         myHealthLevel = getMaxHealth();
-        if (type.isBuildable() && buildDelay > 0) {
+        if (type.isBuildable() && buildDelay > 0) { // What is this for?
             myHealthLevel /= 2.0;
         }
 
-        mySupplyLevel = 0.0;
         coreDelay = 0.0;
         weaponDelay = 0.0;
-        missileCount = 0;
+        zombieInfectedTurns = 0;
+        viperInfectedTurns = 0;
 
         controlBits = 0;
 
@@ -86,28 +83,17 @@ public class InternalRobot implements GenericRobot {
         bytecodesUsed = 0;
         hasBeenAttacked = false;
         healthChanged = true;
-        missileCountChanged = true;
-        
+
         didSelfDestruct = false;
         broadcasted = false;
         broadcastMap = new HashMap<Integer, Integer>();
         roundsAlive = 0;
-        justClearedBuilding = false;
-    
+
         supplyActions = new ArrayList<Signal>();
         missileLaunchActions = new ArrayList<SpawnSignal>();
         movementSignal = null;
         attackSignal = null;
         castSignal = null;
-
-        myBuilder = -1;
-        myBuilding = -1;
-
-        // Update GameWorld stuff
-        if (type == RobotType.COMMANDER) {
-            myGameWorld.putCommander(this);
-            myGameWorld.incrementCommandersSpawned(getTeam());
-        }
 
         myGameWorld.incrementTotalRobotTypeCount(getTeam(), type);
 
@@ -115,13 +101,14 @@ public class InternalRobot implements GenericRobot {
             myGameWorld.incrementActiveRobotTypeCount(getTeam(), type);
         }
 
-        myGameWorld.updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
+        myGameWorld
+                .updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
     }
-
 
     @Override
     public boolean equals(Object o) {
-        return o != null && (o instanceof InternalRobot) && ((InternalRobot) o).getID() == myID;
+        return o != null && (o instanceof InternalRobot)
+                && ((InternalRobot) o).getID() == myID;
     }
 
     @Override
@@ -134,16 +121,9 @@ public class InternalRobot implements GenericRobot {
     // *********************************
 
     public RobotInfo getRobotInfo() {
-        MapLocation myBuilderLocation = null;
-        if (myBuilder >= 0) {
-            myBuilderLocation = myGameWorld.getRobotByID(myBuilder).getLocation();
-        }
-        MapLocation myBuildingLocation = null;
-        if (myBuilding >= 0) {
-            myBuildingLocation = myGameWorld.getRobotByID(myBuilding).getLocation();
-        }
-
-        return new RobotInfo(getID(), getTeam(), type, getLocation(), getCoreDelay(), getWeaponDelay(), getHealthLevel(), getSupplyLevel(), getXP(), getMissileCount(), myBuilderLocation, myBuildingLocation);
+        return new RobotInfo(getID(), getTeam(), type, getLocation(),
+                getCoreDelay(), getWeaponDelay(), getHealthLevel(),
+                getZombieInfectedTurns(),getViperInfectedTurns());
     }
 
     public int getRoundsAlive() {
@@ -184,6 +164,7 @@ public class InternalRobot implements GenericRobot {
         else
             return getLocation();
     }
+
     // *********************************
     // ****** BASIC METHODS ************
     // *********************************
@@ -193,8 +174,9 @@ public class InternalRobot implements GenericRobot {
     }
 
     public boolean canExecuteCode() {
-    	if (getHealthLevel() <= 0.0) return false;
-    	return isActive();
+        if (getHealthLevel() <= 0.0)
+            return false;
+        return isActive();
     }
 
     public void setBytecodesUsed(int numBytecodes) {
@@ -211,13 +193,6 @@ public class InternalRobot implements GenericRobot {
 
     public boolean movedThisTurn() {
         return this.movementSignal != null;
-    }
-
-    public int getXP() {
-        if (type == RobotType.COMMANDER) {
-            return ((InternalCommander)this).getXP();
-        }
-        return 0;
     }
 
     public void setControlBits(long l) {
@@ -240,73 +215,38 @@ public class InternalRobot implements GenericRobot {
         return healthChanged;
     }
 
-    public void clearMissileCountChanged() {
-        missileCountChanged = false;
+    // *********************************
+    // ****** ZOMBIE METHODS ***********
+    // *********************************
+
+    public int getZombieInfectedTurns() {
+        return zombieInfectedTurns;
+    }
+    
+    public int getViperInfectedTurns() {
+        return viperInfectedTurns;
+    }
+    
+    public boolean isInfected() {
+        return (zombieInfectedTurns > 0 || viperInfectedTurns > 0);
     }
 
-    public boolean missileCountChanged() {
-        return missileCountChanged;
-    }
-
-    public void setMyBuilding(int id) {
-        myBuilding = id;
-    }
-
-    public int getMyBuilding() {
-        return myBuilding;
-    }
-
-    public void setMyBuilder(int id) {
-        myBuilder = id;
-    }
-
-    public int getMyBuilder() {
-        return myBuilder;
-    }
-
-    public void clearBuilding() {
-        myBuilding = -1;
-        myBuilder = -1;
-        justClearedBuilding = true;
-    }
-
-    public void clearBuildingAndFree() {
-        clearBuilding();
-        justClearedBuilding = false;
-
-        int amountToDecrement = (int) coreDelay;
-        coreDelay -= amountToDecrement;
-        weaponDelay -= amountToDecrement;
-
-        if (weaponDelay < 0) {
-            weaponDelay = 0;
+    public void setInfected(InternalRobot attacker) {
+        if (attacker.type == RobotType.VIPER) {
+            viperInfectedTurns = attacker.type.infectTurns;
+        } else if (attacker.type.isZombie) {
+            zombieInfectedTurns = attacker.type.infectTurns;
         }
     }
 
-    // *********************************
-    // ****** MISSILE METHODS **********
-    // *********************************
-
-    public void decrementMissileCount() {
-        missileCount--;
-        missileCountChanged = true;
-    }
-
-    public int getMissileCount() {
-        return missileCount;
-    }
-
-    public boolean canLaunchMissileAtLocation(MapLocation loc) {
-        for (SpawnSignal s : missileLaunchActions) {
-            if (s.getLoc().equals(loc)) {
-                return false;
-            }
+    public void processBeingInfected() { // TODO: Call this somewhere where it runs for each robot every turn
+        if (viperInfectedTurns > 0) {
+            takeDamage(GameConstants.VIPER_INFECTION_DAMAGE);
+            viperInfectedTurns--;
         }
-        return true;
-    }
-
-    public void launchMissile(MapLocation loc) {
-        missileLaunchActions.add(new SpawnSignal(loc, RobotType.MISSILE, getTeam(), this, 0));
+        if (zombieInfectedTurns > 0) {
+            zombieInfectedTurns--;
+        }
     }
 
     // *********************************
@@ -322,29 +262,17 @@ public class InternalRobot implements GenericRobot {
         if (baseAmount < 0) {
             changeHealthLevel(-baseAmount);
         } else {
-            // HQ has a tower boost
-            double rate = 1.0;
-            if (type == RobotType.HQ) {
-                int towerCount = myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.TOWER);
-                if (towerCount >= 6) {
-                    rate = GameConstants.HQ_BUFFED_DAMAGE_RATIO_LEVEL_3;
-                } else if (towerCount >= 4) {
-                    rate = GameConstants.HQ_BUFFED_DAMAGE_RATIO_LEVEL_2;
-                } else if (towerCount >= 1) {
-                    rate = GameConstants.HQ_BUFFED_DAMAGE_RATIO_LEVEL_1;
-                }
-            }
-            changeHealthLevelFromAttack(-rate * baseAmount);
+            changeHealthLevelFromAttack(-baseAmount);
         }
     }
-    
+
     public void takeDamage(double amt, InternalRobot source) {
         if (!(getTeam() == Team.NEUTRAL)) {
             healthChanged = true;
             takeDamage(amt);
         }
     }
-    
+
     public void changeHealthLevelFromAttack(double amount) {
         healthChanged = true;
         hasBeenAttacked = true;
@@ -364,7 +292,7 @@ public class InternalRobot implements GenericRobot {
     }
 
     public void processLethalDamage() {
-        myGameWorld.notifyDied(this);
+        myGameWorld.notifyDied(this);   // myGameWorld checks if infected and creates zombie
     }
 
     public double getMaxHealth() {
@@ -400,23 +328,8 @@ public class InternalRobot implements GenericRobot {
     }
 
     public void decrementDelays() {
-        if (type.supplyUpkeep > 0 && upkeepEnabled && myBuilding < 0 && !justClearedBuilding) {
-            weaponDelay -= 0.5;
-            coreDelay -= 0.5;
-            double maxDelay = Math.max(weaponDelay,coreDelay);
-            if (maxDelay > 0.0) {
-                //fraction of upkeep that can be paid
-                double supplyDelayReduction = Math.min(Math.min(0.5,getSupplyLevel()/(2*type.supplyUpkeep)),maxDelay);
-                weaponDelay-=supplyDelayReduction;
-                coreDelay-=supplyDelayReduction;
-                decreaseSupplyLevel(2*supplyDelayReduction*type.supplyUpkeep);
-            }
-        } else {
-            weaponDelay--;
-            coreDelay--;
-        }
-
-        justClearedBuilding = false;
+        weaponDelay--;
+        coreDelay--;
 
         if (weaponDelay < 0.0) {
             weaponDelay = 0.0;
@@ -426,26 +339,20 @@ public class InternalRobot implements GenericRobot {
         }
     }
 
-    public int getAttackDelayForType() {
-        if (type == RobotType.HQ && myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.TOWER) >= 5) {
-            return GameConstants.HQ_BUFFED_ATTACK_DELAY;
-        }
+    public double getAttackDelayForType() {
         return type.attackDelay;
     }
 
-    public int getMovementDelayForType() {
+    public double getMovementDelayForType() {
         return type.movementDelay;
     }
 
-    public int getLoadingDelayForType() {
-        return type.loadingDelay;
-    }
-
-    public int getCooldownDelayForType() {
+    public double getCooldownDelayForType() {
         return type.cooldownDelay;
     }
 
-    public double calculateMovementActionDelay(MapLocation from, MapLocation to, TerrainTile terrain) {
+    public double calculateMovementActionDelay(MapLocation from,
+            MapLocation to) {
         double base = 1;
         if (from.distanceSquaredTo(to) <= 1) {
             base = getMovementDelayForType();
@@ -456,34 +363,11 @@ public class InternalRobot implements GenericRobot {
     }
 
     // *********************************
-    // ****** SUPPLY METHODS ***********
-    // *********************************
-
-    public void transferSupply(int amount, InternalRobot target) {
-        supplyActions.add(new TransferSupplySignal(this, target, amount));
-    }
-
-    public double getSupplyLevel() {
-        return mySupplyLevel;
-    }
-
-    public void decreaseSupplyLevel(double dec) {
-        mySupplyLevel -= dec;
-        if (mySupplyLevel < 0) {
-            mySupplyLevel = 0;
-        }
-    }
-
-    public void increaseSupplyLevel(double inc) {
-        mySupplyLevel += inc;
-    }
-
-    // *********************************
     // ****** BROADCAST METHODS ********
     // *********************************
 
     public void addBroadcast(int channel, int data) {
-    	broadcastMap.put(channel, data);
+        broadcastMap.put(channel, data);
         broadcasted = true;
     }
 
@@ -494,7 +378,7 @@ public class InternalRobot implements GenericRobot {
     public boolean hasBroadcasted() {
         return broadcasted;
     }
-    
+
     // *********************************
     // ****** ACTION METHODS ***********
     // *********************************
@@ -503,24 +387,28 @@ public class InternalRobot implements GenericRobot {
         myGameWorld.visitSignal(s);
     }
 
-    public void activateMovement(Signal s, double attackDelay, double movementDelay) {
+    public void activateMovement(Signal s, double attackDelay,
+            double movementDelay) {
         movementSignal = s;
         addLoadingDelay(attackDelay);
         addCoreDelay(movementDelay);
     }
-    
-    public void activateAttack(Signal s, double attackDelay, double movementDelay) {
+
+    public void activateAttack(Signal s, double attackDelay,
+            double movementDelay) {
         attackSignal = s;
         addWeaponDelay(attackDelay);
         addCooldownDelay(movementDelay);
     }
 
     public void setLocation(MapLocation loc) {
-    	MapLocation oldloc = getLocation();
+        MapLocation oldloc = getLocation();
         myGameWorld.notifyMovingObject(this, myLocation, loc);
         myLocation = loc;
-        myGameWorld.updateMapMemoryRemove(getTeam(), oldloc, type.sensorRadiusSquared);
-        myGameWorld.updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
+        myGameWorld.updateMapMemoryRemove(getTeam(), oldloc,
+                type.sensorRadiusSquared);
+        myGameWorld
+                .updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
     }
 
     public void setSelfDestruct() {
@@ -538,6 +426,14 @@ public class InternalRobot implements GenericRobot {
     public void suicide() {
         (new DeathSignal(this)).accept(myGameWorld);
     }
+    
+    public void transform(RobotType newType) {
+        myGameWorld.decrementActiveRobotTypeCount(getTeam(), type);
+        type = newType;
+        myGameWorld.incrementTotalRobotTypeCount(getTeam(), newType);
+        coreDelay += 10;
+        weaponDelay += 10;
+    }
 
     // *********************************
     // ****** GAMEPLAY METHODS *********
@@ -551,28 +447,19 @@ public class InternalRobot implements GenericRobot {
         decrementDelays(); // expends supply to decrement delays
 
         this.currentBytecodeLimit = type.bytecodeLimit;
-        if (type.supplyUpkeep > 0 && upkeepEnabled) {
-            // decide how many bytecodes we'll be allowed
-            this.currentBytecodeLimit = Math.max(type.bytecodeLimit / 2, Math.min(type.bytecodeLimit, GameConstants.FREE_BYTECODES + (int) (mySupplyLevel * GameConstants.BYTECODES_PER_SUPPLY)));
-        }
     }
 
     public void processEndOfTurn() {
         roundsAlive++;
-		
+
         // resetting stuff
         hasBeenAttacked = false;
 
-        // remove supply from bytecode usage
-        if (type.supplyUpkeep > 0 && upkeepEnabled) {
-            double supplyNeeded = Math.max(getBytecodesUsed() - GameConstants.FREE_BYTECODES, 0) / (double) GameConstants.BYTECODES_PER_SUPPLY;
-            decreaseSupplyLevel(supplyNeeded);
-        }
-
         // broadcasts
-        if (broadcasted) myGameWorld.visitSignal(new BroadcastSignal(this, broadcastMap));
-        
-    	broadcastMap = new HashMap<Integer, Integer>();
+        if (broadcasted)
+            myGameWorld.visitSignal(new BroadcastSignal(this, broadcastMap));
+
+        broadcastMap = new HashMap<Integer, Integer>();
         broadcasted = false;
 
         // perform supply actions
@@ -581,15 +468,10 @@ public class InternalRobot implements GenericRobot {
         }
         supplyActions.clear();
 
-        // supply decay
-        if (type != RobotType.HQ && type != RobotType.SUPPLYDEPOT) {
-            mySupplyLevel *= (1 - GameConstants.SUPPLY_DECAY);
-        }
-        
         // perform attacks
         if (attackSignal != null) {
-        	myGameWorld.visitSignal(attackSignal);
-        	attackSignal = null;
+            myGameWorld.visitSignal(attackSignal);
+            attackSignal = null;
         }
 
         // launch missiles
@@ -597,61 +479,23 @@ public class InternalRobot implements GenericRobot {
             myGameWorld.visitSignal(s);
         }
         missileLaunchActions.clear();
-        
+
         // perform movements (moving, spawning, mining)
         if (movementSignal != null) {
             myGameWorld.visitSignal(movementSignal);
             movementSignal = null;
         }
-
-        // bashers should bash()
-        if (type == RobotType.BASHER) {
-            myGameWorld.visitSignal(new BashSignal(this, getLocation()));
-        }
-
-        // produce missile
-        if (type == RobotType.LAUNCHER && weaponDelay < 1 && missileCount + 1 <= GameConstants.MISSILE_MAX_COUNT) {
-            missileCount++;
-            addWeaponDelay(GameConstants.MISSILE_SPAWN_FREQUENCY);
-            missileCountChanged = true;
-        }
-    	
-        // commander regen
-        if (type == RobotType.COMMANDER && ((InternalCommander)this).hasSkill(CommanderSkillType.REGENERATION)) {
-           this.changeHealthLevel(GameConstants.REGEN_RATE); 
-        }
-		
-        // missiles should die automatically
-		if (type == RobotType.MISSILE && roundsAlive >= GameConstants.MISSILE_LIFESPAN) {
-			setSelfDestruct();
-            suicide();
-        }
-		
-        // generate supply
-		if (type == RobotType.HQ) {
-            int numSupplyDepots = myGameWorld.getActiveRobotTypeCount(getTeam(), RobotType.SUPPLYDEPOT);
-			increaseSupplyLevel(GameConstants.SUPPLY_GEN_BASE * (GameConstants.SUPPLY_GEN_MULTIPLIER + Math.pow(numSupplyDepots, GameConstants.SUPPLY_GEN_EXPONENT)));
-		}
-
-        // possibly convert building from inactive to active
-        // after building is done, double health
-        if (type.isBuildable() && roundsAlive == buildDelay) {
-            changeHealthLevel(getHealthLevel());
-            // increase robot count
-            myGameWorld.incrementActiveRobotTypeCount(getTeam(), type);
-            if (myBuilder >= 0) {
-                myGameWorld.getRobotByID(myBuilder).clearBuilding();
-            }
-            clearBuilding();
-        }
     }
 
-    public void processEndOfRound() {}
+    public void processEndOfRound() {
+    }
 
     // *********************************
     // ****** MISC. METHODS ************
     // *********************************
-
+    
+    
+    
     @Override
     public String toString() {
         return String.format("%s:%s#%d", getTeam(), type, getID());

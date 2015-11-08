@@ -1,20 +1,19 @@
 package battlecode.world;
 
-import battlecode.common.Direction;
-import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
-import battlecode.common.RobotType;
-import battlecode.common.TerrainTile;
+import battlecode.common.ZombieCount;
 import battlecode.serial.GenericGameMap;
 
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.Map;
 import java.util.Random;
 
 /**
  * The class represents the map in the game world on which
  * objects interact.
+ *
+ * This class is STATIC and does not change. It reflects the initial
+ * condition of the map. All changes to the map are reflected in GameWorld.
  */
 public class GameMap implements GenericGameMap {
 
@@ -26,31 +25,31 @@ public class GameMap implements GenericGameMap {
     /**
      * The default game maxiumum number of rounds.
      */
-    public static final int GAME_DEFAULT_MAX_ROUNDS = 10000;
+    public static final int GAME_DEFAULT_ROUNDS = 2000;
     /**
      * The width and height of the map.
      */
     private final int mapWidth, mapHeight;
     /**
-     * The tiles on the map.
+     * The initial rubble on the map.
      */
-    private final TerrainTile[][] mapTiles;
+    private final int[][] mapInitialRubble;
     /**
-     * The scalar field of the ore on the map.
+     * The initial parts on the map.
      */
-    private final int[][] mapInitialOre;
+    private final int[][] mapInitialParts;
     /**
      * The coordinates of the origin.
      */
     private final int mapOriginX, mapOriginY;
     /**
-     * The random seed contained in the map file
+     * The random seed contained in the map file.
      */
     private final int seed;
     /**
      * The maximum number of rounds in the game
      */
-    private final int maxRounds;
+    private final int rounds;
 
     /**
      * The name of the map
@@ -58,100 +57,122 @@ public class GameMap implements GenericGameMap {
     private final String mapName;
 
     /**
-     * The maximum ore that was available on as quare to begin with.
+     * The zombie spawn schedule for the map
      */
-    private int maxInitialOre;
+    private final ZombieSpawnSchedule zSchedule;
 
     /**
      * Represents the various integer properties a GameMap
      * can have.
      */
     public enum MapProperties {
-        WIDTH, HEIGHT, SEED, MAX_ROUNDS
+        WIDTH, HEIGHT, SEED, ROUNDS
     }
-    private void calculateMaxInitialOre() {
-	this.maxInitialOre = 0;
-	for (int i = 0; i < this.mapWidth; i++) {
-	    for (int j = 0; j < this.mapHeight; j++) {
-		int tileOre = this.mapInitialOre[i][j];
-		if (tileOre > maxInitialOre) {
-		    maxInitialOre = tileOre;
-		}
-	    }
-	}
-    }
-    public int getMaxInitialOre() {
-	return maxInitialOre;
-    }
-    
+
+    /**
+     * Creates a deep copy of the input GameMap.
+     *
+     * @param gm the GameMap to copy.
+     */
     public GameMap(GameMap gm) {
         this.mapWidth = gm.mapWidth;
         this.mapHeight = gm.mapHeight;
-        this.mapTiles = new TerrainTile[this.mapWidth][this.mapHeight];
-        this.mapInitialOre = new int[this.mapWidth][this.mapHeight];
+        this.mapInitialRubble = new int[this.mapWidth][this.mapHeight];
+        this.mapInitialParts = new int[this.mapWidth][this.mapHeight];
         for (int i = 0; i < this.mapWidth; i++) {
-            System.arraycopy(gm.mapTiles[i], 0, this.mapTiles[i], 0, this.mapHeight);
-            System.arraycopy(gm.mapInitialOre[i], 0, this.mapInitialOre[i], 0, this.mapHeight);
+            System.arraycopy(gm.mapInitialRubble[i], 0, this.mapInitialRubble[i], 0, this.mapHeight);
+            System.arraycopy(gm.mapInitialParts[i], 0, this.mapInitialParts[i], 0, this.mapHeight);
         }
 
         this.mapOriginX = gm.mapOriginX;
         this.mapOriginY = gm.mapOriginY;
         this.seed = gm.seed;
-        this.maxRounds = gm.maxRounds;
+        this.rounds = gm.rounds;
         this.mapName = gm.mapName;
-
-	calculateMaxInitialOre();
+        this.zSchedule = new ZombieSpawnSchedule(gm.zSchedule);
     }
 
     /**
-     * Creates a new GameMap from the given properties, tiles, and territory
-     * locations.
+     * Creates a GameMap with the given parameters. Note: the rubble and
+     * parts arrays should be indexed such that rubble[x][y] gives you the
+     * rubble at coordinate (x, y). This is weird if you're used to imagining
+     * the first index as the row and the second index as the column, because
+     * here it's the other way around.
      *
-     * @param mapProperties      a map of MapProperties to their integer values containing dimensions, etc.
-     * @param mapTiles           a matrix of TerrainTypes representing the map
+     * The map will be initialized with a random origin between (0, 0) and
+     * (500, 500).
+     *
+     * @param mapProperties used to specify integer properties of the map
+     *                      (width, height, seed, and number of rounds).
+     * @param mapInitialRubble initial rubble array for the map.
+     * @param mapInitialParts initial parts array for the map.
+     * @param zSchedule zombie spawn schedule.
+     * @param mapName name of the map.
      */
-    public GameMap(Map<MapProperties, Integer> mapProperties, TerrainTile[][] mapTiles, int[][] mapInitialOre, String mapName) {
-        if (mapProperties.containsKey(MapProperties.WIDTH))
+    public GameMap(Map<MapProperties, Integer> mapProperties, int[][]
+            mapInitialRubble, int[][] mapInitialParts, ZombieSpawnSchedule
+            zSchedule, String mapName) {
+        if (mapProperties.containsKey(MapProperties.WIDTH)) {
             this.mapWidth = mapProperties.get(MapProperties.WIDTH);
-        else
-            this.mapWidth = mapTiles[0].length;
+        } else {
+            this.mapWidth = mapInitialRubble[0].length;
+        }
 
-        if (mapProperties.containsKey(MapProperties.HEIGHT))
+        if (mapProperties.containsKey(MapProperties.HEIGHT)) {
             this.mapHeight = mapProperties.get(MapProperties.HEIGHT);
-        else
-            this.mapHeight = mapTiles.length;
+        } else {
+            this.mapHeight = mapInitialRubble.length;
+        }
 
-        if (mapProperties.containsKey(MapProperties.SEED))
+        if (mapProperties.containsKey(MapProperties.SEED)) {
             this.seed = mapProperties.get(MapProperties.SEED);
-        else
+        } else {
             this.seed = GAME_DEFAULT_SEED;
+        }
 
-        if (mapProperties.containsKey(MapProperties.MAX_ROUNDS))
-            this.maxRounds = mapProperties.get(MapProperties.MAX_ROUNDS);
-        else
-            this.maxRounds = GAME_DEFAULT_MAX_ROUNDS;
-
-        //if (mapProperties.containsKey(MapProperties.MIN_POINTS))
-        //	this.minPoints = mapProperties.get(MapProperties.MIN_POINTS);
-        //else this.minPoints = GAME_DEFAULT_MIN_POINTS;
+        if (mapProperties.containsKey(MapProperties.ROUNDS)) {
+            this.rounds = mapProperties.get(MapProperties.ROUNDS);
+        } else {
+            this.rounds = GAME_DEFAULT_ROUNDS;
+        }
 
         Random rand = new Random(this.seed);
-        this.mapOriginX = rand.nextInt(32001) - 16000;
-        this.mapOriginY = rand.nextInt(32001) - 16000;
+        this.mapOriginX = rand.nextInt(500);
+        this.mapOriginY = rand.nextInt(500);
         
-        this.mapTiles = mapTiles;
-
-        this.mapInitialOre = mapInitialOre;
-
+        this.mapInitialRubble = mapInitialRubble;
+        this.mapInitialParts = mapInitialParts;
+        this.zSchedule = zSchedule;
         this.mapName = mapName;
-	
-	calculateMaxInitialOre();
+    }
+
+    /**
+     * Returns whether two GameMaps are equivalent. Two equivalent game maps
+     * have the same information, but their zombie schedules might be in
+     * different orders and their origins do not have to be the same.
+     *
+     * @param other the other map to compare to.
+     * @return whether the two maps are equivalent.
+     */
+    public boolean equivalentTo(GameMap other) {
+        if (this.rounds != other.rounds) return false;
+        if (this.mapWidth != other.mapWidth) return false;
+        if (this.mapHeight != other.mapHeight) return false;
+        if (this.seed != other.seed) return false;
+        if (!Arrays.equals(this.mapInitialRubble, other.mapInitialRubble))
+            return false;
+        if (!Arrays.equals(this.mapInitialParts, other.mapInitialParts))
+            return false;
+        if (!this.mapName.equals(other.mapName)) return false;
+        if (!this.zSchedule.equivalentTo(other.zSchedule)) return false;
+
+        return true;
     }
 
     /**
      * Returns the width of this map.
      *
-     * @return the width of this map
+     * @return the width of this map.
      */
     public int getWidth() {
         return mapWidth;
@@ -160,19 +181,25 @@ public class GameMap implements GenericGameMap {
     /**
      * Returns the height of this map.
      *
-     * @return the height of this map
+     * @return the height of this map.
      */
     public int getHeight() {
         return mapHeight;
     }
 
+    /**
+     * Returns the name of the map.
+     *
+     * @return the name o the map.
+     */
     public String getMapName() {
         return mapName;
     }
 
     /**
      * Determines whether or not the location at the specified
-     * unshifted coordinates is on the map.
+     * coordinates is on the map. The coordinate should be a shifted one
+     * (takes into account the origin).
      *
      * @param x the (shifted) x-coordinate of the location
      * @param y the (shifted) y-coordinate of the location
@@ -195,42 +222,40 @@ public class GameMap implements GenericGameMap {
     }
 
     /**
-     * Determines the type of the terrain on the map at the
-     * given location.
+     * Determines the amount of rubble on the map at
+     * the given location.
      *
-     * @param location the MapLocation to test
-     * @return the TerrainTile at the given location
-     *         of the map, and TerrainTile.OFF_MAP if the given location is
-     *         off the map.
+     * @param location the MapLocation to get rubble for.
+     * @return the amount of rubble in the given location, or 0 if off map
      */
-    public TerrainTile getTerrainTile(MapLocation location) {
+    public int getInitialRubble(MapLocation location) {
         if (!onTheMap(location))
-            return TerrainTile.OFF_MAP;
+            return 0;
 
-        return mapTiles[location.x - mapOriginX][location.y - mapOriginY];
+        return mapInitialRubble[location.x - mapOriginX][location.y - mapOriginY];
     }
 
     /**
-     * Returns a two-dimensional array of terrain data for this map.
+     * Returns a two-dimensional array of rubble data for this map.
      *
-     * @return the map's terrain in a 2D array
+     * @return the map's rubble in a 2D array
      */
-    public TerrainTile[][] getTerrainMatrix() {
-        return mapTiles;
+    public int[][] getInitialRubbleMatrix() {
+        return mapInitialRubble;
     }
-
+    
     /**
      * Determines the amount of ore on the map at the
      * given location.
      *
      * @param location the MapLocation to test
-     * @return the amount of ore in the given location, or 0 if off the map
+     * @return the amount of parts in the given location, or 0 if off the map
      */
-    public int getInitialOre(MapLocation location) {
+    public int getInitialParts(MapLocation location) {
         if (!onTheMap(location))
             return 0;
 
-        return mapInitialOre[location.x - mapOriginX][location.y - mapOriginY];
+        return mapInitialParts[location.x - mapOriginX][location.y - mapOriginY];
     }
 
     /**
@@ -238,8 +263,8 @@ public class GameMap implements GenericGameMap {
      *
      * @return the map's ore in a 2D array
      */
-    public int[][] getInitialOreMatrix() {
-        return mapInitialOre;
+    public int[][] getInitialPartsMatrix() {
+        return mapInitialParts;
     }
 
     /**
@@ -247,16 +272,20 @@ public class GameMap implements GenericGameMap {
      *
      * @return the maximum number of rounds for this game
      */
-    public int getMaxRounds() {
-        return maxRounds;
+    public int getRounds() {
+        return rounds;
     }
 
     public int getStraightMaxRounds() {
-        return maxRounds;
+        return rounds;
     }
 
     public int getSeed() {
         return seed;
+    }
+
+    public ZombieCount[] getZombieSpawnSchedule(int round) {
+        return zSchedule.getScheduleForRound(round).toArray(new ZombieCount[0]);
     }
 
     /**
@@ -278,8 +307,11 @@ public class GameMap implements GenericGameMap {
         /** Represents whether a certain location was ever in sensor range. */
         private final boolean[][] seen;
 
-        /** Represents the amount of ore mined when the location was last in sensor range. */
-        private final double[][] oreMined;
+        /** Represents the amount of rubble on location when the location was last in sensor range. */
+        private final int[][] rubbleOnSquare;
+        
+        /** Represents the amount of parts on location when the location was last in sensor range. */
+        private final int[][] partsOnSquare;
 
         /** It's important to keep track of OFF_MAP squares so we have this buffer around the map. */
         private final int OFFSET = 50;
@@ -288,7 +320,8 @@ public class GameMap implements GenericGameMap {
             this.map = map;
             this.currentCount = new int[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
             this.seen = new boolean[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
-            this.oreMined = new double[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
+            this.rubbleOnSquare = new int[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
+            this.partsOnSquare = new int[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
         }
 
         // x and y are locations relative to the origin
@@ -308,7 +341,7 @@ public class GameMap implements GenericGameMap {
             }
         }
 
-        public void rememberLocation(MapLocation loc, int radiusSquared, Map<MapLocation, Double> oreMinedMap) {
+        public void rememberLocation(MapLocation loc, int radiusSquared, Map<MapLocation, Integer> partsMap,  Map<MapLocation, Integer> rubbleMap) {
             MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
             for (int i = 0; i < locs.length; i++) {
@@ -317,20 +350,23 @@ public class GameMap implements GenericGameMap {
                 if (validLoc(x, y)) {
                     seen[x + OFFSET][y + OFFSET] = true;
                     currentCount[x + OFFSET][y + OFFSET]++;
-                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && oreMinedMap.containsKey(locs[i])) {
-                        oreMined[x + OFFSET][y + OFFSET] = oreMinedMap.get(locs[i]);
+                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && partsMap.containsKey(locs[i])) {
+                        partsOnSquare[x + OFFSET][y + OFFSET] = partsMap.get(locs[i]);
+                    }
+                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && rubbleMap.containsKey(locs[i])) {
+                        rubbleOnSquare[x + OFFSET][y + OFFSET] = rubbleMap.get(locs[i]);
                     }
                 }
             }
         }
 
-        /** When a location gets mined, we'll update map memory if it's currently in sight. */
-        public void updateLocation(MapLocation loc, double oreMinedNew) {
+        /** When a location gets rubble cleared, we'll update map memory if it's currently in sight. */
+        public void updateLocation(MapLocation loc, int rubbleNew) {
             if (canSense(loc)) {
                 int x = loc.x - map.mapOriginX;
                 int y = loc.y - map.mapOriginY;
                 if (validLoc(x, y)) {
-                    oreMined[x + OFFSET][y + OFFSET] = oreMinedNew;
+                    rubbleOnSquare[x + OFFSET][y + OFFSET] = rubbleNew;
                 }
             }
         }
@@ -357,23 +393,26 @@ public class GameMap implements GenericGameMap {
             }
         }
 
-        public TerrainTile recallTerrain(MapLocation loc) {
-            if (seenBefore(loc)) {
-                return map.getTerrainTile(loc);
-            } else {
-                return TerrainTile.UNKNOWN;
-            }
-        }
-
-        public double recallOreMined(MapLocation loc) {
+        public int recallRubble(MapLocation loc) {
             int X = loc.x - map.mapOriginX;
             int Y = loc.y - map.mapOriginY;
 
             if (seenBefore(loc)) {
-                return oreMined[X + OFFSET][Y + OFFSET];
+                return rubbleOnSquare[X + OFFSET][Y + OFFSET];
             } else {
-                return -1.0;
+                return -1;
             }
+        }
+        
+        public int recallParts(MapLocation loc) {
+            int X = loc.x - map.mapOriginX;
+            int Y = loc.y - map.mapOriginY;
+
+            if (seenBefore(loc)) {
+                return partsOnSquare[X + OFFSET][Y + OFFSET];
+            } else {
+                return -1;
+            } 
         }
     }
 }

@@ -8,38 +8,21 @@ import java.util.ArrayList;
 public enum RobotType {
 
     // last one is strength weight
-
-    //  isbuilding, spawn-source, build-dep, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
-    HQ          (true, null, null, 0, 0, 0, 2000, 24, 24, 0, 2, 0, 0, 35, 10000, 0),    
-    TOWER       (true, null, null, 0, 0, 0, 1000, 8, 24, 0, 1, 0, 0, 35,  2000, 0),
-
-    SUPPLYDEPOT          (true, null,                  HQ, 100,  40, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
-    TECHNOLOGYINSTITUTE  (true, null,                  HQ, 200,  50, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
-    BARRACKS             (true, null,                  HQ, 300,  50, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
-    HELIPAD              (true, null,                  HQ, 300, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
-    TRAININGFIELD        (true, null, TECHNOLOGYINSTITUTE, 200, 200, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
-    TANKFACTORY          (true, null,            BARRACKS, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
-    MINERFACTORY         (true, null,                  HQ, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
-    /**
-     * Sanitation is important.
-     */
-    HANDWASHSTATION      (true, null,                  HQ, 200, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
-    AEROSPACELAB         (true, null,             HELIPAD, 500, 100, 0, 100, 0, 0, 0, 0, 0, 0, 24, 2000, 0),
-
-	//isbuilding, spawn-source, build-dep, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
-    BEAVER      (false,                  HQ, null, 100,  20, 10,  30,  4,  5, 2, 2, 1, 1, 24, 10000, 2),
-    COMPUTER    (false, TECHNOLOGYINSTITUTE, null,  10,  25,  2,   1,  0,  0, 8, 0, 0, 0, 24, 20000, 0),
-    SOLDIER     (false,            BARRACKS, null,  60,  20,  5,  40,  4,  8, 2, 1, 1, 1, 24, 10000, 6),
-    BASHER      (false,            BARRACKS, null,  80,  20,  6,  64,  4,  2, 2, 1, 0, 1, 24, 10000, 8),
-    MINER       (false,        MINERFACTORY, null,  60,  20,  8,  50,  3,  5, 2, 2, 2, 1, 24, 10000, 3),
-    DRONE       (false,             HELIPAD, null, 125,  30, 10,  70,  8,  5, 1, 3, 1, 1, 24, 10000, 10),
-    TANK        (false,         TANKFACTORY, null, 250,  50, 15, 144, 20, 15, 2, 3, 2, 2, 24, 10000, 20),
-    COMMANDER   (false,       TRAININGFIELD, null, 100, 200, 15, 200,  6, 10, 2, 1, 0, 0, 24, 10000, 40),
-    LAUNCHER    (false,        AEROSPACELAB, null, 400, 100, 25, 200,  0,  0, 4, 0, 0, 0, 24, 10000, 35),
-    MISSILE     (false,            LAUNCHER, null,   0,   6,  0,   3, 18,  2, 1, 0, 0, 0, 24,   500, 0),
+    //  isbuilding, iszombie, infectTurns, spawn-source, build-dep, part cost, turns cost, hp, attack, range, movement delay, attack delay, cooldown delay, sight range, bytecode limit, zombieType, strWeight
+    ZOMBIEDEN       (true,  false, 0,  null,      0,  0,  5000, 0,  0,    0,   0, 0, 35,     10000, 0, null),
+    STANDARDZOMBIE  (false, true,  10, ZOMBIEDEN, 0,  0,  50,   3,  2,    2,   1, 1, 35,     10000, 0, null),
+    RANGEDZOMBIE    (false, true,  10, ZOMBIEDEN, 0,  0,  50,   3,  13,   1.4, 0, 1, 35,     10000, 0, null),
+    FASTZOMBIE      (false, true,  10, ZOMBIEDEN, 0,  0,  40,   4,  2,    2,   2, 1, 35,     10000, 0, null),
+    BIGZOMBIE       (false, true,  10, ZOMBIEDEN, 0,  0,  250,  50, 2,    2,   1, 1, 35,     10000, 0, null),
+    ARCHON          (false, false, 0,  null,      0,  0,  1000, 0,  24,   2,   1, 1, 35,     20000, 0, BIGZOMBIE),  
+    SCOUT           (false, false, 0,  ARCHON,    25, 15, 100,  0,  0,    1.4, 0, 1, 53,     20000, 0, FASTZOMBIE),
+    SOLDIER         (false, false, 0,  ARCHON,    10, 25, 50,   4,  13,   2,   2, 1, 24,     10000, 0, STANDARDZOMBIE),
+    GUARD           (false, false, 0,  ARCHON,    10, 25, 120,  2,  24,   2,   1, 1, 24,     10000, 0, STANDARDZOMBIE),
+    VIPER           (false, false, 20, ARCHON,    50, 30, 100,  2,  13,   3,   3, 1, 24,     10000, 0, RANGEDZOMBIE),
+    TURRET          (true,  false, 0,  ARCHON,    50, 50, 50,   18, 34,   0,   3, 3, 24,     2000,  0, RANGEDZOMBIE),
+    TTM             (false, false, 0,  TURRET,    0,  10, 50,   0,  0,    2,   0, 2, 24,     2000,  0, RANGEDZOMBIE),
+    //HANDWASHSTATION (false, false, 0,  null,   20, 80, 100,  0,  0,    0,   0, 0, 24, 2000,  0, null), RIP
     ;
-
-    //  isbuilding, spawn-source, build-dep, ore cost, turns cost, supply upkeep, hp, attack, range, movement delay, attack delay, loading delay, cooldown delay, sight range, bytecode limit
 
     /**
      * Whether this robot is a structure (or building). Structures are the units that cannot move.
@@ -47,29 +30,29 @@ public enum RobotType {
     public final boolean isBuilding;
 
     /**
+     * Whether this robot a zombie. Zombies are not player-controlled and run their own code.
+     */
+    public final boolean isZombie;
+
+    /**
+     * Number of turns a robot is infected for after being attacked by this robot.
+     */
+    public final int infectTurns;
+    
+    /**
      * For units, this is the structure that spawns it. For non-spawnable robots, this is null.
      */
     public final RobotType spawnSource;
 
     /**
-     * For structures, this is the pre-requisite structure needed to build this structure (null if not applicable or if there is no dependency).
-     */
-    public final RobotType dependency;
-
-    /**
      * Ore cost for building or spawning.
      */
-    public final int oreCost;
+    public final int partCost;
 
     /**
      * Number of turns to spawn or build.
      */
     public final int buildTurns;
-
-    /**
-     * Base supply upkeep (not including bytecode supply upkeep).
-     */
-    public final int supplyUpkeep;
 
     /**
      * Maximum health for the robot.
@@ -89,22 +72,17 @@ public enum RobotType {
     /**
      * Movement delay: the amount of contribution to core delay from a movement.
      */
-    public final int movementDelay;
+    public final double movementDelay;
 
     /**
      * Attack delay: the amount of contribution to weapon delay from an attack.
      */
-    public final int attackDelay;
-
-    /**
-     * Loading delay: the amount of contribution to weapon delay from a movement.
-     */
-    public final int loadingDelay;
+    public final double attackDelay;
 
     /**
      * Cooldown delay: the amount of contribution to core delay from an attack.
      */
-    public final int cooldownDelay;
+    public final double cooldownDelay;
 
     /**
      * Range^2 for sensing.
@@ -115,7 +93,12 @@ public enum RobotType {
      * Base bytecode limit of this robot (halved if the robot does not have sufficient supply upkeep).
      */
     public final int bytecodeLimit;
-
+    
+    /**
+     * The type of zombie this unit turns into after becoming infected. For zombies, this value is null.
+     */
+    public final RobotType turnsInto;
+    
     /**
      * How relatively strong the unit is. This number isn't really meaningful and is just used for part of the client.
      */
@@ -131,6 +114,24 @@ public enum RobotType {
     }
 
     /**
+     * Returns whether the robot infects robots it attacks.
+     *
+     * @return whether the robot infects robots it attacks.
+     */
+    public boolean canInfect() {
+        return infectTurns > 0;
+    }
+
+    /**
+     * Returns whether the robot is infected when attacked by a robot that infects.
+     *
+     * @return whether the robot is infected when attacked by a robot that infects.
+     */
+    public boolean isInfectable() {
+        return !isZombie && this != ZOMBIEDEN;
+    }
+
+    /**
      * Returns whether the robot can move.
      *
      * @return whether the robot can move.
@@ -140,30 +141,12 @@ public enum RobotType {
     }
 
     /**
-     * Returns whether the robot can mine.
-     *
-     * @return whether the robot can mine.
-     */
-    public boolean canMine() {
-        return this == MINER || this == BEAVER;
-    }
-
-    /**
-     * Returns whether the robot can launch missiles.
-     *
-     * @return whether the robot can launch missiles.
-     */
-    public boolean canLaunch() {
-        return this == LAUNCHER;
-    }
-
-    /**
      * Returns whether the robot can build.
      *
      * @return whether the robot can build.
      */
     public boolean canBuild() {
-        return this == BEAVER;
+        return this == ARCHON || this == ZOMBIEDEN;
     }
 
     /**
@@ -172,7 +155,7 @@ public enum RobotType {
      * @return whether the robot is buildable.
      */
     public boolean isBuildable() {
-        return isBuilding && this != HQ && this != TOWER;
+        return spawnSource == ARCHON || spawnSource == ZOMBIEDEN;
     }
 
     /**
@@ -180,50 +163,41 @@ public enum RobotType {
      *
      * @return whether the robot can spawn.
      */
-    public boolean canSpawn() {
-        return isBuilding && this != TOWER && this != SUPPLYDEPOT;
+    public boolean canSpawn() { // Update later
+        return this == ARCHON || this == ZOMBIEDEN;
     }
-
-    /**
-     * Returns whether the robot uses supply.
-     *
-     * @return whether the robot uses supply.
-     */
-    public boolean needsSupply() {
-        return supplyUpkeep > 0;
-    }
-
+    
     RobotType(boolean isBuilding,
+              boolean isZombie,
+              int infectTurns,
               RobotType spawnSource,
-              RobotType dependency,
-              int oreCost,
+              int partCost,
               int buildTurns,
-              int supplyUpkeep,
               double maxHealth,
               double attackPower,
               int attackRadiusSquared,
-              int movementDelay,
-              int attackDelay,
-              int loadingDelay,
-              int cooldownDelay,
+              double movementDelay,
+              double attackDelay,
+              double cooldownDelay,
               int sensorRadiusSquared,
               int bytecodeLimit,
-              int strengthWeight) {
+              int strengthWeight,
+              RobotType turnsInto) {
         this.isBuilding = isBuilding;
+        this.isZombie = isZombie;
+        this.infectTurns = infectTurns;
         this.spawnSource = spawnSource;
-        this.dependency = dependency;
-        this.oreCost = oreCost;
+        this.partCost = partCost;
         this.buildTurns = buildTurns;
-        this.supplyUpkeep = supplyUpkeep;
         this.maxHealth = maxHealth;
         this.attackPower = attackPower;
         this.attackRadiusSquared = attackRadiusSquared;
         this.movementDelay = movementDelay;
         this.attackDelay = attackDelay;
-        this.loadingDelay = loadingDelay;
         this.cooldownDelay = cooldownDelay;
         this.sensorRadiusSquared = sensorRadiusSquared;
         this.bytecodeLimit = bytecodeLimit;
+        this.turnsInto = turnsInto;
         this.strengthWeight = strengthWeight;
     }
 }

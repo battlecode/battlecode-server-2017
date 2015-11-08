@@ -44,6 +44,8 @@ public class Config {
         defaults.setProperty("bc.engine.debug-max-bytecodes", "64000");
         defaults.setProperty("bc.engine.silence-a", "false");
         defaults.setProperty("bc.engine.silence-b", "false");
+        defaults.setProperty("bc.engine.silence-c", "false");
+        defaults.setProperty("bc.engine.silence-d", "false");
         defaults.setProperty("bc.engine.gc", "false");
         defaults.setProperty("bc.engine.gc-rounds", "50");
         defaults.setProperty("bc.engine.upkeep", "true");

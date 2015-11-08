@@ -41,33 +41,18 @@ public class RobotInfo {
      * The current health of the robot.
      */
     public final double health;
-
+    
     /**
-     * The current supply level of the robot.
+     * The number of turns this robot will remain infected with a Zombie infection
      */
-    public final double supplyLevel;
-
+    public final int zombieInfectedTurns;
+    
     /**
-     * The XP of the robot. COMMANDER only.
+     * The number of turns this robot will remain infected with a Viper infection
      */
-    public final int xp;
+    public final int viperInfectedTurns;
 
-    /**
-     * The missile count of the robot. LAUNCHER only.
-     */
-    public final int missileCount;
-
-    /**
-     * For structures being built, this will be the location of the unit building the structure (null if N/A).
-     */
-    public final MapLocation builder;
-
-    /**
-     * For units that are building a structure, this will be the location of the structure being built (null if N/A).
-     */
-    public final MapLocation buildingLocation;
-
-    public RobotInfo(int ID, Team team, RobotType type, MapLocation location, double coreDelay, double weaponDelay, double health, double supplyLevel, int xp, int missileCount, MapLocation builder, MapLocation buildingLocation) {
+    public RobotInfo(int ID, Team team, RobotType type, MapLocation location, double coreDelay, double weaponDelay, double health, int zombieInfectedTurns, int viperInfectedTurns) {
         super();
         this.ID = ID;
         this.team = team;
@@ -76,11 +61,8 @@ public class RobotInfo {
         this.coreDelay = coreDelay;
         this.weaponDelay = weaponDelay;
         this.health = health;
-        this.supplyLevel = supplyLevel;
-        this.xp = xp;
-        this.missileCount = missileCount;
-        this.builder = builder;
-        this.buildingLocation = buildingLocation;
+        this.zombieInfectedTurns = zombieInfectedTurns;
+        this.viperInfectedTurns = viperInfectedTurns;
     }
 
     public int hashCode() {
