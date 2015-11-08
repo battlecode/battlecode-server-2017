@@ -300,7 +300,7 @@ public class TestMapGenerator {
      * All test maps will be placed in this folder.
      */
     public static final String MAP_PATH =
-            "battlecode-server/src/test/battlecode/world/maps/";
+            "src/test/battlecode/world/maps/";
 
     public void writeMapToFile(String mapName) throws IOException {
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter

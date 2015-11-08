@@ -1,5 +1,7 @@
 package battlecode.common;
 
+import java.lang.IllegalArgumentException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -76,5 +78,11 @@ public class MapLocationTest {
         testGetMapLocationsHelper(center, 10, 37);
         testGetMapLocationsHelper(center, 24, 69);
         testGetMapLocationsHelper(center, 25, 69 + 4 + 8);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testCantGetMapLocationsLargeRadiusSq() {
+        final MapLocation center = new MapLocation(-500, 200);
+        testGetMapLocationsHelper(center, 1000000, 241 * 241);
     }
 }
