@@ -2,10 +2,11 @@ package battlecode.world;
 
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import battlecode.server.Config;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Random;
 
 import static org.junit.Assert.assertTrue;
 
@@ -27,6 +28,15 @@ public class XMLMapHandlerTest {
     }
 
     /**
+     * Sets unit-test-mode so that the engine will not try to instrument any
+     * player code. It's not necessary for these tests.
+     */
+    @Before
+    public void prepare() {
+        Config.getGlobalConfig().setBoolean("bc.engine.unit-test-mode", true);
+    }
+
+    /**
      * Writes a map to a file and then reads it. A basic test to make sure
      * XMLMapHandler reads map files properly.
      *
@@ -34,8 +44,6 @@ public class XMLMapHandlerTest {
      */
     @Test(timeout=5000)
     public void testBasic() throws IOException {
-        Random random = new Random(123456);
-
         int width = 50;
         int height = 80;
         int rounds = 2123;
@@ -43,8 +51,8 @@ public class XMLMapHandlerTest {
 
         TestMapGenerator gen = new TestMapGenerator(width, height, rounds)
                 .withSeed(seed)
-                .withRubble(5, 5, 100)
-                .withRubble(44, 78, 100)
+                .withRubble(1, 1, 100)
+                .withRubble(48, 78, 100)
                 .withParts(0, 1, 111)
                 .withParts(1, 0, 111)
                 .withParts(49, 78, 111)
@@ -58,17 +66,11 @@ public class XMLMapHandlerTest {
 
         gen.writeMapToFile("basicMap");
 
-        System.out.println("here");
-
-        GameMap inputMap = gen.getMap();
-
-        System.out.println("here2");
+        GameMap inputMap = gen.getMap("basicMap");
 
         long[][] teamMemory = new long[2][32];
         GameWorld world = getMap(teamMemory, "basicMap");
         GameMap outputMap = world.getGameMap();
-
-        System.out.println("here3");
 
         assertTrue(inputMap.equivalentTo(outputMap));
     }
