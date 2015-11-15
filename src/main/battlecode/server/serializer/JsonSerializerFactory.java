@@ -3,9 +3,13 @@ package battlecode.server.serializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
 
-import com.cedarsoftware.util.io.JsonReader;
-import com.cedarsoftware.util.io.JsonWriter;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Serialize things with JSON.
@@ -21,48 +25,66 @@ public final class JsonSerializerFactory implements SerializerFactory {
 
     public static final class JsonSerializer implements Serializer {
 
-        private final JsonReader reader;
-        private final JsonWriter writer;
+        /**
+         * The mapper instance to use for all serializers.
+         * ObjectMapper is thread-safe, so this is fine.
+         */
+        private static final ObjectMapper mapper = new ObjectMapper();
+
+        /**
+         * The reader factory to use to create all streaming parsers.
+         * Again, thread safe.
+         */
+        private static final JsonFactory streamingParserFactory = new JsonFactory();
+
+        /**
+         * Configure JSON serialization.
+         */
+        static {
+            // Serialize *everything* with type annotations.
+            mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+            // Serialize empty classes (like ResumeNotification)
+            mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+
+            // Parser should own input, and close input when it is closed.
+            // Generator should own output, and close output when it is closed.
+            streamingParserFactory.enable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
+        }
+
+
+        private final JsonParser input;
+        private final JsonGenerator output;
 
         public JsonSerializer(final OutputStream output, final InputStream input) throws IOException {
-            if (input != null) {
-                reader = new JsonReader(input);
-            } else {
-                reader = null;
-            }
-
-            if (output != null) {
-                writer = new JsonWriter(output);
-            } else {
-                writer = null;
-            }
+            this.output = streamingParserFactory.createGenerator(output);
+            this.input = streamingParserFactory.createParser(input);
         }
 
         @Override
         public void serialize(Object message) throws IOException {
-            if (writer == null) {
+            if (this.output == null) {
                 throw new IOException("No OutputStream given");
             }
 
-            writer.write(message);
+            mapper.writeValue(output, message);
         }
 
         @Override
         public Object deserialize() throws IOException {
-            if (reader == null) {
+            if (input == null) {
                 throw new IOException("No InputStream given");
             }
 
-            return reader.readObject();
+            return mapper.readValue(input, Object.class);
         }
 
         @Override
         public void close() throws IOException {
-            if (writer != null) {
-                writer.close();
+            if (output != null) {
+                output.close();
             }
-            if (reader != null) {
-                reader.close();
+            if (input != null) {
+                input.close();
             }
         }
     }

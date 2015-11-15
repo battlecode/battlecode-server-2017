@@ -19,7 +19,7 @@
     <dependency org="com.google.guava" name="guava" rev="18.0"/>
     <dependency org="org.ow2.asm" name="asm" rev="5.0.4"/>
     <dependency org="org.ow2.asm" name="asm-tree" rev="5.0.4"/>
-    <dependency org="com.cedarsoftware" name="json-io" rev="4.1.6" />
+    <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.6.3"/>
     <!-- ivy thinks xstream depends on 6 different xml parsers and 3 optional packages but we only need xpp3,
          and xmlpull, which specifies xpp3's API. -->
     <dependency org="com.thoughtworks.xstream" name="xstream" rev="1.4.8" transitive="false"/>

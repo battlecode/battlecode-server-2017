@@ -12,7 +12,8 @@ import java.io.OutputStream;
  */
 public interface SerializerFactory {
     /**
-     * Create a serializer
+     * Create a serializer. The serializer will own the given streams and close them when it is
+     * closed.
      *
      * @param output stream to write to; may be null
      * @param input stream to read from; may be null

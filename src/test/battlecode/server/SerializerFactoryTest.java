@@ -15,18 +15,15 @@ import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
 import battlecode.world.ZombieSpawnSchedule;
 import battlecode.world.signal.*;
-import org.junit.Test;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
-
 /**
  * Created by james on 7/28/15.
  */
-public class SerializerTest {
+public abstract class SerializerFactoryTest {
     static final Map<GameMap.MapProperties, Integer> properties = new HashMap<>();
     static {
         properties.put(GameMap.MapProperties.HEIGHT, 3);
@@ -104,21 +101,6 @@ public class SerializerTest {
             new ExtensibleMetadata()
     };
 
-    @Test
-    public void testJavaRoundTrip() throws IOException {
-        testRoundTrip(new JavaSerializerFactory());
-    }
-
-    @Test
-    public void testXStreamRoundTrip() throws IOException {
-        testRoundTrip(new XStreamSerializerFactory());
-    }
-
-    @Test
-    public void testJsonRoundTrip() throws IOException {
-        testRoundTrip(new JsonSerializerFactory());
-    }
-
     /**
      * Runs all the objects we're going to serialize through a serializer-deserializer pair.
      *
@@ -126,7 +108,6 @@ public class SerializerTest {
      * @throws IOException
      */
     public void testRoundTrip(final SerializerFactory serializerFactory) throws IOException {
-
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
 
         final Serializer serializer = serializerFactory.createSerializer(output, null);
@@ -134,7 +115,8 @@ public class SerializerTest {
             try {
                 serializer.serialize(serializeableObjects[i]);
             } catch (final IOException e) {
-                fail("Couldn't serialize object of class: " + serializeableObjects[i].getClass().getCanonicalName() + ": " + e);
+                throw new IOException("Couldn't serialize object of class: " +
+                        serializeableObjects[i].getClass().getCanonicalName(), e);
             }
         }
         serializer.close();
@@ -148,8 +130,8 @@ public class SerializerTest {
             try {
                 result = deserializer.deserialize();
             } catch (final IOException e) {
-                fail("Couldn't deserialize object of class: " + serializeableObjects[i].getClass().getCanonicalName() + ": " + e);
-                return; // To satisfy "might not have been initialized"
+                throw new IOException("Couldn't deserialize object of class: " +
+                        serializeableObjects[i].getClass().getCanonicalName(), e);
             }
 
             // TODO assertEquals(serializeableObjects[i], result);
