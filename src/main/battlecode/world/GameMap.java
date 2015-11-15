@@ -116,13 +116,13 @@ public class GameMap implements Serializable {
         if (mapProperties.containsKey(MapProperties.WIDTH)) {
             this.mapWidth = mapProperties.get(MapProperties.WIDTH);
         } else {
-            this.mapWidth = mapInitialRubble[0].length;
+            this.mapWidth = mapInitialRubble.length;
         }
 
         if (mapProperties.containsKey(MapProperties.HEIGHT)) {
             this.mapHeight = mapProperties.get(MapProperties.HEIGHT);
         } else {
-            this.mapHeight = mapInitialRubble.length;
+            this.mapHeight = mapInitialRubble[0].length;
         }
 
         if (mapProperties.containsKey(MapProperties.SEED)) {
@@ -140,7 +140,6 @@ public class GameMap implements Serializable {
         Random rand = new Random(this.seed);
         this.mapOriginX = rand.nextInt(500);
         this.mapOriginY = rand.nextInt(500);
-        
         this.mapInitialRubble = mapInitialRubble;
         this.mapInitialParts = mapInitialParts;
         this.zSchedule = zSchedule;
@@ -160,9 +159,9 @@ public class GameMap implements Serializable {
         if (this.mapWidth != other.mapWidth) return false;
         if (this.mapHeight != other.mapHeight) return false;
         if (this.seed != other.seed) return false;
-        if (!Arrays.equals(this.mapInitialRubble, other.mapInitialRubble))
+        if (!Arrays.deepEquals(this.mapInitialRubble, other.mapInitialRubble))
             return false;
-        if (!Arrays.equals(this.mapInitialParts, other.mapInitialParts))
+        if (!Arrays.deepEquals(this.mapInitialParts, other.mapInitialParts))
             return false;
         if (!this.mapName.equals(other.mapName)) return false;
         if (!this.zSchedule.equivalentTo(other.zSchedule)) return false;

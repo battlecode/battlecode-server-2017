@@ -23,9 +23,7 @@ public class PlayerFactory {
     }
 
     public static void loadPlayer(GenericController rc, String teamName) {
-
-        // This should only happen in the unit tests
-        if (teamName.length() == 0) {
+        if (Config.getGlobalConfig().getBoolean("bc.engine.unit-test-mode")) {
             return;
         }
 
@@ -53,6 +51,10 @@ public class PlayerFactory {
     }
     
     public static void loadZombiePlayer(GenericController rc) {
+        if (Config.getGlobalConfig().getBoolean("bc.engine.unit-test-mode")) {
+            return;
+        }
+
         // instantiate and instrument the ZombiePlayer class
         Class playerClass;
         try {

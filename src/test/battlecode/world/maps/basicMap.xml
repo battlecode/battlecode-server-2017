@@ -6,15 +6,62 @@
     <symbols>
         <symbol terrain="RUBBLE" type="TERRAIN" character="r"/>
         <symbol terrain="PARTS" type="TERRAIN" character="p"/>
-        <symbol team="A" type="ZOMBIEDEN" character="za" />n        <symbol team="B" type="ZOMBIEDEN" character="zb" />n        <symbol team="NEUTRAL" type="ZOMBIEDEN" character="zn" />n        <symbol team="ZOMBIE" type="ZOMBIEDEN" character="zz" />n        <symbol team="A" type="STANDARDZOMBIE" character="sa" />n        <symbol team="B" type="STANDARDZOMBIE" character="sb" />n        <symbol team="NEUTRAL" type="STANDARDZOMBIE" character="sn" />n        <symbol team="ZOMBIE" type="STANDARDZOMBIE" character="sz" />n        <symbol team="A" type="RANGEDZOMBIE" character="ra" />n        <symbol team="B" type="RANGEDZOMBIE" character="rb" />n        <symbol team="NEUTRAL" type="RANGEDZOMBIE" character="rn" />n        <symbol team="ZOMBIE" type="RANGEDZOMBIE" character="rz" />n        <symbol team="A" type="FASTZOMBIE" character="fa" />n        <symbol team="B" type="FASTZOMBIE" character="fb" />n        <symbol team="NEUTRAL" type="FASTZOMBIE" character="fn" />n        <symbol team="ZOMBIE" type="FASTZOMBIE" character="fz" />n        <symbol team="A" type="BIGZOMBIE" character="ba" />n        <symbol team="B" type="BIGZOMBIE" character="bb" />n        <symbol team="NEUTRAL" type="BIGZOMBIE" character="bn" />n        <symbol team="ZOMBIE" type="BIGZOMBIE" character="bz" />n        <symbol team="A" type="ARCHON" character="aa" />n        <symbol team="B" type="ARCHON" character="ab" />n        <symbol team="NEUTRAL" type="ARCHON" character="an" />n        <symbol team="ZOMBIE" type="ARCHON" character="az" />n        <symbol team="A" type="SCOUT" character="ca" />n        <symbol team="B" type="SCOUT" character="cb" />n        <symbol team="NEUTRAL" type="SCOUT" character="cn" />n        <symbol team="ZOMBIE" type="SCOUT" character="cz" />n        <symbol team="A" type="SOLDIER" character="oa" />n        <symbol team="B" type="SOLDIER" character="ob" />n        <symbol team="NEUTRAL" type="SOLDIER" character="on" />n        <symbol team="ZOMBIE" type="SOLDIER" character="oz" />n        <symbol team="A" type="GUARD" character="ga" />n        <symbol team="B" type="GUARD" character="gb" />n        <symbol team="NEUTRAL" type="GUARD" character="gn" />n        <symbol team="ZOMBIE" type="GUARD" character="gz" />n        <symbol team="A" type="VIPER" character="va" />n        <symbol team="B" type="VIPER" character="vb" />n        <symbol team="NEUTRAL" type="VIPER" character="vn" />n        <symbol team="ZOMBIE" type="VIPER" character="vz" />n        <symbol team="A" type="TURRET" character="ta" />n        <symbol team="B" type="TURRET" character="tb" />n        <symbol team="NEUTRAL" type="TURRET" character="tn" />n        <symbol team="ZOMBIE" type="TURRET" character="tz" />n        <symbol team="A" type="TTM" character="ma" />n        <symbol team="B" type="TTM" character="mb" />n        <symbol team="NEUTRAL" type="TTM" character="mn" />n        <symbol team="ZOMBIE" type="TTM" character="mz" />n    </symbols>
+        <symbol team="A" type="ZOMBIEDEN" character="za" />
+        <symbol team="B" type="ZOMBIEDEN" character="zb" />
+        <symbol team="NEUTRAL" type="ZOMBIEDEN" character="zn" />
+        <symbol team="ZOMBIE" type="ZOMBIEDEN" character="zz" />
+        <symbol team="A" type="STANDARDZOMBIE" character="sa" />
+        <symbol team="B" type="STANDARDZOMBIE" character="sb" />
+        <symbol team="NEUTRAL" type="STANDARDZOMBIE" character="sn" />
+        <symbol team="ZOMBIE" type="STANDARDZOMBIE" character="sz" />
+        <symbol team="A" type="RANGEDZOMBIE" character="ra" />
+        <symbol team="B" type="RANGEDZOMBIE" character="rb" />
+        <symbol team="NEUTRAL" type="RANGEDZOMBIE" character="rn" />
+        <symbol team="ZOMBIE" type="RANGEDZOMBIE" character="rz" />
+        <symbol team="A" type="FASTZOMBIE" character="fa" />
+        <symbol team="B" type="FASTZOMBIE" character="fb" />
+        <symbol team="NEUTRAL" type="FASTZOMBIE" character="fn" />
+        <symbol team="ZOMBIE" type="FASTZOMBIE" character="fz" />
+        <symbol team="A" type="BIGZOMBIE" character="ba" />
+        <symbol team="B" type="BIGZOMBIE" character="bb" />
+        <symbol team="NEUTRAL" type="BIGZOMBIE" character="bn" />
+        <symbol team="ZOMBIE" type="BIGZOMBIE" character="bz" />
+        <symbol team="A" type="ARCHON" character="aa" />
+        <symbol team="B" type="ARCHON" character="ab" />
+        <symbol team="NEUTRAL" type="ARCHON" character="an" />
+        <symbol team="ZOMBIE" type="ARCHON" character="az" />
+        <symbol team="A" type="SCOUT" character="ca" />
+        <symbol team="B" type="SCOUT" character="cb" />
+        <symbol team="NEUTRAL" type="SCOUT" character="cn" />
+        <symbol team="ZOMBIE" type="SCOUT" character="cz" />
+        <symbol team="A" type="SOLDIER" character="oa" />
+        <symbol team="B" type="SOLDIER" character="ob" />
+        <symbol team="NEUTRAL" type="SOLDIER" character="on" />
+        <symbol team="ZOMBIE" type="SOLDIER" character="oz" />
+        <symbol team="A" type="GUARD" character="ga" />
+        <symbol team="B" type="GUARD" character="gb" />
+        <symbol team="NEUTRAL" type="GUARD" character="gn" />
+        <symbol team="ZOMBIE" type="GUARD" character="gz" />
+        <symbol team="A" type="VIPER" character="va" />
+        <symbol team="B" type="VIPER" character="vb" />
+        <symbol team="NEUTRAL" type="VIPER" character="vn" />
+        <symbol team="ZOMBIE" type="VIPER" character="vz" />
+        <symbol team="A" type="TURRET" character="ta" />
+        <symbol team="B" type="TURRET" character="tb" />
+        <symbol team="NEUTRAL" type="TURRET" character="tn" />
+        <symbol team="ZOMBIE" type="TURRET" character="tz" />
+        <symbol team="A" type="TTM" character="ma" />
+        <symbol team="B" type="TTM" character="mb" />
+        <symbol team="NEUTRAL" type="TTM" character="mn" />
+        <symbol team="ZOMBIE" type="TTM" character="mz" />
+    </symbols>
     <data>
 <![CDATA[
-aa0 p0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 zz0
-p0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
+aa0 p111 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 zz0
+p111 r100 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
-r0 r0 r0 r0 r0 r100 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
@@ -87,8 +134,9 @@ r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
-r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r100 r0 r0 r0 r0 p0
-zz0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 p0 ab0
+r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0
+r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r100 p111
+zz0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 r0 p111 ab0
 ]]>
     </data>
 </map>
