@@ -369,6 +369,11 @@ class XMLMapHandler extends DefaultHandler {
      * Current column as we are scanning the map data.
      */
     private int currentCol = 0;
+    /**
+     * Stores what has been read of a map cell token so far as we scan the
+     * map data.
+     */
+    private String dataSoFar = "";
 
     /**
      * This method validates a given attribute, returning its value
@@ -569,7 +574,7 @@ class XMLMapHandler extends DefaultHandler {
 
         if (currentRow >= mapHeight) {
             // if we have an extra row at the end, check if it's only whitespace
-            for (int i = start; i < length; i++) {
+            for (int i = start; i < start + length; i++) {
                 // if it isn't whitespace, fail
                 if (!Character.isWhitespace(ch[i]) && ch[i] != '\n')
                     fail("the <data> node has too many rows", "Check that the" +
@@ -580,7 +585,6 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         // Parse each character into TerrainTypes.
-        String dataSoFar = "";
         for (int i = start; i < length; i++) {
             char c = ch[i];
             // ignore tabs
@@ -614,13 +618,21 @@ class XMLMapHandler extends DefaultHandler {
 
                 currentCol++;
                 dataSoFar = "";
-            } else {
+            } else if (!(c == '\n' || c == ' ')) {
                 dataSoFar += c;
             }
 
             // if it's a newline, update currentRow and currentCol
             if (c == '\n') {
                 if (currentRow != -1) {
+                    // On some machines, it seems like the initial newline
+                    // before the first row of the map cell data gets fed in
+                    // twice. This if-statement handles this case, and also
+                    // allows people to add arbitrary blank lines between
+                    // rows in the map data.
+                    if (currentCol == 0 && dataSoFar.equals("")) {
+                        continue;
+                    }
                     if (currentCol < mapWidth)
                         fail("row " + currentRow + " in <data> has too few " +
                                 "characters", "Check that the number of " +

@@ -287,13 +287,14 @@ public class TestMapGenerator {
     /**
      * Generates the game map represented by this generator.
      *
+     * @param mapName the name to give the map
      * @return the game map represented by this generator
      */
-    public GameMap getMap() {
+    public GameMap getMap(String mapName) {
         EnumMap<GameMap.MapProperties, Integer> props = new EnumMap<GameMap.MapProperties, Integer>(GameMap.MapProperties.class);
         props.put(GameMap.MapProperties.ROUNDS, this.rounds);
         props.put(GameMap.MapProperties.SEED, this.seed);
-        return new GameMap(props, rubble, parts, zSchedule, "map");
+        return new GameMap(props, rubble, parts, zSchedule, mapName);
     }
 
     /**
@@ -327,7 +328,7 @@ public class TestMapGenerator {
         for (RobotType type : RobotType.values()) {
             for (Team team : Team.values()) {
                 out.printf("        <symbol team=\"%s\" type=\"%s\" " +
-                        "character=\"%s\" />n", team.toString(), type
+                        "character=\"%s\" />\n", team.toString(), type
                         .toString(), getSymbol(type, team));
             }
         }
@@ -350,7 +351,7 @@ public class TestMapGenerator {
         for (int i = 0; i < height; ++i) {
             for (int j = 0; j < width; ++j) {
                 out.printf("%s", characters[j][i]);
-                if (parts[j][j] > 0) out.printf("%d", parts[j][i]);
+                if (parts[j][i] > 0) out.printf("%d", parts[j][i]);
                 else out.printf("%d", rubble[j][i]);
 
                 if (j == width - 1) out.printf("\n");
