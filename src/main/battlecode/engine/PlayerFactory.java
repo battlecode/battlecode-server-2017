@@ -4,7 +4,7 @@ import battlecode.engine.instrumenter.IndividualClassLoader;
 import battlecode.engine.instrumenter.InstrumentationException;
 import battlecode.engine.scheduler.ScheduledRunnable;
 import battlecode.server.Config;
-import java.lang.instrument.*;
+import battlecode.world.RobotControllerImpl;
 
 /*
 TODO:
@@ -22,7 +22,7 @@ public class PlayerFactory {
         _debugMethodsEnabled = options.getBoolean("bc.engine.debug-methods");
     }
 
-    public static void loadPlayer(GenericController rc, String teamName) {
+    public static void loadPlayer(RobotControllerImpl rc, String teamName) {
         if (Config.getGlobalConfig().getBoolean("bc.engine.unit-test-mode")) {
             return;
         }
@@ -50,7 +50,7 @@ public class PlayerFactory {
 
     }
     
-    public static void loadZombiePlayer(GenericController rc) {
+    public static void loadZombiePlayer(RobotControllerImpl rc) {
         if (Config.getGlobalConfig().getBoolean("bc.engine.unit-test-mode")) {
             return;
         }

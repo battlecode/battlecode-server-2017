@@ -19,7 +19,6 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.ZombieCount;
-import battlecode.engine.GenericController;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.world.signal.AttackSignal;
@@ -46,8 +45,7 @@ import battlecode.world.signal.SpawnSignal;
  - better suicide() ??
  - pare down GW, GWviewer methods; add engine.getallsignals?
  */
-public final class RobotControllerImpl implements RobotController,
-        GenericController {
+public final class RobotControllerImpl implements RobotController {
     private GameWorld gameWorld;
     private InternalRobot robot;
 

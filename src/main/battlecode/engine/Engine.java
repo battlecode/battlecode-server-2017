@@ -6,6 +6,7 @@ import battlecode.engine.instrumenter.lang.RoboRandom;
 import battlecode.engine.scheduler.Scheduler;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
+import battlecode.world.GameWorld;
 import battlecode.world.GameWorldFactory;
 
 //~ import java.lang.Thread;
@@ -16,7 +17,7 @@ TODO:
  */
 public class Engine {
 
-    private final GenericWorld gameWorld;
+    private final GameWorld gameWorld;
     private final boolean garbageCollectEnabled;
     private final int garbageCollectRounds;
     private final boolean breakpointsEnabled;
@@ -29,7 +30,7 @@ public class Engine {
         this.garbageCollectEnabled = options.getBoolean("bc.engine.gc");
         this.garbageCollectRounds = options.getInt("bc.engine.gc-rounds");
         this.breakpointsEnabled = options.getBoolean("bc.engine.breakpoints");
-        GenericWorld tempGameWorld = null;
+        GameWorld tempGameWorld = null;
         //InternalRobot.resetIDs();
         IndividualClassLoader.reset();
         Scheduler.reset();
@@ -54,7 +55,7 @@ public class Engine {
         Scheduler.start();
     }
 
-    public GenericWorld getGameWorld() {
+    public GameWorld getGameWorld() {
         return gameWorld;
     }
 

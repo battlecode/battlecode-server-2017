@@ -13,7 +13,7 @@ public interface NotificationHandler<R> {
      * @param n the notification to process
      * @return the result of processing
      */
-    public R visitStartNotification(StartNotification n);
+    R visitStartNotification(StartNotification n);
 
     /**
      * Processes a pause notification.
@@ -21,7 +21,7 @@ public interface NotificationHandler<R> {
      * @param n the notification to process
      * @return the result of processing
      */
-    public R visitPauseNotification(PauseNotification n);
+    R visitPauseNotification(PauseNotification n);
 
     /**
      * Processes a run notification.
@@ -29,7 +29,7 @@ public interface NotificationHandler<R> {
      * @param n the notification to process
      * @return the result of processing
      */
-    public R visitRunNotification(RunNotification nb);
+    R visitRunNotification(RunNotification nb);
 
     /**
      * Processes a resume notification.
@@ -37,5 +37,5 @@ public interface NotificationHandler<R> {
      * @param n the notification to process
      * @return the result of processing
      */
-    public R visitResumeNotification(ResumeNotification n);
+    R visitResumeNotification(ResumeNotification n);
 }

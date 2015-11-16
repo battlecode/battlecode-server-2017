@@ -4,9 +4,9 @@ import battlecode.common.GameConstants;
 import battlecode.common.Team;
 import battlecode.engine.Engine;
 import battlecode.engine.GameState;
-import battlecode.engine.GenericWorld;
 import battlecode.engine.signal.Signal;
 import battlecode.serial.*;
+import battlecode.world.GameWorld;
 
 import java.util.Observable;
 
@@ -28,7 +28,7 @@ public class Match extends Observable {
     /**
      * The GenericWorld for getting signals.
      */
-    private GenericWorld gameWorld;
+    private GameWorld gameWorld;
 
     /**
      * The MatchInfo from which this match was created.

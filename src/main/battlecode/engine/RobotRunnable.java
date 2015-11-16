@@ -4,6 +4,7 @@ import battlecode.common.Clock;
 import battlecode.common.RobotController;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.scheduler.Scheduler;
+import battlecode.world.RobotControllerImpl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -20,9 +21,9 @@ TODO:
 class RobotRunnable implements Runnable {
 
     private final Class<?> myPlayerClass;
-    private final GenericController myRobotController;
+    private final RobotControllerImpl myRobotController;
 
-    public RobotRunnable(Class playerClass, GenericController rc) {
+    public RobotRunnable(Class playerClass, RobotControllerImpl rc) {
         myPlayerClass = playerClass;
         myRobotController = rc;
     }
