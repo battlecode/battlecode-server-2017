@@ -4,7 +4,11 @@ import battlecode.common.MapLocation;
 import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
+/**
+ * Signifies that a robot has requested a debug indicator line be created.
+ */
 public class IndicatorLineSignal extends Signal {
 
     public final int robotID;
@@ -12,13 +16,22 @@ public class IndicatorLineSignal extends Signal {
     public final MapLocation loc1, loc2;
     public final int red, green, blue;
 
-    public IndicatorLineSignal(InternalRobot robot, MapLocation l1, MapLocation l2, int r, int g, int b) {
-        robotID = robot.getID();
-        team = robot.getTeam();
-        loc1 = l1;
-        loc2 = l2;
-        red = r;
-        green = g;
-        blue = b;
+    public IndicatorLineSignal(int robotID, Team team, MapLocation loc1, MapLocation loc2,
+                               int red, int green, int blue) {
+        this.robotID = robotID;
+        this.team = team;
+        this.loc1 = loc1;
+        this.loc2 = loc2;
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
+    }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private IndicatorLineSignal() {
+        this(0, null, null, null, 0, 0, 0);
     }
 }

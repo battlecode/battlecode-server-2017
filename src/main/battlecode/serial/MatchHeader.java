@@ -33,4 +33,12 @@ public class MatchHeader implements Serializable {
     public long[][] getState() {
         return state;
     }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private MatchHeader() {
+        this(null, null, 0, 0);
+    }
 }

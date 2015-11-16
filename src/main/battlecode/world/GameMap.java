@@ -1,9 +1,11 @@
 package battlecode.world;
 
 import battlecode.common.MapLocation;
-import battlecode.common.RobotType;
+
 import java.io.Serializable;
 import battlecode.common.ZombieCount;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -30,19 +32,19 @@ public class GameMap implements Serializable {
     /**
      * The width and height of the map.
      */
-    private final int mapWidth, mapHeight;
+    private final int width, height;
     /**
      * The initial rubble on the map.
      */
-    private final int[][] mapInitialRubble;
+    private final int[][] initialRubble;
     /**
      * The initial parts on the map.
      */
-    private final int[][] mapInitialParts;
+    private final int[][] initialParts;
     /**
      * The coordinates of the origin.
      */
-    private final int mapOriginX, mapOriginY;
+    private final int originX, originY;
     /**
      * The random seed contained in the map file.
      */
@@ -76,17 +78,17 @@ public class GameMap implements Serializable {
      * @param gm the GameMap to copy.
      */
     public GameMap(GameMap gm) {
-        this.mapWidth = gm.mapWidth;
-        this.mapHeight = gm.mapHeight;
-        this.mapInitialRubble = new int[this.mapWidth][this.mapHeight];
-        this.mapInitialParts = new int[this.mapWidth][this.mapHeight];
-        for (int i = 0; i < this.mapWidth; i++) {
-            System.arraycopy(gm.mapInitialRubble[i], 0, this.mapInitialRubble[i], 0, this.mapHeight);
-            System.arraycopy(gm.mapInitialParts[i], 0, this.mapInitialParts[i], 0, this.mapHeight);
+        this.width = gm.width;
+        this.height = gm.height;
+        this.initialRubble = new int[this.width][this.height];
+        this.initialParts = new int[this.width][this.height];
+        for (int i = 0; i < this.width; i++) {
+            System.arraycopy(gm.initialRubble[i], 0, this.initialRubble[i], 0, this.height);
+            System.arraycopy(gm.initialParts[i], 0, this.initialParts[i], 0, this.height);
         }
 
-        this.mapOriginX = gm.mapOriginX;
-        this.mapOriginY = gm.mapOriginY;
+        this.originX = gm.originX;
+        this.originY = gm.originY;
         this.seed = gm.seed;
         this.rounds = gm.rounds;
         this.mapName = gm.mapName;
@@ -105,24 +107,24 @@ public class GameMap implements Serializable {
      *
      * @param mapProperties used to specify integer properties of the map
      *                      (width, height, seed, and number of rounds).
-     * @param mapInitialRubble initial rubble array for the map.
-     * @param mapInitialParts initial parts array for the map.
+     * @param initialRubble initial rubble array for the map.
+     * @param initialParts initial parts array for the map.
      * @param zSchedule zombie spawn schedule.
      * @param mapName name of the map.
      */
     public GameMap(Map<MapProperties, Integer> mapProperties, int[][]
-            mapInitialRubble, int[][] mapInitialParts, ZombieSpawnSchedule
+            initialRubble, int[][] initialParts, ZombieSpawnSchedule
             zSchedule, String mapName) {
         if (mapProperties.containsKey(MapProperties.WIDTH)) {
-            this.mapWidth = mapProperties.get(MapProperties.WIDTH);
+            this.width = mapProperties.get(MapProperties.WIDTH);
         } else {
-            this.mapWidth = mapInitialRubble.length;
+            this.width = initialRubble.length;
         }
 
         if (mapProperties.containsKey(MapProperties.HEIGHT)) {
-            this.mapHeight = mapProperties.get(MapProperties.HEIGHT);
+            this.height = mapProperties.get(MapProperties.HEIGHT);
         } else {
-            this.mapHeight = mapInitialRubble[0].length;
+            this.height = initialRubble[0].length;
         }
 
         if (mapProperties.containsKey(MapProperties.SEED)) {
@@ -138,10 +140,10 @@ public class GameMap implements Serializable {
         }
 
         Random rand = new Random(this.seed);
-        this.mapOriginX = rand.nextInt(500);
-        this.mapOriginY = rand.nextInt(500);
-        this.mapInitialRubble = mapInitialRubble;
-        this.mapInitialParts = mapInitialParts;
+        this.originX = rand.nextInt(500);
+        this.originY = rand.nextInt(500);
+        this.initialRubble = initialRubble;
+        this.initialParts = initialParts;
         this.zSchedule = zSchedule;
         this.mapName = mapName;
     }
@@ -156,12 +158,12 @@ public class GameMap implements Serializable {
      */
     public boolean equivalentTo(GameMap other) {
         if (this.rounds != other.rounds) return false;
-        if (this.mapWidth != other.mapWidth) return false;
-        if (this.mapHeight != other.mapHeight) return false;
+        if (this.width != other.width) return false;
+        if (this.height != other.height) return false;
         if (this.seed != other.seed) return false;
-        if (!Arrays.deepEquals(this.mapInitialRubble, other.mapInitialRubble))
+        if (!Arrays.deepEquals(this.initialRubble, other.initialRubble))
             return false;
-        if (!Arrays.deepEquals(this.mapInitialParts, other.mapInitialParts))
+        if (!Arrays.deepEquals(this.initialParts, other.initialParts))
             return false;
         if (!this.mapName.equals(other.mapName)) return false;
         if (!this.zSchedule.equivalentTo(other.zSchedule)) return false;
@@ -175,7 +177,7 @@ public class GameMap implements Serializable {
      * @return the width of this map.
      */
     public int getWidth() {
-        return mapWidth;
+        return width;
     }
 
     /**
@@ -184,7 +186,7 @@ public class GameMap implements Serializable {
      * @return the height of this map.
      */
     public int getHeight() {
-        return mapHeight;
+        return height;
     }
 
     /**
@@ -207,7 +209,7 @@ public class GameMap implements Serializable {
      *         false if they're not
      */
     private boolean onTheMap(int x, int y) {
-        return (x >= mapOriginX && y >= mapOriginY && x < mapOriginX + mapWidth && y < mapOriginY + mapHeight);
+        return (x >= originX && y >= originY && x < originX + width && y < originY + height);
     }
 
     /**
@@ -228,11 +230,11 @@ public class GameMap implements Serializable {
      * @param location the MapLocation to get rubble for.
      * @return the amount of rubble in the given location, or 0 if off map
      */
-    public int getInitialRubble(MapLocation location) {
+    public int initialRubbleAtLocation(MapLocation location) {
         if (!onTheMap(location))
             return 0;
 
-        return mapInitialRubble[location.x - mapOriginX][location.y - mapOriginY];
+        return initialRubble[location.x - originX][location.y - originY];
     }
 
     /**
@@ -240,8 +242,8 @@ public class GameMap implements Serializable {
      *
      * @return the map's rubble in a 2D array
      */
-    public int[][] getInitialRubbleMatrix() {
-        return mapInitialRubble;
+    public int[][] getInitialRubble() {
+        return initialRubble;
     }
     
     /**
@@ -251,11 +253,11 @@ public class GameMap implements Serializable {
      * @param location the MapLocation to test
      * @return the amount of parts in the given location, or 0 if off the map
      */
-    public int getInitialParts(MapLocation location) {
+    public int initialPartsAtLocation(MapLocation location) {
         if (!onTheMap(location))
             return 0;
 
-        return mapInitialParts[location.x - mapOriginX][location.y - mapOriginY];
+        return initialParts[location.x - originX][location.y - originY];
     }
 
     /**
@@ -263,8 +265,8 @@ public class GameMap implements Serializable {
      *
      * @return the map's ore in a 2D array
      */
-    public int[][] getInitialPartsMatrix() {
-        return mapInitialParts;
+    public int[][] getInitialParts() {
+        return initialParts;
     }
 
     /**
@@ -276,14 +278,11 @@ public class GameMap implements Serializable {
         return rounds;
     }
 
-    public int getStraightMaxRounds() {
-        return rounds;
-    }
-
     public int getSeed() {
         return seed;
     }
 
+    @JsonIgnore
     public ZombieCount[] getZombieSpawnSchedule(int round) {
         return zSchedule.getScheduleForRound(round).toArray(new ZombieCount[0]);
     }
@@ -293,8 +292,9 @@ public class GameMap implements Serializable {
      *
      * @return the origin of the map
      */
+    @JsonIgnore
     public MapLocation getMapOrigin() {
-        return new MapLocation(mapOriginX, mapOriginY);
+        return new MapLocation(originX, originY);
     }
 
     // TODO: this shouldn't be named MapMemory
@@ -333,8 +333,8 @@ public class GameMap implements Serializable {
             MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
             for (int i = 0; i < locs.length; i++) {
-                int x = locs[i].x - map.mapOriginX;
-                int y = locs[i].y - map.mapOriginY;
+                int x = locs[i].x - map.originX;
+                int y = locs[i].y - map.originY;
                 if (validLoc(x, y)) {
                     currentCount[x + OFFSET][y + OFFSET]--;
                 }
@@ -345,8 +345,8 @@ public class GameMap implements Serializable {
             MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
             for (int i = 0; i < locs.length; i++) {
-                int x = locs[i].x - map.mapOriginX;
-                int y = locs[i].y - map.mapOriginY;
+                int x = locs[i].x - map.originX;
+                int y = locs[i].y - map.originY;
                 if (validLoc(x, y)) {
                     seen[x + OFFSET][y + OFFSET] = true;
                     currentCount[x + OFFSET][y + OFFSET]++;
@@ -363,8 +363,8 @@ public class GameMap implements Serializable {
         /** When a location gets rubble cleared, we'll update map memory if it's currently in sight. */
         public void updateLocation(MapLocation loc, int rubbleNew) {
             if (canSense(loc)) {
-                int x = loc.x - map.mapOriginX;
-                int y = loc.y - map.mapOriginY;
+                int x = loc.x - map.originX;
+                int y = loc.y - map.originY;
                 if (validLoc(x, y)) {
                     rubbleOnSquare[x + OFFSET][y + OFFSET] = rubbleNew;
                 }
@@ -372,8 +372,8 @@ public class GameMap implements Serializable {
         }
 
         public boolean seenBefore(MapLocation loc) {
-            int X = loc.x - map.mapOriginX;
-            int Y = loc.y - map.mapOriginY;
+            int X = loc.x - map.originX;
+            int Y = loc.y - map.originY;
 
             if (validLoc(X, Y)) {
                 return seen[X + OFFSET][Y + OFFSET];
@@ -383,8 +383,8 @@ public class GameMap implements Serializable {
         }
 
         public boolean canSense(MapLocation loc) {
-            int X = loc.x - map.mapOriginX;
-            int Y = loc.y - map.mapOriginY;
+            int X = loc.x - map.originX;
+            int Y = loc.y - map.originY;
 
             if (validLoc(X, Y)) {
                 return currentCount[X + OFFSET][Y + OFFSET] > 0;
@@ -394,8 +394,8 @@ public class GameMap implements Serializable {
         }
 
         public int recallRubble(MapLocation loc) {
-            int X = loc.x - map.mapOriginX;
-            int Y = loc.y - map.mapOriginY;
+            int X = loc.x - map.originX;
+            int Y = loc.y - map.originY;
 
             if (seenBefore(loc)) {
                 return rubbleOnSquare[X + OFFSET][Y + OFFSET];
@@ -405,8 +405,8 @@ public class GameMap implements Serializable {
         }
         
         public int recallParts(MapLocation loc) {
-            int X = loc.x - map.mapOriginX;
-            int Y = loc.y - map.mapOriginY;
+            int X = loc.x - map.originX;
+            int Y = loc.y - map.originY;
 
             if (seenBefore(loc)) {
                 return partsOnSquare[X + OFFSET][Y + OFFSET];
@@ -414,5 +414,22 @@ public class GameMap implements Serializable {
                 return -1;
             } 
         }
+    }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private GameMap() {
+        this.width = 0;
+        this.height = 0;
+        this.initialRubble = null;
+        this.initialParts = null;
+        this.originX = 0;
+        this.originY = 0;
+        this.seed = 0;
+        this.rounds = 0;
+        this.mapName = null;
+        this.zSchedule = null;
     }
 }

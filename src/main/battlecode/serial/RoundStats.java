@@ -17,4 +17,12 @@ public class RoundStats implements Serializable {
     public double getPoints(Team team) {
         return points[team.ordinal()];
     }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private RoundStats() {
+        this.points = null;
+    }
 }

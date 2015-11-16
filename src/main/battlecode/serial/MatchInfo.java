@@ -16,10 +16,6 @@ public class MatchInfo implements Serializable {
         this.maps = maps;
     }
 
-    public MatchInfo(String teamA, String teamB, String mapName) {
-        this(teamA, teamB, new String[]{mapName});
-    }
-
     public String[] getMaps() {
         return maps;
     }
@@ -30,5 +26,13 @@ public class MatchInfo implements Serializable {
 
     public String getTeamB() {
         return teamB;
+    }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private MatchInfo() {
+        this(null, null, null);
     }
 }

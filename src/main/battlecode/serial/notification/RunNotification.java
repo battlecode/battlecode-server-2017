@@ -1,5 +1,7 @@
 package battlecode.serial.notification;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 /**
  * Represents a "run for n rounds" notification.
  */
@@ -8,6 +10,7 @@ public class RunNotification implements Notification {
     private static final long serialVersionUID = 2218449423201081302L;
     private final int rounds;
 
+    @JsonCreator(mode=JsonCreator.Mode.PROPERTIES)
     public RunNotification(int rounds) {
         this.rounds = rounds;
     }

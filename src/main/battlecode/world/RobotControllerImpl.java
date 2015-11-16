@@ -338,13 +338,12 @@ public final class RobotControllerImpl implements RobotController,
                 : 1.0);
         double factor2 = 1.0;
         // if (robot.type == RobotType.DRONE &&
-        // gameWorld.getMapTerrain(getLocation().add(d)) == TerrainType.VOID) {
+        // gameWorld.getMapTerrain(getLoc().add(d)) == TerrainType.VOID) {
         // factor1 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
         // factor2 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
         // } TODO: Will we have flying units?
 
-        robot.activateMovement(new MovementSignal(robot, getLocation().add(d),
-                true, (int) (robot.getMovementDelayForType() * factor1)),
+        robot.activateMovement(new MovementSignal(robot.getID(), getLocation().add(d), true, (int) (robot.getMovementDelayForType() * factor1)),
                 robot.getCooldownDelayForType() * factor2,
                 robot.getMovementDelayForType() * factor1);
     }
@@ -409,7 +408,7 @@ public final class RobotControllerImpl implements RobotController,
         assertIsAttackingUnit();
         assertValidAttackLocation(loc);
 
-        robot.activateAttack(new AttackSignal(robot, loc),
+        robot.activateAttack(new AttackSignal(robot.getID(), loc),
                 robot.getAttackDelayForType(), robot.getCooldownDelayForType());
     }
 
@@ -559,8 +558,7 @@ public final class RobotControllerImpl implements RobotController,
         assertIsPathable(type, loc);
 
         int delay = type.buildTurns;
-        robot.activateMovement(new BuildSignal(loc, type, robot.getTeam(),
-                robot, delay), delay, delay);
+        robot.activateMovement(new BuildSignal(robot == null ? robot.getID() : 0, loc, type, robot.getTeam(), delay), delay, delay);
     }
 
     // ***********************************
@@ -604,20 +602,20 @@ public final class RobotControllerImpl implements RobotController,
     public void setIndicatorString(int stringIndex, String newString) {
         if (stringIndex >= 0
                 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS)
-            (new IndicatorStringSignal(robot, stringIndex, newString))
+            (new IndicatorStringSignal(robot.getID(), stringIndex, newString))
                     .accept(gameWorld);
     }
 
     public void setIndicatorDot(MapLocation loc, int red, int green, int blue) {
         assertNotNull(loc);
-        new IndicatorDotSignal(robot, loc, red, green, blue).accept(gameWorld);
+        new IndicatorDotSignal(robot.getID(), robot.getTeam(), loc, red, green, blue).accept(gameWorld);
     }
 
     public void setIndicatorLine(MapLocation from, MapLocation to, int red,
             int green, int blue) {
         assertNotNull(from);
         assertNotNull(to);
-        new IndicatorLineSignal(robot, from, to, red, green, blue)
+        new IndicatorLineSignal(robot.getID(), robot.getTeam(), from, to, red, green, blue)
                 .accept(gameWorld);
     }
 
@@ -626,7 +624,7 @@ public final class RobotControllerImpl implements RobotController,
     }
 
     public void addMatchObservation(String observation) {
-        (new MatchObservationSignal(robot, observation)).accept(gameWorld);
+        (new MatchObservationSignal(robot.getID(), observation)).accept(gameWorld);
     }
 
     public void breakpoint() {

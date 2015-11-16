@@ -2,6 +2,7 @@ package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Creates an observation to be displayed in transcribed matches
@@ -25,12 +26,11 @@ public class MatchObservationSignal extends Signal {
     /**
      * Creates a signal for a robot whose indicator string has just changed
      *
-     * @param robot        the robot whose indicator string just changed
-     * @param stringNumber indicates which of the robot's indicator strings was changed
+     * @param robotID      the id of the robot whose indicator string just changed
      * @param observation  the value of the new indicator string
      */
-    public MatchObservationSignal(InternalRobot robot, String observation) {
-        this.robotID = robot.getID();
+    public MatchObservationSignal(int robotID, String observation) {
+        this.robotID = robotID;
         this.observation = observation;
     }
 
@@ -50,5 +50,13 @@ public class MatchObservationSignal extends Signal {
      */
     public String getObservation() {
         return observation;
+    }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private MatchObservationSignal() {
+        this(0, null);
     }
 }

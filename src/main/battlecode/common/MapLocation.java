@@ -1,5 +1,7 @@
 package battlecode.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
@@ -29,10 +31,8 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      * @param y the y-coordinate of the location
      */
     public MapLocation(int x, int y) {
-
         this.x = x;
         this.y = y;
-
     }
 
     /**
@@ -252,5 +252,12 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
         }
 
         return locations.toArray(new MapLocation[locations.size()]);
+    }
+
+    /**
+     * For use by serializers.
+     */
+    private MapLocation() {
+        this(0,0);
     }
 }

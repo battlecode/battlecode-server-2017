@@ -7,16 +7,13 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import battlecode.common.CommanderSkillType;
 import battlecode.common.Team;
 import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
-import battlecode.world.signal.BashSignal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.SpawnSignal;
-import battlecode.world.signal.TransferSupplySignal;
 
 public class InternalRobot implements GenericRobot {
     public RobotType type;
@@ -424,7 +421,7 @@ public class InternalRobot implements GenericRobot {
     }
 
     public void suicide() {
-        (new DeathSignal(this)).accept(myGameWorld);
+        (new DeathSignal(this.getID())).accept(myGameWorld);
     }
     
     public void transform(RobotType newType) {
@@ -457,7 +454,7 @@ public class InternalRobot implements GenericRobot {
 
         // broadcasts
         if (broadcasted)
-            myGameWorld.visitSignal(new BroadcastSignal(this, broadcastMap));
+            myGameWorld.visitSignal(new BroadcastSignal(this.getID(), this.getTeam(), broadcastMap));
 
         broadcastMap = new HashMap<Integer, Integer>();
         broadcasted = false;

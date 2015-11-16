@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Created by james on 7/28/15.
  */
-public abstract class SerializerFactoryTest {
+public abstract class SerializerFactoryTestBase {
     static final Map<GameMap.MapProperties, Integer> properties = new HashMap<>();
     static {
         properties.put(GameMap.MapProperties.HEIGHT, 3);
@@ -70,28 +70,25 @@ public abstract class SerializerFactoryTest {
             new MatchInfo("Team 1", "Team 2", new String[] {"Map 1", "Map 2"}),
             new MatchHeader(gameMap, teamMemories, 0, 3),
             new RoundDelta(new Signal[] {
-                    new AttackSignal(robot, new MapLocation(1,1)),
-                    new BashSignal(robot, new MapLocation(1,1)),
-                    new BroadcastSignal(robot, new HashMap<Integer, Integer>()),
-                    new BuildSignal(robot, robot, 2), // This is technically incorrect but whatever
+                    new AttackSignal(robot.getID(), new MapLocation(1,1)),
+                    new BashSignal(robot.getID(), new MapLocation(1,1)),
+                    new BroadcastSignal(robot.getID(), robot.getTeam(), new HashMap<Integer, Integer>()),
+                    new BuildSignal(57, new MapLocation(1,1), RobotType.GUARD, Team.A, 50),
                     new BytecodesUsedSignal(new InternalRobot[]{robot}),
-                    new CastSignal(robot, new MapLocation(-75, -75)),
+                    new CastSignal(robot.getID(), new MapLocation(-75, -75)),
                     new ControlBitsSignal(0, 0),
-                    new DeathSignal(robot),
+                    new DeathSignal(robot.getID()),
                     new HealthChangeSignal(new InternalRobot[]{robot}),
-                    new IndicatorDotSignal(robot, new MapLocation(0,0), 0,0,0),
-                    new IndicatorLineSignal(robot, new MapLocation(0,0), new MapLocation(1,1), 0,0,0),
-                    new IndicatorStringSignal(robot, 0, "Test Indicator String"),
+                    new IndicatorDotSignal(robot.getID(), robot.getTeam(), new MapLocation(0,0), 0, 0, 0),
+                    new IndicatorLineSignal(robot.getID(), robot.getTeam(), new MapLocation(0,0), new MapLocation(1,1), 0, 0, 0),
+                    new IndicatorStringSignal(robot.getID(), 0, "Test Indicator String"),
                     new LocationOreChangeSignal(new MapLocation(0,0), -1.0),
-                    new MatchObservationSignal(robot, "test"),
-                    new MineSignal(new MapLocation(0,0), 0),
-                    new MissileCountSignal(0, 1),
+                    new MatchObservationSignal(robot.getID(), "test"),
                     new MovementOverrideSignal(0, new MapLocation(10000, 10000)),
-                    new MovementSignal(robot, new MapLocation(0, 0), true),
-                    new RobotInfoSignal(new InternalRobot[] {robot}),
-                    new SelfDestructSignal(robot, new MapLocation(0,0), 1000),
+                    new MovementSignal(robot.getID(), new MapLocation(0, 0), true, 0),
+                    new RobotDelaySignal(new InternalRobot[] {robot}),
                     new SpawnSignal(robot, robot, 1000),
-                    new TeamOreSignal(new double[] {10000, 21293}),
+                    new TeamOreSignal(Team.A, 100),
                     new XPSignal(0, 1000)
             }),
             new MatchFooter(Team.A, teamMemories),

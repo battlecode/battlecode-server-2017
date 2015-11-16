@@ -10,7 +10,7 @@ import java.io.IOException;
  *
  * Created by james on 11/15/15.
  */
-public class JsonSerializerFactoryTest extends SerializerFactoryTest {
+public class JsonSerializerFactoryTest extends SerializerFactoryTestBase {
     @Test
     public void testJsonRoundTrip() throws IOException {
         testRoundTrip(new JsonSerializerFactory());

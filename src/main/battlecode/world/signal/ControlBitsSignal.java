@@ -1,7 +1,11 @@
 package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
+/**
+ * Signifies that the control bits of a robot have just changed.
+ */
 public class ControlBitsSignal extends Signal {
 
     private static final long serialVersionUID = -4229507739170593943L;
@@ -21,5 +25,13 @@ public class ControlBitsSignal extends Signal {
 
     public long getControlBits() {
         return controlBits;
+    }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private ControlBitsSignal() {
+        this(0, 0L);
     }
 }
