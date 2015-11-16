@@ -2,6 +2,7 @@ package battlecode.server.controller;
 
 import battlecode.server.Server;
 import battlecode.server.serializer.Serializer;
+import battlecode.server.serializer.SerializerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,9 +29,9 @@ public final class InputStreamController extends Controller {
     /**
      * Creates a new InputStreamController using the given properties.
      */
-    public InputStreamController(final InputStream input, final Serializer serializer) {
+    public InputStreamController(final InputStream input, final SerializerFactory serializerFactory) throws IOException {
         this.input = input;
-        this.serializer = serializer;
+        this.serializer = serializerFactory.createSerializer(null, input);
         this.listener = new InputStreamListener();
         this.listenerThread = new Thread(listener);
         this.listenerThread.setDaemon(true);
@@ -94,7 +95,7 @@ public final class InputStreamController extends Controller {
         public void run() {
             while (isRunning) {
                 try {
-                    final Object data = serializer.deserialize(input);
+                    final Object data = serializer.deserialize();
 
                     setChanged();
                     notifyObservers(data);

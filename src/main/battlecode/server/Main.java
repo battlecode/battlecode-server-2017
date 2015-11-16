@@ -6,9 +6,10 @@ import battlecode.server.controller.InputStreamController;
 import battlecode.server.proxy.FileProxy;
 import battlecode.server.proxy.OutputStreamProxy;
 import battlecode.server.proxy.Proxy;
-import battlecode.server.serializer.JavaSerializer;
+import battlecode.server.serializer.JavaSerializerFactory;
 import battlecode.server.serializer.Serializer;
-import battlecode.server.serializer.XStreamSerializer;
+import battlecode.server.serializer.SerializerFactory;
+import battlecode.server.serializer.XStreamSerializerFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -22,14 +23,14 @@ public class Main {
         try {
             final Controller controller = new HeadlessController(options);
 
-            final Serializer serializer;
+            final SerializerFactory serializerFactory;
             if (options.getBoolean("bc.server.output-xml")) {
-                serializer = new XStreamSerializer();
+                serializerFactory = new XStreamSerializerFactory();
             } else {
-                serializer = new JavaSerializer();
+                serializerFactory = new JavaSerializerFactory();
             }
 
-            final Proxy proxy = new FileProxy(saveFile, serializer);
+            final Proxy proxy = new FileProxy(saveFile, serializerFactory);
 
             final Server server = new Server(options, Server.Mode.HEADLESS, controller, proxy);
 
@@ -70,21 +71,21 @@ public class Main {
             Socket clientSocket = serverSocket.accept();
             // serverSocket.close(); (?)
 
-            final Serializer serializer;
+            final SerializerFactory serializerFactory;
             if (options.getBoolean("bc.server.output-xml")) {
-                serializer = new XStreamSerializer();
+                serializerFactory = new XStreamSerializerFactory();
             } else {
-                serializer = new JavaSerializer();
+                serializerFactory = new JavaSerializerFactory();
             }
 
-            Controller controller = new InputStreamController(clientSocket.getInputStream(), serializer);
+            Controller controller = new InputStreamController(clientSocket.getInputStream(), serializerFactory);
 
             List<Proxy> proxies = new LinkedList<Proxy>();
 
             if (saveFile != null)
-                proxies.add(new FileProxy(saveFile, serializer));
+                proxies.add(new FileProxy(saveFile, serializerFactory));
 
-            proxies.add(new OutputStreamProxy(serializer, clientSocket.getOutputStream()));
+            proxies.add(new OutputStreamProxy(serializerFactory, clientSocket.getOutputStream()));
 
             Server server = new Server(options, Server.Mode.TCP, controller,
                     proxies.toArray(new Proxy[proxies.size()]));
@@ -98,21 +99,21 @@ public class Main {
 
     private static void runPipe(Config options, String saveFile) {
         try {
-            final Serializer serializer;
+            final SerializerFactory serializerFactory;
             if (options.getBoolean("bc.server.output-xml")) {
-                serializer = new XStreamSerializer();
+                serializerFactory = new XStreamSerializerFactory();
             } else {
-                serializer = new JavaSerializer();
+                serializerFactory = new JavaSerializerFactory();
             }
 
-            Controller controller = new InputStreamController(System.in, serializer);
+            Controller controller = new InputStreamController(System.in, serializerFactory);
 
             List<Proxy> proxies = new LinkedList<Proxy>();
 
             if (saveFile != null)
-                proxies.add(new FileProxy(saveFile, serializer));
+                proxies.add(new FileProxy(saveFile, serializerFactory));
 
-            proxies.add(new OutputStreamProxy(serializer, System.out));
+            proxies.add(new OutputStreamProxy(serializerFactory, System.out));
 
             // since we're sending the match file to System.out, don't send log
             // messages there

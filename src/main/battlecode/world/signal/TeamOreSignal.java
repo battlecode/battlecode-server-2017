@@ -2,25 +2,36 @@ package battlecode.world.signal;
 
 import java.util.Arrays;
 
+import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
+
+/**
+ * Signifies a new quantity of ore for a team.
+ */
 public class TeamOreSignal extends Signal {
 
     /**
-     * The robot's new energon level
+     * The team
      */
-    public final double[] ore;
+    public final Team team;
 
-    public TeamOreSignal(double[] ore) {
-    	this.ore = Arrays.copyOf(ore, ore.length);
+    /**
+     * The team's new ore level
+     */
+    public final double ore;
+
+    public TeamOreSignal(Team team, double ore) {
+        this.team = team;
+        this.ore = ore;
     }
 
     /**
-     * Returns the robot's new energon amount
-     *
-     * @return the robot's new energon amount
+     * For use by serializers.
      */
-    public double[] getOre() {
-        return ore;
+    @SuppressWarnings("unused")
+    private TeamOreSignal() {
+        this(null, 0);
     }
 }

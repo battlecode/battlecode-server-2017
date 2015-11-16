@@ -3,13 +3,15 @@ package battlecode.world.signal;
 import battlecode.common.MapLocation;
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Signifies that a robot just attacked
  *
  * @author adamd
  */
-public class AttackSignal extends Signal {
+public final class AttackSignal extends Signal {
 
     private static final long serialVersionUID = 8064711239305833273L;
 
@@ -26,17 +28,20 @@ public class AttackSignal extends Signal {
     /**
      * Creates a signal for a robot attack.
      *
-     * @param robot     the robot that attacked
+     * @param robotID   the ID of the robot that attacked
      * @param targetLoc the location that the robot attacked
      */
-    public AttackSignal(InternalRobot robot, MapLocation targetLoc) {
-        this.robotID = robot.getID();
+    public AttackSignal(int robotID, MapLocation targetLoc) {
+        this.robotID = robotID;
         this.targetLoc = targetLoc;
     }
 
-    public AttackSignal(int ID, MapLocation targetLoc) {
-        this.robotID = ID;
-        this.targetLoc = targetLoc;
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private AttackSignal() {
+        this(0, null);
     }
 
     /**

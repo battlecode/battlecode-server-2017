@@ -22,4 +22,12 @@ public class MatchFooter implements Serializable {
     public long[][] getState() {
         return state;
     }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private MatchFooter() {
+        this(null, null);
+    }
 }

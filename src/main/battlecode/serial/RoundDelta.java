@@ -2,6 +2,7 @@ package battlecode.serial;
 
 import battlecode.engine.signal.Signal;
 import battlecode.world.signal.IndicatorStringSignal;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,9 +10,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * A list of Signals that occurred in a round.
+ */
 public class RoundDelta implements Serializable {
 
     private static final long serialVersionUID = 1667367676711924140L;
+
     private Signal[] signals;
 
     public RoundDelta() {

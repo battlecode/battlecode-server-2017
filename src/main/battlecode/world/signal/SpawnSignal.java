@@ -6,6 +6,7 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Signifies that a robot was just spawned
@@ -43,41 +44,27 @@ public class SpawnSignal extends Signal {
 
     private final int delay;
 
-//    /**
-//     * The new robot's direction
-//     */
-//    private final Direction dir;
-
-    /**
-     * Creates a signal for a robot that was just spawned
-     */
-    public SpawnSignal(InternalRobot child, InternalRobot parent, int delay) {
-        robotID = child.getID();
-        this.delay = delay;
-        if (parent == null)
-            parentID = 0;
-        else
-            parentID = parent.getID();
-        loc = child.getLocation();
-        type = child.type;
-        team = child.getTeam();
-//        dir = child.getDirection();
-    }
-
-    /**
-     * Creates a spawn signal for a robot that hasn't been spawned yet
-     */
-    public SpawnSignal(MapLocation loc, RobotType type, Team team, InternalRobot parent, int delay) {
+    public SpawnSignal(int robotID, int parentID, MapLocation loc, RobotType type, Team team, int delay) {
+        this.robotID = robotID;
+        this.parentID = parentID;
         this.loc = loc;
         this.type = type;
         this.team = team;
         this.delay = delay;
-        robotID = 0;
-        if (parent == null)
-            parentID = 0;
-        else
-            parentID = parent.getID();
-//        dir = null;
+    }
+
+    /**
+     * Convenience constructor; creates a signal for a robot that was just spawned
+     */
+    public SpawnSignal(InternalRobot child, InternalRobot parent, int delay) {
+        this(child.getID(), parent == null ? 0 : parent.getID(), child.getLocation(), child.type, child.getTeam(), delay);
+    }
+
+    /**
+     * Convenience constructor; creates a spawn signal for a robot that hasn't been spawned yet
+     */
+    public SpawnSignal(MapLocation loc, RobotType type, Team team, InternalRobot parent, int delay) {
+        this(0, parent == null ? parent.getID() : 0, loc, type, team, delay);
     }
 
     public int getRobotID() {
@@ -96,15 +83,19 @@ public class SpawnSignal extends Signal {
         return team;
     }
 
-//    public Direction getDirection() {
-//        return dir;
-//    }
-
     public int getParentID() {
         return parentID;
     }
 
     public int getDelay() {
         return delay;
+    }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private SpawnSignal() {
+        this(0, 0, null, null, null, 0);
     }
 }

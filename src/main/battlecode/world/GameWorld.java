@@ -30,13 +30,14 @@ import battlecode.world.signal.IndicatorStringSignal;
 import battlecode.world.signal.MatchObservationSignal;
 import battlecode.world.signal.MovementSignal;
 import battlecode.world.signal.MovementOverrideSignal;
-import battlecode.world.signal.RobotInfoSignal;
+import battlecode.world.signal.RobotDelaySignal;
 import battlecode.world.signal.SpawnSignal;
 
 /**
  * The primary implementation of the GameWorld interface for containing and
  * modifying the game map and the objects on it.
  */
+@SuppressWarnings("unused")
 public class GameWorld implements GenericWorld {
     protected int currentRound; // do we need this here?? -- yes
     protected boolean running = true; // do we need this here?? -- yes
@@ -453,7 +454,7 @@ public class GameWorld implements GenericWorld {
             InternalRobot r = deadRobots.remove(deadRobots.size() - 1);
             if (r.getID() == RobotMonitor.getCurrentRobotID())
                 current = true;
-            visitSignal(new DeathSignal(r)); // If infected, also turns into zombie
+            visitSignal(new DeathSignal(r.getID())); // If infected, also turns into zombie
         }
         removingDead = false;
         if (current)
@@ -611,7 +612,7 @@ public class GameWorld implements GenericWorld {
         /*
          * for (int i = 0; i < gameObjects.length; i++) { InternalRobot ir =
          * (InternalRobot) gameObjects[i];
-         * mapMemory.get(ir.getTeam()).rememberLocations(ir.getLocation(),
+         * mapMemory.get(ir.getTeam()).rememberLocations(ir.getLoc(),
          * ir.type.sensorRadiusSquared, oreMined); }
          */
 
@@ -621,7 +622,10 @@ public class GameWorld implements GenericWorld {
         teamResources[Team.B.ordinal()] += GameConstants.ARCHON_PART_INCOME
                 * getActiveRobotTypeCount(Team.B, RobotType.ARCHON);
 
-        addSignal(new TeamOreSignal(teamResources));
+        // Add signals for team resources
+        for (final Team team : Team.values()) {
+            addSignal(new TeamOreSignal(team, teamResources[team.ordinal()]));
+        }
 
         if (timeLimitReached() && winner == null) {
             // tiebreak by number of Archons
@@ -696,8 +700,15 @@ public class GameWorld implements GenericWorld {
         if (includeBytecodesUsedSignal) {
             signals.add(new BytecodesUsedSignal(robots));
         }
-        signals.add(new RobotInfoSignal(robots));
+        signals.add(new RobotDelaySignal(robots));
+
         HealthChangeSignal healthChange = new HealthChangeSignal(robots);
+
+        // Reset health levels.
+        for (final InternalRobot robot : robots) {
+            robot.clearHealthChanged();
+        }
+
         if (healthChange.getRobotIDs().length > 0) {
             signals.add(healthChange);
         }
@@ -760,7 +771,6 @@ public class GameWorld implements GenericWorld {
 
     public void visitBroadcastSignal(BroadcastSignal s) {
         radio.get(s.getRobotTeam()).putAll(s.broadcastMap);
-        s.broadcastMap = null;
         addSignal(s);
     }
 

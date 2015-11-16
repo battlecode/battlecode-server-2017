@@ -9,28 +9,21 @@ import battlecode.serial.notification.PauseNotification;
 import battlecode.serial.notification.ResumeNotification;
 import battlecode.serial.notification.RunNotification;
 import battlecode.serial.notification.StartNotification;
-import battlecode.server.serializer.JavaSerializer;
-import battlecode.server.serializer.Serializer;
-import battlecode.server.serializer.XStreamSerializer;
+import battlecode.server.serializer.*;
 import battlecode.world.GameMap;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
 import battlecode.world.ZombieSpawnSchedule;
 import battlecode.world.signal.*;
-import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.junit.Assert.*;
 
 /**
  * Created by james on 7/28/15.
  */
-public class SerializerTest {
+public abstract class SerializerFactoryTestBase {
     static final Map<GameMap.MapProperties, Integer> properties = new HashMap<>();
     static {
         properties.put(GameMap.MapProperties.HEIGHT, 3);
@@ -77,28 +70,25 @@ public class SerializerTest {
             new MatchInfo("Team 1", "Team 2", new String[] {"Map 1", "Map 2"}),
             new MatchHeader(gameMap, teamMemories, 0, 3),
             new RoundDelta(new Signal[] {
-                    new AttackSignal(robot, new MapLocation(1,1)),
-                    new BashSignal(robot, new MapLocation(1,1)),
-                    new BroadcastSignal(robot, new HashMap<Integer, Integer>()),
-                    new BuildSignal(robot, robot, 2), // This is technically incorrect but whatever
+                    new AttackSignal(robot.getID(), new MapLocation(1,1)),
+                    new BashSignal(robot.getID(), new MapLocation(1,1)),
+                    new BroadcastSignal(robot.getID(), robot.getTeam(), new HashMap<Integer, Integer>()),
+                    new BuildSignal(57, new MapLocation(1,1), RobotType.GUARD, Team.A, 50),
                     new BytecodesUsedSignal(new InternalRobot[]{robot}),
-                    new CastSignal(robot, new MapLocation(-75, -75)),
+                    new CastSignal(robot.getID(), new MapLocation(-75, -75)),
                     new ControlBitsSignal(0, 0),
-                    new DeathSignal(robot),
+                    new DeathSignal(robot.getID()),
                     new HealthChangeSignal(new InternalRobot[]{robot}),
-                    new IndicatorDotSignal(robot, new MapLocation(0,0), 0,0,0),
-                    new IndicatorLineSignal(robot, new MapLocation(0,0), new MapLocation(1,1), 0,0,0),
-                    new IndicatorStringSignal(robot, 0, "Test Indicator String"),
+                    new IndicatorDotSignal(robot.getID(), robot.getTeam(), new MapLocation(0,0), 0, 0, 0),
+                    new IndicatorLineSignal(robot.getID(), robot.getTeam(), new MapLocation(0,0), new MapLocation(1,1), 0, 0, 0),
+                    new IndicatorStringSignal(robot.getID(), 0, "Test Indicator String"),
                     new LocationOreChangeSignal(new MapLocation(0,0), -1.0),
-                    new MatchObservationSignal(robot, "test"),
-                    new MineSignal(new MapLocation(0,0), 0),
-                    new MissileCountSignal(0, 1),
+                    new MatchObservationSignal(robot.getID(), "test"),
                     new MovementOverrideSignal(0, new MapLocation(10000, 10000)),
-                    new MovementSignal(robot, new MapLocation(0, 0), true),
-                    new RobotInfoSignal(new InternalRobot[] {robot}),
-                    new SelfDestructSignal(robot, new MapLocation(0,0), 1000),
+                    new MovementSignal(robot.getID(), new MapLocation(0, 0), true, 0),
+                    new RobotDelaySignal(new InternalRobot[] {robot}),
                     new SpawnSignal(robot, robot, 1000),
-                    new TeamOreSignal(new double[] {10000, 21293}),
+                    new TeamOreSignal(Team.A, 100),
                     new XPSignal(0, 1000)
             }),
             new MatchFooter(Team.A, teamMemories),
@@ -108,36 +98,40 @@ public class SerializerTest {
             new ExtensibleMetadata()
     };
 
-    @Test
-    public void testJavaRoundTrip() {
-        testRoundTrip(new JavaSerializer());
-    }
-
-    @Test
-    public void testXStreamRoundTrip() {
-        testRoundTrip(new XStreamSerializer());
-    }
-
-    public void testRoundTrip(final Serializer serializer) {
+    /**
+     * Runs all the objects we're going to serialize through a serializer-deserializer pair.
+     *
+     * @param serializerFactory The factory to create serializers with.
+     * @throws IOException
+     */
+    public void testRoundTrip(final SerializerFactory serializerFactory) throws IOException {
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
-        for (final Object message : serializeableObjects) {
-            output.reset();
-            try {
-                serializer.serialize(output, message);
-            } catch (final IOException e) {
-                fail("Couldn't serialize object of class: " + message.getClass().getCanonicalName() + ": " + e);
-            }
 
-            final ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
+        final Serializer serializer = serializerFactory.createSerializer(output, null);
+        for (int i = 0; i < serializeableObjects.length; i++) {
+            try {
+                serializer.serialize(serializeableObjects[i]);
+            } catch (final IOException e) {
+                throw new IOException("Couldn't serialize object of class: " +
+                        serializeableObjects[i].getClass().getCanonicalName(), e);
+            }
+        }
+        serializer.close();
+        output.close();
+
+        final ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
+        final Serializer deserializer = serializerFactory.createSerializer(null, input);
+
+        for (int i = 0; i < serializeableObjects.length; i++) {
             final Object result;
             try {
-                result = serializer.deserialize(input);
+                result = deserializer.deserialize();
             } catch (final IOException e) {
-                fail("Couldn't deserialize object of class: " + message.getClass().getCanonicalName() + ": " + e);
-                return; // To satisfy "might not have been initialized"
+                throw new IOException("Couldn't deserialize object of class: " +
+                        serializeableObjects[i].getClass().getCanonicalName(), e);
             }
 
-            // TODO assertEquals(message, result);
+            // TODO assertEquals(serializeableObjects[i], result);
             // For this to work, we'll need to override Object.equals on any class we want to serialize.
         }
     }

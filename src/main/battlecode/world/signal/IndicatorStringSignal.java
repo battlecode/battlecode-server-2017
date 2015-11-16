@@ -2,6 +2,7 @@ package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Signifies that one of the robot's indicator strings has been changed
@@ -30,12 +31,12 @@ public class IndicatorStringSignal extends Signal {
     /**
      * Creates a signal for a robot whose indicator string has just changed
      *
-     * @param robot        the robot whose indicator string just changed
-     * @param stringNumber indicates which of the robot's indicator strings was changed
-     * @param newString    the value of the new indicator string
+     * @param robotID     the id of the robot whose indicator string just changed
+     * @param stringIndex indicates which of the robot's indicator strings was changed
+     * @param newString   the value of the new indicator string
      */
-    public IndicatorStringSignal(InternalRobot robot, int stringIndex, String newString) {
-        this.robotID = robot.getID();
+    public IndicatorStringSignal(int robotID, int stringIndex, String newString) {
+        this.robotID = robotID;
         this.stringIndex = stringIndex;
         this.newString = newString;
     }
@@ -65,5 +66,13 @@ public class IndicatorStringSignal extends Signal {
      */
     public String getNewString() {
         return newString;
+    }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private IndicatorStringSignal() {
+        this(0, 0, null);
     }
 }

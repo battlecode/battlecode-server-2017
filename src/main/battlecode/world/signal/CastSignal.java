@@ -4,6 +4,7 @@ import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
 import battlecode.common.MapLocation;
 import battlecode.common.CommanderSkillType;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Signifies that a robot cast a spell.
@@ -25,9 +26,9 @@ public class CastSignal extends Signal {
 
     public final MapLocation targetLoc;
 
-    public CastSignal(InternalRobot robot, MapLocation loc) {
-        this.robotID = robot.getID();
-        this.targetLoc = loc;
+    public CastSignal(int robotID, MapLocation targetLoc) {
+        this.robotID = robotID;
+        this.targetLoc = targetLoc;
     }
 
     /**
@@ -45,5 +46,13 @@ public class CastSignal extends Signal {
      */
     public MapLocation getTargetLoc() {
         return targetLoc;
+    }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private CastSignal() {
+        this(0, null);
     }
 }

@@ -2,7 +2,6 @@ package battlecode.world.signal;
 
 import battlecode.common.MapLocation;
 import battlecode.engine.signal.Signal;
-import battlecode.world.InternalRobot;
 
 /**
  * Signifies that a robot has moved.
@@ -26,32 +25,25 @@ public class MovementSignal extends Signal {
     /**
      * Whether the robot got to the new location by moving forward or backward.
      */
-    private final boolean isMovingForward;
+    private final boolean movingForward;
 
+    /**
+     * The delay of the movement (?)
+     */
     private final int delay;
 
     /**
      * Creates a signal for a robot movement.
      *
-     * @param robot           the robot that is moving
+     * @param robotID         the ID of the robot that is moving
      * @param newLoc          the robot's new location
-     * @param isMovingForward whether the robot got to the new location by moving forward or backward
+     * @param movingForward whether the robot got to the new location by moving forward or backward
+     * @param delay           the delay of the movement
      */
-    public MovementSignal(InternalRobot robot, MapLocation newLoc, boolean isMovingForward) {
-        this(robot, newLoc, isMovingForward, 0);
-    }
-
-    /**
-     * Creates a signal for a robot movement.
-     *
-     * @param robot           the robot that is moving
-     * @param newLoc          the robot's new location
-     * @param isMovingForward whether the robot got to the new location by moving forward or backward
-     */
-    public MovementSignal(InternalRobot robot, MapLocation newLoc, boolean isMovingForward, int delay) {
-        this.robotID = robot.getID();
+    public MovementSignal(int robotID, MapLocation newLoc, boolean movingForward, int delay) {
+        this.robotID = robotID;
         this.newLoc = newLoc;
-        this.isMovingForward = isMovingForward;
+        this.movingForward = movingForward;
         this.delay = delay;
     }
 
@@ -76,11 +68,22 @@ public class MovementSignal extends Signal {
     /**
      * Whether the robot got to the new location by moving forward or backward.
      */
-    public boolean isMovingForward() {
-        return isMovingForward;
+    public boolean getMovingForward() {
+        return movingForward;
     }
 
+    /**
+     * The delay of the movement (?)
+     */
     public int getDelay() {
         return delay;
+    }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private MovementSignal() {
+        this(0, null, false, 0);
     }
 }

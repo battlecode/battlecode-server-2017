@@ -1,6 +1,7 @@
 package battlecode.server.proxy;
 
 import battlecode.server.serializer.Serializer;
+import battlecode.server.serializer.SerializerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,19 +16,20 @@ public class OutputStreamProxy implements Proxy {
     private final Serializer serializer;
     private final OutputStream output;
 
-    public OutputStreamProxy(final Serializer serializer, final OutputStream output) {
-        this.serializer = serializer;
+    public OutputStreamProxy(final SerializerFactory serializerFactory, final OutputStream output) throws IOException {
+        this.serializer = serializerFactory.createSerializer(output, null);
         this.output = output;
     }
 
     @Override
     public void writeObject(final Object message) throws IOException {
-        serializer.serialize(output, message);
+        serializer.serialize(message);
         output.flush();
     }
 
     @Override
     public void close() throws IOException {
+        serializer.close();
         output.close();
     }
 }

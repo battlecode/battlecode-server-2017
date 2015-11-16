@@ -2,7 +2,11 @@ package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
 import battlecode.common.MapLocation;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
+/**
+ * Represents that the amoun
+ */
 public class LocationOreChangeSignal extends Signal {
 
     private static final long serialVersionUID = -4229507739170593123L;
@@ -15,11 +19,19 @@ public class LocationOreChangeSignal extends Signal {
         this.ore = ore;
     }
 
-    public MapLocation getLocation() {
+    public MapLocation getLoc() {
         return loc;
     }
 
     public double getOre() {
         return ore;
+    }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private LocationOreChangeSignal() {
+        this(null, 0);
     }
 }
