@@ -1,13 +1,12 @@
 package battlecode.world.signal;
 
-import battlecode.engine.signal.Signal;
 import battlecode.common.MapLocation;
-import com.fasterxml.jackson.annotation.JsonCreator;
+import battlecode.engine.signal.Signal;
 
 /**
  * Represents that the amoun
  */
-public class LocationOreChangeSignal extends Signal {
+public class LocationOreChangeSignal implements Signal {
 
     private static final long serialVersionUID = -4229507739170593123L;
 

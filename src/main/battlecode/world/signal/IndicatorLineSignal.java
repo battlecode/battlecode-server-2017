@@ -3,13 +3,11 @@ package battlecode.world.signal;
 import battlecode.common.MapLocation;
 import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
-import battlecode.world.InternalRobot;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Signifies that a robot has requested a debug indicator line be created.
  */
-public class IndicatorLineSignal extends Signal {
+public class IndicatorLineSignal implements Signal {
 
     public final int robotID;
     public final Team team;

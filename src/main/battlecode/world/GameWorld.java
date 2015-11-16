@@ -13,6 +13,7 @@ import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.signal.AutoSignalHandler;
 import battlecode.engine.signal.Signal;
 import battlecode.engine.signal.SignalHandler;
+import battlecode.engine.signal.Signal;
 import battlecode.serial.DominationFactor;
 import battlecode.serial.GameStats;
 import battlecode.serial.RoundStats;

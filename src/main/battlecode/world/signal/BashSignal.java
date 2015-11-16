@@ -2,15 +2,13 @@ package battlecode.world.signal;
 
 import battlecode.common.MapLocation;
 import battlecode.engine.signal.Signal;
-import battlecode.world.InternalRobot;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Signifies that a robot just bashed.
  *
  * @author adamd
  */
-public class BashSignal extends Signal {
+public class BashSignal implements Signal {
     private static final long serialVersionUID = 8064711239305833273L;
 
     /**

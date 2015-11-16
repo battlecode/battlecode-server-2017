@@ -1,15 +1,13 @@
 package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
-import battlecode.world.InternalRobot;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Creates an observation to be displayed in transcribed matches
  *
  * @author jmstein
  */
-public class MatchObservationSignal extends Signal {
+public class MatchObservationSignal implements Signal {
 
     private static final long serialVersionUID = -8277652765201239399L;
 

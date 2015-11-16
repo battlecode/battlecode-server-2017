@@ -1,8 +1,8 @@
 package battlecode.serial;
 
 import battlecode.engine.signal.Signal;
+import battlecode.engine.signal.Signal;
 import battlecode.world.signal.IndicatorStringSignal;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

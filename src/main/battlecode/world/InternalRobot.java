@@ -10,6 +10,7 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
+import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
@@ -421,7 +422,7 @@ public class InternalRobot implements GenericRobot {
     }
 
     public void suicide() {
-        (new DeathSignal(this.getID())).accept(myGameWorld);
+        myGameWorld.visitSignal((new DeathSignal(this.getID())));
     }
     
     public void transform(RobotType newType) {

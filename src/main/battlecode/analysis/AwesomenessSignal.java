@@ -2,7 +2,7 @@ package battlecode.analysis;
 
 import battlecode.engine.signal.Signal;
 
-public class AwesomenessSignal extends Signal {
+public class AwesomenessSignal implements Signal {
     private static final long serialVersionUID = -5655877873179815593L;
 
     // Tweak to desired average awesomeness for relativeAwesomeness calculation

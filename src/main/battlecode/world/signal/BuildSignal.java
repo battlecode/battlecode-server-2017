@@ -4,14 +4,13 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
-import battlecode.world.InternalRobot;
 
 /**
  * Signifies that a robot was just spawned
  *
  * @author adamd
  */
-public class BuildSignal extends Signal {
+public class BuildSignal implements Signal {
 
     private static final long serialVersionUID = -5655877873179815892L;
 

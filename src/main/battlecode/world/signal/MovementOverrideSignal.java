@@ -2,14 +2,13 @@ package battlecode.world.signal;
 
 import battlecode.common.MapLocation;
 import battlecode.engine.signal.Signal;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Signifies that a robot was moved by a user override -- i.e., it should warp to the new location without an animation
  *
  * @author Matt
  */
-public class MovementOverrideSignal extends Signal {
+public class MovementOverrideSignal implements Signal {
 
     private static final long serialVersionUID = -5689176900158693078L;
 

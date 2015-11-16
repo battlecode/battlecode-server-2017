@@ -1,13 +1,11 @@
 package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
-import battlecode.world.InternalRobot;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Represents a robot acquiring XP.
  */
-public class XPSignal extends Signal {
+public class XPSignal implements Signal {
 
     private static final long serialVersionUID = 6612331359077155789L;
 

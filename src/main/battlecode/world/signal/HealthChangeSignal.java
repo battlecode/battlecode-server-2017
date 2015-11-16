@@ -2,14 +2,13 @@ package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Signifies that a robot's energon has just changed
  *
  * @author adamd
  */
-public class HealthChangeSignal extends Signal {
+public class HealthChangeSignal implements Signal {
 
     private static final long serialVersionUID = 6617731359077112385L;
 

@@ -1,16 +1,14 @@
 package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
-import battlecode.common.RobotInfo;
 import battlecode.world.InternalRobot;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * The delays associated with a group of robots.
  *
  * @author axc
  */
-public class RobotDelaySignal extends Signal {
+public class RobotDelaySignal implements Signal {
 
     private static final long serialVersionUID = 6617731214077155785L;
 

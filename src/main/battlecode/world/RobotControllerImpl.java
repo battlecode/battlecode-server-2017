@@ -602,21 +602,19 @@ public final class RobotControllerImpl implements RobotController,
     public void setIndicatorString(int stringIndex, String newString) {
         if (stringIndex >= 0
                 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS)
-            (new IndicatorStringSignal(robot.getID(), stringIndex, newString))
-                    .accept(gameWorld);
+            gameWorld.visitSignal((new IndicatorStringSignal(robot.getID(), stringIndex, newString)));
     }
 
     public void setIndicatorDot(MapLocation loc, int red, int green, int blue) {
         assertNotNull(loc);
-        new IndicatorDotSignal(robot.getID(), robot.getTeam(), loc, red, green, blue).accept(gameWorld);
+        gameWorld.visitSignal(new IndicatorDotSignal(robot.getID(), robot.getTeam(), loc, red, green, blue));
     }
 
     public void setIndicatorLine(MapLocation from, MapLocation to, int red,
             int green, int blue) {
         assertNotNull(from);
         assertNotNull(to);
-        new IndicatorLineSignal(robot.getID(), robot.getTeam(), from, to, red, green, blue)
-                .accept(gameWorld);
+        gameWorld.visitSignal(new IndicatorLineSignal(robot.getID(), robot.getTeam(), from, to, red, green, blue));
     }
 
     public long getControlBits() {
@@ -624,7 +622,7 @@ public final class RobotControllerImpl implements RobotController,
     }
 
     public void addMatchObservation(String observation) {
-        (new MatchObservationSignal(robot.getID(), observation)).accept(gameWorld);
+        gameWorld.visitSignal((new MatchObservationSignal(robot.getID(), observation)));
     }
 
     public void breakpoint() {

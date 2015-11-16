@@ -8,7 +8,7 @@ import battlecode.engine.signal.Signal;
  *
  * @author Matt
  */
-public class MovementSignal extends Signal {
+public class MovementSignal implements Signal {
 
     private static final long serialVersionUID = -6853620834787044985L;
 

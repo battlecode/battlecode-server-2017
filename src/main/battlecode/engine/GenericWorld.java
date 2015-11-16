@@ -1,8 +1,8 @@
 package battlecode.engine;
 
 import battlecode.common.Team;
-import battlecode.engine.signal.Signal;
 import battlecode.engine.signal.SignalHandler;
+import battlecode.engine.signal.Signal;
 import battlecode.serial.GameStats;
 import battlecode.serial.RoundStats;
 import battlecode.world.GameMap;

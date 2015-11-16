@@ -1,20 +1,16 @@
 package battlecode.world.signal;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
-import battlecode.world.InternalRobot;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Signifies that a robot has broadcast a message.
  *
  * @author Matt
  */
-public class BroadcastSignal extends Signal {
+public class BroadcastSignal implements Signal {
 
     private static final long serialVersionUID = 8603786984259160822L;
 

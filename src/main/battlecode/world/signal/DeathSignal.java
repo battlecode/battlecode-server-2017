@@ -1,15 +1,13 @@
 package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
-import battlecode.world.InternalRobot;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Signifies that an object has died somewhere.
  *
  * @author Matt
  */
-public class DeathSignal extends Signal {
+public class DeathSignal implements Signal {
 
     private static final long serialVersionUID = 8518453257317948520L;
 

@@ -1,19 +1,17 @@
 package battlecode.world.signal;
 
-import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Signifies that a robot was just spawned
  *
  * @author adamd
  */
-public class SpawnSignal extends Signal {
+public class SpawnSignal implements Signal {
 
     private static final long serialVersionUID = -5655877873179815892L;
 

@@ -103,7 +103,7 @@ public class Engine {
     public boolean receiveSignal(Signal s) {
         gameWorld.clearAllSignals();
         try {
-            s.accept(gameWorld);
+            gameWorld.visitSignal(s);
         } catch (RuntimeException e) {
             return false;
         }

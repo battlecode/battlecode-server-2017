@@ -3,23 +3,15 @@ package battlecode.server.serializer;
 import battlecode.common.MapLocation;
 import battlecode.engine.signal.Signal;
 import battlecode.serial.ExtensibleMetadata;
-import battlecode.serial.MatchFooter;
 import battlecode.serial.RoundDelta;
-import battlecode.serial.RoundStats;
-import battlecode.world.GameMap;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.*;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
-import java.util.zip.GZIPInputStream;
 
 /**
  * Serialize things to XML, with XStream.
