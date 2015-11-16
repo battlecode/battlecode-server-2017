@@ -2,6 +2,7 @@ package battlecode.engine.instrumenter.lang;
 
 import battlecode.engine.instrumenter.InstrumentationException;
 
+@SuppressWarnings("unused")
 public class Thread extends java.lang.Thread {
 
     private static Thread INSTANCE = new Thread(false);

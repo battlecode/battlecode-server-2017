@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 /**
  * Do-nothing replacement for sun.misc.Unsafe.  Used by Random.
  */
+@SuppressWarnings("unused")
 public class Unsafe {
 
     private Unsafe() {

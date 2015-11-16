@@ -20,7 +20,7 @@ public class RobotMonitor {
 
     private static int DEBUG_BYTECODES;
 
-    private static final Set<Integer> robotsToKill = new HashSet<Integer>();
+    private static final Set<Integer> robotsToKill = new HashSet<>();
 
     // the RobotData for the currently running robot
     public volatile static RobotData currentRobotData;

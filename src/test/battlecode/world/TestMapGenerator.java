@@ -291,7 +291,7 @@ public class TestMapGenerator {
      * @return the game map represented by this generator
      */
     public GameMap getMap(String mapName) {
-        EnumMap<GameMap.MapProperties, Integer> props = new EnumMap<GameMap.MapProperties, Integer>(GameMap.MapProperties.class);
+        EnumMap<GameMap.MapProperties, Integer> props = new EnumMap<>(GameMap.MapProperties.class);
         props.put(GameMap.MapProperties.ROUNDS, this.rounds);
         props.put(GameMap.MapProperties.SEED, this.seed);
         return new GameMap(props, rubble, parts, zSchedule, mapName);

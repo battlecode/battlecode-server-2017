@@ -43,7 +43,7 @@ class XMLMapHandler extends DefaultHandler {
     /**
      * Implements a stack for keeping track of XML elements.
      */
-    private LinkedList<String> xmlStack = new LinkedList<String>();
+    private LinkedList<String> xmlStack = new LinkedList<>();
     /**
      * Contains a SymbolData for each cell on the map.
      */
@@ -69,7 +69,7 @@ class XMLMapHandler extends DefaultHandler {
      * Used to pass to the GameMap constructor.
      */
     private Map<MapProperties, Integer> mapProperties = new
-            HashMap<MapProperties, Integer>();
+            HashMap<>();
     /**
      * Zombie spawn schedule for the GameMap constructor.
      */
@@ -655,13 +655,11 @@ class XMLMapHandler extends DefaultHandler {
                         "of <map>.\n");
         }
 
-        typesHaveBeenSet = true;
-    }
-
-    /**
-     * Whether characters has been called.
+        /*
+      Whether characters has been called.
      */
-    private boolean typesHaveBeenSet = false;
+        boolean typesHaveBeenSet = true;
+    }
 
     /**
      * {@inheritDoc}
@@ -725,8 +723,7 @@ class XMLMapHandler extends DefaultHandler {
      */
     private static void fail(String reason, String thingsToTry) {
         ErrorReporter.report("Malformed map file: " + reason, thingsToTry);
-        RuntimeException e = new IllegalArgumentException();
-        throw e;
+        throw new IllegalArgumentException();
     }
 
     /**
@@ -803,8 +800,8 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         // A tournament map should only start with archons and zombie dens.
-        ArrayList<MapLocation> teamAArchons = new ArrayList<MapLocation>();
-        ArrayList<MapLocation> teamBArchons = new ArrayList<MapLocation>();
+        ArrayList<MapLocation> teamAArchons = new ArrayList<>();
+        ArrayList<MapLocation> teamBArchons = new ArrayList<>();
         for (y = 0; y < mapHeight; y++) {
             for (x = 0; x < mapWidth; x++) {
                 d = map[x][y];

@@ -35,7 +35,7 @@ public class GameWorld implements SignalHandler {
     protected final long[][] teamMemory;
     protected final long[][] oldTeamMemory;
     protected final Map<Integer, InternalRobot> gameObjectsByID;
-    protected final ArrayList<Integer> randomIDs = new ArrayList<Integer>();
+    protected final ArrayList<Integer> randomIDs = new ArrayList<>();
 
     private final GameMap gameMap;
     private RoundStats roundStats = null; // stats for each round; new object is
@@ -44,28 +44,27 @@ public class GameWorld implements SignalHandler {
 
     private double[] teamResources = new double[4];
 
-    private Map<Team, Set<InternalRobot>> baseArchons = new EnumMap<Team, Set<InternalRobot>>(
-            Team.class);
-    private final Map<MapLocation, InternalRobot> gameObjectsByLoc = new HashMap<MapLocation, InternalRobot>();
+    private Map<Team, Set<InternalRobot>> baseArchons = new EnumMap<>(Team.class);
+    private final Map<MapLocation, InternalRobot> gameObjectsByLoc = new HashMap<>();
 
-    private Map<MapLocation, Integer> partsMap = new HashMap<MapLocation, Integer>();
-    private Map<MapLocation, Integer> rubbleMap = new HashMap<MapLocation, Integer>();
+    private Map<MapLocation, Integer> partsMap = new HashMap<>();
+    private Map<MapLocation, Integer> rubbleMap = new HashMap<>();
      
-    private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<Team, GameMap.MapMemory>(
+    private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<>(
             Team.class);
 
-    private Map<Team, Map<Integer, Integer>> radio = new EnumMap<Team, Map<Integer, Integer>>(
+    private Map<Team, Map<Integer, Integer>> radio = new EnumMap<>(
             Team.class);
 
     // a count for each robot type per team for tech tree checks and for tower
     // counts
-    private Map<Team, Map<RobotType, Integer>> activeRobotTypeCount = new EnumMap<Team, Map<RobotType, Integer>>(
+    private Map<Team, Map<RobotType, Integer>> activeRobotTypeCount = new EnumMap<>(
             Team.class); // only includes active bots
-    private Map<Team, Map<RobotType, Integer>> totalRobotTypeCount = new EnumMap<Team, Map<RobotType, Integer>>(
+    private Map<Team, Map<RobotType, Integer>> totalRobotTypeCount = new EnumMap<>(
             Team.class); // includes inactive buildings
 
     // robots to remove from the game at end of turn
-    private List<InternalRobot> deadRobots = new ArrayList<InternalRobot>();
+    private List<InternalRobot> deadRobots = new ArrayList<>();
     private boolean removingDead = false;
 
     @SuppressWarnings("unchecked")
@@ -74,8 +73,8 @@ public class GameWorld implements SignalHandler {
         currentRound = -1;
         teamAName = teamA;
         teamBName = teamB;
-        gameObjectsByID = new LinkedHashMap<Integer, InternalRobot>();
-        signals = new ArrayList<Signal>();
+        gameObjectsByID = new LinkedHashMap<>();
+        signals = new ArrayList<>();
         randGen = new Random(gm.getSeed());
         nextID = 1;
         teamMemory = new long[2][oldTeamMemory[0].length];
@@ -88,28 +87,28 @@ public class GameWorld implements SignalHandler {
         mapMemory.put(Team.NEUTRAL, new GameMap.MapMemory(gameMap));
         mapMemory.put(Team.ZOMBIE, new GameMap.MapMemory(gameMap));
 
-        radio.put(Team.A, new HashMap<Integer, Integer>());
-        radio.put(Team.B, new HashMap<Integer, Integer>());
+        radio.put(Team.A, new HashMap<>());
+        radio.put(Team.B, new HashMap<>());
 
-        activeRobotTypeCount.put(Team.A, new EnumMap<RobotType, Integer>(
+        activeRobotTypeCount.put(Team.A, new EnumMap<>(
                 RobotType.class));
-        activeRobotTypeCount.put(Team.B, new EnumMap<RobotType, Integer>(
+        activeRobotTypeCount.put(Team.B, new EnumMap<>(
                 RobotType.class));
-        activeRobotTypeCount.put(Team.NEUTRAL, new EnumMap<RobotType, Integer>(
+        activeRobotTypeCount.put(Team.NEUTRAL, new EnumMap<>(
                 RobotType.class));
-        activeRobotTypeCount.put(Team.ZOMBIE, new EnumMap<RobotType, Integer>(
+        activeRobotTypeCount.put(Team.ZOMBIE, new EnumMap<>(
                 RobotType.class));
-        totalRobotTypeCount.put(Team.A, new EnumMap<RobotType, Integer>(
+        totalRobotTypeCount.put(Team.A, new EnumMap<>(
                 RobotType.class));
-        totalRobotTypeCount.put(Team.B, new EnumMap<RobotType, Integer>(
+        totalRobotTypeCount.put(Team.B, new EnumMap<>(
                 RobotType.class));
-        totalRobotTypeCount.put(Team.NEUTRAL, new EnumMap<RobotType, Integer>(
+        totalRobotTypeCount.put(Team.NEUTRAL, new EnumMap<>(
                 RobotType.class));
-        totalRobotTypeCount.put(Team.ZOMBIE, new EnumMap<RobotType, Integer>(
+        totalRobotTypeCount.put(Team.ZOMBIE, new EnumMap<>(
                 RobotType.class));
 
-        baseArchons.put(Team.A, new HashSet<InternalRobot>());
-        baseArchons.put(Team.B, new HashSet<InternalRobot>());
+        baseArchons.put(Team.A, new HashSet<>());
+        baseArchons.put(Team.B, new HashSet<>());
 
         adjustResources(Team.A, GameConstants.PARTS_INITIAL_AMOUNT);
         adjustResources(Team.B, GameConstants.PARTS_INITIAL_AMOUNT);
@@ -147,11 +146,7 @@ public class GameWorld implements SignalHandler {
     }
 
     public InternalRobot getRobot(MapLocation loc) {
-        InternalRobot obj = getObject(loc);
-        if (obj instanceof InternalRobot)
-            return obj;
-        else
-            return null;
+        return getObject(loc);
     }
 
     public Collection<InternalRobot> allObjects() {
@@ -164,8 +159,7 @@ public class GameWorld implements SignalHandler {
     }
 
     public InternalRobot getRobotByID(int id) {
-        InternalRobot r = getObjectByID(id);
-        return r;
+        return getObjectByID(id);
     }
 
     public boolean exists(InternalRobot o) {
@@ -299,7 +293,7 @@ public class GameWorld implements SignalHandler {
     // TODO: make a faster implementation of this
     public MapLocation[] getAllMapLocationsWithinRadiusSq(MapLocation center,
             int radiusSquared) {
-        ArrayList<MapLocation> locations = new ArrayList<MapLocation>();
+        ArrayList<MapLocation> locations = new ArrayList<>();
 
         int radius = (int) Math.sqrt(radiusSquared);
         radius = Math.min(radius, Math.max(GameConstants.MAP_MAX_HEIGHT,
@@ -329,13 +323,12 @@ public class GameWorld implements SignalHandler {
             if (getRobot(center) == null) {
                 return new InternalRobot[0];
             } else {
-                InternalRobot[] res = { getRobot(center) };
-                return res;
+                return new InternalRobot[]{ getRobot(center) };
             }
         } else if (radiusSquared < 16) {
             MapLocation[] locs = getAllMapLocationsWithinRadiusSq(center,
                     radiusSquared);
-            ArrayList<InternalRobot> robots = new ArrayList<InternalRobot>();
+            ArrayList<InternalRobot> robots = new ArrayList<>();
             for (MapLocation loc : locs) {
                 InternalRobot res = getRobot(loc);
                 if (res != null) {
@@ -345,10 +338,10 @@ public class GameWorld implements SignalHandler {
             return robots.toArray(new InternalRobot[robots.size()]);
         }
 
-        ArrayList<InternalRobot> robots = new ArrayList<InternalRobot>();
+        ArrayList<InternalRobot> robots = new ArrayList<>();
 
         for (InternalRobot o : gameObjectsByID.values()) {
-            if (!(o instanceof InternalRobot))
+            if (o == null)
                 continue;
             if (o.getLocation() != null
                     && o.getLocation().distanceSquaredTo(center) <= radiusSquared)
@@ -403,10 +396,7 @@ public class GameWorld implements SignalHandler {
             gameObjectsByID.remove(o.getID());
         }
 
-        if (o instanceof InternalRobot) {
-            InternalRobot r = o;
-            r.freeMemory();
-        }
+        o.freeMemory();
     }
 
     public void beginningOfExecution(int robotID) {
@@ -559,8 +549,8 @@ public class GameWorld implements SignalHandler {
         // process all gameobjects
         InternalRobot[] gameObjects = new InternalRobot[gameObjectsByID.size()];
         gameObjects = gameObjectsByID.values().toArray(gameObjects);
-        for (int i = 0; i < gameObjects.length; i++) {
-            gameObjects[i].processBeginningOfRound();
+        for (InternalRobot gameObject : gameObjects) {
+            gameObject.processBeginningOfRound();
         }
     }
 
@@ -587,8 +577,8 @@ public class GameWorld implements SignalHandler {
         // process all gameobjects
         InternalRobot[] gameObjects = new InternalRobot[gameObjectsByID.size()];
         gameObjects = gameObjectsByID.values().toArray(gameObjects);
-        for (int i = 0; i < gameObjects.length; i++) {
-            gameObjects[i].processEndOfRound();
+        for (InternalRobot gameObject : gameObjects) {
+            gameObject.processEndOfRound();
         }
         removeDead();
 
@@ -624,23 +614,22 @@ public class GameWorld implements SignalHandler {
                 int highestBArchonID = 0;
                 InternalRobot[] objs = getAllGameObjects();
                 for (InternalRobot obj : objs) {
-                    if (obj instanceof InternalRobot) {
-                        InternalRobot ir = obj;
-                        if (ir.getTeam() == Team.A) {
-                            partsDiff += ir.type.partCost;
-                        } else if (ir.getTeam() == Team.B) {
-                            partsDiff -= ir.type.partCost;
-                        }
-                        if (ir.type == RobotType.ARCHON) {
-                            if (ir.getTeam() == Team.A) {
-                                archonDiff += ir.getHealthLevel();
-                                highestAArchonID = Math.max(highestAArchonID,
-                                        ir.getID());
-                            } else if (ir.getTeam() == Team.B) {
-                                archonDiff -= ir.getHealthLevel();
-                                highestBArchonID = Math.max(highestBArchonID,
-                                        ir.getID());
-                            }
+                    if (obj == null) continue;
+
+                    if (obj.getTeam() == Team.A) {
+                        partsDiff += obj.type.partCost;
+                    } else if (obj.getTeam() == Team.B) {
+                        partsDiff -= obj.type.partCost;
+                    }
+                    if (obj.type == RobotType.ARCHON) {
+                        if (obj.getTeam() == Team.A) {
+                            archonDiff += obj.getHealthLevel();
+                            highestAArchonID = Math.max(highestAArchonID,
+                                    obj.getID());
+                        } else if (obj.getTeam() == Team.B) {
+                            archonDiff -= obj.getHealthLevel();
+                            highestBArchonID = Math.max(highestBArchonID,
+                                    obj.getID());
                         }
                     }
                 }
@@ -663,8 +652,9 @@ public class GameWorld implements SignalHandler {
         if (winner != null) {
             running = false;
             for (InternalRobot o : gameObjectsByID.values()) {
-                if (o instanceof InternalRobot)
+                if (o != null) {
                     RobotMonitor.killRobot(o.getID());
+                }
             }
         }
 
@@ -672,15 +662,15 @@ public class GameWorld implements SignalHandler {
     }
 
     public Signal[] getAllSignals(boolean includeBytecodesUsedSignal) {
-        ArrayList<InternalRobot> allRobots = new ArrayList<InternalRobot>();
+        ArrayList<InternalRobot> allRobots = new ArrayList<>();
         for (InternalRobot obj : gameObjectsByID.values()) {
-            if (!(obj instanceof InternalRobot))
+            if (obj == null)
                 continue;
-            InternalRobot ir = obj;
-            allRobots.add(ir);
+            allRobots.add(obj);
         }
 
-        InternalRobot[] robots = allRobots.toArray(new InternalRobot[] {});
+        InternalRobot[] robots = allRobots.toArray(new InternalRobot[allRobots.size()]);
+
         if (includeBytecodesUsedSignal) {
             signals.add(new BytecodesUsedSignal(robots));
         }
@@ -807,43 +797,42 @@ public class GameWorld implements SignalHandler {
         if (obj != null) {
             removeObject(obj);
         }
-        if (obj instanceof InternalRobot) {
-            InternalRobot r = obj;
+        if (obj != null) {
             RobotMonitor.killRobot(ID);
 
             // update robot counting
-            if (r.isActive()) {
-                Integer currentCount = activeRobotTypeCount.get(r.getTeam())
-                        .get(r.type);
-                activeRobotTypeCount.get(r.getTeam()).put(r.type,
+            if (obj.isActive()) {
+                Integer currentCount = activeRobotTypeCount.get(obj.getTeam())
+                        .get(obj.type);
+                activeRobotTypeCount.get(obj.getTeam()).put(obj.type,
                         currentCount - 1);
             }
-            Integer currentCount = totalRobotTypeCount.get(r.getTeam()).get(
-                    r.type);
-            totalRobotTypeCount.get(r.getTeam()).put(r.type, currentCount - 1);
+            Integer currentCount = totalRobotTypeCount.get(obj.getTeam()).get(
+                    obj.type);
+            totalRobotTypeCount.get(obj.getTeam()).put(obj.type, currentCount - 1);
 
-            if (r.hasBeenAttacked()) {
-                gameStats.setUnitKilled(r.getTeam(), currentRound);
+            if (obj.hasBeenAttacked()) {
+                gameStats.setUnitKilled(obj.getTeam(), currentRound);
             }
-            if (r.type == RobotType.ARCHON) {
-                int totalArchons = getActiveRobotTypeCount(r.getTeam(),
+            if (obj.type == RobotType.ARCHON) {
+                int totalArchons = getActiveRobotTypeCount(obj.getTeam(),
                         RobotType.ARCHON);
                 if (totalArchons == 0) {
-                    setWinner(r.getTeam().opponent(),
+                    setWinner(obj.getTeam().opponent(),
                             DominationFactor.DESTROYED);
                 }
             }
             // if it was an infected robot, create a Zombie in its place.
-            if (r.isInfected()) {
-                RobotType zombieType = r.type.turnsInto; // Type of Zombie this unit turns into
-                
+            if (obj.isInfected()) {
+                RobotType zombieType = obj.type.turnsInto; // Type of Zombie this unit turns into
+
                 // Create new Zombie
                 InternalRobot robot = GameWorldFactory.createPlayer(this, zombieType,
-                        r.getLocation(), Team.ZOMBIE, r, 0); // TODO: Figure out Runnable and get that working
+                        obj.getLocation(), Team.ZOMBIE, obj, 0); // TODO: Figure out Runnable and get that working
             }
 
-            updateMapMemoryRemove(r.getTeam(), r.getLocation(),
-                    r.type.sensorRadiusSquared);
+            updateMapMemoryRemove(obj.getTeam(), obj.getLocation(),
+                    obj.type.sensorRadiusSquared);
         }
         if (obj != null) {
             addSignal(s);

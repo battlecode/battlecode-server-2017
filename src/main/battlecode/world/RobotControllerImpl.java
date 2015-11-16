@@ -224,7 +224,7 @@ public final class RobotControllerImpl implements RobotController {
             robots.add(o.getRobotInfo());
         }
 
-        return robots.toArray(new RobotInfo[0]);
+        return robots.toArray(new RobotInfo[robots.size()]);
     }
 
     public RobotInfo[] senseNearbyRobots() {
@@ -423,11 +423,10 @@ public final class RobotControllerImpl implements RobotController {
 
         Integer queued = robot.getQueuedBroadcastFor(channel);
         if (queued != null) {
-            return queued.intValue();
+            return queued;
         }
 
-        int m = gameWorld.getMessage(robot.getTeam(), channel);
-        return m;
+        return gameWorld.getMessage(robot.getTeam(), channel);
     }
 
     // ***********************************
@@ -538,7 +537,7 @@ public final class RobotControllerImpl implements RobotController {
         assertIsPathable(type, loc);
 
         int delay = type.buildTurns;
-        robot.activateMovement(new BuildSignal(robot == null ? robot.getID() : 0, loc, type, robot.getTeam(), delay), delay, delay);
+        robot.activateMovement(new BuildSignal(robot != null ? robot.getID() : 0, loc, type, robot.getTeam(), delay), delay, delay);
     }
 
     // ***********************************
@@ -553,10 +552,11 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     public void resign() {
-        for (InternalRobot obj : gameWorld.getAllGameObjects())
-            if ((obj instanceof InternalRobot)
-                    && obj.getTeam() == robot.getTeam())
+        for (InternalRobot obj : gameWorld.getAllGameObjects()) {
+            if ((obj != null) && obj.getTeam() == robot.getTeam()) {
                 gameWorld.notifyDied(obj);
+            }
+        }
         gameWorld.removeDead();
     }
 

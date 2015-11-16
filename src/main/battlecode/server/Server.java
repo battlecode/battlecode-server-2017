@@ -83,14 +83,13 @@ public class Server implements Observer, Runnable {
      */
     public Server(Config options, Mode mode, Controller controller,
                   Proxy... proxies) {
-        this.matches = new LinkedList<Match>();
-        this.finished = new LinkedList<Match>();
+        this.matches = new LinkedList<>();
+        this.finished = new LinkedList<>();
 
         this.mode = mode;
         this.controller = controller;
-        this.proxies = new LinkedList<Proxy>();
-        for (Proxy proxy : proxies)
-            this.proxies.add(proxy);
+        this.proxies = new LinkedList<>();
+        Collections.addAll(this.proxies, proxies);
 
         this.options = options;
         this.state = State.NOT_READY;

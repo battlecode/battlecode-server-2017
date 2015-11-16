@@ -29,7 +29,7 @@ public interface NotificationHandler<R> {
      * @param n the notification to process
      * @return the result of processing
      */
-    R visitRunNotification(RunNotification nb);
+    R visitRunNotification(RunNotification n);
 
     /**
      * Processes a resume notification.

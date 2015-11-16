@@ -80,9 +80,7 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
         int x = Integer.valueOf(coord[0].trim());
         int y = Integer.valueOf(coord[1].trim());
 
-        MapLocation ml = new MapLocation(x, y);
-
-        return ml;
+        return new MapLocation(x, y);
     }
 
     /**
@@ -225,7 +223,7 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      * @throws IllegalArgumentException if the radiusSquared is greater than 100 or is negative.
 	 */
     public static MapLocation[] getAllMapLocationsWithinRadiusSq(MapLocation center, int radiusSquared) {
-        ArrayList<MapLocation> locations = new ArrayList<MapLocation>();
+        ArrayList<MapLocation> locations = new ArrayList<>();
 
         if (radiusSquared > 100 || radiusSquared < 0) {
             throw new IllegalArgumentException("radiusSquared argument for getAllMapLocationsWithinRadiusSq cannot be greater than 100 or negative. However, since Battlecode is open source, you are free to use the source code of this method to implement it yourself.");

@@ -37,8 +37,8 @@ public class HealthChangeSignal implements Signal {
      */
     public HealthChangeSignal(InternalRobot[] robots) {
         int nChangedHealth = 0;
-        for (int i = 0; i < robots.length; i++) {
-            if (robots[i].healthChanged() || robots[i].getRoundsAlive() <= 2) {
+        for (InternalRobot robot : robots) {
+            if (robot.healthChanged() || robot.getRoundsAlive() <= 2) {
                 nChangedHealth++;
             }
         }
@@ -46,10 +46,10 @@ public class HealthChangeSignal implements Signal {
         robotIDs = new int[nChangedHealth];
         health = new double[nChangedHealth];
         int curIndex = 0;
-        for (int i = 0; i < robots.length; i++) {
-            if (robots[i].healthChanged() || robots[i].getRoundsAlive() <= 2) { // TODO(axc) clean
-                robotIDs[curIndex] = robots[i].getID();
-                health[curIndex] = robots[i].getHealthLevel();
+        for (InternalRobot robot : robots) {
+            if (robot.healthChanged() || robot.getRoundsAlive() <= 2) { // TODO(axc) clean
+                robotIDs[curIndex] = robot.getID();
+                health[curIndex] = robot.getHealthLevel();
                 curIndex++;
             }
         }

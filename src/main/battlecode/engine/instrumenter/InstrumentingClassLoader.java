@@ -88,8 +88,7 @@ public abstract class InstrumentingClassLoader extends ClassLoader {
         ClassWriter cw = new ClassWriter(COMPUTE_MAXS); // passing true sets maxLocals and maxStack, so we don't have to
         ClassVisitor cv = new RoboAdapter(cw, teamPackageName, debugMethodsEnabled, silenced, checkDisallowed);
         cr.accept(cv, 0);        //passing false lets debug info be included in the transformation, so players get line numbers in stack traces
-        byte[] bytes = cw.toByteArray();
-        return bytes;
+        return cw.toByteArray();
     }
 
     public abstract Class<?> saveAndDefineClass(String name, byte[] classBytes);

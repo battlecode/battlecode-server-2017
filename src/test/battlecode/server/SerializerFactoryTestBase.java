@@ -75,7 +75,7 @@ public abstract class SerializerFactoryTestBase {
             new RoundDelta(new Signal[] {
                     new AttackSignal(robot.getID(), new MapLocation(1,1)),
                     new BashSignal(robot.getID(), new MapLocation(1,1)),
-                    new BroadcastSignal(robot.getID(), robot.getTeam(), new HashMap<Integer, Integer>()),
+                    new BroadcastSignal(robot.getID(), robot.getTeam(), new HashMap<>()),
                     new BuildSignal(57, new MapLocation(1,1), RobotType.GUARD, Team.A, 50),
                     new BytecodesUsedSignal(new InternalRobot[]{robot}),
                     new CastSignal(robot.getID(), new MapLocation(-75, -75)),

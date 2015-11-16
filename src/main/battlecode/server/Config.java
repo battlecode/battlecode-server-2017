@@ -145,7 +145,7 @@ public class Config {
         // Parse them GNU-style. This allows both long and short switches
         // with arguments, i.e. "-c configfile" or "--config configfile".
         CommandLineParser cmdParser = new GnuParser();
-        CommandLine cmd = null;
+        CommandLine cmd;
         try {
             cmd = cmdParser.parse(options, args);
         } catch (ParseException e) {

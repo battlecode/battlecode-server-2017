@@ -46,10 +46,9 @@ public class ClassReferenceUtil {
     static {
         BufferedReader reader;
         String line;
-        ZipFile zfile;
 
-        allowedPackages = new HashSet<String>();
-        disallowedClasses = new HashSet<String>();
+        allowedPackages = new HashSet<>();
+        disallowedClasses = new HashSet<>();
 
         // load allowed packages
         try {
@@ -126,9 +125,7 @@ public class ClassReferenceUtil {
      * @throws InstrumentationException if the class reference is not allowed
      */
     public static String classReference(String className, String teamPackageName, boolean silenced, boolean checkDisallowed) {
-        String ans = classReferenceX(className, teamPackageName, silenced, checkDisallowed);
-        //System.out.println("CR "+className+":"+ans);
-        return ans;
+        return classReferenceX(className, teamPackageName, silenced, checkDisallowed);
     }
 
     public static String classReferenceX(String className, String teamPackageName, boolean silenced, boolean checkDisallowed) {
@@ -178,9 +175,8 @@ public class ClassReferenceUtil {
      */
 
     public static String classDescReference(String classDesc, String teamPackageName, boolean silenced, boolean checkDisallowed) {
-        String ans = classDescReferenceX(classDesc, teamPackageName, silenced, checkDisallowed);
         //System.out.println("CDR "+classDesc+":"+ans);
-        return ans;
+        return classDescReferenceX(classDesc, teamPackageName, silenced, checkDisallowed);
     }
 
     public static String classDescReferenceX(String classDesc, String teamPackageName, boolean silenced, boolean checkDisallowed) {
@@ -210,12 +206,12 @@ public class ClassReferenceUtil {
         String ret = "(";
 
         Type[] argTypes = Type.getArgumentTypes(methodDesc);
-        for (int i = 0; i < argTypes.length; i++) {
-            if (argTypes[i].getSort() == Type.ARRAY || argTypes[i].getSort() == Type.OBJECT)
+        for (Type argType : argTypes) {
+            if (argType.getSort() == Type.ARRAY || argType.getSort() == Type.OBJECT)
                 // HACK: whitelistSystem is set to true here b/c we're only replacing Object; once the whole library is replaced, this should be changed
-                ret = ret + classDescReference(argTypes[i].toString(), teamPackageName, silenced, checkDisallowed);
+                ret = ret + classDescReference(argType.toString(), teamPackageName, silenced, checkDisallowed);
             else
-                ret = ret + argTypes[i].toString();
+                ret = ret + argType.toString();
         }
 
         ret = ret + ")";
@@ -257,8 +253,7 @@ public class ClassReferenceUtil {
             return "forbidden/" + className;
         } else {
             ErrorReporter.report("Illegal class: " + className + "\nThis class cannot be referenced by player " + teamPackageName, false);
-            InstrumentationException e = new InstrumentationException();
-            throw e;
+            throw new InstrumentationException();
         }
     }
 

@@ -15,6 +15,7 @@ import java.io.PrintStream;
  *
  * @author adamd
  */
+@SuppressWarnings("unused")
 public final class System {
 
     // singleton

@@ -14,9 +14,10 @@ import java.util.HashMap;
  * parameter that is a subclass of {@link Signal} (but not Signal itself).
  * Currently it uses reflection, which is kind of inelegant and slow (but probably not slow enough to matter).  I guess we could avoid reflection and instead create classes on the fly.
  */
+@SuppressWarnings("ALL")
 public class AutoSignalHandler implements SignalHandler {
 
-    static HashMap<Class, HashMap<Class, Method>> metaMap = new HashMap<Class, HashMap<Class, Method>>();
+    static final HashMap<Class, HashMap<Class, Method>> metaMap = new HashMap<>();
     HashMap<Class, Method> methodMap;
     Object myObject;
 
@@ -35,7 +36,7 @@ public class AutoSignalHandler implements SignalHandler {
             methodMap = metaMap.get(cls);
             if (methodMap != null) return;
             assert Modifier.isPublic(cls.getModifiers());
-            methodMap = new HashMap<Class, Method>();
+            methodMap = new HashMap<>();
             for (Method method : cls.getMethods()) {
                 boolean shouldAdd;
                 Class<?>[] parameters = method.getParameterTypes();

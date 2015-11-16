@@ -4,6 +4,7 @@ import battlecode.engine.ErrorReporter;
 import org.objectweb.asm.*;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 
 import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
@@ -40,16 +41,16 @@ class InterfaceReader extends ClassVisitor {
 
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         // first, put all interfaces/classes directly implemented/extended by the given class into result
-        HashSet<String> result = new HashSet<String>();
-        for (String i : interfaces) {
-            result.add(i);
-        }
+        HashSet<String> result = new HashSet<>();
+
+        Collections.addAll(result, interfaces);
+
         if (superName != null)
             result.add(superName);
 
         // now, for each element of result, use an InterfaceReader on it, so we recursively get all interfaces/classes transitively implemented/extended
         // by the given class.  The results will be stored in result2.
-        HashSet<String> result2 = new HashSet<String>();
+        HashSet<String> result2 = new HashSet<>();
         for (String i : result) {
             ClassReader cr;
             try {
@@ -61,12 +62,12 @@ class InterfaceReader extends ClassVisitor {
             InterfaceReader ir = new InterfaceReader();
             cr.accept(ir, SKIP_DEBUG);
             String[] ret = ir.getInterfaces();
-            for (String j : ret)
-                result2.add(j);
+
+            Collections.addAll(result2, ret);
         }
         result2.addAll(result);
 
-        this.interfaces = result2.toArray(new String[]{});
+        this.interfaces = result2.toArray(new String[result2.size()]);
     }
 
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {

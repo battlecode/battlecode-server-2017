@@ -29,10 +29,10 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
     private boolean codeVisited = false;    // tells whether visitCode() has been called
 
     // all the exception handlers we've seen in the code
-    private final Set<LabelNode> exceptionHandlers = new HashSet<LabelNode>();
-    private final Set<LabelNode> tryCatchStarts = new HashSet<LabelNode>();
+    private final Set<LabelNode> exceptionHandlers = new HashSet<>();
+    private final Set<LabelNode> tryCatchStarts = new HashSet<>();
 
-    private static final Set<String> instrumentedStringFuncs = new HashSet<String>();
+    private static final Set<String> instrumentedStringFuncs = new HashSet<>();
 
     static {
         instrumentedStringFuncs.add("matches");
@@ -458,7 +458,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
     private void endOfBasicBlock(AbstractInsnNode n) {
         if (bytecodeCtr == 0)
             return;
-        instructions.insertBefore(n, new LdcInsnNode(new Integer(bytecodeCtr)));
+        instructions.insertBefore(n, new LdcInsnNode(bytecodeCtr));
         instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "incrementBytecodes", "(I)V", false));
         bytecodeCtr = 0;
     }
@@ -472,7 +472,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
      * @throws InstrumentationException if class <code>owner</code> cannot be found
      */
     private static boolean isSuperClass(String owner, String superclass) {
-        ClassReader cr = null;
+        ClassReader cr;
 
         try {
             cr = new ClassReader(owner);

@@ -51,7 +51,7 @@ public class ZombieSpawnSchedule implements Serializable {
      */
     public void add(int round, RobotType type, int count) {
         if (!map.containsKey(round)) {
-            map.put(round, new ArrayList<ZombieCount>());
+            map.put(round, new ArrayList<>());
         }
         map.get(round).add(new ZombieCount(type, count));
     }
@@ -75,7 +75,7 @@ public class ZombieSpawnSchedule implements Serializable {
      */
     public ArrayList<ZombieCount> getScheduleForRound(int round) {
         if (!map.containsKey(round)) {
-            return new ArrayList<ZombieCount>();
+            return new ArrayList<>();
         } else {
             return map.get(round);
         }

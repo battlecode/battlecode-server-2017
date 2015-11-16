@@ -45,9 +45,6 @@ public class InternalRobot implements GenericRobot {
 
     private int buildDelay;
 
-    private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean(
-            "bc.engine.upkeep");
-
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
             boolean spawnedRobot, int buildDelay) {
@@ -79,11 +76,11 @@ public class InternalRobot implements GenericRobot {
 
         didSelfDestruct = false;
         broadcasted = false;
-        broadcastMap = new HashMap<Integer, Integer>();
+        broadcastMap = new HashMap<>();
         roundsAlive = 0;
 
-        supplyActions = new ArrayList<Signal>();
-        missileLaunchActions = new ArrayList<SpawnSignal>();
+        supplyActions = new ArrayList<>();
+        missileLaunchActions = new ArrayList<>();
         movementSignal = null;
         attackSignal = null;
         castSignal = null;
@@ -346,13 +343,11 @@ public class InternalRobot implements GenericRobot {
 
     public double calculateMovementActionDelay(MapLocation from,
             MapLocation to) {
-        double base = 1;
         if (from.distanceSquaredTo(to) <= 1) {
-            base = getMovementDelayForType();
+            return getMovementDelayForType();
         } else {
-            base = getMovementDelayForType() * 1.4;
+            return getMovementDelayForType() * 1.4;
         }
-        return base;
     }
 
     // *********************************
@@ -452,7 +447,7 @@ public class InternalRobot implements GenericRobot {
         if (broadcasted)
             myGameWorld.visitSignal(new BroadcastSignal(this.getID(), this.getTeam(), broadcastMap));
 
-        broadcastMap = new HashMap<Integer, Integer>();
+        broadcastMap = new HashMap<>();
         broadcasted = false;
 
         // perform supply actions

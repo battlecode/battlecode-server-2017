@@ -18,11 +18,7 @@ public class Doclet extends Standard {
         StringBuilder methodBuilder = new StringBuilder();
         StringBuilder memberBuilder = new StringBuilder();
         ClassDoc[] doc = root.classes();
-        Arrays.sort(doc, new Comparator<ClassDoc>() {
-            public int compare(ClassDoc o1, ClassDoc o2) {
-                return o1.qualifiedName().compareToIgnoreCase(o2.qualifiedName());
-            }
-        });
+        Arrays.sort(doc, (o1, o2) -> o1.qualifiedName().compareToIgnoreCase(o2.qualifiedName()));
         for (ClassDoc cl : doc) {
             String clname = cl.qualifiedName().replace(".", "/");
             for (MethodDoc m : cl.methods()) {

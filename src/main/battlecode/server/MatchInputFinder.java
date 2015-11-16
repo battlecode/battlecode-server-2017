@@ -122,7 +122,7 @@ public class MatchInputFinder {
      */
     private String[] findResourcesLocally(String[] paths, Filter filter, boolean parent) {
 
-        List<String> foundList = new LinkedList<String>();
+        List<String> foundList = new LinkedList<>();
 
         for (String path : paths) {
             File f = new File(path);

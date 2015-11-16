@@ -7,6 +7,7 @@ import java.util.Random;
  *
  * @author adamd
  */
+@SuppressWarnings("unused")
 public class RoboRandom extends Random {
 
     private static final long serialVersionUID = 0; // don't serialize
