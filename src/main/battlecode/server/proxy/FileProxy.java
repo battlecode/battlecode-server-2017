@@ -36,7 +36,7 @@ public class FileProxy implements Proxy {
     /**
      * The eventual, target file
      */
-    protected final File file;
+    protected File file;
 
     /**
      * The temp file.
