@@ -69,9 +69,8 @@ public class Server implements Observer, Runnable {
      * an RPC server is set up, and which controllers are chosen for server
      * operation.
      */
-    public static enum Mode {
-        HEADLESS, LOCAL, TCP, SCRIMMAGE, TOURNAMENT, TESTS, AUTOTEST, MATCH, PIPE, BADGEREVIEW
-
+    public enum Mode {
+        HEADLESS, LOCAL, SCRIMMAGE, TOURNAMENT, TESTS, AUTOTEST, MATCH
     }
 
     /**

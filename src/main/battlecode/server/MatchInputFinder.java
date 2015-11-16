@@ -16,8 +16,7 @@ import java.util.zip.ZipEntry;
 /**
  * A utility class for finding the two types match inputs (teams and maps) that
  * are available either locally or on a remote machine. It searches the Java
- * classpath and a set of map paths for elements, or it can prompt a remotely
- * running server to do the same via the RPCServer/RPCClient utilities.
+ * classpath and a set of map paths for elements.
  * <p/>
  * Note that this class only matches files by name, so it's possible for it to
  * return invalid map files, for instance, so long as they are named like map
