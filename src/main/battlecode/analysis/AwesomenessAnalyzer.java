@@ -3,7 +3,6 @@ package battlecode.analysis;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.engine.signal.Signal;
-import battlecode.engine.signal.Signal;
 import battlecode.serial.MatchHeader;
 import battlecode.serial.RoundDelta;
 import battlecode.server.proxy.FileProxy;

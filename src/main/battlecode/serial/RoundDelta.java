@@ -1,7 +1,6 @@
 package battlecode.serial;
 
 import battlecode.engine.signal.Signal;
-import battlecode.engine.signal.Signal;
 import battlecode.world.signal.IndicatorStringSignal;
 
 import java.io.IOException;

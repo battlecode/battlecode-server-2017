@@ -1,9 +1,9 @@
 package battlecode.world.signal;
 
-import java.util.Map;
-
 import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
+
+import java.util.Map;
 
 /**
  * Signifies that a robot has broadcast a message.

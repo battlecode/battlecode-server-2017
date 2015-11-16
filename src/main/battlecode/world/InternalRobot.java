@@ -1,20 +1,15 @@
 package battlecode.world;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
+import battlecode.common.*;
 import battlecode.engine.GenericRobot;
-import battlecode.engine.signal.Signal;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.SpawnSignal;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class InternalRobot implements GenericRobot {
     public RobotType type;

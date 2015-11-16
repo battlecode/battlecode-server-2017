@@ -7,7 +7,6 @@ import battlecode.server.proxy.FileProxy;
 import battlecode.server.proxy.OutputStreamProxy;
 import battlecode.server.proxy.Proxy;
 import battlecode.server.serializer.JavaSerializerFactory;
-import battlecode.server.serializer.Serializer;
 import battlecode.server.serializer.SerializerFactory;
 import battlecode.server.serializer.XStreamSerializerFactory;
 

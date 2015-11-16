@@ -1,7 +1,7 @@
 package battlecode.doc;
 
 import battlecode.common.RobotType;
-import com.sun.javadoc.*;
+import com.sun.javadoc.Tag;
 import com.sun.tools.doclets.Taglet;
 
 import java.util.Map;

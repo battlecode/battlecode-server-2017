@@ -1,9 +1,10 @@
 package battlecode.world;
 
-import battlecode.common.ZombieCount;
 import battlecode.common.RobotType;
-import java.util.*;
+import battlecode.common.ZombieCount;
+
 import java.io.Serializable;
+import java.util.*;
 
 /**
  * A class to hold information about how many zombies spawn each round, and

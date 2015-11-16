@@ -1,7 +1,5 @@
 package battlecode.common;
 
-import java.util.ArrayList;
-
 /**
  * Contains details on various attributes of the different robots. All of this information is in the specs in a more organized form.
  */

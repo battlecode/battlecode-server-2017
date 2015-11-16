@@ -1,6 +1,9 @@
 package battlecode.engine.instrumenter;
 
-import org.objectweb.asm.*;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  * Instruments a class.  See InstrumenterASMImpl for more info on what this instrumentation does.

@@ -1,34 +1,16 @@
 package battlecode.world;
 
-import static battlecode.common.GameActionExceptionType.NOT_ACTIVE;
-import static battlecode.common.GameActionExceptionType.CANT_DO_THAT_BRO;
-import static battlecode.common.GameActionExceptionType.CANT_SENSE_THAT;
-import static battlecode.common.GameActionExceptionType.NOT_ENOUGH_RESOURCE;
-import static battlecode.common.GameActionExceptionType.OUT_OF_RANGE;
-
-import java.util.*;
-
-import battlecode.common.DependencyProgress;
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.GameActionExceptionType;
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
-import battlecode.common.ZombieCount;
+import battlecode.common.*;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
-import battlecode.world.signal.AttackSignal;
-import battlecode.world.signal.BuildSignal;
-import battlecode.world.signal.IndicatorDotSignal;
-import battlecode.world.signal.IndicatorLineSignal;
-import battlecode.world.signal.IndicatorStringSignal;
-import battlecode.world.signal.MatchObservationSignal;
-import battlecode.world.signal.MovementSignal;
-import battlecode.world.signal.SpawnSignal;
+import battlecode.world.signal.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import static battlecode.common.GameActionExceptionType.*;
 
 /*
  TODO:

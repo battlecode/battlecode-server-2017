@@ -1,7 +1,5 @@
 package battlecode.world;
 
-import java.util.*;
-
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
@@ -15,22 +13,9 @@ import battlecode.engine.signal.SignalHandler;
 import battlecode.serial.DominationFactor;
 import battlecode.serial.GameStats;
 import battlecode.serial.RoundStats;
-import battlecode.world.signal.AttackSignal;
-import battlecode.world.signal.BroadcastSignal;
-import battlecode.world.signal.BuildSignal;
-import battlecode.world.signal.BytecodesUsedSignal;
-import battlecode.world.signal.ControlBitsSignal;
-import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.TeamOreSignal;
-import battlecode.world.signal.HealthChangeSignal;
-import battlecode.world.signal.IndicatorDotSignal;
-import battlecode.world.signal.IndicatorLineSignal;
-import battlecode.world.signal.IndicatorStringSignal;
-import battlecode.world.signal.MatchObservationSignal;
-import battlecode.world.signal.MovementSignal;
-import battlecode.world.signal.MovementOverrideSignal;
-import battlecode.world.signal.RobotDelaySignal;
-import battlecode.world.signal.SpawnSignal;
+import battlecode.world.signal.*;
+
+import java.util.*;
 
 /**
  * The primary implementation of the GameWorld interface for containing and

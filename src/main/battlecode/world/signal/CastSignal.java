@@ -1,7 +1,7 @@
 package battlecode.world.signal;
 
-import battlecode.engine.signal.Signal;
 import battlecode.common.MapLocation;
+import battlecode.engine.signal.Signal;
 
 /**
  * Signifies that a robot cast a spell.

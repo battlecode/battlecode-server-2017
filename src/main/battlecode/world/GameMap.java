@@ -1,12 +1,10 @@
 package battlecode.world;
 
 import battlecode.common.MapLocation;
-
-import java.io.Serializable;
 import battlecode.common.ZombieCount;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
