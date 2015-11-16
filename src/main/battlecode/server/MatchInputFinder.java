@@ -38,15 +38,13 @@ public class MatchInputFinder {
      * A file filter that passes directories (to propagate a directory search)
      * and class files that seem to be BattleCode players.
      */
-    private static interface Filter extends FileFilter {
-        public boolean accept(ZipEntry pathname);
+    private interface Filter extends FileFilter {
+        boolean accept(ZipEntry pathname);
     }
 
     private static class TeamFileFilter implements Filter {
         public boolean accept(File pathname) {
-            if (pathname.isDirectory() || "RobotPlayer.class".equals(pathname.getName()))
-                return true;
-            return false;
+            return pathname.isDirectory() || "RobotPlayer.class".equals(pathname.getName());
         }
 
         public boolean accept(ZipEntry pathname) {
@@ -60,11 +58,9 @@ public class MatchInputFinder {
      */
     private static class MapFileFilter implements Filter {
         public boolean accept(File pathname) {
-            if (pathname.isDirectory() ||
+            return pathname.isDirectory() ||
                     ("maps".equals(pathname.getParentFile().getName()) &&
-                            pathname.getName().endsWith(".xml")))
-                return true;
-            return false;
+                            pathname.getName().endsWith(".xml"));
         }
 
         public boolean accept(ZipEntry pathname) {

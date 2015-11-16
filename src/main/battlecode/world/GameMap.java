@@ -164,9 +164,8 @@ public class GameMap implements Serializable {
         if (!Arrays.deepEquals(this.initialParts, other.initialParts))
             return false;
         if (!this.mapName.equals(other.mapName)) return false;
-        if (!this.zSchedule.equivalentTo(other.zSchedule)) return false;
+        return this.zSchedule.equivalentTo(other.zSchedule);
 
-        return true;
     }
 
     /**

@@ -115,12 +115,9 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      */
     public final boolean isAdjacentTo(MapLocation location) {
 
-        int distTo;
-        if ((distTo = this.distanceSquaredTo(location)) == 1 || distTo == 2) {
-            return true;
-        }
+        int distTo = this.distanceSquaredTo(location);
 
-        return false;
+        return distTo == 1 || distTo == 2;
 
     }
 

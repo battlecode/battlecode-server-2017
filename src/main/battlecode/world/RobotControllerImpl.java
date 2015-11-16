@@ -165,7 +165,7 @@ public final class RobotControllerImpl implements RobotController {
             throws GameActionException {
         assertNotNull(loc);
         assertCanSense(loc);
-        InternalRobot obj = (InternalRobot) gameWorld.getObject(loc);
+        InternalRobot obj = gameWorld.getObject(loc);
         return obj != null;
     }
 
@@ -173,7 +173,7 @@ public final class RobotControllerImpl implements RobotController {
             throws GameActionException {
         assertNotNull(loc);
         assertCanSense(loc);
-        InternalRobot obj = (InternalRobot) gameWorld.getObject(loc);
+        InternalRobot obj = gameWorld.getObject(loc);
         if (obj != null && canSense(obj)) {
             return obj.getRobotInfo();
         } else {
@@ -182,7 +182,7 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     public boolean canSenseRobot(int id) {
-        InternalRobot obj = (InternalRobot) gameWorld.getObjectByID(id);
+        InternalRobot obj = gameWorld.getObjectByID(id);
         if (obj == null) {
             return false;
         }
@@ -190,7 +190,7 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     public RobotInfo senseRobot(int id) throws GameActionException {
-        InternalRobot obj = (InternalRobot) gameWorld.getObjectByID(id);
+        InternalRobot obj = gameWorld.getObjectByID(id);
         if (obj != null && canSense(obj)) {
             return obj.getRobotInfo();
         } else {
@@ -221,7 +221,7 @@ public final class RobotControllerImpl implements RobotController {
             if (useTeam && o.getTeam() != team)
                 continue;
 
-            robots.add(((InternalRobot) o).getRobotInfo());
+            robots.add(o.getRobotInfo());
         }
 
         return robots.toArray(new RobotInfo[0]);
@@ -556,7 +556,7 @@ public final class RobotControllerImpl implements RobotController {
         for (InternalRobot obj : gameWorld.getAllGameObjects())
             if ((obj instanceof InternalRobot)
                     && obj.getTeam() == robot.getTeam())
-                gameWorld.notifyDied((InternalRobot) obj);
+                gameWorld.notifyDied(obj);
         gameWorld.removeDead();
     }
 

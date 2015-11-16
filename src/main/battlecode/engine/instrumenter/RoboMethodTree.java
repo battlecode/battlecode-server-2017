@@ -169,7 +169,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
         LabelNode robotDeathLabel = new LabelNode(new Label());
         LabelNode firstTryCatch = null;
         for(AbstractInsnNode node : instructions.toArray()) {
-            if(node.getType()==AbstractInsnNode.LABEL&&tryCatchStarts.contains((LabelNode)node)) {
+            if(node.getType()==AbstractInsnNode.LABEL&&tryCatchStarts.contains(node)) {
                 firstTryCatch = (LabelNode)node;
                 break;
             }

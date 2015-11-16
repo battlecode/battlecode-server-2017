@@ -149,7 +149,7 @@ public class GameWorld implements SignalHandler {
     public InternalRobot getRobot(MapLocation loc) {
         InternalRobot obj = getObject(loc);
         if (obj instanceof InternalRobot)
-            return (InternalRobot) obj;
+            return obj;
         else
             return null;
     }
@@ -352,7 +352,7 @@ public class GameWorld implements SignalHandler {
                 continue;
             if (o.getLocation() != null
                     && o.getLocation().distanceSquaredTo(center) <= radiusSquared)
-                robots.add((InternalRobot) o);
+                robots.add(o);
         }
 
         return robots.toArray(new InternalRobot[robots.size()]);
@@ -404,19 +404,19 @@ public class GameWorld implements SignalHandler {
         }
 
         if (o instanceof InternalRobot) {
-            InternalRobot r = (InternalRobot) o;
+            InternalRobot r = o;
             r.freeMemory();
         }
     }
 
     public void beginningOfExecution(int robotID) {
-        InternalRobot r = (InternalRobot) getObjectByID(robotID);
+        InternalRobot r = getObjectByID(robotID);
         if (r != null)
             r.processBeginningOfTurn();
     }
 
     public void endOfExecution(int robotID) {
-        InternalRobot r = (InternalRobot) getObjectByID(robotID);
+        InternalRobot r = getObjectByID(robotID);
         // if the robot is dead, it won't be in the map any more
         if (r != null) {
             r.setBytecodesUsed(RobotMonitor.getBytecodesUsed());
@@ -625,7 +625,7 @@ public class GameWorld implements SignalHandler {
                 InternalRobot[] objs = getAllGameObjects();
                 for (InternalRobot obj : objs) {
                     if (obj instanceof InternalRobot) {
-                        InternalRobot ir = (InternalRobot) obj;
+                        InternalRobot ir = obj;
                         if (ir.getTeam() == Team.A) {
                             partsDiff += ir.type.partCost;
                         } else if (ir.getTeam() == Team.B) {
@@ -676,7 +676,7 @@ public class GameWorld implements SignalHandler {
         for (InternalRobot obj : gameObjectsByID.values()) {
             if (!(obj instanceof InternalRobot))
                 continue;
-            InternalRobot ir = (InternalRobot) obj;
+            InternalRobot ir = obj;
             allRobots.add(ir);
         }
 
@@ -711,7 +711,7 @@ public class GameWorld implements SignalHandler {
     }
 
     public void visitAttackSignal(AttackSignal s) {
-        InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
+        InternalRobot attacker = getObjectByID(s.getRobotID());
 
         MapLocation targetLoc = s.getTargetLoc();
         double rate = 1.0;
@@ -766,7 +766,7 @@ public class GameWorld implements SignalHandler {
             parent = null;
             loc = s.getLoc();
         } else {
-            parent = (InternalRobot) getObjectByID(parentID);
+            parent = getObjectByID(parentID);
             loc = s.getLoc();
         }
 
@@ -781,7 +781,7 @@ public class GameWorld implements SignalHandler {
     }
 
     public void visitControlBitsSignal(ControlBitsSignal s) {
-        InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
+        InternalRobot r = getObjectByID(s.getRobotID());
         r.setControlBits(s.getControlBits());
 
         addSignal(s);
@@ -808,7 +808,7 @@ public class GameWorld implements SignalHandler {
             removeObject(obj);
         }
         if (obj instanceof InternalRobot) {
-            InternalRobot r = (InternalRobot) obj;
+            InternalRobot r = obj;
             RobotMonitor.killRobot(ID);
 
             // update robot counting
@@ -867,7 +867,7 @@ public class GameWorld implements SignalHandler {
     }
 
     public void visitMovementSignal(MovementSignal s) {
-        InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
+        InternalRobot r = getObjectByID(s.getRobotID());
         r.setLocation(s.getNewLoc());
         int newParts = takeParts(r.getLocation());
         adjustResources(r.getTeam(), newParts);
@@ -875,7 +875,7 @@ public class GameWorld implements SignalHandler {
     }
 
     public void visitMovementOverrideSignal(MovementOverrideSignal s) {
-        InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
+        InternalRobot r = getObjectByID(s.getRobotID());
         r.setLocation(s.getNewLoc());
 
         addSignal(s);
@@ -890,7 +890,7 @@ public class GameWorld implements SignalHandler {
             parent = null;
             loc = s.getLoc();
         } else {
-            parent = (InternalRobot) getObjectByID(parentID);
+            parent = getObjectByID(parentID);
             loc = s.getLoc();
         }
 
