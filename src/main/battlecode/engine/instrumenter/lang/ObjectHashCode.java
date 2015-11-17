@@ -6,6 +6,7 @@ import org.hibernate.search.util.WeakIdentityHashMap;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+@SuppressWarnings("unused")
 public class ObjectHashCode {
 
     static final Method objectHashCode;
@@ -28,9 +29,9 @@ public class ObjectHashCode {
 
     static int lastHashCode = -1;
 
-    static WeakIdentityHashMap<Object, Integer> codes = new WeakIdentityHashMap<Object, Integer>();
+    static WeakIdentityHashMap<Object, Integer> codes = new WeakIdentityHashMap<>();
     // reflection is slow so cache the results
-    static HashMap<Class, Boolean> usesOHC = new HashMap<Class, Boolean>();
+    static HashMap<Class, Boolean> usesOHC = new HashMap<>();
 
     static public int hashCode(int hash, Object o, Class<?> cl) throws NoSuchMethodException {
         int idHash = java.lang.System.identityHashCode(o);

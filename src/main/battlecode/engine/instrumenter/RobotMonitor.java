@@ -1,11 +1,11 @@
 package battlecode.engine.instrumenter;
 
 import battlecode.engine.GenericRobot;
-import battlecode.engine.GenericWorld;
 import battlecode.engine.instrumenter.lang.RoboPrintStream;
 import battlecode.engine.instrumenter.lang.SilencedPrintStream;
 import battlecode.engine.scheduler.Scheduler;
 import battlecode.server.Config;
+import battlecode.world.GameWorld;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,7 +20,7 @@ public class RobotMonitor {
 
     private static int DEBUG_BYTECODES;
 
-    private static final Set<Integer> robotsToKill = new HashSet<Integer>();
+    private static final Set<Integer> robotsToKill = new HashSet<>();
 
     // the RobotData for the currently running robot
     public volatile static RobotData currentRobotData;
@@ -31,7 +31,7 @@ public class RobotMonitor {
     private static int bytecodeLimit;
     private static int bytecodesLeft;
 
-    private static GenericWorld myGameWorld = null;
+    private static GameWorld myGameWorld = null;
 
 
     /**
@@ -209,7 +209,7 @@ public class RobotMonitor {
     /**
      * Notifies the RobotMonitor of what the current GameWorld is.  Should be called before the start of each game.
      */
-    public static void setGameWorld(GenericWorld gw) {
+    public static void setGameWorld(GameWorld gw) {
         myGameWorld = gw;
     }
 

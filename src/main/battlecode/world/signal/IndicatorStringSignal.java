@@ -1,15 +1,13 @@
 package battlecode.world.signal;
 
 import battlecode.engine.signal.Signal;
-import battlecode.world.InternalRobot;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Signifies that one of the robot's indicator strings has been changed
  *
  * @author adamd
  */
-public class IndicatorStringSignal extends Signal {
+public class IndicatorStringSignal implements Signal {
 
     private static final long serialVersionUID = -8277652765209879399L;
 

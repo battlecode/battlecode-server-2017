@@ -1,19 +1,15 @@
 package battlecode.world;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
+import battlecode.common.*;
 import battlecode.engine.GenericRobot;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.SpawnSignal;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class InternalRobot implements GenericRobot {
     public RobotType type;
@@ -49,9 +45,6 @@ public class InternalRobot implements GenericRobot {
 
     private int buildDelay;
 
-    private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean(
-            "bc.engine.upkeep");
-
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
             boolean spawnedRobot, int buildDelay) {
@@ -83,11 +76,11 @@ public class InternalRobot implements GenericRobot {
 
         didSelfDestruct = false;
         broadcasted = false;
-        broadcastMap = new HashMap<Integer, Integer>();
+        broadcastMap = new HashMap<>();
         roundsAlive = 0;
 
-        supplyActions = new ArrayList<Signal>();
-        missileLaunchActions = new ArrayList<SpawnSignal>();
+        supplyActions = new ArrayList<>();
+        missileLaunchActions = new ArrayList<>();
         movementSignal = null;
         attackSignal = null;
         castSignal = null;
@@ -350,13 +343,11 @@ public class InternalRobot implements GenericRobot {
 
     public double calculateMovementActionDelay(MapLocation from,
             MapLocation to) {
-        double base = 1;
         if (from.distanceSquaredTo(to) <= 1) {
-            base = getMovementDelayForType();
+            return getMovementDelayForType();
         } else {
-            base = getMovementDelayForType() * 1.4;
+            return getMovementDelayForType() * 1.4;
         }
-        return base;
     }
 
     // *********************************
@@ -421,7 +412,7 @@ public class InternalRobot implements GenericRobot {
     }
 
     public void suicide() {
-        (new DeathSignal(this.getID())).accept(myGameWorld);
+        myGameWorld.visitSignal((new DeathSignal(this.getID())));
     }
     
     public void transform(RobotType newType) {
@@ -456,7 +447,7 @@ public class InternalRobot implements GenericRobot {
         if (broadcasted)
             myGameWorld.visitSignal(new BroadcastSignal(this.getID(), this.getTeam(), broadcastMap));
 
-        broadcastMap = new HashMap<Integer, Integer>();
+        broadcastMap = new HashMap<>();
         broadcasted = false;
 
         // perform supply actions

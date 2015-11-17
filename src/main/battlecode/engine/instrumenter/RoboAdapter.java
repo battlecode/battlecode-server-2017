@@ -1,6 +1,9 @@
 package battlecode.engine.instrumenter;
 
-import org.objectweb.asm.*;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  * Instruments a class.  See InstrumenterASMImpl for more info on what this instrumentation does.
@@ -98,12 +101,11 @@ public class RoboAdapter extends ClassVisitor implements Opcodes {
         // should never be accessed by more than one thread.
         if (checkDisallowed || (access & Opcodes.ACC_STATIC) == 0)
             access &= ~Opcodes.ACC_VOLATILE;
-        FieldVisitor fv = cv.visitField(access,
+        return cv.visitField(access,
                 name,
                 ClassReferenceUtil.classDescReference(desc, teamPackageName, silenced, checkDisallowed),
                 ClassReferenceUtil.fieldSignatureReference(signature, teamPackageName, silenced, checkDisallowed),
                 value);
-        return fv;
     }
 
     /**

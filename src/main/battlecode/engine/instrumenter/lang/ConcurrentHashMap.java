@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentMap;
  * ConcurrentMap implementation that isn't really concurrent.
  * Needed to instrument Clojure.
  */
+@SuppressWarnings("unused")
 public class ConcurrentHashMap<K, V> extends Hashtable<K, V> implements ConcurrentMap<K, V> {
 
     public V putIfAbsent(K key, V value) {

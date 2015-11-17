@@ -51,7 +51,7 @@ public class MethodCostUtil {
         BufferedReader reader;
         String line;
 
-        methodCosts = new HashMap<String, MethodData>();
+        methodCosts = new HashMap<>();
         // load method costs
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream("MethodCosts.txt")));
@@ -65,7 +65,7 @@ public class MethodCostUtil {
             ClassReferenceUtil.fileLoadError("MethodCosts.txt");
         }
 
-        interfacesMap = new HashMap<String, String[]>();
+        interfacesMap = new HashMap<>();
     }
 
     public static MethodData getMethodDataRaw(String fullName) {
@@ -86,7 +86,7 @@ public class MethodCostUtil {
         if (methodCosts.containsKey(key))
             return methodCosts.get(key);
 
-        String[] interfaces = null;
+        String[] interfaces;
         if (interfacesMap.containsKey(className))
             interfaces = interfacesMap.get(className);
         else {
@@ -104,8 +104,8 @@ public class MethodCostUtil {
             interfacesMap.put(className, interfaces);
         }
 
-        for (int i = 0; i < interfaces.length; i++) {
-            key = interfaces[i] + "/" + methodName;
+        for (String anInterface : interfaces) {
+            key = anInterface + "/" + methodName;
             if (methodCosts.containsKey(key))
                 return methodCosts.get(key);
         }

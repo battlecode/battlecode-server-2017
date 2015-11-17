@@ -1,14 +1,11 @@
 package battlecode.world;
 
 import battlecode.common.*;
+import org.junit.Ignore;
 
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
-
-import org.junit.Ignore;
 
 /**
  * TestGame holds a GameWorld and contains utility methods to spawn units and execute rounds. The main purpose is to

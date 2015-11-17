@@ -1,7 +1,8 @@
 package battlecode.engine.signal;
 
+/**
+ * Implemented by objects that can absorb signals.
+ */
 public interface SignalHandler {
-
-    public void visitSignal(Signal s);
-
+    void visitSignal(Signal s);
 }

@@ -19,7 +19,7 @@ public class Verifier {
             InstrumentingClassLoader icl = new IndividualClassLoader(teamPackageName, false, true, false);
             icl.loadClass(teamPackageName + ".RobotPlayer");
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
             e.printStackTrace(System.out);
             System.exit(42);
         }

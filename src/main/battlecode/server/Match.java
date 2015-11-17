@@ -4,9 +4,9 @@ import battlecode.common.GameConstants;
 import battlecode.common.Team;
 import battlecode.engine.Engine;
 import battlecode.engine.GameState;
-import battlecode.engine.GenericWorld;
 import battlecode.engine.signal.Signal;
 import battlecode.serial.*;
+import battlecode.world.GameWorld;
 
 import java.util.Observable;
 
@@ -28,7 +28,7 @@ public class Match extends Observable {
     /**
      * The GenericWorld for getting signals.
      */
-    private GenericWorld gameWorld;
+    private GameWorld gameWorld;
 
     /**
      * The MatchInfo from which this match was created.
@@ -82,7 +82,6 @@ public class Match extends Observable {
      */
     public void initialize() {
 
-        boolean breakpointsEnabled = options.getBoolean("bc.engine.breakpoints");
         this.bytecodesUsedEnabled =
                 options.getBoolean("bc.engine.bytecodes-used");
 
@@ -248,14 +247,11 @@ public class Match extends Observable {
         for (int i = 0; i < (50 - teamName.length()) / 2; i++)
             sb.append(' ');
         sb.append(teamName);
-        sb.append(" wins (round " + getRoundNumber() + ")");
+        sb.append(" wins (round ").append(getRoundNumber()).append(")");
 
         sb.append("\nReason: ");
         GameStats stats = gameWorld.getGameStats();
         DominationFactor dom = stats.getDominationFactor();
-        double[] points = stats.getTotalPoints();
-        double[] energon = stats.getTotalEnergon();
-        int[] archons = stats.getNumArchons();
         if (dom == DominationFactor.DESTROYED)
             sb.append("The winning team won by destruction.");
         else if (dom == DominationFactor.PWNED)
@@ -265,7 +261,7 @@ public class Match extends Observable {
         else if (dom == DominationFactor.BARELY_BEAT)
             sb.append("The winning team won on tiebreakers (more Parts)");
         else if (dom == DominationFactor.WON_BY_DUBIOUS_REASONS)
-            sb.append("Team " + getWinner() + " won arbitrarily.");
+            sb.append("Team ").append(getWinner()).append(" won arbitrarily.");
 
         return sb.toString();
     }

@@ -1,35 +1,16 @@
 package battlecode.world;
 
-import static battlecode.common.GameActionExceptionType.NOT_ACTIVE;
-import static battlecode.common.GameActionExceptionType.CANT_DO_THAT_BRO;
-import static battlecode.common.GameActionExceptionType.CANT_SENSE_THAT;
-import static battlecode.common.GameActionExceptionType.NOT_ENOUGH_RESOURCE;
-import static battlecode.common.GameActionExceptionType.OUT_OF_RANGE;
-
-import java.util.*;
-
-import battlecode.common.DependencyProgress;
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.GameActionExceptionType;
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
-import battlecode.common.ZombieCount;
-import battlecode.engine.GenericController;
+import battlecode.common.*;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
-import battlecode.world.signal.AttackSignal;
-import battlecode.world.signal.BuildSignal;
-import battlecode.world.signal.IndicatorDotSignal;
-import battlecode.world.signal.IndicatorLineSignal;
-import battlecode.world.signal.IndicatorStringSignal;
-import battlecode.world.signal.MatchObservationSignal;
-import battlecode.world.signal.MovementSignal;
-import battlecode.world.signal.SpawnSignal;
+import battlecode.world.signal.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import static battlecode.common.GameActionExceptionType.*;
 
 /*
  TODO:
@@ -46,8 +27,7 @@ import battlecode.world.signal.SpawnSignal;
  - better suicide() ??
  - pare down GW, GWviewer methods; add engine.getallsignals?
  */
-public final class RobotControllerImpl implements RobotController,
-        GenericController {
+public final class RobotControllerImpl implements RobotController {
     private GameWorld gameWorld;
     private InternalRobot robot;
 
@@ -185,7 +165,7 @@ public final class RobotControllerImpl implements RobotController,
             throws GameActionException {
         assertNotNull(loc);
         assertCanSense(loc);
-        InternalRobot obj = (InternalRobot) gameWorld.getObject(loc);
+        InternalRobot obj = gameWorld.getObject(loc);
         return obj != null;
     }
 
@@ -193,7 +173,7 @@ public final class RobotControllerImpl implements RobotController,
             throws GameActionException {
         assertNotNull(loc);
         assertCanSense(loc);
-        InternalRobot obj = (InternalRobot) gameWorld.getObject(loc);
+        InternalRobot obj = gameWorld.getObject(loc);
         if (obj != null && canSense(obj)) {
             return obj.getRobotInfo();
         } else {
@@ -202,7 +182,7 @@ public final class RobotControllerImpl implements RobotController,
     }
 
     public boolean canSenseRobot(int id) {
-        InternalRobot obj = (InternalRobot) gameWorld.getObjectByID(id);
+        InternalRobot obj = gameWorld.getObjectByID(id);
         if (obj == null) {
             return false;
         }
@@ -210,7 +190,7 @@ public final class RobotControllerImpl implements RobotController,
     }
 
     public RobotInfo senseRobot(int id) throws GameActionException {
-        InternalRobot obj = (InternalRobot) gameWorld.getObjectByID(id);
+        InternalRobot obj = gameWorld.getObjectByID(id);
         if (obj != null && canSense(obj)) {
             return obj.getRobotInfo();
         } else {
@@ -241,10 +221,10 @@ public final class RobotControllerImpl implements RobotController,
             if (useTeam && o.getTeam() != team)
                 continue;
 
-            robots.add(((InternalRobot) o).getRobotInfo());
+            robots.add(o.getRobotInfo());
         }
 
-        return robots.toArray(new RobotInfo[0]);
+        return robots.toArray(new RobotInfo[robots.size()]);
     }
 
     public RobotInfo[] senseNearbyRobots() {
@@ -443,11 +423,10 @@ public final class RobotControllerImpl implements RobotController,
 
         Integer queued = robot.getQueuedBroadcastFor(channel);
         if (queued != null) {
-            return queued.intValue();
+            return queued;
         }
 
-        int m = gameWorld.getMessage(robot.getTeam(), channel);
-        return m;
+        return gameWorld.getMessage(robot.getTeam(), channel);
     }
 
     // ***********************************
@@ -558,7 +537,7 @@ public final class RobotControllerImpl implements RobotController,
         assertIsPathable(type, loc);
 
         int delay = type.buildTurns;
-        robot.activateMovement(new BuildSignal(robot == null ? robot.getID() : 0, loc, type, robot.getTeam(), delay), delay, delay);
+        robot.activateMovement(new BuildSignal(robot != null ? robot.getID() : 0, loc, type, robot.getTeam(), delay), delay, delay);
     }
 
     // ***********************************
@@ -573,10 +552,11 @@ public final class RobotControllerImpl implements RobotController,
     }
 
     public void resign() {
-        for (InternalRobot obj : gameWorld.getAllGameObjects())
-            if ((obj instanceof InternalRobot)
-                    && obj.getTeam() == robot.getTeam())
-                gameWorld.notifyDied((InternalRobot) obj);
+        for (InternalRobot obj : gameWorld.getAllGameObjects()) {
+            if ((obj != null) && obj.getTeam() == robot.getTeam()) {
+                gameWorld.notifyDied(obj);
+            }
+        }
         gameWorld.removeDead();
     }
 
@@ -602,21 +582,19 @@ public final class RobotControllerImpl implements RobotController,
     public void setIndicatorString(int stringIndex, String newString) {
         if (stringIndex >= 0
                 && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS)
-            (new IndicatorStringSignal(robot.getID(), stringIndex, newString))
-                    .accept(gameWorld);
+            gameWorld.visitSignal((new IndicatorStringSignal(robot.getID(), stringIndex, newString)));
     }
 
     public void setIndicatorDot(MapLocation loc, int red, int green, int blue) {
         assertNotNull(loc);
-        new IndicatorDotSignal(robot.getID(), robot.getTeam(), loc, red, green, blue).accept(gameWorld);
+        gameWorld.visitSignal(new IndicatorDotSignal(robot.getID(), robot.getTeam(), loc, red, green, blue));
     }
 
     public void setIndicatorLine(MapLocation from, MapLocation to, int red,
             int green, int blue) {
         assertNotNull(from);
         assertNotNull(to);
-        new IndicatorLineSignal(robot.getID(), robot.getTeam(), from, to, red, green, blue)
-                .accept(gameWorld);
+        gameWorld.visitSignal(new IndicatorLineSignal(robot.getID(), robot.getTeam(), from, to, red, green, blue));
     }
 
     public long getControlBits() {
@@ -624,7 +602,7 @@ public final class RobotControllerImpl implements RobotController,
     }
 
     public void addMatchObservation(String observation) {
-        (new MatchObservationSignal(robot.getID(), observation)).accept(gameWorld);
+        gameWorld.visitSignal((new MatchObservationSignal(robot.getID(), observation)));
     }
 
     public void breakpoint() {

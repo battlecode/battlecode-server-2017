@@ -3,22 +3,15 @@ package ZombiePlayer;
 // instrumenter explicitly disallows player classes to be part of a Battlecode
 // package.
 
-import battlecode.common.Clock;
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
-import battlecode.common.ZombieCount;
+import battlecode.common.*;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class ZombiePlayer {
     public static void run(RobotController rc) throws GameActionException{
         Direction[] dirs = { Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST };
-        Queue<RobotType> zombies = new LinkedList<RobotType>();
+        Queue<RobotType> zombies = new LinkedList<>();
         while (true) {
             switch (rc.getType()) {
                 case ZOMBIEDEN:

@@ -2,13 +2,12 @@ package battlecode.server.proxy;
 
 import battlecode.serial.notification.Notification;
 import battlecode.server.Server;
-
-import java.io.*;
-import java.util.zip.GZIPOutputStream;
-
 import battlecode.server.serializer.Serializer;
 import battlecode.server.serializer.SerializerFactory;
 import org.apache.commons.io.FileUtils;
+
+import java.io.*;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This class represents a "connection" to a file. It allows match data to be

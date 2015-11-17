@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 // The instrumenter replaces calls to java.lang.String methods,
 // which are not instrumented, with these methods, which are.
 
+@SuppressWarnings("unused")
 public class InstrumentableFunctions {
     private InstrumentableFunctions() {
     }

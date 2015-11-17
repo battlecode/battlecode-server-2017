@@ -7,6 +7,7 @@ import java.io.PrintStream;
  *
  * @author adamd
  */
+@SuppressWarnings("unused")
 public class SilencedPrintStream extends PrintStream {
 
     // singleton

@@ -23,5 +23,5 @@ public enum DominationFactor {
     /**
      * Win by destroying enemy Archons.
      */
-    DESTROYED;
+    DESTROYED
 }

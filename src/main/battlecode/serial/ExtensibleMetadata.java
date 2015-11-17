@@ -16,7 +16,7 @@ public class ExtensibleMetadata implements Serializable {
     }
 
     public ExtensibleMetadata(Map<String, Object> data) {
-        this.data = new LinkedHashMap<String, Object>();
+        this.data = new LinkedHashMap<>();
         if (data != null)
             this.data.putAll(data);
     }

@@ -8,7 +8,7 @@ import java.util.Map;
 class SingletonClassLoader extends InstrumentingClassLoader {
 
     // caches the classes that have been loaded and designated as reusable, to speed up future attempts to load them
-    private final Map<String, Class> loadedReusableClasses = new HashMap<String, Class>();
+    private final Map<String, Class> loadedReusableClasses = new HashMap<>();
 
     protected SingletonClassLoader() {
         super(false, false);
@@ -19,7 +19,7 @@ class SingletonClassLoader extends InstrumentingClassLoader {
         name = name.replace('.', '/');
 
         // this is the class we'll return
-        Class finishedClass = null;
+        Class finishedClass;
 
         //System.out.println("loadClass "+name);
 

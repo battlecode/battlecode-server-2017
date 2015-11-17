@@ -1,5 +1,6 @@
 package battlecode.engine.instrumenter.lang;
 
+@SuppressWarnings("unused")
 public class AtomicInteger {
 
     private int l;

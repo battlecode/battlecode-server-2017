@@ -9,14 +9,17 @@ import battlecode.serial.notification.PauseNotification;
 import battlecode.serial.notification.ResumeNotification;
 import battlecode.serial.notification.RunNotification;
 import battlecode.serial.notification.StartNotification;
-import battlecode.server.serializer.*;
+import battlecode.server.serializer.Serializer;
+import battlecode.server.serializer.SerializerFactory;
 import battlecode.world.GameMap;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
 import battlecode.world.ZombieSpawnSchedule;
 import battlecode.world.signal.*;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,7 +75,7 @@ public abstract class SerializerFactoryTestBase {
             new RoundDelta(new Signal[] {
                     new AttackSignal(robot.getID(), new MapLocation(1,1)),
                     new BashSignal(robot.getID(), new MapLocation(1,1)),
-                    new BroadcastSignal(robot.getID(), robot.getTeam(), new HashMap<Integer, Integer>()),
+                    new BroadcastSignal(robot.getID(), robot.getTeam(), new HashMap<>()),
                     new BuildSignal(57, new MapLocation(1,1), RobotType.GUARD, Team.A, 50),
                     new BytecodesUsedSignal(new InternalRobot[]{robot}),
                     new CastSignal(robot.getID(), new MapLocation(-75, -75)),

@@ -1,5 +1,6 @@
 package battlecode.engine.instrumenter.lang;
 
+@SuppressWarnings("unused")
 public class AtomicReference<V> {
 
     private V v;

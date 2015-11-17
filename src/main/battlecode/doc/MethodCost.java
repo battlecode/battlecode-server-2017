@@ -1,7 +1,7 @@
 package battlecode.doc;
 
 import battlecode.engine.instrumenter.MethodCostUtil;
-import com.sun.javadoc.*;
+import com.sun.javadoc.Tag;
 import com.sun.tools.doclets.Taglet;
 
 import java.util.Map;
@@ -56,10 +56,8 @@ public class MethodCost implements Taglet {
         if (methods == null) methods = System.getProperty("battlecode.doc.methods").split("\n");
         MethodCostUtil.MethodData data = MethodCostUtil.getMethodDataRaw(methods[n++]);
         if (data == null || data.cost == 0) return null;
-        StringBuilder builder = new StringBuilder();
-        builder.append("<dt><strong>Bytecode cost:</strong></dt><dd>");
-        builder.append(data.cost);
-        builder.append("</dd>");
-        return builder.toString();
+        return "<dt><strong>Bytecode cost:</strong></dt><dd>" +
+                data.cost +
+                "</dd>";
     }
 }

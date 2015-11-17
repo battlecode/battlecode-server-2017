@@ -1,6 +1,8 @@
 package battlecode.server.serializer;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 /**
  * A Serializer implementation that simply wraps standard Java

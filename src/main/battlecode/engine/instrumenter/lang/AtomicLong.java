@@ -1,6 +1,7 @@
 package battlecode.engine.instrumenter.lang;
 
 // Fake AtomicLong class, needed by java.util.Random.
+@SuppressWarnings("unused")
 public class AtomicLong {
 
     private long l;

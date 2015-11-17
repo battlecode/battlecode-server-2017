@@ -7,13 +7,13 @@ import battlecode.common.Team;
  */
 public interface GenericRobot {
 
-    public int getID();
+    int getID();
 
-    public Team getTeam();
+    Team getTeam();
 
-    public int getBytecodesUsed();
+    int getBytecodesUsed();
 
-    public int getBytecodeLimit();
+    int getBytecodeLimit();
 
-    public void suicide();
+    void suicide();
 }

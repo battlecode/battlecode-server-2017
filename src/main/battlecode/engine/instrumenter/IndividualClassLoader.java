@@ -16,10 +16,10 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
     // caches the binary format of classes that have been instrumented
     // the values are byte arrays, not Classes, because each instance of InstrumentingClassLoader should define its own class,
     // even if another InstrumentingClassLoader has already loaded a class from the same class file
-    private final static Map<String, byte[]> instrumentedClasses = new HashMap<String, byte[]>();
+    private final static Map<String, byte[]> instrumentedClasses = new HashMap<>();
 
     // caches the names of teams with errors, so that if a class is loaded for that team, it immediately throws an exception
-    private final static Set<String> teamsWithErrors = Collections.newSetFromMap(new IdentityHashMap<String, Boolean>());
+    private final static Set<String> teamsWithErrors = Collections.newSetFromMap(new IdentityHashMap<>());
 
     // the name of the team this InstrumentingClassLoader is loading
     private final String teamPackageName;
@@ -70,7 +70,7 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
             name = name.replace('.', '/');
 
             // this is the class we'll return
-            Class finishedClass = null;
+            Class finishedClass;
 
             //System.out.println("loadClass "+name);
 
@@ -82,7 +82,7 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                 // We want each robot to have its own copy of this class
                 // so that it isn't possible to send messages by calling
                 // hashCode repeatedly.  But we don't want to instrument it.
-                ClassReader cr = null;
+                ClassReader cr;
                 try {
                     cr = new ClassReader(name);
                 } catch (IOException ioe) {

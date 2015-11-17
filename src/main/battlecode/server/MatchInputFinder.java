@@ -16,8 +16,7 @@ import java.util.zip.ZipEntry;
 /**
  * A utility class for finding the two types match inputs (teams and maps) that
  * are available either locally or on a remote machine. It searches the Java
- * classpath and a set of map paths for elements, or it can prompt a remotely
- * running server to do the same via the RPCServer/RPCClient utilities.
+ * classpath and a set of map paths for elements.
  * <p/>
  * Note that this class only matches files by name, so it's possible for it to
  * return invalid map files, for instance, so long as they are named like map
@@ -39,15 +38,13 @@ public class MatchInputFinder {
      * A file filter that passes directories (to propagate a directory search)
      * and class files that seem to be BattleCode players.
      */
-    private static interface Filter extends FileFilter {
-        public boolean accept(ZipEntry pathname);
+    private interface Filter extends FileFilter {
+        boolean accept(ZipEntry pathname);
     }
 
     private static class TeamFileFilter implements Filter {
         public boolean accept(File pathname) {
-            if (pathname.isDirectory() || "RobotPlayer.class".equals(pathname.getName()))
-                return true;
-            return false;
+            return pathname.isDirectory() || "RobotPlayer.class".equals(pathname.getName());
         }
 
         public boolean accept(ZipEntry pathname) {
@@ -61,11 +58,9 @@ public class MatchInputFinder {
      */
     private static class MapFileFilter implements Filter {
         public boolean accept(File pathname) {
-            if (pathname.isDirectory() ||
+            return pathname.isDirectory() ||
                     ("maps".equals(pathname.getParentFile().getName()) &&
-                            pathname.getName().endsWith(".xml")))
-                return true;
-            return false;
+                            pathname.getName().endsWith(".xml"));
         }
 
         public boolean accept(ZipEntry pathname) {
@@ -127,7 +122,7 @@ public class MatchInputFinder {
      */
     private String[] findResourcesLocally(String[] paths, Filter filter, boolean parent) {
 
-        List<String> foundList = new LinkedList<String>();
+        List<String> foundList = new LinkedList<>();
 
         for (String path : paths) {
             File f = new File(path);

@@ -1,13 +1,12 @@
 package battlecode.world;
 
 import battlecode.common.MapLocation;
-
-import java.io.Serializable;
 import battlecode.common.ZombieCount;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -166,9 +165,8 @@ public class GameMap implements Serializable {
         if (!Arrays.deepEquals(this.initialParts, other.initialParts))
             return false;
         if (!this.mapName.equals(other.mapName)) return false;
-        if (!this.zSchedule.equivalentTo(other.zSchedule)) return false;
+        return this.zSchedule.equivalentTo(other.zSchedule);
 
-        return true;
     }
 
     /**
@@ -284,7 +282,8 @@ public class GameMap implements Serializable {
 
     @JsonIgnore
     public ZombieCount[] getZombieSpawnSchedule(int round) {
-        return zSchedule.getScheduleForRound(round).toArray(new ZombieCount[0]);
+        final List<ZombieCount> sched = zSchedule.getScheduleForRound(round);
+        return sched.toArray(new ZombieCount[sched.size()]);
     }
 
     /**
@@ -332,9 +331,9 @@ public class GameMap implements Serializable {
         public void removeLocation(MapLocation loc, int radiusSquared) {
             MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
-            for (int i = 0; i < locs.length; i++) {
-                int x = locs[i].x - map.originX;
-                int y = locs[i].y - map.originY;
+            for (MapLocation target : locs) {
+                int x = target.x - map.originX;
+                int y = target.y - map.originY;
                 if (validLoc(x, y)) {
                     currentCount[x + OFFSET][y + OFFSET]--;
                 }
@@ -344,17 +343,17 @@ public class GameMap implements Serializable {
         public void rememberLocation(MapLocation loc, int radiusSquared, Map<MapLocation, Integer> partsMap,  Map<MapLocation, Integer> rubbleMap) {
             MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
-            for (int i = 0; i < locs.length; i++) {
-                int x = locs[i].x - map.originX;
-                int y = locs[i].y - map.originY;
+            for (MapLocation target : locs) {
+                int x = target.x - map.originX;
+                int y = target.y - map.originY;
                 if (validLoc(x, y)) {
                     seen[x + OFFSET][y + OFFSET] = true;
                     currentCount[x + OFFSET][y + OFFSET]++;
-                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && partsMap.containsKey(locs[i])) {
-                        partsOnSquare[x + OFFSET][y + OFFSET] = partsMap.get(locs[i]);
+                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && partsMap.containsKey(target)) {
+                        partsOnSquare[x + OFFSET][y + OFFSET] = partsMap.get(target);
                     }
-                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && rubbleMap.containsKey(locs[i])) {
-                        rubbleOnSquare[x + OFFSET][y + OFFSET] = rubbleMap.get(locs[i]);
+                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && rubbleMap.containsKey(target)) {
+                        rubbleOnSquare[x + OFFSET][y + OFFSET] = rubbleMap.get(target);
                     }
                 }
             }

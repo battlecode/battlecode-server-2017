@@ -6,6 +6,7 @@ package battlecode.common;
  * constructed, it is passed an instance of <code>RobotController</code> that
  * controls the newly created robot.
  */
+@SuppressWarnings("unused")
 public interface RobotController {
 
     // *********************************
@@ -18,21 +19,21 @@ public interface RobotController {
      *
      * @return the number of rounds in the game.
      */
-    public int getRoundLimit();
+    int getRoundLimit();
 
     /**
      * Gets the team's total ore.
      *
      * @return the team's total ore.
      */
-    public double getTeamOre();
+    double getTeamOre();
 
     /**
      * Returns the zombie spawn schedule for the map. Only works on zombie dens. NOT AVAILABLE TO COMPETITORS?
      *
      * @return the zombie spawn schedule.
      */
-    public ZombieCount[] getZombieSpawnSchedule(int round);
+    ZombieCount[] getZombieSpawnSchedule(int round);
 
     // *********************************
     // ****** UNIT QUERY METHODS *******
@@ -43,28 +44,28 @@ public interface RobotController {
      *
      * @return the ID of the robot.
      */
-    public int getID();
+    int getID();
 
     /**
      * Gets the Team of this robot.
      *
      * @return this robot's Team
      */
-    public Team getTeam();
+    Team getTeam();
 
     /**
      * Gets this robot's type (SOLDIER, HQ, etc.).
      *
      * @return this robot's type.
      */
-    public RobotType getType();
+    RobotType getType();
 
     /**
      * Gets the robot's current location.
      *
      * @return this robot's current location.
      */
-    public MapLocation getLocation();
+    MapLocation getLocation();
 
     /**
      * Returns the amount of core delay a robot has accumulated. If the result
@@ -72,7 +73,7 @@ public interface RobotController {
      *
      * @return the amount of core delay a robot has accumulated.
      */
-    public double getCoreDelay();
+    double getCoreDelay();
 
     /**
      * Returns the amount of weapon delay a robot has accumulated. If the result
@@ -80,14 +81,14 @@ public interface RobotController {
      *
      * @return the number of weapon delay a robot has accumulated.
      */
-    public double getWeaponDelay();
+    double getWeaponDelay();
 
     /**
      * Gets the robot's current health.
      *
      * @return this robot's current health.
      */
-    public double getHealth();
+    double getHealth();
 
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
@@ -101,7 +102,7 @@ public interface RobotController {
      *            the location to check.
      * @return the amount of rubble at the location
      */
-    public int senseRubble(MapLocation loc);
+    int senseRubble(MapLocation loc);
     
     /**
      * Senses the parts at the given location. Returns -1 for a location
@@ -111,7 +112,7 @@ public interface RobotController {
      *            the location to check.
      * @return the amount of parts at the location
      */   
-    public int senseParts(MapLocation loc);
+    int senseParts(MapLocation loc);
 
     /**
      * Returns true if the given location is within the robot's sensor range, or
@@ -121,7 +122,7 @@ public interface RobotController {
      *            the location to check.
      * @return whether the given location is within the robot's sensor range.
      */
-    public boolean canSenseLocation(MapLocation loc);
+    boolean canSenseLocation(MapLocation loc);
 
     /**
      * Returns whether there is a robot at the given location.
@@ -133,8 +134,7 @@ public interface RobotController {
      *             if <code>loc</code> is not within sensor range
      *             (CANT_SENSE_THAT).
      */
-    public boolean isLocationOccupied(MapLocation loc)
-            throws GameActionException;
+    boolean isLocationOccupied(MapLocation loc) throws GameActionException;
 
     /**
      * Returns the robot at the given location, or <code>null</code> if there is
@@ -147,7 +147,7 @@ public interface RobotController {
      *             if <code>loc</code> is not within sensor range
      *             (CANT_SENSE_THAT).
      */
-    public RobotInfo senseRobotAtLocation(MapLocation loc)
+    RobotInfo senseRobotAtLocation(MapLocation loc)
             throws GameActionException;
 
     /**
@@ -157,7 +157,7 @@ public interface RobotController {
      *            the ID of the robot to query.
      * @return whether the given robot is within the robot's sensor range.
      */
-    public boolean canSenseRobot(int id);
+    boolean canSenseRobot(int id);
 
     /**
      * Senses information about a particular robot given its ID.
@@ -169,14 +169,14 @@ public interface RobotController {
      *             if the robot cannot be sensed (for example, if it doesn't
      *             exist or is out of sight range).
      */
-    public RobotInfo senseRobot(int id) throws GameActionException;
+    RobotInfo senseRobot(int id) throws GameActionException;
 
     /**
      * Returns all robots that can be sensed on the map.
      * 
      * @return array of class type of game objects.
      */
-    public RobotInfo[] senseNearbyRobots();
+    RobotInfo[] senseNearbyRobots();
 
     /**
      * Returns all robots that can be sensed within a certain radius of the
@@ -186,7 +186,7 @@ public interface RobotController {
      *            return objects this distance away from the center.
      * @return array of class type of game objects.
      */
-    public RobotInfo[] senseNearbyRobots(int radiusSquared);
+    RobotInfo[] senseNearbyRobots(int radiusSquared);
 
     /**
      * Returns all robots of a given team that can be sensed within a certain
@@ -199,7 +199,7 @@ public interface RobotController {
      *            objects from all teams are returned.
      * @return array of class type of game objects.
      */
-    public RobotInfo[] senseNearbyRobots(int radiusSquared, Team team);
+    RobotInfo[] senseNearbyRobots(int radiusSquared, Team team);
 
     /**
      * Returns all robots of a givin team that can be sensed within a certain
@@ -214,7 +214,7 @@ public interface RobotController {
      *            objects from all teams are returned.
      * @return array of class type of game objects.
      */
-    public RobotInfo[] senseNearbyRobots(MapLocation center, int radiusSquared,
+    RobotInfo[] senseNearbyRobots(MapLocation center, int radiusSquared,
             Team team);
 
     // ***********************************
@@ -227,7 +227,7 @@ public interface RobotController {
      * 
      * @return whether the robot can perform a core action in this turn.
      */
-    public boolean isCoreReady();
+    boolean isCoreReady();
 
     /**
      * Returns whether the weapon delay is less than 1 (whether the robot can
@@ -235,7 +235,7 @@ public interface RobotController {
      *
      * @return whether the robot is able to attack in the current turn.
      */
-    public boolean isWeaponReady();
+    boolean isWeaponReady();
 
     // ***********************************
     // ****** MOVEMENT METHODS ***********
@@ -254,7 +254,7 @@ public interface RobotController {
      * @return true if there are no robots or voids preventing this robot from
      *         moving in the given direction; false otherwise.
      */
-    public boolean canMove(Direction dir);
+    boolean canMove(Direction dir);
 
     /**
      * Queues a move in the given direction to be performed at the end of this
@@ -265,7 +265,7 @@ public interface RobotController {
      * @throws GameActionException
      *             if the robot cannot move in this direction.
      */
-    public void move(Direction dir) throws GameActionException;
+    void move(Direction dir) throws GameActionException;
 
     // ***********************************
     // ****** ATTACK METHODS *************
@@ -282,7 +282,7 @@ public interface RobotController {
      *         Does not take into account whether the robot is currently
      *         attacking.
      */
-    public boolean canAttackLocation(MapLocation loc);
+    boolean canAttackLocation(MapLocation loc);
 
     /**
      * Queues an attack on the given location to be performed at the end of this
@@ -293,7 +293,7 @@ public interface RobotController {
      * @throws GameActionException
      *             if the robot cannot attack the given square.
      */
-    public void attackLocation(MapLocation loc) throws GameActionException;
+    void attackLocation(MapLocation loc) throws GameActionException;
 
     // ***********************************
     // ****** BROADCAST METHODS **********
@@ -310,7 +310,7 @@ public interface RobotController {
      * @throws GameActionException
      *             if the channel is invalid.
      */
-    public void broadcast(int channel, int data) throws GameActionException;
+    void broadcast(int channel, int data) throws GameActionException;
 
     /**
      * Retrieves the message stored at the given radio channel.
@@ -322,7 +322,7 @@ public interface RobotController {
      * @throws GameActionException
      *             if the channel is invalid.
      */
-    public int readBroadcast(int channel) throws GameActionException;
+    int readBroadcast(int channel) throws GameActionException;
 
     // ***********************************
     // ****** BUILDING/SPAWNING **********
@@ -336,7 +336,7 @@ public interface RobotController {
      *            the type to build.
      * @return whether the requirements to build are met.
      */
-    public boolean hasBuildRequirements(RobotType type);
+    boolean hasBuildRequirements(RobotType type);
 
     /**
      * Returns whether the robot can build a structure of the given type in the
@@ -352,7 +352,7 @@ public interface RobotController {
      * @return whether it is possible to build a building of the given type in
      *         the given direction.
      */
-    public boolean canBuild(Direction dir, RobotType type);
+    boolean canBuild(Direction dir, RobotType type);
 
     /**
      * Builds a structure in the given direction, queued for the end of the
@@ -367,7 +367,7 @@ public interface RobotController {
      * @throws GameActionException
      *             if the build is bad.
      */
-    public void build(Direction dir, RobotType type) throws GameActionException;
+    void build(Direction dir, RobotType type) throws GameActionException;
 
     // ***********************************
     // ****** OTHER ACTION METHODS *******
@@ -376,17 +376,17 @@ public interface RobotController {
     /**
      * Ends the current round. Never fails.
      */
-    public void yield();
+    void yield();
 
     /**
      * Kills your robot and ends the current round. Never fails.
      */
-    public void disintegrate();
+    void disintegrate();
 
     /**
      * Causes your team to lose the game. It's like typing "gg."
      */
-    public void resign();
+    void resign();
 
     // ***********************************
     // ******** MISC. METHODS ************
@@ -408,7 +408,7 @@ public interface RobotController {
      * @see #getTeamMemory
      * @see #setTeamMemory(int, long, long)
      */
-    public void setTeamMemory(int index, long value);
+    void setTeamMemory(int index, long value);
 
     /**
      * Sets this team's "memory". This function allows for finer control than
@@ -428,7 +428,7 @@ public interface RobotController {
      * @see #getTeamMemory
      * @see #setTeamMemory(int, long)
      */
-    public void setTeamMemory(int index, long value, long mask);
+    void setTeamMemory(int index, long value, long mask);
 
     /**
      * Returns the team memory from the last game of the match. The return value
@@ -440,7 +440,7 @@ public interface RobotController {
      * @see #setTeamMemory(int, long)
      * @see #setTeamMemory(int, long, long)
      */
-    public long[] getTeamMemory();
+    long[] getTeamMemory();
 
     // ***********************************
     // ******** DEBUG METHODS ************
@@ -458,7 +458,7 @@ public interface RobotController {
      * @param newString
      *            the value to which the indicator string should be set.
      */
-    public void setIndicatorString(int stringIndex, String newString);
+    void setIndicatorString(int stringIndex, String newString);
 
     /**
      * Draws a dot on the game map, for debugging purposes. Press V in the
@@ -473,7 +473,7 @@ public interface RobotController {
      * @param blue
      *            the blue component of the dot's color.
      */
-    public void setIndicatorDot(MapLocation loc, int red, int green, int blue);
+    void setIndicatorDot(MapLocation loc, int red, int green, int blue);
 
     /**
      * Draws a line on the game map, for debugging purposes. Press V in the
@@ -490,7 +490,7 @@ public interface RobotController {
      * @param blue
      *            the blue component of the line's color.
      */
-    public void setIndicatorLine(MapLocation from, MapLocation to, int red,
+    void setIndicatorLine(MapLocation from, MapLocation to, int red,
             int green, int blue);
 
     /**
@@ -499,7 +499,7 @@ public interface RobotController {
      *
      * @return this robot's control bits
      */
-    public long getControlBits();
+    long getControlBits();
 
     /**
      * Adds a custom observation to the match file, such that when it is
@@ -508,12 +508,12 @@ public interface RobotController {
      * @param observation
      *            the observation you want to inject into the match file.
      */
-    public void addMatchObservation(String observation);
+    void addMatchObservation(String observation);
 
     /**
      * If breakpoints are enabled, calling this method causes the game engine to
      * pause execution at the end of this round, until the user decides to
      * resume execution.
      */
-    public void breakpoint();
+    void breakpoint();
 }

@@ -1,16 +1,13 @@
 package battlecode.world.signal;
 
-import java.util.Arrays;
-
 import battlecode.common.Team;
 import battlecode.engine.signal.Signal;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 /**
  * Signifies a new quantity of ore for a team.
  */
-public class TeamOreSignal extends Signal {
+public class TeamOreSignal implements Signal {
 
     /**
      * The team

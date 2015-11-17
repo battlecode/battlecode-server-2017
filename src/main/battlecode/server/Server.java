@@ -69,9 +69,8 @@ public class Server implements Observer, Runnable {
      * an RPC server is set up, and which controllers are chosen for server
      * operation.
      */
-    public static enum Mode {
-        HEADLESS, LOCAL, TCP, SCRIMMAGE, TOURNAMENT, TESTS, AUTOTEST, MATCH, PIPE, BADGEREVIEW
-
+    public enum Mode {
+        HEADLESS, LOCAL, SCRIMMAGE, TOURNAMENT, TESTS, AUTOTEST, MATCH
     }
 
     /**
@@ -84,14 +83,13 @@ public class Server implements Observer, Runnable {
      */
     public Server(Config options, Mode mode, Controller controller,
                   Proxy... proxies) {
-        this.matches = new LinkedList<Match>();
-        this.finished = new LinkedList<Match>();
+        this.matches = new LinkedList<>();
+        this.finished = new LinkedList<>();
 
         this.mode = mode;
         this.controller = controller;
-        this.proxies = new LinkedList<Proxy>();
-        for (Proxy proxy : proxies)
-            this.proxies.add(proxy);
+        this.proxies = new LinkedList<>();
+        Collections.addAll(this.proxies, proxies);
 
         this.options = options;
         this.state = State.NOT_READY;

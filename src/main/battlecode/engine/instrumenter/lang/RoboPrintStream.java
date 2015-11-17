@@ -12,6 +12,7 @@ import java.io.PrintStream;
  *
  * @author adamd
  */
+@SuppressWarnings("unused")
 public class RoboPrintStream extends PrintStream {
 
     private boolean alreadyInLine = false;
