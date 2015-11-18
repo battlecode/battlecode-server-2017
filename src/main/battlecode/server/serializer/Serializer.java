@@ -12,7 +12,7 @@ import java.io.IOException;
 public interface Serializer {
 
     /**
-     * Write an object.
+     * Write an object. Safe to be called from multiple threads.
      *
      * @param message the object to write.
      * @throws IOException
@@ -20,8 +20,12 @@ public interface Serializer {
     void serialize(final Object message) throws IOException;
 
     /**
-     * Read an object.
+     * Read an object. Safe to be called from multiple threads; read order is
+     * not guaranteed if multiple threads are calling. Otherwise,
+     * objects will be returned in the order deserialized.
+     *
      * Note that this BLOCKS the calling thread until an object is read!
+     * @throws IOException
      */
     Object deserialize() throws IOException;
 

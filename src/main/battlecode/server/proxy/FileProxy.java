@@ -67,7 +67,7 @@ public class FileProxy implements Proxy {
     }
 
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         serializer.close();
 
         gzipWriter.flush();
@@ -86,7 +86,7 @@ public class FileProxy implements Proxy {
     }
 
     @Override
-    public void writeObject(final Object message) throws IOException {
+    public synchronized void writeObject(final Object message) throws IOException {
         if (message instanceof Notification)
             return;
         serializer.serialize(message);

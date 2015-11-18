@@ -26,7 +26,7 @@ public class StandardSerializer implements Serializer {
     }
 
     @Override
-    public void serialize(final Object message) throws IOException {
+    public synchronized void serialize(final Object message) throws IOException {
         if (output == null) {
             throw new IOException("No OutputStream given");
         }
@@ -36,7 +36,7 @@ public class StandardSerializer implements Serializer {
     }
 
     @Override
-    public Object deserialize() throws IOException {
+    public synchronized Object deserialize() throws IOException {
         if (input == null) {
             throw new IOException("No InputStream given");
         }
@@ -51,7 +51,7 @@ public class StandardSerializer implements Serializer {
     }
 
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         if (input != null) {
             input.close();
         }
