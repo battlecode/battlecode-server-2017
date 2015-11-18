@@ -65,7 +65,7 @@ public final class JsonSerializerFactory implements SerializerFactory {
         }
 
         @Override
-        public void serialize(Object message) throws IOException {
+        public synchronized void serialize(Object message) throws IOException {
             if (this.output == null) {
                 throw new IOException("No OutputStream given");
             }
@@ -74,7 +74,7 @@ public final class JsonSerializerFactory implements SerializerFactory {
         }
 
         @Override
-        public Object deserialize() throws IOException {
+        public synchronized Object deserialize() throws IOException {
             if (input == null) {
                 throw new IOException("No InputStream given");
             }
@@ -84,7 +84,7 @@ public final class JsonSerializerFactory implements SerializerFactory {
         }
 
         @Override
-        public void close() throws IOException {
+        public synchronized void close() throws IOException {
             if (output != null) {
                 output.close();
             }

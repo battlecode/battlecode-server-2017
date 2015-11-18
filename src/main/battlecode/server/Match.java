@@ -299,20 +299,7 @@ public class Match extends Observable {
 
     @Override
     public String toString() {
-        String teams = String.format("%s vs. %s on %s", info.getTeamA(), info
+        return String.format("%s vs. %s on %s", info.getTeamA(), info
                 .getTeamB(), map);
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < (50 - teams.length()) / 2; i++)
-            sb.append(' ');
-        sb.append(teams);
-
-        return sb.toString();
-    }
-
-    // Match file IO is pretty performance intensive so we want to do it while robots are
-    // running if possible.
-    public void setIOCallback(Runnable callback) {
-        engine.setIOCallback(callback);
     }
 }

@@ -12,7 +12,6 @@ import battlecode.world.GameWorldFactory;
 //~ import java.lang.Thread;
 /*
 TODO:
-- constructor
 - comments
  */
 public class Engine {
@@ -22,7 +21,6 @@ public class Engine {
     private final int garbageCollectRounds;
     private final boolean breakpointsEnabled;
     private static Engine theInstance = null;
-    private Runnable ioCallback;
 
     public Engine(String teamA, String teamB, String mapName, String mapPath, long[][] teamMemory) {
         theInstance = this;
@@ -75,7 +73,6 @@ public class Engine {
                 System.out.println("Round: " + getRoundNum());
             }
             Scheduler.startNextThread();
-            ioCallback.run();
             Scheduler.endTurn();
             gameWorld.processEndOfRound();
             if (!gameWorld.isRunning()) {
@@ -121,9 +118,5 @@ public class Engine {
 
     public long[][] getTeamMemory() {
         return gameWorld.getTeamMemory();
-    }
-
-    public void setIOCallback(Runnable callback) {
-        ioCallback = callback;
     }
 }

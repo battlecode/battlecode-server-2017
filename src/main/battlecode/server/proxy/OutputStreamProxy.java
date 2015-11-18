@@ -22,13 +22,13 @@ public class OutputStreamProxy implements Proxy {
     }
 
     @Override
-    public void writeObject(final Object message) throws IOException {
+    public synchronized void writeObject(final Object message) throws IOException {
         serializer.serialize(message);
         output.flush();
     }
 
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         serializer.close();
         output.close();
     }

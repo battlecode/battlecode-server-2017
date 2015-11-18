@@ -14,6 +14,9 @@ public interface Proxy {
     /**
      * Tries to write the given object to the recipient.
      *
+     * Safe to be called from multiple threads; write order is
+     * not guaranteed of called from multiple threads.
+     *
      * @param message the object to write
      * @throws IOException if the object could not be written
      */
