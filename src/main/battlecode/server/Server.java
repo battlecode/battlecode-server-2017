@@ -1,20 +1,20 @@
 package battlecode.server;
 
 import battlecode.common.Team;
-import battlecode.engine.ErrorReporter;
 import battlecode.engine.GameState;
 import battlecode.engine.signal.Signal;
 import battlecode.serial.*;
 import battlecode.serial.notification.*;
 import battlecode.server.controller.Controller;
 import battlecode.server.proxy.Proxy;
+import battlecode.server.proxy.ProxyWriter;
 
 import java.io.IOException;
 import java.util.*;
 
 /**
  * Runs matches. Specifically, this class forms a pipeline connecting match and
- * configuraiton parameters to the game engine and engine output to an abstract
+ * configuration parameters to the game engine and engine output to an abstract
  * match data sink.
  */
 public class Server implements Observer, Runnable {
@@ -32,12 +32,12 @@ public class Server implements Observer, Runnable {
     /**
      * A queue of matches that this server has yet to run.
      */
-    private final Queue<Match> matches;
+    private final Deque<Match> matches;
 
     /**
      * A list of matches that this server has already run.
      */
-    private final LinkedList<Match> finished;
+    private final Deque<Match> finished;
 
     /**
      * The state of the match that the server is running (or about to run).
@@ -83,12 +83,12 @@ public class Server implements Observer, Runnable {
      */
     public Server(Config options, Mode mode, Controller controller,
                   Proxy... proxies) {
-        this.matches = new LinkedList<>();
-        this.finished = new LinkedList<>();
+        this.matches = new ArrayDeque<>();
+        this.finished = new ArrayDeque<>();
 
         this.mode = mode;
         this.controller = controller;
-        this.proxies = new LinkedList<>();
+        this.proxies = new ArrayList<>();
         Collections.addAll(this.proxies, proxies);
 
         this.options = options;
@@ -111,6 +111,7 @@ public class Server implements Observer, Runnable {
                     try {
                         p.writeObject(PauseNotification.INSTANCE);
                     } catch (IOException e) {
+
                     }
                 }
             } else if (GameState.DONE.equals(arg))
@@ -209,13 +210,20 @@ public class Server implements Observer, Runnable {
      */
     public void run() {
 
+        debug("using controller " + this.controller.getClass().getSimpleName());
+        for (Proxy p : this.proxies) {
+            debug("using proxy " + p.getClass().getSimpleName());
+        }
+
         try {
-            setupMatches();
+            controller.start();
         } catch (IOException e) {
             this.state = State.ERROR;
             e.printStackTrace();
             return;
         }
+
+        final ProxyWriter proxyWriter = new ProxyWriter(proxies, options.getBoolean("bc.server.debug"));
 
         int aWins = 0, bWins = 0;
 
@@ -228,7 +236,7 @@ public class Server implements Observer, Runnable {
             try {
                 debug("running match " + match);
                 match.initialize();
-                runMatch(match);
+                runMatch(match, proxyWriter);
                 finished.add(match);
                 matches.remove(match);
 
@@ -253,6 +261,9 @@ public class Server implements Observer, Runnable {
             }
         }
 
+        // Make sure to write out all messages before closing proxies.
+        proxyWriter.terminate();
+
         for (Proxy p : proxies) {
             try {
                 p.close();
@@ -269,47 +280,12 @@ public class Server implements Observer, Runnable {
         }
     }
 
-    /**
-     * Sets up a new series of matches. Blocks until the matches have been set
-     * up.
-     *
-     * @throws IOException if a match could not be setup
-     */
-    private void setupMatches() throws IOException {
-
-        debug("using controller " + this.controller.getClass().getSimpleName());
-        controller.start();
-
-        for (Proxy p : this.proxies) {
-            debug("using proxy " + p.getClass().getSimpleName());
-        }
-    }
-
-    private class IOCallback implements Runnable {
-        public RoundDelta round;
-        public RoundStats stats;
-
-        public void run() {
-            if (round != null) {
-                try {
-                    for (Proxy p : proxies) {
-                        p.writeObject(round);
-                        p.writeObject(stats);
-                    }
-                } catch (IOException e) {
-                    ErrorReporter.report(e, false);
-                }
-                round = null;
-                stats = null;
-            }
-        }
-    }
 
     /**
      * Runs a match; configures the controller and list of proxies, and starts
      * running the game in a separate thread.
      */
-    private void runMatch(Match match) throws Exception {
+    private void runMatch(final Match match, final ProxyWriter proxyWriter) throws Exception {
         if (Mode.HEADLESS.equals(mode) || Mode.SCRIMMAGE.equals(mode)
                 || Mode.TOURNAMENT.equals(mode) || Mode.TESTS.equals(mode)
                 || Mode.AUTOTEST.equals(mode) || Mode.MATCH.equals(mode)) {
@@ -317,7 +293,7 @@ public class Server implements Observer, Runnable {
             this.runUntil = Integer.MAX_VALUE;
         }
 
-        // Poll for RUNNING.
+        // Poll for RUNNING, if mode == Mode.LOCAL
         while (!State.RUNNING.equals(state)) {
             try {
                 Thread.sleep(250);
@@ -337,9 +313,6 @@ public class Server implements Observer, Runnable {
             p.writeObject(header);
             p.writeObject(exHeader);
         }
-
-        IOCallback callback = new IOCallback();
-        match.setIOCallback(callback);
 
         this.state = State.RUNNING;
 
@@ -365,9 +338,15 @@ public class Server implements Observer, Runnable {
                         break;
                     }
 
-                    callback.round = match.getRound();
-                    if (callback.round == null)
+                    final RoundDelta round = match.getRound();
+                    if (round == null)
                         break;
+
+                    proxyWriter.enqueue(round);
+
+                    final RoundStats stats = match.getStats();
+
+                    proxyWriter.enqueue(stats);
 
                     if (count++ == throttleCount) {
                         if (doYield)
@@ -377,9 +356,6 @@ public class Server implements Observer, Runnable {
                         count = 0;
                     }
 
-                    // Compute stats bytes.
-                    callback.stats = match.getStats();
-
                     break;
 
                 case PAUSED:
@@ -388,23 +364,18 @@ public class Server implements Observer, Runnable {
             }
         }
 
-        // we need to write the last round ourselves
-        callback.run();
-
         // Compute footer data.
         GameStats gameStats = match.getGameStats();
         MatchFooter footer = match.getFooter();
+
+        proxyWriter.enqueue(gameStats);
+        proxyWriter.enqueue(footer);
 
         say(match.getWinnerString());
         say("-------------------- Match Finished --------------------");
 
         double timeDiff = (System.currentTimeMillis() - startTime) / 1000.0;
         debug(String.format("match completed in %.4g seconds", timeDiff));
-
-        for (Proxy p : proxies) {
-            p.writeObject(gameStats);
-            p.writeObject(footer);
-        }
 
         this.state = State.FINISHED;
     }
@@ -456,7 +427,6 @@ public class Server implements Observer, Runnable {
 
     /**
      * This method is used to display debugging messages with formatted output.
-     * Cannot be used statically.
      *
      * @param msg the debug message to display
      */
