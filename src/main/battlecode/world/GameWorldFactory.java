@@ -6,12 +6,6 @@ import battlecode.common.Team;
 import battlecode.engine.PlayerFactory;
 import battlecode.world.signal.SpawnSignal;
 
-/*
- TODO:
- - make the parser more robust, and with better failure modes
- - maybe take out the locations, objects, and terrain nodes
- - comments & javadoc
- */
 public class GameWorldFactory {
 
     public static GameWorld createGameWorld(String teamA, String teamB,
@@ -19,7 +13,7 @@ public class GameWorldFactory {
             throws IllegalArgumentException {
         XMLMapHandler handler = XMLMapHandler.loadMap(mapName, mapPath);
 
-        return handler.createGameWorld(teamA, teamB, teamMemory);
+        return new GameWorld(handler.getParsedMap(), teamA, teamB, teamMemory);
     }
 
     public static InternalRobot createPlayer(GameWorld gw, RobotType type,

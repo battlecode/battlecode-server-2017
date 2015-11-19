@@ -10,14 +10,12 @@ import battlecode.world.GameMap.MapProperties;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.swing.text.html.Option;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class contains the code for reading an XML map file and converting it
@@ -76,6 +74,12 @@ class XMLMapHandler extends DefaultHandler {
     private ZombieSpawnSchedule zSchedule = new ZombieSpawnSchedule();
 
     /**
+     * The result of the parsing; created the first time getParsedMap()
+     * is called.
+     */
+    private GameMap resultMap;
+
+    /**
      * Sets the map name.
      *
      * @param mn the map name.
@@ -110,14 +114,13 @@ class XMLMapHandler extends DefaultHandler {
         TerrainType tile();
 
         /**
-         * Given a GameWorld, creates a robot at the given location based on
-         * the specifications of this map cell. If the map cell does not give
-         * specifications for a robot, this method does nothing.
+         * Give the robot that should be placed at a tile for this type of symbol
+         * when the game starts.
          *
-         * @param world the GameWorld that creates the robot.
-         * @param loc the location the robot should be created at.
+         * @param originOffsetX the x offset from the origin of the tile
+         * @param originOffsetY the y offset from the origin of the tile
          */
-        void createRobot(GameWorld world, MapLocation loc);
+        Optional<GameMap.InitialRobotInfo> getRobotAt(int originOffsetX, int originOffsetY);
 
         /**
          * Returns whether two SymbolDatas are equivalent but represent
@@ -191,6 +194,7 @@ class XMLMapHandler extends DefaultHandler {
          *
          * @param value the new value for this cell.
          */
+        @Override
         public void setValue(int value) {
             this.value = value;
         }
@@ -200,6 +204,7 @@ class XMLMapHandler extends DefaultHandler {
          *
          * @return the value for this cell.
          */
+        @Override
         public int getValue() {
             return this.value;
         }
@@ -209,17 +214,17 @@ class XMLMapHandler extends DefaultHandler {
          *
          * @return the terrain type for this cell.
          */
+        @Override
         public TerrainType tile() {
             return tile;
         }
 
         /**
-         * Does nothing, because there are no game objects on terrain cells.
-         *
-         * @param world ignored.
-         * @param loc ignored.
+         * Returns nothing, because there are no robots on terrain cells.
          */
-        public void createRobot(GameWorld world, MapLocation loc) {
+        @Override
+        public Optional<GameMap.InitialRobotInfo> getRobotAt(int originOffsetX, int originOffsetY) {
+            return Optional.empty();
         }
 
         /**
@@ -228,6 +233,7 @@ class XMLMapHandler extends DefaultHandler {
          * @param data the SymbolData to compare this to.
          * @return whether the other SymbolData is exactly equal to this one.
          */
+        @Override
         public boolean equalsMirror(SymbolData data) {
             if (!(data instanceof TerrainData))
                 return false;
@@ -240,6 +246,7 @@ class XMLMapHandler extends DefaultHandler {
          *
          * @return a copy of itself.
          */
+        @Override
         public SymbolData copy() {
             TerrainData t = new TerrainData(this.tile);
             t.setValue(this.value);
@@ -310,15 +317,14 @@ class XMLMapHandler extends DefaultHandler {
         }
 
         /**
-         * Given a game world, will create a robot of the specific type and
-         * team on the given location.
-         *
-         * @param world the GameWorld that creates the robot.
-         * @param loc the location the robot should be created at.
+         * Gives a robot of the specific type and team at the
+         * given origin offset.
          */
-        public void createRobot(GameWorld world, MapLocation loc) {
-            GameWorldFactory.createPlayer(world, type, loc, team, null, false,
-                    0);
+        @Override
+        public Optional<GameMap.InitialRobotInfo> getRobotAt(int originOffsetX, int originOffsetY) {
+            return Optional.of(
+                    new GameMap.InitialRobotInfo(originOffsetX, originOffsetY, type, team)
+            );
         }
 
         /**
@@ -678,10 +684,13 @@ class XMLMapHandler extends DefaultHandler {
         xmlStack.removeLast();
     }
 
-    public GameWorld createGameWorld(String teamA, String teamB, long[][]
-            teamMemory) {
-        int[][] rubbleData = new int[map.length][];
-        int[][] partsData = new int[map.length][];
+    public GameMap getParsedMap() {
+        if (resultMap != null) {
+            return resultMap;
+        }
+
+        final int[][] rubbleData = new int[map.length][];
+        final int[][] partsData = new int[map.length][];
         for (int i = 0; i < map.length; i++) {
             rubbleData[i] = new int[map[i].length];
             partsData[i] = new int[map[i].length];
@@ -698,21 +707,21 @@ class XMLMapHandler extends DefaultHandler {
             }
         }
 
-        GameMap gm = new GameMap(mapProperties, rubbleData, partsData,
-                zSchedule, mapName);
-        GameWorld gw = new GameWorld(gm, teamA, teamB, teamMemory);
-
-        gw.reserveRandomIDs(32000);
-
-        MapLocation origin = gm.getMapOrigin();
+        final Set<GameMap.InitialRobotInfo> initialRobots = new HashSet<>();
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
-                map[i][j].createRobot(gw, new MapLocation(origin.x + i,
-                        origin.y + j));
+                final Optional<GameMap.InitialRobotInfo> maybeRobot = map[i][j].getRobotAt(i, j);
+
+                if (maybeRobot.isPresent()) {
+                    initialRobots.add(maybeRobot.get());
+                }
             }
         }
 
-        return gw;
+        resultMap = new GameMap(mapProperties, rubbleData, partsData,
+                zSchedule, initialRobots, mapName);
+
+        return resultMap;
     }
 
     /**

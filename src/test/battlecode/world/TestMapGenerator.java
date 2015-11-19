@@ -1,18 +1,13 @@
 package battlecode.world;
 
-import battlecode.common.MapLocation;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
-import battlecode.common.ZombieCount;
+import battlecode.common.*;
 import org.junit.Ignore;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * A class that creates instances of GameMap, mostly to be used for testing
@@ -107,7 +102,7 @@ public class TestMapGenerator {
     /** The map's zombie spawn schedule. Defaults to no zombies. */
     private ZombieSpawnSchedule zSchedule;
     /** All the robots on the map. Defaults to none. */
-    private ArrayList<RobotInfo> robots;
+    private Set<GameMap.InitialRobotInfo> robots;
 
     /**
      * Prepares an empty map of the given size. There will be no parts or rubble.
@@ -119,12 +114,12 @@ public class TestMapGenerator {
     public TestMapGenerator(int width, int height, int rounds) {
         this.width = width;
         this.height = height;
-        this.seed = GameMap.GAME_DEFAULT_SEED;
+        this.seed = GameConstants.GAME_DEFAULT_SEED;
         this.rounds = rounds;
         this.rubble = new int[width][height];
         this.parts = new int[width][height];
         this.zSchedule = new ZombieSpawnSchedule();
-        this.robots = new ArrayList<>();
+        this.robots = new HashSet<>();
     }
 
     /**
@@ -148,7 +143,7 @@ public class TestMapGenerator {
             }
         }
 
-        this.seed = GameMap.GAME_DEFAULT_SEED;
+        this.seed = GameConstants.GAME_DEFAULT_SEED;
         this.rounds = rounds;
         this.parts = new int[width][height];
         this.rubble = new int[width][height];
@@ -163,7 +158,7 @@ public class TestMapGenerator {
         }
 
         this.zSchedule = new ZombieSpawnSchedule();
-        this.robots = new ArrayList<>();
+        this.robots = new HashSet<>();
     }
 
     /**
@@ -268,7 +263,7 @@ public class TestMapGenerator {
      * @return itself, after the robot has been added
      */
     public TestMapGenerator withRobot(RobotType type, Team team, int x, int y) {
-        this.robots.add(new RobotInfo(type, team, new MapLocation(x, y)));
+        this.robots.add(new GameMap.InitialRobotInfo(x, y, type, team));
         return this;
     }
 
@@ -281,7 +276,7 @@ public class TestMapGenerator {
      * @param y y location for the robot
      */
     public void addRobot(RobotType type, Team team, int x, int y) {
-        this.robots.add(new RobotInfo(type, team, new MapLocation(x, y)));
+        this.robots.add(new GameMap.InitialRobotInfo(x, y, type, team));
     }
 
     /**
@@ -294,7 +289,7 @@ public class TestMapGenerator {
         EnumMap<GameMap.MapProperties, Integer> props = new EnumMap<>(GameMap.MapProperties.class);
         props.put(GameMap.MapProperties.ROUNDS, this.rounds);
         props.put(GameMap.MapProperties.SEED, this.seed);
-        return new GameMap(props, rubble, parts, zSchedule, mapName);
+        return new GameMap(props, rubble, parts, zSchedule, robots, mapName);
     }
 
     /**
@@ -344,10 +339,11 @@ public class TestMapGenerator {
                 else characters[j][i] = "r";
             }
         }
-        for (RobotInfo robot : robots) {
-            characters[robot.location.x][robot.location.y] = getSymbol(robot
+        for (GameMap.InitialRobotInfo robot : robots) {
+            characters[robot.originOffsetX][robot.originOffsetY] = getSymbol(robot
                     .type, robot.team);
         }
+
         for (int i = 0; i < height; ++i) {
             for (int j = 0; j < width; ++j) {
                 out.printf("%s", characters[j][i]);

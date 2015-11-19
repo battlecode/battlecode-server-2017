@@ -28,26 +28,21 @@ public class Engine {
         this.garbageCollectEnabled = options.getBoolean("bc.engine.gc");
         this.garbageCollectRounds = options.getInt("bc.engine.gc-rounds");
         this.breakpointsEnabled = options.getBoolean("bc.engine.breakpoints");
-        GameWorld tempGameWorld = null;
-        //InternalRobot.resetIDs();
         IndividualClassLoader.reset();
         Scheduler.reset();
         RobotMonitor.reset();
         PlayerFactory.checkOptions();
+
         try {
-            try {
-                tempGameWorld = GameWorldFactory.createGameWorld(teamA, teamB, mapName, mapPath, teamMemory);
-            } catch (IllegalArgumentException e) {
-                java.lang.System.out.println("[Engine] Error while loading map '" + mapName + "'");
-                return;
-            } catch (Exception e) {
-                ErrorReporter.report(e);
-                return;
-            }
-        } finally {
-            gameWorld = tempGameWorld;
+            gameWorld = GameWorldFactory.createGameWorld(teamA, teamB, mapName, mapPath, teamMemory);
+        } catch (IllegalArgumentException e) {
+            System.out.println("[Engine] Error while loading map '" + mapName + "'");
+            throw e;
+        } catch (Exception e) {
+            ErrorReporter.report(e);
+            throw e;
         }
-        gameWorld.resetStatic();
+
         RobotMonitor.setGameWorld(gameWorld);
         RoboRandom.setMapSeed(gameWorld.getMapSeed());
         Scheduler.start();

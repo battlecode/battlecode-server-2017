@@ -20,8 +20,7 @@ import battlecode.world.signal.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by james on 7/28/15.
@@ -53,16 +52,22 @@ public abstract class SerializerFactoryTestBase {
             new int[] {6, 7, 8},
     };
 
-    static final GameMap gameMap = new GameMap(properties, rubble, parts, zSchedule, "Test Map");
+    static final Set<GameMap.InitialRobotInfo> initialRobots = new HashSet<>();
+    static {
+        initialRobots.add(new GameMap.InitialRobotInfo(10, 100, RobotType.ARCHON, Team.B));
+    }
+
+    static final GameMap gameMap = new GameMap(properties,
+            rubble,
+            parts,
+            zSchedule,
+            initialRobots,
+            "Test Map");
 
     static final long[][] teamMemories = new long[][] {
             new long[] {1, 2, 3, 4, 5},
             new long[] {1, 2, 3, 4, 5},
     };
-
-    static final GameWorld gameWorld = new GameWorld(gameMap, "Team 1", "Team 2", teamMemories);
-
-    static final InternalRobot robot = new InternalRobot(gameWorld, RobotType.ARCHON, new MapLocation(0,0), Team.A, false, 0);
 
     // An array with a sample object from every type of thing we could ever want to serialize / deserialize.
     static final Object[] serializeableObjects = new Object[]{
@@ -73,24 +78,24 @@ public abstract class SerializerFactoryTestBase {
             new MatchInfo("Team 1", "Team 2", new String[] {"Map 1", "Map 2"}),
             new MatchHeader(gameMap, teamMemories, 0, 3),
             new RoundDelta(new Signal[] {
-                    new AttackSignal(robot.getID(), new MapLocation(1,1)),
-                    new BashSignal(robot.getID(), new MapLocation(1,1)),
-                    new BroadcastSignal(robot.getID(), robot.getTeam(), new HashMap<>()),
+                    new AttackSignal(57, new MapLocation(1,1)),
+                    new BashSignal(57, new MapLocation(1,1)),
+                    new BroadcastSignal(57, Team.B, new HashMap<>()),
                     new BuildSignal(57, new MapLocation(1,1), RobotType.GUARD, Team.A, 50),
-                    new BytecodesUsedSignal(new InternalRobot[]{robot}),
-                    new CastSignal(robot.getID(), new MapLocation(-75, -75)),
+                    new BytecodesUsedSignal(new int[] {5, 6}, new int[] {17, 32}),
+                    new CastSignal(57, new MapLocation(-75, -75)),
                     new ControlBitsSignal(0, 0),
-                    new DeathSignal(robot.getID()),
-                    new HealthChangeSignal(new InternalRobot[]{robot}),
-                    new IndicatorDotSignal(robot.getID(), robot.getTeam(), new MapLocation(0,0), 0, 0, 0),
-                    new IndicatorLineSignal(robot.getID(), robot.getTeam(), new MapLocation(0,0), new MapLocation(1,1), 0, 0, 0),
-                    new IndicatorStringSignal(robot.getID(), 0, "Test Indicator String"),
+                    new DeathSignal(57),
+                    new HealthChangeSignal(new int[] {5, 6}, new double[] {17.21, 32}),
+                    new IndicatorDotSignal(57, Team.B, new MapLocation(0,0), 0, 0, 0),
+                    new IndicatorLineSignal(57, Team.B, new MapLocation(0,0), new MapLocation(1,1), 0, 0, 0),
+                    new IndicatorStringSignal(57, 0, "Test Indicator String"),
                     new LocationOreChangeSignal(new MapLocation(0,0), -1.0),
-                    new MatchObservationSignal(robot.getID(), "test"),
+                    new MatchObservationSignal(57, "test"),
                     new MovementOverrideSignal(0, new MapLocation(10000, 10000)),
-                    new MovementSignal(robot.getID(), new MapLocation(0, 0), true, 0),
-                    new RobotDelaySignal(new InternalRobot[] {robot}),
-                    new SpawnSignal(robot, robot, 1000),
+                    new MovementSignal(57, new MapLocation(0, 0), true, 0),
+                    new RobotDelaySignal(new int[] {5, 6}, new double[] {17, 32}, new double[] {10, 2.5}),
+                    new SpawnSignal(120, 0, new MapLocation(5, 6), RobotType.ZOMBIEDEN, Team.ZOMBIE, 0),
                     new TeamOreSignal(Team.A, 100),
                     new XPSignal(0, 1000)
             }),

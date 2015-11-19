@@ -1,51 +1,45 @@
 package battlecode.world;
 
-import battlecode.common.MapLocation;
-import battlecode.common.ZombieCount;
+import battlecode.common.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 /**
  * The class represents the map in the game world on which
  * objects interact.
  *
- * This class is STATIC and does not change. It reflects the initial
+ * This class is STATIC and immutable. It reflects the initial
  * condition of the map. All changes to the map are reflected in GameWorld.
  */
 public class GameMap implements Serializable {
 
     private static final long serialVersionUID = -2068896916199851260L;
-    /**
-     * The default game seed.
-     */
-    public static final int GAME_DEFAULT_SEED = 6370;
-    /**
-     * The default game maxiumum number of rounds.
-     */
-    public static final int GAME_DEFAULT_ROUNDS = 2000;
+
     /**
      * The width and height of the map.
      */
     private final int width, height;
+
     /**
      * The initial rubble on the map.
      */
     private final int[][] initialRubble;
+
     /**
      * The initial parts on the map.
      */
     private final int[][] initialParts;
+
     /**
-     * The coordinates of the origin.
+     * The coordinates of the origin
      */
-    private final int originX, originY;
+    private final MapLocation origin;
+
     /**
-     * The random seed contained in the map file.
+     * The random seed contained in the map file
      */
     private final int seed;
     /**
@@ -62,6 +56,13 @@ public class GameMap implements Serializable {
      * The zombie spawn schedule for the map
      */
     private final ZombieSpawnSchedule zSchedule;
+
+    /**
+     * The robots to spawn on the map; MapLocations are in world space -
+     * i.e. in game correct MapLocations that need to have the origin
+     * subtracted from them to be used to index into the map arrays.
+     */
+    private final Set<InitialRobotInfo> initialRobots;
 
     /**
      * Represents the various integer properties a GameMap
@@ -86,12 +87,12 @@ public class GameMap implements Serializable {
             System.arraycopy(gm.initialParts[i], 0, this.initialParts[i], 0, this.height);
         }
 
-        this.originX = gm.originX;
-        this.originY = gm.originY;
+        this.origin = gm.origin;
         this.seed = gm.seed;
         this.rounds = gm.rounds;
         this.mapName = gm.mapName;
         this.zSchedule = new ZombieSpawnSchedule(gm.zSchedule);
+        this.initialRobots = new HashSet<>(gm.initialRobots);
     }
 
     /**
@@ -109,11 +110,15 @@ public class GameMap implements Serializable {
      * @param initialRubble initial rubble array for the map.
      * @param initialParts initial parts array for the map.
      * @param zSchedule zombie spawn schedule.
+     * @param initialRobots the robots initially on the map
      * @param mapName name of the map.
      */
-    public GameMap(Map<MapProperties, Integer> mapProperties, int[][]
-            initialRubble, int[][] initialParts, ZombieSpawnSchedule
-            zSchedule, String mapName) {
+    public GameMap(Map<MapProperties, Integer> mapProperties,
+                   int[][] initialRubble,
+                   int[][] initialParts,
+                   ZombieSpawnSchedule zSchedule,
+                   Set<InitialRobotInfo> initialRobots,
+                   String mapName) {
         if (mapProperties.containsKey(MapProperties.WIDTH)) {
             this.width = mapProperties.get(MapProperties.WIDTH);
         } else {
@@ -129,33 +134,42 @@ public class GameMap implements Serializable {
         if (mapProperties.containsKey(MapProperties.SEED)) {
             this.seed = mapProperties.get(MapProperties.SEED);
         } else {
-            this.seed = GAME_DEFAULT_SEED;
+            this.seed = GameConstants.GAME_DEFAULT_SEED;
         }
 
         if (mapProperties.containsKey(MapProperties.ROUNDS)) {
             this.rounds = mapProperties.get(MapProperties.ROUNDS);
         } else {
-            this.rounds = GAME_DEFAULT_ROUNDS;
+            this.rounds = GameConstants.GAME_DEFAULT_ROUNDS;
         }
 
-        Random rand = new Random(this.seed);
-        this.originX = rand.nextInt(500);
-        this.originY = rand.nextInt(500);
+        final Random rand = new Random(this.seed);
+
+        this.origin = new MapLocation(rand.nextInt(500), rand.nextInt(500));
         this.initialRubble = initialRubble;
         this.initialParts = initialParts;
         this.zSchedule = zSchedule;
         this.mapName = mapName;
+        this.initialRobots = new HashSet<>(initialRobots);
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof GameMap)) return false;
+
+        return this.equals((GameMap) o);
     }
 
     /**
-     * Returns whether two GameMaps are equivalent. Two equivalent game maps
+     * Returns whether two GameMaps are equal. Two equal game maps
      * have the same information, but their zombie schedules might be in
      * different orders and their origins do not have to be the same.
      *
      * @param other the other map to compare to.
      * @return whether the two maps are equivalent.
      */
-    public boolean equivalentTo(GameMap other) {
+    public boolean equals(GameMap other) {
         if (this.rounds != other.rounds) return false;
         if (this.width != other.width) return false;
         if (this.height != other.height) return false;
@@ -165,8 +179,10 @@ public class GameMap implements Serializable {
         if (!Arrays.deepEquals(this.initialParts, other.initialParts))
             return false;
         if (!this.mapName.equals(other.mapName)) return false;
-        return this.zSchedule.equivalentTo(other.zSchedule);
+        if (!this.origin.equals(other.origin)) return false;
+        if (!this.zSchedule.equivalentTo(other.zSchedule)) return false;
 
+        return this.initialRobots.equals(other.initialRobots);
     }
 
     /**
@@ -207,7 +223,7 @@ public class GameMap implements Serializable {
      *         false if they're not
      */
     private boolean onTheMap(int x, int y) {
-        return (x >= originX && y >= originY && x < originX + width && y < originY + height);
+        return (x >= origin.x && y >= origin.y && x < origin.x + width && y < origin.y + height);
     }
 
     /**
@@ -232,7 +248,7 @@ public class GameMap implements Serializable {
         if (!onTheMap(location))
             return 0;
 
-        return initialRubble[location.x - originX][location.y - originY];
+        return initialRubble[location.x - origin.x][location.y - origin.y];
     }
 
     /**
@@ -255,7 +271,7 @@ public class GameMap implements Serializable {
         if (!onTheMap(location))
             return 0;
 
-        return initialParts[location.x - originX][location.y - originY];
+        return initialParts[location.x - origin.x][location.y - origin.y];
     }
 
     /**
@@ -265,6 +281,27 @@ public class GameMap implements Serializable {
      */
     public int[][] getInitialParts() {
         return initialParts;
+    }
+
+    /**
+     * Gives the inital robot at a location, if any.
+     *
+     * @param location the location to check
+     * @return the RobotInfo for the robot at that
+     */
+    public Optional<InitialRobotInfo> getInitialRobotAtLocation(MapLocation location) {
+        return initialRobots.stream()
+                .filter(robot -> robot.getLocation(origin).equals(location))
+                .findFirst();
+    }
+
+    /**
+     * Get a list of the initial robots on the map.
+     *
+     * @return the list of starting robots on the map.
+     */
+    public Set<InitialRobotInfo> getInitialRobots() {
+        return initialRobots;
     }
 
     /**
@@ -293,10 +330,12 @@ public class GameMap implements Serializable {
      */
     @JsonIgnore
     public MapLocation getMapOrigin() {
-        return new MapLocation(originX, originY);
+        return new MapLocation(origin.x, origin.y);
     }
 
-    // TODO: this shouldn't be named MapMemory
+    /**
+     * Stores the current "field of view" / "fog of war" for a robot team.
+     */
     public static class MapMemory {
         private final GameMap map;
 
@@ -332,8 +371,8 @@ public class GameMap implements Serializable {
             MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
             for (MapLocation target : locs) {
-                int x = target.x - map.originX;
-                int y = target.y - map.originY;
+                int x = target.x - map.origin.x;
+                int y = target.y - map.origin.y;
                 if (validLoc(x, y)) {
                     currentCount[x + OFFSET][y + OFFSET]--;
                 }
@@ -344,8 +383,8 @@ public class GameMap implements Serializable {
             MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
             for (MapLocation target : locs) {
-                int x = target.x - map.originX;
-                int y = target.y - map.originY;
+                int x = target.x - map.origin.x;
+                int y = target.y - map.origin.y;
                 if (validLoc(x, y)) {
                     seen[x + OFFSET][y + OFFSET] = true;
                     currentCount[x + OFFSET][y + OFFSET]++;
@@ -362,8 +401,8 @@ public class GameMap implements Serializable {
         /** When a location gets rubble cleared, we'll update map memory if it's currently in sight. */
         public void updateLocation(MapLocation loc, int rubbleNew) {
             if (canSense(loc)) {
-                int x = loc.x - map.originX;
-                int y = loc.y - map.originY;
+                int x = loc.x - map.origin.x;
+                int y = loc.y - map.origin.y;
                 if (validLoc(x, y)) {
                     rubbleOnSquare[x + OFFSET][y + OFFSET] = rubbleNew;
                 }
@@ -371,8 +410,8 @@ public class GameMap implements Serializable {
         }
 
         public boolean seenBefore(MapLocation loc) {
-            int X = loc.x - map.originX;
-            int Y = loc.y - map.originY;
+            int X = loc.x - map.origin.x;
+            int Y = loc.y - map.origin.y;
 
             if (validLoc(X, Y)) {
                 return seen[X + OFFSET][Y + OFFSET];
@@ -382,8 +421,8 @@ public class GameMap implements Serializable {
         }
 
         public boolean canSense(MapLocation loc) {
-            int X = loc.x - map.originX;
-            int Y = loc.y - map.originY;
+            int X = loc.x - map.origin.x;
+            int Y = loc.y - map.origin.y;
 
             if (validLoc(X, Y)) {
                 return currentCount[X + OFFSET][Y + OFFSET] > 0;
@@ -393,8 +432,8 @@ public class GameMap implements Serializable {
         }
 
         public int recallRubble(MapLocation loc) {
-            int X = loc.x - map.originX;
-            int Y = loc.y - map.originY;
+            int X = loc.x - map.origin.x;
+            int Y = loc.y - map.origin.y;
 
             if (seenBefore(loc)) {
                 return rubbleOnSquare[X + OFFSET][Y + OFFSET];
@@ -404,8 +443,8 @@ public class GameMap implements Serializable {
         }
         
         public int recallParts(MapLocation loc) {
-            int X = loc.x - map.originX;
-            int Y = loc.y - map.originY;
+            int X = loc.x - map.origin.x;
+            int Y = loc.y - map.origin.y;
 
             if (seenBefore(loc)) {
                 return partsOnSquare[X + OFFSET][Y + OFFSET];
@@ -416,19 +455,101 @@ public class GameMap implements Serializable {
     }
 
     /**
+     * Information about a robot that starts on the map.
+     */
+    public static final class InitialRobotInfo implements Serializable {
+
+        private static final long serialVersionUID = -2012039299851260L;
+
+        /**
+         * The offset from the origin of this robot.
+         */
+        public final int originOffsetX, originOffsetY;
+
+        /**
+         * The type of the robot.
+         */
+        public final RobotType type;
+
+        /**
+         * The team of the robot.
+         */
+        public final Team team;
+
+        public InitialRobotInfo(int originOffsetX, int originOffsetY, RobotType type, Team team) {
+            this.originOffsetX = originOffsetX;
+            this.originOffsetY = originOffsetY;
+            this.type = type;
+            this.team = team;
+        }
+
+        /**
+         * This is a somewhat awkward workaround to deal with the fact
+         * that InitialRobotInfos are often created before a game map,
+         * and therefore don't know their gamemap's origin.
+         *
+         * @param origin the origin of a GameMap
+         * @return the location of this initial robot (not relative to origin)
+         */
+        public MapLocation getLocation(MapLocation origin) {
+            return new MapLocation(
+                    origin.x + originOffsetX,
+                    origin.y + originOffsetY
+            );
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof InitialRobotInfo)) {
+                return false;
+            }
+
+            final InitialRobotInfo that = (InitialRobotInfo) o;
+
+            return this.originOffsetX == that.originOffsetX &&
+                    this.originOffsetY == that.originOffsetY &&
+                    this.type.equals(that.type) &&
+                    this.team.equals(that.team);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(originOffsetX, originOffsetY, type, team);
+        }
+
+        @Override
+        public String toString() {
+            return "InitialRobotInfo{" +
+                    "originOffsetX=" + originOffsetX +
+                    ", originOffsetY=" + originOffsetY +
+                    ", type=" + type +
+                    ", team=" + team +
+                    '}';
+        }
+
+        /**
+         * For use by serializers.
+         */
+        @SuppressWarnings("unused")
+        private InitialRobotInfo() {
+            this(0, 0, null, null);
+        }
+    }
+
+    /**
      * For use by serializers.
      */
     @SuppressWarnings("unused")
     private GameMap() {
         this.width = 0;
         this.height = 0;
+        this.origin = null;
         this.initialRubble = null;
         this.initialParts = null;
-        this.originX = 0;
-        this.originY = 0;
         this.seed = 0;
         this.rounds = 0;
         this.mapName = null;
         this.zSchedule = null;
+        this.initialRobots = null;
     }
 }
