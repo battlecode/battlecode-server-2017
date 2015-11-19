@@ -31,7 +31,6 @@ public class Engine {
         IndividualClassLoader.reset();
         Scheduler.reset();
         RobotMonitor.reset();
-        PlayerFactory.checkOptions();
 
         try {
             XMLMapHandler handler = XMLMapHandler.loadMap(mapName, mapPath);

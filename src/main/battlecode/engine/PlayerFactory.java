@@ -12,22 +12,16 @@ TODO:
  */
 public class PlayerFactory {
 
-    private static boolean _debugMethodsEnabled = false;
-
-    private PlayerFactory() {
-    }
-
-    public static void checkOptions() {
-        Config options = Config.getGlobalConfig();
-        _debugMethodsEnabled = options.getBoolean("bc.engine.debug-methods");
-    }
+    private PlayerFactory() {}
 
     public static void loadPlayer(RobotControllerImpl rc, String teamName) {
+        final boolean debugMethodsEnabled = Config.getGlobalConfig().getBoolean("bc.engine.debug-methods");
+
         // now, we instantiate and instrument the player's class
         Class playerClass;
         try {
             // The classloaders ignore silenced now - RobotMonitor takes care of it
-            ClassLoader icl = new IndividualClassLoader(teamName, _debugMethodsEnabled, false, true);
+            ClassLoader icl = new IndividualClassLoader(teamName, debugMethodsEnabled, false, true);
             playerClass = icl.loadClass(teamName + ".RobotPlayer");
             //~ System.out.println("PF done loading");
         } catch (InstrumentationException ie) {
@@ -47,11 +41,13 @@ public class PlayerFactory {
     }
     
     public static void loadZombiePlayer(RobotControllerImpl rc) {
+        final boolean debugMethodsEnabled = Config.getGlobalConfig().getBoolean("bc.engine.debug-methods");
+
         // instantiate and instrument the ZombiePlayer class
         Class playerClass;
         try {
             // The classloaders ignore silenced now - RobotMonitor takes care of it
-            ClassLoader icl = new IndividualClassLoader("ZombiePlayer", _debugMethodsEnabled, false, true);
+            ClassLoader icl = new IndividualClassLoader("ZombiePlayer", debugMethodsEnabled, false, true);
             playerClass = icl.loadClass("ZombiePlayer.ZombiePlayer");
             //~ System.out.println("PF done loading");
         } catch (InstrumentationException ie) {
