@@ -53,7 +53,6 @@ public class Config {
         defaults.setProperty("bc.engine.bytecodes-used", "true");
         defaults.setProperty("bc.engine.lazy-instrumenter", "false");
         defaults.setProperty("bc.engine.fast-hash", "false");
-        defaults.setProperty("bc.engine.unit-test-mode", "false");
 
         defaults.setProperty("bc.client.opengl", "false");
         defaults.setProperty("bc.client.use-models", "true");

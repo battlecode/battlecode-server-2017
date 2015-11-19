@@ -114,6 +114,18 @@ public class GameWorld implements SignalHandler {
         adjustResources(Team.B, GameConstants.PARTS_INITIAL_AMOUNT);
 
         removingDead = false;
+
+        reserveRandomIDs(32000);
+
+        // Add the robots contained in the GameMap to this world.
+        for (GameMap.InitialRobotInfo initialRobot : gameMap.getInitialRobots()) {
+            GameWorldFactory.createPlayer(
+                    this,
+                    initialRobot.type,
+                    initialRobot.getLocation(gameMap.getMapOrigin()),
+                    initialRobot.team,
+                    null, false, 0);
+        }
     }
 
     // *********************************
@@ -412,9 +424,6 @@ public class GameWorld implements SignalHandler {
             r.setBytecodesUsed(RobotMonitor.getBytecodesUsed());
             r.processEndOfTurn();
         }
-    }
-
-    public void resetStatic() {
     }
 
     public void notifyDied(InternalRobot r) {

@@ -3,6 +3,7 @@ package battlecode.common;
 /**
  * Defines constants that affect gameplay.
  */
+@SuppressWarnings("unused")
 public interface GameConstants {
 
     // *********************************
@@ -188,4 +189,10 @@ public interface GameConstants {
 
     /** Attack delay incurred by using the 'heavy hands' skill. **/
     double HEAVY_HANDS_ATTACK_DELAY = 3.0;
+
+    /** The default game seed. **/
+    int GAME_DEFAULT_SEED = 6370;
+
+    /** The default game maxiumum number of rounds. **/
+    int GAME_DEFAULT_ROUNDS = 2000;
 }

@@ -23,10 +23,6 @@ public class PlayerFactory {
     }
 
     public static void loadPlayer(RobotControllerImpl rc, String teamName) {
-        if (Config.getGlobalConfig().getBoolean("bc.engine.unit-test-mode")) {
-            return;
-        }
-
         // now, we instantiate and instrument the player's class
         Class playerClass;
         try {
@@ -51,10 +47,6 @@ public class PlayerFactory {
     }
     
     public static void loadZombiePlayer(RobotControllerImpl rc) {
-        if (Config.getGlobalConfig().getBoolean("bc.engine.unit-test-mode")) {
-            return;
-        }
-
         // instantiate and instrument the ZombiePlayer class
         Class playerClass;
         try {

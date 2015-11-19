@@ -20,20 +20,11 @@ public class XMLMapHandlerTest {
      * @param mapName name of the map.
      * @return a GameWorld with this map.
      */
-    public GameWorld getMap(long[][] teamMemory, String mapName) {
+    public GameMap getMap(long[][] teamMemory, String mapName) {
         XMLMapHandler handler = XMLMapHandler.loadMap(mapName,
                 TestMapGenerator.MAP_PATH);
 
-        return handler.createGameWorld("", "", teamMemory);
-    }
-
-    /**
-     * Sets unit-test-mode so that the engine will not try to instrument any
-     * player code. It's not necessary for these tests.
-     */
-    @Before
-    public void prepare() {
-        Config.getGlobalConfig().setBoolean("bc.engine.unit-test-mode", true);
+        return handler.getParsedMap();
     }
 
     /**
@@ -69,9 +60,8 @@ public class XMLMapHandlerTest {
         GameMap inputMap = gen.getMap("basicMap");
 
         long[][] teamMemory = new long[2][32];
-        GameWorld world = getMap(teamMemory, "basicMap");
-        GameMap outputMap = world.getGameMap();
+        GameMap outputMap = getMap(teamMemory, "basicMap");
 
-        assertTrue(inputMap.equivalentTo(outputMap));
+        assertTrue(inputMap.equals(outputMap));
     }
 }
