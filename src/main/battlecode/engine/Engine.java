@@ -7,7 +7,7 @@ import battlecode.engine.scheduler.Scheduler;
 import battlecode.engine.signal.Signal;
 import battlecode.server.Config;
 import battlecode.world.GameWorld;
-import battlecode.world.GameWorldFactory;
+import battlecode.world.XMLMapHandler;
 
 //~ import java.lang.Thread;
 /*
@@ -34,7 +34,9 @@ public class Engine {
         PlayerFactory.checkOptions();
 
         try {
-            gameWorld = GameWorldFactory.createGameWorld(teamA, teamB, mapName, mapPath, teamMemory);
+            XMLMapHandler handler = XMLMapHandler.loadMap(mapName, mapPath);
+
+            gameWorld = new GameWorld(handler.getParsedMap(), teamA, teamB, teamMemory);
         } catch (IllegalArgumentException e) {
             System.out.println("[Engine] Error while loading map '" + mapName + "'");
             throw e;

@@ -2,14 +2,15 @@ package battlecode.world;
 
 import battlecode.common.*;
 import battlecode.engine.GenericRobot;
+import battlecode.engine.PlayerFactory;
 import battlecode.engine.signal.Signal;
-import battlecode.server.Config;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.SpawnSignal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 
 public class InternalRobot implements GenericRobot {
     public RobotType type;
@@ -45,12 +46,22 @@ public class InternalRobot implements GenericRobot {
 
     private int buildDelay;
 
+    /**
+     * Create a new internal representation of a robot
+     *
+     * @param gw the world the robot exists in
+     * @param type the type of the robot
+     * @param loc the location of the robot
+     * @param team the team of the robot
+     * @param buildDelay the build
+     * @param parent the parent of the robot, if one exists
+     */
     @SuppressWarnings("unchecked")
-    public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
-            boolean spawnedRobot, int buildDelay) {
+    public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team team,
+            int buildDelay, Optional<InternalRobot> parent) {
 
         myID = gw.nextID();
-        myTeam = t;
+        myTeam = team;
         myGameWorld = gw;
         myLocation = loc;
         gw.notifyAddingNewObject(this);
@@ -93,6 +104,25 @@ public class InternalRobot implements GenericRobot {
 
         myGameWorld
                 .updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
+
+        // Signal the world that we've spawned
+        gw.addSignal(new SpawnSignal(
+                this.getID(),
+                parent.isPresent() ? parent.get().getID() : 0,
+                this.getLocation(),
+                this.type,
+                this.getTeam(),
+                buildDelay
+        ));
+
+        RobotControllerImpl rc = new RobotControllerImpl(gw, this);
+
+        if(rc.getTeam() == Team.ZOMBIE){
+            PlayerFactory.loadZombiePlayer(rc);
+        } else {
+            String teamName = gw.getTeamName(team);
+            PlayerFactory.loadPlayer(rc, teamName);
+        }
     }
 
     @Override

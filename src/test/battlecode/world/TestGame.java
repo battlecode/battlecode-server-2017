@@ -3,6 +3,7 @@ package battlecode.world;
 import battlecode.common.*;
 import org.junit.Ignore;
 
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -74,7 +75,7 @@ public class TestGame {
      * @return the ID of the robot spawned
      */
     public int spawn(int x, int y, RobotType type, Team team) {
-        InternalRobot robot = new InternalRobot(this.world, type, new MapLocation(x, y), team, false, 0);
+        InternalRobot robot = new InternalRobot(this.world, type, new MapLocation(x, y), team, 0, Optional.empty());
 
         RobotControllerImpl rc = new RobotControllerImpl(world, robot);
 

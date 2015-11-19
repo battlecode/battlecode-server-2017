@@ -119,12 +119,15 @@ public class GameWorld implements SignalHandler {
 
         // Add the robots contained in the GameMap to this world.
         for (GameMap.InitialRobotInfo initialRobot : gameMap.getInitialRobots()) {
-            GameWorldFactory.createPlayer(
+            // Side-effectful constructor; will add robot to relevant stuff
+            new InternalRobot(
                     this,
                     initialRobot.type,
                     initialRobot.getLocation(gameMap.getMapOrigin()),
                     initialRobot.team,
-                    null, false, 0);
+                    0,
+                    Optional.empty()
+            );
         }
     }
 
@@ -773,8 +776,15 @@ public class GameWorld implements SignalHandler {
         adjustResources(s.getTeam(), -cost);
 
         // note: this also adds the signal
-        InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(),
-                loc, s.getTeam(), parent, s.getDelay());
+
+        InternalRobot robot = new InternalRobot(
+                this,
+                s.getType(),
+                loc,
+                s.getTeam(),
+                s.getDelay(),
+                Optional.of(parent)
+        );
 
         // addSignal(s); //client doesn't need this one
     }
@@ -836,8 +846,14 @@ public class GameWorld implements SignalHandler {
                 RobotType zombieType = obj.type.turnsInto; // Type of Zombie this unit turns into
 
                 // Create new Zombie
-                InternalRobot robot = GameWorldFactory.createPlayer(this, zombieType,
-                        obj.getLocation(), Team.ZOMBIE, obj, 0); // TODO: Figure out Runnable and get that working
+
+                InternalRobot robot = new InternalRobot(
+                        this,
+                        zombieType,
+                        obj.getLocation(),
+                        Team.ZOMBIE,
+                        0,
+                        Optional.of(obj)); // TODO: Figure out Runnable and get that working
             }
 
             updateMapMemoryRemove(obj.getTeam(), obj.getLocation(),
@@ -897,7 +913,8 @@ public class GameWorld implements SignalHandler {
         adjustResources(s.getTeam(), -cost);
 
         // note: this also adds the signal
-        InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(),
-                loc, s.getTeam(), parent, s.getDelay());
+
+        InternalRobot robot =
+                new InternalRobot(this, s.getType(), loc, s.getTeam(), s.getDelay(), Optional.of(parent));
     }
 }

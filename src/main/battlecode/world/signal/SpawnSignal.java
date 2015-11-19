@@ -52,13 +52,6 @@ public class SpawnSignal implements Signal {
     }
 
     /**
-     * Convenience constructor; creates a signal for a robot that was just spawned
-     */
-    public SpawnSignal(InternalRobot child, InternalRobot parent, int delay) {
-        this(child.getID(), parent == null ? 0 : parent.getID(), child.getLocation(), child.type, child.getTeam(), delay);
-    }
-
-    /**
      * Convenience constructor; creates a spawn signal for a robot that hasn't been spawned yet
      */
     public SpawnSignal(MapLocation loc, RobotType type, Team team, InternalRobot parent, int delay) {
