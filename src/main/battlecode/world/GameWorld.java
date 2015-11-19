@@ -410,8 +410,6 @@ public class GameWorld implements SignalHandler {
         if (gameObjectsByID.get(o.getID()) == o) {
             gameObjectsByID.remove(o.getID());
         }
-
-        o.freeMemory();
     }
 
     public void beginningOfExecution(int robotID) {

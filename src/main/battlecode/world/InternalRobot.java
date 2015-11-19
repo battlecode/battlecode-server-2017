@@ -38,7 +38,6 @@ public class InternalRobot implements GenericRobot {
     private volatile int bytecodesUsed;
     protected volatile boolean hasBeenAttacked;
     private boolean healthChanged;
-    private boolean didSelfDestruct;
     private boolean broadcasted;
     private volatile HashMap<Integer, Integer> broadcastMap;
     private int roundsAlive;
@@ -47,7 +46,6 @@ public class InternalRobot implements GenericRobot {
     private ArrayList<SpawnSignal> missileLaunchActions;
     private Signal movementSignal;
     private Signal attackSignal;
-    private Signal castSignal;
 
     private int buildDelay;
 
@@ -90,7 +88,6 @@ public class InternalRobot implements GenericRobot {
         hasBeenAttacked = false;
         healthChanged = true;
 
-        didSelfDestruct = false;
         broadcasted = false;
         broadcastMap = new HashMap<>();
         roundsAlive = 0;
@@ -99,7 +96,6 @@ public class InternalRobot implements GenericRobot {
         missileLaunchActions = new ArrayList<>();
         movementSignal = null;
         attackSignal = null;
-        castSignal = null;
 
         myGameWorld.incrementTotalRobotTypeCount(getTeam(), type);
 
@@ -223,23 +219,8 @@ public class InternalRobot implements GenericRobot {
         return myLocation;
     }
 
-    public GameWorld getGameWorld() {
-        return myGameWorld;
-    }
-
     public boolean exists() {
         return myGameWorld.exists(this);
-    }
-
-    public InternalRobot container() {
-        return null;
-    }
-
-    public MapLocation sensedLocation() {
-        if (container() != null)
-            return container().sensedLocation();
-        else
-            return getLocation();
     }
 
     // *********************************
@@ -266,10 +247,6 @@ public class InternalRobot implements GenericRobot {
 
     public int getBytecodeLimit() {
         return canExecuteCode() ? this.currentBytecodeLimit : 0;
-    }
-
-    public boolean movedThisTurn() {
-        return this.movementSignal != null;
     }
 
     public void setControlBits(long l) {
@@ -364,12 +341,8 @@ public class InternalRobot implements GenericRobot {
         }
 
         if (myHealthLevel <= 0 && getMaxHealth() != Integer.MAX_VALUE) {
-            processLethalDamage();
+            myGameWorld.notifyDied(this);   // myGameWorld checks if infected and creates zombie
         }
-    }
-
-    public void processLethalDamage() {
-        myGameWorld.notifyDied(this);   // myGameWorld checks if infected and creates zombie
     }
 
     public double getMaxHealth() {
@@ -416,27 +389,6 @@ public class InternalRobot implements GenericRobot {
         }
     }
 
-    public double getAttackDelayForType() {
-        return type.attackDelay;
-    }
-
-    public double getMovementDelayForType() {
-        return type.movementDelay;
-    }
-
-    public double getCooldownDelayForType() {
-        return type.cooldownDelay;
-    }
-
-    public double calculateMovementActionDelay(MapLocation from,
-            MapLocation to) {
-        if (from.distanceSquaredTo(to) <= 1) {
-            return getMovementDelayForType();
-        } else {
-            return getMovementDelayForType() * 1.4;
-        }
-    }
-
     // *********************************
     // ****** BROADCAST METHODS ********
     // *********************************
@@ -457,10 +409,6 @@ public class InternalRobot implements GenericRobot {
     // *********************************
     // ****** ACTION METHODS ***********
     // *********************************
-
-    public void addAction(Signal s) {
-        myGameWorld.visitSignal(s);
-    }
 
     public void activateMovement(Signal s, double attackDelay,
             double movementDelay) {
@@ -484,18 +432,6 @@ public class InternalRobot implements GenericRobot {
                 type.sensorRadiusSquared);
         myGameWorld
                 .updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
-    }
-
-    public void setSelfDestruct() {
-        didSelfDestruct = true;
-    }
-
-    public void unsetSelfDestruct() {
-        didSelfDestruct = false;
-    }
-
-    public boolean didSelfDestruct() {
-        return didSelfDestruct;
     }
 
     public void suicide() {
@@ -522,6 +458,8 @@ public class InternalRobot implements GenericRobot {
         decrementDelays(); // expends supply to decrement delays
 
         this.currentBytecodeLimit = type.bytecodeLimit;
+
+        processBeingInfected();
     }
 
     public void processEndOfTurn() {
@@ -562,22 +500,14 @@ public class InternalRobot implements GenericRobot {
         }
     }
 
-    public void processEndOfRound() {
-    }
+    public void processEndOfRound() {}
 
     // *********************************
     // ****** MISC. METHODS ************
     // *********************************
-    
-    
-    
+
     @Override
     public String toString() {
         return String.format("%s:%s#%d", getTeam(), type, getID());
-    }
-
-    public void freeMemory() {
-        movementSignal = null;
-        attackSignal = null;
     }
 }
