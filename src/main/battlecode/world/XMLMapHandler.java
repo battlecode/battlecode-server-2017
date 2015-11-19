@@ -21,7 +21,7 @@ import java.util.*;
  * This class contains the code for reading an XML map file and converting it
  * to a proper GameMap.
  */
-class XMLMapHandler extends DefaultHandler {
+public class XMLMapHandler extends DefaultHandler {
 
     /**
      * An enum to keep track of the two types of terrain that might appear in

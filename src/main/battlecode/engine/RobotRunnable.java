@@ -18,7 +18,7 @@ TODO:
 - better commenting
 - better error reporting
  */
-class RobotRunnable implements Runnable {
+public class RobotRunnable implements Runnable {
 
     private final Class<?> myPlayerClass;
     private final RobotControllerImpl myRobotController;
