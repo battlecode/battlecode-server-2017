@@ -1,6 +1,8 @@
 package battlecode.world;
 
 import battlecode.common.*;
+import battlecode.world.control.NullControlProvider;
+import battlecode.world.control.RobotControlProvider;
 import org.junit.Ignore;
 
 import java.util.Optional;
@@ -20,11 +22,11 @@ import java.util.function.Consumer;
 @Ignore
 public class TestGame {
     /** The game world that everything is based on. */
-    private GameWorld world;
+    private final GameWorld world;
     /** Map from IDs to robots. */
-    private TreeMap<Integer, InternalRobot> robots = new TreeMap<>();
+    private final TreeMap<Integer, InternalRobot> robots = new TreeMap<>();
     /** Map from IDs to robot controllers. */
-    private TreeMap<Integer, RobotController> rcs = new TreeMap<>();
+    private final TreeMap<Integer, RobotController> rcs = new TreeMap<>();
 
     /**
      * Creates a test game with the given map.
@@ -33,7 +35,7 @@ public class TestGame {
      */
     public TestGame(GameMap map) {
         long[][] teamMemory = new long[2][GameConstants.TEAM_MEMORY_LENGTH];
-        world = new GameWorld(map, "A", "B", teamMemory);
+        world = new GameWorld(map, new NullControlProvider(), "A", "B", teamMemory);
     }
 
     /**
@@ -43,7 +45,7 @@ public class TestGame {
      * @param memory the previous round's team memory
      */
     public TestGame(GameMap map, long[][] memory) {
-        world = new GameWorld(map, "A", "B", memory);
+        world = new GameWorld(map, new NullControlProvider(), "A", "B", memory);
     }
 
     /**

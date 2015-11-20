@@ -6,6 +6,7 @@ import battlecode.engine.instrumenter.lang.SilencedPrintStream;
 import battlecode.engine.scheduler.Scheduler;
 import battlecode.server.Config;
 import battlecode.world.GameWorld;
+import battlecode.world.InternalRobot;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -83,8 +84,10 @@ public class RobotMonitor {
         }
 
         if (newData.ID >= 0) {
-            myGameWorld.beginningOfExecution(newData.ID);
-            GenericRobot robot = myGameWorld.getRobotByID(newData.ID);
+            InternalRobot robot = myGameWorld.getObjectByID(newData.ID);
+
+            robot.processBeginningOfTurn();
+
             bytecodeLimit = robot.getBytecodeLimit();
             debugLevel = currentRobotData.debugLevel;
             currentRobotData.bytecodesLeft += bytecodeLimit;
@@ -153,7 +156,15 @@ public class RobotMonitor {
      * Ends the run of the currently active robot.
      */
     public static void endRunner() {
-        myGameWorld.endOfExecution(currentRobotData.ID);
+
+        // Inject bytecodes used into the current robot
+        InternalRobot r = myGameWorld.getObjectByID(currentRobotData.ID);
+        // if the robot is dead, it won't be in the map any more
+        if (r != null) {
+            r.setBytecodesUsed(getBytecodesUsed());
+            r.processEndOfTurn();
+        }
+
         currentRobotData.debugLevel = debugLevel;
         if (debugLevel == 0)
             currentRobotData.bytecodesLeft = bytecodesLeft;

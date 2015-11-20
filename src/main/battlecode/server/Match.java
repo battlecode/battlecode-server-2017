@@ -6,8 +6,11 @@ import battlecode.engine.ErrorReporter;
 import battlecode.engine.GameState;
 import battlecode.engine.signal.Signal;
 import battlecode.serial.*;
-import battlecode.world.GameWorld;
-import battlecode.world.XMLMapHandler;
+import battlecode.world.*;
+import battlecode.world.control.PlayerControlProvider;
+import battlecode.world.control.RobotControlProvider;
+import battlecode.world.control.TeamControlProvider;
+import battlecode.world.control.ZombieControlProvider;
 
 import java.util.Observable;
 
@@ -76,10 +79,21 @@ public class Match extends Observable {
         String mapPath = options.get("bc.game.map-path");
 
         try {
+            // Load the map for the match
             final XMLMapHandler handler = XMLMapHandler.loadMap(map, mapPath);
+            final GameMap map = handler.getParsedMap();
 
-            gameWorld = new GameWorld(handler.getParsedMap(), info.getTeamA(), info.getTeamB(), state);
+            // Create the control provider for the match
+            // TODO move this somewhere better-fitting
+            final TeamControlProvider teamProvider = new TeamControlProvider();
+            teamProvider.registerControlProvider(Team.ZOMBIE, new ZombieControlProvider());
 
+            final RobotControlProvider playerProvider = new PlayerControlProvider();
+            teamProvider.registerControlProvider(Team.A, playerProvider);
+            teamProvider.registerControlProvider(Team.B, playerProvider);
+
+            // Create the game world!
+            gameWorld = new GameWorld(map, teamProvider, info.getTeamA(), info.getTeamB(), state);
         } catch (IllegalArgumentException e) {
             System.out.println("[Engine] Error while loading map '" + map + "'");
             throw e;
@@ -129,8 +143,11 @@ public class Match extends Observable {
      */
     public RoundDelta getRound() {
 
-        if (gameWorld == null)
+
+        if (gameWorld == null) {
+            System.out.println("Match.getRound(): Null GameWorld, return null");
             return null;
+        }
 
         // Run the next round.
         GameState result = gameWorld.runRound();

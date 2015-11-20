@@ -6,11 +6,8 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.GameState;
-import battlecode.engine.instrumenter.IndividualClassLoader;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
-import battlecode.engine.instrumenter.lang.RoboRandom;
-import battlecode.engine.scheduler.Scheduler;
 import battlecode.engine.signal.AutoSignalHandler;
 import battlecode.engine.signal.Signal;
 import battlecode.engine.signal.SignalHandler;
@@ -18,6 +15,7 @@ import battlecode.serial.DominationFactor;
 import battlecode.serial.GameStats;
 import battlecode.serial.RoundStats;
 import battlecode.server.Config;
+import battlecode.world.control.RobotControlProvider;
 import battlecode.world.signal.*;
 
 import java.util.*;
@@ -43,6 +41,9 @@ public class GameWorld implements SignalHandler {
     protected final ArrayList<Integer> randomIDs = new ArrayList<>();
 
     private final GameMap gameMap;
+
+    private final RobotControlProvider controlProvider;
+
     private RoundStats roundStats = null; // stats for each round; new object is
                                           // created for each round
     private final GameStats gameStats = new GameStats(); // end-of-game stats
@@ -73,12 +74,9 @@ public class GameWorld implements SignalHandler {
     private boolean removingDead = false;
 
     @SuppressWarnings("unchecked")
-    public GameWorld(GameMap gm, String teamA, String teamB,
-            long[][] oldTeamMemory) {
-
-        IndividualClassLoader.reset();
-        Scheduler.reset();
-        RobotMonitor.reset();
+    public GameWorld(GameMap gm, RobotControlProvider cp,
+                     String teamA, String teamB,
+                     long[][] oldTeamMemory) {
 
         currentRound = -1;
         teamAName = teamA;
@@ -91,6 +89,7 @@ public class GameWorld implements SignalHandler {
         this.oldTeamMemory = oldTeamMemory;
 
         gameMap = gm;
+        controlProvider = cp;
 
         mapMemory.put(Team.A, new GameMap.MapMemory(gameMap));
         mapMemory.put(Team.B, new GameMap.MapMemory(gameMap));
@@ -127,10 +126,12 @@ public class GameWorld implements SignalHandler {
 
         reserveRandomIDs(32000);
 
+        controlProvider.matchStarted(this);
+
         // Add the robots contained in the GameMap to this world.
         for (GameMap.InitialRobotInfo initialRobot : gameMap.getInitialRobots()) {
             // Side-effectful constructor; will add robot to relevant stuff
-            new InternalRobot(
+            final InternalRobot r = new InternalRobot(
                     this,
                     initialRobot.type,
                     initialRobot.getLocation(gameMap.getMapOrigin()),
@@ -138,12 +139,10 @@ public class GameWorld implements SignalHandler {
                     0,
                     Optional.empty()
             );
-        }
 
-        RobotMonitor.setGameWorld(this);
-        RoboRandom.setMapSeed(getMapSeed());
-        Scheduler.start();
-    }
+            controlProvider.robotSpawned(r);
+        }
+   }
 
     public GameState runRound() {
         if (!this.isRunning()) {
@@ -155,15 +154,17 @@ public class GameWorld implements SignalHandler {
                 this.clearAllSignals();
             }
             this.processBeginningOfRound();
-            Scheduler.startNextThread();
-            Scheduler.endTurn();
+
+            // Tell our control providers to
+            // run a round.
+            this.controlProvider.runRound();
+
             this.processEndOfRound();
+
             if (!this.isRunning()) {
-                // Let all of the threads return so we don't leak
-                // memory.  GameWorld has already told RobotMonitor
-                // to kill all the robots;
-                Scheduler.passToNextThread();
+                this.controlProvider.matchEnded();
             }
+
         } catch (Exception e) {
             ErrorReporter.report(e);
             return GameState.DONE;
@@ -455,21 +456,6 @@ public class GameWorld implements SignalHandler {
         }
     }
 
-    public void beginningOfExecution(int robotID) {
-        InternalRobot r = getObjectByID(robotID);
-        if (r != null)
-            r.processBeginningOfTurn();
-    }
-
-    public void endOfExecution(int robotID) {
-        InternalRobot r = getObjectByID(robotID);
-        // if the robot is dead, it won't be in the map any more
-        if (r != null) {
-            r.setBytecodesUsed(RobotMonitor.getBytecodesUsed());
-            r.processEndOfTurn();
-        }
-    }
-
     public void notifyDied(InternalRobot r) {
         deadRobots.add(r);
     }
@@ -706,7 +692,7 @@ public class GameWorld implements SignalHandler {
             running = false;
             for (InternalRobot o : gameObjectsByID.values()) {
                 if (o != null) {
-                    RobotMonitor.killRobot(o.getID());
+                    controlProvider.robotKilled(o);
                 }
             }
         }
@@ -827,6 +813,8 @@ public class GameWorld implements SignalHandler {
                 Optional.of(parent)
         );
 
+        controlProvider.robotSpawned(robot);
+
         // addSignal(s); //client doesn't need this one
     }
 
@@ -858,7 +846,7 @@ public class GameWorld implements SignalHandler {
             removeObject(obj);
         }
         if (obj != null) {
-            RobotMonitor.killRobot(ID);
+            controlProvider.robotKilled(obj);
 
             // update robot counting
             if (obj.isActive()) {
@@ -895,6 +883,8 @@ public class GameWorld implements SignalHandler {
                         Team.ZOMBIE,
                         0,
                         Optional.of(obj)); // TODO: Figure out Runnable and get that working
+
+                controlProvider.robotSpawned(robot);
             }
 
             updateMapMemoryRemove(obj.getTeam(), obj.getLocation(),
@@ -957,5 +947,7 @@ public class GameWorld implements SignalHandler {
 
         InternalRobot robot =
                 new InternalRobot(this, s.getType(), loc, s.getTeam(), s.getDelay(), Optional.of(parent));
+
+        controlProvider.robotSpawned(robot);
     }
 }
