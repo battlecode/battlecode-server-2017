@@ -99,7 +99,7 @@ public class RobotMonitor {
                 battlecode.engine.instrumenter.lang.System.err = stream;
             } else {
                 RoboPrintStream stream = RoboPrintStream.theInstance();
-                stream.changeRobot();
+                stream.updateHeader(robot, myGameWorld.getCurrentRound());
                 battlecode.engine.instrumenter.lang.System.out = stream;
                 battlecode.engine.instrumenter.lang.System.err = stream;
             }

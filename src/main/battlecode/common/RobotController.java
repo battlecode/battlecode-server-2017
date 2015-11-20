@@ -516,4 +516,23 @@ public interface RobotController {
      * resume execution.
      */
     void breakpoint();
+
+    /**
+     * Returns the number of bytecodes the current robot has executed since the beginning
+     * of the current round.
+     * @return the number of bytecodes the current robot has executed since the beginning of the current round.
+     */
+    int getBytecodeNum();
+
+    /**
+     * Returns the current round number, where round 0 is the first round of the match.
+     * @return the current round number, where 0 is the first round of the match.
+     */
+    int getRoundNum();
+
+    /**
+     * Returns the number of bytecodes this robot has left in this round.
+     * @return the number of bytecodes this robot has left in this round.
+     */
+    int getBytecodesLeft();
 }

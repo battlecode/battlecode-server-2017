@@ -2,16 +2,14 @@ package battlecode.server;
 
 import battlecode.common.GameConstants;
 import battlecode.common.Team;
-import battlecode.engine.Engine;
+import battlecode.engine.ErrorReporter;
 import battlecode.engine.GameState;
 import battlecode.engine.signal.Signal;
 import battlecode.serial.*;
 import battlecode.world.GameWorld;
+import battlecode.world.XMLMapHandler;
 
 import java.util.Observable;
-
-//import battlecode.tournament.TournamentType;
-//import battlecode.tournament.Match.Type;
 
 /**
  * Abstracts the game engine for the server. This class is responsible for
@@ -19,11 +17,6 @@ import java.util.Observable;
  * server.
  */
 public class Match extends Observable {
-
-    /**
-     * The Engine instance to use to run the game.
-     */
-    private Engine engine;
 
     /**
      * The GenericWorld for getting signals.
@@ -71,28 +64,30 @@ public class Match extends Observable {
         this.number = number;
         this.count = count;
 
-        this.engine = null;
         this.gameWorld = null;
     }
 
     /**
-     * Sets up the engine for this match. Because Engine's constructor
+     * Sets up the engine for this match. Because GameWorld's constructor
      * manipulates static state, engine object creation should not be done at
      * match creation time!
      */
     public void initialize() {
-
-        this.bytecodesUsedEnabled =
-                options.getBoolean("bc.engine.bytecodes-used");
-
         String mapPath = options.get("bc.game.map-path");
 
-        // Create a new engine.
-        this.engine = new Engine(info.getTeamA(), info.getTeamB(), map,
-                mapPath, this.state);
+        try {
+            final XMLMapHandler handler = XMLMapHandler.loadMap(map, mapPath);
 
-        // Get the viewer from the engine.
-        this.gameWorld = engine.getGameWorld();
+            gameWorld = new GameWorld(handler.getParsedMap(), info.getTeamA(), info.getTeamB(), state);
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("[Engine] Error while loading map '" + map + "'");
+            throw e;
+        } catch (Exception e) {
+            ErrorReporter.report(e);
+            throw e;
+        }
+
         assert this.gameWorld != null;
     }
 
@@ -105,10 +100,14 @@ public class Match extends Observable {
      *         empty signal array if there was no effect
      */
     public Signal[] alter(Signal signal) {
-        if (engine.receiveSignal(signal))
-            return gameWorld.getAllSignals(false);
-        else
+        gameWorld.clearAllSignals();
+        try {
+            gameWorld.visitSignal(signal);
+        } catch (RuntimeException e) {
             return new Signal[0];
+        }
+
+        return gameWorld.getAllSignals(false);
     }
 
     /**
@@ -117,7 +116,7 @@ public class Match extends Observable {
      * @return true if the match has been initialized, false otherwise
      */
     public boolean isInitialized() {
-        return this.engine != null;
+        return this.gameWorld != null;
     }
 
     /**
@@ -130,8 +129,11 @@ public class Match extends Observable {
      */
     public RoundDelta getRound() {
 
+        if (gameWorld == null)
+            return null;
+
         // Run the next round.
-        GameState result = engine.runRound();
+        GameState result = gameWorld.runRound();
 
         // Notify the server of any other result.
         if (result == GameState.BREAKPOINT) {
@@ -218,7 +220,7 @@ public class Match extends Observable {
      * @return true if the match has finished running, false otherwise
      */
     public boolean hasMoreRounds() {
-        return engine.isRunning();
+        return gameWorld != null && gameWorld.isRunning();
     }
 
     /**
@@ -276,7 +278,8 @@ public class Match extends Observable {
 
     public long[][] getComputedTeamMemory() {
         if (computedTeamMemory == null)
-            return this.engine.getTeamMemory();
+            return this.gameWorld.getTeamMemory();
+
         else return computedTeamMemory;
     }
 
@@ -285,16 +288,15 @@ public class Match extends Observable {
      *         round is 1 (0 if no rounds have been run yet)
      */
     public int getRoundNumber() {
-        return Engine.getRoundNum() + 1;
+        return gameWorld.getCurrentRound() + 1;
     }
 
     /**
      * Cleans up the match so that its resources can be garbage collected.
      */
     public void finish() {
-        this.computedTeamMemory = this.engine.getTeamMemory();
+        this.computedTeamMemory = this.gameWorld.getTeamMemory();
         this.gameWorld = null;
-        this.engine = null;
     }
 
     @Override

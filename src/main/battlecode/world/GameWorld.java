@@ -5,14 +5,19 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.engine.ErrorReporter;
+import battlecode.engine.GameState;
+import battlecode.engine.instrumenter.IndividualClassLoader;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.instrumenter.RobotMonitor;
+import battlecode.engine.instrumenter.lang.RoboRandom;
+import battlecode.engine.scheduler.Scheduler;
 import battlecode.engine.signal.AutoSignalHandler;
 import battlecode.engine.signal.Signal;
 import battlecode.engine.signal.SignalHandler;
 import battlecode.serial.DominationFactor;
 import battlecode.serial.GameStats;
 import battlecode.serial.RoundStats;
+import battlecode.server.Config;
 import battlecode.world.signal.*;
 
 import java.util.*;
@@ -70,6 +75,11 @@ public class GameWorld implements SignalHandler {
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, String teamA, String teamB,
             long[][] oldTeamMemory) {
+
+        IndividualClassLoader.reset();
+        Scheduler.reset();
+        RobotMonitor.reset();
+
         currentRound = -1;
         teamAName = teamA;
         teamBName = teamB;
@@ -129,6 +139,39 @@ public class GameWorld implements SignalHandler {
                     Optional.empty()
             );
         }
+
+        RobotMonitor.setGameWorld(this);
+        RoboRandom.setMapSeed(getMapSeed());
+        Scheduler.start();
+    }
+
+    public GameState runRound() {
+        if (!this.isRunning()) {
+            return GameState.DONE;
+        }
+
+        try {
+            if (this.getCurrentRound() != -1) {
+                this.clearAllSignals();
+            }
+            this.processBeginningOfRound();
+            Scheduler.startNextThread();
+            Scheduler.endTurn();
+            this.processEndOfRound();
+            if (!this.isRunning()) {
+                // Let all of the threads return so we don't leak
+                // memory.  GameWorld has already told RobotMonitor
+                // to kill all the robots;
+                Scheduler.passToNextThread();
+            }
+        } catch (Exception e) {
+            ErrorReporter.report(e);
+            return GameState.DONE;
+        }
+
+        return ((Config.getGlobalConfig().getBoolean("bc.engine.breakpoints") &&
+                wasBreakpointHit()) ? GameState.BREAKPOINT :
+                                                GameState.RUNNING);
     }
 
     // *********************************
@@ -410,8 +453,6 @@ public class GameWorld implements SignalHandler {
         if (gameObjectsByID.get(o.getID()) == o) {
             gameObjectsByID.remove(o.getID());
         }
-
-        o.freeMemory();
     }
 
     public void beginningOfExecution(int robotID) {

@@ -15,7 +15,7 @@ public class ZombiePlayer {
         while (true) {
             switch (rc.getType()) {
                 case ZOMBIEDEN:
-                    ZombieCount[] zSchedule = rc.getZombieSpawnSchedule(Clock.getRoundNum());
+                    ZombieCount[] zSchedule = rc.getZombieSpawnSchedule(rc.getRoundNum());
                     for (ZombieCount count : zSchedule) {
                         for (int i = 0; i < count.getCount(); ++i) {
                             zombies.add(count.getType());

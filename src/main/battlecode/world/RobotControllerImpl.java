@@ -150,13 +150,6 @@ public final class RobotControllerImpl implements RobotController {
         }
     }
 
-    public void assertCanSense(InternalRobot obj) throws GameActionException {
-        if (!canSense(obj)) {
-            throw new GameActionException(CANT_SENSE_THAT,
-                    "That object is not within the robot's sensor range.");
-        }
-    }
-
     public boolean canSenseLocation(MapLocation loc) {
         return canSense(loc);
     }
@@ -323,9 +316,9 @@ public final class RobotControllerImpl implements RobotController {
         // factor2 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
         // } TODO: Will we have flying units?
 
-        robot.activateMovement(new MovementSignal(robot.getID(), getLocation().add(d), true, (int) (robot.getMovementDelayForType() * factor1)),
-                robot.getCooldownDelayForType() * factor2,
-                robot.getMovementDelayForType() * factor1);
+        robot.activateMovement(new MovementSignal(robot.getID(), getLocation().add(d), true, (int) (robot.type.movementDelay * factor1)),
+                robot.type.cooldownDelay * factor2,
+                robot.type.movementDelay * factor1);
     }
     
     // ***********************************
@@ -389,19 +382,12 @@ public final class RobotControllerImpl implements RobotController {
         assertValidAttackLocation(loc);
 
         robot.activateAttack(new AttackSignal(robot.getID(), loc),
-                robot.getAttackDelayForType(), robot.getCooldownDelayForType());
-    }
-
-    public void explode() throws GameActionException {
-        throw new RobotDeathException();
+                robot.type.attackDelay, robot.type.cooldownDelay);
     }
 
     // ***********************************
     // ****** BROADCAST METHODS **********
     // ***********************************
-    public boolean hasBroadcasted() {
-        return robot.hasBroadcasted();
-    }
 
     public void broadcast(int channel, int data) throws GameActionException {
         if (channel < 0 || channel > GameConstants.BROADCAST_MAX_CHANNELS)
@@ -432,15 +418,6 @@ public final class RobotControllerImpl implements RobotController {
     // ***********************************
     // ****** BUILDING/SPAWNING **********
     // ***********************************
-    public DependencyProgress checkDependencyProgress(RobotType type) {
-        if (gameWorld.getActiveRobotTypeCount(robot.getTeam(), type) > 0) {
-            return DependencyProgress.DONE;
-        } else if (gameWorld.getTotalRobotTypeCount(robot.getTeam(), type) > 0) {
-            return DependencyProgress.INPROGRESS;
-        } else {
-            return DependencyProgress.NONE;
-        }
-    }
 
     public boolean isSpawningUnit() {
         return robot.type.canSpawn();
@@ -607,5 +584,17 @@ public final class RobotControllerImpl implements RobotController {
 
     public void breakpoint() {
         gameWorld.notifyBreakpoint();
+    }
+
+    public int getBytecodeNum() {
+        return RobotMonitor.getBytecodeNum();
+    }
+
+    public int getRoundNum() {
+        return gameWorld.getCurrentRound();
+    }
+
+    public int getBytecodesLeft() {
+        return RobotMonitor.getBytecodesLeft();
     }
 }

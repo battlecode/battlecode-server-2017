@@ -11,12 +11,10 @@ public class Thread extends java.lang.Thread {
     }
 
     public Thread() {
-        System.err.println("A new thread!");
         throw new InstrumentationException();
     }
 
     public Thread(Runnable r) {
-        System.err.println("trying to create a thread with " + r);
         throw new InstrumentationException();
     }
 
