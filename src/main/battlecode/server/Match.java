@@ -285,7 +285,7 @@ public class Match extends Observable {
      *         round is 1 (0 if no rounds have been run yet)
      */
     public int getRoundNumber() {
-        return Engine.getRoundNum() + 1;
+        return gameWorld.getCurrentRound() + 1;
     }
 
     /**

@@ -1,6 +1,5 @@
 package battlecode.engine;
 
-import battlecode.common.Clock;
 import battlecode.common.RobotController;
 import battlecode.engine.instrumenter.RobotDeathException;
 import battlecode.engine.scheduler.Scheduler;
@@ -65,12 +64,14 @@ public class RobotRunnable implements Runnable {
 
             m.invoke(null, myRobotController);
 
-            System.out.println("[Engine] Robot " + myRobotController.getRobot() + " died on round "+Clock.getRoundNum()+" because its run method returned");
+            System.out.println("[Engine] Robot " + myRobotController.getRobot() + " died on round "+
+                    myRobotController.getRoundNum()+" because its run method returned");
         } catch (Throwable t) {
             while ((t instanceof InvocationTargetException) || (t instanceof ExceptionInInitializerError))
                 t = t.getCause();
             if (!causedByRobotDeath(t)) {
-                System.out.println("[Engine] Robot " + myRobotController.getRobot() + " died on round "+Clock.getRoundNum()+" because of:");
+                System.out.println("[Engine] Robot " + myRobotController.getRobot() + " died on round "+
+                        myRobotController.getRoundNum()+" because of:");
                 t.printStackTrace();
             }
         }

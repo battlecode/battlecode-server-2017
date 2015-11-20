@@ -585,4 +585,16 @@ public final class RobotControllerImpl implements RobotController {
     public void breakpoint() {
         gameWorld.notifyBreakpoint();
     }
+
+    public int getBytecodeNum() {
+        return RobotMonitor.getBytecodeNum();
+    }
+
+    public int getRoundNum() {
+        return gameWorld.getCurrentRound();
+    }
+
+    public int getBytecodesLeft() {
+        return RobotMonitor.getBytecodesLeft();
+    }
 }

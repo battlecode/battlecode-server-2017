@@ -20,10 +20,8 @@ public class Engine {
     private final boolean garbageCollectEnabled;
     private final int garbageCollectRounds;
     private final boolean breakpointsEnabled;
-    private static Engine theInstance = null;
 
     public Engine(String teamA, String teamB, String mapName, String mapPath, long[][] teamMemory) {
-        theInstance = this;
         Config options = Config.getGlobalConfig();
         this.garbageCollectEnabled = options.getBoolean("bc.engine.gc");
         this.garbageCollectRounds = options.getInt("bc.engine.gc-rounds");
@@ -108,8 +106,8 @@ public class Engine {
         return (gameWorld != null) && gameWorld.isRunning();
     }
 
-    public static int getRoundNum() {
-        return theInstance.gameWorld.getCurrentRound();
+    public int getRoundNum() {
+        return gameWorld.getCurrentRound();
     }
 
     public long[][] getTeamMemory() {
