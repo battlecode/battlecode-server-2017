@@ -15,7 +15,11 @@
 
     <property name="rootname" value="battlecode-server"/>
     <property name="src.dir" value="${basedir}/src/main"/>
-    <property name="lib.dir" value="${basedir}/lib/"/>
+    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="lib.compile.dir" value="${lib.dir}/compile"/>
+    <property name="lib.src.dir" value="${lib.dir}/src"/>
+    <property name="lib.doc.dir" value="${lib.dir}/doc"/>
+    <property name="lib.test.dir" value="${lib.dir}/test"/>
     <property name="build.dir" value="${basedir}/build"/>
     <property name="build.encoding" value="UTF-8"/>
 
@@ -55,21 +59,18 @@
     <available file="${ivy.jar.file}" property="ivy.jar.exists"/>
     <property name="ivy.remote.jar" value="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"/>
 
-    <!-- the normal classpath -->
+    <!-- the normal classpath for libraries -->
     <path id="classpath-libs">
-        <fileset dir="${lib.dir}"><include name="**/*.jar"/></fileset>
+        <fileset dir="${lib.compile.dir}">
+            <include name="*.jar"/>
+        </fileset>
     </path>
-  
-    <path id="classpath-test">
-        <pathelement location="${basedir}/${rootname}.jar"/>
-    </path>
-  
-    <path id="classpath-compiled">
-        <pathelement location="${pkg.build.dir}"/>
-    </path>
-  
-    <path id="classpath-coverage">
-        <pathelement location="${instr.build.dir}"/>
+
+    <!-- the classpath for testing libraries -->
+    <path id="classpath-test-libs">
+        <fileset dir="${lib.test.dir}">
+            <include name="*.jar"/>
+        </fileset>
     </path>
 
     <target name="download-ivy" unless="ivy.jar.exists">
@@ -80,11 +81,7 @@
     </target>
 
     <target name="init-ivy" depends="download-ivy" unless="ivy.jar.exists">
-        <!-- try to load ivy here from ivy home, in case the user has not
-        already dropped it into ant's lib dir (note that the latter copy will
-        always take precedence).  We will not fail as long as local lib dir
-        'exists (it may be empty) and ivy is in at least one of ant's lib dir or
-        the local lib dir. -->
+        <!-- try to load ivy into ant at runtime. -->
         <path id="ivy.lib.path">
             <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
         </path>
@@ -95,9 +92,10 @@
 
     <target name="retrieve" depends="init,init-ivy">
         <ivy:settings file="ivyconf.xml"/>
-        <ivy:retrieve pattern="lib/[artifact]-[revision].[ext]" conf="compile"/>
-        <ivy:retrieve pattern="lib/src/[artifact]-[revision](-[classifier]).[ext]" conf="sources"/>
-        <ivy:retrieve pattern="lib/doc/[artifact]-[revision](-[classifier]).[ext]" conf="javadoc"/>
+        <ivy:retrieve pattern="${lib.compile.dir}/[artifact]-[revision].[ext]" conf="compile"/>
+        <ivy:retrieve pattern="${lib.src.dir}/[artifact]-[revision](-[classifier]).[ext]" conf="sources"/>
+        <ivy:retrieve pattern="${lib.doc.dir}/doc/[artifact]-[revision](-[classifier]).[ext]" conf="javadoc"/>
+        <ivy:retrieve pattern="${lib.test.dir}/[artifact]-[revision](-[classifier]).[ext]" conf="test"/>
     </target>
 
     <target name="init">
@@ -142,7 +140,7 @@
 
     <target name="compiletest"
             description="Compile Battlecode classes."
-            depends="init, jar">
+            depends="init, compile">
         <javac encoding="${build.encoding}"
                 srcdir="${test.src.dir}"
                 includes="**/*.java"
@@ -155,6 +153,7 @@
                 includeantruntime="true">
             <compilerarg line="${javac.args} ${javac.args.warnings}"/>
             <classpath refid="classpath-libs"/>
+            <classpath refid="classpath-test-libs"/>
             <classpath>
                 <pathelement location="${pkg.build.dir}"/>
             </classpath>
@@ -165,7 +164,7 @@
             description="Build the jar (with dependencies included)."
             depends="compile">
         <jar jarfile="${pkg.build.jar}" basedir="${pkg.build.dir}">
-            <zipgroupfileset dir="${lib.dir}" excludes="battlecode-*,junit-*" includes="*.jar"/>
+            <zipgroupfileset dir="${lib.compile.dir}" includes="*.jar"/>
         </jar>
     </target>
 
@@ -207,6 +206,7 @@
     <target name="unittest" depends="compiletest">
         <junit printsummary="withOutAndErr" timeout="${test.timeout}" filtertrace="off" failureproperty="test.failed">
             <classpath refid="classpath-libs"/>
+            <classpath refid="classpath-test-libs"/>
             <classpath>
                 <pathelement location="${pkg.build.dir}"/>
             </classpath>
