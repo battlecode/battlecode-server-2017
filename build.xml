@@ -16,6 +16,7 @@
     <property name="rootname" value="battlecode-server"/>
     <property name="src.dir" value="${basedir}/src/main"/>
     <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="resources.dir" value="${basedir}/resources"/>
     <property name="lib.compile.dir" value="${lib.dir}/compile"/>
     <property name="lib.src.dir" value="${lib.dir}/src"/>
     <property name="lib.doc.dir" value="${lib.dir}/doc"/>
@@ -37,7 +38,7 @@
     <property name="extern.target" value="run"/>
 
     <property name="javadoc.destdir" value="${extern.dir}/javadoc/"/>
-    <property name="commondoc.destdir" value="docs/common"/>
+    <property name="commondoc.destdir" value="docs/cootommon"/>
 
     <!-- Unit tests -->
     <property name="test.src.dir" value="${basedir}/src/test"/>
@@ -120,9 +121,18 @@
         <ivy:cleancache/>
     </target>
 
+    <target name="copy-resources"
+            description="Copy inline Battlecode resources to build folder"
+            depends="init">
+        <copy todir="${pkg.build.dir}">
+            <fileset dir="${src.dir}"
+                     excludes="**/*.java"/>
+        </copy>
+    </target>
+
     <target name="compile"
             description="Compile Battlecode classes."
-            depends="init">
+            depends="init,copy-resources">
         <javac encoding="${build.encoding}"
                 srcdir="${src.dir}"
                 includes="**/*.java"
@@ -140,7 +150,7 @@
 
     <target name="compiletest"
             description="Compile Battlecode classes."
-            depends="init, compile">
+            depends="init,compile">
         <javac encoding="${build.encoding}"
                 srcdir="${test.src.dir}"
                 includes="**/*.java"

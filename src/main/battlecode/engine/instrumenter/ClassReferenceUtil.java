@@ -21,6 +21,17 @@ import java.util.Set;
  * @author adamd
  */
 public class ClassReferenceUtil {
+
+    /**
+     * The resource, relative to this .java/.class file, to load allowed packages from
+     */
+    private final static String ALLOWED_RESOURCE_FILE = "resources/AllowedPackages.txt";
+
+    /**
+     * The resource, relative to this .java/.class file, to load disallowed packages from
+     */
+    private final static String DISALLOWED_RESOURCE_FILE = "resources/AllowedPackages.txt";
+
     // packages for which the player is allowed to use any of the contained classes; loaded from AllowedPackages.txt
     private final static Set<String> allowedPackages;
 
@@ -51,22 +62,26 @@ public class ClassReferenceUtil {
 
         // load allowed packages
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream("AllowedPackages.txt")));
+            reader = new BufferedReader(new InputStreamReader(
+                    ClassReferenceUtil.class.getResourceAsStream(ALLOWED_RESOURCE_FILE)
+            ));
             while ((line = reader.readLine()) != null) {
                 allowedPackages.add(line);
             }
         } catch (Exception e) {
-            fileLoadError("AllowedPackages.txt");
+            fileLoadError(ALLOWED_RESOURCE_FILE);
         }
 
         // load disallowed classes
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream("DisallowedClasses.txt")));
+            reader = new BufferedReader(new InputStreamReader(
+                    ClassReferenceUtil.class.getResourceAsStream(DISALLOWED_RESOURCE_FILE)
+            ));
             while ((line = reader.readLine()) != null) {
                 disallowedClasses.add(line);
             }
         } catch (Exception e) {
-            fileLoadError("DisallowedClasses.txt");
+            fileLoadError(DISALLOWED_RESOURCE_FILE);
         }
 
     }

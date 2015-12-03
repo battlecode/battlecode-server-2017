@@ -60,25 +60,9 @@ public abstract class InstrumentingClassLoader extends ClassLoader {
         }
     }
 
-    public InstrumentingClassLoader(boolean silenced) {
-        super();
+    public InstrumentingClassLoader(ClassLoader parent, boolean silenced) {
+        super(parent);
         this.silenced = silenced;
     }
 
-    public byte[] instrument(String className, boolean checkDisallowed, String teamPackageName) throws InstrumentationException {
-        ClassReader cr;
-        try {
-            if (className.startsWith("instrumented/"))
-                cr = new ClassReader(className.substring(13));
-            else
-                cr = new ClassReader(className);
-        } catch (IOException ioe) {
-            ErrorReporter.report("Can't find the class \"" + className + "\"", "Make sure the team name is spelled correctly.\nMake sure the .class files are in the right directory (teams/teamname/*.class)");
-            throw new InstrumentationException();
-        }
-        ClassWriter cw = new ClassWriter(COMPUTE_MAXS); // passing true sets maxLocals and maxStack, so we don't have to
-        ClassVisitor cv = new RoboAdapter(cw, teamPackageName, silenced, checkDisallowed);
-        cr.accept(cv, 0);        //passing false lets debug info be included in the transformation, so players get line numbers in stack traces
-        return cw.toByteArray();
-    }
 }

@@ -25,6 +25,11 @@ public class MethodCostUtil {
     }
 
     /**
+     * The file to load method data from.
+     */
+    private final static String RESOURCE_FILE = "resources/MethodCosts.txt";
+
+    /**
      * This is a map from method names (in the format 'ClassName/methodName'), to the MethodData associated with each method.
      */
     private final static Map<String, MethodData> methodCosts;
@@ -54,15 +59,17 @@ public class MethodCostUtil {
         methodCosts = new HashMap<>();
         // load method costs
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream("MethodCosts.txt")));
+            reader = new BufferedReader(new InputStreamReader(
+                    MethodCostUtil.class.getResourceAsStream(RESOURCE_FILE)
+            ));
             while ((line = reader.readLine()) != null) {
                 StringTokenizer st = new StringTokenizer(line);
                 if (st.countTokens() != 3)
-                    ClassReferenceUtil.fileLoadError("MethodCosts.txt");
+                    ClassReferenceUtil.fileLoadError(RESOURCE_FILE);
                 methodCosts.put(st.nextToken(), new MethodData(Integer.parseInt(st.nextToken()), Boolean.parseBoolean(st.nextToken())));
             }
         } catch (IOException e) {
-            ClassReferenceUtil.fileLoadError("MethodCosts.txt");
+            ClassReferenceUtil.fileLoadError(RESOURCE_FILE);
         }
 
         interfacesMap = new HashMap<>();

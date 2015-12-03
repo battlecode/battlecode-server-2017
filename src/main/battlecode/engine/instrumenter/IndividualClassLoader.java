@@ -2,6 +2,7 @@ package battlecode.engine.instrumenter;
 
 import battlecode.engine.ErrorReporter;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
 import java.io.IOException;
@@ -16,19 +17,19 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
      * e.g. java.util.*, but those classes are prefixed with "instrumented"
      * during instrumentation.
      */
-    private final static String[] disallowedPlayerPackages = {"java/", "battlecode/", "sun/"};
+    protected final static String[] disallowedPlayerPackages = {"java.", "battlecode.", "sun."};
 
     /**
      * Classes that don't need to be instrumented but do need to be reloaded
      * for every individual player.
      */
-    private final static Set<String> alwaysRedefine = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            "battlecode/engine/instrumenter/lang/ObjectHashCode",
-            "battlecode/engine/instrumenter/lang/InstrumentableFunctions",
-            "battlecode/engine/instrumenter/lang/System",
-            "battlecode/engine/instrumenter/RobotMonitor",
-            "battlecode/engine/instrumenter/RoboRandom",
-            "battlecode/common/Clock"
+    protected final static Set<String> alwaysRedefine = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            "battlecode.engine.instrumenter.lang.ObjectHashCode",
+            "battlecode.engine.instrumenter.lang.InstrumentableFunctions",
+            "battlecode.engine.instrumenter.lang.System",
+            "battlecode.engine.instrumenter.lang.RoboRandom",
+            "battlecode.engine.instrumenter.RobotMonitor",
+            "battlecode.common.Clock"
     )));
 
     /**
@@ -61,12 +62,10 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
     /**
      * Classes this particular IndividualClassLoader has already loaded.
      */
-    private static final Map<String, Class<?>> loadedCache = new HashMap<String, Class<?>>();
+    private final Map<String, Class<?>> loadedCache;
 
-    public IndividualClassLoader(String teamPackageName,
-                                 boolean silenced) throws InstrumentationException {
-
-        super(silenced);
+    public IndividualClassLoader(String teamPackageName, boolean silenced) throws InstrumentationException {
+        super(IndividualClassLoader.class.getClassLoader(), silenced);
 
         checkSettings();
 
@@ -84,11 +83,11 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
         }
 
         this.teamPackageName = teamPackageName.intern();
+        this.loadedCache = new HashMap<>();
     }
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-
         // Don't bother to recreate a class if we've done so before -
         // in *this particular* IndividualClassLoader.
         if (loadedCache.containsKey(name)) {
@@ -101,12 +100,8 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
             if (teamsWithErrors.contains(teamPackageName))
                 throw new InstrumentationException();
 
-            name = name.replace('.', '/');
-
             // this is the class we'll return
             Class finishedClass;
-
-            //System.out.println("loadClass "+name);
 
             if (instrumentedClasses.containsKey(name)) {
                 byte[] classBytes = instrumentedClasses.get(name);
@@ -116,17 +111,22 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                 // so that it isn't possible to send messages by calling
                 // hashCode repeatedly.  But we don't want to instrument it.
                 // So just add its raw bytes to the instrumented classes cache.
+
                 ClassReader cr;
+
                 try {
-                    cr = new ClassReader(name);
+                    cr = getReaderForClass(name);
                 } catch (IOException e) {
                     throw new InstrumentationException(
-                            "Couldn't load required class"
+                            "Couldn't load required class: "+name,
+                            e
                     );
                 }
+
                 ClassWriter cw = new ClassWriter(cr, COMPUTE_MAXS);
                 cr.accept(cw, 0);
                 finishedClass = saveAndDefineClass(name, cw.toByteArray());
+
             } else if (name.startsWith(teamPackageName)) {
                 final byte[] classBytes;
                 try {
@@ -140,7 +140,7 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                 }
 
                 finishedClass = saveAndDefineClass(name, classBytes);
-            } else if (name.startsWith("instrumented")) {
+            } else if (name.startsWith("instrumented.")) {
                 // Each robot has its own version of java.util classes.
                 // If permgen space becomes a problem, we could make it so
                 // that only one copy of these classes is loaded, but
@@ -154,11 +154,11 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                     throw ie;
                 }
                 finishedClass = saveAndDefineClass(name, classBytes);
-            } else if (name.startsWith("forbidden/")) {
+            } else if (name.startsWith("forbidden.")) {
                 ErrorReporter.report("Illegal class: " + name.substring(10) + "\nThis class cannot be referenced by player " + teamPackageName, false);
                 throw new InstrumentationException();
             } else {
-                // Load class normally
+                // Load class normally; note that we use the dotted form of the name.
                 finishedClass = super.loadClass(name, resolve);
             }
 
@@ -183,6 +183,38 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 
         return theClass;
 
+    }
+
+    public byte[] instrument(String className, boolean checkDisallowed, String teamPackageName) throws InstrumentationException {
+        ClassReader cr;
+        try {
+            if (className.startsWith("instrumented.")) {
+                cr = getReaderForClass(className.substring(13));
+            } else {
+                cr = getReaderForClass(className);
+            }
+        } catch (IOException ioe) {
+            ErrorReporter.report("Can't find the class \"" + className + "\"", "Make sure the team name is spelled correctly.\nMake sure the .class files are in the right directory (teams/teamname/*.class)");
+            throw new InstrumentationException("Can't load class: "+className, ioe);
+        }
+        ClassWriter cw = new ClassWriter(COMPUTE_MAXS); // passing true sets maxLocals and maxStack, so we don't have to
+        ClassVisitor cv = new RoboAdapter(cw, teamPackageName, silenced, checkDisallowed);
+        cr.accept(cv, 0);        //passing false lets debug info be included in the transformation, so players get line numbers in stack traces
+        return cw.toByteArray();
+    }
+
+    /**
+     * Gets a ClassReader for a given class.
+     *
+     * @param className the binary name (i.e. "."s and "$"s for inner classes)
+     * @return an asm class reader for the class
+     * @throws IOException if the class can't be read
+     */
+    private ClassReader getReaderForClass(final String className) throws IOException {
+        String fileName = className.replace(".", "/") + ".class";
+
+        // read the raw bytes of the file, using this classloader to locate it
+        return new ClassReader(getResourceAsStream(fileName));
     }
 
 }
