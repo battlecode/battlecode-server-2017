@@ -9,7 +9,6 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.zip.ZipFile;
 
 /**
  * ClassReferenceUtil is a singleton used to keep track of class references during instrumentation.

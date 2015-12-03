@@ -1,7 +1,5 @@
 package battlecode.engine.instrumenter.lang;
 
-import battlecode.engine.GenericRobot;
-
 import java.io.PrintStream;
 
 
@@ -18,14 +16,8 @@ public class RoboPrintStream extends PrintStream {
 
     private String header;
 
-    private static RoboPrintStream theInstance = new RoboPrintStream();
-
-    private RoboPrintStream() {
+    public RoboPrintStream() {
         super(java.lang.System.out);
-    }
-
-    static public RoboPrintStream theInstance() {
-        return theInstance;
     }
 
     //************************
@@ -170,8 +162,8 @@ public class RoboPrintStream extends PrintStream {
      * @param targetRobot the robot currently printing messages
      * @param roundNum    the round messages are being printed during
      */
-    public void updateHeader(GenericRobot targetRobot, int roundNum) {
-        header = String.format("[%s@%d] ", targetRobot.toString(), roundNum);
+    public void updateHeader(String header) {
+        this.header = header;
     }
 
     private void printHelper(String s) {

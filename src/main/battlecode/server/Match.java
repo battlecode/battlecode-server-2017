@@ -6,11 +6,12 @@ import battlecode.engine.ErrorReporter;
 import battlecode.engine.GameState;
 import battlecode.engine.signal.Signal;
 import battlecode.serial.*;
-import battlecode.world.*;
+import battlecode.world.GameMap;
+import battlecode.world.GameWorld;
+import battlecode.world.XMLMapHandler;
 import battlecode.world.control.PlayerControlProvider;
 import battlecode.world.control.RobotControlProvider;
 import battlecode.world.control.TeamControlProvider;
-import battlecode.world.control.ZombieControlProvider;
 
 import java.util.Observable;
 
@@ -86,11 +87,10 @@ public class Match extends Observable {
             // Create the control provider for the match
             // TODO move this somewhere better-fitting
             final TeamControlProvider teamProvider = new TeamControlProvider();
-            teamProvider.registerControlProvider(Team.ZOMBIE, new ZombieControlProvider());
-
             final RobotControlProvider playerProvider = new PlayerControlProvider();
             teamProvider.registerControlProvider(Team.A, playerProvider);
             teamProvider.registerControlProvider(Team.B, playerProvider);
+            teamProvider.registerControlProvider(Team.ZOMBIE, playerProvider);
 
             // Create the game world!
             gameWorld = new GameWorld(map, teamProvider, info.getTeamA(), info.getTeamB(), state);
@@ -142,7 +142,6 @@ public class Match extends Observable {
      *         the engine's result was a breakpoint or completion
      */
     public RoundDelta getRound() {
-
 
         if (gameWorld == null) {
             System.out.println("Match.getRound(): Null GameWorld, return null");

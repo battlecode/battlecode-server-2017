@@ -10,56 +10,90 @@ import java.util.*;
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 
 public class IndividualClassLoader extends InstrumentingClassLoader {
-    private boolean retryLoad;
+    /**
+     * Packages players are not allowed to use.
+     * Some elements of these packages *are* permitted to be used,
+     * e.g. java.util.*, but those classes are prefixed with "instrumented"
+     * during instrumentation.
+     */
     private final static String[] disallowedPlayerPackages = {"java/", "battlecode/", "sun/"};
 
-    // caches the binary format of classes that have been instrumented
-    // the values are byte arrays, not Classes, because each instance of InstrumentingClassLoader should define its own class,
-    // even if another InstrumentingClassLoader has already loaded a class from the same class file
+    /**
+     * Classes that don't need to be instrumented but do need to be reloaded
+     * for every individual player.
+     */
+    private final static Set<String> alwaysRedefine = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            "battlecode/engine/instrumenter/lang/ObjectHashCode",
+            "battlecode/engine/instrumenter/lang/InstrumentableFunctions",
+            "battlecode/engine/instrumenter/lang/System",
+            "battlecode/engine/instrumenter/RobotMonitor",
+            "battlecode/engine/instrumenter/RoboRandom",
+            "battlecode/common/Clock"
+    )));
+
+    /**
+     * Caches the binary format of classes that have been instrumented.
+     * The values are byte arrays, not Classes, because each instance of
+     * InstrumentingClassLoader should define its own class, even if another
+     * InstrumentingClassLoader has already loaded a class from the same class file.
+     */
     private final static Map<String, byte[]> instrumentedClasses = new HashMap<>();
 
-    // caches the names of teams with errors, so that if a class is loaded for that team, it immediately throws an exception
+    /**
+     * Caches the names of teams with errors, so that if a class is loaded for
+     * that team, it immediately throws an exception.
+     * <p>
+     * Note that this is an identity-based Set because we synchronize on the interned
+     * team name during loading.
+     */
     private final static Set<String> teamsWithErrors = Collections.newSetFromMap(new IdentityHashMap<>());
-
-    // the name of the team this InstrumentingClassLoader is loading
-    private final String teamPackageName;
 
     public static void reset() {
         instrumentedClasses.clear();
         teamsWithErrors.clear();
-        singletonLoader = new SingletonClassLoader();
     }
 
-    static SingletonClassLoader singletonLoader = new SingletonClassLoader();
+    /**
+     * The name of the team this InstrumentingClassLoader is loading.
+     */
+    private final String teamPackageName;
 
-    public IndividualClassLoader(String teamPackageName, boolean debugMethodsEnabled, boolean silenced, boolean retry) throws InstrumentationException {
-        super(silenced, debugMethodsEnabled, singletonLoader);
-        retryLoad = retry;
+    /**
+     * Classes this particular IndividualClassLoader has already loaded.
+     */
+    private static final Map<String, Class<?>> loadedCache = new HashMap<String, Class<?>>();
+
+    public IndividualClassLoader(String teamPackageName,
+                                 boolean silenced) throws InstrumentationException {
+
+        super(silenced);
+
         checkSettings();
 
         // check that the package we're trying to load isn't contained in a disallowed package
         String teamNameSlash = teamPackageName + "/";
         for (String sysName : disallowedPlayerPackages) {
             if (teamNameSlash.startsWith(sysName)) {
-                ErrorReporter.report("Invalid package name: \"" + teamPackageName + "\"\nPlayer packages cannot be contained in system packages (e.g., java., battlecode.)", false);
-                throw new InstrumentationException();
+                throw new InstrumentationException(
+                        "Invalid package name: \""
+                                + teamPackageName
+                                + "\"\nPlayer packages cannot be contained "
+                                + "in system packages (e.g., java., battlecode.)"
+                );
             }
         }
 
         this.teamPackageName = teamPackageName.intern();
     }
 
-    private void dumpToFile(String name, byte[] bytes) {
-        try {
-            java.io.File file = new java.io.File("classes/" + name + ".class");
-            java.io.FileOutputStream stream = new java.io.FileOutputStream(file);
-            stream.write(bytes);
-            stream.close();
-        } catch (Exception e) {
-        }
-    }
-
+    @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+
+        // Don't bother to recreate a class if we've done so before -
+        // in *this particular* IndividualClassLoader.
+        if (loadedCache.containsKey(name)) {
+            return loadedCache.get(name);
+        }
 
         synchronized (teamPackageName) {
 
@@ -77,50 +111,40 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
             if (instrumentedClasses.containsKey(name)) {
                 byte[] classBytes = instrumentedClasses.get(name);
                 finishedClass = defineClass(null, classBytes, 0, classBytes.length);
-            } else if (name.equals("battlecode/engine/instrumenter/lang/ObjectHashCode") ||
-                    name.equals("battlecode/engine/instrumenter/lang/InstrumentableFunctions")) {
+            } else if (alwaysRedefine.contains(name)) {
                 // We want each robot to have its own copy of this class
                 // so that it isn't possible to send messages by calling
                 // hashCode repeatedly.  But we don't want to instrument it.
+                // So just add its raw bytes to the instrumented classes cache.
                 ClassReader cr;
                 try {
                     cr = new ClassReader(name);
-                } catch (IOException ioe) {
-                    ErrorReporter.report("Can't find the class \"" + name + "\"", "Make sure the team name is spelled correctly.\nMake sure the .class files are in the right directory (teams/teamname/*.class)");
-                    throw new InstrumentationException();
+                } catch (IOException e) {
+                    throw new InstrumentationException(
+                            "Couldn't load required class"
+                    );
                 }
                 ClassWriter cw = new ClassWriter(cr, COMPUTE_MAXS);
                 cr.accept(cw, 0);
                 finishedClass = saveAndDefineClass(name, cw.toByteArray());
             } else if (name.startsWith(teamPackageName)) {
-                byte[] classBytes = null;
-		boolean retry = true;
-		while(retry) {
-		    if(!retryLoad)
-			retry = false;
-		    try {
-			classBytes = instrument(name, true, teamPackageName);
-			//dumpToFile(name,classBytes);
-			retry = false;
-		    } catch (InstrumentationException ie) {			
-			if(!retryLoad) {
-			    teamsWithErrors.add(teamPackageName);
-			    throw ie;
-			} else {
-			    try {
-				Thread.sleep(10000);
-			    } catch(Exception e) {}
-			}
-		    }
+                final byte[] classBytes;
+                try {
+                    classBytes = instrument(name, true, teamPackageName);
+                } catch (InstrumentationException e) {
+                        teamsWithErrors.add(teamPackageName);
+                        throw new InstrumentationException("Can't find the class \"" + name + "\". "
+                                    + "Make sure the team name is spelled correctly. "
+                                    + "Make sure the .class files are in the right directory (teams/teamname/*.class)",
+                                    e);
                 }
 
                 finishedClass = saveAndDefineClass(name, classBytes);
-            }
-            // Each robot has its own version of java.util classes.
-            // If permgen space becomes a problem, we could make it so
-            // that only one copy of these classes is loaded, but
-            // we would need to modify ObjectHashCode.
-            else if (name.startsWith("instrumented")) {
+            } else if (name.startsWith("instrumented")) {
+                // Each robot has its own version of java.util classes.
+                // If permgen space becomes a problem, we could make it so
+                // that only one copy of these classes is loaded, but
+                // we would need to modify ObjectHashCode.
                 byte[] classBytes;
                 try {
                     classBytes = instrument(name, false, teamPackageName);
@@ -134,16 +158,14 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                 ErrorReporter.report("Illegal class: " + name.substring(10) + "\nThis class cannot be referenced by player " + teamPackageName, false);
                 throw new InstrumentationException();
             } else {
-                try {
-                    return singletonLoader.loadClass(name, resolve);
-                } catch (InstrumentationException ie) {
-                    teamsWithErrors.add(teamPackageName);
-                    throw ie;
-                }
+                // Load class normally
+                finishedClass = super.loadClass(name, resolve);
             }
 
             if (resolve)
                 resolveClass(finishedClass);
+
+            loadedCache.put(name, finishedClass);
 
             return finishedClass;
 
@@ -155,8 +177,10 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
             ErrorReporter.report("Can't find instrumented class " + name + ", but no errors reported", true);
             throw new InstrumentationException();
         }
+
         Class<?> theClass = defineClass(null, classBytes, 0, classBytes.length);
         instrumentedClasses.put(name, classBytes);
+
         return theClass;
 
     }

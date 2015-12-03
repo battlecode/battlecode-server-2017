@@ -13,6 +13,9 @@ import java.io.PrintStream;
  * The battlecode instrumenter should (sneakily) replace any references to java.lang.System with references to
  * battlecode.lang.System.
  *
+ * Reloaded individually for every robot.
+ * TODO move
+ *
  * @author adamd
  */
 @SuppressWarnings("unused")

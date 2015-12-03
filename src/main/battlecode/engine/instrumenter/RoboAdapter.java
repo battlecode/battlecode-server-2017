@@ -13,7 +13,6 @@ import org.objectweb.asm.Opcodes;
 public class RoboAdapter extends ClassVisitor implements Opcodes {
     private String className;
     private final String teamPackageName;
-    private final boolean debugMethodsEnabled;
     private final boolean silenced;
 
     // We check contestants' code for disallowed packages.
@@ -26,13 +25,11 @@ public class RoboAdapter extends ClassVisitor implements Opcodes {
      *
      * @param cv                  the ClassVisitor that should be used to read the class
      * @param teamPackageName     the package name of the team for which this class is being instrumented
-     * @param debugMethodsEnabled whether debug methods are enabled for this class
      * @param silenced            whether System.out should be silenced for this class
      */
-    public RoboAdapter(final ClassVisitor cv, final String teamPackageName, final boolean debugMethodsEnabled, boolean silenced, boolean checkDisallowed) {
+    public RoboAdapter(final ClassVisitor cv, final String teamPackageName, boolean silenced, boolean checkDisallowed) {
         super(Opcodes.ASM5, cv);
         this.teamPackageName = teamPackageName;
-        this.debugMethodsEnabled = debugMethodsEnabled;
         this.silenced = silenced;
         this.checkDisallowed = checkDisallowed;
     }
@@ -89,7 +86,7 @@ public class RoboAdapter extends ClassVisitor implements Opcodes {
                 exceptions);
         // create a new RoboMethodAdapter, and let it loose on this method
         //return mv == null ? null : new RoboMethodAdapter(mv, className, name, desc, teamPackageName, debugMethodsEnabled, silenced, checkDisallowed);
-        return mv == null ? null : new RoboMethodTree(mv, className, access, name, desc, signature, exceptions, teamPackageName, debugMethodsEnabled, silenced, checkDisallowed);
+        return mv == null ? null : new RoboMethodTree(mv, className, access, name, desc, signature, exceptions, teamPackageName, silenced, checkDisallowed);
     }
 
     /**

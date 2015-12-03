@@ -20,7 +20,7 @@ public class InstrumentableFunctions {
 
     static private Random getRandom() {
         if (rnd == null)
-            rnd = new Random(RoboRandom.getMapSeed());
+            rnd = new RoboRandom();
         return rnd;
     }
 

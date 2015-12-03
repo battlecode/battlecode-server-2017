@@ -2,7 +2,6 @@ package battlecode.world;
 
 import battlecode.common.*;
 import battlecode.engine.instrumenter.RobotDeathException;
-import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.world.signal.*;
 
 import java.util.ArrayList;
@@ -12,28 +11,27 @@ import java.util.List;
 
 import static battlecode.common.GameActionExceptionType.*;
 
-/*
- TODO:
- - tweak player
- -specs & software page?
- - performance tips
- - figure out why it's not deterministic
-
- - optimize
- - non-constant java.util costs
- - player's navigation class, and specs about it
- - fix execute action hack w/ robotmonitor ??
- - fix playerfactory/spawnsignal hack??
- - better suicide() ??
- - pare down GW, GWviewer methods; add engine.getallsignals?
+/**
+ * The actual implementation of RobotController.
+ * Its methods *must* be called from a player thread.
+ *
+ * It is theoretically possible to have multiple for a single InternalRobot,
+ * but that may cause problems in practice, and anyway why would you want to?
  */
 public final class RobotControllerImpl implements RobotController {
-    private GameWorld gameWorld;
-    private InternalRobot robot;
+    /**
+     * The world the robot controlled by this controller inhabits.
+     */
+    private final GameWorld gameWorld;
 
-    public RobotControllerImpl(GameWorld gw, InternalRobot r) {
-        gameWorld = gw;
-        robot = r;
+    /**
+     * The robot this controller controls.
+     */
+    private final InternalRobot robot;
+
+    public RobotControllerImpl(GameWorld gameWorld, InternalRobot robot) {
+        this.gameWorld = gameWorld;
+        this.robot = robot;
     }
 
     // *********************************
@@ -53,15 +51,15 @@ public final class RobotControllerImpl implements RobotController {
     // ****** GLOBAL QUERY METHODS *****
     // *********************************
     public int getRoundLimit() {
-        return robot.myGameWorld.getGameMap().getRounds();
+        return gameWorld.getGameMap().getRounds();
     }
 
     public int getMapWidth() {
-        return robot.myGameWorld.getGameMap().getWidth();
+        return gameWorld.getGameMap().getWidth();
     }
 
     public int getMapHeight() {
-        return robot.myGameWorld.getGameMap().getHeight();
+        return gameWorld.getGameMap().getHeight();
     }
 
     public double getTeamOre() {
@@ -209,7 +207,8 @@ public final class RobotControllerImpl implements RobotController {
             if (o.equals(robot))
                 continue;
             if (useRadius
-                    && o.myLocation.distanceSquaredTo(center) > radiusSquared)
+                    && o.getLocation()
+                    .distanceSquaredTo(center) > radiusSquared)
                 continue;
             if (useTeam && o.getTeam() != team)
                 continue;
@@ -230,7 +229,7 @@ public final class RobotControllerImpl implements RobotController {
 
     public RobotInfo[] senseNearbyRobots(final int radiusSquared,
             final Team team) {
-        return senseNearbyRobots(robot.myLocation, radiusSquared, team);
+        return senseNearbyRobots(robot.getLocation(), radiusSquared, team);
     }
 
     // ***********************************
@@ -517,13 +516,6 @@ public final class RobotControllerImpl implements RobotController {
         robot.activateMovement(new BuildSignal(robot != null ? robot.getID() : 0, loc, type, robot.getTeam(), delay), delay, delay);
     }
 
-    // ***********************************
-    // ****** OTHER ACTION METHODS *******
-    // ***********************************
-    public void yield() {
-        RobotMonitor.endRunner();
-    }
-
     public void disintegrate() {
         throw new RobotDeathException();
     }
@@ -531,10 +523,9 @@ public final class RobotControllerImpl implements RobotController {
     public void resign() {
         for (InternalRobot obj : gameWorld.getAllGameObjects()) {
             if ((obj != null) && obj.getTeam() == robot.getTeam()) {
-                gameWorld.notifyDied(obj);
+                gameWorld.visitDeathSignal(new DeathSignal(obj.getID()));
             }
         }
-        gameWorld.removeDead();
     }
 
     // ***********************************
@@ -582,19 +573,7 @@ public final class RobotControllerImpl implements RobotController {
         gameWorld.visitSignal((new MatchObservationSignal(robot.getID(), observation)));
     }
 
-    public void breakpoint() {
-        gameWorld.notifyBreakpoint();
-    }
-
-    public int getBytecodeNum() {
-        return RobotMonitor.getBytecodeNum();
-    }
-
     public int getRoundNum() {
         return gameWorld.getCurrentRound();
-    }
-
-    public int getBytecodesLeft() {
-        return RobotMonitor.getBytecodesLeft();
     }
 }

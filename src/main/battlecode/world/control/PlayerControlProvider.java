@@ -1,16 +1,17 @@
 package battlecode.world.control;
 
-import battlecode.engine.ErrorReporter;
-import battlecode.engine.RobotRunnable;
+import battlecode.common.RobotController;
 import battlecode.engine.instrumenter.IndividualClassLoader;
-import battlecode.engine.instrumenter.InstrumentationException;
 import battlecode.engine.instrumenter.RobotMonitor;
+import battlecode.engine.instrumenter.SandboxedRobotPlayer;
 import battlecode.engine.instrumenter.lang.RoboRandom;
-import battlecode.engine.scheduler.ScheduledRunnable;
-import battlecode.engine.scheduler.Scheduler;
 import battlecode.server.Config;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
+import battlecode.world.RobotControllerImpl;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Controls robots with instrumented player code.
@@ -22,9 +23,15 @@ import battlecode.world.InternalRobot;
 public class PlayerControlProvider implements RobotControlProvider {
 
     /**
-     * The gameWorld we're acting on.
+     * The sandboxed robot players we're using to control robots;
+     * maps ids to sandboxes.
      */
-    private GameWorld world;
+    private Map<Integer, SandboxedRobotPlayer> sandboxes;
+
+    /**
+     * The GameWorld we're providing for.
+     */
+    private GameWorld gameWorld;
 
     /**
      * Create a new PlayerControlProvider.
@@ -32,59 +39,87 @@ public class PlayerControlProvider implements RobotControlProvider {
     public PlayerControlProvider() {}
 
     @Override
-    public void matchStarted(GameWorld world) {
-        this.world = world;
+    public void matchStarted(GameWorld gameWorld) {
+        this.sandboxes = new LinkedHashMap<>(); // maintain order!
+        this.gameWorld = gameWorld;
 
         IndividualClassLoader.reset();
-        Scheduler.reset();
-        RobotMonitor.reset();
-        RobotMonitor.setGameWorld(world);
-        RoboRandom.setMapSeed(world.getMapSeed());
-        Scheduler.start();
+    }
+
+     @Override
+    public void matchEnded() {
+         // TODO clean up threads?
     }
 
     @Override
     public void robotSpawned(InternalRobot robot) {
-        final boolean debugMethodsEnabled = Config.getGlobalConfig().getBoolean("bc.engine.debug-methods");
+        final Config config = Config.getGlobalConfig();
 
-        // now, we instantiate and instrument the player's class
-        Class playerClass;
-        try {
-            String teamName = world.getTeamName(robot.getTeam());
+        final SandboxedRobotPlayer player;
 
-            // The classloaders ignore silenced now - RobotMonitor takes care of it
-            ClassLoader icl = new IndividualClassLoader(teamName, debugMethodsEnabled, false, true);
-            playerClass = icl.loadClass(teamName + ".RobotPlayer");
-            //~ System.out.println("PF done loading");
-        } catch (InstrumentationException ie) {
-            // if we get an InstrumentationException, then the error should have been reported, so we just kill the robot
-            System.out.println("[Engine] Error during instrumentation of " + robot + ".\n[Engine] Robot will self-destruct in 3...2...1...");
-            robot.suicide();
-            return;
-        } catch (Exception e) {
-            ErrorReporter.report(e);
-            robot.suicide();
-            return;
+        switch (robot.getTeam()) {
+            case A:
+                player = new SandboxedRobotPlayer(config.get("bc.game.team-a"),
+                        "RobotPlayer",
+                        robot.getController(),
+                        gameWorld.getMapSeed());
+                break;
+            case B:
+                player = new SandboxedRobotPlayer(config.get("bc.game.team-a"),
+                        "RobotPlayer",
+                        robot.getController(),
+                        gameWorld.getMapSeed());
+                break;
+            case ZOMBIE:
+                player = new SandboxedRobotPlayer(config.get("bc.game.team-a"),
+                        "RobotPlayer",
+                        robot.getController(),
+                        gameWorld.getMapSeed());
+                break;
+            default:
+                throw new RuntimeException("Don't know how to create a neutral player??");
         }
 
-        // finally, create the player's thread, and let it loose
-        new ScheduledRunnable(new RobotRunnable(playerClass, robot.getRobotController()), robot.getID());
+        this.sandboxes.put(robot.getID(), player);
     }
 
     @Override
     public void robotKilled(InternalRobot robot) {
-        RobotMonitor.killRobot(robot.getID());
+        // TODO check robot isn't running?
+
+        assert this.sandboxes.containsKey(robot.getID());
+
+        this.sandboxes.get(robot.getID()).terminate();
     }
 
     @Override
-    public void runRound() {
-        Scheduler.startNextThread();
-        Scheduler.endTurn();
+    public void roundStarted() {}
+
+    @Override
+    public void roundEnded() {}
+
+    @Override
+    public void runRobot(InternalRobot robot) {
+        assert this.sandboxes.containsKey(robot.getID());
+
+        final SandboxedRobotPlayer player = this.sandboxes.get(robot.getID());
+
+        player.setBytecodeLimit(robot.getBytecodeLimit());
+
+        player.step();
     }
 
     @Override
-    public void matchEnded() {
-        // Clean up threads
-        Scheduler.passToNextThread();
+    public int getBytecodesUsed(InternalRobot robot) {
+        assert this.sandboxes.containsKey(robot.getID());
+
+        return this.sandboxes.get(robot.getID()).getBytecodesUsed();
+    }
+
+    @Override
+    public boolean getTerminated(InternalRobot robot) {
+        assert this.sandboxes.containsKey(robot.getID());
+
+        return this.sandboxes.get(robot.getID()).getTerminated();
     }
 }

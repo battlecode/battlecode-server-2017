@@ -9,7 +9,6 @@ import battlecode.world.InternalRobot;
  * @author james
  */
 public class NullControlProvider implements RobotControlProvider {
-
     @Override
     public void matchStarted(GameWorld world) {}
 
@@ -23,5 +22,21 @@ public class NullControlProvider implements RobotControlProvider {
     public void robotKilled(InternalRobot robot) {}
 
     @Override
-    public void runRound() {}
+    public void roundStarted() {}
+
+    @Override
+    public void runRobot(InternalRobot robot) {}
+
+    @Override
+    public void roundEnded() {}
+
+    @Override
+    public int getBytecodesUsed(InternalRobot robot) {
+        return 0;
+    }
+
+    @Override
+    public boolean getTerminated(InternalRobot robot) {
+        return false;
+    }
 }

@@ -14,7 +14,6 @@ public abstract class InstrumentingClassLoader extends ClassLoader {
 
     // silenced is not used any more
     protected final boolean silenced;
-    protected final boolean debugMethodsEnabled;
 
     private static boolean lazy;
     private static boolean fastHash;
@@ -61,20 +60,12 @@ public abstract class InstrumentingClassLoader extends ClassLoader {
         }
     }
 
-    public InstrumentingClassLoader(boolean silenced, boolean debugMethodsEnabled) {
+    public InstrumentingClassLoader(boolean silenced) {
         super();
         this.silenced = silenced;
-        this.debugMethodsEnabled = debugMethodsEnabled;
-    }
-
-    public InstrumentingClassLoader(boolean silenced, boolean debugMethodsEnabled, ClassLoader cl) {
-        super(cl);
-        this.silenced = silenced;
-        this.debugMethodsEnabled = debugMethodsEnabled;
     }
 
     public byte[] instrument(String className, boolean checkDisallowed, String teamPackageName) throws InstrumentationException {
-        //System.out.println("instrumenting "+className+", checkDisallowed "+checkDisallowed);
         ClassReader cr;
         try {
             if (className.startsWith("instrumented/"))
@@ -86,11 +77,8 @@ public abstract class InstrumentingClassLoader extends ClassLoader {
             throw new InstrumentationException();
         }
         ClassWriter cw = new ClassWriter(COMPUTE_MAXS); // passing true sets maxLocals and maxStack, so we don't have to
-        ClassVisitor cv = new RoboAdapter(cw, teamPackageName, debugMethodsEnabled, silenced, checkDisallowed);
+        ClassVisitor cv = new RoboAdapter(cw, teamPackageName, silenced, checkDisallowed);
         cr.accept(cv, 0);        //passing false lets debug info be included in the transformation, so players get line numbers in stack traces
         return cw.toByteArray();
     }
-
-    public abstract Class<?> saveAndDefineClass(String name, byte[] classBytes);
-
 }

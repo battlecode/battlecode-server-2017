@@ -32,6 +32,17 @@ public interface RobotControlProvider {
     void matchEnded();
 
     /**
+     * Signals to the provider that it should prepare to
+     * process the next round.
+     */
+    void roundStarted();
+
+    /**
+     * Signals to the provider that no more robots will be run this round.
+     */
+    void roundEnded();
+
+    /**
      * Signals to the provider that a robot has spawned, and
      * gives it a handle to that robot.
      *
@@ -41,18 +52,37 @@ public interface RobotControlProvider {
 
     /**
      * Signals to the provider that the robot with the
-     * given info has been killed.
+     * given info has been killed, and it should stop processing it.
+     *
+     * SHOULD NOT MODIFY THE ROBOT OR WORLD.
      *
      * @param robot the freshly executed robot
      */
     void robotKilled(InternalRobot robot);
 
     /**
-     * Tells the provider to process the current round.
+     * Instructs the provider to process a round for the given robot.
      *
-     * THE IMPLEMENTER MUST CALL processBeginningOfTurn() AND
-     * processEndOfTurn() ON ALL ROBOTS IT CONTROLS. This is
-     * awkward, and will be fixed after another round of refactoring.
+     * @param robot the robot to process
      */
-    void runRound();
+    void runRobot(InternalRobot robot);
+
+    /**
+     * Get the bytecodes used in the most recent round by the
+     * given robot.
+     *
+     * @param robot the robot to check
+     * @return the bytecodes used by the robot
+     */
+    int getBytecodesUsed(InternalRobot robot);
+
+    /**
+     * Determine whether the computation thread for the given
+     * robot has terminated
+     *
+     * @param robot the robot to check
+     * @return whether the robot is terminated or not
+     */
+    boolean getTerminated(InternalRobot robot);
+
 }

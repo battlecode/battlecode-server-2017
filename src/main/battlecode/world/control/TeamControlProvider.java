@@ -13,7 +13,6 @@ import java.util.*;
  * @author james
  */
 public final class TeamControlProvider implements RobotControlProvider {
-
     /**
      * The map of teams to providers.
      */
@@ -80,9 +79,41 @@ public final class TeamControlProvider implements RobotControlProvider {
     }
 
     @Override
-    public void runRound() {
+    public void roundStarted() {
         for (RobotControlProvider provider : orderedProviders) {
-            provider.runRound();
+            provider.roundStarted();
         }
+    }
+
+    @Override
+    public void roundEnded() {
+        for (RobotControlProvider provider : orderedProviders) {
+            provider.roundEnded();
+        }
+    }
+
+    @Override
+    public void runRobot(InternalRobot robot) {
+        Team team = robot.getTeam();
+        assert teamProviderMap.containsKey(team);
+
+        teamProviderMap.get(team).runRobot(robot);
+
+    }
+
+    @Override
+    public int getBytecodesUsed(InternalRobot robot) {
+        Team team = robot.getTeam();
+        assert teamProviderMap.containsKey(team);
+
+        return teamProviderMap.get(team).getBytecodesUsed(robot);
+    }
+
+    @Override
+    public boolean getTerminated(InternalRobot robot) {
+        Team team = robot.getTeam();
+        assert teamProviderMap.containsKey(team);
+
+        return teamProviderMap.get(team).getTerminated(robot);
     }
 }

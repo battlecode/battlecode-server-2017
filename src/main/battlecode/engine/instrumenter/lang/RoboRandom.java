@@ -23,7 +23,7 @@ public class RoboRandom extends Random {
     }
 
     /**
-     * Sets the seed used for the default Random cosntructor.  Should be called at the beginning of each game.
+     * Sets the seed used for the default Random constructor.  Should be called at the beginning of each game.
      */
     public static void setMapSeed(long seed) {
         mapSeed = seed;

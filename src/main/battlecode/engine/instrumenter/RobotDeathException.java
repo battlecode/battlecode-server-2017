@@ -13,7 +13,6 @@ public class RobotDeathException extends VirtualMachineError {
 
     public RobotDeathException() {
         super();
-        RobotMonitor.currentRobotData.thrownRobotDeathException = true;
     }
 
 }
