@@ -46,16 +46,6 @@ public class SandboxedRobotPlayer {
     private final IndividualClassLoader individualLoader;
 
     /**
-     * The loaded, instrumented RobotPlayer.
-     */
-    private final Class<?> robotPlayer;
-
-    /**
-     * The loaded, uninstrumented-but-individual RobotMonitor for this player.
-     */
-    private final Class<?> monitor;
-
-    /**
      * The main thread the player is running on.
      */
     private final Thread mainThread;
@@ -81,6 +71,11 @@ public class SandboxedRobotPlayer {
     private final Method setSystemOutMethod;
 
     /**
+     * The object used to trade of control between threads.
+     */
+    private final Object notifier;
+
+    /**
      * Create a new sandboxed robot player.
      *
      * @param teamName        the name of the team to create a player for
@@ -94,13 +89,15 @@ public class SandboxedRobotPlayer {
         this.robotController = robotController;
         this.seed = seed;
         this.terminated = false;
+        this.notifier = new Object();
 
         // Create classloader sandbox
         individualLoader = new IndividualClassLoader(teamName, false);
 
         // Load player in sandbox
+        Class<?> robotPlayer;
         try {
-            robotPlayer = individualLoader.loadClass(teamName + "." + playerClassName);
+            robotPlayer = individualLoader.loadClass(teamName + "." + playerClassName, true);
         } catch (Exception e) {
             throw new InstrumentationException("Couldn't sandbox player class", e);
         }
@@ -128,7 +125,9 @@ public class SandboxedRobotPlayer {
         // Used to set the random seed for the player
         final Method setSeedMethod;
         try {
-            monitor = individualLoader.loadClass(RobotMonitor.class.getName());
+            // The loaded, uninstrumented-but-individual RobotMonitor for this player.
+            Class<?> monitor = individualLoader.loadClass(RobotMonitor.class.getName());
+
             killMethod = monitor.getMethod("killRobot");
             setBytecodeLimitMethod = monitor.getMethod("setBytecodeLimit", int.class);
             setSystemOutMethod = monitor.getMethod("setSystemOut", PrintStream.class);
@@ -137,22 +136,26 @@ public class SandboxedRobotPlayer {
             initMethod = monitor.getMethod("init", Pauser.class, Killer.class);
 
             setSeedMethod = individualLoader.loadClass(RoboRandom.class.getName())
-                    .getMethod("setSeed", int.class);
+                    .getMethod("setMapSeed", long.class);
+
         } catch (Exception e) {
             throw new InstrumentationException("Couldn't load RobotMonitor", e);
         }
 
         // Used to pause the RobotPlayer main thread.
         final Pauser pauser = () -> {
-            // Note: "this" refers to the enclosing SandboxedRobotPlayer
-            // Unpause the main thread, which is waiting on the player thread
-            this.notifyAll();
             try {
-                // Wait for the main thread to restart us
-                this.wait();
-            } catch (InterruptedException e) {
-                System.err.println("RobotPlayer interrupted while waiting: "+e.getMessage());
+                synchronized (notifier) {
+                    // Unpause the main thread, which is waiting on the player thread
+                    notifier.notifyAll();
 
+
+                    // Wait for the main thread to restart us
+                    notifier.wait();
+                }
+            } catch (InterruptedException e) {
+                ErrorReporter.report("RobotPlayer thread interrupted while paused");
+                throw new RobotDeathException();
                 // What to do now?
             }
         };
@@ -167,7 +170,7 @@ public class SandboxedRobotPlayer {
             try {
                 // Init RobotMonitor and RoboRandom
                 initMethod.invoke(null, pauser, killer);
-                setSeedMethod.invoke(null, seed);
+                setSeedMethod.invoke(null, this.seed);
                 // Pause immediately
                 pauseMethod.invoke(null);
                 // Run the robot!
@@ -178,15 +181,29 @@ public class SandboxedRobotPlayer {
                 // Exception, and so won't be caught here.
                 ErrorReporter.report(e, false);
             } finally {
+
                 // Ensure that we know we're terminated.
                 this.terminated = true;
+
                 // Unpause the main thread, which is waiting on the player thread.
-                this.notifyAll();
+                synchronized (notifier) {
+                    notifier.notifyAll();
+                }
             }
         });
 
-        // Doesn't do anything besides initialize the sandbox, since thread pauses immediately
-        mainThread.start();
+
+        // Wait for thread to tell us it's ready
+        try {
+            synchronized (notifier) {
+                // Doesn't do anything besides initialize the sandbox, since thread pauses immediately
+                mainThread.start();
+
+                notifier.wait();
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Unexpected interruption initializing sandbox", e);
+        }
     }
 
     /**
@@ -218,11 +235,15 @@ public class SandboxedRobotPlayer {
             throw new InstrumentationException("Error invoking RobotMonitor methods", e);
         }
 
-        // Unpause the robot's thread
-        this.notifyAll();
-        // Pause this thread until the robot ends turn or dies
+
         try {
-            this.wait();
+            synchronized (notifier) {
+                // Unpause the robot's thread
+                notifier.notifyAll();
+
+                // Pause this thread until the robot ends turn or dies
+                notifier.wait();
+            }
         } catch (InterruptedException e) {
             throw new RuntimeException("Unexpected interruption", e);
         }
