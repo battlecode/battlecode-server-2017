@@ -3,7 +3,6 @@ package battlecode.engine.instrumenter;
 import battlecode.common.RobotController;
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.instrumenter.lang.RoboPrintStream;
-import battlecode.engine.instrumenter.lang.RoboRandom;
 import battlecode.engine.instrumenter.lang.SilencedPrintStream;
 import battlecode.server.Config;
 
@@ -122,8 +121,6 @@ public class SandboxedRobotPlayer {
         final Method initMethod;
         // Used to pause the player thread after loading
         final Method pauseMethod;
-        // Used to set the random seed for the player
-        final Method setSeedMethod;
         try {
             // The loaded, uninstrumented-but-individual RobotMonitor for this player.
             Class<?> monitor = individualLoader.loadClass(RobotMonitor.class.getName());
@@ -133,10 +130,8 @@ public class SandboxedRobotPlayer {
             setSystemOutMethod = monitor.getMethod("setSystemOut", PrintStream.class);
             getBytecodeNumMethod = monitor.getMethod("getBytecodeNum");
             pauseMethod = monitor.getMethod("pause");
-            initMethod = monitor.getMethod("init", Pauser.class, Killer.class);
+            initMethod = monitor.getMethod("init", Pauser.class, Killer.class, int.class);
 
-            setSeedMethod = individualLoader.loadClass(RoboRandom.class.getName())
-                    .getMethod("setMapSeed", long.class);
 
         } catch (Exception e) {
             throw new InstrumentationException("Couldn't load RobotMonitor", e);
@@ -168,9 +163,8 @@ public class SandboxedRobotPlayer {
 
         mainThread = new Thread(() -> {
             try {
-                // Init RobotMonitor and RoboRandom
-                initMethod.invoke(null, pauser, killer);
-                setSeedMethod.invoke(null, this.seed);
+                // Init RobotMonitor
+                initMethod.invoke(null, pauser, killer, this.seed);
                 // Pause immediately
                 pauseMethod.invoke(null);
                 // Run the robot!

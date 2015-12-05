@@ -15,8 +15,8 @@ import java.util.Set;
  * <p/>
  * Whenever a class reference is encountered while instrumenting a class, that reference should be registered with
  * ClassReferenceUtil (e.g., using <code>classReference(...)</code>).  This does two things.  First, the class reference
- * may be replaced with a reference to a different class (e.g., replacing Random with RoboRandom).  Second,
- * ClassReferenceUtil remembers new references.  New class references can be retrieved using flushNewlyReferencedClasses.
+ * may be replaced with a reference to a different class. Second, ClassReferenceUtil remembers new references.
+ * New class references can be retrieved using flushNewlyReferencedClasses.
  *
  * @author adamd
  */

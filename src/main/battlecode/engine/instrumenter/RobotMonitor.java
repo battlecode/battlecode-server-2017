@@ -16,6 +16,8 @@ import java.io.PrintStream;
 public final class RobotMonitor {
     private static int BYTECODE_LIMIT;
 
+    private static int randomSeed;
+
     private static int bytecodesLeft;
     private static boolean shouldDie;
 
@@ -34,9 +36,11 @@ public final class RobotMonitor {
      */
     @SuppressWarnings("unused")
     public static void init(SandboxedRobotPlayer.Pauser thePauser,
-                            SandboxedRobotPlayer.Killer theKiller) {
+                            SandboxedRobotPlayer.Killer theKiller,
+                            int seed) {
         shouldDie = false;
         bytecodesLeft = 0;
+        randomSeed = seed;
         pauser = thePauser;
         killer = theKiller;
     }
@@ -107,6 +111,17 @@ public final class RobotMonitor {
         while (bytecodesLeft <= 0) {
             pause();
         }
+    }
+
+    /**
+     * Used to construct new Random instances.
+     *
+     * THIS METHOD IS CALLED BY THE INSTRUMENTER.
+     *
+     * @return the random seed for this robot
+     */
+    public static int getRandomSeed() {
+        return randomSeed;
     }
 
     /**

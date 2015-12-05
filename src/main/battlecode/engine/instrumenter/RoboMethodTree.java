@@ -247,7 +247,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 
         if (n.owner.equals("java/util/Random") && n.name.equals("<init>") &&
                 n.desc.equals("()V")) {
-            instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/lang/RoboRandom", "getMapSeed", "()J", false));
+            instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "getRandomSeed", "()J", false));
             n.owner = "instrumented/java/util/Random";
             n.desc = "(J)V";
             return;

@@ -1,5 +1,7 @@
 package battlecode.engine.instrumenter.lang;
 
+import battlecode.engine.instrumenter.RobotMonitor;
+
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -20,7 +22,7 @@ public class InstrumentableFunctions {
 
     static private Random getRandom() {
         if (rnd == null)
-            rnd = new RoboRandom();
+            rnd = new Random(RobotMonitor.getRandomSeed());
         return rnd;
     }
 

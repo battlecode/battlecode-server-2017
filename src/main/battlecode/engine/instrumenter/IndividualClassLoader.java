@@ -28,7 +28,6 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
             "battlecode.engine.instrumenter.lang.InstrumentableFunctions",
             "battlecode.engine.instrumenter.lang.System",
             "battlecode.engine.instrumenter.lang.System$1",
-            "battlecode.engine.instrumenter.lang.RoboRandom",
             "battlecode.engine.instrumenter.RobotMonitor",
             "battlecode.common.Clock"
     )));
