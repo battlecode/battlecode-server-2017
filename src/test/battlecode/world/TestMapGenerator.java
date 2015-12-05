@@ -96,9 +96,9 @@ public class TestMapGenerator {
     /** Number of rounds for the game. */
     private Integer rounds;
     /** The rubble on the map. Defaults to no rubble. x is the first index. */
-    private int[][] rubble;
+    private double[][] rubble;
     /** The parts on the map. Defaults to no parts. x is the first index. */
-    private int[][] parts;
+    private double[][] parts;
     /** The map's zombie spawn schedule. Defaults to no zombies. */
     private ZombieSpawnSchedule zSchedule;
     /** All the robots on the map. Defaults to none. */
@@ -116,8 +116,8 @@ public class TestMapGenerator {
         this.height = height;
         this.seed = GameConstants.GAME_DEFAULT_SEED;
         this.rounds = rounds;
-        this.rubble = new int[width][height];
-        this.parts = new int[width][height];
+        this.rubble = new double[width][height];
+        this.parts = new double[width][height];
         this.zSchedule = new ZombieSpawnSchedule();
         this.robots = new HashSet<>();
     }
@@ -145,8 +145,8 @@ public class TestMapGenerator {
 
         this.seed = GameConstants.GAME_DEFAULT_SEED;
         this.rounds = rounds;
-        this.parts = new int[width][height];
-        this.rubble = new int[width][height];
+        this.parts = new double[width][height];
+        this.rubble = new double[width][height];
         for (int i = 0; i < height; ++i) {
             StringTokenizer st = new StringTokenizer(map[i]);
             for (int j = 0; j < width; ++j) {
@@ -347,8 +347,8 @@ public class TestMapGenerator {
         for (int i = 0; i < height; ++i) {
             for (int j = 0; j < width; ++j) {
                 out.printf("%s", characters[j][i]);
-                if (parts[j][i] > 0) out.printf("%d", parts[j][i]);
-                else out.printf("%d", rubble[j][i]);
+                if (parts[j][i] > 0) out.printf("%.2f", parts[j][i]);
+                else out.printf("%.2f", rubble[j][i]);
 
                 if (j == width - 1) out.printf("\n");
                 else out.printf(" ");

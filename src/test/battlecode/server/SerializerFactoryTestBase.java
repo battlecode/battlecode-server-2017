@@ -40,16 +40,16 @@ public abstract class SerializerFactoryTestBase {
         zSchedule.add(10, RobotType.FASTZOMBIE, 4);
     }
 
-    static final int[][] parts = new int[][] {
-            new int[] {10, 11, 12},
-            new int[] {13, 14, 15},
-            new int[] {16, 17, 18},
+    static final double[][] parts = new double[][] {
+            new double[] {10, 11, 12},
+            new double[] {13, 14, 15},
+            new double[] {16, 17, 18},
     };
 
-    static final int[][] rubble = new int[][] {
-            new int[] {0, 1, 2},
-            new int[] {3, 4, 5},
-            new int[] {6, 7, 8},
+    static final double[][] rubble = new double[][] {
+            new double[] {0, 1, 2},
+            new double[] {3, 4, 5},
+            new double[] {6, 7, 8},
     };
 
     static final Set<GameMap.InitialRobotInfo> initialRobots = new HashSet<>();
