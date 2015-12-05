@@ -26,12 +26,12 @@ public class GameMap implements Serializable {
     /**
      * The initial rubble on the map.
      */
-    private final int[][] initialRubble;
+    private final double[][] initialRubble;
 
     /**
      * The initial parts on the map.
      */
-    private final int[][] initialParts;
+    private final double[][] initialParts;
 
     /**
      * The coordinates of the origin
@@ -80,8 +80,8 @@ public class GameMap implements Serializable {
     public GameMap(GameMap gm) {
         this.width = gm.width;
         this.height = gm.height;
-        this.initialRubble = new int[this.width][this.height];
-        this.initialParts = new int[this.width][this.height];
+        this.initialRubble = new double[this.width][this.height];
+        this.initialParts = new double[this.width][this.height];
         for (int i = 0; i < this.width; i++) {
             System.arraycopy(gm.initialRubble[i], 0, this.initialRubble[i], 0, this.height);
             System.arraycopy(gm.initialParts[i], 0, this.initialParts[i], 0, this.height);
@@ -114,8 +114,8 @@ public class GameMap implements Serializable {
      * @param mapName name of the map.
      */
     public GameMap(Map<MapProperties, Integer> mapProperties,
-                   int[][] initialRubble,
-                   int[][] initialParts,
+                   double[][] initialRubble,
+                   double[][] initialParts,
                    ZombieSpawnSchedule zSchedule,
                    Set<InitialRobotInfo> initialRobots,
                    String mapName) {
@@ -244,7 +244,7 @@ public class GameMap implements Serializable {
      * @param location the MapLocation to get rubble for.
      * @return the amount of rubble in the given location, or 0 if off map
      */
-    public int initialRubbleAtLocation(MapLocation location) {
+    public double initialRubbleAtLocation(MapLocation location) {
         if (!onTheMap(location))
             return 0;
 
@@ -256,7 +256,7 @@ public class GameMap implements Serializable {
      *
      * @return the map's rubble in a 2D array
      */
-    public int[][] getInitialRubble() {
+    public double[][] getInitialRubble() {
         return initialRubble;
     }
     
@@ -267,9 +267,9 @@ public class GameMap implements Serializable {
      * @param location the MapLocation to test
      * @return the amount of parts in the given location, or 0 if off the map
      */
-    public int initialPartsAtLocation(MapLocation location) {
+    public double initialPartsAtLocation(MapLocation location) {
         if (!onTheMap(location))
-            return 0;
+            return 0.0;
 
         return initialParts[location.x - origin.x][location.y - origin.y];
     }
@@ -279,7 +279,7 @@ public class GameMap implements Serializable {
      *
      * @return the map's ore in a 2D array
      */
-    public int[][] getInitialParts() {
+    public double[][] getInitialParts() {
         return initialParts;
     }
 
@@ -346,10 +346,10 @@ public class GameMap implements Serializable {
         private final boolean[][] seen;
 
         /** Represents the amount of rubble on location when the location was last in sensor range. */
-        private final int[][] rubbleOnSquare;
+        private final double[][] rubbleOnSquare;
         
         /** Represents the amount of parts on location when the location was last in sensor range. */
-        private final int[][] partsOnSquare;
+        private final double[][] partsOnSquare;
 
         /** It's important to keep track of OFF_MAP squares so we have this buffer around the map. */
         private final int OFFSET = 50;
@@ -358,8 +358,8 @@ public class GameMap implements Serializable {
             this.map = map;
             this.currentCount = new int[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
             this.seen = new boolean[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
-            this.rubbleOnSquare = new int[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
-            this.partsOnSquare = new int[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
+            this.rubbleOnSquare = new double[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
+            this.partsOnSquare = new double[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
         }
 
         // x and y are locations relative to the origin
@@ -379,7 +379,7 @@ public class GameMap implements Serializable {
             }
         }
 
-        public void rememberLocation(MapLocation loc, int radiusSquared, Map<MapLocation, Integer> partsMap,  Map<MapLocation, Integer> rubbleMap) {
+        public void rememberLocation(MapLocation loc, int radiusSquared, Map<MapLocation, Double> partsMap,  Map<MapLocation, Double> rubbleMap) {
             MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
             for (MapLocation target : locs) {
@@ -399,7 +399,7 @@ public class GameMap implements Serializable {
         }
 
         /** When a location gets rubble cleared, we'll update map memory if it's currently in sight. */
-        public void updateLocation(MapLocation loc, int rubbleNew) {
+        public void updateLocation(MapLocation loc, double rubbleNew) {
             if (canSense(loc)) {
                 int x = loc.x - map.origin.x;
                 int y = loc.y - map.origin.y;
@@ -431,7 +431,7 @@ public class GameMap implements Serializable {
             }
         }
 
-        public int recallRubble(MapLocation loc) {
+        public double recallRubble(MapLocation loc) {
             int X = loc.x - map.origin.x;
             int Y = loc.y - map.origin.y;
 
@@ -442,7 +442,7 @@ public class GameMap implements Serializable {
             }
         }
         
-        public int recallParts(MapLocation loc) {
+        public double recallParts(MapLocation loc) {
             int X = loc.x - map.origin.x;
             int Y = loc.y - map.origin.y;
 

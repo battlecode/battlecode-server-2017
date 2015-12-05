@@ -10,7 +10,6 @@ import battlecode.world.GameMap.MapProperties;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.swing.text.html.Option;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.FileInputStream;
@@ -97,14 +96,14 @@ public class XMLMapHandler extends DefaultHandler {
          *
          * @param value the new value for this cell.
          */
-        void setValue(int value);
+        void setValue(double value);
 
         /**
          * Returns the integer value associated with this cell.
          *
          * @return the integer value associated with this cell.
          */
-        int getValue();
+        double getValue();
 
         /**
          * Returns the TerrainType associated with this cell.
@@ -173,12 +172,13 @@ public class XMLMapHandler extends DefaultHandler {
         /**
          * Stores the terrain type for this map cell.
          */
+
         private TerrainType tile;
         /**
          * Stores either the number of parts or the amount of rubble,
          * depending on the terrain type.
          */
-        private int value;
+        private double value;
 
         /**
          * Creates a new TerrainData based on a specific terrain.
@@ -195,7 +195,7 @@ public class XMLMapHandler extends DefaultHandler {
          * @param value the new value for this cell.
          */
         @Override
-        public void setValue(int value) {
+        public void setValue(double value) {
             this.value = value;
         }
 
@@ -205,7 +205,7 @@ public class XMLMapHandler extends DefaultHandler {
          * @return the value for this cell.
          */
         @Override
-        public int getValue() {
+        public double getValue() {
             return this.value;
         }
 
@@ -295,7 +295,7 @@ public class XMLMapHandler extends DefaultHandler {
          *
          * @param value ignored.
          */
-        public void setValue(int value) {
+        public void setValue(double value) {
         }
 
         /**
@@ -303,7 +303,7 @@ public class XMLMapHandler extends DefaultHandler {
          *
          * @return 0.
          */
-        public int getValue() {
+        public double getValue() {
             return 0;
         }
 
@@ -618,8 +618,8 @@ public class XMLMapHandler extends DefaultHandler {
                 if (dataSoFar.substring(letterIdx).trim().equals("")) {
                     map[currentCol][currentRow].setValue(0);
                 } else {
-                    map[currentCol][currentRow].setValue(Integer.parseInt
-                            (dataSoFar.substring(letterIdx)));
+                    map[currentCol][currentRow].setValue(Double.parseDouble(
+                            dataSoFar.substring(letterIdx)));
                 }
 
                 currentCol++;
@@ -689,11 +689,11 @@ public class XMLMapHandler extends DefaultHandler {
             return resultMap;
         }
 
-        final int[][] rubbleData = new int[map.length][];
-        final int[][] partsData = new int[map.length][];
+        final double[][] rubbleData = new double[map.length][];
+        final double[][] partsData = new double[map.length][];
         for (int i = 0; i < map.length; i++) {
-            rubbleData[i] = new int[map[i].length];
-            partsData[i] = new int[map[i].length];
+            rubbleData[i] = new double[map[i].length];
+            partsData[i] = new double[map[i].length];
             for (int j = 0; j < map[i].length; j++) {
                 //If a standard tile, use float data as rubble. If a parts
                 // tile, use as parts

@@ -58,10 +58,10 @@ public interface GameConstants {
     // *********************************
 
     /** The amount that each team starts with */
-    int PARTS_INITIAL_AMOUNT = 1000;
+    int PARTS_INITIAL_AMOUNT = 200;
     
     /** The part income per turn per archon */
-    int ARCHON_PART_INCOME = 10;
+    int ARCHON_PART_INCOME = 1;
 
     // *********************************
     // ****** RUBBLE *******************
@@ -73,57 +73,6 @@ public interface GameConstants {
     // *********************************
     // ****** UNIT PROPERTIES **********
     // *********************************
-
-    /** The attack radius of a buffed HQ (2 towers). */
-    int HQ_BUFFED_ATTACK_RADIUS_SQUARED = 35;
-
-    /** The fraction of damage taken per attack for a buffed HQ (1 tower). */
-    double HQ_BUFFED_DAMAGE_RATIO_LEVEL_1 = 0.8;
-
-    /**
-     * The fraction of damage taken per attack for a 4-tower buffed HQ (4
-     * towers).
-     */
-    double HQ_BUFFED_DAMAGE_RATIO_LEVEL_2 = 0.5;
-
-    /**
-     * The fraction of damage taken per attack for a 6-tower buffed HQ (6
-     * towers).
-     */
-    double HQ_BUFFED_DAMAGE_RATIO_LEVEL_3 = 0.3;
-
-    /** The damage multiplier for a buffed HQ (3 towers). */
-    double HQ_BUFFED_DAMAGE_MULTIPLIER_LEVEL_1 = 1.5;
-
-    /** The damage multiplier for a buffed HQ (6 towers). */
-    double HQ_BUFFED_DAMAGE_MULTIPLIER_LEVEL_2 = 10.0;
-
-    /** The attack delay of a buffed HQ (5 towers). */
-    int HQ_BUFFED_ATTACK_DELAY = 1;
-
-    /** The fraction of damage done by splash on a buffed HQ (5 towers). */
-    double HQ_BUFFED_SPLASH_RATE = 0.5;
-
-    /** Splash radius of a buffed HQ (5 towers). */
-    int HQ_BUFFED_SPLASH_RADIUS_SQUARED = 2;
-
-    /** Bash radius of a basher. */
-    int BASH_RADIUS_SQUARED = 2;
-
-    /** Missile explosion splash radius. */
-    int MISSILE_RADIUS_SQUARED = 2;
-
-    /** The rate at which a launcher spawns missiles. */
-    int MISSILE_SPAWN_FREQUENCY = 8;
-
-    /** Maximum damage a missile can take. */
-    double MISSILE_MAXIMUM_DAMAGE = 1.0;
-
-    /** The maximum number of missiles a launcher can have at a time. */
-    int MISSILE_MAX_COUNT = 5;
-
-    /** After this many turns, a missile automatically detonates. */
-    int MISSILE_LIFESPAN = 5;
    
     /** Guard's attack is scaled by this when attacking a Zombie opponent. */
     double GUARD_ZOMBIE_MULTIPLIER = 1.5;
@@ -131,64 +80,11 @@ public interface GameConstants {
     /** Damage a robot receives from a Viper's infection per turn */
     double VIPER_INFECTION_DAMAGE = 2;
     
-    /**
-     * The factor that the delays are multiplied by when a DRONE travels on a
-     * void.
-     */
-    double DRONE_VOID_DELAY_MULTIPLIER = 2.0;
+    /** Minimum attack range of a Turret */
+    int TURRET_MINIMUM_RANGE = 5;
 
     /** The factor that delays are multiplied by when a unit moves diagonally. */
     double DIAGONAL_DELAY_MULTIPLIER = 1.4;
-
-    // *********************************
-    // ****** COMMANDER ***** **********
-    // *********************************
-
-    /** The range inside which commanders gain xp for destroyed enemy units. **/
-    int XP_RANGE = 24;
-
-    /** The hp that a commander regenerates per turn. **/
-    double REGEN_RATE = 1.0;
-
-    /** The xp required to activate the 'flash' skill. **/
-    int XP_REQUIRED_FLASH = 0;
-
-    /** The xp required to activate the 'leadership' skill. **/
-    int XP_REQUIRED_LEADERSHIP = 1000;
-
-    /** The xp required to activate the 'heavy hands' skill. **/
-    int XP_REQUIRED_HEAVY_HANDS = 1500;
-
-    /** The xp required to activate the 'leadership' skill. **/
-    int XP_REQUIRED_IMPROVED_LEADERSHIP = 2000;
-
-    /** The range of the 'leadership' skill. **/
-    int LEADERSHIP_RANGE_SQUARED = 24;
-
-    /**
-     * The damage increase applied to all allied units within range of
-     * 'leadership' when the skill is active.
-     **/
-    double LEADERSHIP_DAMAGE_BONUS = 1;
-    double IMPROVED_LEADERSHIP_DAMAGE_BONUS = 2;
-
-    /**
-     * Cooldown for the FLASH skill (minimum number of turns between each usage
-     * of FLASH).
-     */
-    int FLASH_COOLDOWN = 20;
-
-    /** The range of the 'flash' skill. **/
-    int FLASH_RANGE_SQUARED = 10;
-
-    /** Movement delay increase upon using the 'flash' skill. **/
-    double FLASH_MOVEMENT_DELAY = 1.0;
-
-    /** Movement delay incurred by using the 'heavy hands' skill. **/
-    double HEAVY_HANDS_MOVEMENT_DELAY = 3.0;
-
-    /** Attack delay incurred by using the 'heavy hands' skill. **/
-    double HEAVY_HANDS_ATTACK_DELAY = 3.0;
 
     /** The default game seed. **/
     int GAME_DEFAULT_SEED = 6370;

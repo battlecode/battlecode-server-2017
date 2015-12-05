@@ -62,14 +62,14 @@ public final class RobotControllerImpl implements RobotController {
         return gameWorld.getGameMap().getHeight();
     }
 
-    public double getTeamOre() {
+    public double getTeamParts() {
         return gameWorld.resources(getTeam());
     }
 
     public void assertHaveResource(double amount) throws GameActionException {
         if (amount > gameWorld.resources(getTeam())) {
             throw new GameActionException(NOT_ENOUGH_RESOURCE,
-                    "You do not have enough ORE to do that.");
+                    "You do not have enough PARTS to do that.");
         }
     }
 
@@ -116,7 +116,7 @@ public final class RobotControllerImpl implements RobotController {
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
-    public int senseRubble(MapLocation loc) {
+    public double senseRubble(MapLocation loc) {
         assertNotNull(loc);
         if (canSense(loc)) {
             return gameWorld.getRubble(loc);
@@ -124,7 +124,7 @@ public final class RobotControllerImpl implements RobotController {
         return gameWorld.senseRubble(getTeam(), loc);
     }
     
-    public int senseParts(MapLocation loc) {
+    public double senseParts(MapLocation loc) {
         assertNotNull(loc);
         if (canSense(loc)) {
             return gameWorld.getRubble(loc);
@@ -324,15 +324,21 @@ public final class RobotControllerImpl implements RobotController {
     // ****** TTM/TURRET METHODS *********
     // ***********************************
     
-    public void pack() {
+    public void pack() throws GameActionException {
         if(robot.type.equals(RobotType.TURRET)) {
             robot.transform(RobotType.TTM);
+        } else {
+            throw new GameActionException(CANT_DO_THAT_BRO,
+                    "Only Turrets can pack. ");
         }
     }
     
-    public void uppack() {
+    public void unpack() throws GameActionException {
         if(robot.type.equals(RobotType.TTM)) {
             robot.transform(RobotType.TURRET);
+        } else {
+            throw new GameActionException(CANT_DO_THAT_BRO,
+                    "Only TTMs can unpack. ");
         }
     }
 
@@ -508,10 +514,10 @@ public final class RobotControllerImpl implements RobotController {
 
         double cost = type.partCost;
         assertHaveResource(cost);
-
+        
         MapLocation loc = getLocation().add(dir);
         assertIsPathable(type, loc);
-
+        
         int delay = type.buildTurns;
         robot.activateMovement(new BuildSignal(robot != null ? robot.getID() : 0, loc, type, robot.getTeam(), delay), delay, delay);
     }

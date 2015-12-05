@@ -22,11 +22,11 @@ public interface RobotController {
     int getRoundLimit();
 
     /**
-     * Gets the team's total ore.
+     * Gets the team's total parts.
      *
-     * @return the team's total ore.
+     * @return the team's total parts.
      */
-    double getTeamOre();
+    double getTeamParts();
 
     /**
      * Returns the zombie spawn schedule for the map. Only works on zombie dens. NOT AVAILABLE TO COMPETITORS?
@@ -102,7 +102,7 @@ public interface RobotController {
      *            the location to check.
      * @return the amount of rubble at the location
      */
-    int senseRubble(MapLocation loc);
+    double senseRubble(MapLocation loc);
     
     /**
      * Senses the parts at the given location. Returns -1 for a location
@@ -112,7 +112,7 @@ public interface RobotController {
      *            the location to check.
      * @return the amount of parts at the location
      */   
-    int senseParts(MapLocation loc);
+    double senseParts(MapLocation loc);
 
     /**
      * Returns true if the given location is within the robot's sensor range, or
@@ -329,7 +329,7 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Returns whether you have the ore and the dependencies to build the given
+     * Returns whether you have the parts and the dependencies to build the given
      * robot, and that the robot can build structures.
      *
      * @param type
@@ -341,7 +341,7 @@ public interface RobotController {
     /**
      * Returns whether the robot can build a structure of the given type in the
      * given direction, without taking delays into account. Checks dependencies,
-     * ore costs, whether the robot can build, and that the given direction is
+     * parts costs, whether the robot can build, and that the given direction is
      * not blocked. Does not check if a robot has sufficiently low coreDelay or
      * not.
      *
@@ -382,6 +382,16 @@ public interface RobotController {
      * Causes your team to lose the game. It's like typing "gg."
      */
     void resign();
+
+    /**
+     * Turret only. Transforms the turret into a TTM after a short delay.
+     */
+    void pack() throws GameActionException;
+
+    /**
+     * TTM only. Transforms the TTM into a turret after a short delay.
+     */
+    void unpack()throws GameActionException;
 
     // ***********************************
     // ******** MISC. METHODS ************
