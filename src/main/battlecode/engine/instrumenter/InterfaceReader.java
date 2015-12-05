@@ -29,7 +29,7 @@ class InterfaceReader extends ClassVisitor {
         super(Opcodes.ASM5);
         ClassReader cr;
         try {
-            cr = new ClassReader(className);
+            cr = ClassReaderUtil.reader(className);
         } catch (IOException ioe) {
             ErrorReporter.report("Can't find the class \"" + className + "\", and this wasn't caught until the MethodData stage.", true);
             throw new InstrumentationException();
@@ -54,7 +54,7 @@ class InterfaceReader extends ClassVisitor {
         for (String i : result) {
             ClassReader cr;
             try {
-                cr = new ClassReader(i);
+                cr = ClassReaderUtil.reader(i);
             } catch (IOException ioe) {
                 ErrorReporter.report("Can't find the class \"" + i + "\", and this wasn't caught until the InterfaceReader stage.", true);
                 continue;

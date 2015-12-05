@@ -398,7 +398,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
         ClassReader cr;
 
         try {
-            cr = new ClassReader(owner);
+            cr = ClassReaderUtil.reader(owner);
         } catch (IOException ioe) {
             ErrorReporter.report("Can't find the class \"" + owner + "\", and this wasn't caught until the RobotMethodAdapter.isSuperClass stage.", true);
             throw new InstrumentationException();

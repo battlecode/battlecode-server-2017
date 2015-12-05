@@ -99,7 +99,7 @@ public class MethodCostUtil {
         else {
             ClassReader cr;
             try {
-                cr = new ClassReader(className);
+                cr = ClassReaderUtil.reader(className);
             } catch (IOException ioe) {
                 ErrorReporter.report("Can't find the class \"" + className + "\", and this wasn't caught until the MethodData stage.", true);
                 // this isn't all that bad an error, so don't throw an InstrumentationException

@@ -116,7 +116,7 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                 ClassReader cr;
 
                 try {
-                    cr = getReaderForClass(name);
+                    cr = ClassReaderUtil.reader(name);
                 } catch (IOException e) {
                     throw new InstrumentationException(
                             "Couldn't load required class: "+name,
@@ -190,9 +190,9 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
         ClassReader cr;
         try {
             if (className.startsWith("instrumented.")) {
-                cr = getReaderForClass(className.substring(13));
+                cr = ClassReaderUtil.reader(className.substring(13));
             } else {
-                cr = getReaderForClass(className);
+                cr = ClassReaderUtil.reader(className);
             }
         } catch (IOException ioe) {
             ErrorReporter.report("Can't find the class \"" + className + "\"", "Make sure the team name is spelled correctly.\nMake sure the .class files are in the right directory (teams/teamname/*.class)");
@@ -202,20 +202,6 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
         ClassVisitor cv = new RoboAdapter(cw, teamPackageName, silenced, checkDisallowed);
         cr.accept(cv, 0);        //passing false lets debug info be included in the transformation, so players get line numbers in stack traces
         return cw.toByteArray();
-    }
-
-    /**
-     * Gets a ClassReader for a given class.
-     *
-     * @param className the binary name (i.e. "."s and "$"s for inner classes)
-     * @return an asm class reader for the class
-     * @throws IOException if the class can't be read
-     */
-    private ClassReader getReaderForClass(final String className) throws IOException {
-        String fileName = className.replace(".", "/") + ".class";
-
-        // read the raw bytes of the file, using this classloader to locate it
-        return new ClassReader(getResourceAsStream(fileName));
     }
 
 }

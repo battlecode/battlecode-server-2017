@@ -4,6 +4,8 @@ package testplayerempty;
 import battlecode.common.RobotController;
 
 /**
+ * A RobotPlayer for testing that does nothing.
+ *
  * @author james
  */
 @SuppressWarnings("unused")
