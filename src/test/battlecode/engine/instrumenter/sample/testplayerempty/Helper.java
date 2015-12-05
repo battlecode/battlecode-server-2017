@@ -7,4 +7,6 @@ package testplayerempty;
 @SuppressWarnings("unused")
 public class Helper {
     public void help() {}
+
+    public static class Inner {}
 }

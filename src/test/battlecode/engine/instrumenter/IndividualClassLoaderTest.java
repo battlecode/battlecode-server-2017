@@ -30,6 +30,7 @@ public class IndividualClassLoaderTest {
         classNames.add("java.lang.Object");
 
         classNames.add("testplayerempty.Helper");
+        classNames.add("testplayerempty.Helper$Inner");
 
         classNames.addAll(IndividualClassLoader.alwaysRedefine);
 
@@ -86,8 +87,26 @@ public class IndividualClassLoaderTest {
         }
     }
 
-    @Test
-    public void testLoadsSystemClasses() throws ClassNotFoundException {
+    // Classes that don't need to be reloaded. Should be from AllowedPackages.txt.
+    private static final Class<?>[] NEVER_RELOAD = new Class<?>[] {
+            java.lang.Object.class,
+            battlecode.common.Direction.class,
+            java.math.BigInteger.class,
+            java.util.Map.class,
+            java.util.regex.Matcher.class,
+            java.io.InputStream.class
+    };
 
+    // Should give already-loaded system classes for most things.
+    @Test
+    public void testNoUnnecessaryReloads() throws ClassNotFoundException {
+        final IndividualClassLoader l
+                = new IndividualClassLoader("testplayerempty", false);
+
+        for (Class<?> theClass : NEVER_RELOAD) {
+            assertEquals(theClass, l.loadClass(theClass.getName()));
+        }
     }
+
+    // TODO: test instrumentation?
 }
