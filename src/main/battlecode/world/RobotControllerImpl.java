@@ -516,8 +516,6 @@ public final class RobotControllerImpl implements RobotController {
         double cost = type.partCost;
         assertHaveResource(cost);
         
-        gameWorld.spendResources(getTeam(), cost);
-        
         MapLocation loc = getLocation().add(dir);
         assertIsPathable(type, loc);
         
