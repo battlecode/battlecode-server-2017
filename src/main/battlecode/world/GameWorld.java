@@ -52,8 +52,8 @@ public class GameWorld implements SignalHandler {
     private Map<Team, Set<InternalRobot>> baseArchons = new EnumMap<>(Team.class);
     private final Map<MapLocation, InternalRobot> gameObjectsByLoc = new HashMap<>();
 
-    private Map<MapLocation, Integer> partsMap = new HashMap<>();
-    private Map<MapLocation, Integer> rubbleMap = new HashMap<>();
+    private Map<MapLocation, Double> partsMap = new HashMap<>();
+    private Map<MapLocation, Double> rubbleMap = new HashMap<>();
      
     private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<>(
             Team.class);
@@ -345,6 +345,9 @@ public class GameWorld implements SignalHandler {
         MapLocation myLoc = ir.getLocation();
         int d = myLoc.distanceSquaredTo(loc);
         int radius = ir.type.attackRadiusSquared;
+        if (ir.type == RobotType.TURRET) {
+            return (d <= radius && d >= GameConstants.TURRET_MINIMUM_RANGE);
+        }
         return d <= radius;
     }
 
@@ -522,6 +525,7 @@ public class GameWorld implements SignalHandler {
         if (totalRobotTypeCount.get(team).containsKey(type)) {
             return totalRobotTypeCount.get(team).get(type);
         } else {
+            totalRobotTypeCount.get(team).put(type, 0);
             return 0;
         }
     }
@@ -538,32 +542,32 @@ public class GameWorld implements SignalHandler {
     // *********************************
     // ****** RUBBLE METHODS **********
     // *********************************
-    public int getRubble(MapLocation loc) {
+    public double getRubble(MapLocation loc) {
         return rubbleMap.get(loc);
     }
     
-    public int senseRubble(Team team, MapLocation loc) {
+    public double senseRubble(Team team, MapLocation loc) {
         return mapMemory.get(team).recallRubble(loc);
     }
     
-    public void alterRubble(MapLocation loc, int amount) {
+    public void alterRubble(MapLocation loc, double amount) {
         rubbleMap.put(loc, rubbleMap.get(loc)+amount);
     }
 
     // *********************************
     // ****** PARTS METHODS ************
     // *********************************
-    public int getParts(MapLocation loc) {
+    public double getParts(MapLocation loc) {
         return partsMap.get(loc);
     }
 
-    public int senseParts(Team team, MapLocation loc) {
+    public double senseParts(Team team, MapLocation loc) {
         return mapMemory.get(team).recallParts(loc);
     }
 
-    public int takeParts(MapLocation loc) { // Remove parts from location
-        int prevVal = partsMap.containsKey(loc) ? partsMap.get(loc) : 0;
-        partsMap.put(loc,0);
+    public double takeParts(MapLocation loc) { // Remove parts from location
+        double prevVal = partsMap.containsKey(loc) ? partsMap.get(loc) : 0;
+        partsMap.put(loc,0.0);
         return prevVal;
       /*  double cur = 0;
         if (oreMined.containsKey(loc)) {
@@ -573,7 +577,7 @@ public class GameWorld implements SignalHandler {
         addSignal(new LocationOreChangeSignal(loc, cur + amount));*/
     }
 
-    protected boolean spendResources(Team t, int amount) {
+    protected boolean spendResources(Team t, double amount) {
         if (teamResources[t.ordinal()] >= amount) {
             teamResources[t.ordinal()] -= amount;
             return true;
@@ -581,7 +585,7 @@ public class GameWorld implements SignalHandler {
             return false;
     }
 
-    protected void adjustResources(Team t, int amount) {
+    protected void adjustResources(Team t, double amount) {
         teamResources[t.ordinal()] += amount;
     }
 
@@ -776,18 +780,16 @@ public class GameWorld implements SignalHandler {
                     splashRadius);
 
             for (InternalRobot target : targets) {
-                if (target.getTeam() != attacker.getTeam()) {
+                
+                if (attacker.type == RobotType.GUARD
+                        && target.type.isZombie)
+                    rate = GameConstants.GUARD_ZOMBIE_MULTIPLIER;
 
-                    if (attacker.type == RobotType.GUARD
-                            && target.type.isZombie)
-                        rate = GameConstants.GUARD_ZOMBIE_MULTIPLIER;
+                if (attacker.type.canInfect() && target.type.isInfectable())
+                    target.setInfected(attacker);
 
-                    if (attacker.type.canInfect() && target.type.isInfectable())
-                        target.setInfected(attacker);
-
-                    double damage = (attacker.type.attackPower) * rate;
-                    target.takeDamage(damage, attacker);
-                }
+                double damage = (attacker.type.attackPower) * rate;
+                target.takeDamage(damage, attacker);
             }
             break;
         default:
@@ -863,13 +865,10 @@ public class GameWorld implements SignalHandler {
 
             // update robot counting
             if (obj.isActive()) {
-                Integer currentCount = activeRobotTypeCount.get(obj.getTeam())
-                        .get(obj.type);
-                activeRobotTypeCount.get(obj.getTeam()).put(obj.type,
-                        currentCount - 1);
+                Integer currentCount = getActiveRobotTypeCount(obj.getTeam(), obj.type);
+                decrementActiveRobotTypeCount(obj.getTeam(), obj.type);
             }
-            Integer currentCount = totalRobotTypeCount.get(obj.getTeam()).get(
-                    obj.type);
+            Integer currentCount = getTotalRobotTypeCount(obj.getTeam(), obj.type);
             totalRobotTypeCount.get(obj.getTeam()).put(obj.type, currentCount - 1);
 
             if (obj.hasBeenAttacked()) {
@@ -925,7 +924,7 @@ public class GameWorld implements SignalHandler {
     public void visitMovementSignal(MovementSignal s) {
         InternalRobot r = getObjectByID(s.getRobotID());
         r.setLocation(s.getNewLoc());
-        int newParts = takeParts(r.getLocation());
+        double newParts = takeParts(r.getLocation());
         adjustResources(r.getTeam(), newParts);
         addSignal(s);
     }

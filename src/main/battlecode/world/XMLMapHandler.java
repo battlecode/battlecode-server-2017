@@ -689,11 +689,11 @@ public class XMLMapHandler extends DefaultHandler {
             return resultMap;
         }
 
-        final int[][] rubbleData = new int[map.length][];
-        final int[][] partsData = new int[map.length][];
+        final double[][] rubbleData = new double[map.length][];
+        final double[][] partsData = new double[map.length][];
         for (int i = 0; i < map.length; i++) {
-            rubbleData[i] = new int[map[i].length];
-            partsData[i] = new int[map[i].length];
+            rubbleData[i] = new double[map[i].length];
+            partsData[i] = new double[map[i].length];
             for (int j = 0; j < map[i].length; j++) {
                 //If a standard tile, use float data as rubble. If a parts
                 // tile, use as parts

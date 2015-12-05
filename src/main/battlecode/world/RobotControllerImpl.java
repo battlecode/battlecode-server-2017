@@ -64,14 +64,14 @@ public final class RobotControllerImpl implements RobotController {
         return robot.myGameWorld.getGameMap().getHeight();
     }
 
-    public double getTeamOre() {
+    public double getTeamParts() {
         return gameWorld.resources(getTeam());
     }
 
     public void assertHaveResource(double amount) throws GameActionException {
         if (amount > gameWorld.resources(getTeam())) {
             throw new GameActionException(NOT_ENOUGH_RESOURCE,
-                    "You do not have enough ORE to do that.");
+                    "You do not have enough PARTS to do that.");
         }
     }
 
@@ -118,7 +118,7 @@ public final class RobotControllerImpl implements RobotController {
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
-    public int senseRubble(MapLocation loc) {
+    public double senseRubble(MapLocation loc) {
         assertNotNull(loc);
         if (canSense(loc)) {
             return gameWorld.getRubble(loc);
@@ -126,7 +126,7 @@ public final class RobotControllerImpl implements RobotController {
         return gameWorld.senseRubble(getTeam(), loc);
     }
     
-    public int senseParts(MapLocation loc) {
+    public double senseParts(MapLocation loc) {
         assertNotNull(loc);
         if (canSense(loc)) {
             return gameWorld.getRubble(loc);
@@ -515,10 +515,12 @@ public final class RobotControllerImpl implements RobotController {
 
         double cost = type.partCost;
         assertHaveResource(cost);
-
+        
+        gameWorld.spendResources(getTeam(), cost);
+        
         MapLocation loc = getLocation().add(dir);
         assertIsPathable(type, loc);
-
+        
         int delay = type.buildTurns;
         robot.activateMovement(new BuildSignal(robot != null ? robot.getID() : 0, loc, type, robot.getTeam(), delay), delay, delay);
     }
