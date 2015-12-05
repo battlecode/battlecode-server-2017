@@ -38,7 +38,7 @@
     <property name="extern.target" value="run"/>
 
     <property name="javadoc.destdir" value="${extern.dir}/javadoc/"/>
-    <property name="commondoc.destdir" value="docs/cootommon"/>
+    <property name="commondoc.destdir" value="docs/common"/>
 
     <!-- Unit tests -->
     <property name="test.src.dir" value="${basedir}/src/test"/>
