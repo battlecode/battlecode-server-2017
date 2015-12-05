@@ -10,7 +10,8 @@ import java.util.Optional;
 
 /**
  * The representation of a robot used by the server.
- * Should only be created by GameWorld.
+ *
+ * Should only ever be created by GameWorld in the visitSpawnSignal method.
  */
 public class InternalRobot {
     public RobotType type;

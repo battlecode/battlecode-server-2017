@@ -497,9 +497,13 @@ public class GameWorld implements SignalHandler {
     // *********************************
 
     /**
-     * Creates a new robot
+     * Spawns a new robot with the given parameters.
      *
-     * @param type
+     * @param type the type of the robot
+     * @param loc the location of the robot
+     * @param team the team of the robot
+     * @param buildDelay the build delay of the robot
+     * @param parent the parent of the robot, or Optional.empty() if there is no parent
      */
     public void spawnRobot(RobotType type,
                            MapLocation loc,
@@ -507,7 +511,7 @@ public class GameWorld implements SignalHandler {
                            int buildDelay,
                            Optional<InternalRobot> parent) {
 
-         visitSignal(new SpawnSignal(
+         visitSpawnSignal(new SpawnSignal(
                 nextID(),
                 parent.isPresent() ? parent.get().getID() : 0,
                 loc,
