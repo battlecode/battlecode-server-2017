@@ -18,4 +18,8 @@ public class InstrumentationException extends RuntimeException {
     public InstrumentationException(String message) {
         super(message);
     }
+
+    public InstrumentationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

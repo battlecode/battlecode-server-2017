@@ -1,9 +1,5 @@
 package battlecode.engine.instrumenter;
 
-// Should produce the exact same results as RoboMethodAdapter.  I wrote
-// this in an attempt to fix a strange bug.  RoboMethodTree is more
-// extensible than RoboMethodAdapter, but also less well tested. -dgulotta
-
 import battlecode.common.GameConstants;
 import battlecode.engine.ErrorReporter;
 import org.objectweb.asm.*;
@@ -22,7 +18,6 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
     private final String methodName;
     private final String teamPackageName;
     private final String className;    // the class to which this method belongs
-    private final boolean debugMethodsEnabled;
     private final boolean silenced;
     private final boolean checkDisallowed;
     private final String methodDesc;    // the description of this method, e.g., "()V"
@@ -49,12 +44,11 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 
     private static boolean checkedFastHash = false, usingFastHash;
 
-    public RoboMethodTree(final MethodVisitor mv, final String className, final int access, final String methodName, final String methodDesc, final String signature, final String[] exceptions, final String teamPackageName, final boolean debugMethodsEnabled, boolean silenced, boolean checkDisallowed) {
+    public RoboMethodTree(final MethodVisitor mv, final String className, final int access, final String methodName, final String methodDesc, final String signature, final String[] exceptions, final String teamPackageName, boolean silenced, boolean checkDisallowed) {
         super(Opcodes.ASM5, access, methodName, methodDesc, signature, exceptions);
         this.methodName = methodName;
         this.teamPackageName = teamPackageName;
         this.className = className;
-        this.debugMethodsEnabled = debugMethodsEnabled;
         this.silenced = silenced;
         this.checkDisallowed = checkDisallowed;
         this.methodDesc = methodDesc;
@@ -132,9 +126,6 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
         startLabel = new LabelNode(new Label());
         instructions.insert(startLabel);
         boolean anyTryCatch = tryCatchBlocks.size() > 0;
-        if (methodName.startsWith("debug_") && methodDesc.endsWith("V") && debugMethodsEnabled) {
-            addDebugHandler();
-        }
         if (anyTryCatch) {
             addRobotDeathHandler();
         }
@@ -179,17 +170,6 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
         instructions.add(new FrameNode(F_FULL, 0, new Object[0], 1, new Object[]{"java/lang/VirtualMachineError"}));
         instructions.add(new InsnNode(ATHROW));
     }
-    
-    @SuppressWarnings("unchecked")	// This is to fix the warning from the add() to tryCatchBlocks
-    private void addDebugHandler() {
-        LabelNode debugEndLabel = new LabelNode(new Label());
-        tryCatchBlocks.add(new TryCatchBlockNode(startLabel, debugEndLabel, debugEndLabel, null));
-        instructions.insertBefore(nextInstruction(instructions.getFirst()), new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "incrementDebugLevel", "()V", false));
-        instructions.add(debugEndLabel);
-        instructions.add(new FrameNode(F_FULL, 0, new Object[0], 1, new Object[]{"java/lang/Throwable"}));
-        instructions.add(new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "decrementDebugLevel", "()V", false));
-        instructions.add(new InsnNode(ATHROW));
-    }
 
     private void visitFieldInsnNode(FieldInsnNode n) {
         bytecodeCtr++;
@@ -207,9 +187,6 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
             case ARETURN:
             case RETURN:
                 endOfBasicBlock(n);
-                if (methodName.startsWith("debug_") && methodDesc.endsWith("V")) {
-                    instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "decrementDebugLevel", "()V", false));
-                }
                 break;
             case ATHROW:
                 endOfBasicBlock(n);
@@ -270,7 +247,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 
         if (n.owner.equals("java/util/Random") && n.name.equals("<init>") &&
                 n.desc.equals("()V")) {
-            instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/lang/RoboRandom", "getMapSeed", "()J", false));
+            instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "getRandomSeed", "()J", false));
             n.owner = "instrumented/java/util/Random";
             n.desc = "(J)V";
             return;
@@ -307,11 +284,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 
         }
 
-        boolean isDebugMethod = n.name.startsWith("debug_") && n.desc.endsWith("V") && n.owner.startsWith(teamPackageName);
         boolean endBasicBlock = n.owner.startsWith(teamPackageName) || classReference(n.owner).startsWith("instrumented") || n.owner.startsWith("battlecode");
-
-        if (!isDebugMethod)
-            bytecodeCtr++;
 
         MethodCostUtil.MethodData data = MethodCostUtil.getMethodData(n.owner, n.name);
         if (data != null) {
@@ -329,6 +302,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
         } else if ((n.owner.equals("java/lang/Math") || n.owner.equals("java/lang/StrictMath")) && n.name.equals("random")) {
             n.owner = "instrumented/battlecode/engine/instrumenter/lang/InstrumentableFunctions";
         }
+
         //hax the e.printStackTrace() method calls
         // This isn't quite the correct behavior.  If
         // we wanted to do the correct thing always
@@ -344,53 +318,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
             // replace class names
             n.owner = classReference(n.owner);
             n.desc = methodDescReference(n.desc);
-
-            // debug methods
-            /*
-               if(name.startsWith("debug_")) {
-                   System.out.println("debug "+className+" "+methodName+" "+owner+" "+name+" "+checkDisallowed);
-               }
-               */
-            if (isDebugMethod) {
-                if (debugMethodsEnabled) {
-                    // we need to end the basic block BEFORE the debug level is incremented
-                    //endOfBasicBlock(n);
-                    //instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "incrementDebugLevel", "()V"));
-                    // don't call endOfBasicBlock twice
-                    //endBasicBlock=false;
-                } else {
-                    // if debug methods aren't enabled, we remove the call to the debug method
-                    // first, pop the arguments from the stack
-                    // arguments are popped in reverse order, so add instructions to newInsns
-                    // using insert, not add
-                    InsnList newInsns = new InsnList();
-                    for (Type t : Type.getArgumentTypes(n.desc)) {
-                        switch (t.getSize()) {
-                            case 1:
-                                //System.out.println("pop "+className+" "+methodName);
-                                newInsns.insert(new InsnNode(POP));
-                                break;
-                            case 2:
-                                newInsns.insert(new InsnNode(POP2));
-                                break;
-                            default:
-                                ErrorReporter.report("Illegal type size: not 1 or 2", true);
-                                throw new InstrumentationException();
-                        }
-                    }
-                    // next, pop the class on which the method would be called
-                    if (n.getOpcode() != INVOKESTATIC)
-                        newInsns.add(new InsnNode(POP));
-                    // if we remove the method call and don't add any instructions then we could end up with a FrameNode that does not have an instruction following it.  asm seems not to like this.
-                    if (newInsns.getFirst() == null)
-                        newInsns.add(new InsnNode(NOP));
-                    instructions.insertBefore(n, newInsns);
-                    instructions.remove(n);
-                    // no function was called so don't end the basic block
-                    endBasicBlock = false;
-                }
-            }
-        }
+       }
 
         if (endBasicBlock)
             endOfBasicBlock(n);
@@ -405,11 +333,6 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
             ErrorReporter.report(message, false);
             throw new InstrumentationException();
         }
-    }
-
-    public static void reportIllegalMethod(String message) {
-        ErrorReporter.report(message, false);
-        throw new RobotDeathException();
     }
 
     private void visitMultiANewArrayInsnNode(MultiANewArrayInsnNode n) {
@@ -475,7 +398,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
         ClassReader cr;
 
         try {
-            cr = new ClassReader(owner);
+            cr = ClassReaderUtil.reader(owner);
         } catch (IOException ioe) {
             ErrorReporter.report("Can't find the class \"" + owner + "\", and this wasn't caught until the RobotMethodAdapter.isSuperClass stage.", true);
             throw new InstrumentationException();

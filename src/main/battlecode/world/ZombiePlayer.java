@@ -36,10 +36,10 @@ public class ZombiePlayer {
                             }
                         }
                         if (!spawned) break;
-                        else rc.yield(); // this is silly but the engine doesn't support spawning multiple things in one round
+                        else Clock.yield(); // this is silly but the engine doesn't support spawning multiple things in one round
                     }
 
-                    rc.yield();
+                    Clock.yield();
                     break;
                 case STANDARDZOMBIE:
                 case RANGEDZOMBIE:
@@ -64,7 +64,7 @@ public class ZombiePlayer {
                     // If target is in range, attack it and end turn
                     if (closestRobot != null && rc.canAttackLocation(closestRobot.location)) {
                         rc.attackLocation(closestRobot.location);
-                        rc.yield();
+                        Clock.yield();
                     }
                     
                     // Else, try to move closer
@@ -75,7 +75,7 @@ public class ZombiePlayer {
                             // First, try to move if best direction toward target
                             if(rc.canMove(preferredDirection)) {
                                 rc.move(preferredDirection);
-                                rc.yield();
+                                Clock.yield();
                                 break;
                             }
                         }
@@ -91,7 +91,7 @@ public class ZombiePlayer {
                         
                         if(rc.canMove(preferredDirection)) { // Try to move in the new rotated direction
                             rc.move(preferredDirection);
-                            rc.yield();
+                            Clock.yield();
                             break;
                         }
                         
@@ -103,13 +103,13 @@ public class ZombiePlayer {
                         
                         if(rc.canMove(preferredDirection)) { // Try to move in the other rotated direction
                             rc.move(preferredDirection);
-                            rc.yield();
+                            Clock.yield();
                             break;
                         }
                         
                         // TODO: Try to clear rubble from original direction
                         
-                        rc.yield();  // We couldn't do anything, so just yield
+                        Clock.yield();  // We couldn't do anything, so just yield
                     }
 
                     break;

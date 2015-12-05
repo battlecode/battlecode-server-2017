@@ -374,11 +374,6 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Ends the current round. Never fails.
-     */
-    void yield();
-
-    /**
      * Kills your robot and ends the current round. Never fails.
      */
     void disintegrate();
@@ -521,28 +516,8 @@ public interface RobotController {
     void addMatchObservation(String observation);
 
     /**
-     * If breakpoints are enabled, calling this method causes the game engine to
-     * pause execution at the end of this round, until the user decides to
-     * resume execution.
-     */
-    void breakpoint();
-
-    /**
-     * Returns the number of bytecodes the current robot has executed since the beginning
-     * of the current round.
-     * @return the number of bytecodes the current robot has executed since the beginning of the current round.
-     */
-    int getBytecodeNum();
-
-    /**
      * Returns the current round number, where round 0 is the first round of the match.
      * @return the current round number, where 0 is the first round of the match.
      */
     int getRoundNum();
-
-    /**
-     * Returns the number of bytecodes this robot has left in this round.
-     * @return the number of bytecodes this robot has left in this round.
-     */
-    int getBytecodesLeft();
 }

@@ -9,19 +9,29 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.zip.ZipFile;
 
 /**
  * ClassReferenceUtil is a singleton used to keep track of class references during instrumentation.
  * <p/>
  * Whenever a class reference is encountered while instrumenting a class, that reference should be registered with
  * ClassReferenceUtil (e.g., using <code>classReference(...)</code>).  This does two things.  First, the class reference
- * may be replaced with a reference to a different class (e.g., replacing Random with RoboRandom).  Second,
- * ClassReferenceUtil remembers new references.  New class references can be retrieved using flushNewlyReferencedClasses.
+ * may be replaced with a reference to a different class. Second, ClassReferenceUtil remembers new references.
+ * New class references can be retrieved using flushNewlyReferencedClasses.
  *
  * @author adamd
  */
 public class ClassReferenceUtil {
+
+    /**
+     * The resource, relative to this .java/.class file, to load allowed packages from
+     */
+    private final static String ALLOWED_RESOURCE_FILE = "resources/AllowedPackages.txt";
+
+    /**
+     * The resource, relative to this .java/.class file, to load disallowed packages from
+     */
+    private final static String DISALLOWED_RESOURCE_FILE = "resources/AllowedPackages.txt";
+
     // packages for which the player is allowed to use any of the contained classes; loaded from AllowedPackages.txt
     private final static Set<String> allowedPackages;
 
@@ -52,22 +62,26 @@ public class ClassReferenceUtil {
 
         // load allowed packages
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream("AllowedPackages.txt")));
+            reader = new BufferedReader(new InputStreamReader(
+                    ClassReferenceUtil.class.getResourceAsStream(ALLOWED_RESOURCE_FILE)
+            ));
             while ((line = reader.readLine()) != null) {
                 allowedPackages.add(line);
             }
         } catch (Exception e) {
-            fileLoadError("AllowedPackages.txt");
+            fileLoadError(ALLOWED_RESOURCE_FILE);
         }
 
         // load disallowed classes
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream("DisallowedClasses.txt")));
+            reader = new BufferedReader(new InputStreamReader(
+                    ClassReferenceUtil.class.getResourceAsStream(DISALLOWED_RESOURCE_FILE)
+            ));
             while ((line = reader.readLine()) != null) {
                 disallowedClasses.add(line);
             }
         } catch (Exception e) {
-            fileLoadError("DisallowedClasses.txt");
+            fileLoadError(DISALLOWED_RESOURCE_FILE);
         }
 
     }

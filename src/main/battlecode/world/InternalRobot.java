@@ -1,49 +1,47 @@
 package battlecode.world;
 
 import battlecode.common.*;
-import battlecode.engine.ErrorReporter;
-import battlecode.engine.GenericRobot;
-import battlecode.engine.RobotRunnable;
-import battlecode.engine.instrumenter.IndividualClassLoader;
-import battlecode.engine.instrumenter.InstrumentationException;
-import battlecode.engine.scheduler.ScheduledRunnable;
 import battlecode.engine.signal.Signal;
-import battlecode.server.Config;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.SpawnSignal;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 
-public class InternalRobot implements GenericRobot {
+/**
+ * The representation of a robot used by the server.
+ *
+ * Should only ever be created by GameWorld in the visitSpawnSignal method.
+ */
+public class InternalRobot {
     public RobotType type;
 
-    private final int myID;
-    private Team myTeam;
+    private final int ID;
+    private Team team;
 
-    protected volatile MapLocation myLocation;
-    protected final GameWorld myGameWorld;
+    // TODO remove volatiles?
 
-    protected volatile double myHealthLevel;
+    private volatile MapLocation location;
+    private final GameWorld gameWorld;
+
+    private final RobotControllerImpl controller;
+
+    private volatile double healthLevel;
     private double coreDelay;
     private double weaponDelay;
     private int zombieInfectedTurns;
     private int viperInfectedTurns;
 
-    protected volatile long controlBits;
+    private volatile long controlBits;
 
     int currentBytecodeLimit;
-    private volatile int bytecodesUsed;
-    protected volatile boolean hasBeenAttacked;
+    private int bytecodesUsed;
+    private boolean hasBeenAttacked;
     private boolean healthChanged;
     private boolean broadcasted;
     private volatile HashMap<Integer, Integer> broadcastMap;
     private int roundsAlive;
 
-    private ArrayList<Signal> supplyActions;
-    private ArrayList<SpawnSignal> missileLaunchActions;
     private Signal movementSignal;
     private Signal attackSignal;
 
@@ -60,133 +58,49 @@ public class InternalRobot implements GenericRobot {
      * @param parent the parent of the robot, if one exists
      */
     @SuppressWarnings("unchecked")
-    public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team team,
+    public InternalRobot(GameWorld gw, int id, RobotType type, MapLocation loc, Team team,
             int buildDelay, Optional<InternalRobot> parent) {
 
-        myID = gw.nextID();
-        myTeam = team;
-        myGameWorld = gw;
-        myLocation = loc;
-        gw.notifyAddingNewObject(this);
+        this.ID = id;
+        this.team = team;
+        this.gameWorld = gw;
+        this.location = loc;
         this.type = type;
         this.buildDelay = buildDelay;
 
-        myHealthLevel = getMaxHealth();
-        if (type.isBuildable() && buildDelay > 0) { // What is this for?
-            myHealthLevel /= 2.0;
-        }
+        this.healthLevel = getMaxHealth();
 
-        coreDelay = 0.0;
-        weaponDelay = 0.0;
-        zombieInfectedTurns = 0;
-        viperInfectedTurns = 0;
+        this.coreDelay = 0.0;
+        this.weaponDelay = 0.0;
+        this.zombieInfectedTurns = 0;
+        this.viperInfectedTurns = 0;
 
-        controlBits = 0;
+        this.controlBits = 0;
 
-        currentBytecodeLimit = type.bytecodeLimit;
-        bytecodesUsed = 0;
-        hasBeenAttacked = false;
-        healthChanged = true;
+        this.currentBytecodeLimit = type.bytecodeLimit;
+        this.bytecodesUsed = 0;
+        this.hasBeenAttacked = false;
+        this.healthChanged = true;
 
-        broadcasted = false;
-        broadcastMap = new HashMap<>();
-        roundsAlive = 0;
+        this.broadcasted = false;
+        this.broadcastMap = new HashMap<>();
+        this.roundsAlive = 0;
 
-        supplyActions = new ArrayList<>();
-        missileLaunchActions = new ArrayList<>();
-        movementSignal = null;
-        attackSignal = null;
+        this.movementSignal = null;
+        this.attackSignal = null;
 
-        myGameWorld.incrementTotalRobotTypeCount(getTeam(), type);
-
-        if (!type.isBuildable() || buildDelay == 0) {
-            myGameWorld.incrementActiveRobotTypeCount(getTeam(), type);
-        }
-
-        myGameWorld
-                .updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
-
-        // Signal the world that we've spawned
-        gw.addSignal(new SpawnSignal(
-                this.getID(),
-                parent.isPresent() ? parent.get().getID() : 0,
-                this.getLocation(),
-                this.type,
-                this.getTeam(),
-                buildDelay
-        ));
-
-        RobotControllerImpl rc = new RobotControllerImpl(gw, this);
-
-        if(rc.getTeam() == Team.ZOMBIE){
-            loadZombiePlayer(rc);
-        } else {
-            String teamName = gw.getTeamName(team);
-            loadPlayer(rc, teamName);
-        }
-    }
-
-    private void loadPlayer(RobotControllerImpl rc, String teamName) {
-        final boolean debugMethodsEnabled = Config.getGlobalConfig().getBoolean("bc.engine.debug-methods");
-
-        // now, we instantiate and instrument the player's class
-        Class playerClass;
-        try {
-            // The classloaders ignore silenced now - RobotMonitor takes care of it
-            ClassLoader icl = new IndividualClassLoader(teamName, debugMethodsEnabled, false, true);
-            playerClass = icl.loadClass(teamName + ".RobotPlayer");
-            //~ System.out.println("PF done loading");
-        } catch (InstrumentationException ie) {
-            // if we get an InstrumentationException, then the error should have been reported, so we just kill the robot
-            System.out.println("[Engine] Error during instrumentation of " + rc.getRobot().toString() + ".\n[Engine] Robot will self-destruct in 3...2...1...");
-            rc.getRobot().suicide();
-            return;
-        } catch (Exception e) {
-            ErrorReporter.report(e);
-            rc.getRobot().suicide();
-            return;
-        }
-
-        // finally, create the player's thread, and let it loose
-        new ScheduledRunnable(new RobotRunnable(playerClass, rc), rc.getRobot().getID());
-
-    }
-
-    private void loadZombiePlayer(RobotControllerImpl rc) {
-        final boolean debugMethodsEnabled = Config.getGlobalConfig().getBoolean("bc.engine.debug-methods");
-
-        // instantiate and instrument the ZombiePlayer class
-        Class playerClass;
-        try {
-            // The classloaders ignore silenced now - RobotMonitor takes care of it
-            ClassLoader icl = new IndividualClassLoader("ZombiePlayer", debugMethodsEnabled, false, true);
-            playerClass = icl.loadClass("ZombiePlayer.ZombiePlayer");
-            //~ System.out.println("PF done loading");
-        } catch (InstrumentationException ie) {
-            // if we get an InstrumentationException, then the error should have been reported, so we just kill the robot
-            System.out.println("[Engine] Error during instrumentation of " + rc.getRobot().toString() + ".\n[Engine] Robot will self-destruct in 3...2...1...");
-            rc.getRobot().suicide();
-            return;
-        } catch (Exception e) {
-            ErrorReporter.report(e);
-            rc.getRobot().suicide();
-            return;
-        }
-
-        // finally, create the ZombiePlayer's thread, and let it loose
-        new ScheduledRunnable(new RobotRunnable(playerClass, rc), rc.getRobot().getID());
-
+        this.controller = new RobotControllerImpl(gameWorld, this);
     }
 
     @Override
     public boolean equals(Object o) {
         return o != null && (o instanceof InternalRobot)
-                && ((InternalRobot) o).getID() == myID;
+                && ((InternalRobot) o).getID() == ID;
     }
 
     @Override
     public int hashCode() {
-        return myID;
+        return ID;
     }
 
     // *********************************
@@ -199,28 +113,28 @@ public class InternalRobot implements GenericRobot {
                 getZombieInfectedTurns(),getViperInfectedTurns());
     }
 
+    public RobotControllerImpl getController() {
+        return controller;
+    }
+
     public int getRoundsAlive() {
         return roundsAlive;
     }
 
     public int getID() {
-        return myID;
-    }
-
-    protected void setTeam(Team newTeam) {
-        myTeam = newTeam;
+        return ID;
     }
 
     public Team getTeam() {
-        return myTeam;
+        return team;
     }
 
     public MapLocation getLocation() {
-        return myLocation;
+        return location;
     }
 
     public boolean exists() {
-        return myGameWorld.exists(this);
+        return gameWorld.exists(this);
     }
 
     // *********************************
@@ -308,7 +222,7 @@ public class InternalRobot implements GenericRobot {
     // *********************************
 
     public double getHealthLevel() {
-        return myHealthLevel;
+        return healthLevel;
     }
 
     public void takeDamage(double baseAmount) {
@@ -316,32 +230,20 @@ public class InternalRobot implements GenericRobot {
         if (baseAmount < 0) {
             changeHealthLevel(-baseAmount);
         } else {
-            changeHealthLevelFromAttack(-baseAmount);
+            hasBeenAttacked = true;
+            changeHealthLevel(-baseAmount);
         }
-    }
-
-    public void takeDamage(double amt, InternalRobot source) {
-        if (!(getTeam() == Team.NEUTRAL)) {
-            healthChanged = true;
-            takeDamage(amt);
-        }
-    }
-
-    public void changeHealthLevelFromAttack(double amount) {
-        healthChanged = true;
-        hasBeenAttacked = true;
-        changeHealthLevel(amount);
     }
 
     public void changeHealthLevel(double amount) {
         healthChanged = true;
-        myHealthLevel += amount;
-        if (myHealthLevel > getMaxHealth()) {
-            myHealthLevel = getMaxHealth();
+        healthLevel += amount;
+        if (healthLevel > getMaxHealth()) {
+            healthLevel = getMaxHealth();
         }
 
-        if (myHealthLevel <= 0 && getMaxHealth() != Integer.MAX_VALUE) {
-            myGameWorld.notifyDied(this);   // myGameWorld checks if infected and creates zombie
+        if (healthLevel <= 0) {
+            gameWorld.visitDeathSignal(new DeathSignal(ID));
         }
     }
 
@@ -426,22 +328,21 @@ public class InternalRobot implements GenericRobot {
 
     public void setLocation(MapLocation loc) {
         MapLocation oldloc = getLocation();
-        myGameWorld.notifyMovingObject(this, myLocation, loc);
-        myLocation = loc;
-        myGameWorld.updateMapMemoryRemove(getTeam(), oldloc,
+        gameWorld.notifyMovingObject(this, location, loc);
+        location = loc;
+        gameWorld.updateMapMemoryRemove(getTeam(), oldloc,
                 type.sensorRadiusSquared);
-        myGameWorld
+        gameWorld
                 .updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
     }
 
     public void suicide() {
-        myGameWorld.visitSignal((new DeathSignal(this.getID())));
+        gameWorld.visitSignal((new DeathSignal(this.getID())));
     }
     
     public void transform(RobotType newType) {
-        myGameWorld.decrementActiveRobotTypeCount(getTeam(), type);
+        gameWorld.decrementActiveRobotTypeCount(getTeam(), type);
         type = newType;
-        myGameWorld.incrementTotalRobotTypeCount(getTeam(), newType);
         coreDelay += 10;
         weaponDelay += 10;
     }
@@ -470,32 +371,20 @@ public class InternalRobot implements GenericRobot {
 
         // broadcasts
         if (broadcasted)
-            myGameWorld.visitSignal(new BroadcastSignal(this.getID(), this.getTeam(), broadcastMap));
+            gameWorld.visitSignal(new BroadcastSignal(this.getID(), this.getTeam(), broadcastMap));
 
         broadcastMap = new HashMap<>();
         broadcasted = false;
 
-        // perform supply actions
-        for (Signal s : supplyActions) {
-            myGameWorld.visitSignal(s);
-        }
-        supplyActions.clear();
-
         // perform attacks
         if (attackSignal != null) {
-            myGameWorld.visitSignal(attackSignal);
+            gameWorld.visitSignal(attackSignal);
             attackSignal = null;
         }
 
-        // launch missiles
-        for (SpawnSignal s : missileLaunchActions) {
-            myGameWorld.visitSignal(s);
-        }
-        missileLaunchActions.clear();
-
         // perform movements (moving, spawning, mining)
         if (movementSignal != null) {
-            myGameWorld.visitSignal(movementSignal);
+            gameWorld.visitSignal(movementSignal);
             movementSignal = null;
         }
     }

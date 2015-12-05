@@ -1,224 +1,153 @@
 package battlecode.engine.instrumenter;
 
-import battlecode.engine.GenericRobot;
-import battlecode.engine.instrumenter.lang.RoboPrintStream;
-import battlecode.engine.instrumenter.lang.SilencedPrintStream;
-import battlecode.engine.scheduler.Scheduler;
-import battlecode.server.Config;
-import battlecode.world.GameWorld;
-
-import java.util.HashSet;
-import java.util.Set;
+import java.io.PrintStream;
 
 /**
- * RobotMonitor is a singleton class for monitoring robots' bytecode execution and stack size, and killing robots' threads.  Player's classes should
- * be instrumented so that they make calls to RobotMonitor as appropriate.
+ * The class used to count bytecodes and debug levels at player runtime; calls to its methods are injected
+ * by the instrumenter.
+ *
+ * Don't let the fact that this class is "static" fool you. It's static for instrumentation convenience;
+ * a new version is loaded every time a new robot player is loaded, and is specific to that robot.
+ *
+ * The specific calls the instrumentation uses are incrementBytecodes, incrementDebugLevel, and decrementDebugLevel.
  *
  * @author adamd
  */
-public class RobotMonitor {
+public final class RobotMonitor {
+    private static int BYTECODE_LIMIT;
 
-    private static int DEBUG_BYTECODES;
+    private static int randomSeed;
 
-    private static final Set<Integer> robotsToKill = new HashSet<>();
-
-    // the RobotData for the currently running robot
-    public volatile static RobotData currentRobotData;
-
-    private static boolean[] silenced = new boolean[4];
-
-    private static int debugLevel;
-    private static int bytecodeLimit;
     private static int bytecodesLeft;
+    private static boolean shouldDie;
 
-    private static GameWorld myGameWorld = null;
+    private static SandboxedRobotPlayer.Pauser pauser;
+    private static SandboxedRobotPlayer.Killer killer;
 
+    // Methods called from SandboxedRobotPlayer
 
     /**
-     * A "struct" that holds data about a robot's execution, e.g., bytecodes, stack size, etc.
+     * A "constructor".
+     * Initializes the monitor.
+     *
+     * Called in the robot thread from SandboxedRobotPlayer.
+     *
+     * @param thePauser pauser to use to pause the thread
      */
-    public static class RobotData {
-        public int bytecodesLeft;
-        public int debugLevel = 0;
-        public final int ID;
-        public boolean thrownRobotDeathException = false;
-
-        public RobotData(int ID) {
-            this.ID = ID;
-        }
-    }
-
-    // private constructor enforces the singleton pattern
-    private RobotMonitor() {
-    }
-
-    private static void init() {
-        robotsToKill.clear();
-        Config options = Config.getGlobalConfig();
-        silenced[0] = options.getBoolean("bc.engine.silence-a");
-        silenced[1] = options.getBoolean("bc.engine.silence-b");
-        silenced[2] = options.getBoolean("bc.engine.silence-c");
-        silenced[3] = options.getBoolean("bc.engine.silence-d");
-        DEBUG_BYTECODES = options.getInt("bc.engine.debug-max-bytecodes");
+    @SuppressWarnings("unused")
+    public static void init(SandboxedRobotPlayer.Pauser thePauser,
+                            SandboxedRobotPlayer.Killer theKiller,
+                            int seed) {
+        shouldDie = false;
+        bytecodesLeft = 0;
+        randomSeed = seed;
+        pauser = thePauser;
+        killer = theKiller;
     }
 
     /**
-     * Resets the internal state of the RobotMonitor.  Should be called between games.
+     * Set the bytecode limit of this robot.
+     *
+     * @param limit the new limit
      */
-    public static void reset() {
-        init();
+    @SuppressWarnings("unused")
+    public static void setBytecodeLimit(int limit) {
+        BYTECODE_LIMIT = limit;
     }
 
     /**
-     * Switches the currently active robot to the one referred to by the given RobotData.
+     * Set System.out for this robot.
+     *
+     * @param out the printstream to replace System.out with
      */
-    public static void switchRunner(RobotData newData) {
-
-        // switch RobotData to the new robot
-        currentRobotData = newData;
-
-        if (robotsToKill.contains(newData.ID)) {
-            //System.out.println("Killing "+newData.ID);
-            throw new RobotDeathException();
-        }
-
-        if (newData.ID >= 0) {
-            myGameWorld.beginningOfExecution(newData.ID);
-            GenericRobot robot = myGameWorld.getRobotByID(newData.ID);
-            bytecodeLimit = robot.getBytecodeLimit();
-            debugLevel = currentRobotData.debugLevel;
-            currentRobotData.bytecodesLeft += bytecodeLimit;
-            if (debugLevel == 0)
-                bytecodesLeft = currentRobotData.bytecodesLeft;
-            else
-                bytecodesLeft = DEBUG_BYTECODES;
-
-            if (silenced[robot.getTeam().ordinal()]) {
-                SilencedPrintStream stream = SilencedPrintStream.theInstance();
-                battlecode.engine.instrumenter.lang.System.out = stream;
-                battlecode.engine.instrumenter.lang.System.err = stream;
-            } else {
-                RoboPrintStream stream = RoboPrintStream.theInstance();
-                stream.updateHeader(robot, myGameWorld.getCurrentRound());
-                battlecode.engine.instrumenter.lang.System.out = stream;
-                battlecode.engine.instrumenter.lang.System.err = stream;
-            }
-        }
-    }
-
-    public static int getCurrentRobotID() {
-        return currentRobotData.ID;
-    }
-
-    public static GenericRobot getCurrentRobot() {
-        return myGameWorld.getRobotByID(currentRobotData.ID);
+    @SuppressWarnings("unused")
+    public static void setSystemOut(PrintStream out) {
+        battlecode.engine.instrumenter.lang.System.out = out;
+        battlecode.engine.instrumenter.lang.System.err = out;
     }
 
     /**
-     * Increments the active robot's debug level.  Should be called at the beginning of any debug method.
+     * Kills the robot associated with this monitor.
+     *
+     * More specifically, the next time the thread is activated, it will throw a RobotDeathException.
      */
-    public static void incrementDebugLevel() {
-        if (debugLevel == 0) {
-            currentRobotData.bytecodesLeft = bytecodesLeft;
-            bytecodesLeft = DEBUG_BYTECODES;
-        }
-        debugLevel++;
+    @SuppressWarnings("unused")
+    public static void killRobot() {
+        shouldDie = true;
     }
 
     /**
-     * Decrements the active robot's debug level.  Should be called at the end of any debug method.
+     * @return the bytecode number that the active robot is currently on.
+     *         Note that this can be above bytecodeLimit in some cases.
      */
-    public static void decrementDebugLevel() {
-        debugLevel--;
-        if (debugLevel == 0) {
-            bytecodesLeft = currentRobotData.bytecodesLeft;
-        }
+    @SuppressWarnings("unused")
+    public static int getBytecodeNum() {
+        return BYTECODE_LIMIT - getBytecodesLeft();
     }
 
     /**
-     * Increments the currently active robot's bytecode count by the given amount.  If the robot exceeds its bytecode limit for the round,
-     * this method will block until the robot's next round.  Should be called at the end of every basic block.
+     * @return the bytecodes this robot has left to use.
+     */
+    @SuppressWarnings("unused")
+    public static int getBytecodesLeft() {
+        return bytecodesLeft;
+    }
+
+    // Methods called from RobotPlayer
+
+    /**
+     * Increments the currently active robot's bytecode count by the given amount.
+     * If the robot exceeds its bytecode limit for the round, this method will block until the robot's next round.
+     * Should be called at the end of every basic block.
+     *
+     * THIS METHOD IS CALLED BY THE INSTRUMENTER.
      *
      * @param numBytecodes the number of bytecodes the robot just executed
      */
+    @SuppressWarnings("unused")
     public static void incrementBytecodes(int numBytecodes) {
         bytecodesLeft -= numBytecodes;
 
         while (bytecodesLeft <= 0) {
-            endRunner();
+            pause();
         }
     }
 
     /**
-     * Ends the run of the currently active robot.
-     */
-    public static void endRunner() {
-        myGameWorld.endOfExecution(currentRobotData.ID);
-        currentRobotData.debugLevel = debugLevel;
-        if (debugLevel == 0)
-            currentRobotData.bytecodesLeft = bytecodesLeft;
-        if (currentRobotData.bytecodesLeft > 0)
-            currentRobotData.bytecodesLeft = 0;
-        Scheduler.passToNextThread();
-    }
-
-    /**
-     * Kills the robot thread of the robot with the given ID.  More specifically, the next time the thread is activated,
-     * it will throw a RobotDeathException.
+     * Used to construct new Random instances.
      *
-     * @param robotID the integer ID of the robot to kill
+     * THIS METHOD IS CALLED BY THE INSTRUMENTER.
+     *
+     * @return the random seed for this robot
      */
-    public static void killRobot(int robotID) {
-        robotsToKill.add(robotID);
+    public static int getRandomSeed() {
+        return randomSeed;
     }
 
     /**
-     * Returns the bytecode number that the active robot is currently on.  Note that this can be above bytecodeLimit in some cases.
+     * Pauses the run of the current robot.
+     *
+     * Must be called from the robot's main thread.
      */
-    public static int getBytecodeNum() {
-        return bytecodeLimit - getBytecodesLeft();
-    }
+    public static void pause() {
+        bytecodesLeft = 0;
 
-    public static int getBytecodeLimit() {
-        return bytecodeLimit;
-    }
+        pauser.pause();
 
-    public static int getBytecodesLeft() {
-        if (debugLevel == 0)
-            return bytecodesLeft;
-        else
-            return currentRobotData.bytecodesLeft;
+        reactivate();
     }
 
     /**
-     * Returns the number of bytecodes that this robot has used this round.  Equal to
-     * min(getBytecodeNum(),bytecodeLimit).
+     * Restarts a paused robot.
+     *
+     * Must be called from the robot's main thread.
      */
-    public static int getBytecodesUsed() {
-        int num = getBytecodeNum();
-        return (num <= bytecodeLimit) ? num : bytecodeLimit;
-    }
+    public static void reactivate() {
 
-    /**
-     * Returns the percentage of this robot's maximum bytecodes that were used this round.
-     */
-    public static double getBytecodesUsedPercent() {
-        return (double) getBytecodesUsed() / bytecodeLimit;
-    }
+        if (shouldDie) {
+            killer.kill();
+        }
 
-    /**
-     * Notifies the RobotMonitor of what the current GameWorld is.  Should be called before the start of each game.
-     */
-    public static void setGameWorld(GameWorld gw) {
-        myGameWorld = gw;
-    }
-
-    public static boolean thrownRobotDeathException() {
-        return currentRobotData.thrownRobotDeathException;
-    }
-
-    public static void checkForRobotDeath() {
-        if (currentRobotData.thrownRobotDeathException)
-            throw new RobotDeathException();
+        bytecodesLeft = BYTECODE_LIMIT;
     }
 }
