@@ -1,14 +1,10 @@
 package battlecode.world.control;
 
-import battlecode.common.RobotController;
 import battlecode.engine.instrumenter.IndividualClassLoader;
-import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.engine.instrumenter.SandboxedRobotPlayer;
-import battlecode.engine.instrumenter.lang.RoboRandom;
 import battlecode.server.Config;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
-import battlecode.world.RobotControllerImpl;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -65,14 +61,14 @@ public class PlayerControlProvider implements RobotControlProvider {
                         gameWorld.getMapSeed());
                 break;
             case B:
-                player = new SandboxedRobotPlayer(config.get("bc.game.team-a"),
+                player = new SandboxedRobotPlayer(config.get("bc.game.team-b"),
                         "RobotPlayer",
                         robot.getController(),
                         gameWorld.getMapSeed());
                 break;
             case ZOMBIE:
-                player = new SandboxedRobotPlayer(config.get("bc.game.team-a"),
-                        "RobotPlayer",
+                player = new SandboxedRobotPlayer("ZombiePlayer",
+                        "ZombiePlayer",
                         robot.getController(),
                         gameWorld.getMapSeed());
                 break;

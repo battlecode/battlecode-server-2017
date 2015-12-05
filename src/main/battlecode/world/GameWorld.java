@@ -818,6 +818,8 @@ public class GameWorld implements SignalHandler {
         updateMapMemoryRemove(obj.getTeam(), obj.getLocation(),
                 obj.type.sensorRadiusSquared);
 
+        gameObjectsByID.remove(obj.getID());
+
         addSignal(s);
     }
 
