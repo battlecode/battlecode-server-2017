@@ -135,7 +135,19 @@ public class GameWorld implements SignalHandler {
             this.processBeginningOfRound();
             this.controlProvider.roundStarted();
 
-            for (final InternalRobot robot : gameObjectsByID.values()) {
+            // We iterate through the IDs so that we avoid ConcurrentModificationExceptions
+            // of an iterator. Kinda gross, but whatever.
+            final int[] idsToRun = gameObjectsByID.keySet().stream()
+                    .mapToInt(i -> i)
+                    .toArray();
+
+            for (final int id : idsToRun) {
+                final InternalRobot robot = gameObjectsByID.get(id);
+                if (robot == null) {
+                    // Robot might have died earlier in the iteration; skip it
+                    continue;
+                }
+
                 robot.processBeginningOfTurn();
                 this.controlProvider.runRobot(robot);
                 robot.setBytecodesUsed(this.controlProvider.getBytecodesUsed(robot));
