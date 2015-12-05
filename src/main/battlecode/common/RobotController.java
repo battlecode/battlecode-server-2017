@@ -388,6 +388,16 @@ public interface RobotController {
      */
     void resign();
 
+    /**
+     * Turret only. Transforms the turret into a TTM after a short delay.
+     */
+    void pack() throws GameActionException;
+
+    /**
+     * TTM only. Transforms the TTM into a turret after a short delay.
+     */
+    void unpack()throws GameActionException;
+
     // ***********************************
     // ******** MISC. METHODS ************
     // ***********************************

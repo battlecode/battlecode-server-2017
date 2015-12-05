@@ -325,15 +325,21 @@ public final class RobotControllerImpl implements RobotController {
     // ****** TTM/TURRET METHODS *********
     // ***********************************
     
-    public void pack() {
+    public void pack() throws GameActionException {
         if(robot.type.equals(RobotType.TURRET)) {
             robot.transform(RobotType.TTM);
+        } else {
+            throw new GameActionException(CANT_DO_THAT_BRO,
+                    "Only Turrets can pack. ");
         }
     }
     
-    public void uppack() {
+    public void unpack() throws GameActionException {
         if(robot.type.equals(RobotType.TTM)) {
             robot.transform(RobotType.TURRET);
+        } else {
+            throw new GameActionException(CANT_DO_THAT_BRO,
+                    "Only TTMs can unpack. ");
         }
     }
 

@@ -497,6 +497,7 @@ public class GameWorld implements SignalHandler {
         if (activeRobotTypeCount.get(team).containsKey(type)) {
             return activeRobotTypeCount.get(team).get(type);
         } else {
+            activeRobotTypeCount.get(team).put(type, 0);
             return 0;
         }
     }
@@ -512,7 +513,7 @@ public class GameWorld implements SignalHandler {
     
     // decrement from active robots (used during TTM <-> Turret transform)
     public void decrementActiveRobotTypeCount(Team team, RobotType type) {
-        Integer currentCount = activeRobotTypeCount.get(team).get(type);
+        Integer currentCount = getActiveRobotTypeCount(team, type);
         activeRobotTypeCount.get(team).put(type,currentCount - 1);
     }
 
