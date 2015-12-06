@@ -12,8 +12,6 @@ import battlecode.serial.notification.StartNotification;
 import battlecode.server.serializer.Serializer;
 import battlecode.server.serializer.SerializerFactory;
 import battlecode.world.GameMap;
-import battlecode.world.GameWorld;
-import battlecode.world.InternalRobot;
 import battlecode.world.ZombieSpawnSchedule;
 import battlecode.world.signal.*;
 
@@ -93,7 +91,7 @@ public abstract class SerializerFactoryTestBase {
                     new LocationOreChangeSignal(new MapLocation(0,0), -1.0),
                     new MatchObservationSignal(57, "test"),
                     new MovementOverrideSignal(0, new MapLocation(10000, 10000)),
-                    new MovementSignal(57, new MapLocation(0, 0), true, 0),
+                    new MovementSignal(57, new MapLocation(0, 0), 0),
                     new RobotDelaySignal(new int[] {5, 6}, new double[] {17, 32}, new double[] {10, 2.5}),
                     new SpawnSignal(120, 0, new MapLocation(5, 6), RobotType.ZOMBIEDEN, Team.ZOMBIE, 0),
                     new TeamOreSignal(Team.A, 100),

@@ -51,7 +51,7 @@ public class TestGame {
      * @return the x coordinate of the map origin.
      */
     public int getOriginX() {
-        return world.getGameMap().getMapOrigin().x;
+        return world.getGameMap().getOrigin().x;
     }
 
     /**
@@ -60,7 +60,7 @@ public class TestGame {
      * @return the y coordinate of the map origin.
      */
     public int getOriginY() {
-        return world.getGameMap().getMapOrigin().y;
+        return world.getGameMap().getOrigin().y;
     }
 
     /**

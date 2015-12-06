@@ -94,6 +94,21 @@ public interface RobotController {
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
 
+    // TODO: seems weird that onTheMap throws GameActionExceptions for things
+    // that can't be sensed while senseRubble and senseParts return -1 for
+    // thosee
+
+    /**
+     * Senses whether a MapLocation is on the map. Will throw an exception if
+     * the location is not currently and has never been within sensor range.
+     *
+     * @paral loc the location to check.
+     * @return true if the location is on the map, and false if it is not.
+     * @throws GameActionException if the location has never been within
+     * sensor range.
+     */
+    boolean onTheMap(MapLocation loc) throws GameActionException;
+
     /**
      * Senses the rubble at the given location. Returns -1 for a location
      * outside sensor range.
@@ -238,16 +253,31 @@ public interface RobotController {
     boolean isWeaponReady();
 
     // ***********************************
+    // ****** RUBBLE METHODS ***********
+    // ***********************************
+
+    /**
+     * Queues a rubble clear in the given direction to be executed at the end
+     * of the turn.
+     *
+     * @param dir
+     *            the direction to clear rubble in.
+     * @throws GameActionException
+     *             if the robot cannot move in this direction.
+     */
+    void clearRubble(Direction dir) throws GameActionException;
+
+    // ***********************************
     // ****** MOVEMENT METHODS ***********
     // ***********************************
 
     /**
      * Tells whether this robot can move in the given direction, without taking
      * any sort of delays into account. Takes into account only the map terrain,
-     * positions of other robots, and the current robot's type (MISSILE and
-     * DRONE can move over VOID). Does not take into account whether this robot
-     * is currently active, but will only return true for units that are capable
-     * of movement. Returns false for the OMNI and NONE directions.
+     * positions of other robots, and the current robot's type. Does not take
+     * into account whether this robot is currently active, but will only
+     * return true for units that are capable of movement. Returns false for
+     * the OMNI and NONE directions.
      *
      * @param dir
      *            the direction to move in.

@@ -129,11 +129,16 @@ public class Server implements Observer, Runnable {
             try {
                 MatchInfo info = (MatchInfo) arg;
 
+                // Update the Config
+                this.options.set("bc.game.team-a", info.getTeamA());
+                this.options.set("bc.game.team-b", info.getTeamB());
+
                 int matchCount = info.getMaps().length;
                 int matchNumber = 0;
                 for (String map : info.getMaps()) {
                     if (map.endsWith(".xml"))
                         map = map.substring(0, map.indexOf('.'));
+                    this.options.set("bc.game.maps", map);
                     Match match = new Match(info, map, this.options,
                             matchNumber++, matchCount);
                     match.addObserver(this);

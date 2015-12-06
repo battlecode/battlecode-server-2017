@@ -341,7 +341,8 @@ public class InternalRobot {
     }
     
     public void transform(RobotType newType) {
-        gameWorld.decrementActiveRobotTypeCount(getTeam(), type);
+        gameWorld.decrementRobotTypeCount(getTeam(), type);
+        gameWorld.incrementRobotTypeCount(getTeam(), newType);
         type = newType;
         coreDelay += 10;
         weaponDelay += 10;

@@ -157,12 +157,12 @@ public enum RobotType {
     }
 
     /**
-     * Returns whether the robot can spawn.
+     * Returns whether the robot can clear rubble.
      *
-     * @return whether the robot can spawn.
+     * @return whether the robot can clear rubble.
      */
-    public boolean canSpawn() { // Update later
-        return this == ARCHON || this == ZOMBIEDEN;
+    public boolean canClearRubble() { // Update later
+        return this != TURRET || this != TTM;
     }
     
     RobotType(boolean isBuilding,
