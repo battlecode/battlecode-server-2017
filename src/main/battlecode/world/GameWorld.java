@@ -836,6 +836,17 @@ public class GameWorld implements SignalHandler {
             }
         }
 
+        // update rubble
+        alterRubble(loc, obj.type.maxHealth);
+        addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
+
+        updateMapMemoryRemove(obj.getTeam(), obj.getLocation(),
+                obj.type.sensorRadiusSquared);
+
+        controlProvider.robotKilled(obj);
+        gameObjectsByID.remove(obj.getID());
+        gameObjectsByLoc.remove(loc);
+
         // if it was an infected robot, create a Zombie in its place.
         if (obj.isInfected()) {
             RobotType zombieType = obj.type.turnsInto; // Type of Zombie this unit turns into
@@ -849,19 +860,7 @@ public class GameWorld implements SignalHandler {
                     0,
                     Optional.of(obj)
             );
-
         }
-
-        // update rubble
-        alterRubble(loc, obj.type.maxHealth);
-        addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
-
-        updateMapMemoryRemove(obj.getTeam(), obj.getLocation(),
-                obj.type.sensorRadiusSquared);
-
-        controlProvider.robotKilled(obj);
-        gameObjectsByID.remove(obj.getID());
-        gameObjectsByLoc.remove(loc);
 
         addSignal(s);
     }
