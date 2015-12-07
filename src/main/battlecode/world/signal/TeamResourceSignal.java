@@ -5,9 +5,9 @@ import battlecode.engine.signal.Signal;
 
 
 /**
- * Signifies a new quantity of ore for a team.
+ * Signifies a new quantity of resources (parts) for a team.
  */
-public class TeamOreSignal implements Signal {
+public class TeamResourceSignal implements Signal {
 
     /**
      * The team
@@ -15,20 +15,20 @@ public class TeamOreSignal implements Signal {
     public final Team team;
 
     /**
-     * The team's new ore level
+     * The team's new resource level
      */
-    public final double ore;
+    public final double resource;
 
-    public TeamOreSignal(Team team, double ore) {
+    public TeamResourceSignal(Team team, double resource) {
         this.team = team;
-        this.ore = ore;
+        this.resource = resource;
     }
 
     /**
      * For use by serializers.
      */
     @SuppressWarnings("unused")
-    private TeamOreSignal() {
+    private TeamResourceSignal() {
         this(null, 0);
     }
 }

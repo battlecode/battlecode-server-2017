@@ -603,7 +603,7 @@ public class GameWorld implements SignalHandler {
 
         // Add signals for team resources
         for (final Team team : Team.values()) {
-            addSignal(new TeamOreSignal(team, teamResources[team.ordinal()]));
+            addSignal(new TeamResourceSignal(team, teamResources[team.ordinal()]));
         }
 
         if (timeLimitReached() && winner == null) {
@@ -948,6 +948,11 @@ public class GameWorld implements SignalHandler {
 
         controlProvider.robotSpawned(robot);
 
+        addSignal(s);
+    }
+
+    @SuppressWarnings("unused")
+    public void visitTypeChangeSignal(TypeChangeSignal s) {
         addSignal(s);
     }
 }
