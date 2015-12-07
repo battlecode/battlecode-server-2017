@@ -275,9 +275,9 @@ public interface RobotController {
      * Tells whether this robot can move in the given direction, without taking
      * any sort of delays into account. Takes into account only the map terrain,
      * positions of other robots, and the current robot's type. Does not take
-     * into account whether this robot is currently active, but will only
-     * return true for units that are capable of movement. Returns false for
-     * the OMNI and NONE directions.
+     * into account whether this robot is currently active (no core delay), but
+     * will only * return true for units that are capable of movement.
+     * Returns false for the OMNI and NONE directions.
      *
      * @param dir
      *            the direction to move in.

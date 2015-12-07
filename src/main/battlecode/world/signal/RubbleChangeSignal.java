@@ -6,7 +6,7 @@ import battlecode.engine.signal.Signal;
 /**
  * Signifies a change in rubble on a tile.
  *
- * @author Matt
+ * @author axc
  */
 public class RubbleChangeSignal implements Signal {
 

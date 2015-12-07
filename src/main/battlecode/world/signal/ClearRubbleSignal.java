@@ -6,7 +6,7 @@ import battlecode.engine.signal.Signal;
 /**
  * Signifies that a robot is clearing rubble.
  *
- * @author Matt
+ * @author axc
  */
 public class ClearRubbleSignal implements Signal {
 
