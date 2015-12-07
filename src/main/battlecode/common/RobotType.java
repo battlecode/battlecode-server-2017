@@ -17,8 +17,11 @@ public enum RobotType {
     SOLDIER         (false, false, 0,  ARCHON,    10, 25, 50,   4,  13,   2,   2, 1, 24,     10000, 0, STANDARDZOMBIE),
     GUARD           (false, false, 0,  ARCHON,    10, 25, 120,  2,  24,   2,   1, 1, 24,     10000, 0, STANDARDZOMBIE),
     VIPER           (false, false, 20, ARCHON,    50, 30, 100,  2,  13,   3,   3, 1, 24,     10000, 0, RANGEDZOMBIE),
-    TURRET          (true,  false, 0,  ARCHON,    50, 50, 50,   18, 34,   0,   3, 3, 24,     2000,  0, RANGEDZOMBIE),
-    TTM             (false, false, 0,  TURRET,    0,  10, 50,   0,  0,    2,   0, 2, 24,     2000,  0, RANGEDZOMBIE),
+    TURRET          (false,  false, 0,  ARCHON,    50, 50, 50,   18, 34,   0,
+            3, 3, 24,     2000,  0, RANGEDZOMBIE),
+    TTM             (false, false, 0,  TURRET,    0,  10, 50,   0,  0,    2,
+            0,
+            2, 24,     2000,  0, RANGEDZOMBIE),
     //HANDWASHSTATION (false, false, 0,  null,   20, 80, 100,  0,  0,    0,   0, 0, 24, 2000,  0, null), RIP
     ;
 
@@ -135,7 +138,7 @@ public enum RobotType {
      * @return whether the robot can move.
      */
     public boolean canMove() {
-        return !isBuilding;
+        return this != ZOMBIEDEN && this != TURRET;
     }
 
     /**
