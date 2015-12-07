@@ -680,6 +680,7 @@ public class GameWorld implements SignalHandler {
             signals.add(new BytecodesUsedSignal(robots));
         }
         signals.add(new RobotDelaySignal(robots));
+        signals.add(new InfectionSignal(robots));
 
         HealthChangeSignal healthChange = new HealthChangeSignal(robots);
 
