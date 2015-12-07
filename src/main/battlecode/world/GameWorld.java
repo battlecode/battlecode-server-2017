@@ -537,21 +537,24 @@ public class GameWorld implements SignalHandler {
      * @param team the team of the robot
      * @param buildDelay the build delay of the robot
      * @param parent the parent of the robot, or Optional.empty() if there is no parent
+     * @return the ID of the spawned robot.
      */
-    public void spawnRobot(RobotType type,
+    public int spawnRobot(RobotType type,
                            MapLocation loc,
                            Team team,
                            int buildDelay,
                            Optional<InternalRobot> parent) {
 
+        int ID = nextID();
          visitSpawnSignal(new SpawnSignal(
-                nextID(),
+                ID,
                 parent.isPresent() ? parent.get().getID() : 0,
                 loc,
                 type,
                 team,
                 buildDelay
         ));
+        return ID;
     }
 
     public void processBeginningOfRound() {
@@ -734,10 +737,10 @@ public class GameWorld implements SignalHandler {
 
                 if (attacker.type.canInfect() && target.type.isInfectable()) {
                     target.setInfected(attacker);
-
-                    double damage = (attacker.type.attackPower) * rate;
-                    target.takeDamage(damage);
                 }
+
+                double damage = (attacker.type.attackPower) * rate;
+                target.takeDamage(damage);
             }
             break;
         default:
@@ -781,12 +784,9 @@ public class GameWorld implements SignalHandler {
     public void visitClearRubbleSignal(ClearRubbleSignal s) {
         MapLocation loc = s.getLoc();
         double currentRubble = getRubble(loc);
-        System.out.println("Previous rubble: " + currentRubble);
         alterRubble(loc, (currentRubble  * (1 - GameConstants
                 .RUBBLE_CLEAR_PERCENTAGE)) - GameConstants
                 .RUBBLE_CLEAR_FLAT_AMOUNT);
-        System.out.println("New rubble: " + getRubble(loc));
-
 
         addSignal(s);
         addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
