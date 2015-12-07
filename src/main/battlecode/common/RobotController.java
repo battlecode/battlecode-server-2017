@@ -111,7 +111,7 @@ public interface RobotController {
 
     /**
      * Senses the rubble at the given location. Returns -1 for a location
-     * outside sensor range.
+     * outside sensor range. Returns 0 for off map locations.
      *
      * @param loc
      *            the location to check.
@@ -121,7 +121,7 @@ public interface RobotController {
     
     /**
      * Senses the parts at the given location. Returns -1 for a location
-     * outside sensor range.
+     * outside sensor range. Returns 0 for off map locations.
      *
      * @param loc
      *            the location to check.

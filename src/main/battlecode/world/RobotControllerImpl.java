@@ -141,7 +141,7 @@ public final class RobotControllerImpl implements RobotController {
         if (canSense(loc)) {
             return gameWorld.getRubble(loc);
         }
-        return gameWorld.senseRubble(getTeam(), loc);
+        return gameWorld.senseParts(getTeam(), loc);
     }
 
     public boolean canSense(MapLocation loc) {

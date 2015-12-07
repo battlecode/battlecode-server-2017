@@ -428,14 +428,6 @@ public class GameWorld implements SignalHandler {
             MapLocation newLoc) {
         if (oldLoc != null) {
             if (gameObjectsByLoc.get(oldLoc) != o) {
-                System.out.println("Round: " + currentRound);
-                System.out.println("Actual = " + gameObjectsByLoc.get(oldLoc)
-                                .getID());
-                System.out.println("Robot = " + o.getID() + ", " + o.getTeam
-                        () + ", " + o.type);
-                System.out.println("oldLoc = " + oldLoc);
-                System.out.println("newLoc = " + newLoc);
-                System.out.println("o.loc = " + o.getLocation());
                 ErrorReporter
                         .report("Internal Error: invalid oldLoc in notifyMovingObject");
                 return;
@@ -479,6 +471,9 @@ public class GameWorld implements SignalHandler {
     // ****** RUBBLE METHODS **********
     // *********************************
     public double getRubble(MapLocation loc) {
+        if (!gameMap.onTheMap(loc)) {
+            return 0;
+        }
         return rubble[loc.x - gameMap.getOrigin().x][loc.y - gameMap
                 .getOrigin().y];
     }
@@ -489,13 +484,16 @@ public class GameWorld implements SignalHandler {
     
     public void alterRubble(MapLocation loc, double amount) {
         rubble[loc.x - gameMap.getOrigin().x][loc.y - gameMap.getOrigin().y]
-                = Math.max(0.0, getRubble(loc) + amount);
+                = Math.max(0.0, amount);
     }
 
     // *********************************
     // ****** PARTS METHODS ************
     // *********************************
     public double getParts(MapLocation loc) {
+        if (!gameMap.onTheMap(loc)) {
+            return 0;
+        }
         return parts[loc.x - gameMap.getOrigin().x][loc.y - gameMap
                 .getOrigin().y];
     }
@@ -783,9 +781,11 @@ public class GameWorld implements SignalHandler {
     public void visitClearRubbleSignal(ClearRubbleSignal s) {
         MapLocation loc = s.getLoc();
         double currentRubble = getRubble(loc);
+        System.out.println("Previous rubble: " + currentRubble);
         alterRubble(loc, (currentRubble  * (1 - GameConstants
                 .RUBBLE_CLEAR_PERCENTAGE)) - GameConstants
                 .RUBBLE_CLEAR_FLAT_AMOUNT);
+        System.out.println("New rubble: " + getRubble(loc));
 
 
         addSignal(s);
@@ -837,7 +837,7 @@ public class GameWorld implements SignalHandler {
         }
 
         // update rubble
-        alterRubble(loc, obj.type.maxHealth);
+        alterRubble(loc, getRubble(loc) + obj.type.maxHealth);
         addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
 
         updateMapMemoryRemove(obj.getTeam(), obj.getLocation(),
