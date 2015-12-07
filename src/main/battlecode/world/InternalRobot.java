@@ -4,6 +4,7 @@ import battlecode.common.*;
 import battlecode.engine.signal.Signal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
+import battlecode.world.signal.TypeChangeSignal;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -341,10 +342,13 @@ public class InternalRobot {
     }
     
     public void transform(RobotType newType) {
-        gameWorld.decrementActiveRobotTypeCount(getTeam(), type);
+        gameWorld.decrementRobotTypeCount(getTeam(), type);
+        gameWorld.incrementRobotTypeCount(getTeam(), newType);
         type = newType;
         coreDelay += 10;
         weaponDelay += 10;
+
+        gameWorld.visitSignal(new TypeChangeSignal(ID, newType));
     }
 
     // *********************************

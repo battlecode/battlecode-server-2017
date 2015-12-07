@@ -50,18 +50,16 @@ public class GameWorld implements SignalHandler {
     private Map<Team, Set<InternalRobot>> baseArchons = new EnumMap<>(Team.class);
     private final Map<MapLocation, InternalRobot> gameObjectsByLoc = new HashMap<>();
 
-    private Map<MapLocation, Double> partsMap = new HashMap<>();
-    private Map<MapLocation, Double> rubbleMap = new HashMap<>();
-     
+    private double[][] rubble;
+    private double[][] parts;
+
     private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<>(
             Team.class);
 
     private Map<Team, Map<Integer, Integer>> radio = new EnumMap<>(
             Team.class);
 
-    // a count for each robot type per team for tech tree checks and for tower
-    // counts
-    private Map<Team, Map<RobotType, Integer>> activeRobotTypeCount = new EnumMap<>(
+    private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<>(
             Team.class);
 
     @SuppressWarnings("unchecked")
@@ -90,13 +88,13 @@ public class GameWorld implements SignalHandler {
         radio.put(Team.A, new HashMap<>());
         radio.put(Team.B, new HashMap<>());
 
-        activeRobotTypeCount.put(Team.A, new EnumMap<>(
+        robotTypeCount.put(Team.A, new EnumMap<>(
                 RobotType.class));
-        activeRobotTypeCount.put(Team.B, new EnumMap<>(
+        robotTypeCount.put(Team.B, new EnumMap<>(
                 RobotType.class));
-        activeRobotTypeCount.put(Team.NEUTRAL, new EnumMap<>(
+        robotTypeCount.put(Team.NEUTRAL, new EnumMap<>(
                 RobotType.class));
-        activeRobotTypeCount.put(Team.ZOMBIE, new EnumMap<>(
+        robotTypeCount.put(Team.ZOMBIE, new EnumMap<>(
                 RobotType.class));
 
         baseArchons.put(Team.A, new HashSet<>());
@@ -104,6 +102,17 @@ public class GameWorld implements SignalHandler {
 
         adjustResources(Team.A, GameConstants.PARTS_INITIAL_AMOUNT);
         adjustResources(Team.B, GameConstants.PARTS_INITIAL_AMOUNT);
+
+        this.rubble = new double[gm.getWidth()][gm.getWidth()];
+        this.parts = new double[gm.getHeight()][gm.getHeight()];
+        for (int i = 0; i < gm.getWidth(); i++) {
+            for (int j = 0; j < gm.getHeight(); j++) {
+                this.rubble[i][j] = gm.initialRubbleAtLocation(i + gm
+                        .getOrigin().x, j + gm.getOrigin().y);
+                this.parts[i][j] = gm.initialPartsAtLocation(i + gm
+                        .getOrigin().x, j + gm.getOrigin().y);
+            }
+        }
 
         reserveRandomIDs(32000);
 
@@ -115,7 +124,7 @@ public class GameWorld implements SignalHandler {
 
             spawnRobot(
                     initialRobot.type,
-                    initialRobot.getLocation(gameMap.getMapOrigin()),
+                    initialRobot.getLocation(gameMap.getOrigin()),
                     initialRobot.team,
                     0,
                     Optional.empty()
@@ -315,12 +324,17 @@ public class GameWorld implements SignalHandler {
             return randomIDs.remove(randomIDs.size() - 1);
     }
 
+    public boolean seenBefore(Team team, MapLocation loc) {
+        return mapMemory.get(team).seenBefore(loc);
+    }
+
     public boolean canSense(Team team, MapLocation loc) {
         return mapMemory.get(team).canSense(loc);
     }
 
     public void updateMapMemoryAdd(Team team, MapLocation loc, int radiusSquared) {
-        mapMemory.get(team).rememberLocation(loc, radiusSquared, partsMap, rubbleMap);
+        mapMemory.get(team).rememberLocation(loc, radiusSquared, parts,
+                rubble);
     }
 
     public void updateMapMemoryRemove(Team team, MapLocation loc,
@@ -329,9 +343,9 @@ public class GameWorld implements SignalHandler {
     }
 
     public boolean canMove(MapLocation loc, RobotType type) {
-        return (gameMap.onTheMap(loc) &&
-                (!rubbleMap.containsKey(loc) || rubbleMap.get(loc) < GameConstants.RUBBLE_OBSTRUCTION_THRESH || type == RobotType.SCOUT) &&
-                gameObjectsByLoc.get(loc) == null);
+        return gameMap.onTheMap(loc) && (getRubble(loc) < GameConstants
+                .RUBBLE_OBSTRUCTION_THRESH || type == RobotType.SCOUT) &&
+                gameObjectsByLoc.get(loc) == null;
     }
 
     protected boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
@@ -430,35 +444,38 @@ public class GameWorld implements SignalHandler {
     // *********************************
 
     // only returns active robots
-    public int getActiveRobotTypeCount(Team team, RobotType type) {
-        if (activeRobotTypeCount.get(team).containsKey(type)) {
-            return activeRobotTypeCount.get(team).get(type);
+    public int getRobotTypeCount(Team team, RobotType type) {
+        if (robotTypeCount.get(team).containsKey(type)) {
+            return robotTypeCount.get(team).get(type);
         } else {
-            activeRobotTypeCount.get(team).put(type, 0);
             return 0;
         }
     }
 
-    public void incrementActiveRobotTypeCount(Team team, RobotType type) {
-        if (activeRobotTypeCount.get(team).containsKey(type)) {
-            activeRobotTypeCount.get(team).put(type,
-                    activeRobotTypeCount.get(team).get(type) + 1);
+    public void incrementRobotTypeCount(Team team, RobotType type) {
+        if (robotTypeCount.get(team).containsKey(type)) {
+            robotTypeCount.get(team).put(type,
+                    robotTypeCount.get(team).get(type) + 1);
         } else {
-            activeRobotTypeCount.get(team).put(type, 1);
+            robotTypeCount.get(team).put(type, 1);
         }
     }
     
     // decrement from active robots (used during TTM <-> Turret transform)
-    public void decrementActiveRobotTypeCount(Team team, RobotType type) {
-        Integer currentCount = getActiveRobotTypeCount(team, type);
-        activeRobotTypeCount.get(team).put(type,currentCount - 1);
+    public void decrementRobotTypeCount(Team team, RobotType type) {
+        Integer currentCount = getRobotTypeCount(team, type);
+        robotTypeCount.get(team).put(type,currentCount - 1);
     }
 
     // *********************************
     // ****** RUBBLE METHODS **********
     // *********************************
     public double getRubble(MapLocation loc) {
-        return rubbleMap.get(loc);
+        if (!gameMap.onTheMap(loc)) {
+            return 0;
+        }
+        return rubble[loc.x - gameMap.getOrigin().x][loc.y - gameMap
+                .getOrigin().y];
     }
     
     public double senseRubble(Team team, MapLocation loc) {
@@ -466,14 +483,19 @@ public class GameWorld implements SignalHandler {
     }
     
     public void alterRubble(MapLocation loc, double amount) {
-        rubbleMap.put(loc, rubbleMap.get(loc)+amount);
+        rubble[loc.x - gameMap.getOrigin().x][loc.y - gameMap.getOrigin().y]
+                = Math.max(0.0, amount);
     }
 
     // *********************************
     // ****** PARTS METHODS ************
     // *********************************
     public double getParts(MapLocation loc) {
-        return partsMap.get(loc);
+        if (!gameMap.onTheMap(loc)) {
+            return 0;
+        }
+        return parts[loc.x - gameMap.getOrigin().x][loc.y - gameMap
+                .getOrigin().y];
     }
 
     public double senseParts(Team team, MapLocation loc) {
@@ -481,15 +503,10 @@ public class GameWorld implements SignalHandler {
     }
 
     public double takeParts(MapLocation loc) { // Remove parts from location
-        double prevVal = partsMap.containsKey(loc) ? partsMap.get(loc) : 0;
-        partsMap.put(loc,0.0);
+        double prevVal = getParts(loc);
+        parts[loc.x - gameMap.getOrigin().x][loc.y - gameMap.getOrigin().y] =
+                0.0;
         return prevVal;
-      /*  double cur = 0;
-        if (oreMined.containsKey(loc)) {
-            cur = oreMined.get(loc);
-        }
-        oreMined.put(loc, cur + amount);
-        addSignal(new LocationOreChangeSignal(loc, cur + amount));*/
     }
 
     protected boolean spendResources(Team t, double amount) {
@@ -520,21 +537,24 @@ public class GameWorld implements SignalHandler {
      * @param team the team of the robot
      * @param buildDelay the build delay of the robot
      * @param parent the parent of the robot, or Optional.empty() if there is no parent
+     * @return the ID of the spawned robot.
      */
-    public void spawnRobot(RobotType type,
+    public int spawnRobot(RobotType type,
                            MapLocation loc,
                            Team team,
                            int buildDelay,
                            Optional<InternalRobot> parent) {
 
+        int ID = nextID();
          visitSpawnSignal(new SpawnSignal(
-                nextID(),
+                ID,
                 parent.isPresent() ? parent.get().getID() : 0,
                 loc,
                 type,
                 team,
                 buildDelay
         ));
+        return ID;
     }
 
     public void processBeginningOfRound() {
@@ -577,20 +597,20 @@ public class GameWorld implements SignalHandler {
 
         // free parts
         teamResources[Team.A.ordinal()] += GameConstants.ARCHON_PART_INCOME
-                * getActiveRobotTypeCount(Team.A, RobotType.ARCHON);
+                * getRobotTypeCount(Team.A, RobotType.ARCHON);
         teamResources[Team.B.ordinal()] += GameConstants.ARCHON_PART_INCOME
-                * getActiveRobotTypeCount(Team.B, RobotType.ARCHON);
+                * getRobotTypeCount(Team.B, RobotType.ARCHON);
 
         // Add signals for team resources
         for (final Team team : Team.values()) {
-            addSignal(new TeamOreSignal(team, teamResources[team.ordinal()]));
+            addSignal(new TeamResourceSignal(team, teamResources[team.ordinal()]));
         }
 
         if (timeLimitReached() && winner == null) {
             // tiebreak by number of Archons
             if (!(setWinnerIfNonzero(
-                    getActiveRobotTypeCount(Team.A, RobotType.ARCHON)
-                            - getActiveRobotTypeCount(Team.B, RobotType.ARCHON),
+                    getRobotTypeCount(Team.A, RobotType.ARCHON)
+                            - getRobotTypeCount(Team.B, RobotType.ARCHON),
                     DominationFactor.PWNED))) {
                 // tiebreak by total Archon health
                 double archonDiff = 0.0;
@@ -660,6 +680,7 @@ public class GameWorld implements SignalHandler {
             signals.add(new BytecodesUsedSignal(robots));
         }
         signals.add(new RobotDelaySignal(robots));
+        signals.add(new InfectionSignal(robots));
 
         HealthChangeSignal healthChange = new HealthChangeSignal(robots);
 
@@ -717,10 +738,10 @@ public class GameWorld implements SignalHandler {
 
                 if (attacker.type.canInfect() && target.type.isInfectable()) {
                     target.setInfected(attacker);
-
-                    double damage = (attacker.type.attackPower) * rate;
-                    target.takeDamage(damage);
                 }
+
+                double damage = (attacker.type.attackPower) * rate;
+                target.takeDamage(damage);
             }
             break;
         default:
@@ -761,6 +782,18 @@ public class GameWorld implements SignalHandler {
     }
 
     @SuppressWarnings("unused")
+    public void visitClearRubbleSignal(ClearRubbleSignal s) {
+        MapLocation loc = s.getLoc();
+        double currentRubble = getRubble(loc);
+        alterRubble(loc, (currentRubble  * (1 - GameConstants
+                .RUBBLE_CLEAR_PERCENTAGE)) - GameConstants
+                .RUBBLE_CLEAR_FLAT_AMOUNT);
+
+        addSignal(s);
+        addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
+    }
+
+    @SuppressWarnings("unused")
     public void visitControlBitsSignal(ControlBitsSignal s) {
         InternalRobot r = getObjectByID(s.getRobotID());
         r.setControlBits(s.getControlBits());
@@ -793,26 +826,27 @@ public class GameWorld implements SignalHandler {
             throw new RuntimeException("Object location out of sync: "+obj);
         }
 
-        gameObjectsByLoc.remove(loc);
-
-        controlProvider.robotKilled(obj);
-
-        // update robot counting
-        if (obj.isActive()) {
-            Integer currentCount = activeRobotTypeCount.get(obj.getTeam())
-                    .get(obj.type);
-            activeRobotTypeCount.get(obj.getTeam()).put(obj.type,
-                    currentCount - 1);
-        }
+        decrementRobotTypeCount(obj.getTeam(), obj.type);
 
         if (obj.type == RobotType.ARCHON) {
-            int totalArchons = getActiveRobotTypeCount(obj.getTeam(),
+            int totalArchons = getRobotTypeCount(obj.getTeam(),
                     RobotType.ARCHON);
             if (totalArchons == 0) {
                 setWinner(obj.getTeam().opponent(),
                         DominationFactor.DESTROYED);
             }
         }
+
+        // update rubble
+        alterRubble(loc, getRubble(loc) + obj.type.maxHealth);
+        addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
+
+        updateMapMemoryRemove(obj.getTeam(), obj.getLocation(),
+                obj.type.sensorRadiusSquared);
+
+        controlProvider.robotKilled(obj);
+        gameObjectsByID.remove(obj.getID());
+        gameObjectsByLoc.remove(loc);
 
         // if it was an infected robot, create a Zombie in its place.
         if (obj.isInfected()) {
@@ -827,13 +861,7 @@ public class GameWorld implements SignalHandler {
                     0,
                     Optional.of(obj)
             );
-
         }
-
-        updateMapMemoryRemove(obj.getTeam(), obj.getLocation(),
-                obj.type.sensorRadiusSquared);
-
-        gameObjectsByID.remove(obj.getID());
 
         addSignal(s);
     }
@@ -865,6 +893,9 @@ public class GameWorld implements SignalHandler {
         double newParts = takeParts(r.getLocation());
         adjustResources(r.getTeam(), newParts);
         addSignal(s);
+        if (newParts > 0) {
+            addSignal(new PartsChangeSignal(s.getNewLoc(), 0));
+        }
     }
 
     @SuppressWarnings("unused")
@@ -907,9 +938,7 @@ public class GameWorld implements SignalHandler {
                 s.getType().sensorRadiusSquared
         );
 
-        if (!s.getType().isBuildable() || s.getDelay() == 0) {
-            incrementActiveRobotTypeCount(s.getTeam(), s.getType());
-        }
+        incrementRobotTypeCount(s.getTeam(), s.getType());
 
         gameObjectsByID.put(s.getRobotID(), robot);
 
@@ -919,6 +948,11 @@ public class GameWorld implements SignalHandler {
 
         controlProvider.robotSpawned(robot);
 
+        addSignal(s);
+    }
+
+    @SuppressWarnings("unused")
+    public void visitTypeChangeSignal(TypeChangeSignal s) {
         addSignal(s);
     }
 }

@@ -70,6 +70,12 @@ public interface GameConstants {
     /** The threshold of rubble that robots (except SCOUTs) can't move through */
     int RUBBLE_OBSTRUCTION_THRESH = 100;
 
+    /** Percentage of rubble removed with each clear. */
+    double RUBBLE_CLEAR_PERCENTAGE = 0.05;
+
+    /** Flat amount of rubble removed with each clear. */
+    double RUBBLE_CLEAR_FLAT_AMOUNT = 20;
+
     // *********************************
     // ****** UNIT PROPERTIES **********
     // *********************************

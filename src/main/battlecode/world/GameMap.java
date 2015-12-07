@@ -241,14 +241,16 @@ public class GameMap implements Serializable {
      * Determines the amount of rubble on the map at
      * the given location.
      *
-     * @param location the MapLocation to get rubble for.
+     * @param x the x value of the MapLocation to get rubble for.
+     * @param y the y value of the MapLocation to get rubble for.
      * @return the amount of rubble in the given location, or 0 if off map
      */
-    public double initialRubbleAtLocation(MapLocation location) {
-        if (!onTheMap(location))
+    public double initialRubbleAtLocation(int x, int y) {
+        if (!onTheMap(x, y)) {
             return 0;
+        }
 
-        return initialRubble[location.x - origin.x][location.y - origin.y];
+        return initialRubble[x - origin.x][y - origin.y];
     }
 
     /**
@@ -261,17 +263,18 @@ public class GameMap implements Serializable {
     }
     
     /**
-     * Determines the amount of ore on the map at the
+     * Determines the amount of parts on the map at the
      * given location.
      *
-     * @param location the MapLocation to test
+     * @param x the x value of the MapLocation to get parts for.
+     * @param y the y value of the MapLocation to get parts for.
      * @return the amount of parts in the given location, or 0 if off the map
      */
-    public double initialPartsAtLocation(MapLocation location) {
-        if (!onTheMap(location))
+    public double initialPartsAtLocation(int x, int y) {
+        if (!onTheMap(x, y))
             return 0.0;
 
-        return initialParts[location.x - origin.x][location.y - origin.y];
+        return initialParts[x - origin.x][y - origin.y];
     }
 
     /**
@@ -329,7 +332,7 @@ public class GameMap implements Serializable {
      * @return the origin of the map
      */
     @JsonIgnore
-    public MapLocation getMapOrigin() {
+    public MapLocation getOrigin() {
         return new MapLocation(origin.x, origin.y);
     }
 
@@ -363,8 +366,15 @@ public class GameMap implements Serializable {
         }
 
         // x and y are locations relative to the origin
+        // returns whether the location is checked by this map memory
         private boolean validLoc(int x, int y) {
             return x >= -OFFSET && x < map.getWidth() + OFFSET && y >= -OFFSET && y < map.getHeight() + OFFSET;
+        }
+
+        // x and y are locations relative to the origin
+        private boolean onTheMap(int x, int y) {
+            return x >= 0 && x < map.getWidth() && y >= 0 && y
+                    < map.getHeight();
         }
 
         public void removeLocation(MapLocation loc, int radiusSquared) {
@@ -379,7 +389,8 @@ public class GameMap implements Serializable {
             }
         }
 
-        public void rememberLocation(MapLocation loc, int radiusSquared, Map<MapLocation, Double> partsMap,  Map<MapLocation, Double> rubbleMap) {
+        public void rememberLocation(MapLocation loc, int radiusSquared,
+                                     double[][] rubble, double[][] parts) {
             MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
             for (MapLocation target : locs) {
@@ -388,11 +399,13 @@ public class GameMap implements Serializable {
                 if (validLoc(x, y)) {
                     seen[x + OFFSET][y + OFFSET] = true;
                     currentCount[x + OFFSET][y + OFFSET]++;
-                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && partsMap.containsKey(target)) {
-                        partsOnSquare[x + OFFSET][y + OFFSET] = partsMap.get(target);
+                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && onTheMap
+                            (x, y)) {
+                        partsOnSquare[x + OFFSET][y + OFFSET] = parts[x][y];
                     }
-                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && rubbleMap.containsKey(target)) {
-                        rubbleOnSquare[x + OFFSET][y + OFFSET] = rubbleMap.get(target);
+                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && onTheMap
+                            (x, y)) {
+                        rubbleOnSquare[x + OFFSET][y + OFFSET] = rubble[x][y];
                     }
                 }
             }

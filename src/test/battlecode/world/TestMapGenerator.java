@@ -189,7 +189,7 @@ public class TestMapGenerator {
      * @param partsValue the new parts value
      * @return itself, after the parts value has been updated
      */
-    public TestMapGenerator withParts(int x, int y, int partsValue) {
+    public TestMapGenerator withParts(int x, int y, double partsValue) {
         this.parts[x][y] = partsValue;
         return this;
     }
@@ -201,7 +201,7 @@ public class TestMapGenerator {
      * @param y the y coordinate of the parts value to change
      * @param partsValue the new parts value
      */
-    public void setParts(int x, int y, int partsValue) {
+    public void setParts(int x, int y, double partsValue) {
         this.parts[x][y] = partsValue;
     }
 
@@ -213,7 +213,7 @@ public class TestMapGenerator {
      * @param rubbleValue the new rubble value
      * @return itself, after the rubble value has been updated
      */
-    public TestMapGenerator withRubble(int x, int y, int rubbleValue) {
+    public TestMapGenerator withRubble(int x, int y, double rubbleValue) {
         this.rubble[x][y] = rubbleValue;
         return this;
     }
@@ -225,7 +225,7 @@ public class TestMapGenerator {
      * @param y the y coordinate of the rubble value to change
      * @param rubbleValue the new rubble value
      */
-    public void setRubble(int x, int y, int rubbleValue) {
+    public void setRubble(int x, int y, double rubbleValue) {
         this.rubble[x][y] = rubbleValue;
     }
 
