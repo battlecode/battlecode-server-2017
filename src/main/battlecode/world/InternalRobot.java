@@ -127,9 +127,9 @@ public class InternalRobot {
         }
         return this.cachedRobotInfo = new RobotInfo(
                 ID, team, type, location,
-                coreDelay, weaponDelay,
-                healthLevel,
-                zombieInfectedTurns,viperInfectedTurns);
+                coreDelay, weaponDelay, healthLevel,
+                zombieInfectedTurns, viperInfectedTurns
+        );
     }
 
     public RobotControllerImpl getController() {

@@ -35,7 +35,7 @@ public class GameWorld implements SignalHandler {
     protected final long[][] teamMemory;
     protected final long[][] oldTeamMemory;
     protected final Map<Integer, InternalRobot> gameObjectsByID;
-    protected final ArrayList<Integer> randomIDs = new ArrayList<>();
+    protected final IDGenerator idGenerator;
 
     private final GameMap gameMap;
 
@@ -75,7 +75,7 @@ public class GameWorld implements SignalHandler {
         gameObjectsByID = new LinkedHashMap<>();
         signals = new ArrayList<>();
         randGen = new Random(gm.getSeed());
-        nextID = 1;
+        idGenerator = new IDGenerator(gm.getSeed());
         teamMemory = new long[2][oldTeamMemory[0].length];
         this.oldTeamMemory = oldTeamMemory;
 
@@ -104,8 +104,6 @@ public class GameWorld implements SignalHandler {
 
         adjustResources(Team.A, GameConstants.PARTS_INITIAL_AMOUNT);
         adjustResources(Team.B, GameConstants.PARTS_INITIAL_AMOUNT);
-
-        reserveRandomIDs(32000);
 
         controlProvider.matchStarted(this);
 
@@ -296,23 +294,6 @@ public class GameWorld implements SignalHandler {
 
     public boolean wasBreakpointHit() {
         return wasBreakpointHit;
-    }
-
-    public void reserveRandomIDs(int num) {
-        while (num > 0) {
-            randomIDs.add(nextID++);
-            num--;
-        }
-        Collections.shuffle(randomIDs, randGen);
-    }
-
-    public int nextID() {
-        if (randomIDs.isEmpty()) {
-            int ret = nextID;
-            nextID += randGen.nextInt(3) + 1;
-            return ret;
-        } else
-            return randomIDs.remove(randomIDs.size() - 1);
     }
 
     public boolean canSense(Team team, MapLocation loc) {
@@ -528,7 +509,7 @@ public class GameWorld implements SignalHandler {
                            Optional<InternalRobot> parent) {
 
          visitSpawnSignal(new SpawnSignal(
-                nextID(),
+                idGenerator.nextID(),
                 parent.isPresent() ? parent.get().getID() : 0,
                 loc,
                 type,
