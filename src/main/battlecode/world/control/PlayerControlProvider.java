@@ -6,7 +6,7 @@ import battlecode.server.Config;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -36,7 +36,7 @@ public class PlayerControlProvider implements RobotControlProvider {
 
     @Override
     public void matchStarted(GameWorld gameWorld) {
-        this.sandboxes = new LinkedHashMap<>(); // maintain order!
+        this.sandboxes = new HashMap<>(); // GameWorld maintains order for us
         this.gameWorld = gameWorld;
 
         IndividualClassLoader.reset();
