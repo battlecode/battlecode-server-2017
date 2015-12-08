@@ -49,6 +49,11 @@ public class InternalRobot {
     private int buildDelay;
 
     /**
+     * Used to avoid recreating the same RobotInfo object over and over.
+     */
+    private RobotInfo cachedRobotInfo;
+
+    /**
      * Create a new internal representation of a robot
      *
      * @param gw the world the robot exists in
@@ -109,9 +114,23 @@ public class InternalRobot {
     // *********************************
 
     public RobotInfo getRobotInfo() {
-        return new RobotInfo(getID(), getTeam(), type, getLocation(),
-                getCoreDelay(), getWeaponDelay(), getHealthLevel(),
-                getZombieInfectedTurns(),getViperInfectedTurns());
+        if (this.cachedRobotInfo != null
+                && this.cachedRobotInfo.ID == ID
+                && this.cachedRobotInfo.team == team
+                && this.cachedRobotInfo.type == type
+                && this.cachedRobotInfo.location.equals(location)
+                && this.cachedRobotInfo.coreDelay == coreDelay
+                && this.cachedRobotInfo.weaponDelay == weaponDelay
+                && this.cachedRobotInfo.health == healthLevel
+                && this.cachedRobotInfo.zombieInfectedTurns == zombieInfectedTurns
+                && this.cachedRobotInfo.viperInfectedTurns == viperInfectedTurns) {
+            return this.cachedRobotInfo;
+        }
+        return this.cachedRobotInfo = new RobotInfo(
+                ID, team, type, location,
+                coreDelay, weaponDelay, healthLevel,
+                zombieInfectedTurns, viperInfectedTurns
+        );
     }
 
     public RobotControllerImpl getController() {
