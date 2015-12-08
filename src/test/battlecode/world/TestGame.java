@@ -5,6 +5,7 @@ import battlecode.world.control.NullControlProvider;
 import battlecode.world.control.RobotControlProvider;
 import org.junit.Ignore;
 
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -22,8 +23,11 @@ public class TestGame {
     /** The game world that everything is based on. */
     private final GameWorld world;
 
-    /** The function to run on robots. **/
+    /** The function to run on robots. */
     private Consumer<InternalRobot> runRobot;
+
+    /** Any exception thrown while running the game. */
+    private GameActionException exception;
 
     /**
      * Creates a test game with the given map.
@@ -32,7 +36,9 @@ public class TestGame {
      */
     public TestGame(GameMap map) {
         long[][] teamMemory = new long[2][GameConstants.TEAM_MEMORY_LENGTH];
-        world = new GameWorld(map, new NullControlProvider(), "A", "B", teamMemory);
+        world = new GameWorld(map, new TestControlProvider(), "A", "B",
+                teamMemory);
+        exception = null;
     }
 
     /**
@@ -42,7 +48,8 @@ public class TestGame {
      * @param memory the previous round's team memory
      */
     public TestGame(GameMap map, long[][] memory) {
-        world = new GameWorld(map, new NullControlProvider(), "A", "B", memory);
+        world = new GameWorld(map, new TestControlProvider(), "A", "B", memory);
+        exception = null;
     }
 
     /**
@@ -51,7 +58,7 @@ public class TestGame {
      * @return the x coordinate of the map origin.
      */
     public int getOriginX() {
-        return world.getGameMap().getMapOrigin().x;
+        return world.getGameMap().getOrigin().x;
     }
 
     /**
@@ -60,7 +67,7 @@ public class TestGame {
      * @return the y coordinate of the map origin.
      */
     public int getOriginY() {
-        return world.getGameMap().getMapOrigin().y;
+        return world.getGameMap().getOrigin().y;
     }
 
     /**
@@ -72,14 +79,24 @@ public class TestGame {
      * @param type type of the robot to spawn
      * @param team team of the robot to spawn
      */
-    public void spawn(int x, int y, RobotType type, Team team) {
-        world.spawnRobot(
+    public int spawn(int x, int y, RobotType type, Team team) {
+        return world.spawnRobot(
                 type,
                 new MapLocation(x, y),
                 team,
                 0,
-                null
+                Optional.empty()
         );
+    }
+
+
+    /**
+     * A helper class to deal with the fact that it's tricky for Java lambdas
+     * to handle checked exceptions. This is equivalent to a BiConsumer,
+     * except that "accept" throws GameActionException.
+     */
+    public interface BiConsumerWithException {
+        void accept(int id, RobotController rc) throws GameActionException;
     }
 
     /**
@@ -93,30 +110,54 @@ public class TestGame {
      * @param f a function that, given an integer ID and a RobotController, will perform the actions for the robot with
      *          that ID for the current turn
      */
-    public void round(BiConsumer<Integer, RobotController> f) {
+    public void round(BiConsumerWithException f) throws
+            GameActionException {
         this.runRobot = (robot) -> {
-            f.accept(robot.getID(), robot.getController());
-        };
-
-        world.runRound();
-    }
-
-    /**
-     * Executes a round of gameplay, in which every robot does nothing except for the robot with the given ID. That
-     * robot instead will use the input function f to execute actions. The function f must accept a RobotController
-     * and use that RobotController to perform the actions.
-     *
-     * @param id the ID of the robot that performs actions
-     * @param f a function that, given a RobotController, will perform the actions for the robot with the input ID
-     */
-    public void turn(int id, Consumer<RobotController> f) {
-        this.runRobot = (robot) -> {
-            if (id == robot.getID()) {
-                f.accept(robot.getController());
+            try {
+                f.accept(robot.getID(), robot.getController());
+            } catch (GameActionException e) {
+                exception = e;
             }
         };
 
         world.runRound();
+        if (exception != null) {
+            throw exception;
+        }
+    }
+
+    /**
+     * Skips a number of rounds. The game state will change, but no robots
+     * will perform actions.
+     *
+     * @param n the number of rounds to skip.
+     */
+    public void waitRounds(int n) {
+        this.runRobot = (robot) -> {
+        };
+
+        for (int i = 0; i < n; ++i) {
+            world.runRound();
+        }
+    }
+
+    /**
+     * Returns the InternalRobot associated with a given ID.
+     *
+     * @param id the ID of the robot to query
+     * @return the InternalRobot for the given ID
+     */
+    public InternalRobot getBot(int id) {
+        return world.getObjectByID(id);
+    }
+
+    /**
+     * Returns the GameWorld.
+     *
+     * @return the GameWorld
+     */
+    public GameWorld getWorld() {
+        return world;
     }
 
     private class TestControlProvider implements RobotControlProvider {

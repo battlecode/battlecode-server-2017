@@ -54,10 +54,12 @@ public final class RobotControllerImpl implements RobotController {
         return gameWorld.getGameMap().getRounds();
     }
 
+    // not in RobotController
     public int getMapWidth() {
         return gameWorld.getGameMap().getWidth();
     }
 
+    // not in RobotController
     public int getMapHeight() {
         return gameWorld.getGameMap().getHeight();
     }
@@ -116,6 +118,16 @@ public final class RobotControllerImpl implements RobotController {
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
+    public boolean onTheMap(MapLocation loc) throws GameActionException {
+        assertNotNull(loc);
+        if (gameWorld.seenBefore(getTeam(), loc)) {
+            return gameWorld.getGameMap().onTheMap(loc);
+        } else {
+            throw new GameActionException(CANT_SENSE_THAT, "Cannot sense that" +
+                    " map location");
+        }
+    }
+
     public double senseRubble(MapLocation loc) {
         assertNotNull(loc);
         if (canSense(loc)) {
@@ -129,7 +141,7 @@ public final class RobotControllerImpl implements RobotController {
         if (canSense(loc)) {
             return gameWorld.getRubble(loc);
         }
-        return gameWorld.senseRubble(getTeam(), loc);
+        return gameWorld.senseParts(getTeam(), loc);
     }
 
     public boolean canSense(MapLocation loc) {
@@ -243,6 +255,40 @@ public final class RobotControllerImpl implements RobotController {
         return getWeaponDelay() < 1;
     }
 
+    public void assertIsCoreReady() throws GameActionException {
+        if (!isCoreReady()) {
+            throw new GameActionException(NOT_ACTIVE,
+                    "This robot has core delay.");
+        }
+    }
+
+    // ***********************************
+    // ****** RUBBLE METHODS *************
+    // ***********************************
+    public boolean isRubbleClearingUnit() {
+        return robot.type.canClearRubble();
+    }
+
+    public void assertIsRubbleClearingUnit() throws GameActionException {
+        if (!isRubbleClearingUnit()) {
+            throw new GameActionException(GameActionExceptionType
+                    .CANT_DO_THAT_BRO, "This unit cannot clear rubble.");
+        }
+    }
+
+    public void clearRubble(Direction dir) throws GameActionException {
+        assertIsCoreReady();
+        assertIsRubbleClearingUnit();
+        if (dir == null || dir.equals(Direction.OMNI)) {
+            throw new IllegalArgumentException("You cannot clear rubble in " +
+                    "the direction OMNI or in a null direction.");
+        }
+
+        robot.activateMovement(new ClearRubbleSignal(robot.getID(),
+                getLocation().add(dir), (int) (robot.type.movementDelay)),
+                robot.type.cooldownDelay, robot.type.movementDelay);
+    }
+
     // ***********************************
     // ****** MOVEMENT METHODS ***********
     // ***********************************
@@ -250,6 +296,7 @@ public final class RobotControllerImpl implements RobotController {
         return gameWorld.canMove(loc, type);
     }
 
+    // TODO: maybe put this back in RobotController
     public boolean isPathable(RobotType type, MapLocation loc) {
         if (!canSense(loc)) {
             return false;
@@ -265,19 +312,13 @@ public final class RobotControllerImpl implements RobotController {
         return dir != null && dir != Direction.NONE && dir != Direction.OMNI;
     }
 
-    public void assertIsCoreReady() throws GameActionException {
-        if (!isCoreReady()) {
-            throw new GameActionException(NOT_ACTIVE,
-                    "This robot has core delay.");
-        }
-    }
-
     public void assertIsPathable(RobotType type, MapLocation loc)
             throws GameActionException {
         if (!isPathableInternal(type, loc)) {
             throw new GameActionException(
                     GameActionExceptionType.CANT_MOVE_THERE,
-                    "Cannot move robot of given type to that location.");
+                    "Cannot move robot of given type to that location. There " +
+                            "might be too much rubble.");
         }
     }
 
@@ -307,15 +348,10 @@ public final class RobotControllerImpl implements RobotController {
         assertIsPathable(robot.type, getLocation().add(d));
 
         double factor1 = (d.isDiagonal() ? GameConstants.DIAGONAL_DELAY_MULTIPLIER
-                : 1.0);
+                : 1.0); // TODO: maybe slow down robots on rubble
         double factor2 = 1.0;
-        // if (robot.type == RobotType.DRONE &&
-        // gameWorld.getMapTerrain(getLoc().add(d)) == TerrainType.VOID) {
-        // factor1 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
-        // factor2 *= GameConstants.DRONE_VOID_DELAY_MULTIPLIER;
-        // } TODO: Will we have flying units?
 
-        robot.activateMovement(new MovementSignal(robot.getID(), getLocation().add(d), true, (int) (robot.type.movementDelay * factor1)),
+        robot.activateMovement(new MovementSignal(robot.getID(), getLocation().add(d), (int) (robot.type.movementDelay * factor1)),
                 robot.type.cooldownDelay * factor2,
                 robot.type.movementDelay * factor1);
     }
@@ -424,61 +460,6 @@ public final class RobotControllerImpl implements RobotController {
     // ****** BUILDING/SPAWNING **********
     // ***********************************
 
-    public boolean isSpawningUnit() {
-        return robot.type.canSpawn();
-    }
-
-    public void assertIsSpawningUnit() throws GameActionException {
-        if (!isSpawningUnit()) {
-            throw new GameActionException(CANT_DO_THAT_BRO,
-                    "Must be spawning unit.");
-        }
-    }
-
-    public boolean hasSpawnRequirements(RobotType type) {
-        if (!isSpawningUnit()) {
-            return false;
-        }
-
-        if (type.partCost > gameWorld.resources(getTeam())) {
-            return false;
-        }
-
-        return type.spawnSource == robot.type;
-    }
-
-    public boolean canSpawn(Direction dir, RobotType type) {
-        MapLocation loc = getLocation().add(dir);
-        return isPathableInternal(robot.type, loc)
-                && hasSpawnRequirements(type);
-    }
-
-    public void spawn(Direction dir, RobotType type) throws GameActionException {
-        assertIsSpawningUnit();
-
-        assertIsCoreReady();
-
-        if (type.spawnSource != robot.type) {
-            throw new GameActionException(CANT_DO_THAT_BRO,
-                    "This spawn can only be by a certain type");
-        }
-
-        // if (!options.getBoolean("bc.game.allow-air-units") && type ==
-        // RobotType.DRONE) {
-        // throw new GameActionException(CANT_DO_THAT_BRO,
-        // "Game config doesn't allow spawning air units.");
-        // } TODO: Will we have flying units?
-
-        MapLocation loc = getLocation().add(dir);
-        assertIsPathable(type, loc);
-
-        double cost = type.partCost;
-        assertHaveResource(cost);
-
-        robot.activateMovement(new SpawnSignal(loc, type, robot.getTeam(),
-                robot, 0), 0, type.buildTurns);
-    }
-
     public boolean isBuildingUnit() {
         return robot.type.canBuild();
     }
@@ -519,7 +500,8 @@ public final class RobotControllerImpl implements RobotController {
         assertIsPathable(type, loc);
         
         int delay = type.buildTurns;
-        robot.activateMovement(new BuildSignal(robot != null ? robot.getID() : 0, loc, type, robot.getTeam(), delay), delay, delay);
+        robot.activateMovement(new BuildSignal(robot != null ? robot.getID()
+                : 0, loc, type, robot.getTeam(), delay), delay, delay);
     }
 
     public void disintegrate() {
@@ -568,7 +550,8 @@ public final class RobotControllerImpl implements RobotController {
             int green, int blue) {
         assertNotNull(from);
         assertNotNull(to);
-        gameWorld.visitSignal(new IndicatorLineSignal(robot.getID(), robot.getTeam(), from, to, red, green, blue));
+        gameWorld.visitSignal(new IndicatorLineSignal(robot.getID(), robot
+                .getTeam(), from, to, red, green, blue));
     }
 
     public long getControlBits() {
