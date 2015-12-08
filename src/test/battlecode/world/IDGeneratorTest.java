@@ -7,8 +7,6 @@ import java.util.BitSet;
 import static org.junit.Assert.assertFalse;
 
 /**
- * TODO document
- *
  * @author james
  */
 public class IDGeneratorTest {
