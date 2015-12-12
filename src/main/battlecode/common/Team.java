@@ -32,6 +32,8 @@ public enum Team {
      * Determines the team that is the opponent of this team.
      *
      * @return the opponent of this team, or ZOMBIE if this team is ZOMBIE.
+     *
+     * @battlecode.doc.costlymethod
      */
     public Team opponent() {
         switch (this) {
@@ -51,6 +53,8 @@ public enum Team {
      * (team A or team B).
      *
      * @return whether a robot of this team is player-controlled.
+     *
+     * @battlecode.doc.costlymethod
      */
     public boolean isPlayer() {
         return this == A || this == B;

@@ -13,6 +13,8 @@ public final class Clock {
 
     /**
      * Ends the processing of this robot during the current round. Never fails.
+     *
+     * @battlecode.doc.costlymethod
      */
     public static void yield() {
         RobotMonitor.pause();
@@ -21,6 +23,8 @@ public final class Clock {
     /**
      * Returns the number of bytecodes this robot has left in this round.
      * @return the number of bytecodes this robot has left in this round.
+     *
+     * @battlecode.doc.costlymethod
      */
     public static int getBytecodesLeft() {
         return RobotMonitor.getBytecodesLeft();
@@ -31,6 +35,8 @@ public final class Clock {
      *      of the current round.
      * @return the number of bytecodes the current robot has executed since the beginning
      *      of the current round.
+     *
+     * @battlecode.doc.costlymethod
      */
     public static int getBytecodeNum() {
         return RobotMonitor.getBytecodeNum();
