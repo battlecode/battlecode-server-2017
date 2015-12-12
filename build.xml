@@ -34,11 +34,8 @@
     <property name="javac.args" value=""/>
     <property name="javac.args.warnings" value="-Xlint:unchecked"/>
 
-    <property name="extern.dir" value=".."/>
-    <property name="extern.target" value="run"/>
-
-    <property name="javadoc.destdir" value="${extern.dir}/javadoc/"/>
-    <property name="commondoc.destdir" value="docs/common"/>
+    <property name="javadoc.common.destdir" value="common-javadoc/"/>
+    <property name="javadoc.server.destdir" value="javadoc/"/>
 
     <!-- Unit tests -->
     <property name="test.src.dir" value="${basedir}/src/test"/>
@@ -109,11 +106,11 @@
     <target name="clean"
             description="Clean up build directory.">
         <delete dir="${build.dir}"/>
-        <delete dir="${javadoc.destdir}"/>
-        <delete dir="${commondoc.destdir}"/>
+        <delete dir="${test.report.dir}"/>
+        <delete dir="${javadoc.common.destdir}"/>
+        <delete dir="${javadoc.server.destdir}"/>
         <delete file="${pkg.build.jar}"/>
         <delete file="${test.build.jar}"/>
-        <delete file="${test.report.file}.xml"/>
     </target>
 
     <target name="clean-deps">
@@ -188,7 +185,7 @@
         <javadoc
                 sourcepath="${src.dir}"
                 packagenames="battlecode.common.*"
-                destdir="${javadoc.destdir}"
+                destdir="${javadoc.common.destdir}"
                 windowtitle="Battlecode ${year}"
                 link="http://docs.oracle.com/javase/8/docs/api/">
             <classpath refid="classpath-libs"/>
@@ -209,17 +206,25 @@
         </javadoc>
     </target>
 
-    <target name="doc">
-        <javadoc destdir="${javadoc.destdir}"
+    <target name="doc" depends="common-doc">
+        <copy todir="${javadoc.server.destdir}">
+            <fileset dir="${javadoc.common.destdir}"/>
+        </copy>
+        <javadoc destdir="${javadoc.server.destdir}"
                 author="true"
                 version="true"
                 use="true"
                 windowtitle="Battlecode Server API">
 
-        <classpath refid="classpath-libs"/>
-        <classpath location="${pkg.build.dir}"/>
-        <packageset dir="${src.dir}" defaultexcludes="yes"/>
-        <link href="http://docs.oracle.com/javase/8/docs/api/" />
+            <classpath refid="classpath-libs"/>
+            <classpath location="${pkg.build.dir}"/>
+
+            <packageset dir="${src.dir}" defaultexcludes="yes">
+                <exclude name="battlecode/common/**"/>
+                <exclude name="battlecode/doc/**"/>
+            </packageset>
+
+            <link href="http://docs.oracle.com/javase/8/docs/api/" />
         </javadoc>
     </target>
 

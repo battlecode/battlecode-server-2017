@@ -1,6 +1,7 @@
 /build
 /lib
-/docs
+/javadoc
+/common-javadoc
 *.rms
 *.jar
 *.swp
