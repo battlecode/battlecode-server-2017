@@ -13,7 +13,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    ZOMBIEDEN       (true,  false, 0,  null,      0,  0,  5000, 0,  0,    0,   0, 0, 35,     10000, 0, null),
+    ZOMBIEDEN       (true,  true,  0,  null,      0,  0,  5000, 0,  0,    0,   0, 0, 35,     10000, 0, null),
 
     /**
      * A normal, boring zombie unit.
@@ -88,7 +88,7 @@ public enum RobotType {
     TURRET          (false,  false, 0,  ARCHON,    50, 50, 50,   18, 34,  0,   3, 3, 24,     2000,  0, RANGEDZOMBIE),
 
     /**
-     * Turret - Transport Mode; the mobile version of a {@link #TURRET TURRET}.
+     * Turret - Transport Mode: the mobile version of a {@link #TURRET TURRET}.
      * Cannot attack.
      *
      * @battlecode.doc.robottype

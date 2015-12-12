@@ -5,6 +5,8 @@ import com.sun.javadoc.Tag;
 import com.sun.tools.doclets.Taglet;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -99,16 +101,16 @@ public class RobotTypeTaglet implements Taglet {
     }
 
     /**
+     * Appends a field annotation to the documentation for a variant.
      *
-     *
-     * @param builder
-     * @param variant
-     * @param fieldName
+     * @param builder the builder to append to
+     * @param variant the variant to document
+     * @param fieldName the field to document
      */
     private static void appendField(StringBuilder builder,
                                           RobotType variant,
                                           String fieldName)
-            throws NoSuchFieldException, IllegalAccessException{
+            throws NoSuchFieldException, IllegalAccessException {
 
         final Field field = RobotType.class.getField(fieldName);
 
@@ -134,6 +136,35 @@ public class RobotTypeTaglet implements Taglet {
         builder.append("<br />");
     }
 
+    /**
+     * Appends a method annotation to the documentation for a variant.
+     *
+     * @param builder the builder to append to
+     * @param variant the variant to document
+     * @param methodName the method to document
+     */
+    private static void appendMethod(StringBuilder builder,
+                                          RobotType variant,
+                                          String methodName)
+            throws NoSuchMethodException,IllegalAccessException,InvocationTargetException {
+
+        final Method method = RobotType.class.getMethod(methodName);
+
+        final String value;
+
+        if (method.getReturnType() == boolean.class) {
+            value = asCode(method.invoke(variant).toString());
+        } else {
+            throw new IllegalArgumentException("Add documentation generation for methods" +
+                    " that return " + method.getReturnType().getSimpleName());
+        }
+
+        builder.append(getInlineMethodLink(methodName));
+        builder.append(": ");
+        builder.append(value);
+        builder.append("<br />");
+    }
+
     public String docFor(String variant) {
         RobotType rt;
         try {
@@ -144,6 +175,9 @@ public class RobotTypeTaglet implements Taglet {
 
         StringBuilder builder = new StringBuilder();
         try {
+            appendMethod(builder, rt, "canAttack");
+            builder.append("<br />");
+
             if (rt.attackPower > 0) {
                 appendField(builder, rt, "attackDelay");
                 appendField(builder, rt, "attackPower");
@@ -181,7 +215,7 @@ public class RobotTypeTaglet implements Taglet {
             if (rt.turnsInto != null) {
                 appendField(builder, rt, "turnsInto");
             }
-       } catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return builder.toString();
