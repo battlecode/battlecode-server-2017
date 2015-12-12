@@ -7,22 +7,93 @@ public enum RobotType {
 
     // last one is strength weight
     //  isbuilding, iszombie, infectTurns, spawn-source, build-dep, part cost, turns cost, hp, attack, range, movement delay, attack delay, cooldown delay, sight range, bytecode limit, zombieType, strWeight
-    ZOMBIEDEN       (true,  false, 0,  null,      0,  0,  5000, 0,  0,    0,   0, 0, 35,     10000, 0, null),
+    /**
+     * An immobile unit that periodically spawns zombies; difficult to
+     * destroy.
+     *
+     * @battlecode.doc.robottype
+     */
+    ZOMBIEDEN       (true,  true,  0,  null,      0,  0,  5000, 0,  0,    0,   0, 0, 35,     10000, 0, null),
+
+    /**
+     * A normal, boring zombie unit.
+     *
+     * @battlecode.doc.robottype
+     */
     STANDARDZOMBIE  (false, true,  10, ZOMBIEDEN, 0,  0,  50,   3,  2,    2,   1, 1, 35,     10000, 0, null),
+
+    /**
+     * A zombie unit with a ranged attack.
+     *
+     * @battlecode.doc.robottype
+     */
     RANGEDZOMBIE    (false, true,  10, ZOMBIEDEN, 0,  0,  50,   3,  13,   1.4, 0, 1, 35,     10000, 0, null),
+
+    /**
+     * A fast zombie unit.
+     *
+     * @battlecode.doc.robottype
+     */
     FASTZOMBIE      (false, true,  10, ZOMBIEDEN, 0,  0,  40,   4,  2,    2,   2, 1, 35,     10000, 0, null),
+
+    /**
+     * A big, tough zombie unit.
+     *
+     * @battlecode.doc.robottype
+     */
     BIGZOMBIE       (false, true,  10, ZOMBIEDEN, 0,  0,  250,  50, 2,    2,   1, 1, 35,     10000, 0, null),
-    ARCHON          (false, false, 0,  null,      0,  0,  1000, 0,  24,   2,   1, 1, 35,     20000, 0, BIGZOMBIE),  
+
+    /**
+     * An important unit that cannot be constructed; builds other robots.
+     *
+     * @battlecode.doc.robottype
+     */
+    ARCHON          (false, false, 0,  null,      0,  0,  1000, 0,  24,   2,   1, 1, 35,     20000, 0, BIGZOMBIE),
+
+    /**
+     * A fast unit, unobstructed by rubble.
+     *
+     * @battlecode.doc.robottype
+     */
     SCOUT           (false, false, 0,  ARCHON,    25, 15, 100,  0,  0,    1.4, 0, 1, 53,     20000, 0, FASTZOMBIE),
+
+    /**
+     * An all-around ranged unit.
+     *
+     * @battlecode.doc.robottype
+     */
     SOLDIER         (false, false, 0,  ARCHON,    10, 25, 50,   4,  13,   2,   2, 1, 24,     10000, 0, STANDARDZOMBIE),
+
+    /**
+     * A melee unit equipped for zombie combat.
+     *
+     * @battlecode.doc.robottype
+     */
     GUARD           (false, false, 0,  ARCHON,    10, 25, 120,  2,  24,   2,   1, 1, 24,     10000, 0, STANDARDZOMBIE),
+
+    /**
+     * A special unit cabable of infecting robots with a damaging strain of the
+     * zombie virus.
+     *
+     * @battlecode.doc.robottype
+     */
     VIPER           (false, false, 20, ARCHON,    50, 30, 100,  2,  13,   3,   3, 1, 24,     10000, 0, RANGEDZOMBIE),
-    TURRET          (false,  false, 0,  ARCHON,    50, 50, 50,   18, 34,   0,
-            3, 3, 24,     2000,  0, RANGEDZOMBIE),
-    TTM             (false, false, 0,  TURRET,    0,  10, 50,   0,  0,    2,
-            0,
-            2, 24,     2000,  0, RANGEDZOMBIE),
-    //HANDWASHSTATION (false, false, 0,  null,   20, 80, 100,  0,  0,    0,   0, 0, 24, 2000,  0, null), RIP
+
+    /**
+     * An immobile unit designed to reinforce an area; transforms into a
+     * {@link #TTM TTM} in order to move.
+     *
+     * @battlecode.doc.robottype
+     */
+    TURRET          (false,  false, 0,  ARCHON,    50, 50, 50,   18, 34,  0,   3, 3, 24,     2000,  0, RANGEDZOMBIE),
+
+    /**
+     * Turret - Transport Mode: the mobile version of a {@link #TURRET TURRET}.
+     * Cannot attack.
+     *
+     * @battlecode.doc.robottype
+     */
+    TTM             (false, false, 0,  TURRET,    0,  10, 50,   0,  0,    2,   0, 2, 24,     2000,  0, RANGEDZOMBIE),
     ;
 
     /**

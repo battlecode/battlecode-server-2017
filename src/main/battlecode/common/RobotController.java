@@ -18,6 +18,8 @@ public interface RobotController {
      * team has destroyed the enemy HQ, then the tiebreakers will be used.
      *
      * @return the number of rounds in the game.
+     *
+     * @battlecode.doc.costlymethod
      */
     int getRoundLimit();
 
@@ -25,6 +27,8 @@ public interface RobotController {
      * Gets the team's total parts.
      *
      * @return the team's total parts.
+     *
+     * @battlecode.doc.costlymethod
      */
     double getTeamParts();
 
@@ -32,6 +36,8 @@ public interface RobotController {
      * Returns the zombie spawn schedule for the map. Only works on zombie dens. NOT AVAILABLE TO COMPETITORS?
      *
      * @return the zombie spawn schedule.
+     *
+     * @battlecode.doc.costlymethod
      */
     ZombieCount[] getZombieSpawnSchedule(int round);
 
@@ -43,6 +49,8 @@ public interface RobotController {
      * Use this method to access your ID.
      *
      * @return the ID of the robot.
+     *
+     * @battlecode.doc.costlymethod
      */
     int getID();
 
@@ -50,6 +58,8 @@ public interface RobotController {
      * Gets the Team of this robot.
      *
      * @return this robot's Team
+     *
+     * @battlecode.doc.costlymethod
      */
     Team getTeam();
 
@@ -57,6 +67,8 @@ public interface RobotController {
      * Gets this robot's type (SOLDIER, HQ, etc.).
      *
      * @return this robot's type.
+     *
+     * @battlecode.doc.costlymethod
      */
     RobotType getType();
 
@@ -64,6 +76,8 @@ public interface RobotController {
      * Gets the robot's current location.
      *
      * @return this robot's current location.
+     *
+     * @battlecode.doc.costlymethod
      */
     MapLocation getLocation();
 
@@ -72,6 +86,8 @@ public interface RobotController {
      * is strictly less than 1, then the robot can perform a core action.
      *
      * @return the amount of core delay a robot has accumulated.
+     *
+     * @battlecode.doc.costlymethod
      */
     double getCoreDelay();
 
@@ -80,6 +96,8 @@ public interface RobotController {
      * is strictly less than 1, then the robot can attack.
      *
      * @return the number of weapon delay a robot has accumulated.
+     *
+     * @battlecode.doc.costlymethod
      */
     double getWeaponDelay();
 
@@ -87,6 +105,8 @@ public interface RobotController {
      * Gets the robot's current health.
      *
      * @return this robot's current health.
+     *
+     * @battlecode.doc.costlymethod
      */
     double getHealth();
 
@@ -102,10 +122,12 @@ public interface RobotController {
      * Senses whether a MapLocation is on the map. Will throw an exception if
      * the location is not currently and has never been within sensor range.
      *
-     * @paral loc the location to check.
+     * @param loc the location to check.
      * @return true if the location is on the map, and false if it is not.
      * @throws GameActionException if the location has never been within
      * sensor range.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean onTheMap(MapLocation loc) throws GameActionException;
 
@@ -116,6 +138,8 @@ public interface RobotController {
      * @param loc
      *            the location to check.
      * @return the amount of rubble at the location
+     *
+     * @battlecode.doc.costlymethod
      */
     double senseRubble(MapLocation loc);
     
@@ -126,7 +150,9 @@ public interface RobotController {
      * @param loc
      *            the location to check.
      * @return the amount of parts at the location
-     */   
+     *
+     * @battlecode.doc.costlymethod
+     */
     double senseParts(MapLocation loc);
 
     /**
@@ -136,6 +162,8 @@ public interface RobotController {
      * @param loc
      *            the location to check.
      * @return whether the given location is within the robot's sensor range.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean canSenseLocation(MapLocation loc);
 
@@ -148,6 +176,8 @@ public interface RobotController {
      * @throws GameActionException
      *             if <code>loc</code> is not within sensor range
      *             (CANT_SENSE_THAT).
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean isLocationOccupied(MapLocation loc) throws GameActionException;
 
@@ -161,6 +191,8 @@ public interface RobotController {
      * @throws GameActionException
      *             if <code>loc</code> is not within sensor range
      *             (CANT_SENSE_THAT).
+     *
+     * @battlecode.doc.costlymethod
      */
     RobotInfo senseRobotAtLocation(MapLocation loc)
             throws GameActionException;
@@ -171,6 +203,8 @@ public interface RobotController {
      * @param id
      *            the ID of the robot to query.
      * @return whether the given robot is within the robot's sensor range.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean canSenseRobot(int id);
 
@@ -183,6 +217,8 @@ public interface RobotController {
      * @throws GameActionException
      *             if the robot cannot be sensed (for example, if it doesn't
      *             exist or is out of sight range).
+     *
+     * @battlecode.doc.costlymethod
      */
     RobotInfo senseRobot(int id) throws GameActionException;
 
@@ -190,6 +226,8 @@ public interface RobotController {
      * Returns all robots that can be sensed on the map.
      * 
      * @return array of class type of game objects.
+     *
+     * @battlecode.doc.costlymethod
      */
     RobotInfo[] senseNearbyRobots();
 
@@ -200,6 +238,8 @@ public interface RobotController {
      * @param radiusSquared
      *            return objects this distance away from the center.
      * @return array of class type of game objects.
+     *
+     * @battlecode.doc.costlymethod
      */
     RobotInfo[] senseNearbyRobots(int radiusSquared);
 
@@ -213,6 +253,8 @@ public interface RobotController {
      *            filter game objects by the given team. If null is passed,
      *            objects from all teams are returned.
      * @return array of class type of game objects.
+     *
+     * @battlecode.doc.costlymethod
      */
     RobotInfo[] senseNearbyRobots(int radiusSquared, Team team);
 
@@ -228,6 +270,8 @@ public interface RobotController {
      *            filter game objects by the given team. If null is passed,
      *            objects from all teams are returned.
      * @return array of class type of game objects.
+     *
+     * @battlecode.doc.costlymethod
      */
     RobotInfo[] senseNearbyRobots(MapLocation center, int radiusSquared,
             Team team);
@@ -241,6 +285,8 @@ public interface RobotController {
      * can perform a core action in the given turn).
      * 
      * @return whether the robot can perform a core action in this turn.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean isCoreReady();
 
@@ -249,6 +295,8 @@ public interface RobotController {
      * attack in the given turn).
      *
      * @return whether the robot is able to attack in the current turn.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean isWeaponReady();
 
@@ -264,6 +312,8 @@ public interface RobotController {
      *            the direction to clear rubble in.
      * @throws GameActionException
      *             if the robot cannot move in this direction.
+     *
+     * @battlecode.doc.costlymethod
      */
     void clearRubble(Direction dir) throws GameActionException;
 
@@ -283,6 +333,8 @@ public interface RobotController {
      *            the direction to move in.
      * @return true if there are no robots or voids preventing this robot from
      *         moving in the given direction; false otherwise.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean canMove(Direction dir);
 
@@ -294,6 +346,8 @@ public interface RobotController {
      *            the direction to move in.
      * @throws GameActionException
      *             if the robot cannot move in this direction.
+     *
+     * @battlecode.doc.costlymethod
      */
     void move(Direction dir) throws GameActionException;
 
@@ -311,6 +365,8 @@ public interface RobotController {
      * @return true if the given location is within this robot's attack range.
      *         Does not take into account whether the robot is currently
      *         attacking.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean canAttackLocation(MapLocation loc);
 
@@ -322,6 +378,8 @@ public interface RobotController {
      *            the location to attack.
      * @throws GameActionException
      *             if the robot cannot attack the given square.
+     *
+     * @battlecode.doc.costlymethod
      */
     void attackLocation(MapLocation loc) throws GameActionException;
 
@@ -339,6 +397,8 @@ public interface RobotController {
      *            one int's worth of data to write.
      * @throws GameActionException
      *             if the channel is invalid.
+     *
+     * @battlecode.doc.costlymethod
      */
     void broadcast(int channel, int data) throws GameActionException;
 
@@ -351,6 +411,8 @@ public interface RobotController {
      * @return data currently stored on the channel.
      * @throws GameActionException
      *             if the channel is invalid.
+     *
+     * @battlecode.doc.costlymethod
      */
     int readBroadcast(int channel) throws GameActionException;
 
@@ -365,6 +427,8 @@ public interface RobotController {
      * @param type
      *            the type to build.
      * @return whether the requirements to build are met.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean hasBuildRequirements(RobotType type);
 
@@ -381,6 +445,8 @@ public interface RobotController {
      *            the robot type to spawn.
      * @return whether it is possible to build a building of the given type in
      *         the given direction.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean canBuild(Direction dir, RobotType type);
 
@@ -396,6 +462,8 @@ public interface RobotController {
      *            the type to build.
      * @throws GameActionException
      *             if the build is bad.
+     *
+     * @battlecode.doc.costlymethod
      */
     void build(Direction dir, RobotType type) throws GameActionException;
 
@@ -405,23 +473,35 @@ public interface RobotController {
 
     /**
      * Kills your robot and ends the current round. Never fails.
+     *
+     * @battlecode.doc.costlymethod
      */
     void disintegrate();
 
     /**
      * Causes your team to lose the game. It's like typing "gg."
+     *
+     * @battlecode.doc.costlymethod
      */
     void resign();
 
     /**
      * Turret only. Transforms the turret into a TTM after a short delay.
+     *
+     * @throws GameActionException if this robot cannot pack
+     *
+     * @battlecode.doc.costlymethod
      */
     void pack() throws GameActionException;
 
     /**
      * TTM only. Transforms the TTM into a turret after a short delay.
+     *
+     * @throws GameActionException if this robot cannot unpack
+     *
+     * @battlecode.doc.costlymethod
      */
-    void unpack()throws GameActionException;
+    void unpack() throws GameActionException;
 
     // ***********************************
     // ******** MISC. METHODS ************
@@ -442,6 +522,8 @@ public interface RobotController {
      *             to {@link GameConstants#TEAM_MEMORY_LENGTH}.
      * @see #getTeamMemory
      * @see #setTeamMemory(int, long, long)
+     *
+     * @battlecode.doc.costlymethod
      */
     void setTeamMemory(int index, long value);
 
@@ -462,6 +544,8 @@ public interface RobotController {
      *             to {@link GameConstants#TEAM_MEMORY_LENGTH}.
      * @see #getTeamMemory
      * @see #setTeamMemory(int, long)
+     *
+     * @battlecode.doc.costlymethod
      */
     void setTeamMemory(int index, long value, long mask);
 
@@ -474,6 +558,8 @@ public interface RobotController {
      * @return the team memory from the the last game of the match.
      * @see #setTeamMemory(int, long)
      * @see #setTeamMemory(int, long, long)
+     *
+     * @battlecode.doc.costlymethod
      */
     long[] getTeamMemory();
 
@@ -492,6 +578,8 @@ public interface RobotController {
      *            and GameConstants.NUMBER_OF_INDICATOR_STRINGS.
      * @param newString
      *            the value to which the indicator string should be set.
+     *
+     * @battlecode.doc.costlymethod
      */
     void setIndicatorString(int stringIndex, String newString);
 
@@ -507,6 +595,8 @@ public interface RobotController {
      *            the green component of the dot's color.
      * @param blue
      *            the blue component of the dot's color.
+     *
+     * @battlecode.doc.costlymethod
      */
     void setIndicatorDot(MapLocation loc, int red, int green, int blue);
 
@@ -524,6 +614,8 @@ public interface RobotController {
      *            the green component of the line's color.
      * @param blue
      *            the blue component of the line's color.
+     *
+     * @battlecode.doc.costlymethod
      */
     void setIndicatorLine(MapLocation from, MapLocation to, int red,
             int green, int blue);
@@ -533,6 +625,8 @@ public interface RobotController {
      * be set manually by the user, so a robot can respond to them.
      *
      * @return this robot's control bits
+     *
+     * @battlecode.doc.costlymethod
      */
     long getControlBits();
 
@@ -542,12 +636,16 @@ public interface RobotController {
      *
      * @param observation
      *            the observation you want to inject into the match file.
+     *
+     * @battlecode.doc.costlymethod
      */
     void addMatchObservation(String observation);
 
     /**
      * Returns the current round number, where round 0 is the first round of the match.
      * @return the current round number, where 0 is the first round of the match.
+     *
+     * @battlecode.doc.costlymethod
      */
     int getRoundNum();
 }

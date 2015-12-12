@@ -13,7 +13,6 @@ package battlecode.common;
  * equality tests.
  */
 public enum Direction {
-
     NORTH(0, -1),
     NORTH_EAST(1, -1),
     EAST(1, 0),
@@ -30,6 +29,7 @@ public enum Direction {
      * All directions.
      */
     OMNI(0, 0);
+
     public final int dx, dy;
 
     Direction(int dx, int dy) {
@@ -42,6 +42,8 @@ public enum Direction {
      *
      * @return true if this Direction is diagonal (northwest, northeast,
      *         southwest, southeast) or false if it's a cardinal, NONE, or OMNI.
+     *
+     * @battlecode.doc.costlymethod
      */
     public boolean isDiagonal() {
         return (ordinal() < 8 && ordinal() % 2 == 1);
@@ -52,6 +54,8 @@ public enum Direction {
      *
      * @return the direction pointing in the opposite direction
      *         to this one, or NONE if it's NONE, or OMNI if it's OMNI
+     *
+     * @battlecode.doc.costlymethod
      */
     public Direction opposite() {
         if (ordinal() >= 8) {
@@ -66,6 +70,8 @@ public enum Direction {
      *
      * @return the direction 45 degrees left of this one, or NONE if it's NONE,
      *         or OMNI if it's OMNI
+     *
+     * @battlecode.doc.costlymethod
      */
     public Direction rotateLeft() {
         if (ordinal() >= 8) {
@@ -83,6 +89,8 @@ public enum Direction {
      *
      * @return the direction 45 degrees right of this one, or NONE if it's NONE,
      *         or OMNI if it's OMNI
+     *
+     * @battlecode.doc.costlymethod
      */
     public Direction rotateRight() {
         if (ordinal() >= 8) {

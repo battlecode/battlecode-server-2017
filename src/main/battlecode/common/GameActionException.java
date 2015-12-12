@@ -15,8 +15,6 @@ package battlecode.common;
  * An <code>IllegalArgumentException</code> is thrown if this type of
  * robot can never successfully call the function with the given arguments.
  * A <code>GameActionException</code> is thrown in all other circumstances.
- *
- * @author Teh Devs
  */
 public class GameActionException extends Exception {
 
