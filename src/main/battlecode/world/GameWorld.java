@@ -317,8 +317,8 @@ public class GameWorld implements SignalHandler {
     }
 
     public void updateMapMemoryAdd(Team team, MapLocation loc, int radiusSquared) {
-        mapMemory.get(team).rememberLocation(loc, radiusSquared, parts,
-                rubble);
+        mapMemory.get(team).rememberLocation(loc, radiusSquared, rubble,
+                parts);
     }
 
     public void updateMapMemoryRemove(Team team, MapLocation loc,

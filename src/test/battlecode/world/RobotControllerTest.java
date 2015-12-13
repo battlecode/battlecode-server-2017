@@ -193,4 +193,183 @@ public class RobotControllerTest {
         assertEquals(soldierABot.getWeaponDelay(), RobotType.SOLDIER
                 .cooldownDelay * 2, EPSILON);
     }
+
+
+    /**
+     * Test that zombies can see everything.
+     */
+    @Test
+    public void testZombieSightRange() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(100, 100, 100);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int zombie = game.spawn(oX, oY, RobotType.FASTZOMBIE, Team
+                .ZOMBIE);
+        final int soldier = game.spawn(oX + 99, oY + 99, RobotType.SOLDIER,
+                Team.B);
+
+        game.round((id, rc) -> {
+            if (id == zombie) {
+                RobotInfo[] nearby = rc.senseNearbyRobots();
+                assertEquals(nearby.length, 1);
+            } else if (id == soldier) {
+                RobotInfo[] nearby = rc.senseNearbyRobots();
+                assertEquals(nearby.length, 0);
+            }
+        });
+    }
+
+    /**
+     * Test Map Memory scenarios.
+     *
+     * 0) You should not be able to sense values of parts and rubble out of
+     * range.
+     * 1) You should be able to sense values of parts and rubble in range.
+     * 2) If you move out of range, you should still be able to sense those
+     * values.
+     * 3) If values for an out-of-sensor-range tile change, you should still
+     * be sensing the old value.
+     * 4) Moving back into range of the tile should update your sensed value.
+     * 5) A value changing while you're in sight range should properly update
+     * map memory and your sensed value.
+     * 6) After moving out of range, your sensed value should reflect the
+     * latest change.
+     * 7) Sanity check that zombies work due to their infinite sight range.
+     *
+     * Note: this test hard-codes the soldier sight range of 24.
+     *
+     * TODO: add a test that makes sure map memory works when there are many
+     * robots on the same team, or if a robot dies.
+     */
+    @Test
+    public void testMapMemory() throws GameActionException {
+        final double rubbleVal = 100;
+        final double partsVal = 30;
+        TestMapGenerator mapGen = new TestMapGenerator(100, 100, 100)
+                .withRubble(0, 5, rubbleVal)
+                .withParts(5, 0, partsVal);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int zombie = game.spawn(oX + 99, oY + 99, RobotType.FASTZOMBIE,
+                Team.ZOMBIE);
+        final int soldier = game.spawn(oX, oY, RobotType.SOLDIER, Team.B);
+        // robots to clear rubble and take parts
+        final int soldier2 = game.spawn(oX, oY + 6, RobotType.SOLDIER, Team.A);
+        final int soldier3 = game.spawn(oX + 6, oY, RobotType.SOLDIER, Team.A);
+        MapLocation loc1 = new MapLocation(oX, oY + 5);
+        MapLocation loc2 = new MapLocation(oX + 5, oY);
+
+        // Zombie can see everything. Soldier can only see values in range.
+        game.round((id, rc) -> {
+            if (id == zombie) {
+                assertEquals(rc.senseRubble(loc1), rubbleVal, EPSILON);
+                assertEquals(rc.senseParts(loc2), partsVal, EPSILON);
+            } else if (id == soldier) {
+                assertEquals(rc.senseRubble(loc1), -1, EPSILON);
+                assertEquals(rc.senseParts(loc2), -1, EPSILON);
+            }
+        });
+
+        // Soldier moving closer results in proper value being sensed.
+        game.round((id, rc) -> {
+            if (id == soldier) {
+                rc.move(Direction.SOUTH_EAST);
+            }
+        });
+        game.round((id, rc) -> {
+            if (id == soldier) {
+                assertEquals(rc.senseRubble(loc1), rubbleVal, EPSILON);
+                assertEquals(rc.senseParts(loc2), partsVal, EPSILON);
+            }
+        });
+
+        // Soldier moves away but should still be able to sense the old values.
+        game.waitRounds(10);
+        game.round((id, rc) -> {
+            if (id == soldier) {
+                rc.move(Direction.NORTH_WEST);
+            }
+        });
+        game.round((id, rc) -> {
+            if (id == soldier) {
+                assertFalse(rc.canSenseLocation(loc1));
+                assertFalse(rc.canSenseLocation(loc2));
+                assertEquals(rc.senseRubble(loc1), rubbleVal, EPSILON);
+                assertEquals(rc.senseParts(loc2), partsVal, EPSILON);
+            }
+        });
+
+        // If parts or rubble values change while you're out of range, you
+        // shouldn't be able to sense the changes.
+        game.round((id, rc) -> {
+            if (id == soldier2) {
+                rc.clearRubble(Direction.NORTH);
+            } else if (id == soldier3) {
+                rc.move(Direction.WEST); // get parts
+            }
+        });
+        game.round((id, rc) -> {
+            if (id == soldier) {
+                assertFalse(rc.canSenseLocation(loc1));
+                assertFalse(rc.canSenseLocation(loc2));
+                assertEquals(rc.senseRubble(loc1), rubbleVal, EPSILON);
+                assertEquals(rc.senseParts(loc2), partsVal, EPSILON);
+            }
+        });
+
+        // If you move back into the location, then you should be able to
+        // sense the new values.
+        game.waitRounds(10);
+        game.round((id, rc) -> {
+            if (id == soldier) {
+                rc.move(Direction.SOUTH_EAST);
+            }
+        });
+        final double rubbleVal2 = rubbleVal * (1 - GameConstants
+                .RUBBLE_CLEAR_PERCENTAGE) -
+                GameConstants.RUBBLE_CLEAR_FLAT_AMOUNT;
+        game.round((id, rc) -> {
+            if (id == soldier) {
+                assertEquals(rc.senseRubble(loc1), rubbleVal2, EPSILON);
+                assertEquals(rc.senseParts(loc2), 0, EPSILON);
+            }
+        });
+
+        // If the rubble value changes while you're able to sense it, map
+        // memory should update too and you should be able to sense the new
+        // value. (Former bug)
+        game.round((id, rc) -> {
+            if (id == soldier2) {
+                rc.clearRubble(Direction.NORTH);
+            }
+        });
+        final double rubbleVal3 = rubbleVal2 * (1 - GameConstants
+                .RUBBLE_CLEAR_PERCENTAGE) -
+                GameConstants.RUBBLE_CLEAR_FLAT_AMOUNT;
+        game.round((id, rc) -> {
+            if (id == soldier) {
+                assertEquals(rc.senseRubble(loc1), rubbleVal3, EPSILON);
+            }
+        });
+
+        // If you move away, you should still be able to sense the old values.
+        // Let's make sure zombie knows this too, and that zombie values
+        // update properly on move.
+        game.round((id, rc) -> {
+            if (id == soldier) {
+                rc.move(Direction.NORTH_WEST);
+            } else if (id == zombie) {
+                rc.move(Direction.NORTH_WEST);
+            }
+        });
+        game.round((id, rc) -> {
+            if (id == soldier || id == zombie) {
+                assertEquals(rc.senseRubble(loc1), rubbleVal3, EPSILON);
+            }
+        });
+    }
 }
