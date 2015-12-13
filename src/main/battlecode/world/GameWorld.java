@@ -469,6 +469,10 @@ public class GameWorld implements SignalHandler {
     public void alterRubble(MapLocation loc, double amount) {
         rubble[loc.x - gameMap.getOrigin().x][loc.y - gameMap.getOrigin().y]
                 = Math.max(0.0, amount);
+        for (Team t : Team.values()) {
+            mapMemory.get(t).updateLocationRubble(loc, rubble[loc.x - gameMap
+                    .getOrigin().x][loc.y - gameMap.getOrigin().y]);
+        }
     }
 
     // *********************************
@@ -490,15 +494,10 @@ public class GameWorld implements SignalHandler {
         double prevVal = getParts(loc);
         parts[loc.x - gameMap.getOrigin().x][loc.y - gameMap.getOrigin().y] =
                 0.0;
+        for (Team t : Team.values()) {
+            mapMemory.get(t).updateLocationParts(loc, 0);
+        }
         return prevVal;
-    }
-
-    protected boolean spendResources(Team t, double amount) {
-        if (teamResources[t.ordinal()] >= amount) {
-            teamResources[t.ordinal()] -= amount;
-            return true;
-        } else
-            return false;
     }
 
     protected void adjustResources(Team t, double amount) {

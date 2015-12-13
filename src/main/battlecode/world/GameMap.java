@@ -342,6 +342,9 @@ public class GameMap implements Serializable {
     public static class MapMemory {
         private final GameMap map;
 
+        /** Represents the number of units that can see all squares. */
+        private int globalCount;
+
         /** Represents how many units are currently able to sense a given location. */
         private final int[][] currentCount;
 
@@ -357,6 +360,11 @@ public class GameMap implements Serializable {
         /** It's important to keep track of OFF_MAP squares so we have this buffer around the map. */
         private final int OFFSET = 50;
 
+        /**
+         * Creates a MapMemory using a given GameMap.
+         *
+         * @param map map to base the map memory on.
+         */
         public MapMemory(GameMap map) {
             this.map = map;
             this.currentCount = new int[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
@@ -365,63 +373,134 @@ public class GameMap implements Serializable {
             this.partsOnSquare = new double[map.getWidth() + 2 * OFFSET][map.getHeight() + 2 * OFFSET];
         }
 
-        // x and y are locations relative to the origin
-        // returns whether the location is checked by this map memory
+        /**
+         * Returns whether (x, y) is a location tracked by the MapMemory. The
+         * MapMemory tracks all locations within OFFSET of the map boundaries.
+         *
+         * @param x x-coordinate relative to origin.
+         * @param y y-coordinate relative to origin.
+         * @return whether (x, y) is a location tracked by the MapMemory.
+         */
         private boolean validLoc(int x, int y) {
             return x >= -OFFSET && x < map.getWidth() + OFFSET && y >= -OFFSET && y < map.getHeight() + OFFSET;
         }
 
-        // x and y are locations relative to the origin
+        /**
+         * Returns whether (x, y) is a location on the map.
+         *
+         * @param x x-coordinate relative to origin.
+         * @param y y-coordinate relative to origin.
+         * @return whether (x, y) is on the map.
+         */
         private boolean onTheMap(int x, int y) {
             return x >= 0 && x < map.getWidth() && y >= 0 && y
                     < map.getHeight();
         }
 
+        /**
+         * Marks that a unit on a certain location is no longer there, and
+         * will update currentCount accordingly.
+         *
+         * @param loc the location that no longer contains a unit.
+         * @param radiusSquared the sight range of that unit.
+         */
         public void removeLocation(MapLocation loc, int radiusSquared) {
-            MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
+            if (radiusSquared < 0) {
+                globalCount--;
+            } else {
+                MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
 
-            for (MapLocation target : locs) {
-                int x = target.x - map.origin.x;
-                int y = target.y - map.origin.y;
-                if (validLoc(x, y)) {
-                    currentCount[x + OFFSET][y + OFFSET]--;
+                for (MapLocation target : locs) {
+                    int x = target.x - map.origin.x;
+                    int y = target.y - map.origin.y;
+                    if (validLoc(x, y)) {
+                        currentCount[x + OFFSET][y + OFFSET]--;
+                    }
                 }
             }
         }
 
+        /**
+         * Marks that a new unit is now on a certain location, and updates
+         * rubble and parts values based on what that unit can currently see.
+         *
+         * @param loc the location that the unit enters.
+         * @param radiusSquared sight range of that unit.
+         * @param rubble all the map's rubble.
+         * @param parts all the map's parts.
+         */
         public void rememberLocation(MapLocation loc, int radiusSquared,
                                      double[][] rubble, double[][] parts) {
-            MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
-
-            for (MapLocation target : locs) {
-                int x = target.x - map.origin.x;
-                int y = target.y - map.origin.y;
-                if (validLoc(x, y)) {
-                    seen[x + OFFSET][y + OFFSET] = true;
-                    currentCount[x + OFFSET][y + OFFSET]++;
-                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && onTheMap
-                            (x, y)) {
-                        partsOnSquare[x + OFFSET][y + OFFSET] = parts[x][y];
+            if (radiusSquared < 0) {
+                globalCount++;
+                if (globalCount == 1) {
+                    for (int x = 0; x < rubble.length; ++x) {
+                        for (int y = 0; y < rubble[0].length; ++y) {
+                            seen[x + OFFSET][y + OFFSET] = true;
+                            rubbleOnSquare[x + OFFSET][y + OFFSET] =
+                                    rubble[x][y];
+                            partsOnSquare[x + OFFSET][y + OFFSET] = parts[x][y];
+                        }
                     }
-                    if (currentCount[x + OFFSET][y + OFFSET] == 1 && onTheMap
-                            (x, y)) {
-                        rubbleOnSquare[x + OFFSET][y + OFFSET] = rubble[x][y];
+                }
+            } else {
+                MapLocation[] locs = MapLocation.getAllMapLocationsWithinRadiusSq(loc, radiusSquared);
+
+                for (MapLocation target : locs) {
+                    int x = target.x - map.origin.x;
+                    int y = target.y - map.origin.y;
+                    if (validLoc(x, y)) {
+                        seen[x + OFFSET][y + OFFSET] = true;
+                        currentCount[x + OFFSET][y + OFFSET]++;
+                        if (currentCount[x + OFFSET][y + OFFSET] == 1 && onTheMap
+                                (x, y)) {
+                            partsOnSquare[x + OFFSET][y + OFFSET] = parts[x][y];
+                        }
+                        if (currentCount[x + OFFSET][y + OFFSET] == 1 && onTheMap
+                                (x, y)) {
+                            rubbleOnSquare[x + OFFSET][y + OFFSET] = rubble[x][y];
+                        }
                     }
                 }
             }
         }
 
-        /** When a location gets rubble cleared, we'll update map memory if it's currently in sight. */
-        public void updateLocation(MapLocation loc, double rubbleNew) {
+        /**
+         * Tells the map memory that a specific location has had its rubble
+         * value changed.
+         *
+         * @param loc the location.
+         * @param rubble the new rubble value.
+         */
+        public void updateLocationRubble(MapLocation loc, double rubble) {
             if (canSense(loc)) {
                 int x = loc.x - map.origin.x;
                 int y = loc.y - map.origin.y;
-                if (validLoc(x, y)) {
-                    rubbleOnSquare[x + OFFSET][y + OFFSET] = rubbleNew;
-                }
+                this.rubbleOnSquare[x + OFFSET][y + OFFSET] = rubble;
             }
         }
 
+        /**
+         * Tells the map memory that a specific location has had its parts
+         * value changed.
+         *
+         * @param loc the location.
+         * @param parts the new parts value.
+         */
+        public void updateLocationParts(MapLocation loc, double parts) {
+            if (canSense(loc)) {
+                int x = loc.x - map.origin.x;
+                int y = loc.y - map.origin.y;
+                this.partsOnSquare[x + OFFSET][y + OFFSET] = parts;
+            }
+        }
+
+        /**
+         * Returns whether any unit has seen that location before.
+         *
+         * @param loc the location.
+         * @return whether any unit has seen that location before.
+         */
         public boolean seenBefore(MapLocation loc) {
             int X = loc.x - map.origin.x;
             int Y = loc.y - map.origin.y;
@@ -433,17 +512,31 @@ public class GameMap implements Serializable {
             }
         }
 
+        /**
+         * Returns whether the location is in sight range currently.
+         *
+         * @param loc the location to check.
+         * @return whether the location is currently in sight range.
+         */
         public boolean canSense(MapLocation loc) {
             int X = loc.x - map.origin.x;
             int Y = loc.y - map.origin.y;
 
             if (validLoc(X, Y)) {
-                return currentCount[X + OFFSET][Y + OFFSET] > 0;
+                return currentCount[X + OFFSET][Y + OFFSET] > 0 ||
+                        globalCount > 0;
             } else {
                 return false;
             }
         }
 
+        /**
+         * Returns the last seen rubble value from that location, or -1 if
+         * that location has never been seen before.
+         *
+         * @param loc the location.
+         * @return last seen rubble value.
+         */
         public double recallRubble(MapLocation loc) {
             int X = loc.x - map.origin.x;
             int Y = loc.y - map.origin.y;
@@ -454,7 +547,14 @@ public class GameMap implements Serializable {
                 return -1;
             }
         }
-        
+
+        /**
+         * Returns the last seen parts value from that location, or -1 if
+         * that location has never been seen before.
+         *
+         * @param loc the location.
+         * @return last seen parts value.
+         */
         public double recallParts(MapLocation loc) {
             int X = loc.x - map.origin.x;
             int Y = loc.y - map.origin.y;
