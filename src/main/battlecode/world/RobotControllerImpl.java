@@ -348,12 +348,14 @@ public final class RobotControllerImpl implements RobotController {
         assertIsPathable(robot.type, getLocation().add(d));
 
         double factor1 = (d.isDiagonal() ? GameConstants.DIAGONAL_DELAY_MULTIPLIER
-                : 1.0); // TODO: maybe slow down robots on rubble
+                : 1.0); //
         double factor2 = 1.0;
+        double factor3 = (gameWorld.getRubble(getLocation().add(d)) >=
+                GameConstants.RUBBLE_SLOW_THRESH) ? 2.0 : 1.0;
 
         robot.activateMovement(new MovementSignal(robot.getID(), getLocation().add(d), (int) (robot.type.movementDelay * factor1)),
-                robot.type.cooldownDelay * factor2,
-                robot.type.movementDelay * factor1);
+                robot.type.cooldownDelay * factor2 * factor3,
+                robot.type.movementDelay * factor1 * factor3);
     }
     
     // ***********************************
