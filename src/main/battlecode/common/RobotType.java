@@ -69,7 +69,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    GUARD           (false, false, 0,  ARCHON,    10, 25, 120,  2,  24,   2,   1, 1, 24,     10000, 0, STANDARDZOMBIE),
+    GUARD           (false, false, 0,  ARCHON,    10, 25, 120,  2,   2,   2,   1, 1, 24,     10000, 0, STANDARDZOMBIE),
 
     /**
      * A special unit cabable of infecting robots with a damaging strain of the
