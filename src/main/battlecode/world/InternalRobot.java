@@ -382,8 +382,6 @@ public class InternalRobot {
         decrementDelays(); // expends supply to decrement delays
 
         this.currentBytecodeLimit = type.bytecodeLimit;
-
-        processBeingInfected();
     }
 
     public void processEndOfTurn() {
@@ -410,6 +408,8 @@ public class InternalRobot {
             gameWorld.visitSignal(movementSignal);
             movementSignal = null;
         }
+
+        processBeingInfected();
     }
 
     public void processEndOfRound() {}
