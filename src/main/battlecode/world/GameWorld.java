@@ -159,7 +159,10 @@ public class GameWorld implements SignalHandler {
                 this.controlProvider.runRobot(robot);
                 robot.setBytecodesUsed(this.controlProvider.getBytecodesUsed(robot));
                 robot.processEndOfTurn();
-                if (this.controlProvider.getTerminated(robot)) {
+                // If the robot terminates but the death signal has not yet
+                // been visited:
+                if (this.controlProvider.getTerminated(robot) && gameObjectsByID
+                        .get(id) != null) {
                     robot.suicide();
                 }
             }
