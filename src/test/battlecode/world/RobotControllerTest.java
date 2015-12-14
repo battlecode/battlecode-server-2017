@@ -90,7 +90,7 @@ public class RobotControllerTest {
      * @throws GameActionException shouldn't happen
      */
     @Test
-    public void testClearRubble() throws GameActionException {
+    public void testRubbleBasic() throws GameActionException {
         TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100)
                 .withRubble(0, 1, 2)
                 .withRubble(1, 0, 100)
@@ -147,9 +147,50 @@ public class RobotControllerTest {
         assertEquals(game.getWorld().getRubble(new MapLocation(oX + 1, oY)),
                 100 * (1 - GameConstants.RUBBLE_CLEAR_PERCENTAGE) -
                         GameConstants
-                        .RUBBLE_CLEAR_FLAT_AMOUNT, EPSILON);
+                                .RUBBLE_CLEAR_FLAT_AMOUNT, EPSILON);
         assertEquals(game.getWorld().getRubble(new MapLocation(oX + 1, oY + 1)),
                 99 * (1 - GameConstants.RUBBLE_CLEAR_PERCENTAGE) - GameConstants
                         .RUBBLE_CLEAR_FLAT_AMOUNT, EPSILON);
+    }
+
+    /**
+     * Verifies that moving onto tiles with rubble doubles your core and move
+     * delay changes.
+     */
+    @Test
+    public void testRubbleSlow() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100)
+                .withRubble(0, 1, 49)
+                .withRubble(0, 2, 51);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int soldierA = game.spawn(oX, oY, RobotType.SOLDIER, Team.A);
+        InternalRobot soldierABot = game.getBot(soldierA);
+
+        game.round((id, rc) -> {
+            if (id == soldierA) {
+                rc.move(Direction.SOUTH);
+            }
+        });
+
+        assertEquals(soldierABot.getCoreDelay(), RobotType.SOLDIER
+                .movementDelay, EPSILON);
+        assertEquals(soldierABot.getWeaponDelay(), RobotType.SOLDIER
+                .cooldownDelay, EPSILON);
+
+        game.waitRounds(10);
+
+        game.round((id, rc) -> {
+            if (id == soldierA) {
+                rc.move(Direction.SOUTH);
+            }
+        });
+
+        assertEquals(soldierABot.getCoreDelay(), RobotType.SOLDIER
+                .movementDelay * 2, EPSILON);
+        assertEquals(soldierABot.getWeaponDelay(), RobotType.SOLDIER
+                .cooldownDelay * 2, EPSILON);
     }
 }
