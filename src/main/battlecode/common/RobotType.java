@@ -13,35 +13,35 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    ZOMBIEDEN       (true,  true,  0,  null,      0,  0,  5000, 0,  0,    0,   0, 0, 35,     10000, 0, null),
+    ZOMBIEDEN       (true,  true,  0,  null,      0,  0,  5000, 0,  0,    0,   0, 0, -1,     10000, 0, null),
 
     /**
      * A normal, boring zombie unit.
      *
      * @battlecode.doc.robottype
      */
-    STANDARDZOMBIE  (false, true,  10, ZOMBIEDEN, 0,  0,  50,   3,  2,    2,   1, 1, 35,     10000, 0, null),
+    STANDARDZOMBIE  (false, true,  10, ZOMBIEDEN, 0,  0,  50,   3,  2,    2,   1, 1, -1,     10000, 0, null),
 
     /**
      * A zombie unit with a ranged attack.
      *
      * @battlecode.doc.robottype
      */
-    RANGEDZOMBIE    (false, true,  10, ZOMBIEDEN, 0,  0,  50,   3,  13,   1.4, 0, 1, 35,     10000, 0, null),
+    RANGEDZOMBIE    (false, true,  10, ZOMBIEDEN, 0,  0,  50,   3,  13,   1.4, 0, 1, -1,     10000, 0, null),
 
     /**
      * A fast zombie unit.
      *
      * @battlecode.doc.robottype
      */
-    FASTZOMBIE      (false, true,  10, ZOMBIEDEN, 0,  0,  40,   4,  2,    2,   2, 1, 35,     10000, 0, null),
+    FASTZOMBIE      (false, true,  10, ZOMBIEDEN, 0,  0,  40,   4,  2,    2,   2, 1, -1,     10000, 0, null),
 
     /**
      * A big, tough zombie unit.
      *
      * @battlecode.doc.robottype
      */
-    BIGZOMBIE       (false, true,  10, ZOMBIEDEN, 0,  0,  250,  50, 2,    2,   1, 1, 35,     10000, 0, null),
+    BIGZOMBIE       (false, true,  10, ZOMBIEDEN, 0,  0,  250,  50, 2,    2,   1, 1, -1,     10000, 0, null),
 
     /**
      * An important unit that cannot be constructed; builds other robots.
@@ -157,7 +157,7 @@ public enum RobotType {
     public final double cooldownDelay;
 
     /**
-     * Range^2 for sensing.
+     * Range^2 for sensing, or -1 if the robot can see everything.
      */
     public final int sensorRadiusSquared;
 
