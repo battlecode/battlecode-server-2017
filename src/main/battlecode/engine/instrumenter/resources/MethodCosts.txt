@@ -41,6 +41,7 @@ battlecode/common/RobotController/getTeamMemory               0     true
 battlecode/common/RobotController/getTeamParts                2     true
 battlecode/common/RobotController/getType                     1     true
 battlecode/common/RobotController/getWeaponDelay              1     true
+battlecode/common/RobotController/getZombieSpawnSchedule      1     true
 battlecode/common/RobotController/hasBuildRequirements        50    true
 battlecode/common/RobotController/isBuildingSomething         1     true
 battlecode/common/RobotController/isCoreReady                 10    true
