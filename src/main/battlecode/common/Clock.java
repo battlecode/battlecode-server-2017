@@ -12,6 +12,12 @@ import battlecode.engine.instrumenter.RobotMonitor;
 public final class Clock {
 
     /**
+     * IMPORTANT NOTE!
+     * This class is reloaded for every individual robot.
+     * See IndividualClassLoader for more information.
+     */
+
+    /**
      * Ends the processing of this robot during the current round. Never fails.
      *
      * @battlecode.doc.costlymethod
@@ -46,6 +52,4 @@ public final class Clock {
      * Prevent construction.
      */
     private Clock() {}
-
-    // TODO(jhgilles): robotmonitor reference check
 }

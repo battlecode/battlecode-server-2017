@@ -1,6 +1,7 @@
-package battlecode.engine.instrumenter;
+package battlecode.engine.instrumenter.bytecode;
 
 import battlecode.engine.ErrorReporter;
+import battlecode.engine.instrumenter.InstrumentationException;
 import org.objectweb.asm.*;
 
 import java.io.IOException;

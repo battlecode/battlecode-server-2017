@@ -1,4 +1,4 @@
-package battlecode.engine.instrumenter;
+package battlecode.engine.instrumenter.bytecode;
 
 import org.objectweb.asm.ClassReader;
 

@@ -9,8 +9,6 @@ package battlecode.engine.instrumenter;
  */
 public class InstrumentationException extends RuntimeException {
 
-    static final long serialVersionUID = 5643406640399347796L;
-
     public InstrumentationException() {
         super();
     }

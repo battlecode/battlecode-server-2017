@@ -1,22 +1,18 @@
-package battlecode.engine.instrumenter;
+package battlecode.engine.instrumenter.bytecode;
 
 import battlecode.engine.ErrorReporter;
+import battlecode.engine.instrumenter.InstrumentationException;
+import battlecode.engine.instrumenter.InstrumentingClassLoader;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * ClassReferenceUtil is a singleton used to keep track of class references during instrumentation.
- * <p/>
- * Whenever a class reference is encountered while instrumenting a class, that reference should be registered with
- * ClassReferenceUtil (e.g., using <code>classReference(...)</code>).  This does two things.  First, the class reference
- * may be replaced with a reference to a different class. Second, ClassReferenceUtil remembers new references.
- * New class references can be retrieved using flushNewlyReferencedClasses.
  *
  * @author adamd
  */
@@ -32,10 +28,15 @@ public class ClassReferenceUtil {
      */
     private final static String DISALLOWED_RESOURCE_FILE = "resources/AllowedPackages.txt";
 
-    // packages for which the player is allowed to use any of the contained classes; loaded from AllowedPackages.txt
+    /**
+     * Packages for which the player is allowed to use any of the contained classes;
+     * loaded from AllowedPackages.txt
+     */
     private final static Set<String> allowedPackages;
 
-    // a set of classes the player is not allowed to use; loaded from DisallowedClasses.txt
+    /**
+     * Classes the player is not allowed to use; loaded from DisallowedClasses.txt
+     */
     private final static Set<String> disallowedClasses;
 
     // We can't instrument these classes because they have native methods.  Java won't allow us
@@ -96,31 +97,25 @@ public class ClassReferenceUtil {
         if (className.startsWith("battlecode/")) {
             return className.equals("battlecode/engine/instrumenter/lang/InstrumentableFunctions");
         }
-        //if(className.startsWith("java/lang/"))
-        //	return false;
+
         if (className.startsWith("instrumented/"))
             return false;
+
         if (className.startsWith("java/util/jar") ||
                 className.startsWith("java/util/zip") ||
+                className.equals("java/util/Iterator") ||
                 className.equals("java/util/concurrent/TimeUnit"))
             return false;
-        if (className.equals("java/util/Iterator"))
-            return false;
+
         if (className.startsWith("java/util/") ||
                 className.startsWith("java/math/"))
             return true;
-        // We get a type mismatch if we instrument PrintStream but not System
-        //if(uninstrumentedClasses.contains(className))
-        //	return false;
-        //if(isInAllowedPackage(className))
-        //	return true;
+
         if (className.startsWith("sun/") ||
                 className.startsWith("com/") ||
                 className.startsWith("java/"))
             return false;
-        //if(className.startsWith("sun/")||
-        //   className.startsWith("com/"))
-        //	return false;
+
         return true;
     }
 
@@ -139,14 +134,10 @@ public class ClassReferenceUtil {
      * @throws InstrumentationException if the class reference is not allowed
      */
     public static String classReference(String className, String teamPackageName, boolean silenced, boolean checkDisallowed) {
-        return classReferenceX(className, teamPackageName, silenced, checkDisallowed);
-    }
-
-    public static String classReferenceX(String className, String teamPackageName, boolean silenced, boolean checkDisallowed) {
         if (className == null) return null;
+
         if (className.charAt(0) == '[') {
             int arrayIndex = className.lastIndexOf('[');
-            //System.out.println("what do I do with "+className);
             if (className.charAt(arrayIndex + 1) == 'L') {
                 return className.substring(0, arrayIndex + 2) + classReference(className.substring(arrayIndex + 2), teamPackageName, silenced, checkDisallowed);
             } else {
@@ -166,15 +157,20 @@ public class ClassReferenceUtil {
             return "battlecode/engine/instrumenter/lang/AtomicReference";
         else if (className.equals("sun/misc/Unsafe"))
             return "battlecode/engine/instrumenter/lang/Unsafe";
+
         if (checkDisallowed) {
             if (disallowedClasses.contains(className) || !isInAllowedPackage(className)) {
                 return illegalClass(className, teamPackageName);
             }
         }
-        if (className.equals("java/security/SecureRandom"))
+        if (className.equals("java/security/SecureRandom")) {
             return "instrumented/java/util/Random";
-        if (shouldAddInstrumentedPrefix(className))
+        }
+
+        if (shouldAddInstrumentedPrefix(className)) {
             return "instrumented/" + className;
+        }
+
         else
             return className;
     }
@@ -189,11 +185,6 @@ public class ClassReferenceUtil {
      */
 
     public static String classDescReference(String classDesc, String teamPackageName, boolean silenced, boolean checkDisallowed) {
-        //System.out.println("CDR "+classDesc+":"+ans);
-        return classDescReferenceX(classDesc, teamPackageName, silenced, checkDisallowed);
-    }
-
-    public static String classDescReferenceX(String classDesc, String teamPackageName, boolean silenced, boolean checkDisallowed) {
         if (classDesc == null)
             return null;
         if (classDesc.charAt(0) == 'L') {
@@ -202,8 +193,6 @@ public class ClassReferenceUtil {
             int arrayIndex = classDesc.lastIndexOf('[');
             return classDesc.substring(0, arrayIndex + 1) + classDescReference(classDesc.substring(arrayIndex + 1, classDesc.length()), teamPackageName, silenced, checkDisallowed);
         } else {
-            if (classDesc.length() > 1)
-                System.out.println("unrecognized CDR " + classDesc);
             return classDesc;
         }
     }
@@ -237,27 +226,22 @@ public class ClassReferenceUtil {
         else
             ret = ret + returnType.toString();
 
-        //System.out.println("mdr "+ret);
         return ret;
     }
 
     public static String methodSignatureReference(String signature, String teamPackageName, boolean silenced, boolean checkDisallowed) {
         if (signature == null) return null;
-        //System.out.println("meth "+signature);
         BattlecodeSignatureWriter writer = new BattlecodeSignatureWriter(teamPackageName, silenced, checkDisallowed);
         SignatureReader reader = new SignatureReader(signature);
         reader.accept(writer);
-        //System.out.println("meth "+writer.toString());
         return writer.toString();
     }
 
     public static String fieldSignatureReference(String signature, String teamPackageName, boolean silenced, boolean checkDisallowed) {
         if (signature == null) return null;
-        //System.out.println("field "+signature);
         BattlecodeSignatureWriter writer = new BattlecodeSignatureWriter(teamPackageName, silenced, checkDisallowed);
         SignatureReader reader = new SignatureReader(signature);
         reader.acceptType(writer);
-        //System.out.println("field "+writer.toString());
         return writer.toString();
     }
 
@@ -266,8 +250,7 @@ public class ClassReferenceUtil {
         if (InstrumentingClassLoader.lazy()) {
             return "forbidden/" + className;
         } else {
-            ErrorReporter.report("Illegal class: " + className + "\nThis class cannot be referenced by player " + teamPackageName, false);
-            throw new InstrumentationException();
+            throw new InstrumentationException("Illegal class: " + className + "\nThis class cannot be referenced by player " + teamPackageName);
         }
     }
 

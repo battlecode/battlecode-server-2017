@@ -1,6 +1,8 @@
 package battlecode.engine.instrumenter;
 
 import battlecode.engine.ErrorReporter;
+import battlecode.engine.instrumenter.bytecode.ClassReaderUtil;
+import battlecode.engine.instrumenter.bytecode.InstrumentingClassVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -64,6 +66,13 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
      */
     private final Map<String, Class<?>> loadedCache;
 
+    /**
+     * Create an IndividualClassLoader.
+     *
+     * @param teamPackageName
+     * @param silenced
+     * @throws InstrumentationException
+     */
     public IndividualClassLoader(String teamPackageName, boolean silenced) throws InstrumentationException {
         super(IndividualClassLoader.class.getClassLoader(), silenced);
 
@@ -141,6 +150,7 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 
                 finishedClass = saveAndDefineClass(name, classBytes);
             } else if (name.startsWith("instrumented.")) {
+
                 // Each robot has its own version of java.util classes.
                 // If permgen space becomes a problem, we could make it so
                 // that only one copy of these classes is loaded, but
@@ -153,6 +163,7 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                     teamsWithErrors.add(teamPackageName);
                     throw ie;
                 }
+
                 finishedClass = saveAndDefineClass(name, classBytes);
             } else if (name.startsWith("forbidden.")) {
                 ErrorReporter.report("Illegal class: " + name.substring(10) + "\nThis class cannot be referenced by player " + teamPackageName, false);
@@ -174,8 +185,7 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 
     public Class<?> saveAndDefineClass(String name, byte[] classBytes) {
         if (classBytes == null) {
-            ErrorReporter.report("Can't find instrumented class " + name + ", but no errors reported", true);
-            throw new InstrumentationException();
+            throw new InstrumentationException("Can't save class with null bytes: " + name);
         }
 
         Class<?> theClass = defineClass(null, classBytes, 0, classBytes.length);
@@ -198,9 +208,11 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
             throw new InstrumentationException("Can't load class: "+className, ioe);
         }
         ClassWriter cw = new ClassWriter(COMPUTE_MAXS); // passing true sets maxLocals and maxStack, so we don't have to
-        ClassVisitor cv = new RoboAdapter(cw, teamPackageName, silenced, checkDisallowed);
+        ClassVisitor cv = new InstrumentingClassVisitor(cw, teamPackageName, silenced, checkDisallowed);
         cr.accept(cv, 0);        //passing false lets debug info be included in the transformation, so players get line numbers in stack traces
         return cw.toByteArray();
     }
+
+
 
 }

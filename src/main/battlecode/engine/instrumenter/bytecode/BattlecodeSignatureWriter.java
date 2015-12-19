@@ -1,4 +1,4 @@
-package battlecode.engine.instrumenter;
+package battlecode.engine.instrumenter.bytecode;
 
 import org.objectweb.asm.signature.SignatureWriter;
 
@@ -18,19 +18,4 @@ class BattlecodeSignatureWriter extends SignatureWriter {
         super.visitClassType(ClassReferenceUtil.classReference(name, teamPackageName, silenced, checkDisallowed));
     }
 
-    //public void visitTypeVariable(String name) {
-    //	System.out.println("tv "+name);
-    //	super.visitTypeVariable(name);
-    //}
-
-    //public void visitFormalTypeParameter(String name) {
-    //	System.out.println("ftp "+name);
-    //	super.visitTypeVariable(name);
-    //}
-
-    //public void visitInnerClassType(String name) {
-    //	System.out.println("ict "+name);
-    //	super.visitInnerClassType(ClassReferenceUtil.classReference(name,teamPackageName,silenced,checkDisallowed));
-    //	super.visitInnerClassType(name);
-    //}
 }

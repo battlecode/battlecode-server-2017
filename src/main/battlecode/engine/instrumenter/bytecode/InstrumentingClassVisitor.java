@@ -1,4 +1,4 @@
-package battlecode.engine.instrumenter;
+package battlecode.engine.instrumenter.bytecode;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -10,7 +10,7 @@ import org.objectweb.asm.Opcodes;
  *
  * @author adamd
  */
-public class RoboAdapter extends ClassVisitor implements Opcodes {
+public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
     private String className;
     private final String teamPackageName;
     private final boolean silenced;
@@ -21,13 +21,13 @@ public class RoboAdapter extends ClassVisitor implements Opcodes {
     private final boolean checkDisallowed;
 
     /**
-     * Creates a RoboAdapter to instrument a given class.
+     * Creates a InstrumentingClassVisitor to instrument a given class.
      *
      * @param cv                  the ClassVisitor that should be used to read the class
      * @param teamPackageName     the package name of the team for which this class is being instrumented
      * @param silenced            whether System.out should be silenced for this class
      */
-    public RoboAdapter(final ClassVisitor cv, final String teamPackageName, boolean silenced, boolean checkDisallowed) {
+    public InstrumentingClassVisitor(final ClassVisitor cv, final String teamPackageName, boolean silenced, boolean checkDisallowed) {
         super(Opcodes.ASM5, cv);
         this.teamPackageName = teamPackageName;
         this.silenced = silenced;
@@ -86,7 +86,7 @@ public class RoboAdapter extends ClassVisitor implements Opcodes {
                 exceptions);
         // create a new RoboMethodAdapter, and let it loose on this method
         //return mv == null ? null : new RoboMethodAdapter(mv, className, name, desc, teamPackageName, debugMethodsEnabled, silenced, checkDisallowed);
-        return mv == null ? null : new RoboMethodTree(mv, className, access, name, desc, signature, exceptions, teamPackageName, silenced, checkDisallowed);
+        return mv == null ? null : new InstrumentingMethodVisitor(mv, className, access, name, desc, signature, exceptions, teamPackageName, silenced, checkDisallowed);
     }
 
     /**

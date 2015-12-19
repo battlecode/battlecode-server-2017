@@ -1,7 +1,8 @@
-package battlecode.engine.instrumenter;
+package battlecode.engine.instrumenter.bytecode;
 
 import battlecode.common.GameConstants;
 import battlecode.engine.ErrorReporter;
+import battlecode.engine.instrumenter.InstrumentationException;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
 
@@ -13,7 +14,7 @@ import java.util.Set;
 
 import static org.objectweb.asm.tree.AbstractInsnNode.*;
 
-public class RoboMethodTree extends MethodNode implements Opcodes {
+public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 	
     private final String methodName;
     private final String teamPackageName;
@@ -21,7 +22,6 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
     private final boolean silenced;
     private final boolean checkDisallowed;
     private final String methodDesc;    // the description of this method, e.g., "()V"
-    private boolean codeVisited = false;    // tells whether visitCode() has been called
 
     // all the exception handlers we've seen in the code
     private final Set<LabelNode> exceptionHandlers = new HashSet<>();
@@ -44,7 +44,7 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
 
     private static boolean checkedFastHash = false, usingFastHash;
 
-    public RoboMethodTree(final MethodVisitor mv, final String className, final int access, final String methodName, final String methodDesc, final String signature, final String[] exceptions, final String teamPackageName, boolean silenced, boolean checkDisallowed) {
+    public InstrumentingMethodVisitor(final MethodVisitor mv, final String className, final int access, final String methodName, final String methodDesc, final String signature, final String[] exceptions, final String teamPackageName, boolean silenced, boolean checkDisallowed) {
         super(Opcodes.ASM5, access, methodName, methodDesc, signature, exceptions);
         this.methodName = methodName;
         this.teamPackageName = teamPackageName;
@@ -267,19 +267,19 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
             // do wait/notify monitoring
             if ((n.desc.equals("()V") && (n.name.equals("wait") || n.name.equals("notify") || n.name.equals("notifyAll")))
                     || (n.name.equals("wait") && (n.desc.equals("(J)V") || n.desc.equals("(JI)V")))) {
-                illegalMethod(n, "Illegal method: Object." + n.name + "() cannot be called by a player.");
+                throw new InstrumentationException("Illegal method: Object." + n.name + "() cannot be called by a player.");
             }
 
             if (n.owner.equals("java/lang/Class") && n.name.equals("forName")) {
-                illegalMethod(n, "Illegal method in" + className + ": Class.forName() may not be called by a player.");
+                throw new InstrumentationException("Illegal method in" + className + ": Class.forName() may not be called by a player.");
             }
 
             if (n.owner.equals("java/io/PrintStream") && n.name.equals("<init>") && n.desc.startsWith("(Ljava/lang/String;")) {
-                illegalMethod(n, "Illegal method in" + className + ": You may not use PrintStream to open files.");
+                throw new InstrumentationException("Illegal method in" + className + ": You may not use PrintStream to open files.");
             }
 
             if (n.owner.equals("java/lang/String") && n.name.equals("intern")) {
-                illegalMethod(n, "Illegal method in " + className + ": String.intern() cannot be called by a player.");
+                throw new InstrumentationException("Illegal method in " + className + ": String.intern() cannot be called by a player.");
             }
 
         }
@@ -318,21 +318,11 @@ public class RoboMethodTree extends MethodNode implements Opcodes {
             // replace class names
             n.owner = classReference(n.owner);
             n.desc = methodDescReference(n.desc);
-       }
+        }
 
         if (endBasicBlock)
             endOfBasicBlock(n);
 
-    }
-
-    private void illegalMethod(MethodInsnNode n, String message) {
-        if (InstrumentingClassLoader.lazy()) {
-            instructions.insertBefore(n, new LdcInsnNode(message));
-            instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RoboMethodTree", "reportIllegalMethod", "(Ljava/lang/String;)V", false));
-        } else {
-            ErrorReporter.report(message, false);
-            throw new InstrumentationException();
-        }
     }
 
     private void visitMultiANewArrayInsnNode(MultiANewArrayInsnNode n) {
