@@ -1,8 +1,6 @@
 package battlecode.world.signal;
 
-import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
-import battlecode.engine.signal.Signal;
 
 /**
  * Signifies that a robot had its type changed.

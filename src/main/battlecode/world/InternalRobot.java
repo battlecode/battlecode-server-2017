@@ -1,7 +1,7 @@
 package battlecode.world;
 
 import battlecode.common.*;
-import battlecode.engine.signal.Signal;
+import battlecode.world.signal.Signal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.TypeChangeSignal;

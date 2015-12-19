@@ -4,7 +4,7 @@ import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import battlecode.engine.ErrorReporter;
+import battlecode.server.ErrorReporter;
 import battlecode.server.Config;
 import battlecode.world.GameMap.MapProperties;
 import org.xml.sax.Attributes;

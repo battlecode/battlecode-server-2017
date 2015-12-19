@@ -1,7 +1,5 @@
 package battlecode.world.signal;
 
-import battlecode.engine.signal.Signal;
-
 /**
  * Signifies that an object has died somewhere.
  *

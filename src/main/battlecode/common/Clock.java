@@ -1,6 +1,6 @@
 package battlecode.common;
 
-import battlecode.engine.instrumenter.RobotMonitor;
+import battlecode.instrumenter.inject.RobotMonitor;
 
 /**
  * Clock is a singleton that allows contestants to introspect the state of their running
@@ -10,6 +10,12 @@ import battlecode.engine.instrumenter.RobotMonitor;
  */
 @SuppressWarnings("unused")
 public final class Clock {
+
+    /**
+     * IMPORTANT NOTE!
+     * This class is reloaded for every individual robot.
+     * See IndividualClassLoader for more information.
+     */
 
     /**
      * Ends the processing of this robot during the current round. Never fails.
@@ -46,6 +52,4 @@ public final class Clock {
      * Prevent construction.
      */
     private Clock() {}
-
-    // TODO(jhgilles): robotmonitor reference check
 }

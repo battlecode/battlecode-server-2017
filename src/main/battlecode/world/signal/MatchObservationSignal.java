@@ -1,7 +1,5 @@
 package battlecode.world.signal;
 
-import battlecode.engine.signal.Signal;
-
 /**
  * Creates an observation to be displayed in transcribed matches
  *

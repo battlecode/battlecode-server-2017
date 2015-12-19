@@ -1,7 +1,7 @@
 package battlecode.world;
 
 import battlecode.common.*;
-import battlecode.engine.instrumenter.RobotDeathException;
+import battlecode.instrumenter.RobotDeathException;
 import battlecode.world.signal.*;
 
 import java.util.ArrayList;

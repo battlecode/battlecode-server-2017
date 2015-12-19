@@ -1,6 +1,6 @@
 package battlecode.doc;
 
-import battlecode.engine.instrumenter.MethodCostUtil;
+import battlecode.instrumenter.bytecode.MethodCostUtil;
 import com.sun.javadoc.Tag;
 import com.sun.tools.doclets.Taglet;
 

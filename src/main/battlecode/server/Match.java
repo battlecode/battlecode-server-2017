@@ -2,9 +2,7 @@ package battlecode.server;
 
 import battlecode.common.GameConstants;
 import battlecode.common.Team;
-import battlecode.engine.ErrorReporter;
-import battlecode.engine.GameState;
-import battlecode.engine.signal.Signal;
+import battlecode.world.signal.Signal;
 import battlecode.serial.*;
 import battlecode.world.GameMap;
 import battlecode.world.GameWorld;

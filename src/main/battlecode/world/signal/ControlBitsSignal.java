@@ -1,7 +1,5 @@
 package battlecode.world.signal;
 
-import battlecode.engine.signal.Signal;
-
 /**
  * Signifies that the control bits of a robot have just changed.
  */

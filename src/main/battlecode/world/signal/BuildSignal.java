@@ -3,7 +3,6 @@ package battlecode.world.signal;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import battlecode.engine.signal.Signal;
 
 /**
  * Signifies that a robot was just spawned

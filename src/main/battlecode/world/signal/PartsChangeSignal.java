@@ -1,7 +1,6 @@
 package battlecode.world.signal;
 
 import battlecode.common.MapLocation;
-import battlecode.engine.signal.Signal;
 
 /**
  * Signifies a change in parts on a tile.

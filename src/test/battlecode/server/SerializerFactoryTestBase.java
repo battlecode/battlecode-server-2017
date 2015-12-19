@@ -3,7 +3,7 @@ package battlecode.server;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import battlecode.engine.signal.Signal;
+import battlecode.world.signal.Signal;
 import battlecode.serial.*;
 import battlecode.serial.notification.PauseNotification;
 import battlecode.serial.notification.ResumeNotification;
