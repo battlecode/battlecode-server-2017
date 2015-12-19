@@ -16,12 +16,9 @@ import static org.objectweb.asm.tree.AbstractInsnNode.*;
 
 public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 	
-    private final String methodName;
     private final String teamPackageName;
     private final String className;    // the class to which this method belongs
-    private final boolean silenced;
     private final boolean checkDisallowed;
-    private final String methodDesc;    // the description of this method, e.g., "()V"
 
     // all the exception handlers we've seen in the code
     private final Set<LabelNode> exceptionHandlers = new HashSet<>();
@@ -42,36 +39,28 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 
     private MethodVisitor methodWriter;
 
-    private static boolean checkedFastHash = false, usingFastHash;
-
     public InstrumentingMethodVisitor(final MethodVisitor mv, final String className, final int access, final String methodName, final String methodDesc, final String signature, final String[] exceptions, final String teamPackageName, boolean silenced, boolean checkDisallowed) {
         super(Opcodes.ASM5, access, methodName, methodDesc, signature, exceptions);
-        this.methodName = methodName;
         this.teamPackageName = teamPackageName;
         this.className = className;
-        this.silenced = silenced;
         this.checkDisallowed = checkDisallowed;
-        this.methodDesc = methodDesc;
         methodWriter = mv;
-        if (!checkedFastHash) {
-            usingFastHash = Boolean.getBoolean(battlecode.server.Config.getGlobalConfig().get("bc.server.fast-hash"));
-        }
     }
 
     protected String classReference(String name) {
-        return ClassReferenceUtil.classReference(name, teamPackageName, silenced, checkDisallowed);
+        return ClassReferenceUtil.classReference(name, teamPackageName, checkDisallowed);
     }
 
     protected String classDescReference(String name) {
-        return ClassReferenceUtil.classDescReference(name, teamPackageName, silenced, checkDisallowed);
+        return ClassReferenceUtil.classDescReference(name, teamPackageName, checkDisallowed);
     }
 
     protected String methodDescReference(String name) {
-        return ClassReferenceUtil.methodDescReference(name, teamPackageName, silenced, checkDisallowed);
+        return ClassReferenceUtil.methodDescReference(name, teamPackageName, checkDisallowed);
     }
 
     protected String fieldSignatureReference(String name) {
-        return ClassReferenceUtil.fieldSignatureReference(name, teamPackageName, silenced, checkDisallowed);
+        return ClassReferenceUtil.fieldSignatureReference(name, teamPackageName, checkDisallowed);
     }
 
     public void visitMaxs(int maxStack, int maxLocals) {
@@ -211,12 +200,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
     }
 
     private void visitMethodInsnNode(MethodInsnNode n) {
-        
-        if(n.getOpcode() == INVOKE_DYNAMIC_INSN) {
-        // TODO: Handle Invoke Dynamic correctly to add support for jruby/jython/etc. Checking submissions on CS for any disqualifications from this.
-        //throw new RuntimeException("Invoke Dynamic probably not instrumented correctly by Battlecode Engine. Plz don't use for now");
-        }
-        
+
         if (n.name.equals("hashCode") && n.desc.equals("()I") && n.getOpcode() != INVOKESTATIC) {
             bytecodeCtr++;
             endOfBasicBlock(n);
@@ -232,7 +216,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                 instructions.insertBefore(n, new InsnNode(DUP));
                 instructions.insertBefore(n, new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false));
             }
-            n.name = usingFastHash ? "fastHashCode" : "hashCode";
+            n.name = "hashCode";
             n.owner = "battlecode/engine/instrumenter/lang/ObjectHashCode";
             n.desc = "(ILjava/lang/Object;Ljava/lang/Class;)I";
             n.itf = false;

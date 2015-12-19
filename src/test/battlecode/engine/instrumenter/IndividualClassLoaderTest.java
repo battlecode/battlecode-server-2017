@@ -23,7 +23,7 @@ public class IndividualClassLoaderTest {
     @Test
     public void testLoadsClassesRepeatedly() throws ClassNotFoundException {
         final IndividualClassLoader l
-                = new IndividualClassLoader("testplayerempty", false);
+                = new IndividualClassLoader("testplayerempty");
 
         final List<String> classNames = new ArrayList<>();
 
@@ -56,9 +56,9 @@ public class IndividualClassLoaderTest {
     @Test
     public void testReloadsPlayerClasses() throws ClassNotFoundException {
         final IndividualClassLoader l1
-                = new IndividualClassLoader("testplayerempty", false);
+                = new IndividualClassLoader("testplayerempty");
         final IndividualClassLoader l2
-                = new IndividualClassLoader("testplayerempty", false);
+                = new IndividualClassLoader("testplayerempty");
 
         assertNotEquals(
                 l1.loadClass("testplayerempty.Helper"),
@@ -75,9 +75,9 @@ public class IndividualClassLoaderTest {
     @Test
     public void testReloadsAlwaysReloadClasses() throws ClassNotFoundException {
         final IndividualClassLoader l1
-                = new IndividualClassLoader("testplayerempty", false);
+                = new IndividualClassLoader("testplayerempty");
         final IndividualClassLoader l2
-                = new IndividualClassLoader("testplayerempty", false);
+                = new IndividualClassLoader("testplayerempty");
 
         for (String alwaysRedefine : IndividualClassLoader.alwaysRedefine) {
             assertNotEquals(
@@ -101,7 +101,7 @@ public class IndividualClassLoaderTest {
     @Test
     public void testNoUnnecessaryReloads() throws ClassNotFoundException {
         final IndividualClassLoader l
-                = new IndividualClassLoader("testplayerempty", false);
+                = new IndividualClassLoader("testplayerempty");
 
         for (Class<?> theClass : NEVER_RELOAD) {
             assertEquals(theClass, l.loadClass(theClass.getName()));

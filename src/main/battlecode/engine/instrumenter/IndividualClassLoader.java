@@ -12,7 +12,7 @@ import java.util.*;
 
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 
-public class IndividualClassLoader extends InstrumentingClassLoader {
+public class IndividualClassLoader extends ClassLoader {
     /**
      * Packages players are not allowed to use.
      * Some elements of these packages *are* permitted to be used,
@@ -70,13 +70,11 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
      * Create an IndividualClassLoader.
      *
      * @param teamPackageName
-     * @param silenced
      * @throws InstrumentationException
      */
-    public IndividualClassLoader(String teamPackageName, boolean silenced) throws InstrumentationException {
-        super(IndividualClassLoader.class.getClassLoader(), silenced);
-
-        checkSettings();
+    public IndividualClassLoader(String teamPackageName) throws InstrumentationException {
+        // use the system classloader as our fallback
+        super(IndividualClassLoader.class.getClassLoader());
 
         // check that the package we're trying to load isn't contained in a disallowed package
         String teamNameSlash = teamPackageName + "/";
@@ -135,7 +133,6 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                 ClassWriter cw = new ClassWriter(cr, COMPUTE_MAXS);
                 cr.accept(cw, 0);
                 finishedClass = saveAndDefineClass(name, cw.toByteArray());
-
             } else if (name.startsWith(teamPackageName)) {
                 final byte[] classBytes;
                 try {
@@ -150,7 +147,6 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
 
                 finishedClass = saveAndDefineClass(name, classBytes);
             } else if (name.startsWith("instrumented.")) {
-
                 // Each robot has its own version of java.util classes.
                 // If permgen space becomes a problem, we could make it so
                 // that only one copy of these classes is loaded, but
@@ -165,9 +161,6 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
                 }
 
                 finishedClass = saveAndDefineClass(name, classBytes);
-            } else if (name.startsWith("forbidden.")) {
-                ErrorReporter.report("Illegal class: " + name.substring(10) + "\nThis class cannot be referenced by player " + teamPackageName, false);
-                throw new InstrumentationException();
             } else {
                 // Load class normally; note that we use the dotted form of the name.
                 finishedClass = super.loadClass(name, resolve);
@@ -208,7 +201,7 @@ public class IndividualClassLoader extends InstrumentingClassLoader {
             throw new InstrumentationException("Can't load class: "+className, ioe);
         }
         ClassWriter cw = new ClassWriter(COMPUTE_MAXS); // passing true sets maxLocals and maxStack, so we don't have to
-        ClassVisitor cv = new InstrumentingClassVisitor(cw, teamPackageName, silenced, checkDisallowed);
+        ClassVisitor cv = new InstrumentingClassVisitor(cw, teamPackageName, false, checkDisallowed);
         cr.accept(cv, 0);        //passing false lets debug info be included in the transformation, so players get line numbers in stack traces
         return cw.toByteArray();
     }

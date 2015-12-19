@@ -40,17 +40,12 @@ public class Config {
         defaults.setProperty("bc.server.throttle-count", "15");
         defaults.setProperty("bc.server.output-xml", "true");
 
-        defaults.setProperty("bc.engine.debug-methods", "true");
-        defaults.setProperty("bc.engine.debug-max-bytecodes", "64000");
         defaults.setProperty("bc.engine.silence-a", "false");
         defaults.setProperty("bc.engine.silence-b", "false");
         defaults.setProperty("bc.engine.silence-c", "false");
         defaults.setProperty("bc.engine.silence-d", "false");
         defaults.setProperty("bc.engine.upkeep", "true");
         defaults.setProperty("bc.engine.breakpoints", "false");
-        defaults.setProperty("bc.engine.bytecodes-used", "true");
-        defaults.setProperty("bc.engine.lazy-instrumenter", "false");
-        defaults.setProperty("bc.engine.fast-hash", "false");
 
         defaults.setProperty("bc.client.opengl", "false");
         defaults.setProperty("bc.client.use-models", "true");

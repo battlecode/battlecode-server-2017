@@ -11,17 +11,15 @@ package battlecode.engine.instrumenter;
  * @author adamd
  */
 public class Verifier {
-
     public static void main(String[] args) {
         String teamPackageName = args[0];
-        //System.setOut(System.err);
         try {
-            InstrumentingClassLoader icl = new IndividualClassLoader(teamPackageName, false);
+            IndividualClassLoader icl = new IndividualClassLoader(teamPackageName);
             icl.loadClass(teamPackageName + ".RobotPlayer");
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace(System.out);
-            System.exit(42);
+            System.exit(1);
         }
     }
 }

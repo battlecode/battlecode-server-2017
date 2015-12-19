@@ -2,7 +2,6 @@ package battlecode.engine.instrumenter.bytecode;
 
 import battlecode.engine.ErrorReporter;
 import battlecode.engine.instrumenter.InstrumentationException;
-import battlecode.engine.instrumenter.InstrumentingClassLoader;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 
@@ -133,13 +132,13 @@ public class ClassReferenceUtil {
      * @return the name of the class that should replace this reference, in fully qualified form
      * @throws InstrumentationException if the class reference is not allowed
      */
-    public static String classReference(String className, String teamPackageName, boolean silenced, boolean checkDisallowed) {
+    public static String classReference(String className, String teamPackageName, boolean checkDisallowed) {
         if (className == null) return null;
 
         if (className.charAt(0) == '[') {
             int arrayIndex = className.lastIndexOf('[');
             if (className.charAt(arrayIndex + 1) == 'L') {
-                return className.substring(0, arrayIndex + 2) + classReference(className.substring(arrayIndex + 2), teamPackageName, silenced, checkDisallowed);
+                return className.substring(0, arrayIndex + 2) + classReference(className.substring(arrayIndex + 2), teamPackageName, checkDisallowed);
             } else {
                 return className;
             }
@@ -160,7 +159,7 @@ public class ClassReferenceUtil {
 
         if (checkDisallowed) {
             if (disallowedClasses.contains(className) || !isInAllowedPackage(className)) {
-                return illegalClass(className, teamPackageName);
+                throw new InstrumentationException("Illegal class: " + className + "\nThis class cannot be referenced by player " + teamPackageName);
             }
         }
         if (className.equals("java/security/SecureRandom")) {
@@ -184,14 +183,14 @@ public class ClassReferenceUtil {
      * @throws InstrumentationException if the class reference is not allowed.
      */
 
-    public static String classDescReference(String classDesc, String teamPackageName, boolean silenced, boolean checkDisallowed) {
+    public static String classDescReference(String classDesc, String teamPackageName, boolean checkDisallowed) {
         if (classDesc == null)
             return null;
         if (classDesc.charAt(0) == 'L') {
-            return "L" + classReference(classDesc.substring(1, classDesc.length() - 1), teamPackageName, silenced, checkDisallowed) + ";";
+            return "L" + classReference(classDesc.substring(1, classDesc.length() - 1), teamPackageName, checkDisallowed) + ";";
         } else if (classDesc.charAt(0) == '[') {
             int arrayIndex = classDesc.lastIndexOf('[');
-            return classDesc.substring(0, arrayIndex + 1) + classDescReference(classDesc.substring(arrayIndex + 1, classDesc.length()), teamPackageName, silenced, checkDisallowed);
+            return classDesc.substring(0, arrayIndex + 1) + classDescReference(classDesc.substring(arrayIndex + 1, classDesc.length()), teamPackageName, checkDisallowed);
         } else {
             return classDesc;
         }
@@ -205,14 +204,13 @@ public class ClassReferenceUtil {
      * @param teamPackageName the name of the team that referenced the given method
      * @throws InstrumentationException if any of the class references contained the the method descriptor are not allowed.
      */
-    public static String methodDescReference(String methodDesc, String teamPackageName, boolean silenced, boolean checkDisallowed) {
+    public static String methodDescReference(String methodDesc, String teamPackageName, boolean checkDisallowed) {
         String ret = "(";
 
         Type[] argTypes = Type.getArgumentTypes(methodDesc);
         for (Type argType : argTypes) {
             if (argType.getSort() == Type.ARRAY || argType.getSort() == Type.OBJECT)
-                // HACK: whitelistSystem is set to true here b/c we're only replacing Object; once the whole library is replaced, this should be changed
-                ret = ret + classDescReference(argType.toString(), teamPackageName, silenced, checkDisallowed);
+                ret = ret + classDescReference(argType.toString(), teamPackageName, checkDisallowed);
             else
                 ret = ret + argType.toString();
         }
@@ -221,37 +219,27 @@ public class ClassReferenceUtil {
 
         Type returnType = Type.getReturnType(methodDesc);
         if (returnType.getSort() == Type.ARRAY || returnType.getSort() == Type.OBJECT)
-            // HACK: whitelistSystem is set to true here b/c we're only replacing Object; once the whole library is replaced, this should be changed
-            ret = ret + classDescReference(returnType.toString(), teamPackageName, silenced, checkDisallowed);
+            ret = ret + classDescReference(returnType.toString(), teamPackageName, checkDisallowed);
         else
             ret = ret + returnType.toString();
 
         return ret;
     }
 
-    public static String methodSignatureReference(String signature, String teamPackageName, boolean silenced, boolean checkDisallowed) {
+    public static String methodSignatureReference(String signature, String teamPackageName, boolean checkDisallowed) {
         if (signature == null) return null;
-        BattlecodeSignatureWriter writer = new BattlecodeSignatureWriter(teamPackageName, silenced, checkDisallowed);
+        BattlecodeSignatureWriter writer = new BattlecodeSignatureWriter(teamPackageName, checkDisallowed);
         SignatureReader reader = new SignatureReader(signature);
         reader.accept(writer);
         return writer.toString();
     }
 
-    public static String fieldSignatureReference(String signature, String teamPackageName, boolean silenced, boolean checkDisallowed) {
+    public static String fieldSignatureReference(String signature, String teamPackageName, boolean checkDisallowed) {
         if (signature == null) return null;
-        BattlecodeSignatureWriter writer = new BattlecodeSignatureWriter(teamPackageName, silenced, checkDisallowed);
+        BattlecodeSignatureWriter writer = new BattlecodeSignatureWriter(teamPackageName, checkDisallowed);
         SignatureReader reader = new SignatureReader(signature);
         reader.acceptType(writer);
         return writer.toString();
-    }
-
-    // called whenever an illegal class is found; throws an InstrumentationException
-    private static String illegalClass(String className, String teamPackageName) {
-        if (InstrumentingClassLoader.lazy()) {
-            return "forbidden/" + className;
-        } else {
-            throw new InstrumentationException("Illegal class: " + className + "\nThis class cannot be referenced by player " + teamPackageName);
-        }
     }
 
 

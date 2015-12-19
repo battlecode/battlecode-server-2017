@@ -45,16 +45,13 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
             final String signature,
             final String superName,
             final String[] interfaces) {
-        className = ClassReferenceUtil.classReference(name, teamPackageName, silenced, checkDisallowed);
+        className = ClassReferenceUtil.classReference(name, teamPackageName, checkDisallowed);
         for (int i = 0; i < interfaces.length; i++) {
-            interfaces[i] = ClassReferenceUtil.classReference(interfaces[i], teamPackageName, silenced, checkDisallowed);
+            interfaces[i] = ClassReferenceUtil.classReference(interfaces[i], teamPackageName, checkDisallowed);
         }
         String newSuperName;
-        //if((access&ACC_INTERFACE)==0&&superName.equals("java/lang/Object"))
-        //	newSuperName = "battlecode/java/lang/Object";
-        //else
-        newSuperName = ClassReferenceUtil.classReference(superName, teamPackageName, silenced, checkDisallowed);
-        super.visit(version, access, className, ClassReferenceUtil.methodSignatureReference(signature, teamPackageName, silenced, checkDisallowed), newSuperName, interfaces);
+        newSuperName = ClassReferenceUtil.classReference(superName, teamPackageName, checkDisallowed);
+        super.visit(version, access, className, ClassReferenceUtil.methodSignatureReference(signature, teamPackageName, checkDisallowed), newSuperName, interfaces);
     }
 
     /**
@@ -73,19 +70,17 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
         // for performance reasons.
         access &= ~Opcodes.ACC_SYNCHRONIZED;
 
-        //System.out.println("sigm "+signature);
         if (exceptions != null) {
             for (int i = 0; i < exceptions.length; i++) {
-                exceptions[i] = ClassReferenceUtil.classReference(exceptions[i], teamPackageName, silenced, checkDisallowed);
+                exceptions[i] = ClassReferenceUtil.classReference(exceptions[i], teamPackageName, checkDisallowed);
             }
         }
         MethodVisitor mv = cv.visitMethod(access,
                 name,
-                ClassReferenceUtil.methodDescReference(desc, teamPackageName, silenced, checkDisallowed),
-                ClassReferenceUtil.methodSignatureReference(signature, teamPackageName, silenced, checkDisallowed),
+                ClassReferenceUtil.methodDescReference(desc, teamPackageName, checkDisallowed),
+                ClassReferenceUtil.methodSignatureReference(signature, teamPackageName, checkDisallowed),
                 exceptions);
-        // create a new RoboMethodAdapter, and let it loose on this method
-        //return mv == null ? null : new RoboMethodAdapter(mv, className, name, desc, teamPackageName, debugMethodsEnabled, silenced, checkDisallowed);
+        // create a new InstrumentingMethodVisitor, and let it loose on this method
         return mv == null ? null : new InstrumentingMethodVisitor(mv, className, access, name, desc, signature, exceptions, teamPackageName, silenced, checkDisallowed);
     }
 
@@ -100,8 +95,8 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
             access &= ~Opcodes.ACC_VOLATILE;
         return cv.visitField(access,
                 name,
-                ClassReferenceUtil.classDescReference(desc, teamPackageName, silenced, checkDisallowed),
-                ClassReferenceUtil.fieldSignatureReference(signature, teamPackageName, silenced, checkDisallowed),
+                ClassReferenceUtil.classDescReference(desc, teamPackageName, checkDisallowed),
+                ClassReferenceUtil.fieldSignatureReference(signature, teamPackageName, checkDisallowed),
                 value);
     }
 
@@ -109,16 +104,14 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
      * @inheritDoc
      */
     public void visitOuterClass(String owner, String name, String desc) {
-        //System.out.println("voc "+owner+" "+name+" "+desc);
-        super.visitOuterClass(ClassReferenceUtil.classReference(owner, teamPackageName, silenced, checkDisallowed), name, ClassReferenceUtil.methodSignatureReference(desc, teamPackageName, silenced, checkDisallowed));
+        super.visitOuterClass(ClassReferenceUtil.classReference(owner, teamPackageName, checkDisallowed), name, ClassReferenceUtil.methodSignatureReference(desc, teamPackageName, checkDisallowed));
     }
 
     /**
      * @inheritDoc
      */
     public void visitInnerClass(String name, String outerName, String innerName, int access) {
-        //System.out.println("vic "+name+" "+outerName+" "+innerName);
-        super.visitInnerClass(ClassReferenceUtil.classReference(name, teamPackageName, silenced, checkDisallowed), ClassReferenceUtil.classReference(outerName, teamPackageName, silenced, checkDisallowed), innerName, access);
+        super.visitInnerClass(ClassReferenceUtil.classReference(name, teamPackageName, checkDisallowed), ClassReferenceUtil.classReference(outerName, teamPackageName, checkDisallowed), innerName, access);
     }
 
 }

@@ -20,8 +20,9 @@ public class ObjectHashCode {
             tmpe = Enum.class.getMethod("hashCode");
             tmpc = Character.class.getMethod("hashCode");
         } catch (Exception e) {
-            ErrorReporter.report(e);
+            throw new RuntimeException("Can't load needed functions", e);
         }
+
         objectHashCode = tmpo;
         enumHashCode = tmpe;
         characterHashCode = tmpc;
@@ -34,23 +35,10 @@ public class ObjectHashCode {
     static HashMap<Class, Boolean> usesOHC = new HashMap<>();
 
     static public int hashCode(int hash, Object o, Class<?> cl) throws NoSuchMethodException {
-        int idHash = java.lang.System.identityHashCode(o);
-        if (hash != idHash)
-            return hash;
         if (usesObjectHashCode(cl))
             return identityHashCode(o);
         else
             return hash;
-    }
-
-    // Assumes that if hashCode and System.identityHashCode are
-    // the same then hashCode has been reimplemented.  Chance
-    // of a collision is 1 in 2^32.
-    static public int fastHashCode(int hash, Object o, Class<?> cl) {
-        int idHash = java.lang.System.identityHashCode(o);
-        if (hash != idHash)
-            return hash;
-        return identityHashCode(o);
     }
 
     static private boolean usesObjectHashCode(Class<?> cl) throws NoSuchMethodException {

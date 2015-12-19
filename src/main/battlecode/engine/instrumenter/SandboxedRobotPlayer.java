@@ -91,7 +91,7 @@ public class SandboxedRobotPlayer {
         this.notifier = new Object();
 
         // Create classloader sandbox
-        individualLoader = new IndividualClassLoader(teamName, false);
+        individualLoader = new IndividualClassLoader(teamName);
 
         // Load player in sandbox
         Class<?> robotPlayer;
