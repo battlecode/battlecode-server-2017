@@ -1,4 +1,4 @@
-package battlecode.engine.instrumenter;
+package battlecode.instrumenter;
 
 /**
  * An exception used to kill robot threads when their robot dies in the game.  In other words, when a robot

@@ -1,4 +1,4 @@
-package battlecode.engine.instrumenter.lang;
+package battlecode.instrumenter.inject;
 
 import java.lang.reflect.Field;
 

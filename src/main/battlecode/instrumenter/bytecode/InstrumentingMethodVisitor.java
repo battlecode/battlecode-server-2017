@@ -1,8 +1,8 @@
-package battlecode.engine.instrumenter.bytecode;
+package battlecode.instrumenter.bytecode;
 
 import battlecode.common.GameConstants;
 import battlecode.server.ErrorReporter;
-import battlecode.engine.instrumenter.InstrumentationException;
+import battlecode.instrumenter.InstrumentationException;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
 
@@ -200,6 +200,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
     }
 
     private void visitMethodInsnNode(MethodInsnNode n) {
+        // do various function replacements
 
         if (n.name.equals("hashCode") && n.desc.equals("()I") && n.getOpcode() != INVOKESTATIC) {
             bytecodeCtr++;
@@ -207,7 +208,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             // replace hashCode with deterministic version
             // send the object, its hash code, and the hash code method owner to
             // ObjectHashCode for analysis
-            n.owner = "battlecode/engine/instrumenter/lang/ObjectHashCode";
+            n.owner = "battlecode/instrumenter/inject/ObjectHashCode";
             n.desc = "(Ljava/lang/Object;)I";
             n.itf = false;
             n.setOpcode(INVOKESTATIC);
@@ -215,13 +216,13 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         }
 
         if (n.name.equals("identityHashCode") && n.owner.equals("java/lang/System")) {
-            n.owner = "battlecode/engine/instrumenter/lang/ObjectHashCode";
+            n.owner = "battlecode/instrumenter/inject/ObjectHashCode";
             return;
         }
 
         if (n.owner.equals("java/util/Random") && n.name.equals("<init>") &&
                 n.desc.equals("()V")) {
-            instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "getRandomSeed", "()J", false));
+            instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "getRandomSeed", "()J", false));
             n.owner = "instrumented/java/util/Random";
             n.desc = "(J)V";
             return;
@@ -266,16 +267,14 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             endBasicBlock = data.shouldEndRound;
         }
 
-        // do various function replacements
-
         // instrument string regex functions
         if (n.owner.equals("java/lang/String") && instrumentedStringFuncs.contains(n.name)) {
             n.setOpcode(INVOKESTATIC);
             n.desc = "(Ljava/lang/String;" + n.desc.substring(1);
-            n.owner = "instrumented/battlecode/engine/instrumenter/lang/InstrumentableFunctions";
+            n.owner = "instrumented/battlecode/instrumenter/inject/InstrumentableFunctions";
         } else if ((n.owner.equals("java/lang/Math") || n.owner.equals("java/lang/StrictMath"))
                 && n.name.equals("random")) {
-            n.owner = "instrumented/battlecode/engine/instrumenter/lang/InstrumentableFunctions";
+            n.owner = "instrumented/battlecode/instrumenter/inject/InstrumentableFunctions";
         }
 
         //hax the e.printStackTrace() method calls
@@ -287,7 +286,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         // But in practice this should be good enough.
         else if (n.name.equals("printStackTrace") && n.desc.equals("()V") &&
                 (n.owner == null || n.owner.equals("java/lang/Throwable") || isSuperClass(n.owner, "java/lang/Throwable"))) {
-            instructions.insertBefore(n, new FieldInsnNode(GETSTATIC, "battlecode/engine/instrumenter/lang/System", "out", "Ljava/io/PrintStream;"));
+            instructions.insertBefore(n, new FieldInsnNode(GETSTATIC, "battlecode/instrumenter/inject/System", "out", "Ljava/io/PrintStream;"));
             n.desc = "(Ljava/io/PrintStream;)V";
         } else {
             // replace class names
@@ -347,7 +346,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         if (bytecodeCtr == 0)
             return;
         instructions.insertBefore(n, new LdcInsnNode(bytecodeCtr));
-        instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "incrementBytecodes", "(I)V", false));
+        instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "incrementBytecodes", "(I)V", false));
         bytecodeCtr = 0;
     }
 

@@ -1,7 +1,7 @@
-package battlecode.engine.instrumenter.bytecode;
+package battlecode.instrumenter.bytecode;
 
+import battlecode.instrumenter.InstrumentationException;
 import battlecode.server.ErrorReporter;
-import battlecode.engine.instrumenter.InstrumentationException;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 
@@ -11,7 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * ClassReferenceUtil is a singleton used to keep track of class references during instrumentation.
+ * ClassReferenceUtil provides utility methods for resolving class names during
+ * instrumentation.
  *
  * @author adamd
  */
@@ -94,7 +95,7 @@ public class ClassReferenceUtil {
 
     private static boolean shouldAddInstrumentedPrefix(String className) {
         if (className.startsWith("battlecode/")) {
-            return className.equals("battlecode/engine/instrumenter/lang/InstrumentableFunctions");
+            return className.equals("battlecode/instrumenter/inject/InstrumentableFunctions");
         }
 
         if (className.startsWith("instrumented/"))
@@ -145,17 +146,17 @@ public class ClassReferenceUtil {
         } else if (className.startsWith(teamPackageName + "/"))
             return className;
         else if (className.equals("java/lang/System"))
-            return "battlecode/engine/instrumenter/lang/System";
+            return "battlecode/instrumenter/inject/System";
         else if (className.equals("java/util/concurrent/ConcurrentHashMap"))
-            return "battlecode/engine/instrumenter/lang/ConcurrentHashMap";
+            return "battlecode/instrumenter/inject/ConcurrentHashMap";
         else if (className.equals("java/util/concurrent/atomic/AtomicInteger"))
-            return "battlecode/engine/instrumenter/lang/AtomicInteger";
+            return "battlecode/instrumenter/inject/AtomicInteger";
         else if (className.equals("java/util/concurrent/atomic/AtomicLong"))
-            return "battlecode/engine/instrumenter/lang/AtomicLong";
+            return "battlecode/instrumenter/inject/AtomicLong";
         else if (className.equals("java/util/concurrent/atomic/AtomicReference"))
-            return "battlecode/engine/instrumenter/lang/AtomicReference";
+            return "battlecode/instrumenter/inject/AtomicReference";
         else if (className.equals("sun/misc/Unsafe"))
-            return "battlecode/engine/instrumenter/lang/Unsafe";
+            return "battlecode/instrumenter/inject/Unsafe";
 
         if (checkDisallowed) {
             if (disallowedClasses.contains(className) || !isInAllowedPackage(className)) {

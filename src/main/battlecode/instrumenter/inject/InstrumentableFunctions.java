@@ -1,6 +1,4 @@
-package battlecode.engine.instrumenter.lang;
-
-import battlecode.engine.instrumenter.RobotMonitor;
+package battlecode.instrumenter.inject;
 
 import java.util.Random;
 import java.util.regex.Pattern;

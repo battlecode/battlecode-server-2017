@@ -1,5 +1,6 @@
-package battlecode.engine.instrumenter;
+package battlecode.instrumenter;
 
+import battlecode.instrumenter.inject.RobotMonitor;
 import org.junit.Before;
 import org.junit.Test;
 

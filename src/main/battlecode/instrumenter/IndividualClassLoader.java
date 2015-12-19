@@ -1,8 +1,8 @@
-package battlecode.engine.instrumenter;
+package battlecode.instrumenter;
 
+import battlecode.instrumenter.bytecode.ClassReaderUtil;
+import battlecode.instrumenter.bytecode.InstrumentingClassVisitor;
 import battlecode.server.ErrorReporter;
-import battlecode.engine.instrumenter.bytecode.ClassReaderUtil;
-import battlecode.engine.instrumenter.bytecode.InstrumentingClassVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -26,11 +26,11 @@ public class IndividualClassLoader extends ClassLoader {
      * for every individual player.
      */
     protected final static Set<String> alwaysRedefine = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            "battlecode.engine.instrumenter.lang.ObjectHashCode",
-            "battlecode.engine.instrumenter.lang.InstrumentableFunctions",
-            "battlecode.engine.instrumenter.lang.System",
-            "battlecode.engine.instrumenter.lang.System$1",
-            "battlecode.engine.instrumenter.RobotMonitor",
+            "battlecode.instrumenter.inject.ObjectHashCode",
+            "battlecode.instrumenter.inject.InstrumentableFunctions",
+            "battlecode.instrumenter.inject.System",
+            "battlecode.instrumenter.inject.System$1",
+            "battlecode.instrumenter.inject.RobotMonitor",
             "battlecode.common.Clock"
     )));
 

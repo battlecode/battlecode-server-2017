@@ -1,7 +1,7 @@
 package battlecode.world.control;
 
-import battlecode.engine.instrumenter.IndividualClassLoader;
-import battlecode.engine.instrumenter.SandboxedRobotPlayer;
+import battlecode.instrumenter.IndividualClassLoader;
+import battlecode.instrumenter.SandboxedRobotPlayer;
 import battlecode.server.Config;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;

@@ -1,4 +1,6 @@
-package battlecode.engine.instrumenter;
+package battlecode.instrumenter.inject;
+
+import battlecode.instrumenter.SandboxedRobotPlayer;
 
 import java.io.PrintStream;
 
@@ -62,8 +64,8 @@ public final class RobotMonitor {
      */
     @SuppressWarnings("unused")
     public static void setSystemOut(PrintStream out) {
-        battlecode.engine.instrumenter.lang.System.out = out;
-        battlecode.engine.instrumenter.lang.System.err = out;
+        System.out = out;
+        System.err = out;
     }
 
     /**

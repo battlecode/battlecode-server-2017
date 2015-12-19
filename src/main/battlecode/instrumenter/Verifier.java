@@ -1,10 +1,10 @@
-package battlecode.engine.instrumenter;
+package battlecode.instrumenter;
 
 /**
  * Used to verify that a team's submission will pass the instrumenter when it's run.
  * <p/>
  * Usage:<br>
- * <code>java battlecode.engine.instrumenter.Verifier teamXXX</code><br>
+ * <code>java Verifier teamXXX</code><br>
  * If the submission passes, the Java process will return 0, and there will be no output to stderr.  If the
  * submission fails, the Java process will return 1, and there will be error messages in stderr.
  *

@@ -1,9 +1,8 @@
-package battlecode.engine.instrumenter;
+package battlecode.instrumenter;
 
 import battlecode.common.RobotController;
+import battlecode.instrumenter.inject.RobotMonitor;
 import battlecode.server.ErrorReporter;
-import battlecode.engine.instrumenter.lang.RoboPrintStream;
-import battlecode.engine.instrumenter.lang.SilencedPrintStream;
 import battlecode.server.Config;
 
 import java.io.PrintStream;

@@ -1,4 +1,4 @@
-package battlecode.engine.instrumenter.lang;
+package battlecode.instrumenter.inject;
 
 // Fake AtomicLong class, needed by java.util.Random.
 @SuppressWarnings("unused")

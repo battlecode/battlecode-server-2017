@@ -1,4 +1,4 @@
-package battlecode.engine.instrumenter;
+package battlecode.instrumenter;
 
 /**
  * An exception used to indicate that there was a problem instrumenting a player (e.g., the player references a

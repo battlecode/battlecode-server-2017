@@ -1,4 +1,4 @@
-package battlecode.engine.instrumenter.lang;
+package battlecode.instrumenter.inject;
 
 @SuppressWarnings("unused")
 public class AtomicInteger {

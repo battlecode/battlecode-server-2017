@@ -1,6 +1,6 @@
-package battlecode.engine.instrumenter.lang;
+package battlecode.instrumenter.inject;
 
-import battlecode.engine.instrumenter.InstrumentationException;
+import battlecode.instrumenter.InstrumentationException;
 
 @SuppressWarnings("unused")
 public class Thread extends java.lang.Thread {

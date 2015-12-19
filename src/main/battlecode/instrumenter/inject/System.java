@@ -1,13 +1,12 @@
-package battlecode.engine.instrumenter.lang;
+package battlecode.instrumenter.inject;
 
-import battlecode.engine.instrumenter.RobotMonitor;
 import battlecode.server.Config;
 
 import java.io.InputStream;
 import java.io.PrintStream;
 
 /**
- * A Wrapper for java.lang.System that supports only arraycopy and System.out.  battlecode.engine.instrumenter.lang.System.out is
+ * A Wrapper for java.lang.System that supports only arraycopy and System.out.  System.out is
  * implemented as a RoboPrintStream, so only a subset of its methods may be implemented.
  * <p/>
  * The battlecode instrumenter should (sneakily) replace any references to java.lang.System with references to

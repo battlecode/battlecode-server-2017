@@ -1,4 +1,4 @@
-package battlecode.engine.instrumenter;
+package battlecode.instrumenter;
 
 import battlecode.common.RobotController;
 import battlecode.common.Team;

@@ -1,4 +1,4 @@
-package battlecode.engine.instrumenter.bytecode;
+package battlecode.instrumenter.bytecode;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;

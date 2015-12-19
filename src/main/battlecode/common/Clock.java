@@ -1,6 +1,6 @@
 package battlecode.common;
 
-import battlecode.engine.instrumenter.RobotMonitor;
+import battlecode.instrumenter.inject.RobotMonitor;
 
 /**
  * Clock is a singleton that allows contestants to introspect the state of their running
