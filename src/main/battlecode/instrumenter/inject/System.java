@@ -45,6 +45,7 @@ public final class System {
      * Some system properties.
      */
     private static Properties props = new Properties();
+
     static {
         props.setProperty("java.version", "who knows?");
         props.setProperty("java.vendor", "who knows?");
@@ -66,7 +67,8 @@ public final class System {
     /**
      * Prevent construction.
      */
-    private System() { }
+    private System() {
+    }
 
     /**
      * Set System.out for this robot.
@@ -83,19 +85,33 @@ public final class System {
 
     // No reason not to let users modify these.
 
-    public static void setIn(InputStream newIn) { in = newIn; }
+    public static void setIn(InputStream newIn) {
+        in = newIn;
+    }
 
-    public static void setOut(PrintStream newOut) { out = newOut; }
+    public static void setOut(PrintStream newOut) {
+        out = newOut;
+    }
 
-    public static void setErr(PrintStream newErr) { err = newErr; }
+    public static void setErr(PrintStream newErr) {
+        err = newErr;
+    }
 
-    public static Console console() { return null; }
+    public static Console console() {
+        return null;
+    }
 
-    public static Channel inheritedChannel() { return null; }
+    public static Channel inheritedChannel() {
+        return null;
+    }
 
-    public static Properties getProperties() { return props; }
+    public static Properties getProperties() {
+        return props;
+    }
 
-    public static String lineSeparator() { return "\n"; }
+    public static String lineSeparator() {
+        return "\n";
+    }
 
     public static void arraycopy(Object src, int srcPos, Object dest, int destPos, int length) {
         java.lang.System.arraycopy(src, srcPos, dest, destPos, length);
@@ -130,43 +146,5 @@ public final class System {
     public static void exit(int status) {
         throw new RobotDeathException();
     }
-
-    // Disabled methods.
-
-    public static SecurityManager getSecurityManager() {
-        throw new SecurityException("Nice try, but you can't access the SecurityManager.");
-    }
-    public static void setSecurityManager(final SecurityManager s) {
-        throw new SecurityException("Nice try, but you can't access the SecurityManager.");
-    }
-    public static long currentTimeMillis() {
-        throw new SecurityException("You can't access the system time, sorry.");
-    }
-    public static long nanoTime() {
-        throw new SecurityException("You can't access the system time, sorry.");
-    }
-    public static String getenv(String name) {
-        throw new SecurityException("Can't access environment variables, sorry.");
-    }
-    public static java.util.Map<String,String> getenv() {
-        throw new SecurityException("Can't access environment variables, sorry.");
-    }
-    public static void gc() {
-        throw new SecurityException("You can't run the gc, sorry.");
-    }
-    public static void runFinalization() {
-        throw new SecurityException("You can't run finalizers, sorry.");
-    }
-    public static void runFinalizersOnExit(boolean value) {
-        throw new SecurityException("You can't run finalizers, sorry.");
-    }
-    public static void load(String filename) {
-        throw new SecurityException("You can't access the JNI, sorry.");
-    }
-    public static void loadLibrary(String libname) {
-        throw new SecurityException("You can't access the JNI, sorry.");
-    }
-    public static String mapLibraryName(String libname) {
-        throw new SecurityException("You can't access the JNI, sorry.");
-    }
 }
+

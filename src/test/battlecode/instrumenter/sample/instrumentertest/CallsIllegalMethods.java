@@ -34,6 +34,16 @@ public class CallsIllegalMethods {
         }
     }
 
+    public static class CallsSystemNanoTime {
+        static {
+            try {
+                System.nanoTime();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     public static class CreatesFilePrintStream {
         static {
             try {
@@ -43,4 +53,5 @@ public class CallsIllegalMethods {
             }
         }
     }
+
 }

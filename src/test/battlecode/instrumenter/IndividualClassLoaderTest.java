@@ -173,6 +173,7 @@ public class IndividualClassLoaderTest {
                 "instrumentertest.CallsIllegalMethods$CallsWait",
                 "instrumentertest.CallsIllegalMethods$CallsClassForName",
                 "instrumentertest.CallsIllegalMethods$CallsStringIntern",
+                "instrumentertest.CallsIllegalMethods$CallsSystemNanoTime",
                 "instrumentertest.CallsIllegalMethods$CreatesFilePrintStream",
         };
 

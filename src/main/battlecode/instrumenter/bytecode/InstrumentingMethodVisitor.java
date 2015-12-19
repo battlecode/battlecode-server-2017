@@ -259,6 +259,23 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                 throw new InstrumentationException("Illegal method in " + className + ": String.intern() cannot be called by a player.");
             }
 
+            if (n.owner.equals("java/lang/System") && (
+                    n.name.equals("getSecurityManager") ||
+                    n.name.equals("setSecurityManager") ||
+                    n.name.equals("currentTimeMillis") ||
+                    n.name.equals("nanoTime") ||
+                    n.name.equals("getenv") ||
+                    n.name.equals("gc") ||
+                    n.name.equals("runFinalization") ||
+                    n.name.equals("runFinalizersOnExit") ||
+                    n.name.equals("load") ||
+                    n.name.equals("loadLibrary") ||
+                    n.name.equals("mapLibraryName"))) {
+                throw new InstrumentationException("Illegal method in " + className
+                        + ": System." + name + "() " + "cannot be called by a player.");
+
+            }
+
         }
 
         boolean endBasicBlock = n.owner.startsWith(teamPackageName) || classReference(n.owner).startsWith("instrumented") || n.owner.startsWith("battlecode");
