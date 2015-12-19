@@ -92,7 +92,7 @@
         <ivy:settings file="ivyconf.xml"/>
         <ivy:retrieve pattern="${lib.compile.dir}/[artifact]-[revision].[ext]" conf="compile"/>
         <ivy:retrieve pattern="${lib.src.dir}/[artifact]-[revision](-[classifier]).[ext]" conf="sources"/>
-        <ivy:retrieve pattern="${lib.doc.dir}/doc/[artifact]-[revision](-[classifier]).[ext]" conf="javadoc"/>
+        <ivy:retrieve pattern="${lib.doc.dir}/[artifact]-[revision](-[classifier]).[ext]" conf="javadoc"/>
         <ivy:retrieve pattern="${lib.test.dir}/[artifact]-[revision](-[classifier]).[ext]" conf="test"/>
     </target>
 
