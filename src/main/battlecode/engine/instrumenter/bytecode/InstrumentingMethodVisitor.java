@@ -207,18 +207,8 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             // replace hashCode with deterministic version
             // send the object, its hash code, and the hash code method owner to
             // ObjectHashCode for analysis
-            instructions.insertBefore(n, new InsnNode(DUP));
-            instructions.insertBefore(n, new MethodInsnNode(n.getOpcode(), classReference(n.owner), "hashCode", "()I", n.itf));
-            instructions.insertBefore(n, new InsnNode(SWAP));
-            if (n.getOpcode() == INVOKESPECIAL) {
-                instructions.insertBefore(n, new LdcInsnNode(Type.getObjectType(n.owner)));
-            } else {
-                instructions.insertBefore(n, new InsnNode(DUP));
-                instructions.insertBefore(n, new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false));
-            }
-            n.name = "hashCode";
             n.owner = "battlecode/engine/instrumenter/lang/ObjectHashCode";
-            n.desc = "(ILjava/lang/Object;Ljava/lang/Class;)I";
+            n.desc = "(Ljava/lang/Object;)I";
             n.itf = false;
             n.setOpcode(INVOKESTATIC);
             return;
@@ -283,7 +273,8 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             n.setOpcode(INVOKESTATIC);
             n.desc = "(Ljava/lang/String;" + n.desc.substring(1);
             n.owner = "instrumented/battlecode/engine/instrumenter/lang/InstrumentableFunctions";
-        } else if ((n.owner.equals("java/lang/Math") || n.owner.equals("java/lang/StrictMath")) && n.name.equals("random")) {
+        } else if ((n.owner.equals("java/lang/Math") || n.owner.equals("java/lang/StrictMath"))
+                && n.name.equals("random")) {
             n.owner = "instrumented/battlecode/engine/instrumenter/lang/InstrumentableFunctions";
         }
 

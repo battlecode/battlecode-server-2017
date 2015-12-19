@@ -30,14 +30,15 @@ public class ObjectHashCode {
     static int lastHashCode = -1;
 
     static WeakIdentityHashMap<Object, Integer> codes = new WeakIdentityHashMap<>();
+
     // reflection is slow so cache the results
     static HashMap<Class, Boolean> usesOHC = new HashMap<>();
 
-    static public int hashCode(int hash, Object o, Class<?> cl) throws NoSuchMethodException {
-        if (usesObjectHashCode(cl))
+    static public int hashCode(Object o) throws NoSuchMethodException {
+        if (usesObjectHashCode(o.getClass()))
             return identityHashCode(o);
         else
-            return hash;
+            return o.hashCode();
     }
 
     static private boolean usesObjectHashCode(Class<?> cl) throws NoSuchMethodException {

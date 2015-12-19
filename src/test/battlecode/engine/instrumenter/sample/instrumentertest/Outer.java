@@ -1,12 +1,11 @@
 // Javac will move this into the correct package in the build output
-package testplayerempty;
+package instrumentertest;
 
 /**
+ * Test loading of inner classes.
  * @author james
  */
 @SuppressWarnings("unused")
-public class Helper {
-    public void help() {}
-
+public class Outer {
     public static class Inner {}
 }
