@@ -1,7 +1,7 @@
 package battlecode.engine.instrumenter.bytecode;
 
 import battlecode.common.GameConstants;
-import battlecode.engine.ErrorReporter;
+import battlecode.server.ErrorReporter;
 import battlecode.engine.instrumenter.InstrumentationException;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;

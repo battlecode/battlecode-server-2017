@@ -1,6 +1,6 @@
 package battlecode.engine.instrumenter.bytecode;
 
-import battlecode.engine.ErrorReporter;
+import battlecode.server.ErrorReporter;
 import org.objectweb.asm.ClassReader;
 
 import java.io.BufferedReader;

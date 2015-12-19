@@ -1,4 +1,4 @@
-package battlecode.engine.signal;
+package battlecode.world.signal;
 
 /**
  * Implemented by objects that can absorb signals.

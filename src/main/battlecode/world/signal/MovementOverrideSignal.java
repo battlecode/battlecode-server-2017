@@ -1,7 +1,6 @@
 package battlecode.world.signal;
 
 import battlecode.common.MapLocation;
-import battlecode.engine.signal.Signal;
 
 /**
  * Signifies that a robot was moved by a user override -- i.e., it should warp to the new location without an animation

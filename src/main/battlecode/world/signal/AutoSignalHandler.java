@@ -1,4 +1,4 @@
-package battlecode.engine.signal;
+package battlecode.world.signal;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

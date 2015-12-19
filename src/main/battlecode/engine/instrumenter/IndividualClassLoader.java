@@ -1,6 +1,6 @@
 package battlecode.engine.instrumenter;
 
-import battlecode.engine.ErrorReporter;
+import battlecode.server.ErrorReporter;
 import battlecode.engine.instrumenter.bytecode.ClassReaderUtil;
 import battlecode.engine.instrumenter.bytecode.InstrumentingClassVisitor;
 import org.objectweb.asm.ClassReader;

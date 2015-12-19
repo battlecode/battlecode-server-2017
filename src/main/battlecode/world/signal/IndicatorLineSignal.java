@@ -2,7 +2,6 @@ package battlecode.world.signal;
 
 import battlecode.common.MapLocation;
 import battlecode.common.Team;
-import battlecode.engine.signal.Signal;
 
 /**
  * Signifies that a robot has requested a debug indicator line be created.

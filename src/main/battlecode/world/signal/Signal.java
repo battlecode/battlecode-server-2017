@@ -1,4 +1,4 @@
-package battlecode.engine.signal;
+package battlecode.world.signal;
 
 import java.io.Serializable;
 

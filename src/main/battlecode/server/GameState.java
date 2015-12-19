@@ -1,4 +1,4 @@
-package battlecode.engine;
+package battlecode.server;
 
 public enum GameState {
     RUNNING,

@@ -1,7 +1,7 @@
 package battlecode.engine.instrumenter;
 
 import battlecode.common.RobotController;
-import battlecode.engine.ErrorReporter;
+import battlecode.server.ErrorReporter;
 import battlecode.engine.instrumenter.lang.RoboPrintStream;
 import battlecode.engine.instrumenter.lang.SilencedPrintStream;
 import battlecode.server.Config;

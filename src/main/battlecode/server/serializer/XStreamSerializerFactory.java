@@ -1,7 +1,7 @@
 package battlecode.server.serializer;
 
 import battlecode.common.MapLocation;
-import battlecode.engine.signal.Signal;
+import battlecode.world.signal.Signal;
 import battlecode.serial.ExtensibleMetadata;
 import battlecode.serial.RoundDelta;
 import com.thoughtworks.xstream.XStream;

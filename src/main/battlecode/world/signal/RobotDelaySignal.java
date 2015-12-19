@@ -1,6 +1,5 @@
 package battlecode.world.signal;
 
-import battlecode.engine.signal.Signal;
 import battlecode.world.InternalRobot;
 
 /**

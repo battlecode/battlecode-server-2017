@@ -1,7 +1,6 @@
 package battlecode.world.signal;
 
 import battlecode.common.Team;
-import battlecode.engine.signal.Signal;
 
 import java.util.Map;
 

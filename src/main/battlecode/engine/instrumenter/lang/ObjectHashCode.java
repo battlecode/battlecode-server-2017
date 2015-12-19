@@ -1,6 +1,5 @@
 package battlecode.engine.instrumenter.lang;
 
-import battlecode.engine.ErrorReporter;
 import org.hibernate.search.util.WeakIdentityHashMap;
 
 import java.lang.reflect.Method;

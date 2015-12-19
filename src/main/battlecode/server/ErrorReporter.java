@@ -1,4 +1,4 @@
-package battlecode.engine;
+package battlecode.server;
 
 // TODO: pass messages along to the client
 public class ErrorReporter {
