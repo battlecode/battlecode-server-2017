@@ -6,7 +6,8 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 /**
- * Instruments a class.  See InstrumenterASMImpl for more info on what this instrumentation does.
+ * Instruments a class. Overrides class references and runs an
+ * InstrumentingMethodVisitor on every method.
  *
  * @author adamd
  */

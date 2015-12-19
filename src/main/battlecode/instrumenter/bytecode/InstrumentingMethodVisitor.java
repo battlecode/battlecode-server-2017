@@ -14,6 +14,14 @@ import java.util.Set;
 
 import static org.objectweb.asm.tree.AbstractInsnNode.*;
 
+/**
+ * The class where the bulk of instrumentation happens.
+ * Takes in the bytecode for a method and modifies it to do a few things:
+ *  - Call RobotMonitor.incrementBytecodes() at the end of every basic block
+ *  - Overrides class references with our injected / instrumented class references
+ *  - Modifies some particularly finnicky method calls so that they behave correctly
+ *    (e.g. Object.hashCode(), Math.random(), Throwable.printStackTrace())
+ */
 public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 	
     private final String teamPackageName;
@@ -40,7 +48,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
     private MethodVisitor methodWriter;
 
     public InstrumentingMethodVisitor(final MethodVisitor mv, final String className, final int access, final String methodName, final String methodDesc, final String signature, final String[] exceptions, final String teamPackageName, boolean silenced, boolean checkDisallowed) {
-        super(Opcodes.ASM5, access, methodName, methodDesc, signature, exceptions);
+        super(ASM5, access, methodName, methodDesc, signature, exceptions);
         this.teamPackageName = teamPackageName;
         this.className = className;
         this.checkDisallowed = checkDisallowed;

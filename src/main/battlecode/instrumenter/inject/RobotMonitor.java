@@ -11,7 +11,7 @@ import java.io.PrintStream;
  * Don't let the fact that this class is "static" fool you. It's static for instrumentation convenience;
  * a new version is loaded every time a new robot player is loaded, and is specific to that robot.
  *
- * The specific calls the instrumentation uses are incrementBytecodes, incrementDebugLevel, and decrementDebugLevel.
+ * The specific call the instrumentation uses is "incrementBytecodes".
  *
  * @author adamd
  */
