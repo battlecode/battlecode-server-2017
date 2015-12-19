@@ -191,8 +191,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             case MONITORENTER:
             case MONITOREXIT:
                 if (checkDisallowed) {
-                    ErrorReporter.report("synchronized() may not be used by a player.", false);
-                    throw new InstrumentationException();
+                    throw new InstrumentationException("synchronized() may not be used by a player.");
                 }
                 // We need to strip these so we don't leave monitors locked when a robot dies
                 instructions.set(n, new InsnNode(POP));
@@ -220,11 +219,6 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             n.desc = "(Ljava/lang/Object;)I";
             n.itf = false;
             n.setOpcode(INVOKESTATIC);
-            return;
-        }
-
-        if (n.name.equals("identityHashCode") && n.owner.equals("java/lang/System")) {
-            n.owner = "battlecode/instrumenter/inject/ObjectHashCode";
             return;
         }
 
@@ -372,8 +366,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         try {
             cr = ClassReaderUtil.reader(owner);
         } catch (IOException ioe) {
-            ErrorReporter.report("Can't find the class \"" + owner + "\", and this wasn't caught until the RobotMethodAdapter.isSuperClass stage.", true);
-            throw new InstrumentationException();
+            throw new InstrumentationException("Can't find the class \"" + owner + "\"");
         }
 
         InterfaceReader ir = new InterfaceReader();

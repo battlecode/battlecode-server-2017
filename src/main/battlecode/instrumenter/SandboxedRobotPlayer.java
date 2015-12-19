@@ -1,7 +1,8 @@
 package battlecode.instrumenter;
 
 import battlecode.common.RobotController;
-import battlecode.instrumenter.inject.RobotMonitor;
+import battlecode.instrumenter.stream.RoboPrintStream;
+import battlecode.instrumenter.stream.SilencedPrintStream;
 import battlecode.server.ErrorReporter;
 import battlecode.server.Config;
 
@@ -122,15 +123,18 @@ public class SandboxedRobotPlayer {
         final Method pauseMethod;
         try {
             // The loaded, uninstrumented-but-individual RobotMonitor for this player.
-            Class<?> monitor = individualLoader.loadClass(RobotMonitor.class.getName());
+            Class<?> monitor = individualLoader
+                    .loadClass("battlecode.instrumenter.inject.RobotMonitor");
 
             killMethod = monitor.getMethod("killRobot");
             setBytecodeLimitMethod = monitor.getMethod("setBytecodeLimit", int.class);
-            setSystemOutMethod = monitor.getMethod("setSystemOut", PrintStream.class);
             getBytecodeNumMethod = monitor.getMethod("getBytecodeNum");
             pauseMethod = monitor.getMethod("pause");
             initMethod = monitor.getMethod("init", Pauser.class, Killer.class, int.class);
 
+            Class<?> system = individualLoader
+                    .loadClass("battlecode.instrumenter.inject.System");
+            setSystemOutMethod = system.getMethod("setSystemOut", PrintStream.class);
 
         } catch (Exception e) {
             throw new InstrumentationException("Couldn't load RobotMonitor", e);

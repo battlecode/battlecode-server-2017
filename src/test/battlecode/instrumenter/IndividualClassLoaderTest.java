@@ -31,7 +31,8 @@ public class IndividualClassLoaderTest {
         SandboxedRobotPlayer.Pauser pauser = () -> {};
         SandboxedRobotPlayer.Killer killer = () -> {};
 
-        final Class<?> monitor1 = l1.loadClass(RobotMonitor.class.getName());
+        final Class<?> monitor1 = l1
+                .loadClass("battlecode.instrumenter.inject.RobotMonitor");
         monitor1.getMethod("init",
                 SandboxedRobotPlayer.Pauser.class,
                 SandboxedRobotPlayer.Killer.class,
@@ -40,7 +41,9 @@ public class IndividualClassLoaderTest {
         monitor1.getMethod("setBytecodeLimit", int.class)
                 .invoke(null, Integer.MAX_VALUE);
 
-        final Class<?> monitor2 = l2.loadClass(RobotMonitor.class.getName());
+
+        final Class<?> monitor2 = l2
+                .loadClass("battlecode.instrumenter.inject.RobotMonitor");
         monitor2.getMethod("init",
                 SandboxedRobotPlayer.Pauser.class,
                 SandboxedRobotPlayer.Killer.class,
@@ -162,5 +165,27 @@ public class IndividualClassLoaderTest {
                 getHashCodeNotOverrides2.invoke(notOverrides2a));
         assertEquals(getHashCodeNotOverrides1.invoke(notOverrides1b),
                 getHashCodeNotOverrides2.invoke(notOverrides2b));
+    }
+
+    @Test
+    public void testIllegalMethodsFail() throws Exception {
+        final String[] classNames = new String[] {
+                "instrumentertest.CallsIllegalMethods$CallsWait",
+                "instrumentertest.CallsIllegalMethods$CallsClassForName",
+                "instrumentertest.CallsIllegalMethods$CallsStringIntern",
+                "instrumentertest.CallsIllegalMethods$CreatesFilePrintStream",
+        };
+
+        for (String className : classNames) {
+            try {
+                l1.loadClass(className);
+            } catch (InstrumentationException e) {
+                // Reset teamsWithErrors.
+                IndividualClassLoader.reset();
+                continue;
+            }
+
+            fail("Didn't outlaw illegal class: "+className);
+        }
     }
 }

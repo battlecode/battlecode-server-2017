@@ -1,4 +1,4 @@
-package battlecode.instrumenter;
+package battlecode.instrumenter.stream;
 
 import java.io.PrintStream;
 

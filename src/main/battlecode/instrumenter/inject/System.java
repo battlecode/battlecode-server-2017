@@ -1,66 +1,172 @@
 package battlecode.instrumenter.inject;
 
-import battlecode.server.Config;
+import battlecode.instrumenter.RobotDeathException;
+import battlecode.instrumenter.stream.EOFInputStream;
+import battlecode.instrumenter.stream.PrintStreamWrapper;
 
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
+import java.nio.channels.Channel;
+import java.util.Properties;
 
 /**
- * A Wrapper for java.lang.System that supports only arraycopy and System.out.  System.out is
- * implemented as a RoboPrintStream, so only a subset of its methods may be implemented.
- * <p/>
- * The battlecode instrumenter should (sneakily) replace any references to java.lang.System with references to
+ * A wrapper for java.lang.System that prevents user code from getting access to
+ * anything they shouldn't.
+ *
+ * The battlecode instrumenter sneakily replaces any references to java.lang.System with references to
  * battlecode.lang.System.
  *
  * Reloaded individually for every robot.
- * TODO move
  *
  * @author adamd
  */
 @SuppressWarnings("unused")
 public final class System {
+    /**
+     * The actual output stream.
+     */
+    private static PrintStreamWrapper realOut = new PrintStreamWrapper();
 
-    // singleton
-    private System() {
+    /**
+     * A fake System.out.
+     */
+    public static PrintStream out = realOut;
+
+    /**
+     * A fake System.error.
+     */
+    public static PrintStream err = realOut;
+
+    /**
+     * A fake System.in.
+     */
+    public static InputStream in = new EOFInputStream();
+
+    /**
+     * Some system properties.
+     */
+    private static Properties props = new Properties();
+    static {
+        props.setProperty("java.version", "who knows?");
+        props.setProperty("java.vendor", "who knows?");
+        props.setProperty("java.vendor.url", "who knows?");
+        props.setProperty("java.home", "who knows?");
+        props.setProperty("java.class.version", "who knows?");
+        props.setProperty("java.class.path", "who knows?");
+        props.setProperty("os.name", "who knows?");
+        props.setProperty("os.arch", "who knows?");
+        props.setProperty("os.version", "who knows?");
+        props.setProperty("file.separator", "who knows?");
+        props.setProperty("path.separator", "who knows?");
+        props.setProperty("line.separator", "who knows?");
+        props.setProperty("user.name", "who knows?");
+        props.setProperty("user.home", "who knows?");
+        props.setProperty("user.dir", "who knows?");
     }
 
     /**
-     * wrapper for java.lang.System.arraycopy(...)
+     * Prevent construction.
      */
+    private System() { }
+
+    /**
+     * Set System.out for this robot.
+     * Used by SandboxedRobotPlayer.
+     *
+     * @param newOut the printstream to replace System.out with
+     */
+    @SuppressWarnings("unused")
+    public static void setSystemOut(PrintStream newOut) {
+        realOut.wrapped = newOut;
+    }
+
+    // Working System methods.
+
+    // No reason not to let users modify these.
+
+    public static void setIn(InputStream newIn) { in = newIn; }
+
+    public static void setOut(PrintStream newOut) { out = newOut; }
+
+    public static void setErr(PrintStream newErr) { err = newErr; }
+
+    public static Console console() { return null; }
+
+    public static Channel inheritedChannel() { return null; }
+
+    public static Properties getProperties() { return props; }
+
+    public static String lineSeparator() { return "\n"; }
+
     public static void arraycopy(Object src, int srcPos, Object dest, int destPos, int length) {
         java.lang.System.arraycopy(src, srcPos, dest, destPos, length);
         if (length > 0)
             RobotMonitor.incrementBytecodes(length);
     }
 
+    public static int identityHashCode(Object x) {
+        return ObjectHashCode.identityHashCode(x);
+    }
+
+    public static void setProperties(Properties props) {
+        battlecode.instrumenter.inject.System.props = props;
+    }
+
     public static String getProperty(String key) {
-        if (key.startsWith("bc.testing."))
-            return Config.getGlobalConfig().get(key);
-        else
-            return null;
+        return props.getProperty(key);
     }
 
     public static String getProperty(String key, String def) {
-        String s = getProperty(key);
-        return (s == null) ? def : s;
+        return props.getProperty(key, def);
     }
 
-    // set by RobotMonitor
-    public static PrintStream out;
-    public static PrintStream err;
-    public static InputStream in = new InputStream() {
-        public int read() throws java.io.IOException {
-            throw new java.io.EOFException();
-        }
-    };
+    public static String setProperty(String key, String value) {
+        return (String) props.setProperty(key, value);
+    }
 
-    /*
-     public static long currentTimeMillis() {
-         return battlecode.common.GameConstants.BYTECODE_LIMIT*battlecode.engine.Engine.getRoundNum()+RobotMonitor.getBytecodeNum();
-     }
+    public static String clearProperty(String key) {
+        return (String) props.remove(key);
+    }
 
-     public static long nanoTime() {
-         return currentTimeMillis()*1000000;
-     }
-     */
+    public static void exit(int status) {
+        throw new RobotDeathException();
+    }
+
+    // Disabled methods.
+
+    public static SecurityManager getSecurityManager() {
+        throw new SecurityException("Nice try, but you can't access the SecurityManager.");
+    }
+    public static void setSecurityManager(final SecurityManager s) {
+        throw new SecurityException("Nice try, but you can't access the SecurityManager.");
+    }
+    public static long currentTimeMillis() {
+        throw new SecurityException("You can't access the system time, sorry.");
+    }
+    public static long nanoTime() {
+        throw new SecurityException("You can't access the system time, sorry.");
+    }
+    public static String getenv(String name) {
+        throw new SecurityException("Can't access environment variables, sorry.");
+    }
+    public static java.util.Map<String,String> getenv() {
+        throw new SecurityException("Can't access environment variables, sorry.");
+    }
+    public static void gc() {
+        throw new SecurityException("You can't run the gc, sorry.");
+    }
+    public static void runFinalization() {
+        throw new SecurityException("You can't run finalizers, sorry.");
+    }
+    public static void runFinalizersOnExit(boolean value) {
+        throw new SecurityException("You can't run finalizers, sorry.");
+    }
+    public static void load(String filename) {
+        throw new SecurityException("You can't access the JNI, sorry.");
+    }
+    public static void loadLibrary(String libname) {
+        throw new SecurityException("You can't access the JNI, sorry.");
+    }
+    public static String mapLibraryName(String libname) {
+        throw new SecurityException("You can't access the JNI, sorry.");
+    }
 }

@@ -29,7 +29,6 @@ public class IndividualClassLoader extends ClassLoader {
             "battlecode.instrumenter.inject.ObjectHashCode",
             "battlecode.instrumenter.inject.InstrumentableFunctions",
             "battlecode.instrumenter.inject.System",
-            "battlecode.instrumenter.inject.System$1",
             "battlecode.instrumenter.inject.RobotMonitor",
             "battlecode.common.Clock"
     )));
@@ -104,8 +103,10 @@ public class IndividualClassLoader extends ClassLoader {
         synchronized (teamPackageName) {
 
             // check if the team we're loading already has errors
-            if (teamsWithErrors.contains(teamPackageName))
-                throw new InstrumentationException();
+            if (teamsWithErrors.contains(teamPackageName)) {
+                throw new InstrumentationException("Team is known to have errors: " +
+                        teamPackageName);
+            }
 
             // this is the class we'll return
             Class finishedClass;
