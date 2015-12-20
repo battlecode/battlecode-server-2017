@@ -38,4 +38,12 @@ public interface NotificationHandler<R> {
      * @return the result of processing
      */
     R visitResumeNotification(ResumeNotification n);
+
+    /**
+     * Processes an inject notification.
+     *
+     * @param n the notification to process
+     * @return the result of processing
+     */
+    R visitInjectNotification(InjectNotification n);
 }

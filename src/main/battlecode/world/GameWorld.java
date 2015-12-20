@@ -23,15 +23,21 @@ import java.util.*;
  * modifying the game map and the objects on it.
  */
 public class GameWorld implements SignalHandler {
+    /**
+     * The current round we're running.
+     */
     protected int currentRound;
+
+    /**
+     * Whether we're running.
+     */
     protected boolean running = true;
-    protected boolean wasBreakpointHit = false;
+
     protected Team winner = null;
     protected final String teamAName;
     protected final String teamBName;
-    protected final Random randGen;
-    protected int nextID;
-    protected final ArrayList<Signal> signals;
+    protected final List<Signal> currentSignals;
+    protected final List<Signal> injectedSignals;
     protected final long[][] teamMemory;
     protected final long[][] oldTeamMemory;
     protected final Map<Integer, InternalRobot> gameObjectsByID;
@@ -71,8 +77,8 @@ public class GameWorld implements SignalHandler {
         teamAName = teamA;
         teamBName = teamB;
         gameObjectsByID = new LinkedHashMap<>();
-        signals = new ArrayList<>();
-        randGen = new Random(gm.getSeed());
+        currentSignals = new ArrayList<>();
+        injectedSignals = new ArrayList<>();
         idGenerator = new IDGenerator(gm.getSeed());
         teamMemory = new long[2][oldTeamMemory[0].length];
         this.oldTeamMemory = oldTeamMemory;
@@ -128,8 +134,13 @@ public class GameWorld implements SignalHandler {
                     Optional.empty()
             );
         }
-   }
+    }
 
+    /**
+     * Run a single round of the game.
+     *
+     * @return the state of the game after the round has run.
+     */
     public GameState runRound() {
         if (!this.isRunning()) {
             return GameState.DONE;
@@ -179,9 +190,22 @@ public class GameWorld implements SignalHandler {
             return GameState.DONE;
         }
 
-        return ((Config.getGlobalConfig().getBoolean("bc.engine.breakpoints") &&
-                wasBreakpointHit()) ? GameState.BREAKPOINT :
-                                                GameState.RUNNING);
+        return GameState.RUNNING;
+    }
+
+    /**
+     * Inject a signal into the game world, and return any new signals
+     * that result from changes created by the signal.
+     *
+     * @param injectedSignal
+     */
+    public Signal[] inject(Signal injectedSignal) throws RuntimeException {
+        clearAllSignals();
+
+        visitSignal(injectedSignal);
+
+        return getAllSignals(false);
+
     }
 
     // *********************************
@@ -293,19 +317,11 @@ public class GameWorld implements SignalHandler {
      * @param s the signal
      */
     public void addSignal(Signal s) {
-        signals.add(s);
+        currentSignals.add(s);
     }
 
     public void clearAllSignals() {
-        signals.clear();
-    }
-
-    public void notifyBreakpoint() {
-        wasBreakpointHit = true;
-    }
-
-    public boolean wasBreakpointHit() {
-        return wasBreakpointHit;
+        currentSignals.clear();
     }
 
     public boolean seenBefore(Team team, MapLocation loc) {
@@ -544,10 +560,6 @@ public class GameWorld implements SignalHandler {
     public void processBeginningOfRound() {
         currentRound++;
 
-        nextID += randGen.nextInt(10);
-
-        wasBreakpointHit = false;
-
         // process all gameobjects
         for (InternalRobot gameObject : gameObjectsByID.values()) {
             gameObject.processBeginningOfRound();
@@ -661,10 +673,10 @@ public class GameWorld implements SignalHandler {
         InternalRobot[] robots = allRobots.toArray(new InternalRobot[allRobots.size()]);
 
         if (includeBytecodesUsedSignal) {
-            signals.add(new BytecodesUsedSignal(robots));
+            currentSignals.add(new BytecodesUsedSignal(robots));
         }
-        signals.add(new RobotDelaySignal(robots));
-        signals.add(new InfectionSignal(robots));
+        currentSignals.add(new RobotDelaySignal(robots));
+        currentSignals.add(new InfectionSignal(robots));
 
         HealthChangeSignal healthChange = new HealthChangeSignal(robots);
 
@@ -674,10 +686,10 @@ public class GameWorld implements SignalHandler {
         }
 
         if (healthChange.getRobotIDs().length > 0) {
-            signals.add(healthChange);
+            currentSignals.add(healthChange);
         }
 
-        return signals.toArray(new Signal[signals.size()]);
+        return currentSignals.toArray(new Signal[currentSignals.size()]);
     }
 
     // ******************************

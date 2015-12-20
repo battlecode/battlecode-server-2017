@@ -101,25 +101,7 @@ public class Server implements Observer, Runnable {
      * {@inheritDoc}
      */
     public void update(Observable o, Object arg) {
-
-        // State-changing feedback from a match.
-        if (o instanceof Match) {
-            if (GameState.BREAKPOINT.equals(arg)) {
-                this.state = State.PAUSED;
-                for (Proxy p : proxies) {
-                    try {
-                        p.writeObject(PauseNotification.INSTANCE);
-                    } catch (IOException e) {
-
-                    }
-                }
-            } else if (GameState.DONE.equals(arg))
-                this.state = State.FINISHED;
-        }
-
-        // Some parameters from our controller.
-        else if (arg instanceof MatchInfo) {
-
+        if (arg instanceof MatchInfo) {
             synchronized (matches) {
                 if (!matches.isEmpty())
                     return;
@@ -140,7 +122,6 @@ public class Server implements Observer, Runnable {
                     this.options.set("bc.game.maps", map);
                     Match match = new Match(info, map, this.options,
                             matchNumber++, matchCount);
-                    match.addObserver(this);
                     debug("queuing match " + match);
                     matches.add(match);
                 }
@@ -159,13 +140,7 @@ public class Server implements Observer, Runnable {
         // Some match-altering signal from our controller. Send to the engine
         // and propagate the engine's repsonse.
         else if (arg instanceof Signal) {
-            Signal[] result = matches.peek().alter((Signal) arg);
-            for (Proxy p : proxies)
-                try {
-                    p.writeObject(result);
-                } catch (IOException e) {
-                    warn("debug mode signal handler failed");
-                }
+            throw new RuntimeException("Can't observe currentSignals any more");
         }
     }
 
@@ -203,6 +178,20 @@ public class Server implements Observer, Runnable {
         public Void visitResumeNotification(ResumeNotification n) {
             if (state == State.PAUSED)
                 state = State.RUNNING;
+            return null;
+        }
+
+        public Void visitInjectNotification(InjectNotification n) {
+            InjectDelta result = matches.peek().inject(n.getSignal());
+
+            for (Proxy p : proxies) {
+                try {
+                    p.writeObject(result);
+                } catch (IOException e) {
+                    warn("debug mode signal handler failed");
+                }
+            }
+
             return null;
         }
     }
@@ -345,6 +334,20 @@ public class Server implements Observer, Runnable {
                     final RoundDelta round = match.getRound();
                     if (round == null)
                         break;
+
+                    if (GameState.BREAKPOINT.equals(match.getGameState())) {
+                        this.state = State.PAUSED;
+                        for (Proxy p : proxies) {
+                            try {
+                                p.writeObject(PauseNotification.INSTANCE);
+                            } catch (IOException e) {
+                                error("Couldn't write pause notification to " +
+                                        "proxy " + p + ": " + e);
+                                e.printStackTrace();
+                            }
+                        }
+                    } else if (GameState.DONE.equals(match.getGameState()))
+                        this.state = State.FINISHED;
 
                     proxyWriter.enqueue(round);
 
