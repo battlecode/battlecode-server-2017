@@ -30,9 +30,22 @@ public class PlayerControlProvider implements RobotControlProvider {
     private GameWorld gameWorld;
 
     /**
+     * The name of the team (package) we're processing.
+     */
+    private String teamName;
+
+    /**
+     * The name of the robot player class we're processing.
+     */
+    private String playerName;
+
+    /**
      * Create a new PlayerControlProvider.
      */
-    public PlayerControlProvider() {}
+    public PlayerControlProvider(String teamName, String playerName) {
+        this.teamName = teamName;
+        this.playerName = playerName;
+    }
 
     @Override
     public void matchStarted(GameWorld gameWorld) {
@@ -49,32 +62,12 @@ public class PlayerControlProvider implements RobotControlProvider {
 
     @Override
     public void robotSpawned(InternalRobot robot) {
-        final Config config = Config.getGlobalConfig();
-
-        final SandboxedRobotPlayer player;
-
-        switch (robot.getTeam()) {
-            case A:
-                player = new SandboxedRobotPlayer(config.get("bc.game.team-a"),
-                        "RobotPlayer",
-                        robot.getController(),
-                        gameWorld.getMapSeed());
-                break;
-            case B:
-                player = new SandboxedRobotPlayer(config.get("bc.game.team-b"),
-                        "RobotPlayer",
-                        robot.getController(),
-                        gameWorld.getMapSeed());
-                break;
-            case ZOMBIE:
-                player = new SandboxedRobotPlayer("ZombiePlayer",
-                        "ZombiePlayer",
-                        robot.getController(),
-                        gameWorld.getMapSeed());
-                break;
-            default:
-                throw new RuntimeException("Don't know how to create a neutral player??");
-        }
+        final SandboxedRobotPlayer player = new SandboxedRobotPlayer(
+                teamName,
+                playerName,
+                robot.getController(),
+                gameWorld.getMapSeed()
+        );
 
         this.sandboxes.put(robot.getID(), player);
     }

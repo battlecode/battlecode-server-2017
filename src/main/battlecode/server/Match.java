@@ -98,10 +98,18 @@ public class Match {
             // Create the control provider for the match
             // TODO move this somewhere better-fitting
             final TeamControlProvider teamProvider = new TeamControlProvider();
-            final RobotControlProvider playerProvider = new PlayerControlProvider();
-            teamProvider.registerControlProvider(Team.A, playerProvider);
-            teamProvider.registerControlProvider(Team.B, playerProvider);
-            teamProvider.registerControlProvider(Team.ZOMBIE, playerProvider);
+            teamProvider.registerControlProvider(
+                    Team.A,
+                    new PlayerControlProvider(info.getTeamA(), "RobotPlayer")
+            );
+            teamProvider.registerControlProvider(
+                    Team.B,
+                    new PlayerControlProvider(info.getTeamB(), "RobotPlayer")
+            );
+            teamProvider.registerControlProvider(
+                    Team.ZOMBIE,
+                    new PlayerControlProvider("ZombiePlayer", "ZombiePlayer")
+            );
 
             // Create the game world!
             gameWorld = new GameWorld(map, teamProvider, info.getTeamA(), info.getTeamB(), state);
