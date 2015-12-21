@@ -1,5 +1,7 @@
 package battlecode.server.proxy;
 
+import battlecode.serial.ServerEvent;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,7 @@ public class ProxyWriter {
      * pull from the queue, and put(), which blocks until
      * there is space on the queue to store an object.
      */
-    private final BlockingQueue<Object> writeQueue;
+    private final BlockingQueue<ServerEvent> writeQueue;
 
     /**
      * The worker thread.
@@ -45,7 +47,7 @@ public class ProxyWriter {
     /**
      * The object enqueued to shut down the worker thread.
      */
-    private final Object poisonPill;
+    private final ServerEvent poisonPill;
 
     /**
      * Whether to write debug output to stdout.
@@ -66,7 +68,7 @@ public class ProxyWriter {
         this.proxies = new ArrayList<>(proxies);
         this.debug = debug;
         this.writeQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
-        this.poisonPill = new Object();
+        this.poisonPill = new ServerEvent() {};
 
         this.workThread = new Thread(this::work);
 
@@ -79,7 +81,7 @@ public class ProxyWriter {
     private void work() {
         debug("worker thread started");
         while (true) {
-            final Object next;
+            final ServerEvent next;
             try {
                 // Block until element is available
                 next = writeQueue.take();
@@ -96,7 +98,7 @@ public class ProxyWriter {
 
             for (final Proxy proxy : proxies) {
                 try {
-                    proxy.writeObject(next);
+                    proxy.writeEvent(next);
                 } catch (final IOException e) {
                     debug("couldn't write to proxy " + proxy + ": " + e.getMessage());
                     e.printStackTrace();
@@ -118,7 +120,7 @@ public class ProxyWriter {
      *
      * @param message the message to send.
      */
-    public synchronized void enqueue(final Object message) {
+    public synchronized void enqueue(final ServerEvent message) {
         assert workThread.isAlive();
 
         try {

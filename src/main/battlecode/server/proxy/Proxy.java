@@ -1,5 +1,7 @@
 package battlecode.server.proxy;
 
+import battlecode.serial.ServerEvent;
+
 import java.io.IOException;
 
 /**
@@ -20,7 +22,7 @@ public interface Proxy {
      * @param message the object to write
      * @throws IOException if the object could not be written
      */
-    void writeObject(final Object message) throws IOException;
+    void writeEvent(final ServerEvent message) throws IOException;
 
     /**
      * Closes the connection.

@@ -86,7 +86,7 @@ public class Server implements Runnable, NotificationHandler {
         state = State.PAUSED;
         for (Proxy p : proxies) {
             try {
-                p.writeObject(n);
+                p.writeEvent(new PauseEvent());
             } catch (IOException e) {
                 warn("debug mode notification propagation failed");
             }
@@ -118,7 +118,7 @@ public class Server implements Runnable, NotificationHandler {
 
         for (Proxy p : proxies) {
             try {
-                p.writeObject(result);
+                p.writeEvent(result);
             } catch (IOException e) {
                 warn("debug mode signal handler failed");
             }
@@ -242,8 +242,8 @@ public class Server implements Runnable, NotificationHandler {
         MatchHeader header = match.getHeader();
         ExtensibleMetadata exHeader = match.getHeaderMetadata();
         for (Proxy p : proxies) {
-            p.writeObject(header);
-            p.writeObject(exHeader);
+            p.writeEvent(header);
+            p.writeEvent(exHeader);
         }
 
         this.state = State.RUNNING;
@@ -278,7 +278,7 @@ public class Server implements Runnable, NotificationHandler {
                         this.state = State.PAUSED;
                         for (Proxy p : proxies) {
                             try {
-                                p.writeObject(PauseNotification.INSTANCE);
+                                p.writeEvent(new PauseEvent());
                             } catch (IOException e) {
                                 error("Couldn't write pause notification to " +
                                         "proxy " + p + ": " + e);

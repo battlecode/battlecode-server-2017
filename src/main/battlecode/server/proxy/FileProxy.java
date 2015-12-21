@@ -1,5 +1,7 @@
 package battlecode.server.proxy;
 
+import battlecode.serial.PauseEvent;
+import battlecode.serial.ServerEvent;
 import battlecode.serial.notification.Notification;
 import battlecode.server.Server;
 import battlecode.server.serializer.Serializer;
@@ -86,9 +88,11 @@ public class FileProxy implements Proxy {
     }
 
     @Override
-    public synchronized void writeObject(final Object message) throws IOException {
-        if (message instanceof Notification)
+    public synchronized void writeEvent(final ServerEvent message) throws IOException {
+        if (message instanceof PauseEvent) {
+            // We can ignore pauses, since people reading the file won't care.
             return;
+        }
         serializer.serialize(message);
     }
 }
