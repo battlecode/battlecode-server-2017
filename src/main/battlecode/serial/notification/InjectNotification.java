@@ -31,4 +31,12 @@ public class InjectNotification implements Notification {
     public void accept(NotificationHandler handler) {
         handler.visitInjectNotification(this);
     }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private InjectNotification() {
+        this(null);
+    }
 }

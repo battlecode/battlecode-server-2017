@@ -36,4 +36,12 @@ public class InjectDelta implements ServerEvent {
     public Signal[] getSignals() {
         return this.signals;
     }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private InjectDelta() {
+        this(false, null);
+    }
 }

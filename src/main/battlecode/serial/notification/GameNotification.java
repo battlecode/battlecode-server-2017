@@ -31,4 +31,12 @@ public class GameNotification implements Notification {
     public void accept(NotificationHandler handler) {
         handler.visitGameNotification(this);
     }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private GameNotification() {
+        this(null);
+    }
 }

@@ -229,7 +229,11 @@ public class XStreamSerializerFactory implements SerializerFactory {
     }
 
     @Override
-    public Serializer createSerializer(final OutputStream output, final InputStream input) throws IOException {
+    public <T> Serializer<T> createSerializer(final OutputStream output,
+                                              final InputStream input,
+                                              final Class<T> messageClass)
+            throws IOException {
+
         final ObjectOutputStream wrappedOutput;
         if (output != null) {
             wrappedOutput = getXStream().createObjectOutputStream(output);
@@ -244,9 +248,10 @@ public class XStreamSerializerFactory implements SerializerFactory {
             wrappedInput = null;
         }
 
-        return new StandardSerializer(
+        return new StandardSerializer<>(
                 wrappedOutput,
-                wrappedInput
+                wrappedInput,
+                messageClass
         );
     }
 }

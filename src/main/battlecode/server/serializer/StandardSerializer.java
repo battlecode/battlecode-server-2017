@@ -10,9 +10,10 @@ import java.io.ObjectOutputStream;
  *
  * Created by james on 9/26/15.
  */
-public class StandardSerializer implements Serializer {
+public class StandardSerializer<T> implements Serializer<T> {
     final ObjectOutputStream output;
     final ObjectInputStream input;
+    final Class<T> messageClass;
 
     /**
      * Create a serializer.
@@ -20,13 +21,16 @@ public class StandardSerializer implements Serializer {
      * @param output the output to use
      * @param input the input to use
      */
-    public StandardSerializer(final ObjectOutputStream output, final ObjectInputStream input) {
+    public StandardSerializer(final ObjectOutputStream output,
+                              final ObjectInputStream input,
+                              final Class<T> messageClass) {
         this.output = output;
         this.input = input;
+        this.messageClass = messageClass;
     }
 
     @Override
-    public synchronized void serialize(final Object message) throws IOException {
+    public synchronized void serialize(final T message) throws IOException {
         if (output == null) {
             throw new IOException("No OutputStream given");
         }
@@ -36,7 +40,7 @@ public class StandardSerializer implements Serializer {
     }
 
     @Override
-    public synchronized Object deserialize() throws IOException {
+    public synchronized T deserialize() throws IOException {
         if (input == null) {
             throw new IOException("No InputStream given");
         }
@@ -47,7 +51,8 @@ public class StandardSerializer implements Serializer {
         } catch (final ClassNotFoundException e) {
             throw new IOException(e);
         }
-        return result;
+
+        return messageClass.cast(result);
     }
 
     @Override

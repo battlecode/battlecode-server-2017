@@ -19,5 +19,7 @@ public interface SerializerFactory {
      * @param input stream to read from; may be null
      * @return a new serializer to use
      */
-    Serializer createSerializer(OutputStream output, InputStream input) throws IOException;
+    <T> Serializer<T> createSerializer(OutputStream output,
+                                       InputStream input,
+                                       Class<T> messageClass) throws IOException;
 }
