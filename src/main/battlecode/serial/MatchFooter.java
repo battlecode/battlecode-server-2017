@@ -2,8 +2,6 @@ package battlecode.serial;
 
 import battlecode.common.Team;
 
-import java.io.Serializable;
-
 public class MatchFooter implements ServerEvent {
 
     private static final long serialVersionUID = 1179780102137505202L;

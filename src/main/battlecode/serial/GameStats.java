@@ -2,8 +2,6 @@ package battlecode.serial;
 
 import battlecode.world.DominationFactor;
 
-import java.io.Serializable;
-
 /**
  * Used to keep track of various statistics in a given
  * battlecode match.  These should be stats that don't change from round

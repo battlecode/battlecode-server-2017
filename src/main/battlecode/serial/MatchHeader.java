@@ -2,8 +2,6 @@ package battlecode.serial;
 
 import battlecode.world.GameMap;
 
-import java.io.Serializable;
-
 public class MatchHeader implements ServerEvent {
 
     private static final long serialVersionUID = -4228142649046586925L;

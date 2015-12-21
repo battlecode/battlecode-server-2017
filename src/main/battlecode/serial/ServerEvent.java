@@ -1,5 +1,7 @@
 package battlecode.serial;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.io.Serializable;
 
 /**
