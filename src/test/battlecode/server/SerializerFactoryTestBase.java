@@ -3,17 +3,16 @@ package battlecode.server;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import battlecode.serial.notification.*;
+import battlecode.world.DominationFactor;
 import battlecode.world.signal.Signal;
 import battlecode.serial.*;
-import battlecode.serial.notification.PauseNotification;
-import battlecode.serial.notification.ResumeNotification;
-import battlecode.serial.notification.RunNotification;
-import battlecode.serial.notification.StartNotification;
 import battlecode.server.serializer.Serializer;
 import battlecode.server.serializer.SerializerFactory;
 import battlecode.world.GameMap;
 import battlecode.world.ZombieSpawnSchedule;
 import battlecode.world.signal.*;
+import org.junit.Ignore;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,10 +20,11 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Created by james on 7/28/15.
+ * @author james
  */
+@Ignore
 public abstract class SerializerFactoryTestBase {
-    static final Map<GameMap.MapProperties, Integer> properties = new HashMap<>();
+    private static final Map<GameMap.MapProperties, Integer> properties = new HashMap<>();
     static {
         properties.put(GameMap.MapProperties.HEIGHT, 3);
         properties.put(GameMap.MapProperties.WIDTH, 3);
@@ -32,48 +32,43 @@ public abstract class SerializerFactoryTestBase {
         properties.put(GameMap.MapProperties.SEED, 12345);
     }
 
-    static final ZombieSpawnSchedule zSchedule = new ZombieSpawnSchedule();
+    private static final ZombieSpawnSchedule zSchedule = new ZombieSpawnSchedule();
     static {
         zSchedule.add(5, RobotType.RANGEDZOMBIE, 10);
         zSchedule.add(10, RobotType.FASTZOMBIE, 4);
     }
 
-    static final double[][] parts = new double[][] {
+    private static final double[][] parts = new double[][] {
             new double[] {10, 11, 12},
             new double[] {13, 14, 15},
             new double[] {16, 17, 18},
     };
 
-    static final double[][] rubble = new double[][] {
+    private static final double[][] rubble = new double[][] {
             new double[] {0, 1, 2},
             new double[] {3, 4, 5},
             new double[] {6, 7, 8},
     };
 
-    static final Set<GameMap.InitialRobotInfo> initialRobots = new HashSet<>();
+    private static final Set<GameMap.InitialRobotInfo> initialRobots = new HashSet<>();
     static {
         initialRobots.add(new GameMap.InitialRobotInfo(10, 100, RobotType.ARCHON, Team.B));
     }
 
-    static final GameMap gameMap = new GameMap(properties,
+    private static final GameMap gameMap = new GameMap(properties,
             rubble,
             parts,
             zSchedule,
             initialRobots,
             "Test Map");
 
-    static final long[][] teamMemories = new long[][] {
+    private static final long[][] teamMemories = new long[][] {
             new long[] {1, 2, 3, 4, 5},
             new long[] {1, 2, 3, 4, 5},
     };
 
     // An array with a sample object from every type of thing we could ever want to serialize / deserialize.
-    static final Object[] serializeableObjects = new Object[]{
-            PauseNotification.INSTANCE,
-            ResumeNotification.INSTANCE,
-            RunNotification.forever(),
-            StartNotification.INSTANCE,
-            new MatchInfo("Team 1", "Team 2", new String[] {"Map 1", "Map 2"}),
+    private static final ServerEvent[] serverEvents = new ServerEvent[] {
             new MatchHeader(gameMap, teamMemories, 0, 3),
             new RoundDelta(new Signal[] {
                     new AttackSignal(57, new MapLocation(1,1)),
@@ -99,43 +94,82 @@ public abstract class SerializerFactoryTestBase {
                     new TypeChangeSignal(57, RobotType.TTM)
             }),
             new MatchFooter(Team.A, teamMemories),
-            new RoundStats(100, 100),
             new GameStats(),
-            DominationFactor.BARELY_BEAT,
+            new InjectDelta(true, new Signal[0]),
+            new PauseEvent(),
             new ExtensibleMetadata()
+
+    };
+
+    private static final Notification[] notifications = new Notification[] {
+            PauseNotification.INSTANCE,
+            ResumeNotification.INSTANCE,
+            RunNotification.forever(),
+            StartNotification.INSTANCE,
+            new InjectNotification(new MovementOverrideSignal(0, new MapLocation(0, 0))),
+            new GameNotification(new GameInfo("teama", "teamb", new String[] {"map-1"}))
     };
 
     /**
      * Runs all the objects we're going to serialize through a serializer-deserializer pair.
      *
-     * @param serializerFactory The factory to create serializers with.
+     * @param factory The factory to create serializers with
      * @throws IOException
      */
-    public void testRoundTrip(final SerializerFactory serializerFactory) throws IOException {
+    public void testRoundTrip(final SerializerFactory factory) throws IOException {
+        testRoundTripForType(factory, serverEvents, ServerEvent.class);
+        testRoundTripForType(factory, notifications, Notification.class);
+    }
+
+    /**
+     * Test a round trip for a list of objects.
+     *
+     * @param factory the factory to create serializers with
+     * @param messages the messages to serialize
+     * @param messageClass the type of messages to serialize
+     * @param <T> the type of messages to serialize
+     * @throws IOException
+     */
+    private <T> void testRoundTripForType(final SerializerFactory factory,
+                                         final T[] messages,
+                                         final Class<T> messageClass)
+            throws IOException{
+
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        final Serializer serializer = serializerFactory.createSerializer(output, null);
-        for (int i = 0; i < serializeableObjects.length; i++) {
+        final Serializer<T> serializer = factory.createSerializer(
+                output, null, messageClass
+        );
+
+        for (T message : messages) {
             try {
-                serializer.serialize(serializeableObjects[i]);
+                serializer.serialize(message);
             } catch (final IOException e) {
                 throw new IOException("Couldn't serialize object of class: " +
-                        serializeableObjects[i].getClass().getCanonicalName(), e);
+                        message.getClass().getName(), e);
             }
         }
         serializer.close();
         output.close();
 
-        final ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
-        final Serializer deserializer = serializerFactory.createSerializer(null, input);
+        System.out.printf("Factory %s output size: %d bytes (for %ss)\n",
+                factory.getClass().getSimpleName(),
+                output.size(),
+                messageClass.getSimpleName()
+        );
 
-        for (int i = 0; i < serializeableObjects.length; i++) {
-            final Object result;
+        final ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
+        final Serializer<T> deserializer = factory.createSerializer(
+                null, input, messageClass
+        );
+
+        for (int i = 0; i < messages.length; i++) {
+            final T result;
             try {
                 result = deserializer.deserialize();
             } catch (final IOException e) {
                 throw new IOException("Couldn't deserialize object of class: " +
-                        serializeableObjects[i].getClass().getCanonicalName(), e);
+                        messages[i].getClass().getName(), e);
             }
 
             // TODO assertEquals(serializeableObjects[i], result);

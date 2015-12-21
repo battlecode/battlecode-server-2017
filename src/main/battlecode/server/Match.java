@@ -2,33 +2,31 @@ package battlecode.server;
 
 import battlecode.common.GameConstants;
 import battlecode.common.Team;
+import battlecode.world.DominationFactor;
 import battlecode.world.signal.Signal;
 import battlecode.serial.*;
 import battlecode.world.GameMap;
 import battlecode.world.GameWorld;
 import battlecode.world.XMLMapHandler;
 import battlecode.world.control.PlayerControlProvider;
-import battlecode.world.control.RobotControlProvider;
 import battlecode.world.control.TeamControlProvider;
-
-import java.util.Observable;
 
 /**
  * Abstracts the game engine for the server. This class is responsible for
  * starting and managing matches and exporting match status and results to the
  * server.
  */
-public class Match extends Observable {
+public class Match {
 
     /**
-     * The GenericWorld for getting signals.
+     * The GameWorld that runs the match.
      */
     private GameWorld gameWorld;
 
     /**
-     * The MatchInfo from which this match was created.
+     * The GameInfo from which this match was created.
      */
-    private final MatchInfo info;
+    private final GameInfo info;
 
     /**
      * The map for this match (one of the maps in info).
@@ -40,14 +38,29 @@ public class Match extends Observable {
      */
     private final Config options;
 
+    /**
+     * The state of the running game.
+     */
+    private GameState gameState;
+
+    /**
+     * The initial memory of the teams playing the map.
+     */
     private long[][] state = new long[2][GameConstants.TEAM_MEMORY_LENGTH];
 
+    /**
+     * The number of this match.
+     */
     private int number;
 
+    /**
+     * The count of this match.
+     */
     private int count;
 
-    private boolean bytecodesUsedEnabled = true;
-
+    /**
+     * The team memory after this match has been run.
+     */
     private long[][] computedTeamMemory = null;
 
     /**
@@ -56,7 +69,7 @@ public class Match extends Observable {
      * @param info    the teams and map to use when running this match
      * @param options options relevant to match creation (i.e., default map path)
      */
-    public Match(MatchInfo info, String map, Config options, int number,
+    public Match(GameInfo info, String map, Config options, int number,
                  int count) {
 
         this.info = info;
@@ -85,10 +98,18 @@ public class Match extends Observable {
             // Create the control provider for the match
             // TODO move this somewhere better-fitting
             final TeamControlProvider teamProvider = new TeamControlProvider();
-            final RobotControlProvider playerProvider = new PlayerControlProvider();
-            teamProvider.registerControlProvider(Team.A, playerProvider);
-            teamProvider.registerControlProvider(Team.B, playerProvider);
-            teamProvider.registerControlProvider(Team.ZOMBIE, playerProvider);
+            teamProvider.registerControlProvider(
+                    Team.A,
+                    new PlayerControlProvider(info.getTeamA(), "RobotPlayer")
+            );
+            teamProvider.registerControlProvider(
+                    Team.B,
+                    new PlayerControlProvider(info.getTeamB(), "RobotPlayer")
+            );
+            teamProvider.registerControlProvider(
+                    Team.ZOMBIE,
+                    new PlayerControlProvider("ZombiePlayer", "ZombiePlayer")
+            );
 
             // Create the game world!
             gameWorld = new GameWorld(map, teamProvider, info.getTeamA(), info.getTeamB(), state);
@@ -99,8 +120,6 @@ public class Match extends Observable {
             ErrorReporter.report(e);
             throw e;
         }
-
-        assert this.gameWorld != null;
     }
 
     /**
@@ -108,18 +127,19 @@ public class Match extends Observable {
      * state.
      *
      * @param signal the signal to send to the engine
-     * @return the signals that represent the effect of the alteration, or an
+     * @return the currentSignals that represent the effect of the alteration, or an
      *         empty signal array if there was no effect
      */
-    public Signal[] alter(Signal signal) {
-        gameWorld.clearAllSignals();
-        try {
-            gameWorld.visitSignal(signal);
-        } catch (RuntimeException e) {
-            return new Signal[0];
-        }
+    public InjectDelta inject(Signal signal) {
+        assert isInitialized();
 
-        return gameWorld.getAllSignals(false);
+        try {
+            return new InjectDelta(true, gameWorld.inject(signal));
+        } catch (final RuntimeException e) {
+            System.err.println("Injection failure: "+e.getMessage());
+            e.printStackTrace();
+            return new InjectDelta(false, new Signal[0]);
+        }
     }
 
     /**
@@ -132,11 +152,11 @@ public class Match extends Observable {
     }
 
     /**
-     * Runs the next round, returning a delta containing all the signals raised
+     * Runs the next round, returning a delta containing all the currentSignals raised
      * during that round. Notifies observers of anything other than a successful
      * delta-producing run.
      *
-     * @return the signals generated for the next round of the game, or null if
+     * @return the currentSignals generated for the next round of the game, or null if
      *         the engine's result was a breakpoint or completion
      */
     public RoundDelta getRound() {
@@ -147,30 +167,13 @@ public class Match extends Observable {
         }
 
         // Run the next round.
-        GameState result = gameWorld.runRound();
+        gameState = gameWorld.runRound();
 
-        // Notify the server of any other result.
-        if (result == GameState.BREAKPOINT) {
-            setChanged();
-            notifyObservers(result);
-            clearChanged();
-        }
-
-        if (result == GameState.DONE)
+        if (gameState == GameState.DONE)
             return null;
 
-        // Serialize the newly modified GameWorld.
-        return new RoundDelta(
-                gameWorld.getAllSignals(this.bytecodesUsedEnabled));
-    }
-
-    /**
-     * Queries the engine for stats for the most recent round and returns them.
-     *
-     * @return round stats from the engine
-     */
-    public RoundStats getStats() {
-        return gameWorld.getRoundStats();
+        // Serialize the changes to the GameWorld.
+        return new RoundDelta(gameWorld.getAllSignals(true));
     }
 
     /**
@@ -190,6 +193,15 @@ public class Match extends Observable {
     public MatchHeader getHeader() {
         return new MatchHeader(gameWorld.getGameMap(), state, number,
                 count);
+    }
+
+    /**
+     * Get the current game state.
+     *
+     * @return the current game state.
+     */
+    public GameState getGameState() {
+        return gameState;
     }
 
     /**

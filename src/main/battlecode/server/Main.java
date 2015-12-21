@@ -1,27 +1,18 @@
 package battlecode.server;
 
-import battlecode.server.controller.Controller;
-import battlecode.server.controller.HeadlessController;
-import battlecode.server.controller.InputStreamController;
+import battlecode.serial.notification.GameNotification;
 import battlecode.server.proxy.FileProxy;
-import battlecode.server.proxy.OutputStreamProxy;
 import battlecode.server.proxy.Proxy;
 import battlecode.server.serializer.JavaSerializerFactory;
 import battlecode.server.serializer.SerializerFactory;
 import battlecode.server.serializer.XStreamSerializerFactory;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.LinkedList;
-import java.util.List;
 
 public class Main {
 
     private static void runHeadless(Config options, String saveFile) {
         try {
-            final Controller controller = new HeadlessController(options);
-
             final SerializerFactory serializerFactory;
             if (options.getBoolean("bc.server.output-xml")) {
                 serializerFactory = new XStreamSerializerFactory();
@@ -31,9 +22,13 @@ public class Main {
 
             final Proxy proxy = new FileProxy(saveFile, serializerFactory);
 
-            final Server server = new Server(options, Server.Mode.HEADLESS, controller, proxy);
+            final Server server = new Server(options, Server.Mode.HEADLESS, proxy);
 
-            controller.addObserver(server);
+            new GameNotification(new GameInfo(
+                options.get("bc.game.team-a"),
+                options.get("bc.game.team-b"),
+                options.get("bc.game.maps").split(",")
+            )).accept(server);
 
             server.run();
         } catch (IOException e) {

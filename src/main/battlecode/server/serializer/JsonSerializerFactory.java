@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 
 import java.io.IOException;
@@ -19,8 +20,12 @@ import java.io.OutputStream;
 public final class JsonSerializerFactory implements SerializerFactory {
 
     @Override
-    public Serializer createSerializer(OutputStream output, InputStream input) throws IOException {
-        return new JsonSerializer(output, input);
+    public <T> Serializer<T> createSerializer(OutputStream output,
+                                              InputStream input,
+                                              Class<T> messageClass)
+            throws IOException {
+
+        return new JsonSerializer<>(output, input, messageClass);
     }
 
     /**
@@ -39,8 +44,6 @@ public final class JsonSerializerFactory implements SerializerFactory {
      * Configure JSON serialization.
      */
     static {
-        // Serialize *everything* with type annotations.
-        mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         // Serialize empty classes (like ResumeNotification)
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         // Allow us to use Optional<T> and stuff
@@ -51,21 +54,26 @@ public final class JsonSerializerFactory implements SerializerFactory {
         streamingFactory.enable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
     }
 
-    public static final class JsonSerializer implements Serializer {
+    public static final class JsonSerializer<T> implements Serializer<T> {
         private final JsonParser input;
         private final JsonGenerator output;
+        private final Class<T> messageClass;
 
-        public JsonSerializer(final OutputStream output, final InputStream input) throws IOException {
+        public JsonSerializer(final OutputStream output,
+                              final InputStream input,
+                              final Class<T> messageClass)
+                throws IOException {
+
             // Note that we create parsers and generators instead of just calling mapper.readValue() /
             // mapper.writeValue(). This is because we read *multiple* values from the stream, with no
-            // delimiters; mapper can't do that just being called on the stream?
-            // Also, it might be faster - not recreating parsers each time?
+            // delimiters; mapper can't do that just being called on the stream.
             this.output = streamingFactory.createGenerator(output);
             this.input = streamingFactory.createParser(input);
+            this.messageClass = messageClass;
         }
 
         @Override
-        public synchronized void serialize(Object message) throws IOException {
+        public synchronized void serialize(T message) throws IOException {
             if (this.output == null) {
                 throw new IOException("No OutputStream given");
             }
@@ -74,13 +82,12 @@ public final class JsonSerializerFactory implements SerializerFactory {
         }
 
         @Override
-        public synchronized Object deserialize() throws IOException {
+        public synchronized T deserialize() throws IOException {
             if (input == null) {
                 throw new IOException("No InputStream given");
             }
 
-            // Note: input has embedded type information, mapper will figure it out.
-            return mapper.readValue(input, Object.class);
+            return mapper.readValue(input, messageClass);
         }
 
         @Override

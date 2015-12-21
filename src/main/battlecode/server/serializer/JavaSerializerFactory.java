@@ -9,7 +9,11 @@ import java.io.*;
  */
 public final class JavaSerializerFactory implements SerializerFactory {
     @Override
-    public Serializer createSerializer(final OutputStream output, final InputStream input) throws IOException {
+    public <T> Serializer<T> createSerializer(final OutputStream output,
+                                              final InputStream input,
+                                              final Class<T> messageClass)
+            throws IOException {
+
         final ObjectOutputStream wrappedOutput;
         if (output != null) {
             wrappedOutput = new ObjectOutputStream(output);
@@ -24,9 +28,10 @@ public final class JavaSerializerFactory implements SerializerFactory {
             wrappedInput = null;
         }
 
-        return new StandardSerializer(
+        return new StandardSerializer<>(
                 wrappedOutput,
-                wrappedInput
+                wrappedInput,
+                messageClass
         );
     }
 }

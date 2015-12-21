@@ -5,14 +5,13 @@ import battlecode.world.signal.IndicatorStringSignal;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * A list of Signals that occurred in a round.
  */
-public class RoundDelta implements Serializable {
+public class RoundDelta implements ServerEvent {
 
     private static final long serialVersionUID = 1667367676711924140L;
 

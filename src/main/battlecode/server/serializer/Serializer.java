@@ -9,15 +9,15 @@ import java.io.IOException;
  *
  * Created by james on 7/24/15.
  */
-public interface Serializer {
+public interface Serializer<T> {
 
     /**
      * Write an object. Safe to be called from multiple threads.
      *
-     * @param message the object to write.
+     * @param message the message to write.
      * @throws IOException
      */
-    void serialize(final Object message) throws IOException;
+    void serialize(final T message) throws IOException;
 
     /**
      * Read an object. Safe to be called from multiple threads; read order is
@@ -27,7 +27,7 @@ public interface Serializer {
      * Note that this BLOCKS the calling thread until an object is read!
      * @throws IOException
      */
-    Object deserialize() throws IOException;
+    T deserialize() throws IOException;
 
     /**
      * Release any resources used by the serializer.

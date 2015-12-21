@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 /**
  * A signal handler that delegates to other signal handling methods, which it discovers
- * automatically.  The following criteria are used for determining if a method should handle signals:
+ * automatically.  The following criteria are used for determining if a method should handle currentSignals:
  * <p/>
  * - If the method has a {@link DiscoverSignal} annotation, that is respected.
  * - Otherwise, a method is discovered if it is public, its name starts with "visit", and it takes a single

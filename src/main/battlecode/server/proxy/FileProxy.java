@@ -1,6 +1,7 @@
 package battlecode.server.proxy;
 
-import battlecode.serial.notification.Notification;
+import battlecode.serial.PauseEvent;
+import battlecode.serial.ServerEvent;
 import battlecode.server.Server;
 import battlecode.server.serializer.Serializer;
 import battlecode.server.serializer.SerializerFactory;
@@ -20,7 +21,7 @@ public class FileProxy implements Proxy {
     /**
      * The serializer used to turn objects into bytes.
      */
-    protected final Serializer serializer;
+    protected final Serializer<ServerEvent> serializer;
 
     /**
      * The stream to use to write to the temporary file.
@@ -63,7 +64,11 @@ public class FileProxy implements Proxy {
         this.fileWriter = new FileOutputStream(temp);
         this.gzipWriter = new GZIPOutputStream(fileWriter);
 
-        this.serializer = serializerFactory.createSerializer(gzipWriter, null);
+        this.serializer = serializerFactory.createSerializer(
+                gzipWriter,
+                null,
+                ServerEvent.class
+        );
     }
 
     @Override
@@ -86,9 +91,11 @@ public class FileProxy implements Proxy {
     }
 
     @Override
-    public synchronized void writeObject(final Object message) throws IOException {
-        if (message instanceof Notification)
+    public synchronized void writeEvent(final ServerEvent message) throws IOException {
+        if (message instanceof PauseEvent) {
+            // We can ignore pauses, since people reading the file won't care.
             return;
+        }
         serializer.serialize(message);
     }
 }
