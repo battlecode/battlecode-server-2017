@@ -8,7 +8,6 @@ import battlecode.world.GameMap;
 import battlecode.world.GameWorld;
 import battlecode.world.XMLMapHandler;
 import battlecode.world.control.PlayerControlProvider;
-import battlecode.world.control.RobotControlProvider;
 import battlecode.world.control.TeamControlProvider;
 
 /**
@@ -24,9 +23,9 @@ public class Match {
     private GameWorld gameWorld;
 
     /**
-     * The MatchInfo from which this match was created.
+     * The GameInfo from which this match was created.
      */
-    private final MatchInfo info;
+    private final GameInfo info;
 
     /**
      * The map for this match (one of the maps in info).
@@ -69,7 +68,7 @@ public class Match {
      * @param info    the teams and map to use when running this match
      * @param options options relevant to match creation (i.e., default map path)
      */
-    public Match(MatchInfo info, String map, Config options, int number,
+    public Match(GameInfo info, String map, Config options, int number,
                  int count) {
 
         this.info = info;
@@ -172,9 +171,8 @@ public class Match {
         if (gameState == GameState.DONE)
             return null;
 
-        // Serialize the newly modified GameWorld.
-        return new RoundDelta(
-                gameWorld.getAllSignals(true));
+        // Serialize the changes to the GameWorld.
+        return new RoundDelta(gameWorld.getAllSignals(true));
     }
 
     /**

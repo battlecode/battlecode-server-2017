@@ -23,7 +23,7 @@ public class InjectDelta {
     }
 
     /**
-     * @return whether the inje
+     * @return whether the injection was successful.
      */
     public boolean getSuccess() {
         return success;

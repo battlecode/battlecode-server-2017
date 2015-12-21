@@ -23,7 +23,7 @@ public class RunNotification implements Notification {
         return new RunNotification(Integer.MAX_VALUE);
     }
 
-    public <R> R accept(NotificationHandler<R> handler) {
-        return handler.visitRunNotification(this);
+    public void accept(NotificationHandler handler) {
+        handler.visitRunNotification(this);
     }
 }

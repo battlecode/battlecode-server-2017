@@ -24,8 +24,8 @@ public class PauseNotification implements Notification {
     /**
      * {@inheritDoc}
      */
-    public <R> R accept(NotificationHandler<R> handler) {
-        return handler.visitPauseNotification(this);
+    public void accept(NotificationHandler handler) {
+        handler.visitPauseNotification(this);
     }
 
     private Object readResolve() throws ObjectStreamException {

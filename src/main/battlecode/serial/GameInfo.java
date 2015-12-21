@@ -2,7 +2,11 @@ package battlecode.serial;
 
 import java.io.Serializable;
 
-public class MatchInfo implements Serializable {
+/**
+ * Represents a "Game": a series of Matches between two players,
+ * on a set of maps.
+ */
+public class GameInfo implements Serializable {
 
     private static final long serialVersionUID = 638514128835207033L;
 
@@ -10,7 +14,14 @@ public class MatchInfo implements Serializable {
     private final String teamB;
     private final String[] maps;
 
-    public MatchInfo(String teamA, String teamB, String[] maps) {
+    /**
+     * Create a GameInfo.
+     *
+     * @param teamA the A team
+     * @param teamB the B team
+     * @param maps the maps to play on
+     */
+    public GameInfo(String teamA, String teamB, String[] maps) {
         this.teamA = teamA;
         this.teamB = teamB;
         this.maps = maps;
@@ -32,7 +43,7 @@ public class MatchInfo implements Serializable {
      * For use by serializers.
      */
     @SuppressWarnings("unused")
-    private MatchInfo() {
+    private GameInfo() {
         this(null, null, null);
     }
 }

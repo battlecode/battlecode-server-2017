@@ -73,7 +73,7 @@ public abstract class SerializerFactoryTestBase {
             ResumeNotification.INSTANCE,
             RunNotification.forever(),
             StartNotification.INSTANCE,
-            new MatchInfo("Team 1", "Team 2", new String[] {"Map 1", "Map 2"}),
+            new GameInfo("Team 1", "Team 2", new String[] {"Map 1", "Map 2"}),
             new MatchHeader(gameMap, teamMemories, 0, 3),
             new RoundDelta(new Signal[] {
                     new AttackSignal(57, new MapLocation(1,1)),

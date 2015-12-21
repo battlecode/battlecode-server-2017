@@ -28,7 +28,7 @@ public class InjectNotification implements Notification {
     }
 
     @Override
-    public <R> R accept(NotificationHandler<R> handler) {
-        return handler.visitInjectNotification(this);
+    public void accept(NotificationHandler handler) {
+        handler.visitInjectNotification(this);
     }
 }

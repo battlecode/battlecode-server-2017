@@ -2,10 +2,8 @@ package battlecode.serial.notification;
 
 /**
  * A flat visitor for processing arbitrary instances of Notification.
- *
- * @param <R> the return type of the processing methods in this handler
  */
-public interface NotificationHandler<R> {
+public interface NotificationHandler {
 
     /**
      * Processes a start notification.
@@ -13,7 +11,7 @@ public interface NotificationHandler<R> {
      * @param n the notification to process
      * @return the result of processing
      */
-    R visitStartNotification(StartNotification n);
+    void visitStartNotification(StartNotification n);
 
     /**
      * Processes a pause notification.
@@ -21,7 +19,7 @@ public interface NotificationHandler<R> {
      * @param n the notification to process
      * @return the result of processing
      */
-    R visitPauseNotification(PauseNotification n);
+    void visitPauseNotification(PauseNotification n);
 
     /**
      * Processes a run notification.
@@ -29,7 +27,7 @@ public interface NotificationHandler<R> {
      * @param n the notification to process
      * @return the result of processing
      */
-    R visitRunNotification(RunNotification n);
+    void visitRunNotification(RunNotification n);
 
     /**
      * Processes a resume notification.
@@ -37,7 +35,7 @@ public interface NotificationHandler<R> {
      * @param n the notification to process
      * @return the result of processing
      */
-    R visitResumeNotification(ResumeNotification n);
+    void visitResumeNotification(ResumeNotification n);
 
     /**
      * Processes an inject notification.
@@ -45,5 +43,13 @@ public interface NotificationHandler<R> {
      * @param n the notification to process
      * @return the result of processing
      */
-    R visitInjectNotification(InjectNotification n);
+    void visitInjectNotification(InjectNotification n);
+
+    /**
+     * Processes a game notification.
+     *
+     * @param n the notification to process
+     * @return the result of processing
+     */
+    void visitGameNotification(GameNotification n);
 }
