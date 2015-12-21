@@ -1,6 +1,7 @@
 package battlecode.server.serializer;
 
 import battlecode.common.MapLocation;
+import battlecode.world.DominationFactor;
 import battlecode.world.signal.Signal;
 import battlecode.serial.ExtensibleMetadata;
 import battlecode.serial.RoundDelta;
@@ -217,7 +218,7 @@ public class XStreamSerializerFactory implements SerializerFactory {
         xstream.useAttributeFor(battlecode.common.MapLocation.class);
         xstream.useAttributeFor(battlecode.common.RobotType.class);
         xstream.useAttributeFor(battlecode.common.Team.class);
-        xstream.useAttributeFor(battlecode.serial.DominationFactor.class);
+        xstream.useAttributeFor(DominationFactor.class);
         xstream.aliasPackage("sig", "battlecode.world.signal");
         xstream.aliasPackage("ser", "battlecode.serial");
     }

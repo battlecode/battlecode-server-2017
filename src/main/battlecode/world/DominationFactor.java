@@ -1,4 +1,4 @@
-package battlecode.serial;
+package battlecode.world;
 
 /**
  * Determines roughly by how much the winning team won.

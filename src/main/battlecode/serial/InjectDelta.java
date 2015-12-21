@@ -7,7 +7,7 @@ import battlecode.world.signal.Signal;
  *
  * @author james
  */
-public class InjectDelta {
+public class InjectDelta implements ServerEvent {
     private final boolean success;
     private final Signal[] signals;
 

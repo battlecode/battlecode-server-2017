@@ -9,10 +9,7 @@ import battlecode.server.GameState;
 import battlecode.world.signal.AutoSignalHandler;
 import battlecode.world.signal.Signal;
 import battlecode.world.signal.SignalHandler;
-import battlecode.serial.DominationFactor;
 import battlecode.serial.GameStats;
-import battlecode.serial.RoundStats;
-import battlecode.server.Config;
 import battlecode.world.control.RobotControlProvider;
 import battlecode.world.signal.*;
 
@@ -47,8 +44,6 @@ public class GameWorld implements SignalHandler {
 
     private final RobotControlProvider controlProvider;
 
-    private RoundStats roundStats = null; // stats for each round; new object is
-                                          // created for each round
     private final GameStats gameStats = new GameStats(); // end-of-game stats
 
     private double[] teamResources = new double[4];
@@ -248,10 +243,6 @@ public class GameWorld implements SignalHandler {
     public int getMessage(Team t, int channel) {
         Integer val = radio.get(t).get(channel);
         return val == null ? 0 : val;
-    }
-
-    public RoundStats getRoundStats() {
-        return roundStats;
     }
 
     public GameStats getGameStats() {
@@ -658,8 +649,6 @@ public class GameWorld implements SignalHandler {
                 }
             }
         }
-
-        roundStats = new RoundStats(teamResources[0], teamResources[1]);
     }
 
     public Signal[] getAllSignals(boolean includeBytecodesUsedSignal) {

@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class ExtensibleMetadata implements Serializable {
+public class ExtensibleMetadata implements ServerEvent {
 
     private static final long serialVersionUID = -8982623693074338715L;
 

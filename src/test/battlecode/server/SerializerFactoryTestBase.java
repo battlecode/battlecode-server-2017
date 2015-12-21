@@ -3,6 +3,7 @@ package battlecode.server;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import battlecode.world.DominationFactor;
 import battlecode.world.signal.Signal;
 import battlecode.serial.*;
 import battlecode.serial.notification.PauseNotification;
@@ -99,7 +100,6 @@ public abstract class SerializerFactoryTestBase {
                     new TypeChangeSignal(57, RobotType.TTM)
             }),
             new MatchFooter(Team.A, teamMemories),
-            new RoundStats(100, 100),
             new GameStats(),
             DominationFactor.BARELY_BEAT,
             new ExtensibleMetadata()

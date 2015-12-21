@@ -1,4 +1,4 @@
-package battlecode.serial;
+package battlecode.server;
 
 import java.io.Serializable;
 
@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Represents a "Game": a series of Matches between two players,
  * on a set of maps.
  */
-public class GameInfo implements Serializable {
+public class GameInfo {
 
     private static final long serialVersionUID = 638514128835207033L;
 

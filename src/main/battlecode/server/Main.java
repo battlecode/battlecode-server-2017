@@ -1,6 +1,5 @@
 package battlecode.server;
 
-import battlecode.serial.GameInfo;
 import battlecode.serial.notification.GameNotification;
 import battlecode.server.proxy.FileProxy;
 import battlecode.server.proxy.Proxy;

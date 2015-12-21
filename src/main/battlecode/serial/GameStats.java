@@ -1,5 +1,7 @@
 package battlecode.serial;
 
+import battlecode.world.DominationFactor;
+
 import java.io.Serializable;
 
 /**
@@ -7,7 +9,7 @@ import java.io.Serializable;
  * battlecode match.  These should be stats that don't change from round
  * to round, but rather are given only at the end of the match.
  */
-public class GameStats implements Serializable {
+public class GameStats implements ServerEvent {
 
     private static final long serialVersionUID = 4678980796113812229L;
 

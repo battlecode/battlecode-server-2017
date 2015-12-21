@@ -2,6 +2,7 @@ package battlecode.server;
 
 import battlecode.common.GameConstants;
 import battlecode.common.Team;
+import battlecode.world.DominationFactor;
 import battlecode.world.signal.Signal;
 import battlecode.serial.*;
 import battlecode.world.GameMap;
@@ -173,15 +174,6 @@ public class Match {
 
         // Serialize the changes to the GameWorld.
         return new RoundDelta(gameWorld.getAllSignals(true));
-    }
-
-    /**
-     * Queries the engine for stats for the most recent round and returns them.
-     *
-     * @return round stats from the engine
-     */
-    public RoundStats getStats() {
-        return gameWorld.getRoundStats();
     }
 
     /**

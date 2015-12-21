@@ -1,6 +1,6 @@
 package battlecode.serial.notification;
 
-import battlecode.serial.GameInfo;
+import battlecode.server.GameInfo;
 
 /**
  * A message to a server that tells it to enqueue a game.

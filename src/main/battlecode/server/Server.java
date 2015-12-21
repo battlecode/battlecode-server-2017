@@ -291,10 +291,6 @@ public class Server implements Runnable, NotificationHandler {
 
                     proxyWriter.enqueue(round);
 
-                    final RoundStats stats = match.getStats();
-
-                    proxyWriter.enqueue(stats);
-
                     if (count++ == throttleCount) {
                         if (doYield)
                             Thread.yield();
