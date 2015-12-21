@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 
 import java.io.IOException;
@@ -43,8 +44,6 @@ public final class JsonSerializerFactory implements SerializerFactory {
      * Configure JSON serialization.
      */
     static {
-        // Serialize *everything* with type annotations.
-        mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         // Serialize empty classes (like ResumeNotification)
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         // Allow us to use Optional<T> and stuff

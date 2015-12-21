@@ -12,6 +12,7 @@ import battlecode.server.serializer.SerializerFactory;
 import battlecode.world.GameMap;
 import battlecode.world.ZombieSpawnSchedule;
 import battlecode.world.signal.*;
+import org.junit.Ignore;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,6 +22,7 @@ import java.util.*;
 /**
  * @author james
  */
+@Ignore
 public abstract class SerializerFactoryTestBase {
     private static final Map<GameMap.MapProperties, Integer> properties = new HashMap<>();
     static {
@@ -149,6 +151,12 @@ public abstract class SerializerFactoryTestBase {
         }
         serializer.close();
         output.close();
+
+        System.out.printf("Factory %s output size: %d bytes (for %ss)\n",
+                factory.getClass().getSimpleName(),
+                output.size(),
+                messageClass.getSimpleName()
+        );
 
         final ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
         final Serializer<T> deserializer = factory.createSerializer(
