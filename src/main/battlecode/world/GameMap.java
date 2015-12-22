@@ -62,7 +62,7 @@ public class GameMap implements Serializable {
      * i.e. in game correct MapLocations that need to have the origin
      * subtracted from them to be used to index into the map arrays.
      */
-    private final Set<InitialRobotInfo> initialRobots;
+    private final List<InitialRobotInfo> initialRobots;
 
     /**
      * Represents the various integer properties a GameMap
@@ -92,7 +92,7 @@ public class GameMap implements Serializable {
         this.rounds = gm.rounds;
         this.mapName = gm.mapName;
         this.zSchedule = new ZombieSpawnSchedule(gm.zSchedule);
-        this.initialRobots = new HashSet<>(gm.initialRobots);
+        this.initialRobots = gm.getInitialRobots();
     }
 
     /**
@@ -102,8 +102,10 @@ public class GameMap implements Serializable {
      * the first index as the row and the second index as the column, because
      * here it's the other way around.
      *
-     * The map will be initialized with a random origin between (0, 0) and
-     * (500, 500).
+     * The map will be initialized with a pseudorandom origin between (0, 0) and
+     * (500, 500), based on the seed.
+     *
+     * YOU MUST NOT MODIFY ANY OF THESE OBJECTS AFTER CREATING THE MAP.
      *
      * @param mapProperties used to specify integer properties of the map
      *                      (width, height, seed, and number of rounds).
@@ -117,7 +119,7 @@ public class GameMap implements Serializable {
                    double[][] initialRubble,
                    double[][] initialParts,
                    ZombieSpawnSchedule zSchedule,
-                   Set<InitialRobotInfo> initialRobots,
+                   List<InitialRobotInfo> initialRobots,
                    String mapName) {
         if (mapProperties.containsKey(MapProperties.WIDTH)) {
             this.width = mapProperties.get(MapProperties.WIDTH);
@@ -150,7 +152,7 @@ public class GameMap implements Serializable {
         this.initialParts = initialParts;
         this.zSchedule = zSchedule;
         this.mapName = mapName;
-        this.initialRobots = new HashSet<>(initialRobots);
+        this.initialRobots = Collections.unmodifiableList(initialRobots);
     }
 
 
@@ -303,7 +305,7 @@ public class GameMap implements Serializable {
      *
      * @return the list of starting robots on the map.
      */
-    public Set<InitialRobotInfo> getInitialRobots() {
+    public List<InitialRobotInfo> getInitialRobots() {
         return initialRobots;
     }
 

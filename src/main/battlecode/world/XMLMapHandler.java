@@ -707,7 +707,7 @@ public class XMLMapHandler extends DefaultHandler {
             }
         }
 
-        final Set<GameMap.InitialRobotInfo> initialRobots = new HashSet<>();
+        final List<GameMap.InitialRobotInfo> initialRobots = new ArrayList<>();
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
                 final Optional<GameMap.InitialRobotInfo> maybeRobot = map[i][j].getRobotAt(i, j);
