@@ -33,7 +33,7 @@ class XMLMapHandler extends DefaultHandler {
     private int mapWidth, mapHeight;
     private String mapName = "";
     private SymbolData[][] map = null;
-    private Map<Character, SymbolData> symbolMap = new HashMap<Character, SymbolData>();
+    private Map<String, SymbolData> symbolMap = new HashMap<String, SymbolData>();
 
     private interface SymbolData {
 
@@ -353,8 +353,8 @@ class XMLMapHandler extends DefaultHandler {
             requireElement(qName, "symbols");
 
             String character = getRequired(attributes, "character");
-            if (character.length() != 1)
-                fail("invalid 'character' attribute '" + character + "' -- 'character' must have length 1", "Check that all 'character' attributes are just one character.\n");
+            if (character.length() != 2)
+                fail("invalid 'character' attribute '" + character + "' -- 'character' must have length 2", "Check that all 'character' attributes are just two characters.\n");
 
             String type = getRequired(attributes, "type");
             SymbolDataFactory factory = factories.get(type);
@@ -371,7 +371,7 @@ class XMLMapHandler extends DefaultHandler {
                 return;
             }
 
-            symbolMap.put(character.charAt(0), data);
+            symbolMap.put(character.substring(0,2), data);
 
         } else if (qName.equals("data")) {
 
@@ -420,18 +420,16 @@ class XMLMapHandler extends DefaultHandler {
                 continue;
             // if it's whitespace, check dataSoFar
             if ((c == '\n' || c == ' ') && dataSoFar.length() > 0) {
-                if (!symbolMap.containsKey(dataSoFar.charAt(0)))
+                if (!symbolMap.containsKey(dataSoFar.substring(0,2)))
                     fail("unrecognized symbol in map: '" + c + "'", "Check that '" + c + "' is defined as one of the symbols in the map file. DEBUG: '" + dataSoFar + "'\n");
-                map[currentCol][currentRow] = symbolMap.get(dataSoFar.charAt(0)).copy();
-                if (dataSoFar.substring(1).trim().equals("")) {
+                map[currentCol][currentRow] = symbolMap.get(dataSoFar.substring(0,2)).copy();
+                if (dataSoFar.substring(2).trim().equals("")) {
                     map[currentCol][currentRow].setPartsValue(0);
                     map[currentCol][currentRow].setRubbleValue(0);
                 } else {
-                    //map[currentCol][currentRow].setValue(Double.parseDouble(dataSoFar.substring(1)));
                     String[] params = dataSoFar.split(",");
                     double partsVal = Double.parseDouble(params[0]);
                     double rubbleVal = Double.parseDouble(params[1]);
-                    
                     map[currentCol][currentRow].setPartsValue(partsVal);
                     map[currentCol][currentRow].setRubbleValue(rubbleVal);
                 }
