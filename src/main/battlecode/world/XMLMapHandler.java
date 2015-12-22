@@ -37,9 +37,13 @@ class XMLMapHandler extends DefaultHandler {
 
     private interface SymbolData {
 
-        public void setValue(double value);
+        public void setPartsValue(double value);
+        
+        public void setRubbleValue(double value);
 
-        public double floatData();
+        public double partsValue();
+        
+        public double rubbleValue();
 
         public TerrainTile tile();
         /* Returns {@code true} if createGameObject() does anything. */
@@ -66,23 +70,33 @@ class XMLMapHandler extends DefaultHandler {
             }
         };
         private TerrainTile tile;
-        private double value;
+        private double partsValue;
+        private double rubbleValue;
 
         public TerrainData(TerrainTile tile) {
             this.tile = tile;
-            this.value = -1;
+            this.partsValue = -1;
+            this.rubbleValue = -1;
         }
 
-        public void setValue(double value) {
-            this.value = value;
+        public void setPartsValue(double value) {
+            this.partsValue = value;
+        }
+        
+        public void setRubbleValue(double value) {
+            this.rubbleValue = value;
         }
 
         public TerrainTile tile() {
             return tile;
         }
-
-        public double floatData() {
-            return this.value;
+        
+        public double partsValue() {
+            return this.partsValue;
+        }
+        
+        public double rubbleValue() {
+            return this.rubbleValue;
         }
 
         public void createGameObject(GameWorld world, MapLocation loc) {
@@ -92,12 +106,13 @@ class XMLMapHandler extends DefaultHandler {
             if (!(data instanceof TerrainData))
                 return false;
             TerrainData d = (TerrainData) data;
-            return d.tile == tile && d.value == value;
+            return d.tile == tile && d.partsValue == partsValue && d.rubbleValue == rubbleValue;
         }
 
         public SymbolData copy() {
             TerrainData t = new TerrainData(this.tile);
-            t.setValue(this.value);
+            t.setPartsValue(this.partsValue);
+            t.setRubbleValue(this.rubbleValue);
             return t;
         }
     }
@@ -120,21 +135,31 @@ class XMLMapHandler extends DefaultHandler {
         public final RobotType type;
         public final Team team;
         public final Team mine;
-        public double value;
+        private double partsValue;
+        private double rubbleValue;
 
         public RobotData(RobotType type, Team team, Team mine) {
             this.type = type;
             this.team = team;
             this.mine = mine;
-            this.value = -1;
+            this.partsValue = -1;
+            this.rubbleValue = -1;
         }
 
-        public void setValue(double value) {
-            this.value = value;
+        public void setPartsValue(double value) {
+            this.partsValue = value;
         }
-
-        public double floatData() {
-            return this.value;
+        
+        public void setRubbleValue(double value) {
+            this.rubbleValue = value;
+        }
+        
+        public double partsValue() {
+            return this.partsValue;
+        }
+        
+        public double rubbleValue() {
+            return this.rubbleValue;
         }
 
         public TerrainTile tile() {
@@ -149,7 +174,7 @@ class XMLMapHandler extends DefaultHandler {
             if (!(data instanceof RobotData))
                 return false;
             RobotData d = (RobotData) data;
-            return type == d.type && team == d.team.opponent() && mine == d.mine && d.value == value;
+            return type == d.type && team == d.team.opponent() && mine == d.mine && d.partsValue == partsValue && d.rubbleValue == rubbleValue;
         }
 
         public String toString() {
@@ -158,7 +183,8 @@ class XMLMapHandler extends DefaultHandler {
 
         public SymbolData copy() {
             RobotData r = new RobotData(this.type, this.team, this.mine);
-            r.setValue(this.value);
+            r.setPartsValue(this.partsValue);
+            r.setRubbleValue(this.rubbleValue);
             return r;
         }
     }
@@ -398,9 +424,16 @@ class XMLMapHandler extends DefaultHandler {
                     fail("unrecognized symbol in map: '" + c + "'", "Check that '" + c + "' is defined as one of the symbols in the map file. DEBUG: '" + dataSoFar + "'\n");
                 map[currentCol][currentRow] = symbolMap.get(dataSoFar.charAt(0)).copy();
                 if (dataSoFar.substring(1).trim().equals("")) {
-                    map[currentCol][currentRow].setValue(0);
+                    map[currentCol][currentRow].setPartsValue(0);
+                    map[currentCol][currentRow].setRubbleValue(0);
                 } else {
-                    map[currentCol][currentRow].setValue(Double.parseDouble(dataSoFar.substring(1)));
+                    //map[currentCol][currentRow].setValue(Double.parseDouble(dataSoFar.substring(1)));
+                    String[] params = dataSoFar.split(",");
+                    double partsVal = Double.parseDouble(params[0]);
+                    double rubbleVal = Double.parseDouble(params[1]);
+                    
+                    map[currentCol][currentRow].setPartsValue(partsVal);
+                    map[currentCol][currentRow].setRubbleValue(rubbleVal);
                 }
 
                 currentCol++;
@@ -468,14 +501,8 @@ class XMLMapHandler extends DefaultHandler {
             rubbleData[i] = new int[map[i].length];
             partsData[i] = new int[map[i].length];
             for (int j = 0; j < map[i].length; j++) {
-                //If a standard tile, use float data as rubble. If a parts tile, use as parts
-                if(mapTiles[i][j] == TerrainTile.PARTS) {
-                    rubbleData[i][j] = 0;
-                    partsData[i][j] = (int) map[i][j].floatData();
-                } else {
-                    rubbleData[i][j] = (int) map[i][j].floatData();
-                    partsData[i][j] = 0;
-                }
+                partsData[i][j] = (int) map[i][j].partsValue();
+                rubbleData[i][j] = (int) map[i][j].rubbleValue();
             }
         }
 
@@ -486,20 +513,6 @@ class XMLMapHandler extends DefaultHandler {
 
         MapLocation origin = gm.getMapOrigin();
 
- /*       for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[i].length; j++) {
-                if (map[i][j] instanceof NodeData) {
-                    map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
-                }
-            }
-        }
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[i].length; j++) {
-                if (!(map[i][j] instanceof NodeData)) {
-                    map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
-                }
-            }
-        }*/ //TODO: cleanup
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
                 map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
@@ -544,7 +557,7 @@ class XMLMapHandler extends DefaultHandler {
     public boolean isTournamentLegal() {
         LegalityWarning warn = new LegalityWarning();
 
-        int maxOre = 0;
+        int maxParts = 0;
 
         int x, y, mx, my;
         SymbolData d, md;
@@ -553,7 +566,7 @@ class XMLMapHandler extends DefaultHandler {
         boolean symA = true, symB = true, symC = mapHeight == mapWidth, symD = mapHeight == mapWidth, symE = true;
         for (y = 0; y < mapHeight; y++) {
             for (x = 0; x < mapWidth; x++) {
-                maxOre = Math.max(maxOre, (int) map[x][y].floatData());
+                maxParts = Math.max(maxParts, (int) map[x][y].partsValue());
 
                 symA = symA && (map[x][y].equalsMirror(map[x][mapHeight - y - 1]));
                 symB = symB && (map[x][y].equalsMirror(map[mapWidth - x - 1][y]));
