@@ -16,11 +16,10 @@ public class XMLMapHandlerTest {
      * Reads a game map from file given the team memory and the name of the
      * map. Will use the map math specified in TestMapGenerator.
      *
-     * @param teamMemory team memory to pass in with the given map.
      * @param mapName name of the map.
      * @return a GameWorld with this map.
      */
-    public GameMap getMap(long[][] teamMemory, String mapName) {
+    public GameMap getMap(String mapName) {
         XMLMapHandler handler = XMLMapHandler.loadMap(mapName,
                 TestMapGenerator.MAP_PATH);
 
@@ -59,8 +58,7 @@ public class XMLMapHandlerTest {
 
         GameMap inputMap = gen.getMap("basicMap");
 
-        long[][] teamMemory = new long[2][32];
-        GameMap outputMap = getMap(teamMemory, "basicMap");
+        GameMap outputMap = getMap("basicMap");
 
         assertTrue(inputMap.equals(outputMap));
     }

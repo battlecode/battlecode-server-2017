@@ -238,7 +238,8 @@ public interface RobotController {
      * robot.
      * 
      * @param radiusSquared
-     *            return objects this distance away from the center.
+     *            return objects this distance away from the center. If -1 is
+     *            passed, robots from the whole map are returned.
      * @return array of class type of game objects.
      *
      * @battlecode.doc.costlymethod
@@ -250,10 +251,11 @@ public interface RobotController {
      * radius of the robot.
      * 
      * @param radiusSquared
-     *            return objects this distance away from the center.
+     *            return objects this distance away from the center. If -1 is
+     *            passed, robots from the whole map are returned.
      * @param team
-     *            filter game objects by the given team. If null is passed,
-     *            objects from all teams are returned.
+     *            filter game objects by the given team. If null is passed, robots from
+     *            any team are returned.
      * @return array of class type of game objects.
      *
      * @battlecode.doc.costlymethod
@@ -267,7 +269,8 @@ public interface RobotController {
      * @param center
      *            center of the given search radius.
      * @param radiusSquared
-     *            return objects this distance away from the center.
+     *            return objects this distance away from the center. If -1 is
+     *            passed, robots from the whole map are returned.
      * @param team
      *            filter game objects by the given team. If null is passed,
      *            objects from all teams are returned.
