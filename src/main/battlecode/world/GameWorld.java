@@ -133,10 +133,12 @@ public class GameWorld implements SignalHandler {
 
     /**
      * Run a single round of the game.
+     * Synchronized because you shouldn't call this and inject() at the same time,
+     * but their order of being executed isn't guaranteed.
      *
      * @return the state of the game after the round has run.
      */
-    public GameState runRound() {
+    public synchronized GameState runRound() {
         if (!this.isRunning()) {
             return GameState.DONE;
         }
@@ -192,9 +194,14 @@ public class GameWorld implements SignalHandler {
      * Inject a signal into the game world, and return any new signals
      * that result from changes created by the signal.
      *
-     * @param injectedSignal
+     * Synchronized because you shouldn't call this and runRound() at the same time,
+     * but their order of being executed isn't guaranteed.
+     *
+     * @param injectedSignal the signal to inject
+     * @return signals that result from the injected signal (including the injected signal)
+     * @throws RuntimeException if the signal injection fails
      */
-    public Signal[] inject(Signal injectedSignal) throws RuntimeException {
+    public synchronized Signal[] inject(Signal injectedSignal) throws RuntimeException {
         clearAllSignals();
 
         visitSignal(injectedSignal);
@@ -307,11 +314,14 @@ public class GameWorld implements SignalHandler {
      *
      * @param s the signal
      */
-    public void addSignal(Signal s) {
+    private void addSignal(Signal s) {
         currentSignals.add(s);
     }
 
-    public void clearAllSignals() {
+    /**
+     * Clear all processed signals from the last round / injection.
+     */
+    private void clearAllSignals() {
         currentSignals.clear();
     }
 

@@ -16,36 +16,23 @@ import java.util.Optional;
  */
 public class InternalRobot {
     public RobotType type;
-
     private final int ID;
     private Team team;
-
-    // TODO remove volatiles?
-
-    private volatile MapLocation location;
+    private MapLocation location;
     private final GameWorld gameWorld;
-
     private final RobotControllerImpl controller;
-
-    private volatile double healthLevel;
+    private double healthLevel;
     private double coreDelay;
     private double weaponDelay;
     private int zombieInfectedTurns;
     private int viperInfectedTurns;
-
-    private volatile long controlBits;
-
-    int currentBytecodeLimit;
+    private long controlBits;
+    private int currentBytecodeLimit;
     private int bytecodesUsed;
-    private boolean hasBeenAttacked;
     private boolean healthChanged;
     private boolean broadcasted;
-    private volatile HashMap<Integer, Integer> broadcastMap;
+    private HashMap<Integer, Integer> broadcastMap;
     private int roundsAlive;
-
-    private Signal movementSignal;
-    private Signal attackSignal;
-
     private int buildDelay;
 
     /**
@@ -85,15 +72,11 @@ public class InternalRobot {
 
         this.currentBytecodeLimit = type.bytecodeLimit;
         this.bytecodesUsed = 0;
-        this.hasBeenAttacked = false;
         this.healthChanged = true;
 
         this.broadcasted = false;
         this.broadcastMap = new HashMap<>();
         this.roundsAlive = 0;
-
-        this.movementSignal = null;
-        this.attackSignal = null;
 
         this.controller = new RobotControllerImpl(gameWorld, this);
     }
@@ -191,10 +174,6 @@ public class InternalRobot {
         return controlBits;
     }
 
-    public boolean hasBeenAttacked() {
-        return hasBeenAttacked;
-    }
-
     public void clearHealthChanged() {
         healthChanged = false;
     }
@@ -250,7 +229,6 @@ public class InternalRobot {
         if (baseAmount < 0) {
             changeHealthLevel(-baseAmount);
         } else {
-            hasBeenAttacked = true;
             changeHealthLevel(-baseAmount);
         }
     }
@@ -334,14 +312,18 @@ public class InternalRobot {
 
     public void activateMovement(Signal s, double attackDelay,
             double movementDelay) {
-        movementSignal = s;
+
+        gameWorld.visitSignal(s);
+
         addLoadingDelay(attackDelay);
         addCoreDelay(movementDelay);
     }
 
     public void activateAttack(Signal s, double attackDelay,
             double movementDelay) {
-        attackSignal = s;
+
+        gameWorld.visitSignal(s);
+
         addWeaponDelay(attackDelay);
         addCooldownDelay(movementDelay);
     }
@@ -375,8 +357,7 @@ public class InternalRobot {
     // *********************************
 
     // should be called at the beginning of every round
-    public void processBeginningOfRound() {
-    }
+    public void processBeginningOfRound() {}
 
     public void processBeginningOfTurn() {
         decrementDelays(); // expends supply to decrement delays
@@ -387,26 +368,11 @@ public class InternalRobot {
     public void processEndOfTurn() {
         roundsAlive++;
 
-        // resetting stuff
-        hasBeenAttacked = false;
-
         // broadcasts
-        if (broadcasted)
+        if (broadcasted) {
             gameWorld.visitSignal(new BroadcastSignal(this.getID(), this.getTeam(), broadcastMap));
-
-        broadcastMap = new HashMap<>();
-        broadcasted = false;
-
-        // perform attacks
-        if (attackSignal != null) {
-            gameWorld.visitSignal(attackSignal);
-            attackSignal = null;
-        }
-
-        // perform movements (moving, spawning, mining)
-        if (movementSignal != null) {
-            gameWorld.visitSignal(movementSignal);
-            movementSignal = null;
+            broadcastMap = new HashMap<>();
+            broadcasted = false;
         }
 
         processBeingInfected();
