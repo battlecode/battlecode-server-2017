@@ -16,7 +16,6 @@
     <property name="rootname" value="battlecode-server"/>
     <property name="src.dir" value="${basedir}/src/main"/>
     <property name="lib.dir" value="${basedir}/lib"/>
-    <property name="resources.dir" value="${basedir}/resources"/>
     <property name="lib.compile.dir" value="${lib.dir}/compile"/>
     <property name="lib.src.dir" value="${lib.dir}/src"/>
     <property name="lib.doc.dir" value="${lib.dir}/doc"/>
@@ -41,14 +40,10 @@
     <property name="test.src.dir" value="${basedir}/src/test"/>
     <property name="test.timeout" value="900000"/>
     <property name="test.build.dir" value="${build.dir}/tests"/>
-    <property name="test.build.jar" value="${basedir}/${rootname}-test.jar"/>
     <condition property="test.report.dir" value="${env.CIRCLE_TEST_REPORTS}/junit" else="testreport">
         <!-- If we're running on CircleCI, write out xml junit reports where they want us to. -->
         <isset property="ci.circle"/>
     </condition>
-
-    <property name="instr.build.dir" value="${build.dir}/instrumented-classes"/>
-    <property name="instr.datafile" value="${build.dir}/cobertura.ser"/>
 
     <!-- IVY configuration items -->
     <property name="ivy.install.version" value="2.4.0"/>
@@ -71,6 +66,10 @@
         </fileset>
     </path>
 
+    <path id="classpath-compiled">
+        <pathelement location="${pkg.build.dir}"/>
+    </path>
+  
     <target name="download-ivy" unless="ivy.jar.exists">
         <mkdir dir="${ivy.jar.dir}"/>
         <get dest="${ivy.jar.file}"
@@ -110,7 +109,6 @@
         <delete dir="${javadoc.common.destdir}"/>
         <delete dir="${javadoc.server.destdir}"/>
         <delete file="${pkg.build.jar}"/>
-        <delete file="${test.build.jar}"/>
     </target>
 
     <target name="clean-deps">
@@ -146,7 +144,7 @@
     </target>
 
     <target name="compiletest"
-            description="Compile Battlecode classes."
+            description="Compile test classes."
             depends="init,compile">
         <javac encoding="${build.encoding}"
                 srcdir="${test.src.dir}"
@@ -178,8 +176,6 @@
     <target name="extern" depends="jar" description="Build the jar, then run an external build file.">
         <ant dir="${extern.dir}" target="${extern.target}"/>
     </target>
-
-    <!-- ========== TESTING ========= -->
 
     <target name="common-doc" depends="compile">
         <javadoc
@@ -228,6 +224,8 @@
         </javadoc>
     </target>
 
+    <!-- ========== TESTING ========= -->
+
     <target name="unittest" depends="compiletest">
         <junit printsummary="withOutAndErr" timeout="${test.timeout}" filtertrace="off" failureproperty="test.failed">
             <classpath refid="classpath-libs"/>
@@ -247,10 +245,12 @@
 
             <batchtest todir="${test.report.dir}">
                 <fileset dir="${test.src.dir}">
-                    <include name="**/*Test.java"/>
+                    <include name="**/*.java"/>
+                    <exclude name="**/sample/**/*.java"/>
                 </fileset>
             </batchtest>
         </junit>
+
         <fail message="Tests failed" if="test.failed"/>
     </target>
 

@@ -15,31 +15,6 @@ import java.util.*;
  */
 @Ignore
 public class TestMapGenerator {
-    /**
-     * A class to hold information about a specific robot that is on the map.
-     */
-    private class RobotInfo {
-        /** The type of the robot. */
-        public final RobotType type;
-        /** The team of the robot. */
-        public final Team team;
-        /** The location of the robot. */
-        public final MapLocation location;
-
-        /**
-         * Creates a new RobotInfo with the given information.
-         *
-         * @param type type of the robot.
-         * @param team team of the robot.
-         * @param location location of the robot.
-         */
-        public RobotInfo(RobotType type, Team team, MapLocation location) {
-            this.type = type;
-            this.team = team;
-            this.location = location;
-        }
-    }
-
     public static String getSymbol(RobotType type) {
         switch (type) {
             case ZOMBIEDEN: return "z";
@@ -102,7 +77,7 @@ public class TestMapGenerator {
     /** The map's zombie spawn schedule. Defaults to no zombies. */
     private ZombieSpawnSchedule zSchedule;
     /** All the robots on the map. Defaults to none. */
-    private Set<GameMap.InitialRobotInfo> robots;
+    private List<GameMap.InitialRobotInfo> robots;
 
     /**
      * Prepares an empty map of the given size. There will be no parts or rubble.
@@ -119,7 +94,7 @@ public class TestMapGenerator {
         this.rubble = new double[width][height];
         this.parts = new double[width][height];
         this.zSchedule = new ZombieSpawnSchedule();
-        this.robots = new HashSet<>();
+        this.robots = new ArrayList<>();
     }
 
     /**
@@ -158,7 +133,7 @@ public class TestMapGenerator {
         }
 
         this.zSchedule = new ZombieSpawnSchedule();
-        this.robots = new HashSet<>();
+        this.robots = new ArrayList<>();
     }
 
     /**
@@ -289,7 +264,26 @@ public class TestMapGenerator {
         EnumMap<GameMap.MapProperties, Integer> props = new EnumMap<>(GameMap.MapProperties.class);
         props.put(GameMap.MapProperties.ROUNDS, this.rounds);
         props.put(GameMap.MapProperties.SEED, this.seed);
-        return new GameMap(props, rubble, parts, zSchedule, robots, mapName);
+
+        GameMap.InitialRobotInfo[] outputRobots = robots.toArray(new GameMap.InitialRobotInfo[robots.size()]);
+
+        // Have to be make sure we sort the robots the same way they'll be sorted
+        // when read in from a file, i.e. starting from the top left
+        Arrays.sort(outputRobots, (a, b) -> {
+            if (a.originOffsetX == b.originOffsetX) {
+                return Integer.compare(a.originOffsetY, b.originOffsetY);
+            }
+            return Integer.compare(a.originOffsetX, b.originOffsetX);
+        });
+
+        return new GameMap(
+                props,
+                rubble,
+                parts,
+                zSchedule,
+                outputRobots,
+                mapName
+        );
     }
 
     /**

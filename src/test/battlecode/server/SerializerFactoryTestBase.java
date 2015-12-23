@@ -50,10 +50,10 @@ public abstract class SerializerFactoryTestBase {
             new double[] {6, 7, 8},
     };
 
-    private static final Set<GameMap.InitialRobotInfo> initialRobots = new HashSet<>();
-    static {
-        initialRobots.add(new GameMap.InitialRobotInfo(10, 100, RobotType.ARCHON, Team.B));
-    }
+    private static final GameMap.InitialRobotInfo[] initialRobots = new GameMap.InitialRobotInfo[] {
+            new GameMap.InitialRobotInfo(10, 100, RobotType.ARCHON, Team.B),
+            new GameMap.InitialRobotInfo(100, 10, RobotType.ARCHON, Team.A)
+    };
 
     private static final GameMap gameMap = new GameMap(properties,
             rubble,

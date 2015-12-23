@@ -177,29 +177,9 @@ public class XStreamSerializerFactory implements SerializerFactory {
 
     }
 
-    public static class EmptyConverter implements Converter {
-
-        public boolean canConvert(Class cls) {
-            return true;
-        }
-
-        public void marshal(Object value, HierarchicalStreamWriter writer,
-                            MarshallingContext context) {
-        }
-
-        public Object unmarshal(HierarchicalStreamReader reader,
-                                UnmarshallingContext context) {
-
-            return null;
-        }
-    }
-
     static protected void initXStream() {
         if (xstream != null) return;
-        xstream = new XStream() {
-            public void reset() {
-            }
-        };
+        xstream = new XStream() {};
         xstream.registerConverter(new IntArrayConverter());
         xstream.registerConverter(new LongArrayConverter());
         xstream.registerConverter(new DoubleArrayConverter());
