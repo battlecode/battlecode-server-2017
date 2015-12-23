@@ -104,8 +104,9 @@ public class GameWorld implements SignalHandler {
         adjustResources(Team.A, GameConstants.PARTS_INITIAL_AMOUNT);
         adjustResources(Team.B, GameConstants.PARTS_INITIAL_AMOUNT);
 
-        this.rubble = new double[gm.getWidth()][gm.getWidth()];
-        this.parts = new double[gm.getHeight()][gm.getHeight()];
+        this.rubble = new double[gm.getWidth()][gm.getHeight()];
+        this.parts = new double[gm.getWidth()][gm.getHeight()];
+
         for (int i = 0; i < gm.getWidth(); i++) {
             for (int j = 0; j < gm.getHeight(); j++) {
                 this.rubble[i][j] = gm.initialRubbleAtLocation(i + gm
