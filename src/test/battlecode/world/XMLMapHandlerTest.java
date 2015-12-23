@@ -3,24 +3,27 @@ package battlecode.world;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.server.Config;
+import battlecode.server.serializer.Serializer;
+import battlecode.server.serializer.XStreamSerializerFactory;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static org.junit.Assert.assertTrue;
 
 public class XMLMapHandlerTest {
 
     /**
-     * Reads a game map from file given the team memory and the name of the
+     * Reads a game map from file given the name of the
      * map. Will use the map math specified in TestMapGenerator.
      *
-     * @param teamMemory team memory to pass in with the given map.
      * @param mapName name of the map.
      * @return a GameWorld with this map.
      */
-    public GameMap getMap(long[][] teamMemory, String mapName) {
+    public GameMap getMap(String mapName) {
         XMLMapHandler handler = XMLMapHandler.loadMap(mapName,
                 TestMapGenerator.MAP_PATH);
 
@@ -34,7 +37,7 @@ public class XMLMapHandlerTest {
      * @throws IOException shouldn't happen.
      */
     @Test(timeout=5000)
-    public void testBasic() throws IOException {
+    public void testRoundTrip() throws IOException {
         int width = 50;
         int height = 80;
         int rounds = 2123;
@@ -57,10 +60,9 @@ public class XMLMapHandlerTest {
 
         gen.writeMapToFile("basicMap");
 
-        GameMap inputMap = gen.getMap("basicMap");
+        final GameMap inputMap = gen.getMap("basicMap");
 
-        long[][] teamMemory = new long[2][32];
-        GameMap outputMap = getMap(teamMemory, "basicMap");
+        final GameMap outputMap = getMap("basicMap");
 
         assertTrue(inputMap.equals(outputMap));
     }
