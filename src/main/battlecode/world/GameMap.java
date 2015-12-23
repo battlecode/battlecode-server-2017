@@ -62,7 +62,7 @@ public class GameMap implements Serializable {
      * i.e. in game correct MapLocations that need to have the origin
      * subtracted from them to be used to index into the map arrays.
      */
-    private final List<InitialRobotInfo> initialRobots;
+    private final InitialRobotInfo[] initialRobots;
 
     /**
      * Represents the various integer properties a GameMap
@@ -119,7 +119,7 @@ public class GameMap implements Serializable {
                    double[][] initialRubble,
                    double[][] initialParts,
                    ZombieSpawnSchedule zSchedule,
-                   List<InitialRobotInfo> initialRobots,
+                   InitialRobotInfo[] initialRobots,
                    String mapName) {
         if (mapProperties.containsKey(MapProperties.WIDTH)) {
             this.width = mapProperties.get(MapProperties.WIDTH);
@@ -152,7 +152,7 @@ public class GameMap implements Serializable {
         this.initialParts = initialParts;
         this.zSchedule = zSchedule;
         this.mapName = mapName;
-        this.initialRobots = Collections.unmodifiableList(initialRobots);
+        this.initialRobots = initialRobots;
     }
 
 
@@ -184,7 +184,7 @@ public class GameMap implements Serializable {
         if (!this.origin.equals(other.origin)) return false;
         if (!this.zSchedule.equivalentTo(other.zSchedule)) return false;
 
-        return this.initialRobots.equals(other.initialRobots);
+        return Arrays.equals(this.initialRobots, other.initialRobots);
     }
 
     /**
@@ -295,17 +295,21 @@ public class GameMap implements Serializable {
      * @return the RobotInfo for the robot at that
      */
     public Optional<InitialRobotInfo> getInitialRobotAtLocation(MapLocation location) {
-        return initialRobots.stream()
-                .filter(robot -> robot.getLocation(origin).equals(location))
-                .findFirst();
+        for (InitialRobotInfo robot : initialRobots) {
+            if (robot.getLocation(origin).equals(location)) {
+                return Optional.of(robot);
+            }
+        }
+        return Optional.empty();
     }
 
     /**
      * Get a list of the initial robots on the map.
      *
      * @return the list of starting robots on the map.
+     *         MUST NOT BE MODIFIED.
      */
-    public List<InitialRobotInfo> getInitialRobots() {
+    public InitialRobotInfo[] getInitialRobots() {
         return initialRobots;
     }
 
@@ -630,16 +634,6 @@ public class GameMap implements Serializable {
         @Override
         public int hashCode() {
             return Objects.hash(originOffsetX, originOffsetY, type, team);
-        }
-
-        @Override
-        public String toString() {
-            return "InitialRobotInfo{" +
-                    "originOffsetX=" + originOffsetX +
-                    ", originOffsetY=" + originOffsetY +
-                    ", type=" + type +
-                    ", team=" + team +
-                    '}';
         }
 
         /**

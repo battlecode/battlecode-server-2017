@@ -718,8 +718,14 @@ public class XMLMapHandler extends DefaultHandler {
             }
         }
 
-        resultMap = new GameMap(mapProperties, rubbleData, partsData,
-                zSchedule, initialRobots, mapName);
+        resultMap = new GameMap(
+                mapProperties,
+                rubbleData,
+                partsData,
+                zSchedule,
+                initialRobots.toArray(new GameMap.InitialRobotInfo[initialRobots.size()]),
+                mapName
+        );
 
         return resultMap;
     }
