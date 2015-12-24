@@ -23,21 +23,6 @@ import java.util.*;
 public class XMLMapHandler extends DefaultHandler {
 
     /**
-     * An enum to keep track of the two types of terrain that might appear in
-     * a map file.
-     */
-    public enum TerrainType {
-        /**
-         * Denotes a tile that has a positive number of parts and no rubble.
-         */
-        PARTS,
-        /**
-         * Denotes a tile that has no parts and any amount of rubble.
-         */
-        RUBBLE
-    }
-
-    /**
      * Implements a stack for keeping track of XML elements.
      */
     private LinkedList<String> xmlStack = new LinkedList<>();
@@ -123,13 +108,6 @@ public class XMLMapHandler extends DefaultHandler {
         double rubbleValue();
 
         /**
-         * Returns the TerrainType associated with this cell.
-         *
-         * @return the TerrainType associatd with this cell.
-         */
-        TerrainType tile();
-
-        /**
          * Give the robot that should be placed at a tile for this type of symbol
          * when the game starts.
          *
@@ -182,14 +160,8 @@ public class XMLMapHandler extends DefaultHandler {
          * A factory that returns a TerrainData with the given terrain type.
          */
         public static final SymbolDataFactory factory = att -> {
-            String type = "RUBBLE";//getRequired(att, "terrain"); TODO: Replace all of this
-            return new TerrainData(TerrainType.valueOf(type));
+            return new TerrainData();
         };
-
-        /**
-         * Stores the terrain type for this map cell.
-         */
-        private TerrainType tile;
         
         /**
          * Stores the initial number of parts on this map cell
@@ -203,10 +175,8 @@ public class XMLMapHandler extends DefaultHandler {
 
         /**
          * Creates a new TerrainData based on a specific terrain.
-         * @param tile the terrain to use for this TerrainData.
          */
-        public TerrainData(TerrainType tile) {
-            this.tile = tile;
+        public TerrainData() {
             this.partsValue = 0;
             this.rubbleValue = 0;
         }
@@ -248,16 +218,6 @@ public class XMLMapHandler extends DefaultHandler {
         }
 
         /**
-         * Returns the terrain type for this cell.
-         *
-         * @return the terrain type for this cell.
-         */
-        @Override
-        public TerrainType tile() {
-            return tile;
-        }
-
-        /**
          * Returns nothing, because there are no robots on terrain cells.
          */
         @Override
@@ -276,7 +236,7 @@ public class XMLMapHandler extends DefaultHandler {
             if (!(data instanceof TerrainData))
                 return false;
             TerrainData d = (TerrainData) data;
-            return d.tile == tile && d.partsValue == partsValue && d.rubbleValue == rubbleValue;
+            return d.partsValue == partsValue && d.rubbleValue == rubbleValue;
         }
 
         /**
@@ -286,7 +246,7 @@ public class XMLMapHandler extends DefaultHandler {
          */
         @Override
         public SymbolData copy() {
-            TerrainData t = new TerrainData(this.tile);
+            TerrainData t = new TerrainData();
             t.setPartsValue(this.partsValue);
             t.setRubbleValue(this.rubbleValue);
             return t;
@@ -361,15 +321,6 @@ public class XMLMapHandler extends DefaultHandler {
          */
         public double rubbleValue() {
             return 0;
-        }
-
-        /**
-         * Returns the terrain type associated with this map cell (always
-         * RUBBLE, because robots do not start on cells with parts).
-         * @return RUBBLE.
-         */
-        public TerrainType tile() {
-            return TerrainType.RUBBLE;
         }
 
         /**
