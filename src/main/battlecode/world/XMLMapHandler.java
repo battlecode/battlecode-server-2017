@@ -628,11 +628,19 @@ public class XMLMapHandler extends DefaultHandler {
                     map[currentCol][currentRow].setPartsValue(0);
                     map[currentCol][currentRow].setRubbleValue(0);
                 } else {
-                    String[] params = dataSoFar.substring(letterIdx).split(",");
-                    double partsVal = Double.parseDouble(params[0]);
-                    double rubbleVal = Double.parseDouble(params[1]);
-                    map[currentCol][currentRow].setPartsValue(partsVal);
-                    map[currentCol][currentRow].setRubbleValue(rubbleVal);
+                    if(dataSoFar.contains(",")) { // If this is a map file in the newer format:
+                        String[] params = dataSoFar.substring(letterIdx).split(",");
+                        double partsVal = Double.parseDouble(params[0]);
+                        double rubbleVal = Double.parseDouble(params[1]);
+                        map[currentCol][currentRow].setPartsValue(partsVal);
+                        map[currentCol][currentRow].setRubbleValue(rubbleVal);
+                    } else { // Else, treat it as an old map
+                        double value = Double.parseDouble(dataSoFar.substring(letterIdx));
+                        if (letters.equals("n"))
+                            map[currentCol][currentRow].setRubbleValue(value);
+                        else if (letters.equals("p"))
+                            map[currentCol][currentRow].setPartsValue(value);  
+                    }
                 }
 
                 currentCol++;
