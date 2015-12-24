@@ -24,8 +24,8 @@ public class StartNotification implements Notification {
     /**
      * {@inheritDoc}
      */
-    public <R> R accept(NotificationHandler<R> handler) {
-        return handler.visitStartNotification(this);
+    public void accept(NotificationHandler handler) {
+        handler.visitStartNotification(this);
     }
 
     private Object readResolve() throws ObjectStreamException {

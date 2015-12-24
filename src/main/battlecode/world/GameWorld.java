@@ -1,152 +1,206 @@
 package battlecode.world;
 
-import java.util.*;
-import java.util.Map.Entry;
-
-import battlecode.common.Clock;
-import battlecode.common.CommanderSkillType;
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.GameActionExceptionType;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import battlecode.engine.ErrorReporter;
-import battlecode.engine.GenericWorld;
-import battlecode.engine.instrumenter.RobotDeathException;
-import battlecode.engine.instrumenter.RobotMonitor;
-import battlecode.engine.signal.AutoSignalHandler;
-import battlecode.engine.signal.Signal;
-import battlecode.engine.signal.SignalHandler;
-import battlecode.serial.DominationFactor;
+import battlecode.server.ErrorReporter;
+import battlecode.server.GameState;
+import battlecode.world.signal.AutoSignalHandler;
+import battlecode.world.signal.Signal;
+import battlecode.world.signal.SignalHandler;
 import battlecode.serial.GameStats;
-import battlecode.serial.RoundStats;
-import battlecode.world.signal.AttackSignal;
-import battlecode.world.signal.BashSignal;
-import battlecode.world.signal.BroadcastSignal;
-import battlecode.world.signal.BuildSignal;
-import battlecode.world.signal.BytecodesUsedSignal;
-import battlecode.world.signal.CastSignal;
-import battlecode.world.signal.ControlBitsSignal;
-import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.TeamOreSignal;
-import battlecode.world.signal.HealthChangeSignal;
-import battlecode.world.signal.IndicatorDotSignal;
-import battlecode.world.signal.IndicatorLineSignal;
-import battlecode.world.signal.IndicatorStringSignal;
-import battlecode.world.signal.LocationOreChangeSignal;
-import battlecode.world.signal.MatchObservationSignal;
-import battlecode.world.signal.MineSignal;
-import battlecode.world.signal.MissileCountSignal;
-import battlecode.world.signal.MovementSignal;
-import battlecode.world.signal.MovementOverrideSignal;
-import battlecode.world.signal.RobotInfoSignal;
-import battlecode.world.signal.SelfDestructSignal;
-import battlecode.world.signal.SpawnSignal;
-import battlecode.world.signal.TransferSupplySignal;
-import battlecode.world.signal.XPSignal;
+import battlecode.world.control.RobotControlProvider;
+import battlecode.world.signal.*;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
+import java.util.*;
 
 /**
  * The primary implementation of the GameWorld interface for containing and
  * modifying the game map and the objects on it.
  */
-public class GameWorld implements GenericWorld {
-    protected int currentRound; // do we need this here?? -- yes
-    protected boolean running = true; // do we need this here?? -- yes
-    protected boolean wasBreakpointHit = false;
+public class GameWorld implements SignalHandler {
+    /**
+     * The current round we're running.
+     */
+    protected int currentRound;
+
+    /**
+     * Whether we're running.
+     */
+    protected boolean running = true;
+
     protected Team winner = null;
     protected final String teamAName;
     protected final String teamBName;
-    protected final Random randGen;
-    protected int nextID;
-    protected final ArrayList<Signal> signals;
+    protected final List<Signal> currentSignals;
+    protected final List<Signal> injectedSignals;
     protected final long[][] teamMemory;
     protected final long[][] oldTeamMemory;
     protected final Map<Integer, InternalRobot> gameObjectsByID;
-    protected final ArrayList<Integer> randomIDs = new ArrayList<Integer>();
+    protected final IDGenerator idGenerator;
 
     private final GameMap gameMap;
-    private RoundStats roundStats = null; // stats for each round; new object is
-                                          // created for each round
+
+    private final RobotControlProvider controlProvider;
+
     private final GameStats gameStats = new GameStats(); // end-of-game stats
 
     private double[] teamResources = new double[4];
 
-    private Map<Team, Set<InternalRobot>> baseArchons = new EnumMap<Team, Set<InternalRobot>>(
-            Team.class);
-    private final Map<MapLocation, InternalRobot> gameObjectsByLoc = new HashMap<MapLocation, InternalRobot>();
+    private Map<Team, Set<InternalRobot>> baseArchons = new EnumMap<>(Team.class);
+    private final Map<MapLocation, InternalRobot> gameObjectsByLoc = new HashMap<>();
 
-    private Map<MapLocation, Integer> partsMap = new HashMap<MapLocation, Integer>();
-    private Map<MapLocation, Integer> rubbleMap = new HashMap<MapLocation, Integer>();
-     
-    private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<Team, GameMap.MapMemory>(
-            Team.class);
+    private double[][] rubble;
+    private double[][] parts;
 
-    private Map<Team, Map<Integer, Integer>> radio = new EnumMap<Team, Map<Integer, Integer>>(
+    private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<>(
             Team.class);
 
-    // a count for each robot type per team for tech tree checks and for tower
-    // counts
-    private Map<Team, Map<RobotType, Integer>> activeRobotTypeCount = new EnumMap<Team, Map<RobotType, Integer>>(
-            Team.class); // only includes active bots
-    private Map<Team, Map<RobotType, Integer>> totalRobotTypeCount = new EnumMap<Team, Map<RobotType, Integer>>(
-            Team.class); // includes inactive buildings
+    private Map<Team, Map<Integer, Integer>> radio = new EnumMap<>(
+            Team.class);
 
-    // robots to remove from the game at end of turn
-    private List<InternalRobot> deadRobots = new ArrayList<InternalRobot>();
-    private boolean removingDead = false;
+    private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<>(
+            Team.class);
 
     @SuppressWarnings("unchecked")
-    public GameWorld(GameMap gm, String teamA, String teamB,
-            long[][] oldTeamMemory) {
+    public GameWorld(GameMap gm, RobotControlProvider cp,
+                     String teamA, String teamB,
+                     long[][] oldTeamMemory) {
+
         currentRound = -1;
         teamAName = teamA;
         teamBName = teamB;
-        gameObjectsByID = new LinkedHashMap<Integer, InternalRobot>();
-        signals = new ArrayList<Signal>();
-        randGen = new Random(gm.getSeed());
-        nextID = 1;
+        gameObjectsByID = new LinkedHashMap<>();
+        currentSignals = new ArrayList<>();
+        injectedSignals = new ArrayList<>();
+        idGenerator = new IDGenerator(gm.getSeed());
         teamMemory = new long[2][oldTeamMemory[0].length];
         this.oldTeamMemory = oldTeamMemory;
 
         gameMap = gm;
+        controlProvider = cp;
 
         mapMemory.put(Team.A, new GameMap.MapMemory(gameMap));
         mapMemory.put(Team.B, new GameMap.MapMemory(gameMap));
         mapMemory.put(Team.NEUTRAL, new GameMap.MapMemory(gameMap));
         mapMemory.put(Team.ZOMBIE, new GameMap.MapMemory(gameMap));
 
-        radio.put(Team.A, new HashMap<Integer, Integer>());
-        radio.put(Team.B, new HashMap<Integer, Integer>());
+        radio.put(Team.A, new HashMap<>());
+        radio.put(Team.B, new HashMap<>());
 
-        activeRobotTypeCount.put(Team.A, new EnumMap<RobotType, Integer>(
+        robotTypeCount.put(Team.A, new EnumMap<>(
                 RobotType.class));
-        activeRobotTypeCount.put(Team.B, new EnumMap<RobotType, Integer>(
+        robotTypeCount.put(Team.B, new EnumMap<>(
                 RobotType.class));
-        activeRobotTypeCount.put(Team.NEUTRAL, new EnumMap<RobotType, Integer>(
+        robotTypeCount.put(Team.NEUTRAL, new EnumMap<>(
                 RobotType.class));
-        activeRobotTypeCount.put(Team.ZOMBIE, new EnumMap<RobotType, Integer>(
-                RobotType.class));
-        totalRobotTypeCount.put(Team.A, new EnumMap<RobotType, Integer>(
-                RobotType.class));
-        totalRobotTypeCount.put(Team.B, new EnumMap<RobotType, Integer>(
-                RobotType.class));
-        totalRobotTypeCount.put(Team.NEUTRAL, new EnumMap<RobotType, Integer>(
-                RobotType.class));
-        totalRobotTypeCount.put(Team.ZOMBIE, new EnumMap<RobotType, Integer>(
+        robotTypeCount.put(Team.ZOMBIE, new EnumMap<>(
                 RobotType.class));
 
-        baseArchons.put(Team.A, new HashSet<InternalRobot>());
-        baseArchons.put(Team.B, new HashSet<InternalRobot>());
+        baseArchons.put(Team.A, new HashSet<>());
+        baseArchons.put(Team.B, new HashSet<>());
 
         adjustResources(Team.A, GameConstants.PARTS_INITIAL_AMOUNT);
         adjustResources(Team.B, GameConstants.PARTS_INITIAL_AMOUNT);
 
-        removingDead = false;
+        this.rubble = new double[gm.getWidth()][gm.getWidth()];
+        this.parts = new double[gm.getHeight()][gm.getHeight()];
+        for (int i = 0; i < gm.getWidth(); i++) {
+            for (int j = 0; j < gm.getHeight(); j++) {
+                this.rubble[i][j] = gm.initialRubbleAtLocation(i + gm
+                        .getOrigin().x, j + gm.getOrigin().y);
+                this.parts[i][j] = gm.initialPartsAtLocation(i + gm
+                        .getOrigin().x, j + gm.getOrigin().y);
+            }
+        }
+
+        controlProvider.matchStarted(this);
+
+        // Add the robots contained in the GameMap to this world.
+        for (GameMap.InitialRobotInfo initialRobot : gameMap.getInitialRobots()) {
+            // Side-effectful constructor; will add robot to relevant stuff
+
+            spawnRobot(
+                    initialRobot.type,
+                    initialRobot.getLocation(gameMap.getOrigin()),
+                    initialRobot.team,
+                    0,
+                    Optional.empty()
+            );
+        }
+    }
+
+    /**
+     * Run a single round of the game.
+     *
+     * @return the state of the game after the round has run.
+     */
+    public GameState runRound() {
+        if (!this.isRunning()) {
+            return GameState.DONE;
+        }
+
+        try {
+            if (this.getCurrentRound() != -1) {
+                this.clearAllSignals();
+            }
+            this.processBeginningOfRound();
+            this.controlProvider.roundStarted();
+
+            // We iterate through the IDs so that we avoid ConcurrentModificationExceptions
+            // of an iterator. Kinda gross, but whatever.
+            final int[] idsToRun = gameObjectsByID.keySet().stream()
+                    .mapToInt(i -> i)
+                    .toArray();
+
+            for (final int id : idsToRun) {
+                final InternalRobot robot = gameObjectsByID.get(id);
+                if (robot == null) {
+                    // Robot might have died earlier in the iteration; skip it
+                    continue;
+                }
+
+                robot.processBeginningOfTurn();
+                this.controlProvider.runRobot(robot);
+                robot.setBytecodesUsed(this.controlProvider.getBytecodesUsed(robot));
+                robot.processEndOfTurn();
+                // If the robot terminates but the death signal has not yet
+                // been visited:
+                if (this.controlProvider.getTerminated(robot) && gameObjectsByID
+                        .get(id) != null) {
+                    robot.suicide();
+                }
+            }
+
+            this.controlProvider.roundEnded();
+            this.processEndOfRound();
+
+            if (!this.isRunning()) {
+                this.controlProvider.matchEnded();
+            }
+
+        } catch (Exception e) {
+            ErrorReporter.report(e);
+            return GameState.DONE;
+        }
+
+        return GameState.RUNNING;
+    }
+
+    /**
+     * Inject a signal into the game world, and return any new signals
+     * that result from changes created by the signal.
+     *
+     * @param injectedSignal
+     */
+    public Signal[] inject(Signal injectedSignal) throws RuntimeException {
+        clearAllSignals();
+
+        visitSignal(injectedSignal);
+
+        return getAllSignals(false);
+
     }
 
     // *********************************
@@ -169,21 +223,8 @@ public class GameWorld implements GenericWorld {
         return gameObjectsByLoc.get(loc);
     }
 
-    public <T extends InternalRobot> T getObjectOfType(MapLocation loc,
-            Class<T> cl) {
-        InternalRobot o = getObject(loc);
-        if (cl.isInstance(o))
-            return cl.cast(o);
-        else
-            return null;
-    }
-
     public InternalRobot getRobot(MapLocation loc) {
-        InternalRobot obj = getObject(loc);
-        if (obj instanceof InternalRobot)
-            return (InternalRobot) obj;
-        else
-            return null;
+        return getObject(loc);
     }
 
     public Collection<InternalRobot> allObjects() {
@@ -195,11 +236,6 @@ public class GameWorld implements GenericWorld {
                 new InternalRobot[gameObjectsByID.size()]);
     }
 
-    public InternalRobot getRobotByID(int id) {
-        InternalRobot r = getObjectByID(id);
-        return r;
-    }
-
     public boolean exists(InternalRobot o) {
         return gameObjectsByID.containsKey(o.getID());
     }
@@ -207,10 +243,6 @@ public class GameWorld implements GenericWorld {
     public int getMessage(Team t, int channel) {
         Integer val = radio.get(t).get(channel);
         return val == null ? 0 : val;
-    }
-
-    public RoundStats getRoundStats() {
-        return roundStats;
     }
 
     public GameStats getGameStats() {
@@ -269,37 +301,22 @@ public class GameWorld implements GenericWorld {
     // ****** MISC UTILITIES ***********
     // *********************************
 
+    /**
+     * Store a signal, to be passed out of the world.
+     * The signal should have already been processed.
+     *
+     * @param s the signal
+     */
     public void addSignal(Signal s) {
-        signals.add(s);
+        currentSignals.add(s);
     }
 
     public void clearAllSignals() {
-        signals.clear();
+        currentSignals.clear();
     }
 
-    public void notifyBreakpoint() {
-        wasBreakpointHit = true;
-    }
-
-    public boolean wasBreakpointHit() {
-        return wasBreakpointHit;
-    }
-
-    public void reserveRandomIDs(int num) {
-        while (num > 0) {
-            randomIDs.add(nextID++);
-            num--;
-        }
-        Collections.shuffle(randomIDs, randGen);
-    }
-
-    public int nextID() {
-        if (randomIDs.isEmpty()) {
-            int ret = nextID;
-            nextID += randGen.nextInt(3) + 1;
-            return ret;
-        } else
-            return randomIDs.remove(randomIDs.size() - 1);
+    public boolean seenBefore(Team team, MapLocation loc) {
+        return mapMemory.get(team).seenBefore(loc);
     }
 
     public boolean canSense(Team team, MapLocation loc) {
@@ -307,7 +324,8 @@ public class GameWorld implements GenericWorld {
     }
 
     public void updateMapMemoryAdd(Team team, MapLocation loc, int radiusSquared) {
-        mapMemory.get(team).rememberLocation(loc, radiusSquared, partsMap, rubbleMap);
+        mapMemory.get(team).rememberLocation(loc, radiusSquared, rubble,
+                parts);
     }
 
     public void updateMapMemoryRemove(Team team, MapLocation loc,
@@ -316,22 +334,25 @@ public class GameWorld implements GenericWorld {
     }
 
     public boolean canMove(MapLocation loc, RobotType type) {
-        return (gameMap.onTheMap(loc) &&
-                (!rubbleMap.containsKey(loc) || rubbleMap.get(loc) < GameConstants.RUBBLE_OBSTRUCTION_THRESH || type == RobotType.SCOUT) &&
-                gameObjectsByLoc.get(loc) == null);
+        return gameMap.onTheMap(loc) && (getRubble(loc) < GameConstants
+                .RUBBLE_OBSTRUCTION_THRESH || type == RobotType.SCOUT) &&
+                gameObjectsByLoc.get(loc) == null;
     }
 
     protected boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
         MapLocation myLoc = ir.getLocation();
         int d = myLoc.distanceSquaredTo(loc);
         int radius = ir.type.attackRadiusSquared;
+        if (ir.type == RobotType.TURRET) {
+            return (d <= radius && d >= GameConstants.TURRET_MINIMUM_RANGE);
+        }
         return d <= radius;
     }
 
     // TODO: make a faster implementation of this
     public MapLocation[] getAllMapLocationsWithinRadiusSq(MapLocation center,
             int radiusSquared) {
-        ArrayList<MapLocation> locations = new ArrayList<MapLocation>();
+        ArrayList<MapLocation> locations = new ArrayList<>();
 
         int radius = (int) Math.sqrt(radiusSquared);
         radius = Math.min(radius, Math.max(GameConstants.MAP_MAX_HEIGHT,
@@ -361,13 +382,12 @@ public class GameWorld implements GenericWorld {
             if (getRobot(center) == null) {
                 return new InternalRobot[0];
             } else {
-                InternalRobot[] res = { getRobot(center) };
-                return res;
+                return new InternalRobot[]{ getRobot(center) };
             }
         } else if (radiusSquared < 16) {
             MapLocation[] locs = getAllMapLocationsWithinRadiusSq(center,
                     radiusSquared);
-            ArrayList<InternalRobot> robots = new ArrayList<InternalRobot>();
+            ArrayList<InternalRobot> robots = new ArrayList<>();
             for (MapLocation loc : locs) {
                 InternalRobot res = getRobot(loc);
                 if (res != null) {
@@ -377,14 +397,14 @@ public class GameWorld implements GenericWorld {
             return robots.toArray(new InternalRobot[robots.size()]);
         }
 
-        ArrayList<InternalRobot> robots = new ArrayList<InternalRobot>();
+        ArrayList<InternalRobot> robots = new ArrayList<>();
 
         for (InternalRobot o : gameObjectsByID.values()) {
-            if (!(o instanceof InternalRobot))
+            if (o == null)
                 continue;
             if (o.getLocation() != null
                     && o.getLocation().distanceSquaredTo(center) <= radiusSquared)
-                robots.add((InternalRobot) o);
+                robots.add(o);
         }
 
         return robots.toArray(new InternalRobot[robots.size()]);
@@ -394,17 +414,6 @@ public class GameWorld implements GenericWorld {
     // ****** ENGINE ACTIONS ***********
     // *********************************
 
-    // should only be called by the InternalRobot constructor
-    public void notifyAddingNewObject(InternalRobot o) {
-        if (gameObjectsByID.containsKey(o.getID()))
-            return;
-        gameObjectsByID.put(o.getID(), o);
-        if (o.getLocation() != null) {
-            gameObjectsByLoc.put(o.getLocation(), o);
-        }
-    }
-
-    // TODO: move stuff to here
     // should only be called by InternalRobot.setLocation
     public void notifyMovingObject(InternalRobot o, MapLocation oldLoc,
             MapLocation newLoc) {
@@ -421,155 +430,84 @@ public class GameWorld implements GenericWorld {
         }
     }
 
-    public void removeObject(InternalRobot o) {
-        if (o.getLocation() != null) {
-            MapLocation loc = o.getLocation();
-            if (gameObjectsByLoc.get(loc) == o)
-                gameObjectsByLoc.remove(loc);
-            else
-                System.out.println("Couldn't remove " + o + " from the game");
-        } else
-            System.out.println("Couldn't remove " + o + " from the game");
-
-        if (gameObjectsByID.get(o.getID()) == o) {
-            gameObjectsByID.remove(o.getID());
-        }
-
-        if (o instanceof InternalRobot) {
-            InternalRobot r = (InternalRobot) o;
-            r.freeMemory();
-        }
-    }
-
-    public void beginningOfExecution(int robotID) {
-        InternalRobot r = (InternalRobot) getObjectByID(robotID);
-        if (r != null)
-            r.processBeginningOfTurn();
-    }
-
-    public void endOfExecution(int robotID) {
-        InternalRobot r = (InternalRobot) getObjectByID(robotID);
-        // if the robot is dead, it won't be in the map any more
-        if (r != null) {
-            r.setBytecodesUsed(RobotMonitor.getBytecodesUsed());
-            r.processEndOfTurn();
-        }
-    }
-
-    public void resetStatic() {
-    }
-
-    public void notifyDied(InternalRobot r) {
-        deadRobots.add(r);
-    }
-
-    public void removeDead() {
-        removingDead = true;
-        boolean current = false;
-        while (deadRobots.size() > 0) {
-            InternalRobot r = deadRobots.remove(deadRobots.size() - 1);
-            if (r.getID() == RobotMonitor.getCurrentRobotID())
-                current = true;
-            visitSignal(new DeathSignal(r)); // If infected, also turns into zombie
-        }
-        removingDead = false;
-        if (current)
-            throw new RobotDeathException();
-    }
-
     // *********************************
     // ****** COUNTING ROBOTS **********
     // *********************************
 
     // only returns active robots
-    public int getActiveRobotTypeCount(Team team, RobotType type) {
-        if (activeRobotTypeCount.get(team).containsKey(type)) {
-            return activeRobotTypeCount.get(team).get(type);
+    public int getRobotTypeCount(Team team, RobotType type) {
+        if (robotTypeCount.get(team).containsKey(type)) {
+            return robotTypeCount.get(team).get(type);
         } else {
             return 0;
         }
     }
 
-    public void incrementActiveRobotTypeCount(Team team, RobotType type) {
-        if (activeRobotTypeCount.get(team).containsKey(type)) {
-            activeRobotTypeCount.get(team).put(type,
-                    activeRobotTypeCount.get(team).get(type) + 1);
+    public void incrementRobotTypeCount(Team team, RobotType type) {
+        if (robotTypeCount.get(team).containsKey(type)) {
+            robotTypeCount.get(team).put(type,
+                    robotTypeCount.get(team).get(type) + 1);
         } else {
-            activeRobotTypeCount.get(team).put(type, 1);
+            robotTypeCount.get(team).put(type, 1);
         }
     }
     
     // decrement from active robots (used during TTM <-> Turret transform)
-    public void decrementActiveRobotTypeCount(Team team, RobotType type) {
-        Integer currentCount = activeRobotTypeCount.get(team).get(type);
-        activeRobotTypeCount.get(team).put(type,currentCount - 1);
+    public void decrementRobotTypeCount(Team team, RobotType type) {
+        Integer currentCount = getRobotTypeCount(team, type);
+        robotTypeCount.get(team).put(type,currentCount - 1);
     }
 
-    // returns active and inactive robots
-    public int getTotalRobotTypeCount(Team team, RobotType type) {
-        if (totalRobotTypeCount.get(team).containsKey(type)) {
-            return totalRobotTypeCount.get(team).get(type);
-        } else {
-            return 0;
-        }
-    }
-
-    public void incrementTotalRobotTypeCount(Team team, RobotType type) {
-        if (totalRobotTypeCount.get(team).containsKey(type)) {
-            totalRobotTypeCount.get(team).put(type,
-                    totalRobotTypeCount.get(team).get(type) + 1);
-        } else {
-            totalRobotTypeCount.get(team).put(type, 1);
-        }
-    }
-    
     // *********************************
     // ****** RUBBLE METHODS **********
     // *********************************
-    public int getRubble(MapLocation loc) {
-        return rubbleMap.get(loc);
+    public double getRubble(MapLocation loc) {
+        if (!gameMap.onTheMap(loc)) {
+            return 0;
+        }
+        return rubble[loc.x - gameMap.getOrigin().x][loc.y - gameMap
+                .getOrigin().y];
     }
     
-    public int senseRubble(Team team, MapLocation loc) {
+    public double senseRubble(Team team, MapLocation loc) {
         return mapMemory.get(team).recallRubble(loc);
     }
     
-    public void alterRubble(MapLocation loc, int amount) {
-        rubbleMap.put(loc, rubbleMap.get(loc)+amount);
+    public void alterRubble(MapLocation loc, double amount) {
+        rubble[loc.x - gameMap.getOrigin().x][loc.y - gameMap.getOrigin().y]
+                = Math.max(0.0, amount);
+        for (Team t : Team.values()) {
+            mapMemory.get(t).updateLocationRubble(loc, rubble[loc.x - gameMap
+                    .getOrigin().x][loc.y - gameMap.getOrigin().y]);
+        }
     }
 
     // *********************************
     // ****** PARTS METHODS ************
     // *********************************
-    public int getParts(MapLocation loc) {
-        return partsMap.get(loc);
+    public double getParts(MapLocation loc) {
+        if (!gameMap.onTheMap(loc)) {
+            return 0;
+        }
+        return parts[loc.x - gameMap.getOrigin().x][loc.y - gameMap
+                .getOrigin().y];
     }
 
-    public int senseParts(Team team, MapLocation loc) {
+    public double senseParts(Team team, MapLocation loc) {
         return mapMemory.get(team).recallParts(loc);
     }
 
-    public int takeParts(MapLocation loc) { // Remove parts from location
-        int prevVal = partsMap.containsKey(loc) ? partsMap.get(loc) : 0;
-        partsMap.put(loc,0);
-        return prevVal;
-      /*  double cur = 0;
-        if (oreMined.containsKey(loc)) {
-            cur = oreMined.get(loc);
+    public double takeParts(MapLocation loc) { // Remove parts from location
+        double prevVal = getParts(loc);
+        parts[loc.x - gameMap.getOrigin().x][loc.y - gameMap.getOrigin().y] =
+                0.0;
+        for (Team t : Team.values()) {
+            mapMemory.get(t).updateLocationParts(loc, 0);
         }
-        oreMined.put(loc, cur + amount);
-        addSignal(new LocationOreChangeSignal(loc, cur + amount));*/
+        return prevVal;
     }
 
-    protected boolean spendResources(Team t, int amount) {
-        if (teamResources[t.ordinal()] >= amount) {
-            teamResources[t.ordinal()] -= amount;
-            return true;
-        } else
-            return false;
-    }
-
-    protected void adjustResources(Team t, int amount) {
+    protected void adjustResources(Team t, double amount) {
         teamResources[t.ordinal()] += amount;
     }
 
@@ -581,18 +519,41 @@ public class GameWorld implements GenericWorld {
     // ****** GAMEPLAY *****************
     // *********************************
 
+    /**
+     * Spawns a new robot with the given parameters.
+     *
+     * @param type the type of the robot
+     * @param loc the location of the robot
+     * @param team the team of the robot
+     * @param buildDelay the build delay of the robot
+     * @param parent the parent of the robot, or Optional.empty() if there is no parent
+     * @return the ID of the spawned robot.
+     */
+    public int spawnRobot(RobotType type,
+                           MapLocation loc,
+                           Team team,
+                           int buildDelay,
+                           Optional<InternalRobot> parent) {
+
+        int ID = idGenerator.nextID();
+
+        visitSpawnSignal(new SpawnSignal(
+                ID,
+                parent.isPresent() ? parent.get().getID() : 0,
+                loc,
+                type,
+                team,
+                buildDelay
+        ));
+        return ID;
+    }
+
     public void processBeginningOfRound() {
         currentRound++;
 
-        nextID += randGen.nextInt(10);
-
-        wasBreakpointHit = false;
-
         // process all gameobjects
-        InternalRobot[] gameObjects = new InternalRobot[gameObjectsByID.size()];
-        gameObjects = gameObjectsByID.values().toArray(gameObjects);
-        for (int i = 0; i < gameObjects.length; i++) {
-            gameObjects[i].processBeginningOfRound();
+        for (InternalRobot gameObject : gameObjectsByID.values()) {
+            gameObject.processBeginningOfRound();
         }
     }
 
@@ -612,39 +573,31 @@ public class GameWorld implements GenericWorld {
     }
 
     public boolean timeLimitReached() {
-        return currentRound >= gameMap.getMaxRounds() - 1;
+        return currentRound >= gameMap.getRounds() - 1;
     }
 
     public void processEndOfRound() {
         // process all gameobjects
-        InternalRobot[] gameObjects = new InternalRobot[gameObjectsByID.size()];
-        gameObjects = gameObjectsByID.values().toArray(gameObjects);
-        for (int i = 0; i < gameObjects.length; i++) {
-            gameObjects[i].processEndOfRound();
+        for (InternalRobot gameObject : gameObjectsByID.values()) {
+            gameObject.processEndOfRound();
         }
-        removeDead();
-
-        // update map memory
-        /*
-         * for (int i = 0; i < gameObjects.length; i++) { InternalRobot ir =
-         * (InternalRobot) gameObjects[i];
-         * mapMemory.get(ir.getTeam()).rememberLocations(ir.getLocation(),
-         * ir.type.sensorRadiusSquared, oreMined); }
-         */
 
         // free parts
         teamResources[Team.A.ordinal()] += GameConstants.ARCHON_PART_INCOME
-                * getActiveRobotTypeCount(Team.A, RobotType.ARCHON);
+                * getRobotTypeCount(Team.A, RobotType.ARCHON);
         teamResources[Team.B.ordinal()] += GameConstants.ARCHON_PART_INCOME
-                * getActiveRobotTypeCount(Team.B, RobotType.ARCHON);
+                * getRobotTypeCount(Team.B, RobotType.ARCHON);
 
-        addSignal(new TeamOreSignal(teamResources));
+        // Add signals for team resources
+        for (final Team team : Team.values()) {
+            addSignal(new TeamResourceSignal(team, teamResources[team.ordinal()]));
+        }
 
         if (timeLimitReached() && winner == null) {
             // tiebreak by number of Archons
             if (!(setWinnerIfNonzero(
-                    getActiveRobotTypeCount(Team.A, RobotType.ARCHON)
-                            - getActiveRobotTypeCount(Team.B, RobotType.ARCHON),
+                    getRobotTypeCount(Team.A, RobotType.ARCHON)
+                            - getRobotTypeCount(Team.B, RobotType.ARCHON),
                     DominationFactor.PWNED))) {
                 // tiebreak by total Archon health
                 double archonDiff = 0.0;
@@ -653,23 +606,22 @@ public class GameWorld implements GenericWorld {
                 int highestBArchonID = 0;
                 InternalRobot[] objs = getAllGameObjects();
                 for (InternalRobot obj : objs) {
-                    if (obj instanceof InternalRobot) {
-                        InternalRobot ir = (InternalRobot) obj;
-                        if (ir.getTeam() == Team.A) {
-                            partsDiff += ir.type.partCost;
-                        } else if (ir.getTeam() == Team.B) {
-                            partsDiff -= ir.type.partCost;
-                        }
-                        if (ir.type == RobotType.ARCHON) {
-                            if (ir.getTeam() == Team.A) {
-                                archonDiff += ir.getHealthLevel();
-                                highestAArchonID = Math.max(highestAArchonID,
-                                        ir.getID());
-                            } else if (ir.getTeam() == Team.B) {
-                                archonDiff -= ir.getHealthLevel();
-                                highestBArchonID = Math.max(highestBArchonID,
-                                        ir.getID());
-                            }
+                    if (obj == null) continue;
+
+                    if (obj.getTeam() == Team.A) {
+                        partsDiff += obj.type.partCost;
+                    } else if (obj.getTeam() == Team.B) {
+                        partsDiff -= obj.type.partCost;
+                    }
+                    if (obj.type == RobotType.ARCHON) {
+                        if (obj.getTeam() == Team.A) {
+                            archonDiff += obj.getHealthLevel();
+                            highestAArchonID = Math.max(highestAArchonID,
+                                    obj.getID());
+                        } else if (obj.getTeam() == Team.B) {
+                            archonDiff -= obj.getHealthLevel();
+                            highestBArchonID = Math.max(highestBArchonID,
+                                    obj.getID());
                         }
                     }
                 }
@@ -692,34 +644,41 @@ public class GameWorld implements GenericWorld {
         if (winner != null) {
             running = false;
             for (InternalRobot o : gameObjectsByID.values()) {
-                if (o instanceof InternalRobot)
-                    RobotMonitor.killRobot(o.getID());
+                if (o != null) {
+                    controlProvider.robotKilled(o);
+                }
             }
         }
-
-        roundStats = new RoundStats(teamResources[0], teamResources[1]);
     }
 
     public Signal[] getAllSignals(boolean includeBytecodesUsedSignal) {
-        ArrayList<InternalRobot> allRobots = new ArrayList<InternalRobot>();
+        ArrayList<InternalRobot> allRobots = new ArrayList<>();
         for (InternalRobot obj : gameObjectsByID.values()) {
-            if (!(obj instanceof InternalRobot))
+            if (obj == null)
                 continue;
-            InternalRobot ir = (InternalRobot) obj;
-            allRobots.add(ir);
+            allRobots.add(obj);
         }
 
-        InternalRobot[] robots = allRobots.toArray(new InternalRobot[] {});
+        InternalRobot[] robots = allRobots.toArray(new InternalRobot[allRobots.size()]);
+
         if (includeBytecodesUsedSignal) {
-            signals.add(new BytecodesUsedSignal(robots));
+            currentSignals.add(new BytecodesUsedSignal(robots));
         }
-        signals.add(new RobotInfoSignal(robots));
+        currentSignals.add(new RobotDelaySignal(robots));
+        currentSignals.add(new InfectionSignal(robots));
+
         HealthChangeSignal healthChange = new HealthChangeSignal(robots);
-        if (healthChange.getRobotIDs().length > 0) {
-            signals.add(healthChange);
+
+        // Reset health levels.
+        for (final InternalRobot robot : robots) {
+            robot.clearHealthChanged();
         }
 
-        return signals.toArray(new Signal[signals.size()]);
+        if (healthChange.getRobotIDs().length > 0) {
+            currentSignals.add(healthChange);
+        }
+
+        return currentSignals.toArray(new Signal[currentSignals.size()]);
     }
 
     // ******************************
@@ -732,8 +691,9 @@ public class GameWorld implements GenericWorld {
         signalHandler.visitSignal(s);
     }
 
+    @SuppressWarnings("unused")
     public void visitAttackSignal(AttackSignal s) {
-        InternalRobot attacker = (InternalRobot) getObjectByID(s.getRobotID());
+        InternalRobot attacker = getObjectByID(s.getRobotID());
 
         MapLocation targetLoc = s.getTargetLoc();
         double rate = 1.0;
@@ -750,37 +710,38 @@ public class GameWorld implements GenericWorld {
         case TURRET:
             int splashRadius = 0;
 
+
+            // TODO - we're not going to find any targets?
             InternalRobot[] targets = getAllRobotsWithinRadiusSq(targetLoc,
                     splashRadius);
 
             for (InternalRobot target : targets) {
-                if (target.getTeam() != attacker.getTeam()) {
+                
+                if (attacker.type == RobotType.GUARD
+                        && target.type.isZombie)
+                    rate = GameConstants.GUARD_ZOMBIE_MULTIPLIER;
 
-                    if (attacker.type == RobotType.GUARD
-                            && target.type.isZombie)
-                        rate = GameConstants.GUARD_ZOMBIE_MULTIPLIER;
-
-                    if (attacker.type.canInfect() && target.type.isInfectable())
-                        target.setInfected(attacker);
-
-                    double damage = (attacker.type.attackPower) * rate;
-                    target.takeDamage(damage, attacker);
+                if (attacker.type.canInfect() && target.type.isInfectable()) {
+                    target.setInfected(attacker);
                 }
+
+                double damage = (attacker.type.attackPower) * rate;
+                target.takeDamage(damage);
             }
             break;
         default:
             // ERROR, should never happen
         }
         addSignal(s);
-        removeDead();
     }
 
+    @SuppressWarnings("unused")
     public void visitBroadcastSignal(BroadcastSignal s) {
         radio.get(s.getRobotTeam()).putAll(s.broadcastMap);
-        s.broadcastMap = null;
         addSignal(s);
     }
 
+    @SuppressWarnings("unused")
     public void visitBuildSignal(BuildSignal s) {
         InternalRobot parent;
         int parentID = s.getParentID();
@@ -789,7 +750,7 @@ public class GameWorld implements GenericWorld {
             parent = null;
             loc = s.getLoc();
         } else {
-            parent = (InternalRobot) getObjectByID(parentID);
+            parent = getObjectByID(parentID);
             loc = s.getLoc();
         }
 
@@ -797,26 +758,35 @@ public class GameWorld implements GenericWorld {
         adjustResources(s.getTeam(), -cost);
 
         // note: this also adds the signal
-        InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(),
-                loc, s.getTeam(), parent, s.getDelay());
 
-        // addSignal(s); //client doesn't need this one
+        spawnRobot(s.getType(),
+                loc,
+                s.getTeam(),
+                s.getDelay(),
+                Optional.of(parent));
     }
 
+    @SuppressWarnings("unused")
+    public void visitClearRubbleSignal(ClearRubbleSignal s) {
+        MapLocation loc = s.getLoc();
+        double currentRubble = getRubble(loc);
+        alterRubble(loc, (currentRubble  * (1 - GameConstants
+                .RUBBLE_CLEAR_PERCENTAGE)) - GameConstants
+                .RUBBLE_CLEAR_FLAT_AMOUNT);
+
+        addSignal(s);
+        addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
+    }
+
+    @SuppressWarnings("unused")
     public void visitControlBitsSignal(ControlBitsSignal s) {
-        InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
+        InternalRobot r = getObjectByID(s.getRobotID());
         r.setControlBits(s.getControlBits());
 
         addSignal(s);
     }
 
-    // TODO: this might need some reorganization
-    // right now, visitDeathSignal is often called from removeDead
-    // and visitDeathSignal might trigger new robot deaths
-    // which gets complicated, because it might call removeDead again.
-    // there's various hacks in place to deal with this but it's all really
-    // messy
-    // and for the same robot visitDeathSignal might get called multiple times.
+    @SuppressWarnings("unused")
     public void visitDeathSignal(DeathSignal s) {
         if (!running) {
             // All robots emit death signals after the game
@@ -824,105 +794,150 @@ public class GameWorld implements GenericWorld {
             // the robots.
             return;
         }
+
         int ID = s.getObjectID();
         InternalRobot obj = getObjectByID(ID);
 
-        if (obj != null) {
-            removeObject(obj);
+        if (obj == null) {
+            throw new RuntimeException("visitDeathSignal of nonexistent robot: "+s.getObjectID());
         }
-        if (obj instanceof InternalRobot) {
-            InternalRobot r = (InternalRobot) obj;
-            RobotMonitor.killRobot(ID);
 
-            // update robot counting
-            if (r.isActive()) {
-                Integer currentCount = activeRobotTypeCount.get(r.getTeam())
-                        .get(r.type);
-                activeRobotTypeCount.get(r.getTeam()).put(r.type,
-                        currentCount - 1);
-            }
-            Integer currentCount = totalRobotTypeCount.get(r.getTeam()).get(
-                    r.type);
-            totalRobotTypeCount.get(r.getTeam()).put(r.type, currentCount - 1);
-
-            if (r.hasBeenAttacked()) {
-                gameStats.setUnitKilled(r.getTeam(), currentRound);
-            }
-            if (r.type == RobotType.ARCHON) {
-                int totalArchons = getActiveRobotTypeCount(r.getTeam(),
-                        RobotType.ARCHON);
-                if (totalArchons == 0) {
-                    setWinner(r.getTeam().opponent(),
-                            DominationFactor.DESTROYED);
-                }
-            }
-            // if it was an infected robot, create a Zombie in its place.
-            if (r.isInfected()) {
-                RobotType zombieType = r.type.turnsInto; // Type of Zombie this unit turns into
-                
-                // Create new Zombie
-                InternalRobot robot = GameWorldFactory.createPlayer(this, zombieType,
-                        r.getLocation(), Team.ZOMBIE, r, 0); // TODO: Figure out Runnable and get that working
-            }
-
-            updateMapMemoryRemove(r.getTeam(), r.getLocation(),
-                    r.type.sensorRadiusSquared);
+        if (obj.getLocation() == null) {
+            throw new RuntimeException("Object has no location: "+obj);
         }
-        if (obj != null) {
-            addSignal(s);
+
+        MapLocation loc = obj.getLocation();
+        if (gameObjectsByLoc.get(loc) != obj) {
+            throw new RuntimeException("Object location out of sync: "+obj);
         }
+
+        decrementRobotTypeCount(obj.getTeam(), obj.type);
+
+        if (obj.type == RobotType.ARCHON) {
+            int totalArchons = getRobotTypeCount(obj.getTeam(),
+                    RobotType.ARCHON);
+            if (totalArchons == 0) {
+                setWinner(obj.getTeam().opponent(),
+                        DominationFactor.DESTROYED);
+            }
+        }
+
+        // update rubble
+        alterRubble(loc, getRubble(loc) + obj.type.maxHealth);
+        addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
+
+        updateMapMemoryRemove(obj.getTeam(), obj.getLocation(),
+                obj.type.sensorRadiusSquared);
+
+        controlProvider.robotKilled(obj);
+        gameObjectsByID.remove(obj.getID());
+        gameObjectsByLoc.remove(loc);
+
+        // if it was an infected robot, create a Zombie in its place.
+        if (obj.isInfected()) {
+            RobotType zombieType = obj.type.turnsInto; // Type of Zombie this unit turns into
+
+            // Create new Zombie
+
+            spawnRobot(
+                    zombieType,
+                    obj.getLocation(),
+                    Team.ZOMBIE,
+                    0,
+                    Optional.of(obj)
+            );
+        }
+
+        addSignal(s);
     }
 
+    @SuppressWarnings("unused")
     public void visitIndicatorDotSignal(IndicatorDotSignal s) {
         addSignal(s);
     }
 
+    @SuppressWarnings("unused")
     public void visitIndicatorLineSignal(IndicatorLineSignal s) {
         addSignal(s);
     }
 
+    @SuppressWarnings("unused")
     public void visitIndicatorStringSignal(IndicatorStringSignal s) {
         addSignal(s);
     }
 
+    @SuppressWarnings("unused")
     public void visitMatchObservationSignal(MatchObservationSignal s) {
         addSignal(s);
     }
 
+    @SuppressWarnings("unused")
     public void visitMovementSignal(MovementSignal s) {
-        InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
+        InternalRobot r = getObjectByID(s.getRobotID());
         r.setLocation(s.getNewLoc());
-        int newParts = takeParts(r.getLocation());
+        double newParts = takeParts(r.getLocation());
         adjustResources(r.getTeam(), newParts);
         addSignal(s);
+        if (newParts > 0) {
+            addSignal(new PartsChangeSignal(s.getNewLoc(), 0));
+        }
     }
 
+    @SuppressWarnings("unused")
     public void visitMovementOverrideSignal(MovementOverrideSignal s) {
-        InternalRobot r = (InternalRobot) getObjectByID(s.getRobotID());
+        InternalRobot r = getObjectByID(s.getRobotID());
         r.setLocation(s.getNewLoc());
 
         addSignal(s);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused"})
     public void visitSpawnSignal(SpawnSignal s) {
         InternalRobot parent;
         int parentID = s.getParentID();
-        MapLocation loc;
+
         if (parentID == 0) {
             parent = null;
-            loc = s.getLoc();
         } else {
-            parent = (InternalRobot) getObjectByID(parentID);
-            loc = s.getLoc();
+            parent = getObjectByID(parentID);
         }
 
         int cost = s.getType().partCost;
 
         adjustResources(s.getTeam(), -cost);
 
-        // note: this also adds the signal
-        InternalRobot robot = GameWorldFactory.createPlayer(this, s.getType(),
-                loc, s.getTeam(), parent, s.getDelay());
+        InternalRobot robot =
+                new InternalRobot(
+                        this,
+                        s.getRobotID(),
+                        s.getType(),
+                        s.getLoc(),
+                        s.getTeam(),
+                        s.getDelay(),
+                        Optional.ofNullable(parent)
+                );
+
+        updateMapMemoryAdd(
+                s.getTeam(),
+                s.getLoc(),
+                s.getType().sensorRadiusSquared
+        );
+
+        incrementRobotTypeCount(s.getTeam(), s.getType());
+
+        gameObjectsByID.put(s.getRobotID(), robot);
+
+        if (s.getLoc() != null) {
+            gameObjectsByLoc.put(s.getLoc(), robot);
+        }
+
+        controlProvider.robotSpawned(robot);
+
+        addSignal(s);
+    }
+
+    @SuppressWarnings("unused")
+    public void visitTypeChangeSignal(TypeChangeSignal s) {
+        addSignal(s);
     }
 }

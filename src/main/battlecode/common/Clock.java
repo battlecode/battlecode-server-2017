@@ -1,41 +1,55 @@
 package battlecode.common;
 
-import battlecode.engine.Engine;
-import battlecode.engine.instrumenter.RobotMonitor;
+import battlecode.instrumenter.inject.RobotMonitor;
 
 /**
- * A robot's internal clock, used for measuring "time" in bytecodes and rounds.
+ * Clock is a singleton that allows contestants to introspect the state of their running
+ * code.
  *
- * @author Teh Devs
+ * @author james
  */
-public class Clock {
+@SuppressWarnings("unused")
+public final class Clock {
 
-    // enforce singleton
-    private Clock() {
+    /**
+     * IMPORTANT NOTE!
+     * This class is reloaded for every individual robot.
+     * See IndividualClassLoader for more information.
+     */
+
+    /**
+     * Ends the processing of this robot during the current round. Never fails.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public static void yield() {
+        RobotMonitor.pause();
+    }
+
+    /**
+     * Returns the number of bytecodes this robot has left in this round.
+     * @return the number of bytecodes this robot has left in this round.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public static int getBytecodesLeft() {
+        return RobotMonitor.getBytecodesLeft();
     }
 
     /**
      * Returns the number of bytecodes the current robot has executed since the beginning
-     * of the current round.
-     * @return the number of bytecodes the current robot has executed since the beginning of the current round.
+     *      of the current round.
+     * @return the number of bytecodes the current robot has executed since the beginning
+     *      of the current round.
+     *
+     * @battlecode.doc.costlymethod
      */
     public static int getBytecodeNum() {
         return RobotMonitor.getBytecodeNum();
     }
 
     /**
-     * Returns the current round number, where round 0 is the first round of the match.
-     * @return the current round number, where 0 is the first round of the match.
+     * Prevent construction.
      */
-    public static int getRoundNum() {
-        return Engine.getRoundNum();
-    }
-
-    /**
-     * Returns the number of bytecodes this robot has left in this round.
-     * @return the number of bytecodes this robot has left in this round.
-     */
-    public static int getBytecodesLeft() {
-        return RobotMonitor.getBytecodesLeft();
-    }
+    private Clock() {}
 }

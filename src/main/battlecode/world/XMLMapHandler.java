@@ -1,7 +1,10 @@
 package battlecode.world;
 
-import battlecode.common.*;
-import battlecode.engine.ErrorReporter;
+import battlecode.common.GameConstants;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotType;
+import battlecode.common.Team;
+import battlecode.server.ErrorReporter;
 import battlecode.server.Config;
 import battlecode.world.GameMap.MapProperties;
 import org.xml.sax.Attributes;
@@ -14,94 +17,261 @@ import java.io.FileNotFoundException;
 import java.util.*;
 
 /**
- * This class is the actual SAX handler that responds
- * to element and character data events.
+ * This class contains the code for reading an XML map file and converting it
+ * to a proper GameMap.
  */
-class XMLMapHandler extends DefaultHandler {
+public class XMLMapHandler extends DefaultHandler {
 
-    public enum TerrainTile {
-        RUBBLE, PARTS, OFF_MAP;
+    /**
+     * An enum to keep track of the two types of terrain that might appear in
+     * a map file.
+     */
+    public enum TerrainType {
+        /**
+         * Denotes a tile that has a positive number of parts and no rubble.
+         */
+        PARTS,
+        /**
+         * Denotes a tile that has no parts and any amount of rubble.
+         */
+        RUBBLE
     }
 
     /**
      * Implements a stack for keeping track of XML elements.
      */
-    private LinkedList<String> xmlStack = new LinkedList<String>();
+    private LinkedList<String> xmlStack = new LinkedList<>();
     /**
-     * Stores all the map properties.
+     * Contains a SymbolData for each cell on the map.
      */
-    private int mapWidth, mapHeight;
-    private String mapName = "";
     private SymbolData[][] map = null;
-    private Map<String, SymbolData> symbolMap = new HashMap<String, SymbolData>();
 
-    private interface SymbolData {
+    /**
+     * A mapping from a string to a map element type. These will be used in
+     * each XML file to specify the contents of each map cell.
+     */
+    private Map<String, SymbolData> symbolMap = new HashMap<>();
+    /**
+     * The width of the map.
+     */
+    private int mapWidth;
+    /**
+     * The height of the map.
+     */
+    private int mapHeight;
+    /**
+     * The name of the map.
+     */
+    private String mapName = "";
+    /**
+     * Used to pass to the GameMap constructor.
+     */
+    private Map<MapProperties, Integer> mapProperties = new
+            HashMap<>();
+    /**
+     * Zombie spawn schedule for the GameMap constructor.
+     */
+    private ZombieSpawnSchedule zSchedule = new ZombieSpawnSchedule();
 
-        public void setPartsValue(double value);
-        
-        public void setRubbleValue(double value);
 
-        public double partsValue();
-        
-        public double rubbleValue();
+    /**
+     * The result of the parsing; created the first time getParsedMap()
+     * is called.
+     */
+    private GameMap resultMap;
 
-        public TerrainTile tile();
-        /* Returns {@code true} if createGameObject() does anything. */
-
-        public void createGameObject(GameWorld world, MapLocation loc);
-
-        public boolean equalsMirror(SymbolData data);
-
-        public SymbolData copy();
+    /**
+     * Sets the map name.
+     *
+     * @param mn the map name.
+     */
+    public void setMapName(String mn) {
+        this.mapName = mn;
     }
 
+    /**
+     * A class to hold information about a particular map cell.
+     */
+    private interface SymbolData {
+        
+        /**
+         * Sets the parts value associated with this cell.
+         * 
+         * @param value the new parts value for this cell.
+         */
+        void setPartsValue(double value);
+        
+        /**
+         * Sets the rubble value associated with this cell.
+         * 
+         * @param value the new rubble value for this cell.
+         */
+        void setRubbleValue(double value);
+        
+        /**
+         * Returns the parts value associated with this cell.
+         * 
+         * @return the parts value associated with this cell.
+         */
+        double partsValue();
+        
+        /**
+         * Returns the rubble value associated with this cell.
+         * 
+         * @return the rubble value associated with this cell.
+         */
+        double rubbleValue();
+
+        /**
+         * Returns the TerrainType associated with this cell.
+         *
+         * @return the TerrainType associatd with this cell.
+         */
+        TerrainType tile();
+
+        /**
+         * Give the robot that should be placed at a tile for this type of symbol
+         * when the game starts.
+         *
+         * @param originOffsetX the x offset from the origin of the tile
+         * @param originOffsetY the y offset from the origin of the tile
+         */
+        Optional<GameMap.InitialRobotInfo> getRobotAt(int originOffsetX, int originOffsetY);
+
+        /**
+         * Returns whether two SymbolDatas are equivalent but represent
+         * opposite teams. The opposite of team A is team B (and vice-versa),
+         * and the opposite of team ZOMBIE is also team ZOMBIE. This is used
+         * to verify that a map is symmetric.
+         *
+         * @param data the SymbolData to compare this to.
+         * @return whether the SymbolData represents a possible counterpart
+         * on a symmetric map.
+         */
+        boolean equalsMirror(SymbolData data);
+
+        /**
+         * Returns a copy of this SymbolData.
+         *
+         * @return a copy of this SymbolData.
+         */
+        SymbolData copy();
+    }
+
+    /**
+     * A factory to create symbol data based on XML attributes.
+     */
     private interface SymbolDataFactory {
 
-        public SymbolData create(Attributes att);
+        /**
+         * Returns a SymbolData given XML attributes.
+         *
+         * @param att the XML attributes.
+         * @return a SymbolData based on the XML data.
+         */
+        SymbolData create(Attributes att);
     }
 
+    /**
+     * A SymbolData type to represent a general terrain map cell (a cell
+     * containing no robots or other game objects).
+     */
     private static class TerrainData implements SymbolData {
 
-        public static final SymbolDataFactory factory = new SymbolDataFactory() {
-
-            public TerrainData create(Attributes att) {
-                String type = getRequired(att, "terrain");
-                return new TerrainData(TerrainTile.valueOf(type));
-            }
+        /**
+         * A factory that returns a TerrainData with the given terrain type.
+         */
+        public static final SymbolDataFactory factory = att -> {
+            String type = getRequired(att, "terrain");
+            return new TerrainData(TerrainType.valueOf(type));
         };
-        private TerrainTile tile;
+
+        /**
+         * Stores the terrain type for this map cell.
+         */
+        private TerrainType tile;
+        
+        /**
+         * Stores the initial number of parts on this map cell
+         */
         private double partsValue;
+        
+        /**
+         * Stores the initial amount of rubble on this map cell
+         */
         private double rubbleValue;
 
-        public TerrainData(TerrainTile tile) {
+        /**
+         * Creates a new TerrainData based on a specific terrain.
+         * @param tile the terrain to use for this TerrainData.
+         */
+        public TerrainData(TerrainType tile) {
             this.tile = tile;
-            this.partsValue = -1;
-            this.rubbleValue = -1;
+            this.partsValue = 0;
+            this.rubbleValue = 0;
         }
 
+        /**
+         * Sets the number of parts for this cell
+         * 
+         * @param value the new parts value for this cell
+         */
         public void setPartsValue(double value) {
             this.partsValue = value;
         }
         
+        /**
+         * Sets the amount of rubble for this cell
+         * 
+         * @param value the new rubble value for this cell
+         */
         public void setRubbleValue(double value) {
             this.rubbleValue = value;
         }
-
-        public TerrainTile tile() {
-            return tile;
-        }
         
+        /**
+         * Returns the parts value for this cell
+         * 
+         * @return the parts value for this cell
+         */
         public double partsValue() {
             return this.partsValue;
         }
         
+        /**
+         * Returns the rubble value for this cell
+         * 
+         * @return the rubble value for this cell
+         */
         public double rubbleValue() {
             return this.rubbleValue;
         }
 
-        public void createGameObject(GameWorld world, MapLocation loc) {
+        /**
+         * Returns the terrain type for this cell.
+         *
+         * @return the terrain type for this cell.
+         */
+        @Override
+        public TerrainType tile() {
+            return tile;
         }
 
+        /**
+         * Returns nothing, because there are no robots on terrain cells.
+         */
+        @Override
+        public Optional<GameMap.InitialRobotInfo> getRobotAt(int originOffsetX, int originOffsetY) {
+            return Optional.empty();
+        }
+
+        /**
+         * Returns whether the other SymbolData is exactly equal to this one.
+         *
+         * @param data the SymbolData to compare this to.
+         * @return whether the other SymbolData is exactly equal to this one.
+         */
+        @Override
         public boolean equalsMirror(SymbolData data) {
             if (!(data instanceof TerrainData))
                 return false;
@@ -109,6 +279,12 @@ class XMLMapHandler extends DefaultHandler {
             return d.tile == tile && d.partsValue == partsValue && d.rubbleValue == rubbleValue;
         }
 
+        /**
+         * Returns a copy of itself.
+         *
+         * @return a copy of itself.
+         */
+        @Override
         public SymbolData copy() {
             TerrainData t = new TerrainData(this.tile);
             t.setPartsValue(this.partsValue);
@@ -117,95 +293,131 @@ class XMLMapHandler extends DefaultHandler {
         }
     }
 
-    // TODO(axc): we should allow different tiles other than normal
+    /**
+     * A SymbolData type to represent map cells that contain robots.
+     */
     private static class RobotData implements SymbolData {
 
-        public static final SymbolDataFactory factory = new SymbolDataFactory() {
-
-            public RobotData create(Attributes att) {
-                String stype = getRequired(att, "type");
-                RobotType chassis;
-                chassis = RobotType.valueOf(stype);
-                Team team = Team.valueOf(getRequired(att, "team"));
-                String smine = getOptional(att, "mine");
-                Team mine = smine==null ? null : Team.valueOf(smine);
-                return new RobotData(chassis, team, mine);
-            }
+        /**
+         * A factory that produces SymbolData for map cells that contain a
+         * specific robot type from a specific team.
+         */
+        public static final SymbolDataFactory factory = att -> {
+            String type = getRequired(att, "type");
+            Team team = Team.valueOf(getRequired(att, "team"));
+            return new RobotData(RobotType.valueOf(type), team);
         };
-        public final RobotType type;
-        public final Team team;
-        public final Team mine;
-        private double partsValue;
-        private double rubbleValue;
 
-        public RobotData(RobotType type, Team team, Team mine) {
+        /**
+         * The RobotType associated with this map cell.
+         */
+        public final RobotType type;
+        /**
+         * The team of the robot associated with this map cell.
+         */
+        public final Team team;
+
+        /**
+         * Creates a new RobotData to represent a map cell containing a robot
+         * of a specific type and team.
+         *
+         * @param type the robot's type.
+         * @param team the robot's team.
+         */
+        public RobotData(RobotType type, Team team) {
             this.type = type;
             this.team = team;
-            this.mine = mine;
-            this.partsValue = -1;
-            this.rubbleValue = -1;
         }
 
+        /**
+         * Does nothing
+         * 
+         * @param value ignored
+         */
         public void setPartsValue(double value) {
-            this.partsValue = value;
         }
-        
+
+        /**
+         * Does nothing
+         * 
+         * @param value ignored
+         */
         public void setRubbleValue(double value) {
-            this.rubbleValue = value;
         }
         
+        /**
+         * Returns 0
+         * 
+         * @return 0
+         */
         public double partsValue() {
-            return this.partsValue;
+            return 0;
         }
         
+        /**
+         * Returns 0
+         * 
+         * @return 0
+         */
         public double rubbleValue() {
-            return this.rubbleValue;
+            return 0;
         }
 
-        public TerrainTile tile() {
-            return TerrainTile.RUBBLE;
+        /**
+         * Returns the terrain type associated with this map cell (always
+         * RUBBLE, because robots do not start on cells with parts).
+         * @return RUBBLE.
+         */
+        public TerrainType tile() {
+            return TerrainType.RUBBLE;
         }
 
-        public void createGameObject(GameWorld world, MapLocation loc) {
-            InternalRobot robot = GameWorldFactory.createPlayer(world, type, loc, team, null, false, 0);
+        /**
+         * Gives a robot of the specific type and team at the
+         * given origin offset.
+         */
+        @Override
+        public Optional<GameMap.InitialRobotInfo> getRobotAt(int originOffsetX, int originOffsetY) {
+            return Optional.of(
+                    new GameMap.InitialRobotInfo(originOffsetX, originOffsetY, type, team)
+            );
         }
 
+        /**
+         * Returns whether the other map cell represents a robot of the
+         * opposite team. The opposite of team A is team B and vice-versa.
+         * The opposite of team ZOMBIE is also team ZOMBIE.
+         *
+         * @param data the SymbolData to compare this to.
+         * @return whether the other SymbolData represents a symmetric copy
+         * of this one.
+         */
         public boolean equalsMirror(SymbolData data) {
             if (!(data instanceof RobotData))
                 return false;
             RobotData d = (RobotData) data;
-            return type == d.type && team == d.team.opponent() && mine == d.mine && d.partsValue == partsValue && d.rubbleValue == rubbleValue;
+            return type == d.type && team == d.team.opponent();   
         }
 
-        public String toString() {
-            return String.format("%s:%s:%s", type, team, mine);
-        }
 
+        /**
+         * Returns a copy of itself.
+         *
+         * @return a copy of itself.
+         */
         public SymbolData copy() {
-            RobotData r = new RobotData(this.type, this.team, this.mine);
-            r.setPartsValue(this.partsValue);
-            r.setRubbleValue(this.rubbleValue);
+            RobotData r = new RobotData(this.type, this.team);
             return r;
         }
     }
 
-    private class SymbolTile {
-
-        SymbolData data;
-        MapLocation loc;
-
-        public SymbolTile(SymbolData data, MapLocation loc) {
-            this.data = data;
-            this.loc = loc;
-        }
-
-        public void createGameObject(GameWorld world) {
-            data.createGameObject(world, loc);
-        }
-    }
-
-    private static final Map<String, SymbolDataFactory> factories = new HashMap<String, SymbolDataFactory>();
-    private final ArrayList<SymbolTile> objectsToCreate = new ArrayList<SymbolTile>();
+    /**
+     * A SymbolDataFactory for each possible symbol "type" that can appear in
+     * the map file. This will include TERRAIN (cells without units) and all
+     * the different robot types.
+     */
+    private static final Map<String, SymbolDataFactory> factories = new
+            HashMap<>();
 
     static {
         factories.put("TERRAIN", TerrainData.factory);
@@ -213,106 +425,118 @@ class XMLMapHandler extends DefaultHandler {
             factories.put(ch.name(), RobotData.factory);
         }
     }
-
     /**
-     * Used to pass to the GameMap constructor.
+     * Current row as we are scanning the map data.
      */
-    private Map<MapProperties, Integer> mapProperties = new HashMap<MapProperties, Integer>();
-    private ZombieSpawnSchedule zSchedule = new ZombieSpawnSchedule();
     private int currentRow = 0;
+    /**
+     * Current column as we are scanning the map data.
+     */
     private int currentCol = 0;
-
-    public void setMapName(String mn) {
-        this.mapName = mn;
-    }
+    /**
+     * Stores what has been read of a map cell token so far as we scan the
+     * map data.
+     */
+    private String dataSoFar = "";
 
     /**
      * This method validates a given attribute, returning its value
      * if it is present and failing if it does not.
      *
-     * @param attributes the SAX Attributes instance
-     * @param property   the property to check for
-     * @return the String value of the specified attribute
+     * @param attributes the SAX Attributes instance.
+     * @param property   the property to check for.
+     * @return the String value of the specified attribute.
      */
     private static String getRequired(Attributes attributes, String property) {
-
         String result = getOptional(attributes, property);
 
         if (result == null) {
-            fail("node missing required attribute '" + property + "'", "Check that all the nodes in the map file have all their required attributes.\n");
+            fail("XML element in map is missing required attribute '" +
+                            property + "'",
+                    "Check that all the elements in the map file have all " +
+                            "their required attributes.\n");
             return null;
-        } else
+        } else {
             return result;
-
+        }
     }
 
     /**
-     * This method returns the value of an attribute without
-     * validating its existence.
+     * This method returns the value of an attribute without validating its
+     * existence.
      *
      * @param attributes the SAX Attributes instance
      * @param property   the property to get the value of
      * @return the String value of the specified attribute, or
-     *         <code>null</code> if it doesn't exist
+     * <code>null</code> if it doesn't exist
      */
     private static String getOptional(Attributes attributes, String property) {
-
         int propertyIndex = attributes.getIndex(property);
-        if (propertyIndex < 0)
+        if (propertyIndex < 0) {
             return null;
-        else
+        } else {
             return attributes.getValue(propertyIndex);
-
+        }
     }
 
     /**
-     * This method validates that an XML element is the
-     * current parent element (i.e. is on the top of the
-     * stack); if it isn't, it fails.
+     * This method validates that an XML element is the current parent
+     * element (i.e. is on the top of the stack); if it isn't, it fails.
      *
-     * @param qName the name of the parent element to check for
+     * @param child the name of the element to check for
+     * @param parent the name of the parent element to check for
      */
     private void requireElement(String child, String parent) {
-        if (!xmlStack.getLast().equals(parent))
-            fail("<" + child + "> allowed only as a child of <" + parent + ">", "Make sure that all nodes in the map file have the right parent nodes, according to the map file specs.\n");
+        if (!xmlStack.getLast().equals(parent)) {
+            fail("<" + child + "> allowed only as a child of <" + parent +
+                    ">", "Make sure that all elements in the map file have " +
+                    "the right parent elements, according to the map file " +
+                    "specs. \n");
+        }
     }
-
-    //private String theme = null;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void startElement(String uri, String localName, String qName, Attributes attributes) {
-
+    public void startElement(String uri, String localName, String qName,
+                             Attributes attributes) {
         // Separately handle each case of element name.
         if (qName.equals("map")) {
-
             // Ensure that the <map> element is the document root.
-            if (xmlStack.size() > 0)
-                fail("<map> must be the root element of the map document", "Check that <map> is the root node.\nCheck that <map> occurs nowhere else in the map file.\n");
-            
-            if ("false".equals(getOptional(attributes, "constraints")))
-            {
-//            	special map, don't check size constraints
+            if (xmlStack.size() > 0) {
+                fail("<map> must be the root element of the map document",
+                        "Check that <map> is the root node.\nCheck that <map>" +
+                                " occurs nowhere else in the map file.\n");
+            }
+
+            if ("false".equals(getOptional(attributes, "constraints"))) {
+                // Special map, don't check size constraints.
                 mapHeight = Integer.parseInt(getRequired(attributes, "height"));
                 mapWidth = Integer.parseInt(getRequired(attributes, "width"));
-            } else
-            {
-            	// Check the bounds of the map height.
+            } else {
+                // Check the bounds of the map height.
                 mapHeight = Integer.parseInt(getRequired(attributes, "height"));
-                if (mapHeight < GameConstants.MAP_MIN_HEIGHT || mapHeight > GameConstants.MAP_MAX_HEIGHT)
-                    fail("map height '" + mapHeight + "' exceeds limits", "Check that the map file defines a height that is consistent with GameConstants.MAP_MAX_HEIGHT (" + GameConstants.MAP_MAX_HEIGHT + ") and GameConstants.MAP_MIN_HEIGHT (" + GameConstants.MAP_MIN_HEIGHT + ").\n");
+                if (mapHeight < GameConstants.MAP_MIN_HEIGHT || mapHeight >
+                        GameConstants.MAP_MAX_HEIGHT)
+                    fail("map height '" + mapHeight + "' exceeds limits",
+                            "Check that the map file defines a height that is" +
+                                    " consistent with GameConstants" +
+                                    ".MAP_MAX_HEIGHT (" + GameConstants
+                                    .MAP_MAX_HEIGHT + ") and GameConstants" +
+                                    ".MAP_MIN_HEIGHT (" + GameConstants
+                                    .MAP_MIN_HEIGHT + ").\n");
 
                 // Check the bounds of the map width.
                 mapWidth = Integer.parseInt(getRequired(attributes, "width"));
-                if (mapWidth < GameConstants.MAP_MIN_WIDTH || mapWidth > GameConstants.MAP_MAX_WIDTH)
-                    fail("map width '" + mapWidth + "' exceeds limits", "Check that the map file defines a width that is consistent with GameConstants.MAP_MAX_WIDTH and GameConstants.MAP_MIN_WIDTH.\n");
+                if (mapWidth < GameConstants.MAP_MIN_WIDTH || mapWidth >
+                        GameConstants.MAP_MAX_WIDTH)
+                    fail("map width '" + mapWidth + "' exceeds limits",
+                            "Check that the map file defines a width that is " +
+                                    "consistent with GameConstants" +
+                                    ".MAP_MAX_WIDTH and GameConstants" +
+                                    ".MAP_MIN_WIDTH.\n");
             }
-
-            /* String result;
-            result = getOptional(attributes,"theme");
-            if (result != null) theme = result; */
 
             // Update the map properties Map.
             mapProperties.put(MapProperties.HEIGHT, mapHeight);
@@ -320,7 +544,6 @@ class XMLMapHandler extends DefaultHandler {
 
             // Allocate map tiles based on the width and height.
             map = new SymbolData[mapWidth][mapHeight];
-
         } else if (qName.equals("game")) {
             // Ensure that <game> only occurs under <map>.
             requireElement(qName, "map");
@@ -334,7 +557,8 @@ class XMLMapHandler extends DefaultHandler {
 
             result = getOptional(attributes, "rounds");
             if (result != null)
-                mapProperties.put(MapProperties.MAX_ROUNDS, Integer.parseInt(result));
+                mapProperties.put(MapProperties.ROUNDS, Integer.parseInt
+                        (result));
         } else if (qName.equals("zombies")) {
             requireElement(qName, "map");
 
@@ -342,24 +566,35 @@ class XMLMapHandler extends DefaultHandler {
             String count = getRequired(attributes, "count");
             String round = getRequired(attributes, "round");
 
-            // TODO might want better error handling here
-            zSchedule.add(Integer.parseInt(round), RobotType.valueOf(type), Integer.parseInt(count));
+            int iRound = -1, iCount = -1;
+            try {
+                iRound = Integer.parseInt(round);
+            } catch (NumberFormatException e) {
+                fail("invalid numeral found in map file for zombie round " +
+                        "number: " + round, "Check that all round numbers are" +
+                        " properly formatted integers.\n");
+            }
+            try {
+                iCount = Integer.parseInt(count);
+            } catch (NumberFormatException e) {
+                fail("invalid numeral found in map file for zombie count " +
+                        "number: " + count, "Check that all count numbers are" +
+                        " properly formatted integers.\n");
+            }
+            zSchedule.add(iRound, RobotType.valueOf(type), iCount);
         } else if (qName.equals("symbols")) {
-
             requireElement(qName, "map");
-
         } else if (qName.equals("symbol")) {
-
             requireElement(qName, "symbols");
 
             String character = getRequired(attributes, "character");
-            if (character.length() != 2)
-                fail("invalid 'character' attribute '" + character + "' -- 'character' must have length 2", "Check that all 'character' attributes are just two characters.\n");
-
             String type = getRequired(attributes, "type");
+            
             SymbolDataFactory factory = factories.get(type);
             if (factory == null) {
-                fail("invalid symbol type '" + type + "'", "Check that all symbol nodes have a type attribute defined in the map file specs.\n");
+                fail("invalid symbol type '" + type + "'", "Check that all " +
+                        "symbol nodes have a type attribute defined in the " +
+                        "map file specs.\n");
                 return;
             }
 
@@ -367,14 +602,13 @@ class XMLMapHandler extends DefaultHandler {
             try {
                 data = factory.create(attributes);
             } catch (IllegalArgumentException e) {
-                fail(e.getMessage(), "Check that all parameters are spelled correctly.");
+                fail(e.getMessage(), "Check that all parameters are spelled " +
+                        "correctly.");
                 return;
             }
 
-            symbolMap.put(character.substring(0,2), data);
-
+            symbolMap.put(character, data);
         } else if (qName.equals("data")) {
-
             // Ensure that <data> only occurs under <map>.
             requireElement(qName, "map");
 
@@ -382,9 +616,9 @@ class XMLMapHandler extends DefaultHandler {
             currentRow = -1;
 
             // The actual map data will be parsed by characters()...
-
         } else {
-            //fail("unrecognized map element '<" + qName + ">'", "Check that all nodes are spelled correctly.\n");
+            fail("unrecognized map element '<" + qName + ">'", "Check that " +
+                    "all nodes are spelled correctly.\n");
         }
 
         // Put this element on the XML element stack.
@@ -396,23 +630,25 @@ class XMLMapHandler extends DefaultHandler {
      */
     @Override
     public void characters(char[] ch, int start, int length) {
-
-        // Only parse if we're in "data" or "height" -- ignores comments and other junk.
-        if (!xmlStack.getLast().equals("data"))
+        // Only parse if we're in "data" or "height" -- ignores comments and
+        // other junk.
+        if (!xmlStack.getLast().equals("data")) {
             return;
+        }
 
         if (currentRow >= mapHeight) {
             // if we have an extra row at the end, check if it's only whitespace
-            for (int i = start; i < length; i++) {
+            for (int i = start; i < start + length; i++) {
                 // if it isn't whitespace, fail
                 if (!Character.isWhitespace(ch[i]) && ch[i] != '\n')
-                    fail("the <data> node has too many rows", "Check that the number of rows is consistent with the 'height' attribute of <map>.\n");
+                    fail("the <data> node has too many rows", "Check that the" +
+                            " number of rows is consistent with the 'height' " +
+                            "attribute of <map>.\n");
             }
-            return;        // if it is whitespace, just ignore it
+            return; // If it is whitespace, just ignore it.
         }
 
         // Parse each character into TerrainTypes.
-        String dataSoFar = "";
         for (int i = start; i < length; i++) {
             char c = ch[i];
             // ignore tabs
@@ -420,10 +656,24 @@ class XMLMapHandler extends DefaultHandler {
                 continue;
             // if it's whitespace, check dataSoFar
             if ((c == '\n' || c == ' ') && dataSoFar.length() > 0) {
-                if (!symbolMap.containsKey(dataSoFar.substring(0,2)))
-                    fail("unrecognized symbol in map: '" + c + "'", "Check that '" + c + "' is defined as one of the symbols in the map file. DEBUG: '" + dataSoFar + "'\n");
-                map[currentCol][currentRow] = symbolMap.get(dataSoFar.substring(0,2)).copy();
-                if (dataSoFar.substring(2).trim().equals("")) {
+                // Each map cell will be represented by a sequence of letters
+                // followed by an optional sequence of digits.
+                String letters = "";
+                int letterIdx = 0;
+                while (letterIdx < dataSoFar.length() && Character.isLetter
+                        (dataSoFar.charAt(letterIdx))) {
+                    letters += dataSoFar.charAt(letterIdx);
+                    letterIdx++;
+                }
+
+                if (!symbolMap.containsKey(letters))
+                    fail("unrecognized symbol in map: '" + letters + "'",
+                            "Check " +
+                            "that '" + letters + "' is defined as one of the " +
+                            "symbols in the map file.\n");
+
+                map[currentCol][currentRow] = symbolMap.get(letters).copy();
+                if (dataSoFar.substring(letterIdx).trim().equals("")) {
                     map[currentCol][currentRow].setPartsValue(0);
                     map[currentCol][currentRow].setRubbleValue(0);
                 } else {
@@ -436,15 +686,26 @@ class XMLMapHandler extends DefaultHandler {
 
                 currentCol++;
                 dataSoFar = "";
-            } else {
+            } else if (!(c == '\n' || c == ' ')) {
                 dataSoFar += c;
             }
 
             // if it's a newline, update currentRow and currentCol
             if (c == '\n') {
                 if (currentRow != -1) {
+                    // On some machines, it seems like the initial newline
+                    // before the first row of the map cell data gets fed in
+                    // twice. This if-statement handles this case, and also
+                    // allows people to add arbitrary blank lines between
+                    // rows in the map data.
+                    if (currentCol == 0 && dataSoFar.equals("")) {
+                        continue;
+                    }
                     if (currentCol < mapWidth)
-                        fail("row " + currentRow + " in <data> has too few characters", "Check that the number of characters in each row is consistent with the 'width' attribute of <map>.\n");
+                        fail("row " + currentRow + " in <data> has too few " +
+                                "characters", "Check that the number of " +
+                                "characters in each row is consistent with " +
+                                "the 'width' attribute of <map>.\n");
                 }
                 currentRow++;
                 currentCol = 0;
@@ -452,15 +713,21 @@ class XMLMapHandler extends DefaultHandler {
                 continue;
             }
             if (currentRow < 0)
-                fail("spurious character in <data> node", "Check that the first row of map characters starts on the line after <data><![CDATA[ (see example maps).\n");
+                fail("spurious character in <data> node", "Check that the " +
+                        "first row of map characters starts on the line after" +
+                        " <data><![CDATA[ (see example maps).\n");
             if (currentCol >= mapWidth)
-                fail("row " + currentRow + " in <data> has too many characters", "Check that the number of characters in each row is consistent with the 'width' attribute of <map>.\n");
+                fail("row " + currentRow + " in <data> has too many " +
+                        "characters", "Check that the number of characters in" +
+                        " each row is consistent with the 'width' attribute " +
+                        "of <map>.\n");
         }
 
-        typesHaveBeenSet = true;
+        /*
+      Whether characters has been called.
+     */
+        boolean typesHaveBeenSet = true;
     }
-
-    private boolean typesHaveBeenSet = false;
 
     /**
      * {@inheritDoc}
@@ -470,118 +737,142 @@ class XMLMapHandler extends DefaultHandler {
         // check that we got enough rows in <data>
         if (qName.equals("data")) {
             if (currentRow < mapHeight)
-                fail("the <data> node has too few rows", "Check that the number of rows is consistent with the 'height' attribute of <map>.\n");
+                fail("the <data> node has too few rows", "Check that the " +
+                        "number of rows is consistent with the 'height' " +
+                        "attribute of <map>.\n");
         }
 
         // Pop an element off the stack.
         xmlStack.removeLast();
-
     }
 
-    public GameWorld createGameWorld(String teamA, String teamB, long[][] teamMemory) {
-
-        System.out.println("Creating a game");
-
-        //if (!isTournamentLegal()) {
-            //fail("Map is not legal!", "Fix it.");
-        //}
-
-        TerrainTile[][] mapTiles = new TerrainTile[map.length][];
-        for (int i = 0; i < map.length; i++) {
-            mapTiles[i] = new TerrainTile[map[i].length];
-            for (int j = 0; j < map[i].length; j++)
-                mapTiles[i][j] = map[i][j].tile();
+    public GameMap getParsedMap() {
+        if (resultMap != null) {
+            return resultMap;
         }
 
-        int[][] rubbleData = new int[map.length][];
-        int[][] partsData = new int[map.length][];
+        final double[][] rubbleData = new double[map.length][];
+        final double[][] partsData = new double[map.length][];
         for (int i = 0; i < map.length; i++) {
-            rubbleData[i] = new int[map[i].length];
-            partsData[i] = new int[map[i].length];
+            rubbleData[i] = new double[map[i].length];
+            partsData[i] = new double[map[i].length];
             for (int j = 0; j < map[i].length; j++) {
                 partsData[i][j] = (int) map[i][j].partsValue();
                 rubbleData[i][j] = (int) map[i][j].rubbleValue();
             }
         }
 
-        GameMap gm = new GameMap(mapProperties, rubbleData, partsData, zSchedule, mapName);
-        GameWorld gw = new GameWorld(gm, teamA, teamB, teamMemory);
-
-        gw.reserveRandomIDs(32000);
-
-        MapLocation origin = gm.getMapOrigin();
-
+        final List<GameMap.InitialRobotInfo> initialRobots = new ArrayList<>();
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
-                map[i][j].createGameObject(gw, new MapLocation(origin.x + i, origin.y + j));
+                final Optional<GameMap.InitialRobotInfo> maybeRobot = map[i][j].getRobotAt(i, j);
+
+                if (maybeRobot.isPresent()) {
+                    initialRobots.add(maybeRobot.get());
+                }
             }
         }
 
-        // by removing this line, you can no longer use IDs to determine execution order
-        //gw.endRandomIDs();
+        resultMap = new GameMap(
+                mapProperties,
+                rubbleData,
+                partsData,
+                zSchedule,
+                initialRobots.toArray(new GameMap.InitialRobotInfo[initialRobots.size()]),
+                mapName
+        );
 
-        return gw;
+        return resultMap;
     }
 
     /**
-     * My favoritist method of them all!
+     * Throws a runtime exception and writes an error report.
+     *
+     * @param reason reason for failure.
+     * @param thingsToTry suggestions on how to fix error.
      */
     private static void fail(String reason, String thingsToTry) {
         ErrorReporter.report("Malformed map file: " + reason, thingsToTry);
-        RuntimeException e = new IllegalArgumentException();
-        //e.printStackTrace();
-        throw e;
+        throw new IllegalArgumentException();
     }
 
+    /**
+     * A class to print warnings to stderr.
+     */
     public static class LegalityWarning {
-
+        /**
+         * Keeps track of whether any warnings have been created.
+         */
         public boolean legal = true;
 
+        /**
+         * Prints the warning to stderr.
+         * @param s the warning.
+         */
         public void warn(String s) {
             System.err.println(s);
             legal = false;
         }
 
+        /**
+         * Prints the warning to stderr.
+         *
+         * @param s the warning with string formatting enabled.
+         * @param obj the formatting arguments.
+         */
         public void warnf(String s, Object... obj) {
             warn(String.format(s, obj));
         }
 
+        /**
+         * Prints a warning about a particular unit to stderr.
+         *
+         * @param r the unit to warn about.
+         */
         public void warnUnit(RobotData r) {
             warn("Illegal unit: " + r);
         }
-
     }
 
+    /**
+     * Returns whether the map is tournament legal. Prints warning statements
+     * to stderr. The map checked is whichever one is being processed by this
+     * XMLMapHandler.
+     *
+     * @return whether the map is tournament legal.
+     */
     public boolean isTournamentLegal() {
         LegalityWarning warn = new LegalityWarning();
 
-        int maxParts = 0;
+        int x, y;
+        SymbolData d;
 
-        int x, y, mx, my;
-        SymbolData d, md;
-        boolean baseBad = false;
-        // check that the map is symmetric
-        boolean symA = true, symB = true, symC = mapHeight == mapWidth, symD = mapHeight == mapWidth, symE = true;
+        // Check for symmetry.
+        boolean symA = true, symB = true, symC = mapHeight == mapWidth, symD
+                = mapHeight == mapWidth, symE = true;
         for (y = 0; y < mapHeight; y++) {
             for (x = 0; x < mapWidth; x++) {
-                maxParts = Math.max(maxParts, (int) map[x][y].partsValue());
+                symA = symA && (map[x][y].equalsMirror(map[x][mapHeight - y -
+                        1]));
+                symB = symB && (map[x][y].equalsMirror(map[mapWidth - x -
+                        1][y]));
 
-                symA = symA && (map[x][y].equalsMirror(map[x][mapHeight - y - 1]));
-                symB = symB && (map[x][y].equalsMirror(map[mapWidth - x - 1][y]));
                 if (mapWidth == mapHeight) {
-                    symC = symC && (map[x][y].equalsMirror(map[mapHeight - y - 1][mapWidth - x - 1]));
+                    symC = symC && (map[x][y].equalsMirror(map[mapHeight - y
+                            - 1][mapWidth - x - 1]));
                     symD = symD && (map[x][y].equalsMirror(map[y][x]));
                 }
-                symE = symE && (map[x][y].equalsMirror(map[mapWidth - x - 1][mapHeight - y - 1]));
+                symE = symE && (map[x][y].equalsMirror(map[mapWidth - x -
+                        1][mapHeight - y - 1]));
             }
         }
         if (!symA && !symB && !symC && !symD && !symE) {
             warn.warnf("Map is not symmetric in any way!");
         }
-        
-        ArrayList<MapLocation> teamAArchons = new ArrayList<MapLocation>();
-        ArrayList<MapLocation> teamBArchons = new ArrayList<MapLocation>();
 
+        // A tournament map should only start with archons and zombie dens.
+        ArrayList<MapLocation> teamAArchons = new ArrayList<>();
+        ArrayList<MapLocation> teamBArchons = new ArrayList<>();
         for (y = 0; y < mapHeight; y++) {
             for (x = 0; x < mapWidth; x++) {
                 d = map[x][y];
@@ -589,19 +880,20 @@ class XMLMapHandler extends DefaultHandler {
                     RobotData rd = (RobotData) d;
                     switch (rd.type) {
                         case ARCHON:
-                            if (rd.team == Team.A) teamAArchons.add(new MapLocation(x, y));
-                            else if (rd.team == Team.B) teamBArchons.add(new MapLocation(x, y));
+                            if (rd.team == Team.A)
+                                teamAArchons.add(new MapLocation(x, y));
+                            else if (rd.team == Team.B)
+                                teamBArchons.add(new MapLocation(x, y));
                             break;
                         case ZOMBIEDEN:
                             break;
                         default:
-                            warn.warnUnit(rd); // Should only start with Archons
+                            warn.warnUnit(rd);
                     }
                 }
             }
         }
-        
-        
+
         if (teamAArchons.size() == 0) {
             warn.warn("No Archons!");
         }
@@ -610,7 +902,7 @@ class XMLMapHandler extends DefaultHandler {
             warn.warn("Too many Archons!");
         }
 
-        int rounds = mapProperties.get(MapProperties.MAX_ROUNDS);
+        int rounds = mapProperties.get(MapProperties.ROUNDS);
         if (rounds < GameConstants.ROUND_MIN_LIMIT)
             warn.warn("The round limit is too small.");
         else if (rounds > GameConstants.ROUND_MAX_LIMIT)
@@ -619,6 +911,13 @@ class XMLMapHandler extends DefaultHandler {
         return warn.legal;
     }
 
+    /**
+     * Checks the specific map for legality. Prints warnings to stderr.
+     *
+     * @param mapName name of map.
+     * @param mapPath path of map.
+     * @return whether the map is legal.
+     */
     public static boolean isTournamentLegal(String mapName, String mapPath) {
         System.err.format("checking map %s for legality\n", mapName);
         XMLMapHandler handler;
@@ -631,6 +930,13 @@ class XMLMapHandler extends DefaultHandler {
         return handler.isTournamentLegal();
     }
 
+    /**
+     * Returns an XMLMapHandler for a specific map.
+     *
+     * @param mapName name of map.
+     * @param mapPath path of map.
+     * @return XMLMapHandler for map.
+     */
     public static XMLMapHandler loadMap(String mapName, String mapPath) {
         // Create a new XMLMapHandler.
         XMLMapHandler handler = new XMLMapHandler();
@@ -653,7 +959,11 @@ class XMLMapHandler extends DefaultHandler {
         try {
             file = new FileInputStream(fileName);
         } catch (FileNotFoundException e) {
-            fail("can't load '" + fileName + "' because of an exception:\n" + e.getMessage(), "Check that the map name is spelled correctly.\nCheck that the map file is located in the right directory.\nCheck that the map file isn't in use by another application.\n");
+            fail("can't load '" + fileName + "' because of an exception:\n" +
+                    e.getMessage(), "Check that the map name is spelled " +
+                    "correctly.\nCheck that the map file is located in the " +
+                    "right directory.\nCheck that the map file isn't in use " +
+                    "by another application.\n");
             return null;
         }
 
@@ -662,12 +972,20 @@ class XMLMapHandler extends DefaultHandler {
             parser.parse(file, handler);
         } catch (Exception e) {
             e.printStackTrace();
-            fail("can't load '" + fileName + "' beacause of an exception:\n" + e.getMessage(), "Check that the map is valid XML.\n");
+            fail("can't load '" + fileName + "' because of an exception:\n"
+                    + e.getMessage(), "Check that the map is valid XML.\n");
             return null;
         }
         return handler;
     }
 
+    /**
+     * Checks a set of maps for legality. It will search in bc.game.map-path
+     * for the maps, and use the maps whose names are passed in as runtime
+     * arguments.
+     *
+     * @param s name of maps to use.
+     */
     public static void main(String[] s) {
         System.out.println("Checking maps for tournament legality...");
         String mapPath = Config.getGlobalConfig().get("bc.game.map-path");

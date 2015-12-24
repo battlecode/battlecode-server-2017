@@ -1,14 +1,11 @@
 package battlecode.world.signal;
 
-import battlecode.engine.signal.Signal;
-import battlecode.world.InternalRobot;
-
 /**
  * Signifies that an object has died somewhere.
  *
  * @author Matt
  */
-public class DeathSignal extends Signal {
+public class DeathSignal implements Signal {
 
     private static final long serialVersionUID = 8518453257317948520L;
 
@@ -16,16 +13,6 @@ public class DeathSignal extends Signal {
      * The ID of the object that died.
      */
     private final int objectID;
-
-    /**
-     * Creates a signal representing the death of
-     * the specified object.
-     *
-     * @param object the object that has died
-     */
-    public DeathSignal(InternalRobot object) {
-        this.objectID = object.getID();
-    }
 
     /**
      * Creates a signal representing the death of
@@ -44,5 +31,13 @@ public class DeathSignal extends Signal {
      */
     public int getObjectID() {
         return objectID;
+    }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private DeathSignal() {
+        this(0);
     }
 }

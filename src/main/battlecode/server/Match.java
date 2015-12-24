@@ -2,38 +2,31 @@ package battlecode.server;
 
 import battlecode.common.GameConstants;
 import battlecode.common.Team;
-import battlecode.engine.Engine;
-import battlecode.engine.GameState;
-import battlecode.engine.GenericWorld;
-import battlecode.engine.signal.Signal;
+import battlecode.world.DominationFactor;
+import battlecode.world.signal.Signal;
 import battlecode.serial.*;
-
-import java.util.Observable;
-
-//import battlecode.tournament.TournamentType;
-//import battlecode.tournament.Match.Type;
+import battlecode.world.GameMap;
+import battlecode.world.GameWorld;
+import battlecode.world.XMLMapHandler;
+import battlecode.world.control.PlayerControlProvider;
+import battlecode.world.control.TeamControlProvider;
 
 /**
  * Abstracts the game engine for the server. This class is responsible for
  * starting and managing matches and exporting match status and results to the
  * server.
  */
-public class Match extends Observable {
+public class Match {
 
     /**
-     * The Engine instance to use to run the game.
+     * The GameWorld that runs the match.
      */
-    private Engine engine;
+    private GameWorld gameWorld;
 
     /**
-     * The GenericWorld for getting signals.
+     * The GameInfo from which this match was created.
      */
-    private GenericWorld gameWorld;
-
-    /**
-     * The MatchInfo from which this match was created.
-     */
-    private final MatchInfo info;
+    private final GameInfo info;
 
     /**
      * The map for this match (one of the maps in info).
@@ -45,14 +38,29 @@ public class Match extends Observable {
      */
     private final Config options;
 
+    /**
+     * The state of the running game.
+     */
+    private GameState gameState;
+
+    /**
+     * The initial memory of the teams playing the map.
+     */
     private long[][] state = new long[2][GameConstants.TEAM_MEMORY_LENGTH];
 
+    /**
+     * The number of this match.
+     */
     private int number;
 
+    /**
+     * The count of this match.
+     */
     private int count;
 
-    private boolean bytecodesUsedEnabled = true;
-
+    /**
+     * The team memory after this match has been run.
+     */
     private long[][] computedTeamMemory = null;
 
     /**
@@ -61,7 +69,7 @@ public class Match extends Observable {
      * @param info    the teams and map to use when running this match
      * @param options options relevant to match creation (i.e., default map path)
      */
-    public Match(MatchInfo info, String map, Config options, int number,
+    public Match(GameInfo info, String map, Config options, int number,
                  int count) {
 
         this.info = info;
@@ -71,30 +79,47 @@ public class Match extends Observable {
         this.number = number;
         this.count = count;
 
-        this.engine = null;
         this.gameWorld = null;
     }
 
     /**
-     * Sets up the engine for this match. Because Engine's constructor
+     * Sets up the engine for this match. Because GameWorld's constructor
      * manipulates static state, engine object creation should not be done at
      * match creation time!
      */
     public void initialize() {
-
-        boolean breakpointsEnabled = options.getBoolean("bc.engine.breakpoints");
-        this.bytecodesUsedEnabled =
-                options.getBoolean("bc.engine.bytecodes-used");
-
         String mapPath = options.get("bc.game.map-path");
 
-        // Create a new engine.
-        this.engine = new Engine(info.getTeamA(), info.getTeamB(), map,
-                mapPath, this.state);
+        try {
+            // Load the map for the match
+            final XMLMapHandler handler = XMLMapHandler.loadMap(map, mapPath);
+            final GameMap map = handler.getParsedMap();
 
-        // Get the viewer from the engine.
-        this.gameWorld = engine.getGameWorld();
-        assert this.gameWorld != null;
+            // Create the control provider for the match
+            // TODO move this somewhere better-fitting
+            final TeamControlProvider teamProvider = new TeamControlProvider();
+            teamProvider.registerControlProvider(
+                    Team.A,
+                    new PlayerControlProvider(info.getTeamA(), "RobotPlayer")
+            );
+            teamProvider.registerControlProvider(
+                    Team.B,
+                    new PlayerControlProvider(info.getTeamB(), "RobotPlayer")
+            );
+            teamProvider.registerControlProvider(
+                    Team.ZOMBIE,
+                    new PlayerControlProvider("ZombiePlayer", "ZombiePlayer")
+            );
+
+            // Create the game world!
+            gameWorld = new GameWorld(map, teamProvider, info.getTeamA(), info.getTeamB(), state);
+        } catch (IllegalArgumentException e) {
+            System.out.println("[Engine] Error while loading map '" + map + "'");
+            throw e;
+        } catch (Exception e) {
+            ErrorReporter.report(e);
+            throw e;
+        }
     }
 
     /**
@@ -102,14 +127,19 @@ public class Match extends Observable {
      * state.
      *
      * @param signal the signal to send to the engine
-     * @return the signals that represent the effect of the alteration, or an
+     * @return the currentSignals that represent the effect of the alteration, or an
      *         empty signal array if there was no effect
      */
-    public Signal[] alter(Signal signal) {
-        if (engine.receiveSignal(signal))
-            return gameWorld.getAllSignals(false);
-        else
-            return new Signal[0];
+    public InjectDelta inject(Signal signal) {
+        assert isInitialized();
+
+        try {
+            return new InjectDelta(true, gameWorld.inject(signal));
+        } catch (final RuntimeException e) {
+            System.err.println("Injection failure: "+e.getMessage());
+            e.printStackTrace();
+            return new InjectDelta(false, new Signal[0]);
+        }
     }
 
     /**
@@ -118,44 +148,32 @@ public class Match extends Observable {
      * @return true if the match has been initialized, false otherwise
      */
     public boolean isInitialized() {
-        return this.engine != null;
+        return this.gameWorld != null;
     }
 
     /**
-     * Runs the next round, returning a delta containing all the signals raised
+     * Runs the next round, returning a delta containing all the currentSignals raised
      * during that round. Notifies observers of anything other than a successful
      * delta-producing run.
      *
-     * @return the signals generated for the next round of the game, or null if
+     * @return the currentSignals generated for the next round of the game, or null if
      *         the engine's result was a breakpoint or completion
      */
     public RoundDelta getRound() {
 
-        // Run the next round.
-        GameState result = engine.runRound();
-
-        // Notify the server of any other result.
-        if (result == GameState.BREAKPOINT) {
-            setChanged();
-            notifyObservers(result);
-            clearChanged();
+        if (gameWorld == null) {
+            System.out.println("Match.getRound(): Null GameWorld, return null");
+            return null;
         }
 
-        if (result == GameState.DONE)
+        // Run the next round.
+        gameState = gameWorld.runRound();
+
+        if (gameState == GameState.DONE)
             return null;
 
-        // Serialize the newly modified GameWorld.
-        return new RoundDelta(
-                gameWorld.getAllSignals(this.bytecodesUsedEnabled));
-    }
-
-    /**
-     * Queries the engine for stats for the most recent round and returns them.
-     *
-     * @return round stats from the engine
-     */
-    public RoundStats getStats() {
-        return gameWorld.getRoundStats();
+        // Serialize the changes to the GameWorld.
+        return new RoundDelta(gameWorld.getAllSignals(true));
     }
 
     /**
@@ -175,6 +193,15 @@ public class Match extends Observable {
     public MatchHeader getHeader() {
         return new MatchHeader(gameWorld.getGameMap(), state, number,
                 count);
+    }
+
+    /**
+     * Get the current game state.
+     *
+     * @return the current game state.
+     */
+    public GameState getGameState() {
+        return gameState;
     }
 
     /**
@@ -219,7 +246,7 @@ public class Match extends Observable {
      * @return true if the match has finished running, false otherwise
      */
     public boolean hasMoreRounds() {
-        return engine.isRunning();
+        return gameWorld != null && gameWorld.isRunning();
     }
 
     /**
@@ -248,14 +275,11 @@ public class Match extends Observable {
         for (int i = 0; i < (50 - teamName.length()) / 2; i++)
             sb.append(' ');
         sb.append(teamName);
-        sb.append(" wins (round " + getRoundNumber() + ")");
+        sb.append(" wins (round ").append(getRoundNumber()).append(")");
 
         sb.append("\nReason: ");
         GameStats stats = gameWorld.getGameStats();
         DominationFactor dom = stats.getDominationFactor();
-        double[] points = stats.getTotalPoints();
-        double[] energon = stats.getTotalEnergon();
-        int[] archons = stats.getNumArchons();
         if (dom == DominationFactor.DESTROYED)
             sb.append("The winning team won by destruction.");
         else if (dom == DominationFactor.PWNED)
@@ -265,7 +289,7 @@ public class Match extends Observable {
         else if (dom == DominationFactor.BARELY_BEAT)
             sb.append("The winning team won on tiebreakers (more Parts)");
         else if (dom == DominationFactor.WON_BY_DUBIOUS_REASONS)
-            sb.append("Team " + getWinner() + " won arbitrarily.");
+            sb.append("Team ").append(getWinner()).append(" won arbitrarily.");
 
         return sb.toString();
     }
@@ -280,7 +304,8 @@ public class Match extends Observable {
 
     public long[][] getComputedTeamMemory() {
         if (computedTeamMemory == null)
-            return this.engine.getTeamMemory();
+            return this.gameWorld.getTeamMemory();
+
         else return computedTeamMemory;
     }
 
@@ -289,34 +314,20 @@ public class Match extends Observable {
      *         round is 1 (0 if no rounds have been run yet)
      */
     public int getRoundNumber() {
-        return Engine.getRoundNum() + 1;
+        return gameWorld.getCurrentRound() + 1;
     }
 
     /**
      * Cleans up the match so that its resources can be garbage collected.
      */
     public void finish() {
-        this.computedTeamMemory = this.engine.getTeamMemory();
+        this.computedTeamMemory = this.gameWorld.getTeamMemory();
         this.gameWorld = null;
-        this.engine = null;
     }
 
     @Override
     public String toString() {
-        String teams = String.format("%s vs. %s on %s", info.getTeamA(), info
+        return String.format("%s vs. %s on %s", info.getTeamA(), info
                 .getTeamB(), map);
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < (50 - teams.length()) / 2; i++)
-            sb.append(' ');
-        sb.append(teams);
-
-        return sb.toString();
-    }
-
-    // Match file IO is pretty performance intensive so we want to do it while robots are
-    // running if possible.
-    public void setIOCallback(Runnable callback) {
-        engine.setIOCallback(callback);
     }
 }

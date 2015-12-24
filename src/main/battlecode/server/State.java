@@ -33,5 +33,5 @@ public enum State {
     /**
      * The match could not be run because the server experienced an error.
      */
-    ERROR;
+    ERROR
 }

@@ -1,15 +1,32 @@
 package battlecode.serial;
 
-import java.io.Serializable;
+import battlecode.world.GameMap;
 
-public class MatchHeader implements Serializable {
+public class MatchHeader implements ServerEvent {
 
     private static final long serialVersionUID = -4228142649046586925L;
-    private final GenericGameMap map;
-    private final long[][] state;
-    private final int matchNumber, matchCount;
 
-    public MatchHeader(GenericGameMap map, long[][] state, int matchNumber, int matchCount) {
+    /**
+     * The map the match is being played on.
+     */
+    private final GameMap map;
+
+    /**
+     * The initial memory of the teams.
+     */
+    private final long[][] state;
+
+    /**
+     * The number of the current match.
+     */
+    private final int matchNumber;
+
+    /**
+     * The number of matches being run in this game.
+     */
+    private final int matchCount;
+
+    public MatchHeader(GameMap map, long[][] state, int matchNumber, int matchCount) {
         this.map = map;
         this.state = state;
         this.matchNumber = matchNumber;
@@ -24,11 +41,19 @@ public class MatchHeader implements Serializable {
         return matchNumber;
     }
 
-    public GenericGameMap getMap() {
+    public GameMap getMap() {
         return map;
     }
 
     public long[][] getState() {
         return state;
+    }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private MatchHeader() {
+        this(null, null, 0, 0);
     }
 }

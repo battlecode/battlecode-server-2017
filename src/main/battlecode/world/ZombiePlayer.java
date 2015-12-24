@@ -3,26 +3,20 @@ package ZombiePlayer;
 // instrumenter explicitly disallows player classes to be part of a Battlecode
 // package.
 
-import battlecode.common.Clock;
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
-import battlecode.common.ZombieCount;
+import battlecode.common.*;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
 
+// TODO: clean up this file a lot... could use some helper methods
 public class ZombiePlayer {
     public static void run(RobotController rc) throws GameActionException{
         Direction[] dirs = { Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST };
-        Queue<RobotType> zombies = new LinkedList<RobotType>();
+        Queue<RobotType> zombies = new LinkedList<>();
         while (true) {
             switch (rc.getType()) {
                 case ZOMBIEDEN:
-                    ZombieCount[] zSchedule = rc.getZombieSpawnSchedule(Clock.getRoundNum());
+                    ZombieCount[] zSchedule = rc.getZombieSpawnSchedule(rc.getRoundNum());
                     for (ZombieCount count : zSchedule) {
                         for (int i = 0; i < count.getCount(); ++i) {
                             zombies.add(count.getType());
@@ -35,18 +29,18 @@ public class ZombiePlayer {
                         int i = (int) (Math.random() * 8);
 
                         for (int j = 0; j < 8; ++j) {
-                            if (rc.canSpawn(dirs[(i + j) % 8], next)) {
-                                rc.spawn(dirs[(i + j) % 8], next);
+                            if (rc.canBuild(dirs[(i + j) % 8], next)) {
+                                rc.build(dirs[(i + j) % 8], next);
                                 zombies.poll();
                                 spawned = true;
                                 break;
                             }
                         }
                         if (!spawned) break;
-                        else rc.yield(); // this is silly but the engine doesn't support spawning multiple things in one round
+                        else Clock.yield(); // this is silly but the engine doesn't support spawning multiple things in one round
                     }
 
-                    rc.yield();
+                    Clock.yield();
                     break;
                 case STANDARDZOMBIE:
                 case RANGEDZOMBIE:
@@ -69,20 +63,22 @@ public class ZombiePlayer {
                     }
                     
                     // If target is in range, attack it and end turn
-                    if (closestRobot != null && rc.canAttackLocation(closestRobot.location)) {
+                    if (rc.isWeaponReady() && closestRobot != null && rc
+                            .canAttackLocation
+                            (closestRobot.location)) {
                         rc.attackLocation(closestRobot.location);
-                        rc.yield();
+                        Clock.yield();
                     }
                     
                     // Else, try to move closer
-                    if(rc.isCoreReady()){
+                    else if (rc.isCoreReady()) {
                         Direction preferredDirection = dirs[(int) (Math.random() * 8)];
                         if (closestRobot != null) {
                             preferredDirection = myLoc.directionTo(closestRobot.location);
                             // First, try to move if best direction toward target
-                            if(rc.canMove(preferredDirection)) {
+                            if (rc.canMove(preferredDirection)) {
                                 rc.move(preferredDirection);
-                                rc.yield();
+                                Clock.yield();
                                 break;
                             }
                         }
@@ -95,28 +91,66 @@ public class ZombiePlayer {
                         } else {
                             newDirection = preferredDirection.rotateRight();
                         }
-                        
-                        if(rc.canMove(preferredDirection)) { // Try to move in the new rotated direction
-                            rc.move(preferredDirection);
-                            rc.yield();
+
+                        // Try to move in the new rotated direction
+                        if(rc.canMove(newDirection)) {
+                            rc.move(newDirection);
+                            Clock.yield();
                             break;
                         }
-                        
-                        if(randomDirection == 0){ // That didn't work, so try the other direction
-                            newDirection = preferredDirection.rotateRight();
+
+                        // That didn't work, so try the other direction
+                        Direction otherDirection;
+                        if (randomDirection == 0) {
+                            otherDirection = preferredDirection.rotateRight();
                         } else {
-                            newDirection = preferredDirection.rotateLeft();
+                            otherDirection = preferredDirection.rotateLeft();
                         }
-                        
-                        if(rc.canMove(preferredDirection)) { // Try to move in the other rotated direction
-                            rc.move(preferredDirection);
-                            rc.yield();
+
+                        // Try to move in the other rotated direction
+                        if (rc.canMove(otherDirection)) {
+                            rc.move(otherDirection);
+                            Clock.yield();
                             break;
                         }
-                        
-                        // TODO: Try to clear rubble from original direction
-                        
-                        rc.yield();  // We couldn't do anything, so just yield
+
+                        // Try to clear rubble instead
+                        MapLocation target1 = rc.getLocation().add
+                                (preferredDirection);
+                        if (!rc.isLocationOccupied(target1) && rc.onTheMap
+                                (target1) && rc.senseRubble
+                                (target1) >= GameConstants
+                                .RUBBLE_OBSTRUCTION_THRESH) {
+                            rc.clearRubble(preferredDirection);
+                            Clock.yield();
+                            break;
+                        }
+
+                        MapLocation target2 = rc.getLocation().add
+                                (newDirection);
+                        if (!rc.isLocationOccupied(target2) && rc.onTheMap
+                                (target1) && rc
+                                .senseRubble
+                                (target2) >= GameConstants
+                                .RUBBLE_OBSTRUCTION_THRESH) {
+                            rc.clearRubble(newDirection);
+                            Clock.yield();
+                            break;
+                        }
+
+                        MapLocation target3 = rc.getLocation().add
+                                (otherDirection);
+                        if (!rc.isLocationOccupied(target3) && rc.onTheMap
+                                (target3) & rc
+                                .senseRubble
+                                (target3) >= GameConstants
+                                .RUBBLE_OBSTRUCTION_THRESH) {
+                            rc.clearRubble(otherDirection);
+                            Clock.yield();
+                            break;
+                        }
+
+                        Clock.yield();  // We couldn't do anything, so just yield
                     }
 
                     break;

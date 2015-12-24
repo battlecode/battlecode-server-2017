@@ -1,25 +1,17 @@
 package battlecode.world.signal;
 
-import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import battlecode.engine.signal.Signal;
-import battlecode.world.InternalRobot;
 
 /**
  * Signifies that a robot was just spawned
  *
  * @author adamd
  */
-public class BuildSignal extends Signal {
+public class BuildSignal implements Signal {
 
     private static final long serialVersionUID = -5655877873179815892L;
-
-    /**
-     * The new robot's ID
-     */
-    private final int robotID;
 
     /**
      * The parent robot's ID, or 0 if there was no parent
@@ -43,45 +35,15 @@ public class BuildSignal extends Signal {
 
     private final int delay;
 
-//    /**
-//     * The new robot's direction
-//     */
-//    private final Direction dir;
-
     /**
-     * Creates a signal for a robot that was just spawned
+     * Creates a spawn signal for a robot that hasn't been spawned yet.
      */
-    public BuildSignal(InternalRobot child, InternalRobot parent, int delay) {
-        robotID = child.getID();
-        this.delay = delay;
-        if (parent == null)
-            parentID = 0;
-        else
-            parentID = parent.getID();
-        loc = child.getLocation();
-        type = child.type;
-        team = child.getTeam();
-//        dir = child.getDirection();
-    }
-
-    /**
-     * Creates a spawn signal for a robot that hasn't been spawned yet
-     */
-    public BuildSignal(MapLocation loc, RobotType type, Team team, InternalRobot parent, int delay) {
+    public BuildSignal(int parentID, MapLocation loc, RobotType type, Team team, int delay) {
+        this.parentID = parentID;
         this.loc = loc;
         this.type = type;
         this.team = team;
         this.delay = delay;
-        robotID = 0;
-        if (parent == null)
-            parentID = 0;
-        else
-            parentID = parent.getID();
-//        dir = null;
-    }
-
-    public int getRobotID() {
-        return robotID;
     }
 
     public MapLocation getLoc() {
@@ -96,15 +58,19 @@ public class BuildSignal extends Signal {
         return team;
     }
 
-//    public Direction getDirection() {
-//        return dir;
-//    }
-
     public int getParentID() {
         return parentID;
     }
 
     public int getDelay() {
         return delay;
+    }
+
+    /**
+     * For use by serializers.
+     */
+    @SuppressWarnings("unused")
+    private BuildSignal() {
+        this(0, null, null, null, 0);
     }
 }

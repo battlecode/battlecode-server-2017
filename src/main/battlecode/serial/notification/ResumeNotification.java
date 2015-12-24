@@ -17,8 +17,8 @@ public class ResumeNotification implements Notification {
     /**
      * {@inheritDoc}
      */
-    public <R> R accept(NotificationHandler<R> handler) {
-        return handler.visitResumeNotification(this);
+    public void accept(NotificationHandler handler) {
+        handler.visitResumeNotification(this);
     }
 
     private Object readResolve() throws ObjectStreamException {

@@ -1,59 +1,114 @@
 package battlecode.world;
 
-import battlecode.common.RobotType;
-
-import java.io.File;
-import java.util.EnumMap;
-import java.util.StringTokenizer;
-
+import battlecode.common.*;
 import org.junit.Ignore;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.*;
+
 /**
- * A class that creates instances of GameMap, mostly to be used for testing purposes.
+ * A class that creates instances of GameMap, mostly to be used for testing
+ * purposes. Can also print a map to a file.
  */
 @Ignore
 public class TestMapGenerator {
+    public static String getSymbol(RobotType type) {
+        switch (type) {
+            case ZOMBIEDEN: return "z";
+            case STANDARDZOMBIE: return "s";
+            case RANGEDZOMBIE: return "r";
+            case FASTZOMBIE: return "f";
+            case BIGZOMBIE: return "b";
+            case ARCHON: return "a";
+            case SCOUT: return "c";
+            case SOLDIER: return "o";
+            case GUARD: return "g";
+            case VIPER: return "v";
+            case TURRET: return "t";
+            case TTM: return "m";
+            default: return "x";
+        }
+    }
+
+    public static String getSymbol(Team team) {
+        switch (team) {
+            case A: return "a";
+            case B: return "b";
+            case NEUTRAL: return "n";
+            case ZOMBIE: return "z";
+            default: return "n";
+        }
+    }
+
+    /**
+     * For the purposes of this map generator, gives a unique String for
+     * each (robot, team) combination.
+     *
+     * p will be parts.
+     * r will be rubble.
+     *
+     * Lower case will be used for team A and upper case will be used for
+     * team B.
+     *
+     * @param type type of the robot.
+     * @param team team of the robot.
+     * @return a unique String to represent the (robot, team) for map
+     * writing purposes.
+     */
+    public static String getSymbol(RobotType type, Team team) {
+        return getSymbol(type) + getSymbol(team);
+    }
+
     /** Width of the map. */
     private Integer width;
     /** Height of the map. */
     private Integer height;
     /** Random seed used for the map. Defaults to GameMap.GAME_DEFAULT_SEED. */
     private Integer seed;
-    /** Maximum number of rounds for the game. Defaults to GameMap.GAME_DEFAULT_MAX_ROUNDS. */
-    private Integer maxRounds;
-    /** The rubble on the map. Defaults to no rubble. */
-    private int[][] rubble;
-    /** The parts on the map. Defaults to no parts. */
-    private int[][] parts;
+    /** Number of rounds for the game. */
+    private Integer rounds;
+    /** The rubble on the map. Defaults to no rubble. x is the first index. */
+    private double[][] rubble;
+    /** The parts on the map. Defaults to no parts. x is the first index. */
+    private double[][] parts;
     /** The map's zombie spawn schedule. Defaults to no zombies. */
     private ZombieSpawnSchedule zSchedule;
+    /** All the robots on the map. Defaults to none. */
+    private List<GameMap.InitialRobotInfo> robots;
 
     /**
      * Prepares an empty map of the given size. There will be no parts or rubble.
      *
      * @param width map width
      * @param height map height
+     * @param rounds the number of rounds
      */
-    public TestMapGenerator(int width, int height) {
+    public TestMapGenerator(int width, int height, int rounds) {
         this.width = width;
         this.height = height;
-        this.seed = GameMap.GAME_DEFAULT_SEED;
-        this.maxRounds = GameMap.GAME_DEFAULT_MAX_ROUNDS;
-        this.rubble = new int[width][height];
-        this.parts = new int[width][height];
+        this.seed = GameConstants.GAME_DEFAULT_SEED;
+        this.rounds = rounds;
+        this.rubble = new double[width][height];
+        this.parts = new double[width][height];
         this.zSchedule = new ZombieSpawnSchedule();
+        this.robots = new ArrayList<>();
     }
 
     /**
      * Prepares a map based on the given input string. Format the string like you would in a map XML file.
-     * Use 'n' to denote a rubble tile and 'p' to denote a parts tile. Separate rows with newlines.
+     * Use 'n' to denote a rubble tile and 'p' to denote a parts tile.
+     * Separate rows with newlines.
      *
      * Example: "n0 n0 n0 n0 n0\nn0 n0 n0 n0 p10" will make a 2x5 map with no ore anywhere except for the bottom right.
      * All the tiles will have no rubble and the bottom right tile will have 10 parts.
      *
      * @param mapStr a string to describe the map
+     * @param rounds the number of rounds for a game
      */
-    public TestMapGenerator(String mapStr) {
+    public TestMapGenerator(String mapStr, int rounds) {
         String[] map = mapStr.split("\n");
         this.height = map.length;
         this.width = 1;
@@ -63,21 +118,22 @@ public class TestMapGenerator {
             }
         }
 
-        this.seed = GameMap.GAME_DEFAULT_SEED;
-        this.maxRounds = GameMap.GAME_DEFAULT_MAX_ROUNDS;
-        this.parts = new int[height][width];
-        this.rubble = new int[height][width];
+        this.seed = GameConstants.GAME_DEFAULT_SEED;
+        this.rounds = rounds;
+        this.parts = new double[width][height];
+        this.rubble = new double[width][height];
         for (int i = 0; i < height; ++i) {
             StringTokenizer st = new StringTokenizer(map[i]);
             for (int j = 0; j < width; ++j) {
                 String next = st.nextToken();
                 int value = Integer.parseInt(next.substring(1));
-                this.rubble[i][j] = next.startsWith("n") ? value : 0;
-                this.parts[i][j] = next.startsWith("p") ? value : 0;
+                this.rubble[j][i] = next.startsWith("n") ? value : 0;
+                this.parts[j][i] = next.startsWith("p") ? value : 0;
             }
         }
 
         this.zSchedule = new ZombieSpawnSchedule();
+        this.robots = new ArrayList<>();
     }
 
     /**
@@ -108,7 +164,7 @@ public class TestMapGenerator {
      * @param partsValue the new parts value
      * @return itself, after the parts value has been updated
      */
-    public TestMapGenerator withParts(int x, int y, int partsValue) {
+    public TestMapGenerator withParts(int x, int y, double partsValue) {
         this.parts[x][y] = partsValue;
         return this;
     }
@@ -120,7 +176,7 @@ public class TestMapGenerator {
      * @param y the y coordinate of the parts value to change
      * @param partsValue the new parts value
      */
-    public void setParts(int x, int y, int partsValue) {
+    public void setParts(int x, int y, double partsValue) {
         this.parts[x][y] = partsValue;
     }
 
@@ -132,7 +188,7 @@ public class TestMapGenerator {
      * @param rubbleValue the new rubble value
      * @return itself, after the rubble value has been updated
      */
-    public TestMapGenerator withRubble(int x, int y, int rubbleValue) {
+    public TestMapGenerator withRubble(int x, int y, double rubbleValue) {
         this.rubble[x][y] = rubbleValue;
         return this;
     }
@@ -144,7 +200,7 @@ public class TestMapGenerator {
      * @param y the y coordinate of the rubble value to change
      * @param rubbleValue the new rubble value
      */
-    public void setRubble(int x, int y, int rubbleValue) {
+    public void setRubble(int x, int y, double rubbleValue) {
         this.rubble[x][y] = rubbleValue;
     }
 
@@ -173,14 +229,130 @@ public class TestMapGenerator {
     }
 
     /**
+     * Adds a robot to the map and returns itself.
+     *
+     * @param type the type of the robot
+     * @param team the team the robot belongs to
+     * @param x x location for the robot
+     * @param y y location for the robot
+     * @return itself, after the robot has been added
+     */
+    public TestMapGenerator withRobot(RobotType type, Team team, int x, int y) {
+        this.robots.add(new GameMap.InitialRobotInfo(x, y, type, team));
+        return this;
+    }
+
+    /**
+     * Adds a robot to the map.
+     *
+     * @param type the type of the robot
+     * @param team the team the robot belongs to
+     * @param x x location for the robot
+     * @param y y location for the robot
+     */
+    public void addRobot(RobotType type, Team team, int x, int y) {
+        this.robots.add(new GameMap.InitialRobotInfo(x, y, type, team));
+    }
+
+    /**
      * Generates the game map represented by this generator.
      *
+     * @param mapName the name to give the map
      * @return the game map represented by this generator
      */
-    public GameMap getMap() {
-        EnumMap<GameMap.MapProperties, Integer> props = new EnumMap<GameMap.MapProperties, Integer>(GameMap.MapProperties.class);
-        props.put(GameMap.MapProperties.MAX_ROUNDS, this.maxRounds);
+    public GameMap getMap(String mapName) {
+        EnumMap<GameMap.MapProperties, Integer> props = new EnumMap<>(GameMap.MapProperties.class);
+        props.put(GameMap.MapProperties.ROUNDS, this.rounds);
         props.put(GameMap.MapProperties.SEED, this.seed);
-        return new GameMap(props, rubble, parts, zSchedule, "map");
+
+        GameMap.InitialRobotInfo[] outputRobots = robots.toArray(new GameMap.InitialRobotInfo[robots.size()]);
+
+        // Have to be make sure we sort the robots the same way they'll be sorted
+        // when read in from a file, i.e. starting from the top left
+        Arrays.sort(outputRobots, (a, b) -> {
+            if (a.originOffsetX == b.originOffsetX) {
+                return Integer.compare(a.originOffsetY, b.originOffsetY);
+            }
+            return Integer.compare(a.originOffsetX, b.originOffsetX);
+        });
+
+        return new GameMap(
+                props,
+                rubble,
+                parts,
+                zSchedule,
+                outputRobots,
+                mapName
+        );
+    }
+
+    /**
+     * All test maps will be placed in this folder.
+     */
+    public static final String MAP_PATH =
+            "src/test/battlecode/world/maps/";
+
+    public void writeMapToFile(String mapName) throws IOException {
+        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter
+                (MAP_PATH + mapName + ".xml")), true);
+        out.printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        out.printf("<map height=\"%d\" width=\"%d\">\n", height, width);
+        out.printf("    <game seed=\"%d\" rounds=\"%d\"/>\n", seed, rounds);
+
+        // Print zombie schedule
+        for (int round : zSchedule.getRounds()) {
+            for (ZombieCount zc : zSchedule.getScheduleForRound(round)) {
+                out.printf("    <zombies round=\"%d\" type=\"%s\" " +
+                        "count=\"%d\" />\n", round, zc.getType().toString(),
+                        zc.getCount());
+            }
+        }
+
+        out.printf("    <symbols>\n");
+        out.printf("        <symbol terrain=\"RUBBLE\" type=\"TERRAIN\" " +
+                "character=\"%s\"/>\n", "r");
+        out.printf("        <symbol terrain=\"PARTS\" type=\"TERRAIN\" " +
+                "character=\"%s\"/>\n", "p");
+
+        for (RobotType type : RobotType.values()) {
+            for (Team team : Team.values()) {
+                out.printf("        <symbol team=\"%s\" type=\"%s\" " +
+                        "character=\"%s\" />\n", team.toString(), type
+                        .toString(), getSymbol(type, team));
+            }
+        }
+
+        out.printf("    </symbols>\n");
+        out.printf("    <data>\n");
+        out.printf("<![CDATA[\n");
+
+        String[][] characters = new String[width][height];
+        for (int i = 0; i < height; ++i) {
+            for (int j = 0; j < width; ++j) {
+                if (parts[j][i] > 0) characters[j][i] = "p";
+                else characters[j][i] = "r";
+            }
+        }
+        for (GameMap.InitialRobotInfo robot : robots) {
+            characters[robot.originOffsetX][robot.originOffsetY] = getSymbol(robot
+                    .type, robot.team);
+        }
+
+        for (int i = 0; i < height; ++i) {
+            for (int j = 0; j < width; ++j) {
+                out.printf("%s", characters[j][i]);
+                if (parts[j][i] > 0) out.printf("%.2f", parts[j][i]);
+                else out.printf("%.2f", rubble[j][i]);
+
+                if (j == width - 1) out.printf("\n");
+                else out.printf(" ");
+            }
+        }
+
+        out.printf("]]>\n");
+        out.printf("    </data>\n");
+        out.printf("</map>\n");
+
+        out.close();
     }
 }

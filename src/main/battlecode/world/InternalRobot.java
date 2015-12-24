@@ -1,119 +1,112 @@
 package battlecode.world;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
-import battlecode.common.CommanderSkillType;
-import battlecode.common.Team;
-import battlecode.engine.GenericRobot;
-import battlecode.engine.signal.Signal;
-import battlecode.server.Config;
-import battlecode.world.signal.BashSignal;
+import battlecode.common.*;
+import battlecode.world.signal.Signal;
 import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.SpawnSignal;
-import battlecode.world.signal.TransferSupplySignal;
+import battlecode.world.signal.TypeChangeSignal;
 
-public class InternalRobot implements GenericRobot {
+import java.util.HashMap;
+import java.util.Optional;
+
+/**
+ * The representation of a robot used by the server.
+ *
+ * Should only ever be created by GameWorld in the visitSpawnSignal method.
+ */
+public class InternalRobot {
     public RobotType type;
 
-    private final int myID;
-    private Team myTeam;
+    private final int ID;
+    private Team team;
 
-    protected volatile MapLocation myLocation;
-    protected final GameWorld myGameWorld;
+    // TODO remove volatiles?
 
-    protected volatile double myHealthLevel;
+    private volatile MapLocation location;
+    private final GameWorld gameWorld;
+
+    private final RobotControllerImpl controller;
+
+    private volatile double healthLevel;
     private double coreDelay;
     private double weaponDelay;
     private int zombieInfectedTurns;
     private int viperInfectedTurns;
 
-    protected volatile long controlBits;
+    private volatile long controlBits;
 
     int currentBytecodeLimit;
-    private volatile int bytecodesUsed;
-    protected volatile boolean hasBeenAttacked;
+    private int bytecodesUsed;
+    private boolean hasBeenAttacked;
     private boolean healthChanged;
-    private boolean didSelfDestruct;
     private boolean broadcasted;
     private volatile HashMap<Integer, Integer> broadcastMap;
     private int roundsAlive;
 
-    private ArrayList<Signal> supplyActions;
-    private ArrayList<SpawnSignal> missileLaunchActions;
     private Signal movementSignal;
     private Signal attackSignal;
-    private Signal castSignal;
 
     private int buildDelay;
 
-    private static boolean upkeepEnabled = Config.getGlobalConfig().getBoolean(
-            "bc.engine.upkeep");
+    /**
+     * Used to avoid recreating the same RobotInfo object over and over.
+     */
+    private RobotInfo cachedRobotInfo;
 
+    /**
+     * Create a new internal representation of a robot
+     *
+     * @param gw the world the robot exists in
+     * @param type the type of the robot
+     * @param loc the location of the robot
+     * @param team the team of the robot
+     * @param buildDelay the build
+     * @param parent the parent of the robot, if one exists
+     */
     @SuppressWarnings("unchecked")
-    public InternalRobot(GameWorld gw, RobotType type, MapLocation loc, Team t,
-            boolean spawnedRobot, int buildDelay) {
+    public InternalRobot(GameWorld gw, int id, RobotType type, MapLocation loc, Team team,
+            int buildDelay, Optional<InternalRobot> parent) {
 
-        myID = gw.nextID();
-        myTeam = t;
-        myGameWorld = gw;
-        myLocation = loc;
-        gw.notifyAddingNewObject(this);
+        this.ID = id;
+        this.team = team;
+        this.gameWorld = gw;
+        this.location = loc;
         this.type = type;
         this.buildDelay = buildDelay;
 
-        myHealthLevel = getMaxHealth();
-        if (type.isBuildable() && buildDelay > 0) { // What is this for?
-            myHealthLevel /= 2.0;
-        }
+        this.healthLevel = getMaxHealth();
 
-        coreDelay = 0.0;
-        weaponDelay = 0.0;
-        zombieInfectedTurns = 0;
-        viperInfectedTurns = 0;
+        this.coreDelay = 0.0;
+        this.weaponDelay = 0.0;
+        this.zombieInfectedTurns = 0;
+        this.viperInfectedTurns = 0;
 
-        controlBits = 0;
+        this.controlBits = 0;
 
-        currentBytecodeLimit = type.bytecodeLimit;
-        bytecodesUsed = 0;
-        hasBeenAttacked = false;
-        healthChanged = true;
+        this.currentBytecodeLimit = type.bytecodeLimit;
+        this.bytecodesUsed = 0;
+        this.hasBeenAttacked = false;
+        this.healthChanged = true;
 
-        didSelfDestruct = false;
-        broadcasted = false;
-        broadcastMap = new HashMap<Integer, Integer>();
-        roundsAlive = 0;
+        this.broadcasted = false;
+        this.broadcastMap = new HashMap<>();
+        this.roundsAlive = 0;
 
-        supplyActions = new ArrayList<Signal>();
-        missileLaunchActions = new ArrayList<SpawnSignal>();
-        movementSignal = null;
-        attackSignal = null;
-        castSignal = null;
+        this.movementSignal = null;
+        this.attackSignal = null;
 
-        myGameWorld.incrementTotalRobotTypeCount(getTeam(), type);
-
-        if (!type.isBuildable() || buildDelay == 0) {
-            myGameWorld.incrementActiveRobotTypeCount(getTeam(), type);
-        }
-
-        myGameWorld
-                .updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
+        this.controller = new RobotControllerImpl(gameWorld, this);
     }
 
     @Override
     public boolean equals(Object o) {
         return o != null && (o instanceof InternalRobot)
-                && ((InternalRobot) o).getID() == myID;
+                && ((InternalRobot) o).getID() == ID;
     }
 
     @Override
     public int hashCode() {
-        return myID;
+        return ID;
     }
 
     // *********************************
@@ -121,9 +114,27 @@ public class InternalRobot implements GenericRobot {
     // *********************************
 
     public RobotInfo getRobotInfo() {
-        return new RobotInfo(getID(), getTeam(), type, getLocation(),
-                getCoreDelay(), getWeaponDelay(), getHealthLevel(),
-                getZombieInfectedTurns(),getViperInfectedTurns());
+        if (this.cachedRobotInfo != null
+                && this.cachedRobotInfo.ID == ID
+                && this.cachedRobotInfo.team == team
+                && this.cachedRobotInfo.type == type
+                && this.cachedRobotInfo.location.equals(location)
+                && this.cachedRobotInfo.coreDelay == coreDelay
+                && this.cachedRobotInfo.weaponDelay == weaponDelay
+                && this.cachedRobotInfo.health == healthLevel
+                && this.cachedRobotInfo.zombieInfectedTurns == zombieInfectedTurns
+                && this.cachedRobotInfo.viperInfectedTurns == viperInfectedTurns) {
+            return this.cachedRobotInfo;
+        }
+        return this.cachedRobotInfo = new RobotInfo(
+                ID, team, type, location,
+                coreDelay, weaponDelay, healthLevel,
+                zombieInfectedTurns, viperInfectedTurns
+        );
+    }
+
+    public RobotControllerImpl getController() {
+        return controller;
     }
 
     public int getRoundsAlive() {
@@ -131,38 +142,19 @@ public class InternalRobot implements GenericRobot {
     }
 
     public int getID() {
-        return myID;
-    }
-
-    protected void setTeam(Team newTeam) {
-        myTeam = newTeam;
+        return ID;
     }
 
     public Team getTeam() {
-        return myTeam;
+        return team;
     }
 
     public MapLocation getLocation() {
-        return myLocation;
-    }
-
-    public GameWorld getGameWorld() {
-        return myGameWorld;
+        return location;
     }
 
     public boolean exists() {
-        return myGameWorld.exists(this);
-    }
-
-    public InternalRobot container() {
-        return null;
-    }
-
-    public MapLocation sensedLocation() {
-        if (container() != null)
-            return container().sensedLocation();
-        else
-            return getLocation();
+        return gameWorld.exists(this);
     }
 
     // *********************************
@@ -189,10 +181,6 @@ public class InternalRobot implements GenericRobot {
 
     public int getBytecodeLimit() {
         return canExecuteCode() ? this.currentBytecodeLimit : 0;
-    }
-
-    public boolean movedThisTurn() {
-        return this.movementSignal != null;
     }
 
     public void setControlBits(long l) {
@@ -254,7 +242,7 @@ public class InternalRobot implements GenericRobot {
     // *********************************
 
     public double getHealthLevel() {
-        return myHealthLevel;
+        return healthLevel;
     }
 
     public void takeDamage(double baseAmount) {
@@ -262,37 +250,21 @@ public class InternalRobot implements GenericRobot {
         if (baseAmount < 0) {
             changeHealthLevel(-baseAmount);
         } else {
-            changeHealthLevelFromAttack(-baseAmount);
+            hasBeenAttacked = true;
+            changeHealthLevel(-baseAmount);
         }
-    }
-
-    public void takeDamage(double amt, InternalRobot source) {
-        if (!(getTeam() == Team.NEUTRAL)) {
-            healthChanged = true;
-            takeDamage(amt);
-        }
-    }
-
-    public void changeHealthLevelFromAttack(double amount) {
-        healthChanged = true;
-        hasBeenAttacked = true;
-        changeHealthLevel(amount);
     }
 
     public void changeHealthLevel(double amount) {
         healthChanged = true;
-        myHealthLevel += amount;
-        if (myHealthLevel > getMaxHealth()) {
-            myHealthLevel = getMaxHealth();
+        healthLevel += amount;
+        if (healthLevel > getMaxHealth()) {
+            healthLevel = getMaxHealth();
         }
 
-        if (myHealthLevel <= 0 && getMaxHealth() != Integer.MAX_VALUE) {
-            processLethalDamage();
+        if (healthLevel <= 0) {
+            gameWorld.visitDeathSignal(new DeathSignal(ID));
         }
-    }
-
-    public void processLethalDamage() {
-        myGameWorld.notifyDied(this);   // myGameWorld checks if infected and creates zombie
     }
 
     public double getMaxHealth() {
@@ -339,29 +311,6 @@ public class InternalRobot implements GenericRobot {
         }
     }
 
-    public double getAttackDelayForType() {
-        return type.attackDelay;
-    }
-
-    public double getMovementDelayForType() {
-        return type.movementDelay;
-    }
-
-    public double getCooldownDelayForType() {
-        return type.cooldownDelay;
-    }
-
-    public double calculateMovementActionDelay(MapLocation from,
-            MapLocation to) {
-        double base = 1;
-        if (from.distanceSquaredTo(to) <= 1) {
-            base = getMovementDelayForType();
-        } else {
-            base = getMovementDelayForType() * 1.4;
-        }
-        return base;
-    }
-
     // *********************************
     // ****** BROADCAST METHODS ********
     // *********************************
@@ -383,10 +332,6 @@ public class InternalRobot implements GenericRobot {
     // ****** ACTION METHODS ***********
     // *********************************
 
-    public void addAction(Signal s) {
-        myGameWorld.visitSignal(s);
-    }
-
     public void activateMovement(Signal s, double attackDelay,
             double movementDelay) {
         movementSignal = s;
@@ -403,36 +348,26 @@ public class InternalRobot implements GenericRobot {
 
     public void setLocation(MapLocation loc) {
         MapLocation oldloc = getLocation();
-        myGameWorld.notifyMovingObject(this, myLocation, loc);
-        myLocation = loc;
-        myGameWorld.updateMapMemoryRemove(getTeam(), oldloc,
+        gameWorld.notifyMovingObject(this, location, loc);
+        location = loc;
+        gameWorld.updateMapMemoryRemove(getTeam(), oldloc,
                 type.sensorRadiusSquared);
-        myGameWorld
+        gameWorld
                 .updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
     }
 
-    public void setSelfDestruct() {
-        didSelfDestruct = true;
-    }
-
-    public void unsetSelfDestruct() {
-        didSelfDestruct = false;
-    }
-
-    public boolean didSelfDestruct() {
-        return didSelfDestruct;
-    }
-
     public void suicide() {
-        (new DeathSignal(this)).accept(myGameWorld);
+        gameWorld.visitSignal((new DeathSignal(this.getID())));
     }
     
     public void transform(RobotType newType) {
-        myGameWorld.decrementActiveRobotTypeCount(getTeam(), type);
+        gameWorld.decrementRobotTypeCount(getTeam(), type);
+        gameWorld.incrementRobotTypeCount(getTeam(), newType);
         type = newType;
-        myGameWorld.incrementTotalRobotTypeCount(getTeam(), newType);
         coreDelay += 10;
         weaponDelay += 10;
+
+        gameWorld.visitSignal(new TypeChangeSignal(ID, newType));
     }
 
     // *********************************
@@ -457,52 +392,34 @@ public class InternalRobot implements GenericRobot {
 
         // broadcasts
         if (broadcasted)
-            myGameWorld.visitSignal(new BroadcastSignal(this, broadcastMap));
+            gameWorld.visitSignal(new BroadcastSignal(this.getID(), this.getTeam(), broadcastMap));
 
-        broadcastMap = new HashMap<Integer, Integer>();
+        broadcastMap = new HashMap<>();
         broadcasted = false;
-
-        // perform supply actions
-        for (Signal s : supplyActions) {
-            myGameWorld.visitSignal(s);
-        }
-        supplyActions.clear();
 
         // perform attacks
         if (attackSignal != null) {
-            myGameWorld.visitSignal(attackSignal);
+            gameWorld.visitSignal(attackSignal);
             attackSignal = null;
         }
 
-        // launch missiles
-        for (SpawnSignal s : missileLaunchActions) {
-            myGameWorld.visitSignal(s);
-        }
-        missileLaunchActions.clear();
-
         // perform movements (moving, spawning, mining)
         if (movementSignal != null) {
-            myGameWorld.visitSignal(movementSignal);
+            gameWorld.visitSignal(movementSignal);
             movementSignal = null;
         }
+
+        processBeingInfected();
     }
 
-    public void processEndOfRound() {
-    }
+    public void processEndOfRound() {}
 
     // *********************************
     // ****** MISC. METHODS ************
     // *********************************
-    
-    
-    
+
     @Override
     public String toString() {
         return String.format("%s:%s#%d", getTeam(), type, getID());
-    }
-
-    public void freeMemory() {
-        movementSignal = null;
-        attackSignal = null;
     }
 }

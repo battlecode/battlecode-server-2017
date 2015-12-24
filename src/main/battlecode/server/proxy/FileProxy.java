@@ -1,13 +1,14 @@
 package battlecode.server.proxy;
 
-import battlecode.serial.notification.Notification;
+import battlecode.serial.PauseEvent;
+import battlecode.serial.ServerEvent;
 import battlecode.server.Server;
+import battlecode.server.serializer.Serializer;
+import battlecode.server.serializer.SerializerFactory;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.util.zip.GZIPOutputStream;
-
-import battlecode.server.serializer.Serializer;
-import org.apache.commons.io.FileUtils;
 
 /**
  * This class represents a "connection" to a file. It allows match data to be
@@ -20,7 +21,7 @@ public class FileProxy implements Proxy {
     /**
      * The serializer used to turn objects into bytes.
      */
-    protected final Serializer serializer;
+    protected final Serializer<ServerEvent> serializer;
 
     /**
      * The stream to use to write to the temporary file.
@@ -35,7 +36,7 @@ public class FileProxy implements Proxy {
     /**
      * The eventual, target file
      */
-    protected final File file;
+    protected File file;
 
     /**
      * The temp file.
@@ -47,10 +48,10 @@ public class FileProxy implements Proxy {
      * filename.
      *
      * @param fileName The name of the file to write to.
-     * @param serializer The serializer to use.
+     * @param serializerFactory The serializerFactory to create a serializer with.
      * @throws IOException if the file cannot be opened or written to.
      */
-    public FileProxy(String fileName, Serializer serializer) throws IOException {
+    public FileProxy(String fileName, SerializerFactory serializerFactory) throws IOException {
         // Create directories if necessary.
         this.file = new File(fileName);
         if (!file.exists() && file.getParentFile() != null)
@@ -63,11 +64,17 @@ public class FileProxy implements Proxy {
         this.fileWriter = new FileOutputStream(temp);
         this.gzipWriter = new GZIPOutputStream(fileWriter);
 
-        this.serializer = serializer;
+        this.serializer = serializerFactory.createSerializer(
+                gzipWriter,
+                null,
+                ServerEvent.class
+        );
     }
 
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
+        serializer.close();
+
         gzipWriter.flush();
         fileWriter.flush();
         gzipWriter.close();
@@ -84,9 +91,11 @@ public class FileProxy implements Proxy {
     }
 
     @Override
-    public void writeObject(final Object message) throws IOException {
-        if (message instanceof Notification)
+    public synchronized void writeEvent(final ServerEvent message) throws IOException {
+        if (message instanceof PauseEvent) {
+            // We can ignore pauses, since people reading the file won't care.
             return;
-        serializer.serialize(gzipWriter, message);
+        }
+        serializer.serialize(message);
     }
 }

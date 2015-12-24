@@ -1,17 +1,20 @@
 package battlecode.serial;
 
-import battlecode.engine.signal.Signal;
+import battlecode.world.signal.Signal;
 import battlecode.world.signal.IndicatorStringSignal;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class RoundDelta implements Serializable {
+/**
+ * A list of Signals that occurred in a round.
+ */
+public class RoundDelta implements ServerEvent {
 
     private static final long serialVersionUID = 1667367676711924140L;
+
     private Signal[] signals;
 
     public RoundDelta() {
@@ -58,7 +61,7 @@ public class RoundDelta implements Serializable {
     }
 
     private void foldIndicatorSignals() {
-        HashMap<IndicatorString, Integer> folded = new HashMap<IndicatorString, Integer>();
+        HashMap<IndicatorString, Integer> folded = new HashMap<>();
         for (int i = 0; i < signals.length; i++) {
             if (signals[i] instanceof IndicatorStringSignal) {
                 IndicatorString is = new IndicatorString((IndicatorStringSignal) signals[i]);
@@ -69,10 +72,10 @@ public class RoundDelta implements Serializable {
                 folded.put(is, i);
             }
         }
-        ArrayList<Signal> foldedSignals = new ArrayList<Signal>(signals.length);
-        for (int i = 0; i < signals.length; i++) {
-            if (signals[i] != null) {
-                foldedSignals.add(signals[i]);
+        ArrayList<Signal> foldedSignals = new ArrayList<>(signals.length);
+        for (Signal signal : signals) {
+            if (signal != null) {
+                foldedSignals.add(signal);
             }
         }
         signals = new Signal[foldedSignals.size()];
