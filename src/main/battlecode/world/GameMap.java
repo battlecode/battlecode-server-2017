@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The class represents the map in the game world on which
@@ -55,7 +56,7 @@ public class GameMap implements Serializable {
     /**
      * The zombie spawn schedule for the map
      */
-    private final ZombieSpawnSchedule zSchedule;
+    private final ZombieSpawnSchedule zombieSpawnSchedule;
 
     /**
      * The robots to spawn on the map; MapLocations are in world space -
@@ -91,7 +92,7 @@ public class GameMap implements Serializable {
         this.seed = gm.seed;
         this.rounds = gm.rounds;
         this.mapName = gm.mapName;
-        this.zSchedule = new ZombieSpawnSchedule(gm.zSchedule);
+        this.zombieSpawnSchedule = new ZombieSpawnSchedule(gm.zombieSpawnSchedule);
         this.initialRobots = gm.getInitialRobots();
     }
 
@@ -111,14 +112,14 @@ public class GameMap implements Serializable {
      *                      (width, height, seed, and number of rounds).
      * @param initialRubble initial rubble array for the map.
      * @param initialParts initial parts array for the map.
-     * @param zSchedule zombie spawn schedule.
+     * @param zombieSpawnSchedule zombie spawn schedule.
      * @param initialRobots the robots initially on the map
      * @param mapName name of the map.
      */
     public GameMap(Map<MapProperties, Integer> mapProperties,
                    double[][] initialRubble,
                    double[][] initialParts,
-                   ZombieSpawnSchedule zSchedule,
+                   ZombieSpawnSchedule zombieSpawnSchedule,
                    InitialRobotInfo[] initialRobots,
                    String mapName) {
         if (mapProperties.containsKey(MapProperties.WIDTH)) {
@@ -150,7 +151,7 @@ public class GameMap implements Serializable {
         this.origin = new MapLocation(rand.nextInt(500), rand.nextInt(500));
         this.initialRubble = initialRubble;
         this.initialParts = initialParts;
-        this.zSchedule = zSchedule;
+        this.zombieSpawnSchedule = zombieSpawnSchedule;
         this.mapName = mapName;
         this.initialRobots = initialRobots;
     }
@@ -182,7 +183,7 @@ public class GameMap implements Serializable {
             return false;
         if (!this.mapName.equals(other.mapName)) return false;
         if (!this.origin.equals(other.origin)) return false;
-        if (!this.zSchedule.equivalentTo(other.zSchedule)) return false;
+        if (!this.zombieSpawnSchedule.equivalentTo(other.zombieSpawnSchedule)) return false;
 
         return Arrays.equals(this.initialRobots, other.initialRobots);
     }
@@ -326,9 +327,20 @@ public class GameMap implements Serializable {
         return seed;
     }
 
+    /**
+     * @return the zombie spawn schedule for the map.
+     */
+    public ZombieSpawnSchedule getZombieSpawnSchedule() {
+        return zombieSpawnSchedule;
+    }
+
+    /**
+     * @param round the round to look up
+     * @return an array of ZombieCounts for that round
+     */
     @JsonIgnore
     public ZombieCount[] getZombieSpawnSchedule(int round) {
-        final List<ZombieCount> sched = zSchedule.getScheduleForRound(round);
+        final List<ZombieCount> sched = zombieSpawnSchedule.getScheduleForRound(round);
         return sched.toArray(new ZombieCount[sched.size()]);
     }
 
@@ -337,9 +349,8 @@ public class GameMap implements Serializable {
      *
      * @return the origin of the map
      */
-    @JsonIgnore
     public MapLocation getOrigin() {
-        return new MapLocation(origin.x, origin.y);
+        return origin;
     }
 
     /**
@@ -646,6 +657,117 @@ public class GameMap implements Serializable {
     }
 
     /**
+     * @return whether this GameMap is tournament legal.
+     */
+    @JsonIgnore
+    public boolean isTournamentLegal() {
+        // The different possible symmetries.
+        boolean symVert = true,
+                symHoriz = true,
+                symRot = true,
+                symNegDiag = height == width, // across the line x=height-y
+                symPosDiag = height == width; // across the line x=y
+
+        // First, we check if rubble and parts are symmetric.
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                symVert = symVert && sameTile(x, y, x, height - y - 1);
+                symHoriz = symHoriz && sameTile(x, y, width - x - 1, y);
+                symRot = symRot && sameTile(x, y, width - x - 1, height - y - 1);
+                if (width == height) {
+                    symNegDiag = symNegDiag && sameTile(x, y, height - y - 1, width - x - 1);
+                    symPosDiag = symPosDiag && sameTile(x, y, y, x);
+                }
+            }
+        }
+
+        // Next, we check if robots are symmetric.
+
+        // The byLoc map is just to speed up robot lookup by-location.
+        final MapLocation origin = new MapLocation(0, 0);
+        final Map<MapLocation, InitialRobotInfo> byLoc =
+                Arrays.stream(initialRobots).collect(Collectors.toMap(
+                        (robot) -> robot.getLocation(origin),
+                        (robot) -> robot
+                ));
+
+        for (MapLocation loc : byLoc.keySet()) {
+            final InitialRobotInfo r1 = byLoc.get(loc);
+            final int x = loc.x, y = loc.y;
+
+            symVert = symVert && oppositeRobots(
+                    r1,
+                    byLoc.get(new MapLocation(x, height - y - 1))
+            );
+            symHoriz = symHoriz && oppositeRobots(
+                    r1,
+                    byLoc.get(new MapLocation(width - x - 1, y))
+            );
+            symRot = symRot && oppositeRobots(
+                    r1,
+                    byLoc.get(new MapLocation(width - x - 1, height - y - 1))
+            );
+            if (width == height) {
+                symNegDiag = symNegDiag && oppositeRobots(
+                        r1,
+                        byLoc.get(new MapLocation(height - y - 1, width - x - 1))
+                );
+                symPosDiag = symPosDiag && oppositeRobots(
+                        r1,
+                        byLoc.get(new MapLocation(y, x))
+                );
+            }
+        }
+
+        if (!symVert && !symHoriz && !symNegDiag && !symPosDiag && !symRot) {
+            return false;
+        }
+
+        // Some sort of symmetry
+        return true;
+    }
+
+    /**
+     * Return whether two map tiles have the same properties.
+     *
+     * @param x1 the x coordinate of the first tile
+     * @param y1 the y coordinate of the first tile
+     * @param x2 the x coordinate of the second tile
+     * @param y2 the y coordinate of the second tile
+     * @return whether the tiles are the same
+     */
+    private boolean sameTile(int x1, int y1, int x2, int y2) {
+        return initialRubble[x1][y1] == initialRubble[x2][y2] &&
+                initialParts[x1][y1] == initialParts[x2][y2];
+    }
+
+    /**
+     * Return whether two robots are considered "opposite",
+     * for the purpose of tournament legality.
+     *
+     * @param r1 the first robot
+     * @param r2 the second robot
+     * @return whether the robots are legal
+     */
+    private boolean oppositeRobots(InitialRobotInfo r1, InitialRobotInfo r2) {
+        if (r1 == null || r2 == null) {
+            return false;
+        }
+
+        if (r1.type != r2.type) {
+            return false;
+        }
+
+        if (r1.team == Team.ZOMBIE || r1.team == Team.NEUTRAL) {
+            return r1.team == r2.team;
+        } else {
+            return r2.team != Team.ZOMBIE
+                    && r2.team != Team.NEUTRAL
+                    && r2.team != r1.team;
+        }
+    }
+
+    /**
      * For use by serializers.
      */
     @SuppressWarnings("unused")
@@ -658,7 +780,7 @@ public class GameMap implements Serializable {
         this.seed = 0;
         this.rounds = 0;
         this.mapName = null;
-        this.zSchedule = null;
+        this.zombieSpawnSchedule = null;
         this.initialRobots = null;
     }
 }

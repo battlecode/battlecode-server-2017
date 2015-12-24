@@ -2,6 +2,8 @@ package battlecode.server.serializer;
 
 import battlecode.common.MapLocation;
 import battlecode.world.DominationFactor;
+import battlecode.world.GameMap;
+import battlecode.world.ZombieSpawnSchedule;
 import battlecode.world.signal.Signal;
 import battlecode.serial.ExtensibleMetadata;
 import battlecode.serial.RoundDelta;
@@ -177,9 +179,27 @@ public class XStreamSerializerFactory implements SerializerFactory {
 
     }
 
+    public static class ZombieScheduleConverter implements Converter {
+
+        @Override
+        public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+
+        }
+
+        @Override
+        public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+            return null;
+        }
+
+        @Override
+        public boolean canConvert(Class type) {
+            return type.equals(ZombieSpawnSchedule.class);
+        }
+    }
+
     static protected void initXStream() {
         if (xstream != null) return;
-        xstream = new XStream() {};
+        xstream = new XStream();
         xstream.registerConverter(new IntArrayConverter());
         xstream.registerConverter(new LongArrayConverter());
         xstream.registerConverter(new DoubleArrayConverter());
@@ -201,6 +221,8 @@ public class XStreamSerializerFactory implements SerializerFactory {
         xstream.useAttributeFor(DominationFactor.class);
         xstream.aliasPackage("sig", "battlecode.world.signal");
         xstream.aliasPackage("ser", "battlecode.serial");
+        xstream.alias("game-map", GameMap.class);
+        xstream.alias("initial-robot", GameMap.InitialRobotInfo.class);
     }
 
     static public XStream getXStream() {
