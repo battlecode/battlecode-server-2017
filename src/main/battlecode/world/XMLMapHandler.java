@@ -182,7 +182,7 @@ public class XMLMapHandler extends DefaultHandler {
          * A factory that returns a TerrainData with the given terrain type.
          */
         public static final SymbolDataFactory factory = att -> {
-            String type = getRequired(att, "terrain");
+            String type = "RUBBLE";//getRequired(att, "terrain"); TODO: Replace all of this
             return new TerrainData(TerrainType.valueOf(type));
         };
 
