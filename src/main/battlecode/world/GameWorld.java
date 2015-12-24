@@ -901,10 +901,6 @@ public class GameWorld implements SignalHandler {
             parent = getObjectByID(parentID);
         }
 
-        int cost = s.getType().partCost;
-
-        adjustResources(s.getTeam(), -cost);
-
         InternalRobot robot =
                 new InternalRobot(
                         this,
