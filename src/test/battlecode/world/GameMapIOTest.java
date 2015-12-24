@@ -34,6 +34,7 @@ public class GameMapIOTest {
                 .withParts(48, 79, 111)
                 .withZombieSpawn(100, RobotType.FASTZOMBIE, 12)
                 .withZombieSpawn(500, RobotType.RANGEDZOMBIE, 15)
+                .withZombieSpawn(500, RobotType.FASTZOMBIE, 100)
                 .withRobot(RobotType.ARCHON, Team.A, 0, 0)
                 .withRobot(RobotType.ARCHON, Team.B, 49, 79)
                 .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 0, 79)
