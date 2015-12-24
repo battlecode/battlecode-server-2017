@@ -636,10 +636,10 @@ public class XMLMapHandler extends DefaultHandler {
                         map[currentCol][currentRow].setRubbleValue(rubbleVal);
                     } else { // Else, treat it as an old map
                         double value = Double.parseDouble(dataSoFar.substring(letterIdx));
-                        if (letters.equals("n"))
-                            map[currentCol][currentRow].setRubbleValue(value);
-                        else if (letters.equals("p"))
+                        if (letters.equals("p")) // If explicitly used for parts
                             map[currentCol][currentRow].setPartsValue(value);  
+                        else        // Else, assume it means rubble
+                            map[currentCol][currentRow].setRubbleValue(value);
                     }
                 }
 
