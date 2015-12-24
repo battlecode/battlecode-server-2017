@@ -63,8 +63,7 @@ public class RobotControllerTest {
         // Let's assert that things happened properly.
         assertEquals(soldierABot.getLocation(), new MapLocation(oX + 1, oY));
         assertEquals(game.getWorld().resources(Team.A), 30 + GameConstants
-                        .PARTS_INITIAL_AMOUNT - RobotType.SOLDIER.partCost,
-                EPSILON);
+                        .PARTS_INITIAL_AMOUNT, EPSILON);
 
         // Lets 10 rounds go by.
         game.waitRounds(10);
