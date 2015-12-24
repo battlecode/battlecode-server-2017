@@ -11,6 +11,8 @@ import battlecode.world.GameMapIO;
 import battlecode.world.control.PlayerControlProvider;
 import battlecode.world.control.TeamControlProvider;
 
+import java.io.File;
+
 /**
  * Abstracts the game engine for the server. This class is responsible for
  * starting and managing matches and exporting match status and results to the
@@ -71,7 +73,6 @@ public class Match {
      */
     public Match(GameInfo info, String map, Config options, int number,
                  int count) {
-
         this.info = info;
         this.map = map;
         this.options = options;
@@ -88,7 +89,7 @@ public class Match {
      * match creation time!
      */
     public void initialize() throws Exception {
-        String mapPath = options.get("bc.game.map-path");
+        final File mapPath = new File(options.get("bc.game.map-path"));
 
         // Load the map for the match
         final GameMap loadedMap = GameMapIO.loadMap(map, mapPath);

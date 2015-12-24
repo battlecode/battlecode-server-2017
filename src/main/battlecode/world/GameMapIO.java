@@ -1,21 +1,10 @@
 package battlecode.world;
 
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
-import battlecode.server.ErrorReporter;
 import battlecode.server.Config;
 import battlecode.server.serializer.Serializer;
 import battlecode.server.serializer.XStreamSerializerFactory;
-import battlecode.world.GameMap.MapProperties;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
-import java.util.*;
 
 /**
  * This class contains the code for reading an XML map file and converting it
@@ -28,13 +17,11 @@ public final class GameMapIO {
      * Returns an GameMapIO for a specific map.
      *
      * @param mapName name of map.
-     * @param mapPath path of map.
+     * @param mapDir directory to store the map file in.
      * @return GameMapIO for map.
      */
-    public static GameMap loadMap(String mapName, String mapPath)
+    public static GameMap loadMap(String mapName, File mapDir)
             throws IOException {
-
-        final File mapDir = new File(mapPath);
 
         assert mapDir.isDirectory();
 
@@ -74,7 +61,7 @@ public final class GameMapIO {
      * @param mapDir the directory to write the map to
      * @throws IOException if the map cannot be written
      */
-    public static void writeMap(GameMap map, String mapDir)
+    public static void writeMap(GameMap map, File mapDir)
             throws IOException {
         writeMap(
                 map,
@@ -107,10 +94,10 @@ public final class GameMapIO {
      */
     public static void main(String[] args) {
         System.out.println("Checking maps for tournament legality...");
-        String mapPath = Config.getGlobalConfig().get("bc.game.map-path");
+        File mapPath = new File(Config.getGlobalConfig().get("bc.game.map-path"));
         for (String map : args) {
             try {
-                if (!loadMap(mapPath, map).isTournamentLegal()) {
+                if (!loadMap(map, mapPath).isTournamentLegal()) {
                     System.err.println("Illegal map: " + map);
                 }
             } catch (Exception e) {

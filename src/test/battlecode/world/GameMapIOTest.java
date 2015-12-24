@@ -45,9 +45,9 @@ public class GameMapIOTest {
         final File tempDir = Files.createTempDirectory("battlecode-test").toFile();
         tempDir.deleteOnExit();
 
-        GameMapIO.writeMap(inputMap, tempDir.toString());
+        GameMapIO.writeMap(inputMap, tempDir);
 
-        final GameMap outputMap = GameMapIO.loadMap("basicMap", tempDir.toString());
+        final GameMap outputMap = GameMapIO.loadMap("basicMap", tempDir);
 
         assertTrue(inputMap.equals(outputMap));
     }
