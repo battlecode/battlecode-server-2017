@@ -63,8 +63,7 @@ public class RobotControllerTest {
         // Let's assert that things happened properly.
         assertEquals(soldierABot.getLocation(), new MapLocation(oX + 1, oY));
         assertEquals(game.getWorld().resources(Team.A), 30 + GameConstants
-                        .PARTS_INITIAL_AMOUNT - RobotType.SOLDIER.partCost,
-                EPSILON);
+                        .PARTS_INITIAL_AMOUNT, EPSILON);
 
         // Lets 10 rounds go by.
         game.waitRounds(10);
@@ -371,5 +370,34 @@ public class RobotControllerTest {
                 assertEquals(rc.senseRubble(loc1), rubbleVal3, EPSILON);
             }
         });
+    }
+
+    /**
+     * Makes sure that parts costs are properly subtracted when building a unit.
+     */
+    @Test
+    public void testPartsCost() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
+
+        GameMap map = mapGen.getMap("test");
+
+        TestGame game = new TestGame(map);
+
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int archon = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+
+        assertEquals(game.getWorld().resources(Team.A), GameConstants
+                .PARTS_INITIAL_AMOUNT, EPSILON);
+
+        game.round((id, rc) -> {
+            if (id == archon) {
+                rc.build(Direction.SOUTH_EAST, RobotType.SOLDIER);
+            }
+        });
+
+        assertEquals(game.getWorld().resources(Team.A), GameConstants
+                .PARTS_INITIAL_AMOUNT - RobotType.SOLDIER.partCost +
+                        GameConstants.ARCHON_PART_INCOME, EPSILON);
     }
 }
