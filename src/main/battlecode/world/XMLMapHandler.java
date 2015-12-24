@@ -677,7 +677,7 @@ public class XMLMapHandler extends DefaultHandler {
                     map[currentCol][currentRow].setPartsValue(0);
                     map[currentCol][currentRow].setRubbleValue(0);
                 } else {
-                    String[] params = dataSoFar.split(",");
+                    String[] params = dataSoFar.substring(letterIdx).split(",");
                     double partsVal = Double.parseDouble(params[0]);
                     double rubbleVal = Double.parseDouble(params[1]);
                     map[currentCol][currentRow].setPartsValue(partsVal);
