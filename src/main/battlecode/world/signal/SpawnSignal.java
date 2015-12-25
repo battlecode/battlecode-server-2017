@@ -12,6 +12,8 @@ import battlecode.world.InternalRobot;
  */
 public class SpawnSignal implements Signal {
 
+    public static final int NO_ID = -1;
+
     private static final long serialVersionUID = -5655877873179815892L;
 
     /**
@@ -41,6 +43,16 @@ public class SpawnSignal implements Signal {
 
     private final int delay;
 
+    /**
+     * Signal the world to a robot.
+     *
+     * @param robotID the robot's id, or NO_ID if the id is TBD.
+     * @param parentID the robot's parent id, or NO_ID if there is no parent.
+     * @param loc the location of the robot
+     * @param type the type of the robot
+     * @param team the team of the robot
+     * @param delay the spawn delay of the parent
+     */
     public SpawnSignal(int robotID, int parentID, MapLocation loc, RobotType type, Team team, int delay) {
         this.robotID = robotID;
         this.parentID = parentID;
@@ -54,7 +66,7 @@ public class SpawnSignal implements Signal {
      * Convenience constructor; creates a spawn signal for a robot that hasn't been spawned yet
      */
     public SpawnSignal(MapLocation loc, RobotType type, Team team, InternalRobot parent, int delay) {
-        this(0, parent != null ? parent.getID() : 0, loc, type, team, delay);
+        this(NO_ID, parent != null ? parent.getID() : NO_ID, loc, type, team, delay);
     }
 
     public int getRobotID() {

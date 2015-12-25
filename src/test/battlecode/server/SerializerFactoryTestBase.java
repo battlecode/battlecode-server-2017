@@ -89,7 +89,7 @@ public abstract class SerializerFactoryTestBase {
                     new MovementSignal(57, new MapLocation(0, 0), 0),
                     new RubbleChangeSignal(new MapLocation(0, 0), 5),
                     new RobotDelaySignal(new int[] {5, 6}, new double[] {17, 32}, new double[] {10, 2.5}),
-                    new SpawnSignal(120, 0, new MapLocation(5, 6), RobotType.ZOMBIEDEN, Team.ZOMBIE, 0),
+                    new SpawnSignal(120, SpawnSignal.NO_ID, new MapLocation(5, 6), RobotType.ZOMBIEDEN, Team.ZOMBIE, 0),
                     new TeamResourceSignal(Team.A, 100),
                     new TypeChangeSignal(57, RobotType.TTM)
             }),
