@@ -23,21 +23,6 @@ import java.util.*;
 public class XMLMapHandler extends DefaultHandler {
 
     /**
-     * An enum to keep track of the two types of terrain that might appear in
-     * a map file.
-     */
-    public enum TerrainType {
-        /**
-         * Denotes a tile that has a positive number of parts and no rubble.
-         */
-        PARTS,
-        /**
-         * Denotes a tile that has no parts and any amount of rubble.
-         */
-        RUBBLE
-    }
-
-    /**
      * Implements a stack for keeping track of XML elements.
      */
     private LinkedList<String> xmlStack = new LinkedList<>();
@@ -45,6 +30,7 @@ public class XMLMapHandler extends DefaultHandler {
      * Contains a SymbolData for each cell on the map.
      */
     private SymbolData[][] map = null;
+
     /**
      * A mapping from a string to a map element type. These will be used in
      * each XML file to specify the contents of each map cell.
@@ -72,6 +58,7 @@ public class XMLMapHandler extends DefaultHandler {
      */
     private ZombieSpawnSchedule zSchedule = new ZombieSpawnSchedule();
 
+
     /**
      * The result of the parsing; created the first time getParsedMap()
      * is called.
@@ -91,26 +78,34 @@ public class XMLMapHandler extends DefaultHandler {
      * A class to hold information about a particular map cell.
      */
     private interface SymbolData {
+        
         /**
-         * Sets the integer value associated with this cell.
-         *
-         * @param value the new value for this cell.
+         * Sets the parts value associated with this cell.
+         * 
+         * @param value the new parts value for this cell.
          */
-        void setValue(double value);
-
+        void setPartsValue(double value);
+        
         /**
-         * Returns the integer value associated with this cell.
-         *
-         * @return the integer value associated with this cell.
+         * Sets the rubble value associated with this cell.
+         * 
+         * @param value the new rubble value for this cell.
          */
-        double getValue();
-
+        void setRubbleValue(double value);
+        
         /**
-         * Returns the TerrainType associated with this cell.
-         *
-         * @return the TerrainType associatd with this cell.
+         * Returns the parts value associated with this cell.
+         * 
+         * @return the parts value associated with this cell.
          */
-        TerrainType tile();
+        double partsValue();
+        
+        /**
+         * Returns the rubble value associated with this cell.
+         * 
+         * @return the rubble value associated with this cell.
+         */
+        double rubbleValue();
 
         /**
          * Give the robot that should be placed at a tile for this type of symbol
@@ -165,58 +160,61 @@ public class XMLMapHandler extends DefaultHandler {
          * A factory that returns a TerrainData with the given terrain type.
          */
         public static final SymbolDataFactory factory = att -> {
-            String type = getRequired(att, "terrain");
-            return new TerrainData(TerrainType.valueOf(type));
+            return new TerrainData();
         };
-
+        
         /**
-         * Stores the terrain type for this map cell.
+         * Stores the initial number of parts on this map cell
          */
-
-        private TerrainType tile;
+        private double partsValue;
+        
         /**
-         * Stores either the number of parts or the amount of rubble,
-         * depending on the terrain type.
+         * Stores the initial amount of rubble on this map cell
          */
-        private double value;
+        private double rubbleValue;
 
         /**
          * Creates a new TerrainData based on a specific terrain.
-         * @param tile the terrain to use for this TerrainData.
          */
-        public TerrainData(TerrainType tile) {
-            this.tile = tile;
-            this.value = 0;
+        public TerrainData() {
+            this.partsValue = 0;
+            this.rubbleValue = 0;
         }
 
         /**
-         * Sets the value for this cell.
-         *
-         * @param value the new value for this cell.
+         * Sets the number of parts for this cell
+         * 
+         * @param value the new parts value for this cell
          */
-        @Override
-        public void setValue(double value) {
-            this.value = value;
+        public void setPartsValue(double value) {
+            this.partsValue = value;
         }
-
+        
         /**
-         * Returns the value for this cell.
-         *
-         * @return the value for this cell.
+         * Sets the amount of rubble for this cell
+         * 
+         * @param value the new rubble value for this cell
          */
-        @Override
-        public double getValue() {
-            return this.value;
+        public void setRubbleValue(double value) {
+            this.rubbleValue = value;
         }
-
+        
         /**
-         * Returns the terrain type for this cell.
-         *
-         * @return the terrain type for this cell.
+         * Returns the parts value for this cell
+         * 
+         * @return the parts value for this cell
          */
-        @Override
-        public TerrainType tile() {
-            return tile;
+        public double partsValue() {
+            return this.partsValue;
+        }
+        
+        /**
+         * Returns the rubble value for this cell
+         * 
+         * @return the rubble value for this cell
+         */
+        public double rubbleValue() {
+            return this.rubbleValue;
         }
 
         /**
@@ -238,7 +236,7 @@ public class XMLMapHandler extends DefaultHandler {
             if (!(data instanceof TerrainData))
                 return false;
             TerrainData d = (TerrainData) data;
-            return d.tile == tile && d.value == value;
+            return d.partsValue == partsValue && d.rubbleValue == rubbleValue;
         }
 
         /**
@@ -248,8 +246,9 @@ public class XMLMapHandler extends DefaultHandler {
          */
         @Override
         public SymbolData copy() {
-            TerrainData t = new TerrainData(this.tile);
-            t.setValue(this.value);
+            TerrainData t = new TerrainData();
+            t.setPartsValue(this.partsValue);
+            t.setRubbleValue(this.rubbleValue);
             return t;
         }
     }
@@ -291,29 +290,37 @@ public class XMLMapHandler extends DefaultHandler {
         }
 
         /**
-         * Does nothing.
-         *
-         * @param value ignored.
+         * Does nothing
+         * 
+         * @param value ignored
          */
-        public void setValue(double value) {
+        public void setPartsValue(double value) {
         }
 
         /**
-         * Returns 0.
-         *
-         * @return 0.
+         * Does nothing
+         * 
+         * @param value ignored
          */
-        public double getValue() {
+        public void setRubbleValue(double value) {
+        }
+        
+        /**
+         * Returns 0
+         * 
+         * @return 0
+         */
+        public double partsValue() {
             return 0;
         }
-
+        
         /**
-         * Returns the terrain type associated with this map cell (always
-         * RUBBLE, because robots do not start on cells with parts).
-         * @return RUBBLE.
+         * Returns 0
+         * 
+         * @return 0
          */
-        public TerrainType tile() {
-            return TerrainType.RUBBLE;
+        public double rubbleValue() {
+            return 0;
         }
 
         /**
@@ -340,8 +347,9 @@ public class XMLMapHandler extends DefaultHandler {
             if (!(data instanceof RobotData))
                 return false;
             RobotData d = (RobotData) data;
-            return type == d.type && team == d.team.opponent();
+            return type == d.type && team == d.team.opponent();   
         }
+
 
         /**
          * Returns a copy of itself.
@@ -349,7 +357,8 @@ public class XMLMapHandler extends DefaultHandler {
          * @return a copy of itself.
          */
         public SymbolData copy() {
-            return new RobotData(this.type, this.team);
+            RobotData r = new RobotData(this.type, this.team);
+            return r;
         }
     }
 
@@ -530,8 +539,8 @@ public class XMLMapHandler extends DefaultHandler {
             requireElement(qName, "symbols");
 
             String character = getRequired(attributes, "character");
-
             String type = getRequired(attributes, "type");
+            
             SymbolDataFactory factory = factories.get(type);
             if (factory == null) {
                 fail("invalid symbol type '" + type + "'", "Check that all " +
@@ -616,10 +625,22 @@ public class XMLMapHandler extends DefaultHandler {
 
                 map[currentCol][currentRow] = symbolMap.get(letters).copy();
                 if (dataSoFar.substring(letterIdx).trim().equals("")) {
-                    map[currentCol][currentRow].setValue(0);
+                    map[currentCol][currentRow].setPartsValue(0);
+                    map[currentCol][currentRow].setRubbleValue(0);
                 } else {
-                    map[currentCol][currentRow].setValue(Double.parseDouble(
-                            dataSoFar.substring(letterIdx)));
+                    if(dataSoFar.contains(",")) { // If this is a map file in the newer format:
+                        String[] params = dataSoFar.substring(letterIdx).split(",");
+                        double partsVal = Double.parseDouble(params[0]);
+                        double rubbleVal = Double.parseDouble(params[1]);
+                        map[currentCol][currentRow].setPartsValue(partsVal);
+                        map[currentCol][currentRow].setRubbleValue(rubbleVal);
+                    } else { // Else, treat it as an old map
+                        double value = Double.parseDouble(dataSoFar.substring(letterIdx));
+                        if (letters.equals("p")) // If explicitly used for parts
+                            map[currentCol][currentRow].setPartsValue(value);  
+                        else        // Else, assume it means rubble
+                            map[currentCol][currentRow].setRubbleValue(value);
+                    }
                 }
 
                 currentCol++;
@@ -695,15 +716,8 @@ public class XMLMapHandler extends DefaultHandler {
             rubbleData[i] = new double[map[i].length];
             partsData[i] = new double[map[i].length];
             for (int j = 0; j < map[i].length; j++) {
-                //If a standard tile, use float data as rubble. If a parts
-                // tile, use as parts
-                if (map[i][j].tile() == TerrainType.PARTS) {
-                    rubbleData[i][j] = 0;
-                    partsData[i][j] = map[i][j].getValue();
-                } else {
-                    rubbleData[i][j] = map[i][j].getValue();
-                    partsData[i][j] = 0;
-                }
+                partsData[i][j] = (int) map[i][j].partsValue();
+                rubbleData[i][j] = (int) map[i][j].rubbleValue();
             }
         }
 
@@ -801,6 +815,7 @@ public class XMLMapHandler extends DefaultHandler {
                         1]));
                 symB = symB && (map[x][y].equalsMirror(map[mapWidth - x -
                         1][y]));
+
                 if (mapWidth == mapHeight) {
                     symC = symC && (map[x][y].equalsMirror(map[mapHeight - y
                             - 1][mapWidth - x - 1]));
