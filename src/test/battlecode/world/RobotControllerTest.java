@@ -3,9 +3,9 @@ package battlecode.world;
 import battlecode.common.*;
 import org.junit.Test;
 
-import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Unit tests for RobotController. These are where the gameplay tests are.
@@ -369,6 +369,54 @@ public class RobotControllerTest {
             if (id == soldier || id == zombie) {
                 assertEquals(rc.senseRubble(loc1), rubbleVal3, EPSILON);
             }
+        });
+    }
+
+    /**
+     * Ensure that actions take place immediately.
+     */
+    @Test
+    public void testImmediateActions() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(3, 1, 20);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+
+        final int a = game.spawn(oX, oY, RobotType.SOLDIER, Team.A);
+        final int b = game.spawn(oX + 2, oY, RobotType.SOLDIER, Team.B);
+
+        game.round((id, rc) -> {
+            if (id != a) return;
+
+            final MapLocation start = rc.getLocation();
+            assertEquals(start, new MapLocation(oX, oY));
+
+            rc.move(Direction.EAST);
+
+            final MapLocation newLocation = rc.getLocation();
+            assertEquals(newLocation, new MapLocation(oX + 1, oY));
+        });
+
+        // Let delays go away
+        game.waitRounds(10);
+
+        game.round((id, rc) -> {
+            if (id != a) return;
+
+            MapLocation bLoc = new MapLocation(oX + 2, oY);
+
+            RobotInfo bInfo = rc.senseRobotAtLocation(bLoc);
+
+            assertEquals(RobotType.SOLDIER.maxHealth, bInfo.health, .00001);
+
+            rc.attackLocation(new MapLocation(oX + 2, oY));
+
+            RobotInfo bInfoNew = rc.senseRobotAtLocation(bLoc);
+
+            assertEquals(RobotType.SOLDIER.maxHealth - RobotType.SOLDIER.attackPower,
+                    bInfoNew.health,
+                    .00001);
         });
     }
 
