@@ -550,7 +550,7 @@ public class GameWorld implements SignalHandler {
 
         visitSpawnSignal(new SpawnSignal(
                 ID,
-                parent.isPresent() ? parent.get().getID() : 0,
+                parent.isPresent() ? parent.get().getID() : SpawnSignal.NO_ID,
                 loc,
                 type,
                 team,
@@ -904,18 +904,30 @@ public class GameWorld implements SignalHandler {
 
     @SuppressWarnings({"unchecked", "unused"})
     public void visitSpawnSignal(SpawnSignal s) {
+        // This robot has no id.
+        // We need to assign it an id and spawn that.
+        // Note that the current spawn signal is discarded.
+        if (s.getRobotID() == SpawnSignal.NO_ID) {
+            spawnRobot(
+                    s.getType(),
+                    s.getLoc(),
+                    s.getTeam(),
+                    s.getDelay(),
+                    Optional.ofNullable(
+                            gameObjectsByID.get(s.getParentID())
+                    )
+            );
+            return;
+        }
+
         InternalRobot parent;
         int parentID = s.getParentID();
 
-        if (parentID == 0) {
+        if (parentID == SpawnSignal.NO_ID) {
             parent = null;
         } else {
             parent = getObjectByID(parentID);
         }
-
-        int cost = s.getType().partCost;
-
-        adjustResources(s.getTeam(), -cost);
 
         InternalRobot robot =
                 new InternalRobot(

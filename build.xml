@@ -227,7 +227,8 @@
     <!-- ========== TESTING ========= -->
 
     <target name="unittest" depends="compiletest">
-        <junit printsummary="withOutAndErr" timeout="${test.timeout}" filtertrace="off" failureproperty="test.failed">
+        <junit printsummary="withOutAndErr" timeout="${test.timeout}" filtertrace="off"
+            failureproperty="test.failed" fork="true" forkmode="once">
             <classpath refid="classpath-libs"/>
             <classpath refid="classpath-test-libs"/>
             <classpath>
@@ -239,6 +240,10 @@
             <classpath>
                 <pathelement location="${player.build.dir}"/>
             </classpath>
+
+            <assertions>
+                <enable package="battlecode"/>
+            </assertions>
 
             <formatter type="xml"/>
             <formatter type="plain" usefile="false"/> <!-- another logger to print output to terminal -->

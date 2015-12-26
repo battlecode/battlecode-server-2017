@@ -75,6 +75,10 @@ public class IndividualClassLoader extends ClassLoader {
         // use the system classloader as our fallback
         super(IndividualClassLoader.class.getClassLoader());
 
+        // always instrument any classes we load
+        this.clearAssertionStatus();
+        this.setDefaultAssertionStatus(true);
+
         // check that the package we're trying to load isn't contained in a disallowed package
         String teamNameSlash = teamPackageName + "/";
         for (String sysName : disallowedPlayerPackages) {
