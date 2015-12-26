@@ -34,6 +34,7 @@ public class InternalRobot {
     private HashMap<Integer, Integer> broadcastMap;
     private int roundsAlive;
     private int buildDelay;
+    private int repairCount;
 
     /**
      * Used to avoid recreating the same RobotInfo object over and over.
@@ -67,6 +68,7 @@ public class InternalRobot {
         this.weaponDelay = 0.0;
         this.zombieInfectedTurns = 0;
         this.viperInfectedTurns = 0;
+        this.repairCount = 0;
 
         this.controlBits = 0;
 
@@ -138,6 +140,10 @@ public class InternalRobot {
 
     public boolean exists() {
         return gameWorld.exists(this);
+    }
+
+    public int getRepairCount() {
+        return repairCount;
     }
 
     // *********************************
@@ -352,15 +358,30 @@ public class InternalRobot {
         gameWorld.visitSignal(new TypeChangeSignal(ID, newType));
     }
 
+    /**
+     * Repairs the other robot. Assumes that all reprequisites are properly
+     * checked: other is not null, you are an archon, the other robot is on
+     * your own team, and you haven't already repaired this turn.
+     *
+     * @param other the robot to repair.
+     */
+    public void repair(InternalRobot other) {
+        repairCount++;
+
+        other.changeHealthLevel(GameConstants.ARCHON_REPAIR_AMOUNT);
+    }
+
     // *********************************
     // ****** GAMEPLAY METHODS *********
     // *********************************
 
     // should be called at the beginning of every round
-    public void processBeginningOfRound() {}
+    public void processBeginningOfRound() {
+    }
 
     public void processBeginningOfTurn() {
         decrementDelays(); // expends supply to decrement delays
+        repairCount = 0;
 
         this.currentBytecodeLimit = type.bytecodeLimit;
     }

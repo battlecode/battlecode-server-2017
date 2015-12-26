@@ -30,7 +30,7 @@ public interface GameConstants {
     int ROUND_MIN_LIMIT = 2000;
 
     /** The maximum possible round at which the game may be forced to end */
-    int ROUND_MAX_LIMIT = 3000;
+    int ROUND_MAX_LIMIT = 4000;
 
     /** The number of longs that your team can remember between games. */
     int TEAM_MEMORY_LENGTH = 32;
@@ -99,9 +99,16 @@ public interface GameConstants {
     /** The factor that delays are multiplied by when a unit moves diagonally. */
     double DIAGONAL_DELAY_MULTIPLIER = 1.4;
 
+    /** Amount an archon repairs another bot for. */
+    double ARCHON_REPAIR_AMOUNT = 1.0;
+
+    // *********************************
+    // ****** GAMEPLAY PROPERTIES ******
+    // *********************************
+
     /** The default game seed. **/
     int GAME_DEFAULT_SEED = 6370;
 
     /** The default game maxiumum number of rounds. **/
-    int GAME_DEFAULT_ROUNDS = 2000;
+    int GAME_DEFAULT_ROUNDS = 3000;
 }

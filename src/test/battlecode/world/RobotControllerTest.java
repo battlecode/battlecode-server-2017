@@ -48,7 +48,7 @@ public class RobotControllerTest {
         InternalRobot soldierABot = game.getBot(soldierA);
         InternalRobot soldierBBot = game.getBot(soldierB);
 
-        assertEquals(soldierABot.getLocation(), new MapLocation(oX , oY));
+        assertEquals(soldierABot.getLocation(), new MapLocation(oX, oY));
 
         // The following specifies the code to be executed in the next round.
         // Bytecodes are not counted, and yields are automatic at the end.
@@ -414,10 +414,40 @@ public class RobotControllerTest {
 
             RobotInfo bInfoNew = rc.senseRobotAtLocation(bLoc);
 
-            assertEquals(RobotType.SOLDIER.maxHealth - RobotType.SOLDIER.attackPower,
+            assertEquals(RobotType.SOLDIER.maxHealth - RobotType.SOLDIER
+                            .attackPower,
                     bInfoNew.health,
                     .00001);
         });
+    }
+
+    /**
+     * Tests the archon repair() method.
+     */
+    @Test
+    public void testRepair() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
+
+        GameMap map = mapGen.getMap("test");
+
+        TestGame game = new TestGame(map);
+
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int archon = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+        final int soldier = game.spawn(oX + 2, oY, RobotType.SOLDIER, Team.A);
+        InternalRobot soldierBot = game.getBot(soldier);
+
+        soldierBot.takeDamage(15);
+
+        game.round((id, rc) -> {
+            if (id == archon) {
+                rc.repair(new MapLocation(oX + 2, oY));
+            }
+        });
+
+        assertEquals(soldierBot.getHealthLevel(), RobotType.SOLDIER.maxHealth
+                - 15 + GameConstants.ARCHON_REPAIR_AMOUNT, EPSILON);
     }
 
     /**
@@ -446,7 +476,7 @@ public class RobotControllerTest {
 
         assertEquals(game.getWorld().resources(Team.A), GameConstants
                 .PARTS_INITIAL_AMOUNT - RobotType.SOLDIER.partCost +
-                        GameConstants.ARCHON_PART_INCOME, EPSILON);
+                GameConstants.ARCHON_PART_INCOME, EPSILON);
     }
 
     /**
