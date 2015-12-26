@@ -448,4 +448,44 @@ public class RobotControllerTest {
                 .PARTS_INITIAL_AMOUNT - RobotType.SOLDIER.partCost +
                         GameConstants.ARCHON_PART_INCOME, EPSILON);
     }
+
+    /**
+     * Destroying a zombie den should reward parts to the attacker's team.
+     */
+    @Test
+    public void testDenPartsReward() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
+
+        GameMap map = mapGen.getMap("test");
+
+        TestGame game = new TestGame(map);
+
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int soldierA = game.spawn(oX, oY + 1, RobotType.SOLDIER, Team.A);
+        final int soldierB = game.spawn(oX + 1, oY, RobotType.SOLDIER, Team.B);
+        final int den = game.spawn(oX, oY, RobotType.ZOMBIEDEN, Team.B);
+        InternalRobot denBot = game.getBot(den);
+
+        assertEquals(game.getWorld().resources(Team.A), GameConstants
+                .PARTS_INITIAL_AMOUNT, EPSILON);
+
+        // The den should have enough health to survive 2 attacks.
+        denBot.takeDamage(RobotType.ZOMBIEDEN.maxHealth - RobotType.SOLDIER
+                .attackPower - 1);
+
+        // Soldier A goes first
+        game.round((id, rc) -> {
+            if (id == soldierA) {
+                rc.attackLocation(new MapLocation(oX, oY));
+            } else if (id == soldierB) {
+                rc.attackLocation(new MapLocation(oX, oY));
+            }
+        });
+
+        assertEquals(game.getWorld().resources(Team.A), GameConstants
+                .PARTS_INITIAL_AMOUNT, EPSILON);
+        assertEquals(game.getWorld().resources(Team.B), GameConstants
+                .PARTS_INITIAL_AMOUNT + GameConstants.DEN_PART_REWARD, EPSILON);
+    }
 }
