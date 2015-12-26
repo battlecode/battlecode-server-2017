@@ -58,10 +58,13 @@ public interface GameConstants {
     // *********************************
 
     /** The amount that each team starts with */
-    int PARTS_INITIAL_AMOUNT = 200;
+    double PARTS_INITIAL_AMOUNT = 200;
     
     /** The part income per turn per archon */
-    int ARCHON_PART_INCOME = 1;
+    double ARCHON_PART_INCOME = 1;
+
+    /** The parts reward for destroying a zomie den */
+    double DEN_PART_REWARD = 300;
 
     // *********************************
     // ****** RUBBLE *******************
@@ -69,10 +72,10 @@ public interface GameConstants {
 
     /** The threshold of rubble that robots (except SCOUTs) can't move
      * through. */
-    int RUBBLE_OBSTRUCTION_THRESH = 100;
+    double RUBBLE_OBSTRUCTION_THRESH = 100;
 
     /** The threshold of rubble that slows robots (except SCOUTS). */
-    int RUBBLE_SLOW_THRESH = 50;
+    double RUBBLE_SLOW_THRESH = 50;
 
     /** Percentage of rubble removed with each clear. */
     double RUBBLE_CLEAR_PERCENTAGE = 0.05;
