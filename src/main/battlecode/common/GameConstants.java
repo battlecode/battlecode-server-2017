@@ -85,7 +85,7 @@ public interface GameConstants {
     // *********************************
    
     /** Guard's attack is scaled by this when attacking a Zombie opponent. */
-    double GUARD_ZOMBIE_MULTIPLIER = 1.5;
+    double GUARD_ZOMBIE_MULTIPLIER = 2;
     
     /** Damage a robot receives from a Viper's infection per turn */
     double VIPER_INFECTION_DAMAGE = 2;

@@ -14,79 +14,79 @@ public enum RobotType {
      * @battlecode.doc.robottype
      */
     ZOMBIEDEN       (true,  true,  0,  null,      0,  0,  5000, 0,  0,    0,   0, 0, -1,     10000, 0, null),
-
+	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A normal, boring zombie unit.
      *
      * @battlecode.doc.robottype
      */
-    STANDARDZOMBIE  (false, true,  10, ZOMBIEDEN, 0,  0,  50,   3,  2,    2,   1, 1, -1,     10000, 0, null),
-
+    STANDARDZOMBIE  (false, true,  10, ZOMBIEDEN, 0,  0,  60,   2.5,  2,    3,   2, 1, -1,     10000, 0, null),
+	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A zombie unit with a ranged attack.
      *
      * @battlecode.doc.robottype
      */
-    RANGEDZOMBIE    (false, true,  10, ZOMBIEDEN, 0,  0,  50,   3,  13,   1.4, 0, 1, -1,     10000, 0, null),
-
+    RANGEDZOMBIE    (false, true,  10, ZOMBIEDEN, 0,  0,  40,   3,  13,   3,   1, 1, -1,     10000, 0, null),
+	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A fast zombie unit.
      *
      * @battlecode.doc.robottype
      */
-    FASTZOMBIE      (false, true,  10, ZOMBIEDEN, 0,  0,  40,   4,  2,    2,   2, 1, -1,     10000, 0, null),
-
+    FASTZOMBIE      (false, true,  10, ZOMBIEDEN, 0,  0,  80,   3,  2,    1.4, 1, 1, -1,     10000, 0, null),
+	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A big, tough zombie unit.
      *
      * @battlecode.doc.robottype
      */
-    BIGZOMBIE       (false, true,  10, ZOMBIEDEN, 0,  0,  250,  50, 2,    2,   1, 1, -1,     10000, 0, null),
-
+    BIGZOMBIE       (false, true,  10, ZOMBIEDEN, 0,  0,  500,  25, 2,    3,   3, 1, -1,     10000, 0, null),
+	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * An important unit that cannot be constructed; builds other robots.
      *
      * @battlecode.doc.robottype
      */
     ARCHON          (false, false, 0,  null,      0,  0,  1000, 0,  24,   2,   1, 1, 35,     20000, 0, BIGZOMBIE),
-
+	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A fast unit, unobstructed by rubble.
      *
      * @battlecode.doc.robottype
      */
     SCOUT           (false, false, 0,  ARCHON,    25, 15, 100,  0,  0,    1.4, 0, 1, 53,     20000, 0, FASTZOMBIE),
-
+	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * An all-around ranged unit.
      *
      * @battlecode.doc.robottype
      */
     SOLDIER         (false, false, 0,  ARCHON,    10, 25, 50,   4,  13,   2,   2, 1, 24,     10000, 0, STANDARDZOMBIE),
-
+	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A melee unit equipped for zombie combat.
      *
      * @battlecode.doc.robottype
      */
-    GUARD           (false, false, 0,  ARCHON,    10, 25, 120,  2,   2,   2,   1, 1, 24,     10000, 0, STANDARDZOMBIE),
-
+    GUARD           (false, false, 0,  ARCHON,    10, 25, 120,  1.5,   2,   2,   1, 1, 24,     10000, 0, STANDARDZOMBIE),
+	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A special unit cabable of infecting robots with a damaging strain of the
      * zombie virus.
      *
      * @battlecode.doc.robottype
      */
-    VIPER           (false, false, 20, ARCHON,    50, 30, 100,  2,  13,   3,   3, 1, 24,     10000, 0, RANGEDZOMBIE),
-
+    VIPER           (false, false, 20, ARCHON,    50, 30, 100,  2,  13,   2,   3, 1, 24,     10000, 0, RANGEDZOMBIE),
+	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * An immobile unit designed to reinforce an area; transforms into a
      * {@link #TTM TTM} in order to move.
      *
      * @battlecode.doc.robottype
      */
-    TURRET          (false,  false, 0,  ARCHON,    50, 50, 50,   18, 34,  0,   3, 3, 24,     2000,  0, RANGEDZOMBIE),
-
+    TURRET          (false,  false, 0,  ARCHON,   50, 50, 100,  18, 48,   0,   3, 3, 24,     2000,  0, RANGEDZOMBIE),
+	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * Turret - Transport Mode: the mobile version of a {@link #TURRET TURRET}.
      * Cannot attack.
@@ -94,7 +94,8 @@ public enum RobotType {
      * @battlecode.doc.robottype
      */
     TTM             (false, false, 0,  TURRET,    0,  10, 50,   0,  0,    2,   0, 2, 24,     2000,  0, RANGEDZOMBIE),
-    ;
+	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
+	;
 
     /**
      * Whether this robot is a structure (or building). Structures are the units that cannot move.
@@ -238,7 +239,7 @@ public enum RobotType {
     public boolean canClearRubble() { // Update later
         return this != TURRET || this != TTM;
     }
-    
+	
     RobotType(boolean isBuilding,
               boolean isZombie,
               int infectTurns,
@@ -255,14 +256,14 @@ public enum RobotType {
               int bytecodeLimit,
               int strengthWeight,
               RobotType turnsInto) {
-        this.isBuilding = isBuilding;
+		this.isBuilding = isBuilding;
         this.isZombie = isZombie;
         this.infectTurns = infectTurns;
         this.spawnSource = spawnSource;
         this.partCost = partCost;
         this.buildTurns = buildTurns;
-        this.maxHealth = maxHealth;
-        this.attackPower = attackPower;
+		this.maxHealth = maxHealth;
+		this.attackPower = attackPower;
         this.attackRadiusSquared = attackRadiusSquared;
         this.movementDelay = movementDelay;
         this.attackDelay = attackDelay;
