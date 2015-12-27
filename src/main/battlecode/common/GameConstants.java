@@ -14,13 +14,13 @@ public interface GameConstants {
     int MAP_MIN_HEIGHT = 30;
 
     /** The maximum possible map height. */
-    int MAP_MAX_HEIGHT = 120;
+    int MAP_MAX_HEIGHT = 100;
 
     /** The minumum possible map width. */
     int MAP_MIN_WIDTH = 30;
 
     /** The maxiumum possible map width. */
-    int MAP_MAX_WIDTH = 120;
+    int MAP_MAX_WIDTH = 100;
 
     // *********************************
     // ****** GAME PARAMETERS **********
