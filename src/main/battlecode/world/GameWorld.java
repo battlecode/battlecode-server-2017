@@ -353,8 +353,8 @@ public class GameWorld implements SignalHandler {
     protected boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
         MapLocation myLoc = ir.getLocation();
         int d = myLoc.distanceSquaredTo(loc);
-        int radius = ir.type.attackRadiusSquared;
-        if (ir.type == RobotType.TURRET) {
+        int radius = ir.getType().attackRadiusSquared;
+        if (ir.getType() == RobotType.TURRET) {
             return (d <= radius && d >= GameConstants.TURRET_MINIMUM_RANGE);
         }
         return d <= radius;
@@ -620,11 +620,11 @@ public class GameWorld implements SignalHandler {
                     if (obj == null) continue;
 
                     if (obj.getTeam() == Team.A) {
-                        partsDiff += obj.type.partCost;
+                        partsDiff += obj.getType().partCost;
                     } else if (obj.getTeam() == Team.B) {
-                        partsDiff -= obj.type.partCost;
+                        partsDiff -= obj.getType().partCost;
                     }
-                    if (obj.type == RobotType.ARCHON) {
+                    if (obj.getType() == RobotType.ARCHON) {
                         if (obj.getTeam() == Team.A) {
                             archonDiff += obj.getHealthLevel();
                             highestAArchonID = Math.max(highestAArchonID,
@@ -709,7 +709,7 @@ public class GameWorld implements SignalHandler {
         MapLocation targetLoc = s.getTargetLoc();
         double rate = 1.0;
 
-        switch (attacker.type) { // Only attacking types
+        switch (attacker.getType()) { // Only attacking types
         case STANDARDZOMBIE:
         case FASTZOMBIE:
         case RANGEDZOMBIE:
@@ -728,19 +728,19 @@ public class GameWorld implements SignalHandler {
 
             for (InternalRobot target : targets) {
                 
-                if (attacker.type == RobotType.GUARD
-                        && target.type.isZombie)
+                if (attacker.getType() == RobotType.GUARD
+                        && target.getType().isZombie)
                     rate = GameConstants.GUARD_ZOMBIE_MULTIPLIER;
 
-                if (attacker.type.canInfect() && target.type.isInfectable()) {
+                if (attacker.getType().canInfect() && target.getType().isInfectable()) {
                     target.setInfected(attacker);
                 }
 
-                double damage = (attacker.type.attackPower) * rate;
+                double damage = (attacker.getType().attackPower) * rate;
                 target.takeDamage(damage);
 
                 // Reward parts to destroyer of zombie den
-                if (target.type == RobotType.ZOMBIEDEN && target
+                if (target.getType() == RobotType.ZOMBIEDEN && target
                         .getHealthLevel() <= 0.0) {
                     adjustResources(attacker.getTeam(),
                             GameConstants.DEN_PART_REWARD);
@@ -829,9 +829,9 @@ public class GameWorld implements SignalHandler {
             throw new RuntimeException("Object location out of sync: "+obj);
         }
 
-        decrementRobotTypeCount(obj.getTeam(), obj.type);
+        decrementRobotTypeCount(obj.getTeam(), obj.getType());
 
-        if (obj.type == RobotType.ARCHON) {
+        if (obj.getType() == RobotType.ARCHON) {
             int totalArchons = getRobotTypeCount(obj.getTeam(),
                     RobotType.ARCHON);
             if (totalArchons == 0) {
@@ -841,11 +841,11 @@ public class GameWorld implements SignalHandler {
         }
 
         // update rubble
-        alterRubble(loc, getRubble(loc) + obj.type.maxHealth);
+        alterRubble(loc, getRubble(loc) + obj.getType().maxHealth);
         addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
 
         updateMapMemoryRemove(obj.getTeam(), obj.getLocation(),
-                obj.type.sensorRadiusSquared);
+                obj.getType().sensorRadiusSquared);
 
         controlProvider.robotKilled(obj);
         gameObjectsByID.remove(obj.getID());
@@ -853,7 +853,7 @@ public class GameWorld implements SignalHandler {
 
         // if it was an infected robot, create a Zombie in its place.
         if (obj.isInfected()) {
-            RobotType zombieType = obj.type.turnsInto; // Type of Zombie this unit turns into
+            RobotType zombieType = obj.getType().turnsInto; // Type of Zombie this unit turns into
 
             // Create new Zombie
 

@@ -15,7 +15,7 @@ import java.util.Optional;
  * Should only ever be created by GameWorld in the visitSpawnSignal method.
  */
 public class InternalRobot {
-    public RobotType type;
+    private RobotType type;
     private final int ID;
     private Team team;
     private MapLocation location;
@@ -102,7 +102,7 @@ public class InternalRobot {
         if (this.cachedRobotInfo != null
                 && this.cachedRobotInfo.ID == ID
                 && this.cachedRobotInfo.team == team
-                && this.cachedRobotInfo.type == type
+                && this.cachedRobotInfo.type == getType()
                 && this.cachedRobotInfo.location.equals(location)
                 && this.cachedRobotInfo.coreDelay == coreDelay
                 && this.cachedRobotInfo.weaponDelay == weaponDelay
@@ -112,7 +112,7 @@ public class InternalRobot {
             return this.cachedRobotInfo;
         }
         return this.cachedRobotInfo = new RobotInfo(
-                ID, team, type, location,
+                ID, team, getType(), location,
                 coreDelay, weaponDelay, healthLevel,
                 zombieInfectedTurns, viperInfectedTurns
         );
@@ -151,7 +151,7 @@ public class InternalRobot {
     // *********************************
 
     public boolean isActive() {
-        return !type.isBuildable() || roundsAlive >= buildDelay;
+        return !getType().isBuildable() || roundsAlive >= buildDelay;
     }
 
     public boolean canExecuteCode() {
@@ -205,10 +205,10 @@ public class InternalRobot {
     }
 
     public void setInfected(InternalRobot attacker) {
-        if (attacker.type == RobotType.VIPER) {
-            viperInfectedTurns = attacker.type.infectTurns;
-        } else if (attacker.type.isZombie) {
-            zombieInfectedTurns = attacker.type.infectTurns;
+        if (attacker.getType() == RobotType.VIPER) {
+            viperInfectedTurns = attacker.getType().infectTurns;
+        } else if (attacker.getType().isZombie) {
+            zombieInfectedTurns = attacker.getType().infectTurns;
         }
     }
 
@@ -252,7 +252,7 @@ public class InternalRobot {
     }
 
     public double getMaxHealth() {
-        return type.maxHealth;
+        return getType().maxHealth;
     }
 
     // *********************************
@@ -339,9 +339,9 @@ public class InternalRobot {
         gameWorld.notifyMovingObject(this, location, loc);
         location = loc;
         gameWorld.updateMapMemoryRemove(getTeam(), oldloc,
-                type.sensorRadiusSquared);
+                getType().sensorRadiusSquared);
         gameWorld
-                .updateMapMemoryAdd(getTeam(), loc, type.sensorRadiusSquared);
+                .updateMapMemoryAdd(getTeam(), loc, getType().sensorRadiusSquared);
     }
 
     public void suicide() {
@@ -349,7 +349,7 @@ public class InternalRobot {
     }
     
     public void transform(RobotType newType) {
-        gameWorld.decrementRobotTypeCount(getTeam(), type);
+        gameWorld.decrementRobotTypeCount(getTeam(), getType());
         gameWorld.incrementRobotTypeCount(getTeam(), newType);
         type = newType;
         coreDelay += 10;
@@ -383,7 +383,7 @@ public class InternalRobot {
         decrementDelays(); // expends supply to decrement delays
         repairCount = 0;
 
-        this.currentBytecodeLimit = type.bytecodeLimit;
+        this.currentBytecodeLimit = getType().bytecodeLimit;
     }
 
     public void processEndOfTurn() {
@@ -407,6 +407,10 @@ public class InternalRobot {
 
     @Override
     public String toString() {
-        return String.format("%s:%s#%d", getTeam(), type, getID());
+        return String.format("%s:%s#%d", getTeam(), getType(), getID());
+    }
+
+    public RobotType getType() {
+        return type;
     }
 }
