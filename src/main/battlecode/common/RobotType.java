@@ -62,14 +62,14 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    SOLDIER         (false, false, 0,  ARCHON,    10, 25, 50,   4,  13,   2,   2, 1, 24,     10000, 0, STANDARDZOMBIE),
+    SOLDIER         (false, false, 0,  ARCHON,    20, 10, 50,   4,  13,   2,   2, 1, 24,     10000, 0, STANDARDZOMBIE),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A melee unit equipped for zombie combat.
      *
      * @battlecode.doc.robottype
      */
-    GUARD           (false, false, 0,  ARCHON,    10, 25, 120,  1.5,   2,   2,   1, 1, 24,     10000, 0, STANDARDZOMBIE),
+    GUARD           (false, false, 0,  ARCHON,    20, 10, 120,  1.5,   2,   2,   1, 1, 24,     10000, 0, STANDARDZOMBIE),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A special unit cabable of infecting robots with a damaging strain of the
@@ -77,7 +77,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    VIPER           (false, false, 20, ARCHON,    50, 30, 100,  2,  13,   2,   3, 1, 24,     10000, 0, RANGEDZOMBIE),
+    VIPER           (false, false, 20, ARCHON,    100,30, 100,  2,  13,   2,   3, 1, 24,     10000, 0, RANGEDZOMBIE),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * An immobile unit designed to reinforce an area; transforms into a
@@ -85,7 +85,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    TURRET          (false,  false, 0,  ARCHON,   50, 50, 100,  18, 48,   0,   3, 3, 24,     2000,  0, RANGEDZOMBIE),
+    TURRET          (false,  false, 0,  ARCHON,   75, 25, 100,  18, 48,   0,   3, 3, 24,     2000,  0, RANGEDZOMBIE),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * Turret - Transport Mode: the mobile version of a {@link #TURRET TURRET}.
