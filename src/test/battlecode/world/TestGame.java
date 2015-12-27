@@ -187,7 +187,10 @@ public class TestGame {
 
         @Override
         public int getBytecodesUsed(InternalRobot robot) {
-            return 0;
+            // BytecodesUsed defaults to zero in InternalRobot, so this gives us
+            // the ability to change bytecodesUsed in a test case without it being
+            // written back to zero
+            return robot.getBytecodesUsed();
         }
 
         @Override
