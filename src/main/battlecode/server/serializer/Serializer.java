@@ -1,5 +1,6 @@
 package battlecode.server.serializer;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 /**
@@ -9,7 +10,7 @@ import java.io.IOException;
  *
  * Created by james on 7/24/15.
  */
-public interface Serializer<T> {
+public interface Serializer<T> extends Closeable {
 
     /**
      * Write an object. Safe to be called from multiple threads.
@@ -28,11 +29,4 @@ public interface Serializer<T> {
      * @throws IOException
      */
     T deserialize() throws IOException;
-
-    /**
-     * Release any resources used by the serializer.
-     *
-     * @throws IOException
-     */
-    void close() throws IOException;
 }

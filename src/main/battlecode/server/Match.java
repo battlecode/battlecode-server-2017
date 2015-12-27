@@ -7,9 +7,11 @@ import battlecode.world.signal.Signal;
 import battlecode.serial.*;
 import battlecode.world.GameMap;
 import battlecode.world.GameWorld;
-import battlecode.world.XMLMapHandler;
+import battlecode.world.GameMapIO;
 import battlecode.world.control.PlayerControlProvider;
 import battlecode.world.control.TeamControlProvider;
+
+import java.io.File;
 
 /**
  * Abstracts the game engine for the server. This class is responsible for
@@ -71,7 +73,6 @@ public class Match {
      */
     public Match(GameInfo info, String map, Config options, int number,
                  int count) {
-
         this.info = info;
         this.map = map;
         this.options = options;
@@ -87,39 +88,30 @@ public class Match {
      * manipulates static state, engine object creation should not be done at
      * match creation time!
      */
-    public void initialize() {
-        String mapPath = options.get("bc.game.map-path");
+    public void initialize() throws Exception {
+        final File mapPath = new File(options.get("bc.game.map-path"));
 
-        try {
-            // Load the map for the match
-            final XMLMapHandler handler = XMLMapHandler.loadMap(map, mapPath);
-            final GameMap map = handler.getParsedMap();
+        // Load the map for the match
+        final GameMap loadedMap = GameMapIO.loadMap(map, mapPath);
 
-            // Create the control provider for the match
-            // TODO move this somewhere better-fitting
-            final TeamControlProvider teamProvider = new TeamControlProvider();
-            teamProvider.registerControlProvider(
-                    Team.A,
-                    new PlayerControlProvider(info.getTeamA(), "RobotPlayer")
-            );
-            teamProvider.registerControlProvider(
-                    Team.B,
-                    new PlayerControlProvider(info.getTeamB(), "RobotPlayer")
-            );
-            teamProvider.registerControlProvider(
-                    Team.ZOMBIE,
-                    new PlayerControlProvider("ZombiePlayer", "ZombiePlayer")
-            );
+        // Create the control provider for the match
+        // TODO move this somewhere better-fitting
+        final TeamControlProvider teamProvider = new TeamControlProvider();
+        teamProvider.registerControlProvider(
+                Team.A,
+                new PlayerControlProvider(info.getTeamA(), "RobotPlayer")
+        );
+        teamProvider.registerControlProvider(
+                Team.B,
+                new PlayerControlProvider(info.getTeamB(), "RobotPlayer")
+        );
+        teamProvider.registerControlProvider(
+                Team.ZOMBIE,
+                new PlayerControlProvider("ZombiePlayer", "ZombiePlayer")
+        );
 
-            // Create the game world!
-            gameWorld = new GameWorld(map, teamProvider, info.getTeamA(), info.getTeamB(), state);
-        } catch (IllegalArgumentException e) {
-            System.out.println("[Engine] Error while loading map '" + map + "'");
-            throw e;
-        } catch (Exception e) {
-            ErrorReporter.report(e);
-            throw e;
-        }
+        // Create the game world!
+        gameWorld = new GameWorld(loadedMap, teamProvider, info.getTeamA(), info.getTeamB(), state);
     }
 
     /**

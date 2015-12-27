@@ -2,37 +2,18 @@ package battlecode.world;
 
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import battlecode.server.Config;
-import battlecode.server.serializer.Serializer;
-import battlecode.server.serializer.XStreamSerializerFactory;
-import org.junit.Before;
 import org.junit.Test;
 
-import java.io.FileOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
 
 import static org.junit.Assert.assertTrue;
 
-public class XMLMapHandlerTest {
-
-    /**
-     * Reads a game map from file given the name of the
-     * map. Will use the map math specified in TestMapGenerator.
-     *
-     * @param mapName name of the map.
-     * @return a GameWorld with this map.
-     */
-    public GameMap getMap(String mapName) {
-        XMLMapHandler handler = XMLMapHandler.loadMap(mapName,
-                TestMapGenerator.MAP_PATH);
-
-        return handler.getParsedMap();
-    }
-
+public class GameMapIOTest {
     /**
      * Writes a map to a file and then reads it. A basic test to make sure
-     * XMLMapHandler reads map files properly.
+     * GameMapIO reads map files properly.
      *
      * @throws IOException shouldn't happen.
      */
@@ -53,16 +34,20 @@ public class XMLMapHandlerTest {
                 .withParts(48, 79, 111)
                 .withZombieSpawn(100, RobotType.FASTZOMBIE, 12)
                 .withZombieSpawn(500, RobotType.RANGEDZOMBIE, 15)
+                .withZombieSpawn(500, RobotType.FASTZOMBIE, 100)
                 .withRobot(RobotType.ARCHON, Team.A, 0, 0)
                 .withRobot(RobotType.ARCHON, Team.B, 49, 79)
                 .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 0, 79)
                 .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 49, 0);
 
-        gen.writeMapToFile("basicMap");
-
         final GameMap inputMap = gen.getMap("basicMap");
 
-        final GameMap outputMap = getMap("basicMap");
+        final File tempDir = Files.createTempDirectory("battlecode-test").toFile();
+        tempDir.deleteOnExit();
+
+        GameMapIO.writeMap(inputMap, tempDir);
+
+        final GameMap outputMap = GameMapIO.loadMap("basicMap", tempDir);
 
         assertTrue(inputMap.equals(outputMap));
     }

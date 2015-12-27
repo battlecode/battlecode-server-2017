@@ -2,6 +2,7 @@ package battlecode.world;
 
 import battlecode.common.RobotType;
 import battlecode.common.ZombieCount;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
 import java.util.*;
@@ -61,6 +62,7 @@ public class ZombieSpawnSchedule implements Serializable {
      *
      * @return the rounds for which there are zombie spawns.
      */
+    @JsonIgnore
     public Collection<Integer> getRounds() {
         return map.keySet();
     }
