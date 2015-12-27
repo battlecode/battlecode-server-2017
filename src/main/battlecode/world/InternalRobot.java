@@ -284,8 +284,11 @@ public class InternalRobot {
     }
 
     public void decrementDelays() {
-        weaponDelay--;
-        coreDelay--;
+        // Formula following the "Explanation of Delays" section of game specs
+        double amountToDecrement = 1.0 - (0.3 * Math.pow(Math.max(0.0,8000-this.currentBytecodeLimit+this.bytecodesUsed)/8000.0,1.5));
+        
+        weaponDelay-=amountToDecrement;
+        coreDelay-=amountToDecrement;
 
         if (weaponDelay < 0.0) {
             weaponDelay = 0.0;
