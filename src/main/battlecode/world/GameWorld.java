@@ -1,9 +1,6 @@
 package battlecode.world;
 
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
+import battlecode.common.*;
 import battlecode.server.ErrorReporter;
 import battlecode.server.GameState;
 import battlecode.world.signal.AutoSignalHandler;
@@ -121,7 +118,6 @@ public class GameWorld implements SignalHandler {
         // Add the robots contained in the GameMap to this world.
         for (GameMap.InitialRobotInfo initialRobot : gameMap.getInitialRobots()) {
             // Side-effectful constructor; will add robot to relevant stuff
-
             spawnRobot(
                     initialRobot.type,
                     initialRobot.getLocation(gameMap.getOrigin()),
@@ -346,7 +342,7 @@ public class GameWorld implements SignalHandler {
 
     public boolean canMove(MapLocation loc, RobotType type) {
         return gameMap.onTheMap(loc) && (getRubble(loc) < GameConstants
-                .RUBBLE_OBSTRUCTION_THRESH || type == RobotType.SCOUT) &&
+                .RUBBLE_OBSTRUCTION_THRESH || type.ignoresRubble) &&
                 gameObjectsByLoc.get(loc) == null;
     }
 
@@ -419,6 +415,38 @@ public class GameWorld implements SignalHandler {
         }
 
         return robots.toArray(new InternalRobot[robots.size()]);
+    }
+
+    // Used by zombies.
+
+    /**
+     * @param loc the location to find nearest robots.
+     * @return the info of the nearest player-controlled robot, or null
+     *         if there are no player-controlled robots
+     */
+    public RobotInfo getNearestPlayerControlled(MapLocation loc) {
+        assert gameObjectsByLoc.size() == gameObjectsByID.size();
+        int distSq = Integer.MAX_VALUE;
+        MapLocation closest = null;
+        for (Map.Entry<MapLocation, InternalRobot> locRobot : gameObjectsByLoc.entrySet()) {
+            if (!locRobot.getValue().getTeam().isPlayer()) continue;
+
+            if (closest == null) {
+                closest = locRobot.getKey();
+                distSq = closest.distanceSquaredTo(loc);
+            } else {
+                MapLocation newLoc = locRobot.getKey();
+                int newDistSq = newLoc.distanceSquaredTo(loc);
+                if (newDistSq < distSq) {
+                    closest = newLoc;
+                }
+            }
+        }
+
+        if (closest == null) {
+            return null;
+        }
+        return gameObjectsByLoc.get(closest).getRobotInfo();
     }
 
     // *********************************
@@ -720,7 +748,6 @@ public class GameWorld implements SignalHandler {
         case VIPER:
         case TURRET:
             int splashRadius = 0;
-
 
             // TODO - we're not going to find any targets?
             InternalRobot[] targets = getAllRobotsWithinRadiusSq(targetLoc,

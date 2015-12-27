@@ -194,8 +194,8 @@ public class Server implements Runnable, NotificationHandler {
                 }
 
             } catch (Exception e) {
-                error("couldn't run match: ");
                 ErrorReporter.report(e);
+                error("couldn't run match: ");
 
                 this.state = State.ERROR;
             }

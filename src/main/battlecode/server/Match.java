@@ -3,6 +3,7 @@ package battlecode.server;
 import battlecode.common.GameConstants;
 import battlecode.common.Team;
 import battlecode.world.DominationFactor;
+import battlecode.world.control.ZombieControlProvider;
 import battlecode.world.signal.Signal;
 import battlecode.serial.*;
 import battlecode.world.GameMap;
@@ -107,7 +108,7 @@ public class Match {
         );
         teamProvider.registerControlProvider(
                 Team.ZOMBIE,
-                new PlayerControlProvider("ZombiePlayer", "ZombiePlayer")
+                new ZombieControlProvider()
         );
 
         // Create the game world!

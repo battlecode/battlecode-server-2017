@@ -455,7 +455,7 @@ public final class RobotControllerImpl implements RobotController {
         double factor1 = (d.isDiagonal() ? GameConstants.DIAGONAL_DELAY_MULTIPLIER
                 : 1.0); //
         double factor2 = 1.0;
-        double factor3 = (gameWorld.getRubble(getLocation().add(d)) >=
+        double factor3 = (!getType().ignoresRubble && gameWorld.getRubble(getLocation().add(d)) >=
                 GameConstants.RUBBLE_SLOW_THRESH) ? 2.0 : 1.0;
 
         robot.activateMovement(new MovementSignal(robot.getID(), getLocation().add(d), (int) (robot.getType().movementDelay * factor1)),
