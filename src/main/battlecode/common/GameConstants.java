@@ -30,7 +30,7 @@ public interface GameConstants {
     int ROUND_MIN_LIMIT = 2000;
 
     /** The maximum possible round at which the game may be forced to end */
-    int ROUND_MAX_LIMIT = 3000;
+    int ROUND_MAX_LIMIT = 4000;
 
     /** The number of longs that your team can remember between games. */
     int TEAM_MEMORY_LENGTH = 32;
@@ -58,10 +58,13 @@ public interface GameConstants {
     // *********************************
 
     /** The amount that each team starts with */
-    int PARTS_INITIAL_AMOUNT = 200;
+    double PARTS_INITIAL_AMOUNT = 200;
     
     /** The part income per turn per archon */
-    int ARCHON_PART_INCOME = 1;
+    double ARCHON_PART_INCOME = 1;
+
+    /** The parts reward for destroying a zomie den */
+    double DEN_PART_REWARD = 300;
 
     // *********************************
     // ****** RUBBLE *******************
@@ -69,10 +72,10 @@ public interface GameConstants {
 
     /** The threshold of rubble that robots (except SCOUTs) can't move
      * through. */
-    int RUBBLE_OBSTRUCTION_THRESH = 100;
+    double RUBBLE_OBSTRUCTION_THRESH = 100;
 
     /** The threshold of rubble that slows robots (except SCOUTS). */
-    int RUBBLE_SLOW_THRESH = 50;
+    double RUBBLE_SLOW_THRESH = 50;
 
     /** Percentage of rubble removed with each clear. */
     double RUBBLE_CLEAR_PERCENTAGE = 0.05;
@@ -96,9 +99,16 @@ public interface GameConstants {
     /** The factor that delays are multiplied by when a unit moves diagonally. */
     double DIAGONAL_DELAY_MULTIPLIER = 1.4;
 
+    /** Amount an archon repairs another bot for. */
+    double ARCHON_REPAIR_AMOUNT = 1.0;
+
+    // *********************************
+    // ****** GAMEPLAY PROPERTIES ******
+    // *********************************
+
     /** The default game seed. **/
     int GAME_DEFAULT_SEED = 6370;
 
     /** The default game maxiumum number of rounds. **/
-    int GAME_DEFAULT_ROUNDS = 2000;
+    int GAME_DEFAULT_ROUNDS = 3000;
 }

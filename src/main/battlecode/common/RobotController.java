@@ -306,7 +306,22 @@ public interface RobotController {
     boolean isWeaponReady();
 
     // ***********************************
-    // ****** RUBBLE METHODS ***********
+    // ****** REPAIR METHODS *************
+    // ***********************************
+
+    /**
+     * Repairs the robot at the given location. The robot must be in attack
+     * range.
+     *
+     * @param loc the location of the robot to repair.
+     * @throws GameActionException if the location is out of range, if there
+     *  is no robot there, if the robot is from the wrong team, or if you
+     *  already repaired this turn.
+     */
+    void repair(MapLocation loc) throws GameActionException;
+
+    // ***********************************
+    // ****** RUBBLE METHODS *************
     // ***********************************
 
     /**

@@ -323,6 +323,44 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     // ***************************
+    // ********* REPAIR **********
+    // ***************************
+
+    @Override
+    public void repair(MapLocation loc) throws GameActionException {
+        assertNotNull(loc);
+
+        if (robot.type != RobotType.ARCHON) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Only archons can" +
+                    " repair.");
+        }
+
+        if (!gameWorld.canAttackSquare(robot, loc)) {
+            throw new GameActionException(
+                    OUT_OF_RANGE,
+                    loc + " is out of this robot's attack range for repair."
+            );
+        }
+
+        InternalRobot target = gameWorld.getRobot(loc);
+        if (target == null) {
+            throw new GameActionException(NO_ROBOT_THERE, "No robot there to " +
+                    "repair.");
+        }
+        if (target.getTeam() != robot.getTeam()) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Can only repair " +
+                    "robots on your own team.");
+        }
+
+        if (robot.getRepairCount() >= 1) {
+            throw new GameActionException(CANT_DO_THAT_BRO, "Can only repair " +
+                    "once per turn.");
+        }
+
+        robot.repair(target);
+    }
+
+    // ***************************
     // ********* RUBBLE **********
     // ***************************
 

@@ -1,7 +1,11 @@
 package battlecode.server.serializer;
 
 import battlecode.common.MapLocation;
+import battlecode.common.RobotType;
+import battlecode.common.ZombieCount;
 import battlecode.world.DominationFactor;
+import battlecode.world.GameMap;
+import battlecode.world.ZombieSpawnSchedule;
 import battlecode.world.signal.Signal;
 import battlecode.serial.ExtensibleMetadata;
 import battlecode.serial.RoundDelta;
@@ -177,15 +181,68 @@ public class XStreamSerializerFactory implements SerializerFactory {
 
     }
 
+    public static class ZombieScheduleConverter implements Converter {
+        @Override
+        public boolean canConvert(Class type) {
+            return type.equals(ZombieSpawnSchedule.class);
+        }
+
+        @Override
+        public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+            final ZombieSpawnSchedule sched = (ZombieSpawnSchedule) source;
+
+            for (final int round : sched.getRounds()) {
+                writer.startNode("round");
+                writer.addAttribute("number", Integer.toString(round));
+                for (final ZombieCount count : sched.getScheduleForRound(round)) {
+                    writer.startNode("zombie-count");
+                    writer.addAttribute("type", count.getType().toString());
+                    writer.addAttribute("count", Integer.toString(count.getCount()));
+                    writer.endNode();
+                }
+                writer.endNode();
+            }
+        }
+
+        @Override
+        public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+            final ZombieSpawnSchedule result = new ZombieSpawnSchedule();
+            while (reader.hasMoreChildren()) {
+                reader.moveDown();
+                assert reader.getNodeName().equals("round");
+
+                final int round = Integer.parseInt(reader.getAttribute("number"));
+
+                while (reader.hasMoreChildren()) {
+                    reader.moveDown();
+                    assert reader.getNodeName().equals("zombie-count");
+
+                    final RobotType type = RobotType.valueOf(reader.getAttribute("type"));
+                    final int count = Integer.parseInt(reader.getAttribute("count"));
+
+                    result.add(round, type, count);
+
+                    reader.moveUp();
+                }
+
+                reader.moveUp();
+            }
+
+            return result;
+        }
+
+    }
+
     static protected void initXStream() {
         if (xstream != null) return;
-        xstream = new XStream() {};
+        xstream = new XStream();
         xstream.registerConverter(new IntArrayConverter());
         xstream.registerConverter(new LongArrayConverter());
         xstream.registerConverter(new DoubleArrayConverter());
         xstream.registerConverter(new MapLocationConverter());
         xstream.registerConverter(new ExtensibleMetadataConverter());
         xstream.registerConverter(new RoundDeltaConverter());
+        xstream.registerConverter(new ZombieScheduleConverter());
         xstream.useAttributeFor(int.class);
         xstream.useAttributeFor(int[].class);
         xstream.useAttributeFor(long.class);
@@ -201,6 +258,9 @@ public class XStreamSerializerFactory implements SerializerFactory {
         xstream.useAttributeFor(DominationFactor.class);
         xstream.aliasPackage("sig", "battlecode.world.signal");
         xstream.aliasPackage("ser", "battlecode.serial");
+        xstream.alias("game-map", GameMap.class);
+        xstream.alias("initial-robot", GameMap.InitialRobotInfo.class);
+        xstream.alias("zombie-count", ZombieCount.class);
     }
 
     static public XStream getXStream() {

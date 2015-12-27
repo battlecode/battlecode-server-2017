@@ -738,6 +738,13 @@ public class GameWorld implements SignalHandler {
 
                 double damage = (attacker.type.attackPower) * rate;
                 target.takeDamage(damage);
+
+                // Reward parts to destroyer of zombie den
+                if (target.type == RobotType.ZOMBIEDEN && target
+                        .getHealthLevel() <= 0.0) {
+                    adjustResources(attacker.getTeam(),
+                            GameConstants.DEN_PART_REWARD);
+                }
             }
             break;
         default:
