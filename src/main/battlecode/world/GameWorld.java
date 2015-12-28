@@ -682,6 +682,23 @@ public class GameWorld implements SignalHandler {
     }
 
     @SuppressWarnings("unused")
+    public void visitActivationSignal(ActivationSignal s) {
+        InternalRobot activator = getObjectByID(s.getRobotID());
+        MapLocation targetLoc = s.getLoc();
+        InternalRobot toBeActivated = getRobot(targetLoc);
+
+        visitDeathSignal(new DeathSignal(toBeActivated.getID(), true));
+
+        spawnRobot(
+                toBeActivated.getType(),
+                targetLoc,
+                activator.getTeam(),
+                0,
+                Optional.of(activator)
+        );
+    }
+
+    @SuppressWarnings("unused")
     public void visitAttackSignal(AttackSignal s) {
         InternalRobot attacker = getObjectByID(s.getRobotID());
 
@@ -800,6 +817,7 @@ public class GameWorld implements SignalHandler {
 
         int ID = s.getObjectID();
         InternalRobot obj = getObjectByID(ID);
+        boolean isDeathByActivation = s.isDeathByActivation();
 
         if (obj == null) {
             throw new RuntimeException("visitDeathSignal of nonexistent robot: "+s.getObjectID());
@@ -816,7 +834,7 @@ public class GameWorld implements SignalHandler {
 
         decrementRobotTypeCount(obj.getTeam(), obj.getType());
 
-        if (obj.getType() == RobotType.ARCHON) {
+        if (obj.getType() == RobotType.ARCHON && obj.getTeam().isPlayer()) {
             int totalArchons = getRobotTypeCount(obj.getTeam(),
                     RobotType.ARCHON);
             if (totalArchons == 0) {
@@ -826,19 +844,20 @@ public class GameWorld implements SignalHandler {
         }
 
         // update rubble
-        alterRubble(loc, getRubble(loc) + obj.getMaxHealth());
-        addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
+        if (!isDeathByActivation) {
+            alterRubble(loc, getRubble(loc) + obj.getMaxHealth());
+            addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
+        }
 
         controlProvider.robotKilled(obj);
         gameObjectsByID.remove(obj.getID());
         gameObjectsByLoc.remove(loc);
 
         // if it was an infected robot, create a Zombie in its place.
-        if (obj.isInfected()) {
+        if (obj.isInfected() && !isDeathByActivation) {
             RobotType zombieType = obj.getType().turnsInto; // Type of Zombie this unit turns into
 
             // Create new Zombie
-
             spawnRobot(
                     zombieType,
                     obj.getLocation(),

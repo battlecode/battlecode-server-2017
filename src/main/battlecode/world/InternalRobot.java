@@ -294,11 +294,11 @@ public class InternalRobot {
         weaponDelay += time;
     }
 
-    public void addCooldownDelay(double delay) {
+    public void setCoreDelayUpTo(double delay) {
         coreDelay = Math.max(coreDelay, delay);
     }
 
-    public void addLoadingDelay(double delay) {
+    public void setWeaponDelayUpTo(double delay) {
         weaponDelay = Math.max(weaponDelay, delay);
     }
 
@@ -339,26 +339,23 @@ public class InternalRobot {
     // ****** ACTION METHODS ***********
     // *********************************
 
-    public void activateMovement(Signal s, double attackDelay,
-            double movementDelay) {
-
+    public void activateCoreAction(Signal s, double attackDelay, double
+            movementDelay) {
         gameWorld.visitSignal(s);
 
-        addLoadingDelay(attackDelay);
+        setWeaponDelayUpTo(attackDelay);
         addCoreDelay(movementDelay);
     }
 
-    public void activateAttack(Signal s, double attackDelay,
-            double movementDelay) {
-
+    public void activateAttack(Signal s, double attackDelay, double
+            movementDelay) {
         gameWorld.visitSignal(s);
 
         addWeaponDelay(attackDelay);
-        addCooldownDelay(movementDelay);
+        setCoreDelayUpTo(movementDelay);
     }
 
     public void setLocation(MapLocation loc) {
-        MapLocation oldloc = getLocation();
         gameWorld.notifyMovingObject(this, location, loc);
         location = loc;
     }

@@ -83,6 +83,11 @@ public final class RobotControllerImpl implements RobotController {
         return gameWorld.resources(getTeam());
     }
 
+    @Override
+    public int getRoundNum() {
+        return gameWorld.getCurrentRound();
+    }
+
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************
@@ -303,8 +308,6 @@ public final class RobotControllerImpl implements RobotController {
         }
     }
 
-
-
     @Override
     public boolean isCoreReady() {
         return getCoreDelay() < 1;
@@ -313,44 +316,6 @@ public final class RobotControllerImpl implements RobotController {
     @Override
     public boolean isWeaponReady() {
         return getWeaponDelay() < 1;
-    }
-
-    // ***************************
-    // ********* REPAIR **********
-    // ***************************
-
-    @Override
-    public void repair(MapLocation loc) throws GameActionException {
-        assertNotNull(loc);
-
-        if (robot.getType() != RobotType.ARCHON) {
-            throw new GameActionException(CANT_DO_THAT, "Only archons can" +
-                    " repair.");
-        }
-
-        if (!gameWorld.canAttackSquare(robot, loc)) {
-            throw new GameActionException(
-                    OUT_OF_RANGE,
-                    loc + " is out of this robot's attack range for repair."
-            );
-        }
-
-        InternalRobot target = gameWorld.getRobot(loc);
-        if (target == null) {
-            throw new GameActionException(NO_ROBOT_THERE, "No robot there to " +
-                    "repair.");
-        }
-        if (target.getTeam() != robot.getTeam()) {
-            throw new GameActionException(CANT_DO_THAT, "Can only repair " +
-                    "robots on your own team.");
-        }
-
-        if (robot.getRepairCount() >= 1) {
-            throw new GameActionException(CANT_DO_THAT, "Can only repair " +
-                    "once per turn.");
-        }
-
-        robot.repair(target);
     }
 
     // ***************************
@@ -379,8 +344,9 @@ public final class RobotControllerImpl implements RobotController {
                     "the direction OMNI.");
         }
 
-        robot.activateMovement(new ClearRubbleSignal(robot.getID(),
-                getLocation().add(dir), (int) (robot.getType().movementDelay)),
+        robot.activateCoreAction(new ClearRubbleSignal(robot.getID(),
+                        getLocation().add(dir), (int) (robot.getType()
+                        .movementDelay)),
                 robot.getType().cooldownDelay, robot.getType().movementDelay);
     }
 
@@ -450,33 +416,11 @@ public final class RobotControllerImpl implements RobotController {
         double factor3 = (!getType().ignoresRubble && gameWorld.getRubble(getLocation().add(d)) >=
                 GameConstants.RUBBLE_SLOW_THRESH) ? 2.0 : 1.0;
 
-        robot.activateMovement(new MovementSignal(robot.getID(), getLocation().add(d), (int) (robot.getType().movementDelay * factor1)),
+        robot.activateCoreAction(new MovementSignal(robot.getID(),
+                        getLocation().add(d), (int) (robot.getType()
+                        .movementDelay * factor1)),
                 robot.getType().cooldownDelay * factor2 * factor3,
                 robot.getType().movementDelay * factor1 * factor3);
-    }
-    
-    // **************************************
-    // ********* TTM/TURRET METHODS *********
-    // **************************************
-
-    @Override
-    public void pack() throws GameActionException {
-        if(robot.getType().equals(RobotType.TURRET)) {
-            robot.transform(RobotType.TTM);
-        } else {
-            throw new GameActionException(CANT_DO_THAT,
-                    "Only Turrets can pack. ");
-        }
-    }
-
-    @Override
-    public void unpack() throws GameActionException {
-        if(robot.getType().equals(RobotType.TTM)) {
-            robot.transform(RobotType.TURRET);
-        } else {
-            throw new GameActionException(CANT_DO_THAT,
-                    "Only TTMs can unpack. ");
-        }
     }
 
     // **********************************
@@ -575,7 +519,8 @@ public final class RobotControllerImpl implements RobotController {
     public boolean hasBuildRequirements(RobotType type) {
         assertNotNull(type);
         return robot.getType().canBuild() && type.isBuildable()
-                && type.partCost <= gameWorld.resources(getTeam());
+                && type.partCost <= gameWorld.resources(getTeam()) && type
+                .spawnSource == robot.getType();
     }
 
     @Override
@@ -614,11 +559,102 @@ public final class RobotControllerImpl implements RobotController {
         assertIsPathable(type, loc);
         
         int delay = type.buildTurns;
-        robot.activateMovement(
+        robot.activateCoreAction(
                 new BuildSignal(robot.getID(),
                         loc, type, robot.getTeam(), delay
                 ),
                 delay, delay);
+    }
+
+    // ***********************************
+    // ****** OTHER ACTION METHODS *******
+    // ***********************************
+
+    @Override
+    public void activate(MapLocation loc) throws GameActionException {
+        assertNotNull(loc);
+
+        if (robot.getType() != RobotType.ARCHON) {
+            throw new GameActionException(CANT_DO_THAT, "Only archons can" +
+                    " activate.");
+        }
+
+        if (getLocation().distanceSquaredTo(loc) > GameConstants.ARCHON_ACTIVATION_RANGE) {
+            throw new GameActionException(
+                    OUT_OF_RANGE,
+                    loc + " is out of this robot's range for activation."
+            );
+        }
+
+        InternalRobot target = gameWorld.getRobot(loc);
+        if (target == null) {
+            throw new GameActionException(NO_ROBOT_THERE, "No robot there to " +
+                    "activate.");
+        }
+        if (target.getTeam() != Team.NEUTRAL) {
+            throw new GameActionException(CANT_DO_THAT, "Can only activate " +
+                    "robots that are NEUTRAL.");
+        }
+
+        assertIsCoreReady();
+
+        robot.repair(target);
+        robot.activateCoreAction(new ActivationSignal(robot.getID(), loc),
+                0, robot.getType().movementDelay);
+    }
+
+    @Override
+    public void repair(MapLocation loc) throws GameActionException {
+        assertNotNull(loc);
+
+        if (robot.getType() != RobotType.ARCHON) {
+            throw new GameActionException(CANT_DO_THAT, "Only archons can" +
+                    " repair.");
+        }
+
+        if (!gameWorld.canAttackSquare(robot, loc)) {
+            throw new GameActionException(
+                    OUT_OF_RANGE,
+                    loc + " is out of this robot's attack range for repair."
+            );
+        }
+
+        InternalRobot target = gameWorld.getRobot(loc);
+        if (target == null) {
+            throw new GameActionException(NO_ROBOT_THERE, "No robot there to " +
+                    "repair.");
+        }
+        if (target.getTeam() != robot.getTeam()) {
+            throw new GameActionException(CANT_DO_THAT, "Can only repair " +
+                    "robots on your own team.");
+        }
+
+        if (robot.getRepairCount() >= 1) {
+            throw new GameActionException(CANT_DO_THAT, "Can only repair " +
+                    "once per turn.");
+        }
+
+        robot.repair(target);
+    }
+
+    @Override
+    public void pack() throws GameActionException {
+        if(robot.getType().equals(RobotType.TURRET)) {
+            robot.transform(RobotType.TTM);
+        } else {
+            throw new GameActionException(CANT_DO_THAT,
+                    "Only Turrets can pack. ");
+        }
+    }
+
+    @Override
+    public void unpack() throws GameActionException {
+        if(robot.getType().equals(RobotType.TTM)) {
+            robot.transform(RobotType.TURRET);
+        } else {
+            throw new GameActionException(CANT_DO_THAT,
+                    "Only TTMs can unpack. ");
+        }
     }
 
     @Override
@@ -636,8 +672,9 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     // ***********************************
-    // ******** MISC. METHODS ************
+    // ******** TEAM MEMORY **************
     // ***********************************
+
     @Override
     public void setTeamMemory(int index, long value) {
         gameWorld.setTeamMemory(robot.getTeam(), index, value);
@@ -657,6 +694,7 @@ public final class RobotControllerImpl implements RobotController {
     // ***********************************
     // ******** DEBUG METHODS ************
     // ***********************************
+
     @Override
     public void setIndicatorString(int stringIndex, String newString) {
         assertNotNull(newString);
@@ -689,10 +727,5 @@ public final class RobotControllerImpl implements RobotController {
     public void addMatchObservation(String observation) {
         assertNotNull(observation);
         gameWorld.visitSignal((new MatchObservationSignal(robot.getID(), observation)));
-    }
-
-    @Override
-    public int getRoundNum() {
-        return gameWorld.getCurrentRound();
     }
 }
