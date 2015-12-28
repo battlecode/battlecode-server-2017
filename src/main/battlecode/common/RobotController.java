@@ -122,12 +122,11 @@ public interface RobotController {
 
     /**
      * Senses whether a MapLocation is on the map. Will throw an exception if
-     * the location is not currently and has never been within sensor range.
+     * the location is not currently within sensor range.
      *
      * @param loc the location to check.
      * @return true if the location is on the map, and false if it is not.
-     * @throws GameActionException if the location has never been within
-     * sensor range.
+     * @throws GameActionException if the location is not within sensor range.
      *
      * @battlecode.doc.costlymethod
      */

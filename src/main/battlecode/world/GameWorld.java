@@ -51,9 +51,6 @@ public class GameWorld implements SignalHandler {
     private double[][] rubble;
     private double[][] parts;
 
-    private Map<Team, GameMap.MapMemory> mapMemory = new EnumMap<>(
-            Team.class);
-
     private Map<Team, Map<Integer, Integer>> radio = new EnumMap<>(
             Team.class);
 
@@ -77,11 +74,6 @@ public class GameWorld implements SignalHandler {
 
         gameMap = gm;
         controlProvider = cp;
-
-        mapMemory.put(Team.A, new GameMap.MapMemory(gameMap));
-        mapMemory.put(Team.B, new GameMap.MapMemory(gameMap));
-        mapMemory.put(Team.NEUTRAL, new GameMap.MapMemory(gameMap));
-        mapMemory.put(Team.ZOMBIE, new GameMap.MapMemory(gameMap));
 
         radio.put(Team.A, new HashMap<>());
         radio.put(Team.B, new HashMap<>());
@@ -211,10 +203,6 @@ public class GameWorld implements SignalHandler {
     // ****** BASIC MAP METHODS ********
     // *********************************
 
-    public GameMap.MapMemory getMapMemory(Team t) {
-        return mapMemory.get(t);
-    }
-
     public int getMapSeed() {
         return gameMap.getSeed();
     }
@@ -322,24 +310,6 @@ public class GameWorld implements SignalHandler {
         currentSignals.clear();
     }
 
-    public boolean seenBefore(Team team, MapLocation loc) {
-        return mapMemory.get(team).seenBefore(loc);
-    }
-
-    public boolean canSense(Team team, MapLocation loc) {
-        return mapMemory.get(team).canSense(loc);
-    }
-
-    public void updateMapMemoryAdd(Team team, MapLocation loc, int radiusSquared) {
-        mapMemory.get(team).rememberLocation(loc, radiusSquared, rubble,
-                parts);
-    }
-
-    public void updateMapMemoryRemove(Team team, MapLocation loc,
-            int radiusSquared) {
-        mapMemory.get(team).removeLocation(loc, radiusSquared);
-    }
-
     public boolean canMove(MapLocation loc, RobotType type) {
         return gameMap.onTheMap(loc) && (getRubble(loc) < GameConstants
                 .RUBBLE_OBSTRUCTION_THRESH || type.ignoresRubble) &&
@@ -425,27 +395,23 @@ public class GameWorld implements SignalHandler {
      *         if there are no player-controlled robots
      */
     public RobotInfo getNearestPlayerControlled(MapLocation loc) {
-        assert gameObjectsByLoc.size() == gameObjectsByID.size();
         int distSq = Integer.MAX_VALUE;
         MapLocation closest = null;
-        for (Map.Entry<MapLocation, InternalRobot> locRobot : gameObjectsByLoc.entrySet()) {
-            if (!locRobot.getValue().getTeam().isPlayer()) continue;
+        for (InternalRobot robot : gameObjectsByID.values()) {
+            if (!robot.getTeam().isPlayer()) continue;
 
-            if (closest == null) {
-                closest = locRobot.getKey();
-                distSq = closest.distanceSquaredTo(loc);
-            } else {
-                MapLocation newLoc = locRobot.getKey();
-                int newDistSq = newLoc.distanceSquaredTo(loc);
-                if (newDistSq < distSq) {
-                    closest = newLoc;
-                }
+            MapLocation newLoc = robot.getLocation();
+            int newDistSq = newLoc.distanceSquaredTo(loc);
+            if (newDistSq < distSq) {
+                closest = newLoc;
+                distSq = newDistSq;
             }
         }
 
         if (closest == null) {
             return null;
         }
+
         return gameObjectsByLoc.get(closest).getRobotInfo();
     }
 
@@ -508,17 +474,9 @@ public class GameWorld implements SignalHandler {
                 .getOrigin().y];
     }
     
-    public double senseRubble(Team team, MapLocation loc) {
-        return mapMemory.get(team).recallRubble(loc);
-    }
-    
     public void alterRubble(MapLocation loc, double amount) {
         rubble[loc.x - gameMap.getOrigin().x][loc.y - gameMap.getOrigin().y]
                 = Math.max(0.0, amount);
-        for (Team t : Team.values()) {
-            mapMemory.get(t).updateLocationRubble(loc, rubble[loc.x - gameMap
-                    .getOrigin().x][loc.y - gameMap.getOrigin().y]);
-        }
     }
 
     // *********************************
@@ -532,17 +490,10 @@ public class GameWorld implements SignalHandler {
                 .getOrigin().y];
     }
 
-    public double senseParts(Team team, MapLocation loc) {
-        return mapMemory.get(team).recallParts(loc);
-    }
-
     public double takeParts(MapLocation loc) { // Remove parts from location
         double prevVal = getParts(loc);
         parts[loc.x - gameMap.getOrigin().x][loc.y - gameMap.getOrigin().y] =
                 0.0;
-        for (Team t : Team.values()) {
-            mapMemory.get(t).updateLocationParts(loc, 0);
-        }
         return prevVal;
     }
 
@@ -871,9 +822,6 @@ public class GameWorld implements SignalHandler {
         alterRubble(loc, getRubble(loc) + obj.getType().maxHealth);
         addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
 
-        updateMapMemoryRemove(obj.getTeam(), obj.getLocation(),
-                obj.getType().sensorRadiusSquared);
-
         controlProvider.robotKilled(obj);
         gameObjectsByID.remove(obj.getID());
         gameObjectsByLoc.remove(loc);
@@ -973,12 +921,6 @@ public class GameWorld implements SignalHandler {
                         s.getDelay(),
                         Optional.ofNullable(parent)
                 );
-
-        updateMapMemoryAdd(
-                s.getTeam(),
-                s.getLoc(),
-                s.getType().sensorRadiusSquared
-        );
 
         incrementRobotTypeCount(s.getTeam(), s.getType());
 

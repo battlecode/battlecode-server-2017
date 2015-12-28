@@ -185,6 +185,9 @@ public class ZombieControlProvider implements RobotControlProvider {
 
         RobotInfo closestRobot = world.getNearestPlayerControlled(rc.getLocation());
 
+        rc.setIndicatorString(0, "Location: "+rc.getLocation());
+        rc.setIndicatorString(1, "Target: "+closestRobot.location);
+
         try {
             if (rc.isWeaponReady() && closestRobot != null && rc.canAttackLocation(closestRobot.location)) {
                 // If target is in range, attack it and end turn
@@ -241,8 +244,6 @@ public class ZombieControlProvider implements RobotControlProvider {
             // Try to clear rubble instead
 
             final MapLocation preferredTarget = rc.getLocation().add(preferredDirection);
-            assert world.getGameMap().onTheMap(preferredTarget);
-            assert world.seenBefore(Team.ZOMBIE, preferredTarget);
             if (!rc.isLocationOccupied(preferredTarget) && rc.onTheMap(preferredTarget)
                     && rc.senseRubble(preferredTarget) >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
                 rc.clearRubble(preferredDirection);
@@ -250,8 +251,6 @@ public class ZombieControlProvider implements RobotControlProvider {
             }
 
             final MapLocation nextTarget = rc.getLocation().add(nextDirection);
-            assert world.getGameMap().onTheMap(preferredTarget);
-            assert world.seenBefore(Team.ZOMBIE, nextTarget);
             if (!rc.isLocationOccupied(nextTarget) && rc.onTheMap(nextTarget)
                     && rc.senseRubble(nextTarget) >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
                 rc.clearRubble(nextDirection);
@@ -259,15 +258,12 @@ public class ZombieControlProvider implements RobotControlProvider {
             }
 
             final MapLocation finalTarget = rc.getLocation().add(finalDirection);
-            assert world.getGameMap().onTheMap(preferredTarget);
-            assert world.seenBefore(Team.ZOMBIE, finalTarget);
             if (!rc.isLocationOccupied(finalTarget) && rc.onTheMap(finalTarget) &&
                     rc.senseRubble(finalTarget) >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
                 rc.clearRubble(finalDirection);
                 return;
             }
         } catch (Exception e) {
-            System.out.println(closestRobot);
             ErrorReporter.report(e, true);
         }
     }

@@ -139,7 +139,7 @@ public final class RobotControllerImpl implements RobotController {
      * @return whether we can sense the location
      */
     public boolean canSense(MapLocation loc) {
-        return gameWorld.canSense(getTeam(), loc);
+        return robot.canSense(loc);
     }
 
     /**
@@ -166,14 +166,10 @@ public final class RobotControllerImpl implements RobotController {
 
     @Override
     public boolean onTheMap(MapLocation loc) throws GameActionException {
-        assertNotNull(loc);
-
-        if (gameWorld.seenBefore(getTeam(), loc)) {
+        if (canSense(loc)) {
             return gameWorld.getGameMap().onTheMap(loc);
-        } else {
-            throw new GameActionException(CANT_SENSE_THAT, "Cannot sense that" +
-                    " map location");
         }
+        throw new GameActionException(CANT_SENSE_THAT, "Location "+loc+" is currently out of sensor range.");
     }
 
     @Override
@@ -183,7 +179,8 @@ public final class RobotControllerImpl implements RobotController {
         if (canSense(loc)) {
             return gameWorld.getRubble(loc);
         }
-        return gameWorld.senseRubble(getTeam(), loc);
+
+        return -1;
     }
 
     @Override
@@ -193,7 +190,8 @@ public final class RobotControllerImpl implements RobotController {
         if (canSense(loc)) {
             return gameWorld.getParts(loc);
         }
-        return gameWorld.senseParts(getTeam(), loc);
+
+        return -1;
     }
 
     @Override

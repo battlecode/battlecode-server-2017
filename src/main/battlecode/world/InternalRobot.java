@@ -188,6 +188,13 @@ public class InternalRobot {
         return healthChanged;
     }
 
+    public boolean canSense(MapLocation target) {
+        if (type.sensorRadiusSquared == -1) {
+            return true;
+        }
+        return location.distanceSquaredTo(target) <= type.sensorRadiusSquared;
+    }
+
     // *********************************
     // ****** ZOMBIE METHODS ***********
     // *********************************
@@ -338,10 +345,6 @@ public class InternalRobot {
         MapLocation oldloc = getLocation();
         gameWorld.notifyMovingObject(this, location, loc);
         location = loc;
-        gameWorld.updateMapMemoryRemove(getTeam(), oldloc,
-                getType().sensorRadiusSquared);
-        gameWorld
-                .updateMapMemoryAdd(getTeam(), loc, getType().sensorRadiusSquared);
     }
 
     public void suicide() {
