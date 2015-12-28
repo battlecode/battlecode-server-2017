@@ -844,7 +844,7 @@ public class GameWorld implements SignalHandler {
         }
 
         // update rubble
-        if (!isDeathByActivation) {
+        if (!isDeathByActivation && !obj.isInfected()) {
             alterRubble(loc, getRubble(loc) + obj.getMaxHealth());
             addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
         }
