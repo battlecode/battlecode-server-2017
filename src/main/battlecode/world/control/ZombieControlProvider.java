@@ -185,9 +185,6 @@ public class ZombieControlProvider implements RobotControlProvider {
 
         RobotInfo closestRobot = world.getNearestPlayerControlled(rc.getLocation());
 
-        rc.setIndicatorString(0, "Location: "+rc.getLocation());
-        rc.setIndicatorString(1, "Target: "+closestRobot.location);
-
         try {
             if (rc.isWeaponReady() && closestRobot != null && rc.canAttackLocation(closestRobot.location)) {
                 // If target is in range, attack it and end turn
