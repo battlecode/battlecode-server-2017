@@ -83,12 +83,6 @@ public final class RobotControllerImpl implements RobotController {
         return gameWorld.resources(getTeam());
     }
 
-    @Override
-    public ZombieCount[] getZombieSpawnSchedule(int round) {
-        // TODO consider disabling this for not zombie dens
-        return gameWorld.getGameMap().getZombieSpawnSchedule(round);
-    }
-
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************

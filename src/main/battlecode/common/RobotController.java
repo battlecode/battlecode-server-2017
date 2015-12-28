@@ -32,17 +32,6 @@ public interface RobotController {
      */
     double getTeamParts();
 
-    /**
-     * Returns the zombie spawn schedule for a given round on the map. Only
-     * works on zombie dens. NOT AVAILABLE TO COMPETITORS?
-     *
-     * @param round the round number
-     * @return the zombie spawn schedule.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    ZombieCount[] getZombieSpawnSchedule(int round);
-
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************

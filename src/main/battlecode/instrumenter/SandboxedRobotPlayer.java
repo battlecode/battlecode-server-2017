@@ -79,7 +79,7 @@ public class SandboxedRobotPlayer {
      *
      * @param teamName        the name of the team to create a player for
      * @param playerClassName the name of the class to be loaded
-     *                        (e.g. RobotPlayer or ZombiePlayer)
+     *                        (e.g. RobotPlayer)
      * @param robotController           the robot we're loading a player for
      */
     public SandboxedRobotPlayer(String teamName, String playerClassName, RobotController robotController,

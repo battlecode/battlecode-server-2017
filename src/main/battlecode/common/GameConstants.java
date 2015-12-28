@@ -14,13 +14,13 @@ public interface GameConstants {
     int MAP_MIN_HEIGHT = 30;
 
     /** The maximum possible map height. */
-    int MAP_MAX_HEIGHT = 120;
+    int MAP_MAX_HEIGHT = 100;
 
     /** The minumum possible map width. */
     int MAP_MIN_WIDTH = 30;
 
     /** The maxiumum possible map width. */
-    int MAP_MAX_WIDTH = 120;
+    int MAP_MAX_WIDTH = 100;
 
     // *********************************
     // ****** GAME PARAMETERS **********
@@ -92,6 +92,9 @@ public interface GameConstants {
     
     /** Damage a robot receives from a Viper's infection per turn */
     double VIPER_INFECTION_DAMAGE = 2;
+    
+    /** Amount of damage a den does to surrounding units when it's blockaded and can't spawn */
+    int DEN_SPLASH_DAMAGE = 10;
     
     /** Minimum attack range of a Turret */
     int TURRET_MINIMUM_RANGE = 5;

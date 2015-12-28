@@ -29,6 +29,7 @@ public class InternalRobot {
     private long controlBits;
     private int currentBytecodeLimit;
     private int bytecodesUsed;
+    private int prevBytecodesUsed;
     private boolean healthChanged;
     private boolean broadcasted;
     private HashMap<Integer, Integer> broadcastMap;
@@ -74,6 +75,7 @@ public class InternalRobot {
 
         this.currentBytecodeLimit = type.bytecodeLimit;
         this.bytecodesUsed = 0;
+        this.prevBytecodesUsed = 0;
         this.healthChanged = true;
 
         this.broadcasted = false;
@@ -291,8 +293,12 @@ public class InternalRobot {
     }
 
     public void decrementDelays() {
-        weaponDelay--;
-        coreDelay--;
+        // Formula following the "Explanation of Delays" section of game specs
+        // (Use previous bytecodes because current bytecode = 0)
+        double amountToDecrement = 1.0 - (0.3 * Math.pow(Math.max(0.0,8000-this.currentBytecodeLimit+this.prevBytecodesUsed)/8000.0,1.5));
+        
+        weaponDelay-=amountToDecrement;
+        coreDelay-=amountToDecrement;
 
         if (weaponDelay < 0.0) {
             weaponDelay = 0.0;
@@ -383,15 +389,16 @@ public class InternalRobot {
     }
 
     public void processBeginningOfTurn() {
-        decrementDelays(); // expends supply to decrement delays
+        decrementDelays();
         repairCount = 0;
 
         this.currentBytecodeLimit = getType().bytecodeLimit;
     }
 
     public void processEndOfTurn() {
+        this.prevBytecodesUsed = this.bytecodesUsed;
         roundsAlive++;
-
+        
         // broadcasts
         if (broadcasted) {
             gameWorld.visitSignal(new BroadcastSignal(this.getID(), this.getTeam(), broadcastMap));

@@ -159,4 +159,41 @@ public class ZombieControlProviderTest {
                 guard.getHealthLevel(),
                 1e-9);
     }
+
+    @Test
+    public void testDenBehaviour() {
+        // . . . Z .
+        // S . . D .
+        // . . . G .
+        final GameMap map = new TestMapGenerator(5, 3, 100)
+                .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 3, 1)
+                .withRobot(RobotType.STANDARDZOMBIE, Team.ZOMBIE, 3, 0)
+                .withRobot(RobotType.GUARD, Team.A, 3, 2)
+                .withRobot(RobotType.SOLDIER, Team.A, 0, 1)
+                .withZombieSpawn(0, RobotType.STANDARDZOMBIE, 6)
+                .getMap("map");
+
+        final GameWorld world = new GameWorld(map, zombieControlProvider, "", "", new long[2][GameConstants.TEAM_MEMORY_LENGTH]);
+
+        final InternalRobot soldier = world.gameObjectsByID.values().stream()
+                .filter(r -> r.getType() == RobotType.SOLDIER).findFirst().get();
+        final InternalRobot guard = world.gameObjectsByID.values().stream()
+                .filter(r -> r.getType() == RobotType.GUARD).findFirst().get();
+        final InternalRobot zombie = world.gameObjectsByID.values().stream()
+                .filter(r -> r.getType() == RobotType.STANDARDZOMBIE).findFirst().get();
+
+        world.runRound();
+
+        // There should now be 7 zombies
+        assertEquals(7, world.getRobotTypeCount(Team.ZOMBIE, RobotType.STANDARDZOMBIE));
+
+        // guard should take damage
+        assertEquals(RobotType.GUARD.maxHealth - GameConstants.DEN_SPAWN_PROXIMITY_DAMAGE,
+                guard.getHealthLevel(), 1e-9);
+
+        // soldier and zombie should not
+        assertEquals(RobotType.SOLDIER.maxHealth, soldier.getHealthLevel(), 1e-9);
+        assertEquals(RobotType.STANDARDZOMBIE.maxHealth, zombie.getHealthLevel(), 1e-9);
+
+    }
 }
