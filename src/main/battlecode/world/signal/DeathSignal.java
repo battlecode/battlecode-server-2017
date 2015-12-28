@@ -17,7 +17,7 @@ public class DeathSignal implements Signal {
     /**
      * Whether the death of the robot is due to it being activated.
      */
-    private final boolean isDeathByActivation;
+    private final boolean deathByActivation;
 
     /**
      * Creates a signal representing the death of
@@ -27,7 +27,7 @@ public class DeathSignal implements Signal {
      */
     public DeathSignal(int objectID) {
         this.objectID = objectID;
-        this.isDeathByActivation = false;
+        this.deathByActivation = false;
     }
 
     /**
@@ -36,11 +36,11 @@ public class DeathSignal implements Signal {
      * activated.
      *
      * @param objectID the ID of the object that died
-     * @param isDeathByActivation whether the death was due to activation
+     * @param deathByActivation whether the death was due to activation
      */
-    public DeathSignal(int objectID, boolean isDeathByActivation) {
+    public DeathSignal(int objectID, boolean deathByActivation) {
         this.objectID = objectID;
-        this.isDeathByActivation = isDeathByActivation;
+        this.deathByActivation = deathByActivation;
     }
 
     /**
@@ -58,11 +58,7 @@ public class DeathSignal implements Signal {
      * @return whether the death is because a robot was activated.
      */
     public boolean isDeathByActivation() {
-        return isDeathByActivation;
-    }
-
-    public boolean getIsDeathByActivation() {
-        return isDeathByActivation;
+        return deathByActivation;
     }
 
     /**
