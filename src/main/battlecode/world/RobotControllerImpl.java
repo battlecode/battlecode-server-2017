@@ -153,7 +153,7 @@ public final class RobotControllerImpl implements RobotController {
      */
     public void assertCanSense(MapLocation loc) throws GameActionException {
         if (!canSense(loc)) {
-            throw new GameActionException(CANT_SENSE_THAT,
+            throw new GameActionException(OUT_OF_RANGE,
                     loc+" is not within this robot's sensor range.");
         }
     }
@@ -163,7 +163,8 @@ public final class RobotControllerImpl implements RobotController {
         if (canSense(loc)) {
             return gameWorld.getGameMap().onTheMap(loc);
         }
-        throw new GameActionException(CANT_SENSE_THAT, "Location "+loc+" is currently out of sensor range.");
+        throw new GameActionException(OUT_OF_RANGE, "Location " + loc + " " +
+                "is currently out of sensor range.");
     }
 
     @Override
@@ -323,7 +324,7 @@ public final class RobotControllerImpl implements RobotController {
         assertNotNull(loc);
 
         if (robot.getType() != RobotType.ARCHON) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Only archons can" +
+            throw new GameActionException(CANT_DO_THAT, "Only archons can" +
                     " repair.");
         }
 
@@ -340,12 +341,12 @@ public final class RobotControllerImpl implements RobotController {
                     "repair.");
         }
         if (target.getTeam() != robot.getTeam()) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Can only repair " +
+            throw new GameActionException(CANT_DO_THAT, "Can only repair " +
                     "robots on your own team.");
         }
 
         if (robot.getRepairCount() >= 1) {
-            throw new GameActionException(CANT_DO_THAT_BRO, "Can only repair " +
+            throw new GameActionException(CANT_DO_THAT, "Can only repair " +
                     "once per turn.");
         }
 
@@ -361,8 +362,8 @@ public final class RobotControllerImpl implements RobotController {
      */
     public void assertIsRubbleClearingUnit() throws GameActionException {
         if (!robot.getType().canClearRubble()) {
-            throw new GameActionException(GameActionExceptionType
-                    .CANT_DO_THAT_BRO, robot.getType().name() + " cannot clear rubble.");
+            throw new GameActionException(CANT_DO_THAT,
+                    robot.getType().name() + " cannot clear rubble.");
         }
     }
 
@@ -416,10 +417,9 @@ public final class RobotControllerImpl implements RobotController {
     public void assertIsPathable(RobotType type, MapLocation loc)
             throws GameActionException {
         if (!isPathableInternal(type, loc)) {
-            throw new GameActionException(
-                    GameActionExceptionType.CANT_MOVE_THERE,
-                    "Cannot move robot of given type to that location. There " +
-                            "might be too much rubble.");
+            throw new GameActionException(CANT_MOVE_THERE, "Cannot move robot" +
+                    " of given type to that location. There might be too much" +
+                            " rubble.");
         }
     }
 
@@ -435,7 +435,7 @@ public final class RobotControllerImpl implements RobotController {
     public void move(Direction d) throws GameActionException {
         assertIsCoreReady();
         if (!robot.getType().canMove()) {
-            throw new GameActionException(CANT_DO_THAT_BRO,
+            throw new GameActionException(CANT_DO_THAT,
                     "This unit cannot move.");
         }
         if (!isValidMovementDirection(d)) {
@@ -464,7 +464,7 @@ public final class RobotControllerImpl implements RobotController {
         if(robot.getType().equals(RobotType.TURRET)) {
             robot.transform(RobotType.TTM);
         } else {
-            throw new GameActionException(CANT_DO_THAT_BRO,
+            throw new GameActionException(CANT_DO_THAT,
                     "Only Turrets can pack. ");
         }
     }
@@ -474,7 +474,7 @@ public final class RobotControllerImpl implements RobotController {
         if(robot.getType().equals(RobotType.TTM)) {
             robot.transform(RobotType.TURRET);
         } else {
-            throw new GameActionException(CANT_DO_THAT_BRO,
+            throw new GameActionException(CANT_DO_THAT,
                     "Only TTMs can unpack. ");
         }
     }
@@ -510,7 +510,7 @@ public final class RobotControllerImpl implements RobotController {
             );
         if (!robot.getType().canAttack()) {
             throw new GameActionException(
-                    CANT_DO_THAT_BRO,
+                    CANT_DO_THAT,
                     robot.getType().name() + " is not an attacking unit type."
             );
         }
@@ -532,7 +532,7 @@ public final class RobotControllerImpl implements RobotController {
     @Override
     public void broadcast(int channel, int data) throws GameActionException {
         if (channel < 0 || channel > GameConstants.BROADCAST_MAX_CHANNELS)
-            throw new GameActionException(CANT_DO_THAT_BRO,
+            throw new GameActionException(CANT_DO_THAT,
                     "Can only use radio channels from 0 to "
                             + GameConstants.BROADCAST_MAX_CHANNELS
                             + ", inclusive");
@@ -543,7 +543,7 @@ public final class RobotControllerImpl implements RobotController {
     @Override
     public int readBroadcast(int channel) throws GameActionException {
         if (channel < 0 || channel > GameConstants.BROADCAST_MAX_CHANNELS)
-            throw new GameActionException(CANT_DO_THAT_BRO,
+            throw new GameActionException(CANT_DO_THAT,
                     "Can only use radio channels from 0 to "
                             + GameConstants.BROADCAST_MAX_CHANNELS
                             + ", inclusive");
@@ -593,14 +593,14 @@ public final class RobotControllerImpl implements RobotController {
 
         if (!robot.getType().canBuild()) {
             throw new GameActionException(
-                    CANT_DO_THAT_BRO,
+                    CANT_DO_THAT,
                     "Unit type " + robot.getType().name() + " cannot build; " +
                             "only ARCHON can build."
             );
         }
         if (!type.isBuildable()) {
             throw new GameActionException(
-                    CANT_DO_THAT_BRO,
+                    CANT_DO_THAT,
                     "Unit type " + type.name() + " not buildable."
             );
         }
