@@ -14,10 +14,6 @@ public enum GameActionExceptionType {
      */
     NOT_ENOUGH_RESOURCE,
     /**
-     * Indicates when a robot tries to perform an action for which it does not have the required dependency.
-     */
-    MISSING_DEPENDENCY,
-    /**
      * Indicates when a robot tries to move into non-empty square.
      */
     CANT_MOVE_THERE,
@@ -38,7 +34,7 @@ public enum GameActionExceptionType {
     /**
      * Indicates when a robot tries to perform an action it can't.
      */
-    CANT_DO_THAT_BRO,
+    CANT_DO_THAT,
     /**
      * Indicates when a robot tries to perform an action on another robot, but there is
      * no suitable robot there.
