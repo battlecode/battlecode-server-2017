@@ -18,7 +18,9 @@ public class RobotControllerTest {
 
     /**
      * Tests the most basic methods of RobotController. This test has extra
-     * comments to serve as an example of how to use TestMapGenerator and TestGame.
+     * comments to serve as an example of how to use TestMapGenerator and
+     * TestGame.
+     *
      * @throws GameActionException shouldn't happen
      */
     @Test
@@ -64,7 +66,7 @@ public class RobotControllerTest {
         // Let's assert that things happened properly.
         assertEquals(soldierABot.getLocation(), new MapLocation(oX + 1, oY));
         assertEquals(game.getWorld().resources(Team.A), 30 + GameConstants
-                        .PARTS_INITIAL_AMOUNT, EPSILON);
+                .PARTS_INITIAL_AMOUNT, EPSILON);
 
         // Lets 10 rounds go by.
         game.waitRounds(10);
@@ -82,7 +84,7 @@ public class RobotControllerTest {
 
     /**
      * This test verifies rubble behavior.
-     *
+     * <p>
      * 1) Clearing rubble doesn't go below 0, and follows the right formula
      * 2) You can't move onto tiles with >= 100 rubble
      * 3) Dying produces rubble equal to your max health.
@@ -223,7 +225,7 @@ public class RobotControllerTest {
 
     /**
      * Test Map Memory scenarios.
-     *
+     * <p>
      * 0) You should not be able to sense values of parts and rubble out of
      * range.
      * 1) You should be able to sense values of parts and rubble in range.
@@ -237,9 +239,9 @@ public class RobotControllerTest {
      * 6) After moving out of range, your sensed value should reflect the
      * latest change.
      * 7) Sanity check that zombies work due to their infinite sight range.
-     *
+     * <p>
      * Note: this test hard-codes the soldier sight range of 24.
-     *
+     * <p>
      * TODO: add a test that makes sure map memory works when there are many
      * robots on the same team, or if a robot dies.
      */
@@ -519,7 +521,7 @@ public class RobotControllerTest {
         assertEquals(game.getWorld().resources(Team.B), GameConstants
                 .PARTS_INITIAL_AMOUNT + GameConstants.DEN_PART_REWARD, EPSILON);
     }
-    
+
     /**
      * A zombie den should be able to attack all surrounding units at once
      */
@@ -536,7 +538,7 @@ public class RobotControllerTest {
         final int soldierA = game.spawn(oX, oY + 1, RobotType.SOLDIER, Team.A);
         final int soldierB = game.spawn(oX + 1, oY, RobotType.SOLDIER, Team.B);
         final int soldierA2 = game.spawn(oX, oY + 2, RobotType.SOLDIER, Team.A); // out of range
-        final int soldierA3 = game.spawn(oX+1, oY + 1, RobotType.SOLDIER, Team.A); // diagonal
+        final int soldierA3 = game.spawn(oX + 1, oY + 1, RobotType.SOLDIER, Team.A); // diagonal
         final int zombie = game.spawn(oX - 1, oY, RobotType.STANDARDZOMBIE, Team.ZOMBIE);
         final int den = game.spawn(oX, oY, RobotType.ZOMBIEDEN, Team.ZOMBIE);
         InternalRobot soldierABot = game.getBot(soldierA);
@@ -544,19 +546,108 @@ public class RobotControllerTest {
         InternalRobot soldierA2Bot = game.getBot(soldierA2);
         InternalRobot soldierA3Bot = game.getBot(soldierA3);
         InternalRobot zombieBot = game.getBot(zombie);
-        
+
         game.round((id, rc) -> {
             if (id == den) {
                 rc.spawnFail(); // Called when den is unable to spawn
             }
         });
-        
+
         // the den should have damaged the player bots that were in range
-        assertEquals(soldierABot.getHealthLevel(),RobotType.SOLDIER.maxHealth-10,EPSILON);
-        assertEquals(soldierBBot.getHealthLevel(),RobotType.SOLDIER.maxHealth-10,EPSILON);
-        assertEquals(soldierA3Bot.getHealthLevel(),RobotType.SOLDIER.maxHealth-10,EPSILON);
+        assertEquals(soldierABot.getHealthLevel(), RobotType.SOLDIER.maxHealth - 10, EPSILON);
+        assertEquals(soldierBBot.getHealthLevel(), RobotType.SOLDIER.maxHealth - 10, EPSILON);
+        assertEquals(soldierA3Bot.getHealthLevel(), RobotType.SOLDIER.maxHealth - 10, EPSILON);
         // the zombie and the player out of range should not have been affected
-        assertEquals(zombieBot.getHealthLevel(),RobotType.STANDARDZOMBIE.maxHealth,EPSILON);
-        assertEquals(soldierA2Bot.getHealthLevel(),RobotType.SOLDIER.maxHealth,EPSILON);
+        assertEquals(zombieBot.getHealthLevel(), RobotType.STANDARDZOMBIE.maxHealth, EPSILON);
+        assertEquals(soldierA2Bot.getHealthLevel(), RobotType.SOLDIER.maxHealth, EPSILON);
+    }
+
+    /**
+     * Using more bytecode should incur delay penalties
+     */
+    @Test
+    public void testDelayPenalty() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 12);
+
+        GameMap map = mapGen.getMap("test");
+
+        TestGame game = new TestGame(map);
+
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int soldierA = game.spawn(oX, oY, RobotType.SOLDIER, Team.A);
+        final int soldierB = game.spawn(oX + 1, oY + 1, RobotType.SOLDIER, Team
+                .B);
+        InternalRobot soldierABot = game.getBot(soldierA);
+        InternalRobot soldierBBot = game.getBot(soldierB);
+
+        soldierABot.setBytecodesUsed(0); // Start out using no bytecode
+        soldierBBot.setBytecodesUsed(0);
+
+        //Soldier A moves, soldier B attacks
+        game.round((id, rc) -> {
+            if (id == soldierA) {
+                rc.move(Direction.EAST);
+            } else if (id == soldierB) {
+                rc.attackLocation(new MapLocation(oX+2,oY+2));
+            }
+        });
+
+        // Core delay = movement delay, weapon delay = attack delay
+        assertEquals(soldierABot.getCoreDelay(),RobotType.SOLDIER.movementDelay,EPSILON);
+        assertEquals(soldierBBot.getWeaponDelay(),RobotType.SOLDIER.attackDelay,EPSILON);
+
+        game.waitRounds(1);
+        // After one round with zero bytecode, should decrement by one
+        assertEquals(soldierABot.getCoreDelay(),RobotType.SOLDIER.movementDelay-1,EPSILON);
+        assertEquals(soldierBBot.getWeaponDelay(),RobotType.SOLDIER.attackDelay-1,EPSILON);
+
+        game.waitRounds(3);
+        // Should have gone back to zero
+        assertEquals(soldierABot.getCoreDelay(),0,EPSILON);
+        assertEquals(soldierBBot.getWeaponDelay(),0,EPSILON);
+
+        // Now use intermediate amount of bytecode
+        soldierABot.setBytecodesUsed(RobotType.SOLDIER.bytecodeLimit-4000);
+        soldierBBot.setBytecodesUsed(RobotType.SOLDIER.bytecodeLimit-4000);
+
+        //Soldier A moves, soldier B attacks
+        game.round((id, rc) -> {
+            if (id == soldierA) {
+                rc.move(Direction.WEST);
+            } else if (id == soldierB) {
+                rc.attackLocation(new MapLocation(oX+2,oY+2));
+            }
+        });
+
+        // Core delay = movement delay, weapon delay = attack delay
+        assertEquals(soldierABot.getCoreDelay(),RobotType.SOLDIER.movementDelay,EPSILON);
+        assertEquals(soldierBBot.getWeaponDelay(),RobotType.SOLDIER.attackDelay,EPSILON);
+
+        game.waitRounds(1);
+        // After one round with zero bytecode, should decrement by new value
+        double decrement = 1.0 - (0.3 * Math.pow(0.5,1.5)); // Approx 0.894
+        assertEquals(soldierABot.getCoreDelay(),RobotType.SOLDIER.movementDelay-decrement,EPSILON);
+        assertEquals(soldierBBot.getWeaponDelay(),RobotType.SOLDIER.attackDelay-decrement,EPSILON);
+
+        game.waitRounds(3);
+
+        // Now use max amount of bytecode
+        soldierABot.setBytecodesUsed(RobotType.SOLDIER.bytecodeLimit);
+        soldierBBot.setBytecodesUsed(RobotType.SOLDIER.bytecodeLimit);
+
+        //Soldier A moves, soldier B attacks
+        game.round((id, rc) -> {
+            if (id == soldierA) {
+                rc.move(Direction.EAST);
+            } else if (id == soldierB) {
+                rc.attackLocation(new MapLocation(oX+2,oY+2));
+            }
+        });
+
+        game.waitRounds(1);
+        decrement = 0.7; // Should now only decrease by 0.7 in one turn
+        assertEquals(soldierABot.getCoreDelay(),RobotType.SOLDIER.movementDelay-decrement,EPSILON);
+        assertEquals(soldierBBot.getWeaponDelay(),RobotType.SOLDIER.attackDelay-decrement,EPSILON);
     }
 }
