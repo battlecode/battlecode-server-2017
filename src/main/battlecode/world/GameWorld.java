@@ -714,7 +714,7 @@ public class GameWorld implements SignalHandler {
                     target.setInfected(attacker);
                 }
 
-                double damage = (attacker.getType().attackPower) * rate;
+                double damage = (attacker.getAttackPower()) * rate;
                 target.takeDamage(damage);
 
                 // Reward parts to destroyer of zombie den
@@ -826,7 +826,7 @@ public class GameWorld implements SignalHandler {
         }
 
         // update rubble
-        alterRubble(loc, getRubble(loc) + obj.getType().maxHealth);
+        alterRubble(loc, getRubble(loc) + obj.getMaxHealth());
         addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
 
         controlProvider.robotKilled(obj);

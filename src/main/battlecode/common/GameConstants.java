@@ -108,6 +108,9 @@ public interface GameConstants {
     /** Amount of damage robots take when standing next to dens that are spawning. **/
     double DEN_SPAWN_PROXIMITY_DAMAGE = 10.0;
 
+    /** Number of turns that elapse for the zombie outbreak level to increase */
+    int OUTBREAK_TIMER = 300;
+
     // *********************************
     // ****** GAMEPLAY PROPERTIES ******
     // *********************************

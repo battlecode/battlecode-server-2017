@@ -21,7 +21,9 @@ public class InternalRobot {
     private MapLocation location;
     private final GameWorld gameWorld;
     private final RobotControllerImpl controller;
+    private double maxHealth;
     private double healthLevel;
+    private double attackPower;
     private double coreDelay;
     private double weaponDelay;
     private int zombieInfectedTurns;
@@ -63,7 +65,9 @@ public class InternalRobot {
         this.type = type;
         this.buildDelay = buildDelay;
 
-        this.healthLevel = getMaxHealth();
+        this.maxHealth = type.maxHealth(gw.getCurrentRound());
+        this.healthLevel = maxHealth;
+        this.attackPower = type.attackPower(gw.getCurrentRound());
 
         this.coreDelay = 0.0;
         this.weaponDelay = 0.0;
@@ -108,15 +112,17 @@ public class InternalRobot {
                 && this.cachedRobotInfo.location.equals(location)
                 && this.cachedRobotInfo.coreDelay == coreDelay
                 && this.cachedRobotInfo.weaponDelay == weaponDelay
+                && this.cachedRobotInfo.attackPower == attackPower
                 && this.cachedRobotInfo.health == healthLevel
+                && this.cachedRobotInfo.maxHealth == maxHealth
                 && this.cachedRobotInfo.zombieInfectedTurns == zombieInfectedTurns
                 && this.cachedRobotInfo.viperInfectedTurns == viperInfectedTurns) {
             return this.cachedRobotInfo;
         }
         return this.cachedRobotInfo = new RobotInfo(
                 ID, team, getType(), location,
-                coreDelay, weaponDelay, healthLevel,
-                zombieInfectedTurns, viperInfectedTurns
+                coreDelay, weaponDelay, attackPower, healthLevel,
+                maxHealth, zombieInfectedTurns, viperInfectedTurns
         );
     }
 
@@ -146,6 +152,14 @@ public class InternalRobot {
 
     public int getRepairCount() {
         return repairCount;
+    }
+
+    public double getMaxHealth() {
+        return maxHealth;
+    }
+
+    public double getAttackPower() {
+        return attackPower;
     }
 
     // *********************************
@@ -251,17 +265,13 @@ public class InternalRobot {
     public void changeHealthLevel(double amount) {
         healthChanged = true;
         healthLevel += amount;
-        if (healthLevel > getMaxHealth()) {
-            healthLevel = getMaxHealth();
+        if (healthLevel > maxHealth) {
+            healthLevel = maxHealth;
         }
 
         if (healthLevel <= 0) {
             gameWorld.visitDeathSignal(new DeathSignal(ID));
         }
-    }
-
-    public double getMaxHealth() {
-        return getType().maxHealth;
     }
 
     // *********************************
