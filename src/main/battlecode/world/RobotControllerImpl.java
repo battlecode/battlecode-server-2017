@@ -589,7 +589,7 @@ public final class RobotControllerImpl implements RobotController {
         InternalRobot target = gameWorld.getRobot(loc);
         if (target == null) {
             throw new GameActionException(NO_ROBOT_THERE, "No robot there to " +
-                    "repair.");
+                    "activate.");
         }
         if (target.getTeam() != Team.NEUTRAL) {
             throw new GameActionException(CANT_DO_THAT, "Can only activate " +
