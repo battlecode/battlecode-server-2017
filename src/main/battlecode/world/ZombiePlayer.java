@@ -36,7 +36,10 @@ public class ZombiePlayer {
                                 break;
                             }
                         }
-                        if (!spawned) break;
+                        if (!spawned) {
+                            rc.spawnFail();
+                            Clock.yield();
+                        }
                         else Clock.yield(); // this is silly but the engine doesn't support spawning multiple things in one round
                     }
 

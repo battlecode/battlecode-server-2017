@@ -487,6 +487,13 @@ public interface RobotController {
      */
     void build(Direction dir, RobotType type) throws GameActionException;
 
+    /**
+     * If you are a ZOMBIEDEN, this method inflicts 10 damage to all surrounding
+     * player-controlled units. It is called whenever the ZOMBIEDEN can't spawn
+     * a new zombie because it is completely surrounded.
+     */
+    void spawnFail() throws GameActionException;
+    
     // ***********************************
     // ****** OTHER ACTION METHODS *******
     // ***********************************
