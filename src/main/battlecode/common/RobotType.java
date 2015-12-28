@@ -13,63 +13,63 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    ZOMBIEDEN       (true,  true,  0,  null,      0,  0,  5000, 0,  0,    0,   0, 0, -1,     10000, 0, null),
+    ZOMBIEDEN       (true,  true,  0,  null,      0,  0,  5000, 0,  0,    0,   0, 0, -1,     10000, 0, null, false),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A normal, boring zombie unit.
      *
      * @battlecode.doc.robottype
      */
-    STANDARDZOMBIE  (false, true,  10, ZOMBIEDEN, 0,  0,  60,   2.5,  2,    3,   2, 1, -1,     10000, 0, null),
-	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
+    STANDARDZOMBIE  (false, true,  10, ZOMBIEDEN, 0,  0,  60,   2.5,  2,    3,   2, 1, -1,     10000, 0, null, false),
+	//                                            PC  TC  HP    ATK   RNG   MVD  AD CD
     /**
      * A zombie unit with a ranged attack.
      *
      * @battlecode.doc.robottype
      */
-    RANGEDZOMBIE    (false, true,  10, ZOMBIEDEN, 0,  0,  40,   3,  13,   3,   1, 1, -1,     10000, 0, null),
+    RANGEDZOMBIE    (false, true,  10, ZOMBIEDEN, 0,  0,  40,   3,  13,   3,   1, 1, -1,     10000, 0, null, false),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A fast zombie unit.
      *
      * @battlecode.doc.robottype
      */
-    FASTZOMBIE      (false, true,  10, ZOMBIEDEN, 0,  0,  80,   3,  2,    1.4, 1, 1, -1,     10000, 0, null),
+    FASTZOMBIE      (false, true,  10, ZOMBIEDEN, 0,  0,  80,   3,  2,    1.4, 1, 1, -1,     10000, 0, null, true),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A big, tough zombie unit.
      *
      * @battlecode.doc.robottype
      */
-    BIGZOMBIE       (false, true,  10, ZOMBIEDEN, 0,  0,  500,  25, 2,    3,   3, 1, -1,     10000, 0, null),
+    BIGZOMBIE       (false, true,  10, ZOMBIEDEN, 0,  0,  500,  25, 2,    3,   3, 1, -1,     10000, 0, null, true),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * An important unit that cannot be constructed; builds other robots.
      *
      * @battlecode.doc.robottype
      */
-    ARCHON          (false, false, 0,  null,      0,  0,  1000, 0,  24,   2,   1, 1, 35,     20000, 0, BIGZOMBIE),
+    ARCHON          (false, false, 0,  null,      0,  0,  1000, 0,  24,   2,   1, 1, 35,     20000, 0, BIGZOMBIE, false),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A fast unit, unobstructed by rubble.
      *
      * @battlecode.doc.robottype
      */
-    SCOUT           (false, false, 0,  ARCHON,    25, 15, 100,  0,  0,    1.4, 0, 1, 53,     20000, 0, FASTZOMBIE),
+    SCOUT           (false, false, 0,  ARCHON,    25, 15, 100,  0,  0,    1.4, 0, 1, 53,     20000, 0, FASTZOMBIE, true),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * An all-around ranged unit.
      *
      * @battlecode.doc.robottype
      */
-    SOLDIER         (false, false, 0,  ARCHON,    20, 10, 50,   4,  13,   2,   2, 1, 24,     10000, 0, STANDARDZOMBIE),
+    SOLDIER         (false, false, 0,  ARCHON,    20, 10, 50,   4,  13,   2,   2, 1, 24,     10000, 0, STANDARDZOMBIE, false),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A melee unit equipped for zombie combat.
      *
      * @battlecode.doc.robottype
      */
-    GUARD           (false, false, 0,  ARCHON,    20, 10, 120,  1.5,   2,   2,   1, 1, 24,     10000, 0, STANDARDZOMBIE),
+    GUARD           (false, false, 0,  ARCHON,    20, 10, 120,  1.5,   2,   2,   1, 1, 24,     10000, 0, STANDARDZOMBIE, false),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A special unit cabable of infecting robots with a damaging strain of the
@@ -77,7 +77,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    VIPER           (false, false, 20, ARCHON,    100,30, 100,  2,  13,   2,   3, 1, 24,     10000, 0, RANGEDZOMBIE),
+    VIPER           (false, false, 20, ARCHON,    100,30, 100,  2,  13,   2,   3, 1, 24,     10000, 0, RANGEDZOMBIE, false),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * An immobile unit designed to reinforce an area; transforms into a
@@ -85,7 +85,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    TURRET          (false,  false, 0,  ARCHON,   75, 25, 100,  18, 48,   0,   3, 3, 24,     2000,  0, RANGEDZOMBIE),
+    TURRET          (false,  false, 0,  ARCHON,   75, 25, 100,  18, 48,   0,   3, 3, 24,     2000,  0, RANGEDZOMBIE, false),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * Turret - Transport Mode: the mobile version of a {@link #TURRET TURRET}.
@@ -93,7 +93,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    TTM             (false, false, 0,  TURRET,    0,  10, 50,   0,  0,    2,   0, 2, 24,     2000,  0, RANGEDZOMBIE),
+    TTM             (false, false, 0,  TURRET,    0,  10, 50,   0,  0,    2,   0, 2, 24,     2000,  0, RANGEDZOMBIE, false),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
 	;
 
@@ -171,7 +171,12 @@ public enum RobotType {
      * The type of zombie this unit turns into after becoming infected. For zombies, this value is null.
      */
     public final RobotType turnsInto;
-    
+
+    /**
+     * Whether the unit ignores rubble.
+     */
+    public final boolean ignoresRubble;
+
     /**
      * How relatively strong the unit is. This number isn't really meaningful and is just used for part of the client.
      */
@@ -255,7 +260,8 @@ public enum RobotType {
               int sensorRadiusSquared,
               int bytecodeLimit,
               int strengthWeight,
-              RobotType turnsInto) {
+              RobotType turnsInto,
+              boolean ignoresRubble) {
 		this.isBuilding = isBuilding;
         this.isZombie = isZombie;
         this.infectTurns = infectTurns;
@@ -272,5 +278,6 @@ public enum RobotType {
         this.bytecodeLimit = bytecodeLimit;
         this.turnsInto = turnsInto;
         this.strengthWeight = strengthWeight;
+        this.ignoresRubble = ignoresRubble;
     }
 }

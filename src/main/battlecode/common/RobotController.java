@@ -32,17 +32,6 @@ public interface RobotController {
      */
     double getTeamParts();
 
-    /**
-     * Returns the zombie spawn schedule for a given round on the map. Only
-     * works on zombie dens. NOT AVAILABLE TO COMPETITORS?
-     *
-     * @param round the round number
-     * @return the zombie spawn schedule.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    ZombieCount[] getZombieSpawnSchedule(int round);
-
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************
@@ -122,12 +111,11 @@ public interface RobotController {
 
     /**
      * Senses whether a MapLocation is on the map. Will throw an exception if
-     * the location is not currently and has never been within sensor range.
+     * the location is not currently within sensor range.
      *
      * @param loc the location to check.
      * @return true if the location is on the map, and false if it is not.
-     * @throws GameActionException if the location has never been within
-     * sensor range.
+     * @throws GameActionException if the location is not within sensor range.
      *
      * @battlecode.doc.costlymethod
      */
@@ -487,13 +475,6 @@ public interface RobotController {
      */
     void build(Direction dir, RobotType type) throws GameActionException;
 
-    /**
-     * If you are a ZOMBIEDEN, this method inflicts 10 damage to all surrounding
-     * player-controlled units. It is called whenever the ZOMBIEDEN can't spawn
-     * a new zombie because it is completely surrounded.
-     */
-    void spawnFail() throws GameActionException;
-    
     // ***********************************
     // ****** OTHER ACTION METHODS *******
     // ***********************************

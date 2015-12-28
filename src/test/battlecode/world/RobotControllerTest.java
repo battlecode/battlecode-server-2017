@@ -229,24 +229,14 @@ public class RobotControllerTest {
      * 0) You should not be able to sense values of parts and rubble out of
      * range.
      * 1) You should be able to sense values of parts and rubble in range.
-     * 2) If you move out of range, you should still be able to sense those
-     * values.
-     * 3) If values for an out-of-sensor-range tile change, you should still
-     * be sensing the old value.
-     * 4) Moving back into range of the tile should update your sensed value.
-     * 5) A value changing while you're in sight range should properly update
-     * map memory and your sensed value.
-     * 6) After moving out of range, your sensed value should reflect the
+     * 2) After moving out of range, your sensed value should reflect the
      * latest change.
-     * 7) Sanity check that zombies work due to their infinite sight range.
-     * <p>
+     * 3) Sanity check that zombies work due to their infinite sight range.
+     *
      * Note: this test hard-codes the soldier sight range of 24.
-     * <p>
-     * TODO: add a test that makes sure map memory works when there are many
-     * robots on the same team, or if a robot dies.
      */
     @Test
-    public void testMapMemory() throws GameActionException {
+    public void testSenses() throws GameActionException {
         final double rubbleVal = 100;
         final double partsVal = 30;
         TestMapGenerator mapGen = new TestMapGenerator(100, 100, 100)
@@ -289,7 +279,7 @@ public class RobotControllerTest {
             }
         });
 
-        // Soldier moves away but should still be able to sense the old values.
+        // Soldier moves away, should go back to -1
         game.waitRounds(10);
         game.round((id, rc) -> {
             if (id == soldier) {
@@ -300,8 +290,8 @@ public class RobotControllerTest {
             if (id == soldier) {
                 assertFalse(rc.canSenseLocation(loc1));
                 assertFalse(rc.canSenseLocation(loc2));
-                assertEquals(rc.senseRubble(loc1), rubbleVal, EPSILON);
-                assertEquals(rc.senseParts(loc2), partsVal, EPSILON);
+                assertEquals(rc.senseRubble(loc1), -1, EPSILON);
+                assertEquals(rc.senseParts(loc2), -1, EPSILON);
             }
         });
 
@@ -318,8 +308,8 @@ public class RobotControllerTest {
             if (id == soldier) {
                 assertFalse(rc.canSenseLocation(loc1));
                 assertFalse(rc.canSenseLocation(loc2));
-                assertEquals(rc.senseRubble(loc1), rubbleVal, EPSILON);
-                assertEquals(rc.senseParts(loc2), partsVal, EPSILON);
+                assertEquals(rc.senseRubble(loc1), -1, EPSILON);
+                assertEquals(rc.senseParts(loc2), -1, EPSILON);
             }
         });
 
@@ -341,9 +331,8 @@ public class RobotControllerTest {
             }
         });
 
-        // If the rubble value changes while you're able to sense it, map
-        // memory should update too and you should be able to sense the new
-        // value. (Former bug)
+        // If the rubble value changes while you're able to sense it, you
+        // should be able to sense the new value. (Former bug)
         game.round((id, rc) -> {
             if (id == soldier2) {
                 rc.clearRubble(Direction.NORTH);
@@ -358,9 +347,9 @@ public class RobotControllerTest {
             }
         });
 
-        // If you move away, you should still be able to sense the old values.
-        // Let's make sure zombie knows this too, and that zombie values
-        // update properly on move.
+        // If you move away, you should lose the ability to sense.
+        // Zombies can always sense every location; make sure their senses
+        // update correctly.
         game.round((id, rc) -> {
             if (id == soldier) {
                 rc.move(Direction.NORTH_WEST);
@@ -369,8 +358,11 @@ public class RobotControllerTest {
             }
         });
         game.round((id, rc) -> {
-            if (id == soldier || id == zombie) {
+            if (id == zombie) {
                 assertEquals(rc.senseRubble(loc1), rubbleVal3, EPSILON);
+            }
+            else if (id == soldier) {
+                assertEquals(rc.senseRubble(loc1), -1, EPSILON);
             }
         });
     }
@@ -520,46 +512,6 @@ public class RobotControllerTest {
                 .PARTS_INITIAL_AMOUNT, EPSILON);
         assertEquals(game.getWorld().resources(Team.B), GameConstants
                 .PARTS_INITIAL_AMOUNT + GameConstants.DEN_PART_REWARD, EPSILON);
-    }
-
-    /**
-     * A zombie den should be able to attack all surrounding units at once
-     */
-    @Test
-    public void testDenDamage() throws GameActionException {
-        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
-
-        GameMap map = mapGen.getMap("test");
-
-        TestGame game = new TestGame(map);
-
-        int oX = game.getOriginX();
-        int oY = game.getOriginY();
-        final int soldierA = game.spawn(oX, oY + 1, RobotType.SOLDIER, Team.A);
-        final int soldierB = game.spawn(oX + 1, oY, RobotType.SOLDIER, Team.B);
-        final int soldierA2 = game.spawn(oX, oY + 2, RobotType.SOLDIER, Team.A); // out of range
-        final int soldierA3 = game.spawn(oX + 1, oY + 1, RobotType.SOLDIER, Team.A); // diagonal
-        final int zombie = game.spawn(oX - 1, oY, RobotType.STANDARDZOMBIE, Team.ZOMBIE);
-        final int den = game.spawn(oX, oY, RobotType.ZOMBIEDEN, Team.ZOMBIE);
-        InternalRobot soldierABot = game.getBot(soldierA);
-        InternalRobot soldierBBot = game.getBot(soldierB);
-        InternalRobot soldierA2Bot = game.getBot(soldierA2);
-        InternalRobot soldierA3Bot = game.getBot(soldierA3);
-        InternalRobot zombieBot = game.getBot(zombie);
-
-        game.round((id, rc) -> {
-            if (id == den) {
-                rc.spawnFail(); // Called when den is unable to spawn
-            }
-        });
-
-        // the den should have damaged the player bots that were in range
-        assertEquals(soldierABot.getHealthLevel(), RobotType.SOLDIER.maxHealth - 10, EPSILON);
-        assertEquals(soldierBBot.getHealthLevel(), RobotType.SOLDIER.maxHealth - 10, EPSILON);
-        assertEquals(soldierA3Bot.getHealthLevel(), RobotType.SOLDIER.maxHealth - 10, EPSILON);
-        // the zombie and the player out of range should not have been affected
-        assertEquals(zombieBot.getHealthLevel(), RobotType.STANDARDZOMBIE.maxHealth, EPSILON);
-        assertEquals(soldierA2Bot.getHealthLevel(), RobotType.SOLDIER.maxHealth, EPSILON);
     }
 
     /**

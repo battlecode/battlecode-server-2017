@@ -105,6 +105,9 @@ public interface GameConstants {
     /** Amount an archon repairs another bot for. */
     double ARCHON_REPAIR_AMOUNT = 1.0;
 
+    /** Amount of damage robots take when standing next to dens that are spawning. **/
+    double DEN_SPAWN_PROXIMITY_DAMAGE = 10.0;
+
     // *********************************
     // ****** GAMEPLAY PROPERTIES ******
     // *********************************

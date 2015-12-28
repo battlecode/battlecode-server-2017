@@ -68,4 +68,19 @@ public class RobotInfo {
     public int hashCode() {
         return ID;
     }
+
+    @Override
+    public String toString() {
+        return "RobotInfo{" +
+                "ID=" + ID +
+                ", team=" + team +
+                ", type=" + type +
+                ", location=" + location +
+                ", coreDelay=" + coreDelay +
+                ", weaponDelay=" + weaponDelay +
+                ", health=" + health +
+                ", zombieInfectedTurns=" + zombieInfectedTurns +
+                ", viperInfectedTurns=" + viperInfectedTurns +
+                '}';
+    }
 }
