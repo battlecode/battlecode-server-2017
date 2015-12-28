@@ -489,7 +489,7 @@ public class RobotControllerTest {
         int oY = game.getOriginY();
         final int soldierA = game.spawn(oX, oY + 1, RobotType.SOLDIER, Team.A);
         final int soldierB = game.spawn(oX + 1, oY, RobotType.SOLDIER, Team.B);
-        final int den = game.spawn(oX, oY, RobotType.ZOMBIEDEN, Team.B);
+        final int den = game.spawn(oX, oY, RobotType.ZOMBIEDEN, Team.ZOMBIE);
         InternalRobot denBot = game.getBot(den);
 
         assertEquals(game.getWorld().resources(Team.A), GameConstants
@@ -601,5 +601,61 @@ public class RobotControllerTest {
         decrement = 0.7; // Should now only decrease by 0.7 in one turn
         assertEquals(soldierABot.getCoreDelay(),RobotType.SOLDIER.movementDelay-decrement,EPSILON);
         assertEquals(soldierBBot.getWeaponDelay(),RobotType.SOLDIER.attackDelay-decrement,EPSILON);
+    }
+
+    /**
+     * Test outbreak mechanics.
+     */
+    @Test
+    public void testZombieOutbreak() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 1000);
+
+        GameMap map = mapGen.getMap("test");
+
+        TestGame game = new TestGame(map);
+
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int archon = game.spawn(oX, oY + 1, RobotType.ARCHON, Team.A);
+        InternalRobot archonBot = game.getBot(archon);
+        final int zombie1 = game.spawn(oX, oY, RobotType.STANDARDZOMBIE, Team
+                .ZOMBIE);
+
+        // round 0
+        game.round((id, rc) -> {
+            if (id == zombie1) {
+                assertEquals(rc.getHealth(), RobotType.STANDARDZOMBIE
+                        .maxHealth, EPSILON);
+                rc.attackLocation(new MapLocation(oX, oY + 1));
+            }
+        });
+
+        assertEquals(archonBot.getHealthLevel(), RobotType.ARCHON.maxHealth -
+                RobotType.STANDARDZOMBIE.attackPower, EPSILON);
+
+        game.waitRounds(600);
+
+        // round 601 (multiplier 1.2)
+        final int zombie2 = game.spawn(oX + 1, oY, RobotType.RANGEDZOMBIE,
+                Team.ZOMBIE);
+
+        game.round((id, rc) -> {
+            if (id == zombie2) {
+                assertEquals(rc.getHealth(), RobotType.RANGEDZOMBIE
+                        .maxHealth * 1.2, EPSILON);
+                rc.attackLocation(new MapLocation(oX, oY + 1));
+            }
+        });
+
+        assertEquals(archonBot.getHealthLevel(), RobotType.ARCHON.maxHealth -
+                RobotType.STANDARDZOMBIE.attackPower - RobotType.RANGEDZOMBIE
+                .attackPower * 1.2, EPSILON);
+
+        // make sure that a zombie dying leaves the right amount of rubble
+        InternalRobot zombie2Bot = game.getBot(zombie2);
+        zombie2Bot.takeDamage(zombie2Bot.getHealthLevel());
+
+        assertEquals(game.getWorld().getRubble(new MapLocation(oX + 1, oY)),
+                RobotType.RANGEDZOMBIE.maxHealth * 1.2, EPSILON);
     }
 }

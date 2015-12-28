@@ -128,12 +128,12 @@ public enum RobotType {
     public final int buildTurns;
 
     /**
-     * Maximum health for the robot.
+     * Maximum health for the robot (for zombies, it's the BASE value).
      */
     public final double maxHealth;
 
     /**
-     * Base damage per attack.
+     * Base damage per attack (for zombies, it's the BASE value).
      */
     public final double attackPower;
 
@@ -279,5 +279,60 @@ public enum RobotType {
         this.turnsInto = turnsInto;
         this.strengthWeight = strengthWeight;
         this.ignoresRubble = ignoresRubble;
+    }
+
+    /**
+     * Returns the multiplier for attack and max health for a given round
+     * (for zombie outbreaks).
+     *
+     * @param round round number
+     * @return a double representing the attack and max health multiplier
+     */
+    public double getOutbreakMultiplier(int round) {
+        int outbreakLevel = round / GameConstants.OUTBREAK_TIMER;
+        switch (outbreakLevel) {
+            case 0: return 1.00;
+            case 1: return 1.10;
+            case 2: return 1.20;
+            case 3: return 1.30;
+            case 4: return 1.50;
+            case 5: return 1.70;
+            case 6: return 2.00;
+            case 7: return 2.30;
+            case 8: return 2.60;
+            case 9: return 3.00;
+            default:
+                return 3.00 + (outbreakLevel - 9);
+        }
+    }
+
+    /**
+     * Returns the attack power of a unit spawned on the given round, taking
+     * outbreak into account.
+     *
+     * @param round round number
+     * @return the attack power of this unit if spawned on the given round
+     */
+    public double attackPower(int round) {
+        if (this.isZombie) {
+            return attackPower * getOutbreakMultiplier(round);
+        } else {
+            return attackPower;
+        }
+    }
+
+    /**
+     * Returns the max health of a unit spawned on the given round, taking
+     * outbreak into account.
+     *
+     * @param round round number
+     * @return the max health of this unit if spawned on the given round
+     */
+    public double maxHealth(int round) {
+        if (this.isZombie) {
+            return maxHealth * getOutbreakMultiplier(round);
+        } else {
+            return maxHealth;
+        }
     }
 }

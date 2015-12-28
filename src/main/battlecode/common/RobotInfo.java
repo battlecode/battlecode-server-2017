@@ -38,9 +38,19 @@ public class RobotInfo {
     public final double weaponDelay;
 
     /**
+     * The attack power of this robot.
+     */
+    public final double attackPower;
+
+    /**
      * The current health of the robot.
      */
     public final double health;
+
+    /**
+     * The maximum health of the robot.
+     */
+    public final double maxHealth;
     
     /**
      * The number of turns this robot will remain infected with a Zombie infection
@@ -52,7 +62,10 @@ public class RobotInfo {
      */
     public final int viperInfectedTurns;
 
-    public RobotInfo(int ID, Team team, RobotType type, MapLocation location, double coreDelay, double weaponDelay, double health, int zombieInfectedTurns, int viperInfectedTurns) {
+    public RobotInfo(int ID, Team team, RobotType type, MapLocation location,
+                     double coreDelay, double weaponDelay, double
+                             attackPower, double health, double maxHealth, int
+                             zombieInfectedTurns, int viperInfectedTurns) {
         super();
         this.ID = ID;
         this.team = team;
@@ -60,7 +73,9 @@ public class RobotInfo {
         this.location = location;
         this.coreDelay = coreDelay;
         this.weaponDelay = weaponDelay;
+        this.attackPower = attackPower;
         this.health = health;
+        this.maxHealth = maxHealth;
         this.zombieInfectedTurns = zombieInfectedTurns;
         this.viperInfectedTurns = viperInfectedTurns;
     }
