@@ -658,4 +658,38 @@ public class RobotControllerTest {
         assertEquals(game.getWorld().getRubble(new MapLocation(oX + 1, oY)),
                 RobotType.RANGEDZOMBIE.maxHealth * 1.2, EPSILON);
     }
+
+    /**
+     * Tests activation of neutral bots.
+     */
+    @Test
+    public void testActivation() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 1000);
+
+        GameMap map = mapGen.getMap("test");
+
+        TestGame game = new TestGame(map);
+
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int archon = game.spawn(oX, oY + 1, RobotType.ARCHON, Team.A);
+        final int neutral = game.spawn(oX, oY, RobotType.SOLDIER, Team.NEUTRAL);
+
+        game.round((id, rc) -> {
+            if (id == archon) {
+                rc.activate(new MapLocation(oX, oY));
+            }
+        });
+
+        // make sure that archon now has an ally
+        game.round((id, rc) -> {
+            if (id == archon) {
+                RobotInfo[] nearby = rc.senseNearbyRobots();
+                assertEquals(nearby.length, 1);
+                assertEquals(nearby[0].location, new MapLocation(oX, oY));
+                assertEquals(nearby[0].type, RobotType.SOLDIER);
+                assertEquals(nearby[0].team, Team.A);
+            }
+        });
+    }
 }

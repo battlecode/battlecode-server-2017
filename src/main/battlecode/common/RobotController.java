@@ -32,6 +32,14 @@ public interface RobotController {
      */
     double getTeamParts();
 
+    /**
+     * Returns the current round number, where round 0 is the first round of the match.
+     * @return the current round number, where 0 is the first round of the match.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    int getRoundNum();
+
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************
@@ -294,21 +302,6 @@ public interface RobotController {
     boolean isWeaponReady();
 
     // ***********************************
-    // ****** REPAIR METHODS *************
-    // ***********************************
-
-    /**
-     * Repairs the robot at the given location. The robot must be in attack
-     * range.
-     *
-     * @param loc the location of the robot to repair.
-     * @throws GameActionException if the location is out of range, if there
-     *  is no robot there, if the robot is from the wrong team, or if you
-     *  already repaired this turn.
-     */
-    void repair(MapLocation loc) throws GameActionException;
-
-    // ***********************************
     // ****** RUBBLE METHODS *************
     // ***********************************
 
@@ -480,18 +473,25 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Kills your robot and ends the current round. Never fails.
+     * Activates the neutral robot at the given location.
      *
-     * @battlecode.doc.costlymethod
+     * @param loc the location of the robot to activate.
+     * @throws GameActionException if the location is out of range (needs to
+     * be adjacent), if there is no robot there, or if the robot is not a
+     * neutral robot.
      */
-    void disintegrate();
+    void activate(MapLocation loc) throws GameActionException;
 
     /**
-     * Causes your team to lose the game. It's like typing "gg."
+     * Repairs the robot at the given location. The robot must be in attack
+     * range.
      *
-     * @battlecode.doc.costlymethod
+     * @param loc the location of the robot to repair.
+     * @throws GameActionException if the location is out of range, if there
+     *  is no robot there, if the robot is from the wrong team, or if you
+     *  already repaired this turn.
      */
-    void resign();
+    void repair(MapLocation loc) throws GameActionException;
 
     /**
      * Turret only. Transforms the turret into a TTM after a short delay.
@@ -511,8 +511,22 @@ public interface RobotController {
      */
     void unpack() throws GameActionException;
 
+    /**
+     * Kills your robot and ends the current round. Never fails.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void disintegrate();
+
+    /**
+     * Causes your team to lose the game. It's like typing "gg."
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void resign();
+
     // ***********************************
-    // ******** MISC. METHODS ************
+    // ******** TEAM MEMORY **************
     // ***********************************
 
     /**
@@ -648,12 +662,4 @@ public interface RobotController {
      * @battlecode.doc.costlymethod
      */
     void addMatchObservation(String observation);
-
-    /**
-     * Returns the current round number, where round 0 is the first round of the match.
-     * @return the current round number, where 0 is the first round of the match.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    int getRoundNum();
 }
