@@ -102,7 +102,11 @@ public class RobotControllerTest {
         int oX = game.getOriginX();
         int oY = game.getOriginY();
         final int soldierA = game.spawn(oX, oY, RobotType.SOLDIER, Team.A);
+        final int soldierB = game.spawn(oX+3, oY+2, RobotType.SOLDIER, Team.B);
+        final int stdZombie = game.spawn(oX+3, oY+3, RobotType.STANDARDZOMBIE, Team.ZOMBIE);
         InternalRobot soldierABot = game.getBot(soldierA);
+        InternalRobot soldierBBot = game.getBot(soldierB);
+        InternalRobot stdZombieBot = game.getBot(stdZombie);
 
         game.round((id, rc) -> {
             if (id == soldierA) {
@@ -126,18 +130,26 @@ public class RobotControllerTest {
             if (id == soldierA) {
                 assertTrue(rc.canMove(Direction.SOUTH_EAST));
                 rc.clearRubble(Direction.SOUTH_EAST);
+            } else if (id == stdZombie) { // Attack soldierB to infect it
+                rc.attackLocation(new MapLocation(oX+3,oY+2));
             }
         });
 
-        game.waitRounds(10);
+        game.waitRounds(5);
 
         // Die to make sure that the robot produces rubble.
         // The damage taken is to make sure the rubble is based on max
         // health, not previous health.
         soldierABot.takeDamage(47);
+        soldierBBot.takeDamage(45);
+        stdZombieBot.takeDamage(58);
         game.round((id, rc) -> {
-            if (id == soldierA) {
+            if (id == soldierA) { // All robots kill themselves
                 rc.attackLocation(new MapLocation(oX, oY));
+            } else if (id == soldierB) {
+                rc.attackLocation(new MapLocation(oX+3, oY+2));
+            } else if (id == stdZombie) {
+                rc.attackLocation(new MapLocation(oX+3, oY+3));
             }
         });
 
@@ -153,6 +165,12 @@ public class RobotControllerTest {
         assertEquals(game.getWorld().getRubble(new MapLocation(oX + 1, oY + 1)),
                 99 * (1 - GameConstants.RUBBLE_CLEAR_PERCENTAGE) - GameConstants
                         .RUBBLE_CLEAR_FLAT_AMOUNT, EPSILON);
+        assertEquals(game.getWorld().getRubble(new MapLocation(oX+3, oY+2)),
+                0, EPSILON); // soldierB turns into zombie and doesn't leave rubble
+        assertEquals(game.getWorld().getRubble(new MapLocation(oX+3, oY+3)),
+                60, EPSILON); // dead zombie leaves rubble
+        assertEquals(game.getWorld().getRobot(new MapLocation(oX+3, oY+2)).getType(),
+                RobotType.STANDARDZOMBIE); // soldierB actually did turn into a zombie
     }
 
     /**
