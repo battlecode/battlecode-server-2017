@@ -1,6 +1,7 @@
 package battlecode.world;
 
 import battlecode.common.*;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -517,5 +518,45 @@ public class RobotControllerTest {
                 .PARTS_INITIAL_AMOUNT, EPSILON);
         assertEquals(game.getWorld().resources(Team.B), GameConstants
                 .PARTS_INITIAL_AMOUNT + GameConstants.DEN_PART_REWARD, EPSILON);
+    }
+    
+    /**
+     * A zombie den should be able to attack all surrounding units at once
+     */
+    @Test
+    public void testDenDamage() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
+
+        GameMap map = mapGen.getMap("test");
+
+        TestGame game = new TestGame(map);
+
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int soldierA = game.spawn(oX, oY + 1, RobotType.SOLDIER, Team.A);
+        final int soldierB = game.spawn(oX + 1, oY, RobotType.SOLDIER, Team.B);
+        final int soldierA2 = game.spawn(oX, oY + 2, RobotType.SOLDIER, Team.A); // out of range
+        final int soldierA3 = game.spawn(oX+1, oY + 1, RobotType.SOLDIER, Team.A); // diagonal
+        final int zombie = game.spawn(oX - 1, oY, RobotType.STANDARDZOMBIE, Team.ZOMBIE);
+        final int den = game.spawn(oX, oY, RobotType.ZOMBIEDEN, Team.ZOMBIE);
+        InternalRobot soldierABot = game.getBot(soldierA);
+        InternalRobot soldierBBot = game.getBot(soldierB);
+        InternalRobot soldierA2Bot = game.getBot(soldierA2);
+        InternalRobot soldierA3Bot = game.getBot(soldierA3);
+        InternalRobot zombieBot = game.getBot(zombie);
+        
+        game.round((id, rc) -> {
+            if (id == den) {
+                rc.spawnFail(); // Called when den is unable to spawn
+            }
+        });
+        
+        // the den should have damaged the player bots that were in range
+        assertEquals(soldierABot.getHealthLevel(),RobotType.SOLDIER.maxHealth-10,EPSILON);
+        assertEquals(soldierBBot.getHealthLevel(),RobotType.SOLDIER.maxHealth-10,EPSILON);
+        assertEquals(soldierA3Bot.getHealthLevel(),RobotType.SOLDIER.maxHealth-10,EPSILON);
+        // the zombie and the player out of range should not have been affected
+        assertEquals(zombieBot.getHealthLevel(),RobotType.STANDARDZOMBIE.maxHealth,EPSILON);
+        assertEquals(soldierA2Bot.getHealthLevel(),RobotType.SOLDIER.maxHealth,EPSILON);
     }
 }

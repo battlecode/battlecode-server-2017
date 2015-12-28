@@ -628,7 +628,22 @@ public final class RobotControllerImpl implements RobotController {
                 ),
                 delay, delay);
     }
-
+    
+    @Override
+    public void spawnFail() throws GameActionException {
+        if (robot.type != RobotType.ZOMBIEDEN) {
+            throw new GameActionException(
+                    CANT_DO_THAT_BRO,
+                    "Only ZOMBIEDENs can have a spawnFail");
+        }
+        RobotInfo[] surroundingRobots = senseNearbyRobots(2);
+        for(RobotInfo neighbor:surroundingRobots) {
+            if(neighbor.team != Team.ZOMBIE) {
+                robot.activateAttack(new AttackSignal(robot.getID(),neighbor.location),0,0);
+            }
+        }
+    }
+    
     @Override
     public void disintegrate() {
         throw new RobotDeathException();
