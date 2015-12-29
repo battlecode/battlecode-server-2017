@@ -7,6 +7,7 @@ import battlecode.server.ErrorReporter;
 import battlecode.server.Config;
 
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -172,13 +173,14 @@ public class SandboxedRobotPlayer {
                 pauseMethod.invoke(null);
                 // Run the robot!
                 runMethod.invoke(null, robotController);
-            } catch (final Exception e) {
-                // Note: does not report RobotDeathExceptions - i.e. non-exceptional
-                // robot deaths - since RobotDeathException does not actually subclass
-                // Exception, and so won't be caught here.
+            } catch (final IllegalAccessException e) {
+                ErrorReporter.report(e, true);
+            } catch (final InvocationTargetException e) {
+                if (e.getCause() instanceof RobotDeathException) {
+                    return;
+                }
                 ErrorReporter.report(e, false);
             } finally {
-
                 // Ensure that we know we're terminated.
                 this.terminated = true;
 
@@ -247,7 +249,7 @@ public class SandboxedRobotPlayer {
     }
 
     /**
-     * Kills a RobotPlayer control thread the next time it runs.
+     * Kills a RobotPlayer control thread immediately.
      * Does nothing if the player is already killed.
      */
     public synchronized void terminate() throws InstrumentationException {
