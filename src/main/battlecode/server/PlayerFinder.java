@@ -54,7 +54,7 @@ public class PlayerFinder {
      * Constructs a PlayerFinder that searches the Java classpath.
      */
     public PlayerFinder() {
-        this.classPaths = System.getProperty("java.class.path").split(File.separator);
+        this.classPaths = System.getProperty("java.class.path").split(File.pathSeparator);
 
         // Construct the file filters.
         teamFilter = new TeamFileFilter();
