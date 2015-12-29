@@ -185,7 +185,7 @@ public final class SquareArray {
         }
 
         /**
-         * Copy a Square Double Array.
+         * Copy a Square T Array.
          * (Note: copies, doesn't alias.)
          *
          * @param source the source to copy from.
