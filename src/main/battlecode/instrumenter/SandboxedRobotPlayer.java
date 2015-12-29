@@ -258,6 +258,9 @@ public class SandboxedRobotPlayer {
         } catch (Exception e) {
             throw new InstrumentationException("Error invoking RobotMonitor methods", e);
         }
+
+        // Step to make the robot die.
+        step();
     }
 
     /**
