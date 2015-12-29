@@ -132,8 +132,6 @@ public final class RobotMonitor {
      * Must be called from the robot's main thread.
      */
     public static void pause() {
-        bytecodesLeft = 0;
-
         pauser.pause();
 
         reactivate();

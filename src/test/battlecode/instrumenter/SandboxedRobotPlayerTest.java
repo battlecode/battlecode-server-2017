@@ -93,4 +93,16 @@ public class SandboxedRobotPlayerTest {
         assertFalse(player.getTerminated());
 
     }
+
+    @Test
+    public void testBytecodeCountsCorrect() throws Exception {
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerclock", "RobotPlayer", rc, 0);
+        player.setBytecodeLimit(10000);
+
+        player.step();
+
+        verify(rc).broadcast(0, 0);
+        // broadcast() is 25 bytecodes, +3 extra
+        assertEquals(player.getBytecodesUsed(), 28);
+    }
 }
