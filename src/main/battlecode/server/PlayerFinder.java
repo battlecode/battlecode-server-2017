@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
 // TODO: read default map paths from config file
@@ -54,7 +55,8 @@ public class PlayerFinder {
      * Constructs a PlayerFinder that searches the Java classpath.
      */
     public PlayerFinder() {
-        this.classPaths = System.getProperty("java.class.path").split(File.separator);
+        this.classPaths = System.getProperty("java.class.path").split
+                (Pattern.quote(File.separator));
 
         // Construct the file filters.
         teamFilter = new TeamFileFilter();
