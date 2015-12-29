@@ -47,6 +47,7 @@ public class Config {
         defaults.setProperty("bc.engine.upkeep", "true");
         defaults.setProperty("bc.engine.breakpoints", "false");
 
+        // TODO clean up
         defaults.setProperty("bc.client.opengl", "false");
         defaults.setProperty("bc.client.use-models", "true");
         defaults.setProperty("bc.client.applet", "false");

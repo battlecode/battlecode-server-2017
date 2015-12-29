@@ -101,11 +101,11 @@ public class Match {
         final TeamControlProvider teamProvider = new TeamControlProvider();
         teamProvider.registerControlProvider(
                 Team.A,
-                new PlayerControlProvider(info.getTeamA(), "RobotPlayer")
+                new PlayerControlProvider(info.getTeamA())
         );
         teamProvider.registerControlProvider(
                 Team.B,
-                new PlayerControlProvider(info.getTeamB(), "RobotPlayer")
+                new PlayerControlProvider(info.getTeamB())
         );
         teamProvider.registerControlProvider(
                 Team.ZOMBIE,
