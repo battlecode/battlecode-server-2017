@@ -3,9 +3,7 @@ package battlecode.server;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
@@ -22,17 +20,17 @@ import java.util.zip.ZipEntry;
  * return invalid map files, for instance, so long as they are named like map
  * files.
  */
-public class MatchInputFinder {
+public class PlayerFinder {
 
     /**
      * The filters used to find teams and maps.
      */
-    private final Filter teamFilter, mapFilter;
+    private final Filter teamFilter;
 
     /**
      * The paths for finding teams and maps.
      */
-    private final String[] classPaths, mapPaths;
+    private final String[] classPaths;
 
     /**
      * A file filter that passes directories (to propagate a directory search)
@@ -53,47 +51,13 @@ public class MatchInputFinder {
     }
 
     /**
-     * A file filter that passes directories (to propagate a directory search)
-     * and XML files that seem to be BattleCode map files.
+     * Constructs a PlayerFinder that searches the Java classpath.
      */
-    private static class MapFileFilter implements Filter {
-        public boolean accept(File pathname) {
-            return pathname.isDirectory() ||
-                    ("maps".equals(pathname.getParentFile().getName()) &&
-                            pathname.getName().endsWith(".xml"));
-        }
-
-        public boolean accept(ZipEntry pathname) {
-            return false;
-        }
-    }
-
-    /**
-     * Constructs a MatchInputFinder that searches the Java classpath
-     * and the default map path (from the configuration file).
-     */
-    public MatchInputFinder() {
-        this(new String[]{"maps"});
-    }
-
-    /**
-     * Constructs a MatchInputFinder that searches the Java claspath
-     * and the given map path.
-     *
-     * @param mapPaths the paths to search for maps
-     */
-    public MatchInputFinder(String[] mapPaths) {
-
-        this.mapPaths = mapPaths;
-
-        // Get the Java classpath, and split it into an array of paths.
-        String classPath = System.getProperty("java.class.path");
-        classPaths = classPath.split(File.pathSeparator);
+    public PlayerFinder() {
+        this.classPaths = System.getProperty("java.class.path").split(File.separator);
 
         // Construct the file filters.
         teamFilter = new TeamFileFilter();
-        mapFilter = new MapFileFilter();
-
     }
 
     /**
@@ -103,11 +67,8 @@ public class MatchInputFinder {
      * @return an array of String arrays, where element 0 is an array of
      *         team names and element 1 is an array of map names
      */
-    public String[][] findMatchInputsLocally() {
-        String[][] inputs = new String[2][];
-        inputs[0] = findResourcesLocally(classPaths, teamFilter, true);
-        inputs[1] = findResourcesLocally(mapPaths, mapFilter, false);
-        return inputs;
+    public String[] findMatchInputsLocally() {
+        return findResourcesLocally(classPaths, teamFilter, true);
     }
 
     /**
@@ -148,7 +109,6 @@ public class MatchInputFinder {
      *               files to the found list
      */
     private void searchPath(File dir, List<String> found, FileFilter filter, boolean parent) {
-
         // Stop if it's not a directory.
         if (!dir.isDirectory())
             return;
@@ -163,6 +123,13 @@ public class MatchInputFinder {
         }
     }
 
+    /**
+     * Search a jar file.
+     *
+     * @param j the jar file
+     * @param found the list to append found files to
+     * @param filter the filter to use to filter entries
+     */
     private void searchJar(File j, List<String> found, Filter filter) {
         try {
             JarFile jar = new JarFile(j);

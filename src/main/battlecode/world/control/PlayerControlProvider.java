@@ -18,6 +18,8 @@ import java.util.Map;
  */
 public class PlayerControlProvider implements RobotControlProvider {
 
+    public static final String PLAYER_CLASS_NAME = "RobotPlayer";
+
     /**
      * The sandboxed robot players we're using to control robots;
      * maps ids to sandboxes.
@@ -35,16 +37,10 @@ public class PlayerControlProvider implements RobotControlProvider {
     private String teamName;
 
     /**
-     * The name of the robot player class we're processing.
-     */
-    private String playerName;
-
-    /**
      * Create a new PlayerControlProvider.
      */
-    public PlayerControlProvider(String teamName, String playerName) {
+    public PlayerControlProvider(String teamName) {
         this.teamName = teamName;
-        this.playerName = playerName;
     }
 
     @Override
@@ -64,7 +60,7 @@ public class PlayerControlProvider implements RobotControlProvider {
     public void robotSpawned(InternalRobot robot) {
         final SandboxedRobotPlayer player = new SandboxedRobotPlayer(
                 teamName,
-                playerName,
+                PLAYER_CLASS_NAME,
                 robot.getController(),
                 gameWorld.getMapSeed()
         );

@@ -5,29 +5,57 @@ import battlecode.server.serializer.Serializer;
 import battlecode.server.serializer.XStreamSerializerFactory;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * This class contains the code for reading an XML map file and converting it
  * to a proper GameMap.
  */
 public final class GameMapIO {
-    private static final XStreamSerializerFactory factory = new XStreamSerializerFactory();
+    /**
+     * The factory we use to create serializers.
+     */
+    private static final XStreamSerializerFactory FACTORY = new XStreamSerializerFactory();
 
     /**
-     * Returns an GameMapIO for a specific map.
+     * The package we check for maps in if they can't be found in the file system.
+     */
+    public static final String DEFAULT_MAP_PACKAGE = "battlecode/world/resources/";
+
+    /**
+     * The loader we use if we can't find a map in the correct path.
+     */
+    private static final ClassLoader BACKUP_LOADER = GameMapIO.class.getClassLoader();
+
+    /**
+     * Returns a GameMap for a specific map.
+     * If the map can't be found in the given directory, the package
+     * "battlecode.world.resources" is checked as a backup.
      *
      * @param mapName name of map.
-     * @param mapDir directory to store the map file in.
-     * @return GameMapIO for map.
+     * @param mapDir directory to load the extra map from; may be null.
+     * @return GameMap for map
+     * @throws IOException if the map fails to load or can't be found.
      */
     public static GameMap loadMap(String mapName, File mapDir)
             throws IOException {
 
-        assert mapDir.isDirectory();
+        final GameMap result;
 
         final File mapFile = new File(mapDir, mapName + ".xml");
-
-        final GameMap result = loadMap(new FileInputStream(mapFile));
+        if (mapFile.exists()) {
+            result = loadMap(new FileInputStream(mapFile));
+        } else {
+            final InputStream backupStream = BACKUP_LOADER.getResourceAsStream(DEFAULT_MAP_PACKAGE + mapName + ".xml");
+            if (backupStream == null) {
+                throw new IOException("Can't load map: " + mapName + " from dir " + mapDir + " or default maps.");
+            }
+            result = loadMap(backupStream);
+        }
 
         if (!result.getMapName().equals(mapName)) {
             throw new IOException("Invalid map: name (" + result.getMapName()
@@ -49,7 +77,7 @@ public final class GameMapIO {
             throws IOException {
 
         try (final Serializer<GameMap> ser =
-                     factory.createSerializer(null, stream, GameMap.class)) {
+                     FACTORY.createSerializer(null, stream, GameMap.class)) {
             return ser.deserialize();
         }
     }
@@ -80,9 +108,65 @@ public final class GameMapIO {
             throws IOException {
 
         try (final Serializer<GameMap> ser =
-                     factory.createSerializer(stream, null, GameMap.class)) {
+                     FACTORY.createSerializer(stream, null, GameMap.class)) {
             ser.serialize(map);
         }
+    }
+
+    /**
+     * @param mapDir the directory to check for extra maps. May be null.
+     * @return a set of available map names, including those built-in to battlecode-server.
+     */
+    public static List<String> getAvailableMaps(String mapDir) {
+        final List<String> result = new ArrayList<>();
+
+        // Load maps from the extra directory
+        if (mapDir != null) {
+            final File mapDirFile = new File(mapDir);
+
+            if (mapDirFile.isDirectory()) {
+                // Files in directory
+                for (File file : mapDirFile.listFiles()) {
+                    String name = file.getName();
+                    if (name.endsWith(".xml")) {
+                        result.add(name.substring(0, name.length() - 4));
+                    }
+                }
+            }
+        }
+
+        // Load built-in maps
+        URL serverURL = GameMapIO.class.getProtectionDomain().getCodeSource().getLocation();
+        try {
+            if (GameMapIO.class.getResource("GameMapIO.class").getProtocol().equals("jar")) {
+                // We're running from a jar file.
+                final ZipInputStream serverJar = new ZipInputStream(serverURL.openStream());
+
+                ZipEntry ze;
+                while ((ze = serverJar.getNextEntry()) != null) {
+                    final String name = ze.getName();
+                    if (name.startsWith(DEFAULT_MAP_PACKAGE) && name.endsWith(".xml")) {
+                        result.add(name.substring(DEFAULT_MAP_PACKAGE.length(), name.length() - 4));
+                    }
+                }
+            } else {
+                // We're running from class files.
+                final String[] resourceFiles = new File(BACKUP_LOADER.getResource(DEFAULT_MAP_PACKAGE).toURI()).list();
+
+                for (String file : resourceFiles) {
+                    if (file.endsWith(".xml")) {
+                        result.add(file.substring(0, file.length() - 4));
+                    }
+                }
+            }
+        } catch (IOException | URISyntaxException e) {
+            System.err.println("Can't load default maps: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        Collections.sort(result);
+
+        return result;
     }
 
     /**

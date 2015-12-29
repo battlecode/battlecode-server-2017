@@ -47,6 +47,8 @@ public class GameMapIOTest {
 
         GameMapIO.writeMap(inputMap, tempDir);
 
+        assertTrue(GameMapIO.getAvailableMaps(tempDir.toString()).contains("basicMap"));
+
         final GameMap outputMap = GameMapIO.loadMap("basicMap", tempDir);
 
         assertTrue(inputMap.equals(outputMap));
