@@ -1,10 +1,13 @@
 package battlecode.instrumenter.stream;
 
+import battlecode.common.RobotType;
+import battlecode.common.Team;
+
 import java.io.PrintStream;
 
 
 /**
- * RoboPrintStream is a wrapper for java.lang.System.out that prepends a string identifying the current robot to
+ * RoboPrintStream is a wrapper for java.lang.super that prepends a string identifying the current robot to
  * all outputted strings.  Also, RoboPrintStream will silence all output if the robot should be silenced.
  *
  * @author adamd
@@ -14,7 +17,10 @@ public class RoboPrintStream extends PrintStream {
 
     private boolean alreadyInLine = false;
 
-    private String header;
+    private Team team;
+    private RobotType type;
+    private int id;
+    private int round;
 
     public RoboPrintStream() {
         super(java.lang.System.out);
@@ -25,39 +31,57 @@ public class RoboPrintStream extends PrintStream {
     //************************
 
     public void print(boolean b) {
-        printHelper(String.valueOf(b));
+        if (!alreadyInLine) printHeader();
+        super.print(b);
+        alreadyInLine = true;
     }
 
     public void print(char c) {
-        printHelper(String.valueOf(c));
+        if (!alreadyInLine) printHeader();
+        super.print(c);
+        alreadyInLine = true;
     }
 
     public void print(char[] s) {
-        printHelper(String.valueOf(s));
+        if (!alreadyInLine) printHeader();
+        super.print(s);
+        alreadyInLine = true;
     }
 
     public void print(double d) {
-        printHelper(String.valueOf(d));
+        if (!alreadyInLine) printHeader();
+        super.print(d);
+        alreadyInLine = true;
     }
 
     public void print(float f) {
-        printHelper(String.valueOf(f));
+        if (!alreadyInLine) printHeader();
+        super.print(f);
+        alreadyInLine = true;
     }
 
     public void print(int i) {
-        printHelper(String.valueOf(i));
+        if (!alreadyInLine) printHeader();
+        super.print(i);
+        alreadyInLine = true;
     }
 
     public void print(long l) {
-        printHelper(String.valueOf(l));
+        if (!alreadyInLine) printHeader();
+        super.print(l);
+        alreadyInLine = true;
     }
 
     public void print(Object obj) {
-        printHelper(String.valueOf(obj));
+        if (!alreadyInLine) printHeader();
+        super.print(String.valueOf(obj));
+        alreadyInLine = true;
     }
 
     public void print(String s) {
-        printHelper(s);
+        if (!alreadyInLine) printHeader();
+        super.print(s);
+        alreadyInLine = true;
     }
 
     //***************************
@@ -65,43 +89,63 @@ public class RoboPrintStream extends PrintStream {
     //***************************
 
     public void println(boolean b) {
-        printlnHelper(String.valueOf(b));
+        if (!alreadyInLine) printHeader();
+        super.println(b);
+        alreadyInLine = false;
     }
 
     public void println(char c) {
-        printlnHelper(String.valueOf(c));
+        if (!alreadyInLine) printHeader();
+        super.println(c);
+        alreadyInLine = false;
     }
 
     public void println(char[] s) {
-        printlnHelper(String.valueOf(s));
+        if (!alreadyInLine) printHeader();
+        super.println(s);
+        alreadyInLine = false;
     }
 
     public void println(double d) {
-        printlnHelper(String.valueOf(d));
+        if (!alreadyInLine) printHeader();
+        super.println(d);
+        alreadyInLine = false;
     }
 
     public void println(float f) {
-        printlnHelper(String.valueOf(f));
+        if (!alreadyInLine) printHeader();
+        super.println(f);
+        alreadyInLine = false;
     }
 
     public void println(int i) {
-        printlnHelper(String.valueOf(i));
+        if (!alreadyInLine) printHeader();
+        super.println(i);
+        alreadyInLine = false;
     }
 
     public void println(long l) {
-        printlnHelper(String.valueOf(l));
+        if (!alreadyInLine) printHeader();
+        super.println(l);
+        alreadyInLine = false;
     }
 
     public void println(Object obj) {
-        printlnHelper(String.valueOf(obj));
+        if (!alreadyInLine) printHeader();
+        super.println(obj);
+        alreadyInLine = false;
     }
 
     public void println(String s) {
-        printlnHelper(s);
+        if (!alreadyInLine) printHeader();
+        super.println(s);
+        alreadyInLine = false;
     }
 
     public void println() {
-        printlnHelper("");
+        if (!alreadyInLine) printHeader();
+        super.println();
+        alreadyInLine = false;
     }
 
     //*************************
@@ -109,17 +153,23 @@ public class RoboPrintStream extends PrintStream {
     //*************************
 
     public PrintStream append(char c) {
-        this.printHelper(String.valueOf(c));
+        if (!alreadyInLine) printHeader();
+        super.print(c);
+        alreadyInLine = true;
         return this;
     }
 
     public PrintStream append(CharSequence csq) {
-        this.printHelper(String.valueOf(csq));
+        if (!alreadyInLine) printHeader();
+        super.print(String.valueOf(csq));
+        alreadyInLine = true;
         return this;
     }
 
     public PrintStream append(CharSequence csq, int start, int end) {
-        this.printHelper(csq.subSequence(start, end).toString());
+        if (!alreadyInLine) printHeader();
+        super.print(csq.subSequence(start, end).toString());
+        alreadyInLine = true;
         return this;
     }
 
@@ -135,21 +185,29 @@ public class RoboPrintStream extends PrintStream {
     }
 
     public PrintStream format(String format, Object... args) {
-        this.printHelper(String.format(format, args));
+        if (!alreadyInLine) printHeader();
+        super.print(String.format(format, args));
+        alreadyInLine = true;
         return this;
     }
 
     public PrintStream printf(String format, Object... args) {
-        this.printHelper(String.format(format, args));
+        if (!alreadyInLine) printHeader();
+        super.printf(format, args);
+        alreadyInLine = true;
         return this;
     }
 
     public void write(byte[] buf, int off, int len) {
-        this.printHelper(new String(buf, off, len));
+        if (!alreadyInLine) printHeader();
+        super.write(buf, off, len);
+        alreadyInLine = true;
     }
 
     public void write(int b) {
-        this.printHelper(String.valueOf((char) b));
+        if (!alreadyInLine) printHeader();
+        super.write(b);
+        alreadyInLine = true;
     }
 
     //**************************
@@ -159,26 +217,27 @@ public class RoboPrintStream extends PrintStream {
     /**
      * Update the header prepended to messages printed with the stream.
      *
-     * @param targetRobot the robot currently printing messages
-     * @param roundNum    the round messages are being printed during
+     * @param team
+     * @param type
+     * @param id
+     * @param round
      */
-    public void updateHeader(String header) {
-        this.header = header;
+    public void updateHeader(Team team, RobotType type, int id, int round) {
+        this.team = team;
+        this.type = type;
+        this.id = id;
+        this.round = round;
     }
 
-    private void printHelper(String s) {
-        if (!alreadyInLine)
-            java.lang.System.out.print(header);
-        java.lang.System.out.print(s);
-        alreadyInLine = true;
+    private void printHeader() {
+        super.print('[');
+        super.print(team);
+        super.print(':');
+        super.print(type);
+        super.print('#');
+        super.print(id);
+        super.print('@');
+        super.print(round);
+        super.print("] ");
     }
-
-    private void printlnHelper(String s) {
-        if (!alreadyInLine) {
-            java.lang.System.out.print(header);
-        }
-        java.lang.System.out.println(s);
-        alreadyInLine = false;
-    }
-
 }

@@ -23,6 +23,8 @@ public class PlayerControlProvider implements RobotControlProvider {
     /**
      * The sandboxed robot players we're using to control robots;
      * maps ids to sandboxes.
+     *
+     * When a sandbox has been terminated,
      */
     private Map<Integer, SandboxedRobotPlayer> sandboxes;
 
@@ -70,11 +72,11 @@ public class PlayerControlProvider implements RobotControlProvider {
 
     @Override
     public void robotKilled(InternalRobot robot) {
-        // TODO check robot isn't running?
-
         assert this.sandboxes.containsKey(robot.getID());
 
         this.sandboxes.get(robot.getID()).terminate();
+
+        this.sandboxes.put(robot.getID(), null);
     }
 
     @Override
@@ -89,22 +91,35 @@ public class PlayerControlProvider implements RobotControlProvider {
 
         final SandboxedRobotPlayer player = this.sandboxes.get(robot.getID());
 
-        player.setBytecodeLimit(robot.getBytecodeLimit());
-
-        player.step();
+        if (player != null) {
+            player.setBytecodeLimit(robot.getBytecodeLimit());
+            player.step();
+        }
     }
 
     @Override
     public int getBytecodesUsed(InternalRobot robot) {
         assert this.sandboxes.containsKey(robot.getID());
 
-        return this.sandboxes.get(robot.getID()).getBytecodesUsed();
+        final SandboxedRobotPlayer player = this.sandboxes.get(robot.getID());
+
+        if (player != null) {
+            return player.getBytecodesUsed();
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public boolean getTerminated(InternalRobot robot) {
         assert this.sandboxes.containsKey(robot.getID());
 
-        return this.sandboxes.get(robot.getID()).getTerminated();
+        final SandboxedRobotPlayer player = this.sandboxes.get(robot.getID());
+
+        if (player != null) {
+            return player.getTerminated();
+        } else {
+            return true;
+        }
     }
 }

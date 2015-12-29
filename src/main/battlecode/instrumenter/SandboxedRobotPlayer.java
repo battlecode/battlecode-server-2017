@@ -1,6 +1,7 @@
 package battlecode.instrumenter;
 
 import battlecode.common.RobotController;
+import battlecode.common.Team;
 import battlecode.instrumenter.stream.RoboPrintStream;
 import battlecode.instrumenter.stream.SilencedPrintStream;
 import battlecode.server.ErrorReporter;
@@ -189,7 +190,7 @@ public class SandboxedRobotPlayer {
                     notifier.notifyAll();
                 }
             }
-        });
+        }, teamName + "." + playerClassName + " #"+ robotController.getID());
 
 
         // Wait for thread to tell us it's ready
@@ -318,15 +319,10 @@ public class SandboxedRobotPlayer {
 
         Config options = Config.getGlobalConfig();
 
-        boolean[] teamSilences = new boolean[4];
-        teamSilences[0] = options.getBoolean("bc.engine.silence-a");
-        teamSilences[1] = options.getBoolean("bc.engine.silence-b");
-        teamSilences[2] = options.getBoolean("bc.engine.silence-c");
-        teamSilences[3] = options.getBoolean("bc.engine.silence-d");
-
-        boolean silenced = teamSilences[robotController.getTeam().ordinal()];
-
-        if (silenced) {
+        if (robotController.getTeam() == Team.A
+                && options.getBoolean("bc.engine.silence-a")
+                || robotController.getTeam() == Team.B
+                && options.getBoolean("bc.engine.silence-b")) {
             if (!(cachedOut instanceof SilencedPrintStream)) {
                 cachedOut = SilencedPrintStream.theInstance();
             }
@@ -337,12 +333,10 @@ public class SandboxedRobotPlayer {
             }
 
             ((RoboPrintStream) cachedOut).updateHeader(
-                    String.format("[%s:%s#%d@%d]",
-                            robotController.getTeam(),
-                            robotController.getType(),
-                            robotController.getID(),
-                            robotController.getRoundNum()
-                    )
+                        robotController.getTeam(),
+                        robotController.getType(),
+                        robotController.getID(),
+                        robotController.getRoundNum()
             );
 
         }
