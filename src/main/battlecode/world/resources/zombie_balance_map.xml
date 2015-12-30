@@ -116,7 +116,7 @@
       <round number="1400">
         <zombie-count type="RANGEDZOMBIE" count="0"/>
       </round>
-      <round number="700">
+      <round number="500">
         <zombie-count type="STANDARDZOMBIE" count="10"/>
       </round>
       <round number="1100">
