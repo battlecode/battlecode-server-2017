@@ -15,5 +15,7 @@ public class RobotPlayer {
         rc.resign();
         rc.senseNearbyRobots();
         rc.setTeamMemory(0, 0);
+
+        System.out.println("I shouldn't overflow!");
     }
 }
