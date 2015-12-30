@@ -633,7 +633,10 @@ public final class RobotControllerImpl implements RobotController {
             throw new GameActionException(CANT_DO_THAT, "Can only repair " +
                     "once per turn.");
         }
-
+        if (target.getType() == RobotType.ARCHON) {
+            throw new GameActionException(CANT_DO_THAT, "Can only repair " +
+                    "non-Archon robots.");
+        }
         robot.repair(target);
     }
 
