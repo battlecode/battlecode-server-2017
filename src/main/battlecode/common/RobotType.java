@@ -242,7 +242,7 @@ public enum RobotType {
      * @return whether the robot can clear rubble.
      */
     public boolean canClearRubble() { // Update later
-        return this != TURRET || this != TTM;
+        return this != TURRET && this != TTM;
     }
 	
     RobotType(boolean isBuilding,
