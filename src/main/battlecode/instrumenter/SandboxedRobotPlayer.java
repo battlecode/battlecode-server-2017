@@ -1,12 +1,14 @@
 package battlecode.instrumenter;
 
 import battlecode.common.RobotController;
+import battlecode.common.Team;
 import battlecode.instrumenter.stream.RoboPrintStream;
 import battlecode.instrumenter.stream.SilencedPrintStream;
 import battlecode.server.ErrorReporter;
 import battlecode.server.Config;
 
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -172,13 +174,14 @@ public class SandboxedRobotPlayer {
                 pauseMethod.invoke(null);
                 // Run the robot!
                 runMethod.invoke(null, robotController);
-            } catch (final Exception e) {
-                // Note: does not report RobotDeathExceptions - i.e. non-exceptional
-                // robot deaths - since RobotDeathException does not actually subclass
-                // Exception, and so won't be caught here.
+            } catch (final IllegalAccessException e) {
+                ErrorReporter.report(e, true);
+            } catch (final InvocationTargetException e) {
+                if (e.getCause() instanceof RobotDeathException) {
+                    return;
+                }
                 ErrorReporter.report(e, false);
             } finally {
-
                 // Ensure that we know we're terminated.
                 this.terminated = true;
 
@@ -187,7 +190,7 @@ public class SandboxedRobotPlayer {
                     notifier.notifyAll();
                 }
             }
-        });
+        }, teamName + "." + playerClassName + " #"+ robotController.getID());
 
 
         // Wait for thread to tell us it's ready
@@ -247,7 +250,7 @@ public class SandboxedRobotPlayer {
     }
 
     /**
-     * Kills a RobotPlayer control thread the next time it runs.
+     * Kills a RobotPlayer control thread immediately.
      * Does nothing if the player is already killed.
      */
     public synchronized void terminate() throws InstrumentationException {
@@ -258,6 +261,9 @@ public class SandboxedRobotPlayer {
         } catch (Exception e) {
             throw new InstrumentationException("Error invoking RobotMonitor methods", e);
         }
+
+        // Step to make the robot die.
+        step();
     }
 
     /**
@@ -313,15 +319,10 @@ public class SandboxedRobotPlayer {
 
         Config options = Config.getGlobalConfig();
 
-        boolean[] teamSilences = new boolean[4];
-        teamSilences[0] = options.getBoolean("bc.engine.silence-a");
-        teamSilences[1] = options.getBoolean("bc.engine.silence-b");
-        teamSilences[2] = options.getBoolean("bc.engine.silence-c");
-        teamSilences[3] = options.getBoolean("bc.engine.silence-d");
-
-        boolean silenced = teamSilences[robotController.getTeam().ordinal()];
-
-        if (silenced) {
+        if (robotController.getTeam() == Team.A
+                && options.getBoolean("bc.engine.silence-a")
+                || robotController.getTeam() == Team.B
+                && options.getBoolean("bc.engine.silence-b")) {
             if (!(cachedOut instanceof SilencedPrintStream)) {
                 cachedOut = SilencedPrintStream.theInstance();
             }
@@ -332,12 +333,10 @@ public class SandboxedRobotPlayer {
             }
 
             ((RoboPrintStream) cachedOut).updateHeader(
-                    String.format("[%s:%s#%d@%d]",
-                            robotController.getTeam(),
-                            robotController.getType(),
-                            robotController.getID(),
-                            robotController.getRoundNum()
-                    )
+                        robotController.getTeam(),
+                        robotController.getType(),
+                        robotController.getID(),
+                        robotController.getRoundNum()
             );
 
         }

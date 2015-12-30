@@ -3,6 +3,7 @@ package battlecode.world;
 import battlecode.common.*;
 import battlecode.server.ErrorReporter;
 import battlecode.server.GameState;
+import battlecode.util.SquareArray;
 import battlecode.world.signal.AutoSignalHandler;
 import battlecode.world.signal.Signal;
 import battlecode.world.signal.SignalHandler;
@@ -48,8 +49,8 @@ public class GameWorld implements SignalHandler {
     private Map<Team, Set<InternalRobot>> baseArchons = new EnumMap<>(Team.class);
     private final Map<MapLocation, InternalRobot> gameObjectsByLoc = new HashMap<>();
 
-    private double[][] rubble;
-    private double[][] parts;
+    private SquareArray.Double rubble;
+    private SquareArray.Double parts;
 
     private Map<Team, Map<Integer, Integer>> radio = new EnumMap<>(
             Team.class);
@@ -93,15 +94,23 @@ public class GameWorld implements SignalHandler {
         adjustResources(Team.A, GameConstants.PARTS_INITIAL_AMOUNT);
         adjustResources(Team.B, GameConstants.PARTS_INITIAL_AMOUNT);
 
-        this.rubble = new double[gm.getWidth()][gm.getHeight()];
-        this.parts = new double[gm.getWidth()][gm.getHeight()];
+        this.rubble = new SquareArray.Double(gm.getWidth(), gm.getHeight());
+        this.parts = new SquareArray.Double(gm.getWidth(), gm.getHeight());
 
         for (int i = 0; i < gm.getWidth(); i++) {
             for (int j = 0; j < gm.getHeight(); j++) {
-                this.rubble[i][j] = gm.initialRubbleAtLocation(i + gm
-                        .getOrigin().x, j + gm.getOrigin().y);
-                this.parts[i][j] = gm.initialPartsAtLocation(i + gm
-                        .getOrigin().x, j + gm.getOrigin().y);
+                this.rubble.set(i, j,
+                        gm.initialRubbleAtLocation(
+                                i + gm.getOrigin().x,
+                                j + gm.getOrigin().y
+                        )
+                );
+                this.parts.set(i, j,
+                        gm.initialPartsAtLocation(
+                                i + gm.getOrigin().x,
+                                j + gm.getOrigin().y
+                        )
+                );
             }
         }
 
@@ -470,13 +479,15 @@ public class GameWorld implements SignalHandler {
         if (!gameMap.onTheMap(loc)) {
             return 0;
         }
-        return rubble[loc.x - gameMap.getOrigin().x][loc.y - gameMap
-                .getOrigin().y];
+        return rubble.get(
+                loc.x - gameMap.getOrigin().x,
+                loc.y - gameMap.getOrigin().y
+        );
     }
     
     public void alterRubble(MapLocation loc, double amount) {
-        rubble[loc.x - gameMap.getOrigin().x][loc.y - gameMap.getOrigin().y]
-                = Math.max(0.0, amount);
+        rubble.set(loc.x - gameMap.getOrigin().x, loc.y - gameMap.getOrigin().y,
+                Math.max(0.0, amount));
     }
 
     // *********************************
@@ -486,14 +497,17 @@ public class GameWorld implements SignalHandler {
         if (!gameMap.onTheMap(loc)) {
             return 0;
         }
-        return parts[loc.x - gameMap.getOrigin().x][loc.y - gameMap
-                .getOrigin().y];
+        return parts.get(
+                loc.x - gameMap.getOrigin().x,
+                loc.y - gameMap.getOrigin().y
+        );
     }
 
     public double takeParts(MapLocation loc) { // Remove parts from location
         double prevVal = getParts(loc);
-        parts[loc.x - gameMap.getOrigin().x][loc.y - gameMap.getOrigin().y] =
-                0.0;
+
+        parts.set(loc.x - gameMap.getOrigin().x, loc.y - gameMap.getOrigin().y,
+                0.0);
         return prevVal;
     }
 

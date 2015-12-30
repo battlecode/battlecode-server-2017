@@ -210,7 +210,4 @@ public class IndividualClassLoader extends ClassLoader {
         cr.accept(cv, 0);        //passing false lets debug info be included in the transformation, so players get line numbers in stack traces
         return cw.toByteArray();
     }
-
-
-
 }
