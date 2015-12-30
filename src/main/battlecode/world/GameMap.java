@@ -1,11 +1,11 @@
 package battlecode.world;
 
 import battlecode.common.*;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -59,6 +59,18 @@ public class GameMap implements Serializable {
     private final ZombieSpawnSchedule zombieSpawnSchedule;
 
     /**
+     * Maps a den MapLocation to its ZombieSpawnSchedule
+     */
+    @JsonIgnore
+    private final Map<MapLocation, ZombieSpawnSchedule> zombieSpawnMap;
+    
+    /**
+     * Boolean values representing the different types of symmetry the map has
+     */
+    @JsonIgnore
+    private boolean symVert, symHoriz, symRot, symNegDiag, symPosDiag;
+    
+    /**
      * The robots to spawn on the map; MapLocations are in world space -
      * i.e. in game correct MapLocations that need to have the origin
      * subtracted from them to be used to index into the map arrays.
@@ -94,6 +106,8 @@ public class GameMap implements Serializable {
         this.mapName = gm.mapName;
         this.zombieSpawnSchedule = new ZombieSpawnSchedule(gm.zombieSpawnSchedule);
         this.initialRobots = gm.getInitialRobots();
+        updateSymmetries();
+        this.zombieSpawnMap = buildZombieSpawnMap(this.zombieSpawnSchedule);
     }
 
     /**
@@ -154,6 +168,8 @@ public class GameMap implements Serializable {
         this.zombieSpawnSchedule = zombieSpawnSchedule;
         this.mapName = mapName;
         this.initialRobots = initialRobots;
+        updateSymmetries();
+        this.zombieSpawnMap = buildZombieSpawnMap(this.zombieSpawnSchedule);
     }
 
 
@@ -425,17 +441,18 @@ public class GameMap implements Serializable {
         }
     }
 
+
     /**
-     * @return whether this GameMap is tournament legal.
+     * Updates the map's symmetry types
      */
     @JsonIgnore
-    public boolean isTournamentLegal() {
+    public void updateSymmetries() {
         // The different possible symmetries.
-        boolean symVert = true,
-                symHoriz = true,
-                symRot = true,
-                symNegDiag = height == width, // across the line x=height-y
-                symPosDiag = height == width; // across the line x=y
+        symVert = true;
+        symHoriz = true;
+        symRot = true;
+        symNegDiag = height == width; // across the line x=height-y
+        symPosDiag = height == width; // across the line x=y
 
         // First, we check if rubble and parts are symmetric.
         for (int y = 0; y < height; y++) {
@@ -487,15 +504,114 @@ public class GameMap implements Serializable {
                 );
             }
         }
-
-        if (!symVert && !symHoriz && !symNegDiag && !symPosDiag && !symRot) {
-            return false;
-        }
-
-        // Some sort of symmetry
-        return true;
+    }
+    
+    /**
+     * @return True if the map is symmetric in some way
+     */
+    @JsonIgnore
+    public boolean isTournamentLegal() {
+        return (symVert || symHoriz || symNegDiag || symPosDiag || symRot);
     }
 
+    /**
+     * Divides a ZombieSpawnSchedule symmetrically among all ZOMBIEDENs 
+     * in a map.
+     * 
+     * @param schedule The ZombieSpawnSchedule to divide between ZOMBIEDENs
+     * @return A Map mapping a ZOMBIEDEN's MapLocation to a ZombieSpawnSchedule
+     */
+    private Map<MapLocation,ZombieSpawnSchedule> buildZombieSpawnMap(ZombieSpawnSchedule schedule) {
+        
+        Map<MapLocation,ZombieSpawnSchedule> returnMap = new HashMap<MapLocation,ZombieSpawnSchedule>();
+
+        // TODO: Innards
+        // Put IDs of all ZOMBIEDENs in map
+        // Create empty list of that length
+        // Choose a ZOMBIEDEN from map, find symmetric pair, but both in list
+        // Fill in returnMap
+        
+        // Used for robot lookups by location
+        final MapLocation origin = new MapLocation(0, 0);
+        final Map<MapLocation, InitialRobotInfo> byLoc =
+                Arrays.stream(initialRobots).collect(Collectors.toMap(
+                        (robot) -> robot.getLocation(origin),
+                        (robot) -> robot
+                ));
+        
+        // Build list of ZOMBIEDEN Locations (in symmetric order)
+        ArrayList<MapLocation> denLocs = new ArrayList<MapLocation>();
+        for (MapLocation loc : byLoc.keySet()) {
+            InitialRobotInfo r1 = byLoc.get(loc);
+            final int x = loc.x, y = loc.y;
+            
+            if(r1.type == RobotType.ZOMBIEDEN && denLocs.indexOf(loc) == -1) {
+                // Add this location
+                denLocs.add(r1.getLocation(origin));
+                
+                // Now find symmetric pair
+                MapLocation newLocation;
+                if(symVert) {
+                    newLocation = new MapLocation(x, height - y - 1);
+                } else if (symHoriz) {
+                    newLocation = new MapLocation(width - x - 1, y);
+                } else if (symNegDiag) {
+                    newLocation = new MapLocation(height - y - 1, width - x - 1);
+                } else if (symPosDiag) {
+                    newLocation = new MapLocation(y, x);
+                } else if (symRot) {
+                    newLocation = new MapLocation(width - x - 1, height - y - 1);
+                } else { 
+                    newLocation = null; // Map is not symmetric, so no pair
+                }
+                
+                // Add the symmetric pair
+                if (oppositeRobots(r1,byLoc.get(newLocation)) && denLocs.indexOf(newLocation) == -1) {
+                    denLocs.add(newLocation);
+                } else {
+                    // This should never happen, but allows it to work with asymmetric maps
+                }
+            }
+        }
+        
+        // Prevent future divide-by-zero errors
+        if(denLocs.size() == 0) {
+            return returnMap;
+        }
+        
+        // Initialize a blank ZombieSpawnSchedule for each location in denLocs
+        for(MapLocation location : denLocs) {
+            returnMap.put(location, new ZombieSpawnSchedule());
+        }
+        
+        int currentIndex = 0; // Index of the ZOMBIEDEN that receives the next zombie
+        int numberDens = denLocs.size();
+        
+        Collection<Integer> spawnScheduleRounds = schedule.getRounds();
+        for(int round : spawnScheduleRounds) {
+            ArrayList<ZombieCount> roundMap = schedule.getScheduleForRound(round);
+            for(ZombieCount zombieCount : roundMap) {
+                // First, divide as evenly as we can
+                int evenlyDivided = zombieCount.getCount() / numberDens;
+                int leftOver = zombieCount.getCount() % numberDens;
+                for(MapLocation denLoc : denLocs) {
+                    returnMap.get(denLoc).add(round, zombieCount.getType(), evenlyDivided);
+                }
+                
+                // Now, iterate individually for all leftover
+                for (int i=0; i<leftOver; i++) {
+                    returnMap.get(denLocs.get(currentIndex)).add(round, zombieCount.getType(), 1);
+                    currentIndex = (currentIndex+1)%numberDens;
+                }
+            }
+            
+            //returnMap.get()
+        }
+        
+        
+        return returnMap;
+    }
+    
     /**
      * Return whether two map tiles have the same properties.
      *
@@ -551,5 +667,6 @@ public class GameMap implements Serializable {
         this.mapName = null;
         this.zombieSpawnSchedule = null;
         this.initialRobots = null;
+        this.zombieSpawnMap = null;
     }
 }
