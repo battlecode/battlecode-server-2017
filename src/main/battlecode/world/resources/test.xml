@@ -111,9 +111,14 @@
     </zombieSpawnSchedule>
     <initialRobots>
       <initial-robot originOffsetX="1" originOffsetY="1" type="ARCHON" team="A"/>
-	  <initial-robot originOffsetX="2" originOffsetY="2" type="SOLDIER" team="NEUTRAL"/>
       <initial-robot originOffsetX="45" originOffsetY="45" type="ARCHON" team="B"/>
 	  <initial-robot originOffsetX="45" originOffsetY="1" type="ZOMBIEDEN" team="ZOMBIE"/>
+	  <initial-robot originOffsetX="45" originOffsetY="3" type="SOLDIER" team="NEUTRAL"/>
+	  <initial-robot originOffsetX="44" originOffsetY="3" type="SOLDIER" team="NEUTRAL"/>
+	  <initial-robot originOffsetX="43" originOffsetY="3" type="SOLDIER" team="NEUTRAL"/>
+	  <initial-robot originOffsetX="43" originOffsetY="2" type="SOLDIER" team="NEUTRAL"/>
+	  <initial-robot originOffsetX="43" originOffsetY="1" type="SOLDIER" team="NEUTRAL"/>
+	  <initial-robot originOffsetX="43" originOffsetY="0" type="SOLDIER" team="NEUTRAL"/>
     </initialRobots>
   </game-map>
 </object-stream>

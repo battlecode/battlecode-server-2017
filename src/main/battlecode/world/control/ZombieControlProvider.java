@@ -248,20 +248,14 @@ public class ZombieControlProvider implements RobotControlProvider {
                 rc.clearRubble(preferredDirection);
                 return;
             }
-
-            final MapLocation nextTarget = rc.getLocation().add(nextDirection);
-            if (!rc.isLocationOccupied(nextTarget) && rc.onTheMap(nextTarget)
-                    && rc.senseRubble(nextTarget) >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
-                rc.clearRubble(nextDirection);
-                return;
-            }
-
-            final MapLocation finalTarget = rc.getLocation().add(finalDirection);
-            if (!rc.isLocationOccupied(finalTarget) && rc.onTheMap(finalTarget) &&
-                    rc.senseRubble(finalTarget) >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
-                rc.clearRubble(finalDirection);
-                return;
-            }
+			
+			if (rc.isLocationOccupied(preferredTarget) && rc.senseRobotAtLocation(preferredTarget).team == Team.NEUTRAL) {
+				if (rc.isWeaponReady()) {
+					rc.attackLocation(preferredTarget);
+					return;
+				}
+			}
+			
         } catch (Exception e) {
             ErrorReporter.report(e, true);
         }

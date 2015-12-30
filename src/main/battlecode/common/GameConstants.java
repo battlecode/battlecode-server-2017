@@ -81,7 +81,7 @@ public interface GameConstants {
     double RUBBLE_CLEAR_PERCENTAGE = 0.05;
 
     /** Flat amount of rubble removed with each clear. */
-    double RUBBLE_CLEAR_FLAT_AMOUNT = 20;
+    double RUBBLE_CLEAR_FLAT_AMOUNT = 10;
 
     // *********************************
     // ****** UNIT PROPERTIES **********
