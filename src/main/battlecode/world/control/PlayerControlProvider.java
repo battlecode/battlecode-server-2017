@@ -24,7 +24,9 @@ public class PlayerControlProvider implements RobotControlProvider {
      * The sandboxed robot players we're using to control robots;
      * maps ids to sandboxes.
      *
-     * When a sandbox has been terminated,
+     * When a sandbox has been terminated, its entry in the map
+     * will have a value of null, so that the classloader it uses
+     * can be reclaimed.
      */
     private Map<Integer, SandboxedRobotPlayer> sandboxes;
 
