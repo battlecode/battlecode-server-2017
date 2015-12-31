@@ -47,11 +47,6 @@ public class ZombieControlProvider implements RobotControlProvider {
     private GameWorld world;
 
     /**
-     * The spawn schedule for zombies.
-     */
-    private ZombieSpawnSchedule zSchedule;
-
-    /**
      * The queues of zombies to spawn for each den.
      */
     private final Map<Integer, Map<RobotType, Integer>> denQueues;
@@ -71,10 +66,8 @@ public class ZombieControlProvider implements RobotControlProvider {
     @Override
     public void matchStarted(GameWorld world) {
         assert this.world == null;
-        assert this.zSchedule == null;
 
         this.world = world;
-        this.zSchedule = world.getGameMap().getZombieSpawnSchedule();
         this.random = new Random(world.getMapSeed());
     }
 
@@ -135,6 +128,11 @@ public class ZombieControlProvider implements RobotControlProvider {
         final RobotController rc = den.getController();
         final Map<RobotType, Integer> spawnQueue = denQueues.get(rc.getID());
 
+        System.out.println("From ZombieControlProvider: " +den.getLocation());
+        final ZombieSpawnSchedule zSchedule = world.getGameMap().getZombieSpawnSchedule(den.getLocation());
+        System.out.println(den.getLocation().toString());
+        System.out.println(zSchedule);
+        
         // Update the spawn queue with the values from this round.
         for (ZombieCount count : zSchedule.getScheduleForRound(world.getCurrentRound())) {
             final int currentCount = spawnQueue.get(count.getType());
