@@ -170,7 +170,7 @@ public class ZombieControlProviderTest {
                 .withRobot(RobotType.STANDARDZOMBIE, Team.ZOMBIE, 3, 0)
                 .withRobot(RobotType.GUARD, Team.A, 3, 2)
                 .withRobot(RobotType.SOLDIER, Team.A, 0, 1)
-                .withZombieSpawn(0, RobotType.STANDARDZOMBIE, 6)
+                .withZombieSpawn(0, RobotType.STANDARDZOMBIE, 7)
                 .getMap("map");
 
         final GameWorld world = new GameWorld(map, zombieControlProvider, "", "", new long[2][GameConstants.TEAM_MEMORY_LENGTH]);

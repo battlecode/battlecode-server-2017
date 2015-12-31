@@ -162,10 +162,18 @@ public class ZombieControlProvider implements RobotControlProvider {
                 } catch (GameActionException e) {
                     ErrorReporter.report(e, true);
                 }
-            } else {
-                // We can't; maybe there's a robot blocking it.
-
-                final InternalRobot block = world.getObject(rc.getLocation().add(dir));
+            }
+        }
+        // Now we've tried every direction. If we still have things in queue, damage surrounding robots
+        RobotType next = null;
+        for (RobotType type : ZOMBIE_TYPES) {
+            if (spawnQueue.get(type) != 0) {
+                next = type;
+            }
+        }
+        if (next != null) { // There are still things in queue, so attack all locations
+            for (int dirOffset=0; dirOffset < DIRECTIONS.length; dirOffset++) {
+                final InternalRobot block = world.getObject(rc.getLocation().add(DIRECTIONS[dirOffset]));
                 if (block != null && block.getTeam() != Team.ZOMBIE) {
                     block.takeDamage(GameConstants.DEN_SPAWN_PROXIMITY_DAMAGE);
                 }
