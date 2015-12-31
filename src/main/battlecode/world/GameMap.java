@@ -108,7 +108,6 @@ public class GameMap implements Serializable {
         this.initialRobots = gm.getInitialRobots();
         updateSymmetries();
         this.zombieSpawnMap = buildZombieSpawnMap(this.zombieSpawnSchedule);
-        System.out.println("ZombieSpawnMap initilized with keys "+this.zombieSpawnMap.keySet());
     }
 
     /**
@@ -171,7 +170,6 @@ public class GameMap implements Serializable {
         this.initialRobots = initialRobots;
         updateSymmetries();
         this.zombieSpawnMap = buildZombieSpawnMap(this.zombieSpawnSchedule);
-        System.out.println("ZombieSpawnMap initilized");
     }
 
 
@@ -369,19 +367,7 @@ public class GameMap implements Serializable {
      */
     @JsonIgnore
     public ZombieSpawnSchedule getZombieSpawnSchedule(MapLocation denLoc) {
-        System.out.println("Requested: "+denLoc);
-        
-        //this.zombieSpawnMap = new HashMap<MapLocation,ZombieSpawnSchedule>();        
-        
-        if(this.zombieSpawnMap == null)
-            System.out.println("It is null :(");
-        else
-            System.out.println("Keys: "+this.zombieSpawnMap.keySet());
         return this.zombieSpawnMap.get(denLoc);
-    }
-    
-    public Map<MapLocation,ZombieSpawnSchedule> getZombieSpawnMap() {
-        return this.zombieSpawnMap;
     }
     
     /**
@@ -548,7 +534,7 @@ public class GameMap implements Serializable {
     private HashMap<MapLocation,ZombieSpawnSchedule> buildZombieSpawnMap(ZombieSpawnSchedule schedule) {
         
         HashMap<MapLocation,ZombieSpawnSchedule> returnMap = new HashMap<MapLocation,ZombieSpawnSchedule>();
-        System.out.println("Origin: "+origin);
+        
         // Used for robot lookups by location
         final MapLocation origin = new MapLocation(0, 0);
         final Map<MapLocation, InitialRobotInfo> byLoc =
@@ -563,8 +549,7 @@ public class GameMap implements Serializable {
 
             InitialRobotInfo r1 = byLoc.get(loc);
             final int x = loc.x, y = loc.y;
-            if(r1.type == RobotType.ZOMBIEDEN)
-                System.out.println("Currentloc: "+loc);    
+
             if(r1.type == RobotType.ZOMBIEDEN && denLocs.indexOf(loc) == -1) {
                 // Add this location
                 denLocs.add(r1.getLocation(origin));
@@ -581,8 +566,7 @@ public class GameMap implements Serializable {
                     newLocation = new MapLocation(y, x);
                 } else if (symRot) {
                     newLocation = new MapLocation(width - x - 1, height - y - 1);
-                } else { 
-                    System.out.println("Error: Map is not symmetric");
+                } else {
                     newLocation = null; // Map is not symmetric, so no pair
                 }
                 
@@ -590,31 +574,25 @@ public class GameMap implements Serializable {
                 if (newLocation != null && oppositeRobots(r1,byLoc.get(newLocation)) && denLocs.indexOf(newLocation) == -1) {
                     denLocs.add(newLocation);
                 } else {
-                    System.out.println("Error: No mate found.");
                     // This should never happen in valid maps, but allows it to work with asymmetric maps (such as tests)
                 }
             }
+        }
+        
+        // Prevent future divide-by-zero errors
+        if(denLocs.size() == 0) {
+            return returnMap;
         }
         
         // Now we need to shift them to match the actual origin of the map
         ArrayList<MapLocation> shiftedDenLocs = new ArrayList<MapLocation>();
         for(MapLocation denLoc : denLocs) {
             shiftedDenLocs.add(denLoc.add(this.origin.x,this.origin.y));
-            System.out.println("New Den loc: "+denLoc.add(this.origin.x,this.origin.y));
         }
         denLocs = shiftedDenLocs;
         
-        // Prevent future divide-by-zero errors
-        System.out.println("Map Size: "+denLocs.size());
-        if(denLocs.size() == 0) {
-            return returnMap;
-        }
-        System.out.println(denLocs.toString());
-        
         // Initialize a blank ZombieSpawnSchedule for each location in denLocs
         for(MapLocation location : denLocs) {
-            System.out.println("Addeding blank zombiespawnschedule to "+location);
-            //returnMap.put(location, new ZombieSpawnSchedule());
             returnMap.put(location, new ZombieSpawnSchedule());
         }
         
@@ -640,7 +618,6 @@ public class GameMap implements Serializable {
                 }
             }
         }
-        
         return returnMap;
     }
     
