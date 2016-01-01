@@ -14,6 +14,10 @@ import java.util.*;
  *
  * @author james
  */
+/**
+ * @author nmccoy
+ *
+ */
 public class ZombieControlProvider implements RobotControlProvider {
 
     /**
@@ -47,11 +51,6 @@ public class ZombieControlProvider implements RobotControlProvider {
     private GameWorld world;
 
     /**
-     * The spawn schedule for zombies.
-     */
-    private ZombieSpawnSchedule zSchedule;
-
-    /**
      * The queues of zombies to spawn for each den.
      */
     private final Map<Integer, Map<RobotType, Integer>> denQueues;
@@ -71,10 +70,8 @@ public class ZombieControlProvider implements RobotControlProvider {
     @Override
     public void matchStarted(GameWorld world) {
         assert this.world == null;
-        assert this.zSchedule == null;
 
         this.world = world;
-        this.zSchedule = world.getGameMap().getZombieSpawnSchedule();
         this.random = new Random(world.getMapSeed());
     }
 
@@ -135,12 +132,44 @@ public class ZombieControlProvider implements RobotControlProvider {
         final RobotController rc = den.getController();
         final Map<RobotType, Integer> spawnQueue = denQueues.get(rc.getID());
 
+        final ZombieSpawnSchedule zSchedule = world.getGameMap().getZombieSpawnSchedule(den.getLocation());
+        
         // Update the spawn queue with the values from this round.
         for (ZombieCount count : zSchedule.getScheduleForRound(world.getCurrentRound())) {
             final int currentCount = spawnQueue.get(count.getType());
             spawnQueue.put(count.getType(), currentCount + count.getCount());
         }
 
+        // Spawn as many available robots as possible
+        spawnAllPossible(rc,spawnQueue);
+        
+        // Now we've tried every direction. If we still have things in queue, damage surrounding robots
+        RobotType next = null;
+        for (RobotType type : ZOMBIE_TYPES) {
+            if (spawnQueue.get(type) != 0) {
+                next = type;
+            }
+        }
+        if (next != null) {
+            // There are still things in queue, so attack all locations
+            for (int dirOffset=0; dirOffset < DIRECTIONS.length; dirOffset++) {
+                final InternalRobot block = world.getObject(rc.getLocation().add(DIRECTIONS[dirOffset]));
+                if (block != null && block.getTeam() != Team.ZOMBIE) {
+                    block.takeDamage(GameConstants.DEN_SPAWN_PROXIMITY_DAMAGE);
+                }
+            }
+            
+            // Now spawn in remaining locations
+            spawnAllPossible(rc,spawnQueue);
+        }
+    }
+    
+    /**
+     * Spawn as of the queued robots as space allows
+     * @param rc a robotcontroller
+     * @param spawnQueue the queue of robots to be spawned
+     */
+    private void spawnAllPossible(RobotController rc, Map<RobotType, Integer> spawnQueue) {
         // Walk around the den, attempting to spawn zombies.
         // We choose a random direction to start spawning so that we don't prefer to spawn zombies
         // to the north.
@@ -166,13 +195,6 @@ public class ZombieControlProvider implements RobotControlProvider {
                     spawnQueue.put(next, spawnQueue.get(next) - 1);
                 } catch (GameActionException e) {
                     ErrorReporter.report(e, true);
-                }
-            } else {
-                // We can't; maybe there's a robot blocking it.
-
-                final InternalRobot block = world.getObject(rc.getLocation().add(dir));
-                if (block != null && block.getTeam() != Team.ZOMBIE) {
-                    block.takeDamage(GameConstants.DEN_SPAWN_PROXIMITY_DAMAGE);
                 }
             }
         }

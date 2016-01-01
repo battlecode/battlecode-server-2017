@@ -94,7 +94,7 @@ public class Match {
         final File mapPath = new File(options.get("bc.game.map-path"));
 
         // Load the map for the match
-        final GameMap loadedMap = GameMapIO.loadMap(map, mapPath);
+        final GameMap loadedMap = new GameMap(GameMapIO.loadMap(map, mapPath));
 
         // Create the control provider for the match
         // TODO move this somewhere better-fitting
