@@ -62,13 +62,13 @@ public class GameMap implements Serializable {
      * Maps a den MapLocation to its ZombieSpawnSchedule
      */
     @JsonIgnore
-    private final HashMap<MapLocation, ZombieSpawnSchedule> zombieSpawnMap;// = new HashMap<MapLocation,ZombieSpawnSchedule>();
+    private transient final HashMap<MapLocation, ZombieSpawnSchedule> zombieSpawnMap;// = new HashMap<MapLocation,ZombieSpawnSchedule>();
     
     /**
      * Boolean values representing the different types of symmetry the map has
      */
     @JsonIgnore
-    private boolean symVert, symHoriz, symRot, symNegDiag, symPosDiag;
+    private transient boolean symVert, symHoriz, symRot, symNegDiag, symPosDiag;
     
     /**
      * The robots to spawn on the map; MapLocations are in world space -
