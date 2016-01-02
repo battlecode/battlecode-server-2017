@@ -6,8 +6,10 @@ import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.TypeChangeSignal;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.*;
 
 /**
  * The representation of a robot used by the server.
@@ -32,9 +34,8 @@ public class InternalRobot {
     private int currentBytecodeLimit;
     private int bytecodesUsed;
     private int prevBytecodesUsed;
-    private boolean healthChanged;
-    private boolean broadcasted;
-    private HashMap<Integer, Integer> broadcastMap;
+    private boolean healthChanged;    
+    private ArrayList<Message> signalqueue;
     private int roundsAlive;
     private int buildDelay;
     private int repairCount;
@@ -81,9 +82,9 @@ public class InternalRobot {
         this.bytecodesUsed = 0;
         this.prevBytecodesUsed = 0;
         this.healthChanged = true;
+        
+        this.signalqueue = new ArrayList<Message>();
 
-        this.broadcasted = false;
-        this.broadcastMap = new HashMap<>();
         this.roundsAlive = 0;
 
         this.controller = new RobotControllerImpl(gameWorld, this);
@@ -322,17 +323,33 @@ public class InternalRobot {
     // ****** BROADCAST METHODS ********
     // *********************************
 
-    public void addBroadcast(int channel, int data) {
-        broadcastMap.put(channel, data);
-        broadcasted = true;
+    public void receiveSignal(Message mess) {
+    	signalqueue.add(mess);
     }
-
-    public Integer getQueuedBroadcastFor(int channel) {
-        return broadcastMap.get(channel);
+    
+    public Message retrieveNextSignal() {
+    	if (signalqueue.size() == 0) {
+    		return null;
+    	}
+    	return signalqueue.remove(0);
     }
-
-    public boolean hasBroadcasted() {
-        return broadcasted;
+    
+    public Message[] retrieveAllSignals() {
+    	int numMessages = signalqueue.size();
+    	Message[] queue = new Message[numMessages];
+    	for(int i = 0; i < numMessages; i++) {
+    		queue[i] = signalqueue.remove(0);
+    	}
+    	return queue;
+    }
+    
+    public void broadcastSignal(Message mess, int rad) {
+    	InternalRobot[] receiving = gameWorld.getAllRobotsWithinRadiusSq(location, rad);
+    	for(int i = 0; i < receiving.length; i++) {
+    		if(!equals(receiving[i])) {
+        		receiving[i].receiveSignal(mess);
+    		}
+    	}
     }
 
     // *********************************
@@ -406,13 +423,6 @@ public class InternalRobot {
         this.prevBytecodesUsed = this.bytecodesUsed;
         roundsAlive++;
         
-        // broadcasts
-        if (broadcasted) {
-            gameWorld.visitSignal(new BroadcastSignal(this.getID(), this.getTeam(), broadcastMap));
-            broadcastMap = new HashMap<>();
-            broadcasted = false;
-        }
-
         processBeingInfected();
     }
 

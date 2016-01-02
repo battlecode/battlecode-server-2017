@@ -474,32 +474,40 @@ public final class RobotControllerImpl implements RobotController {
     // ***********************************
 
     @Override
-    public void broadcast(int channel, int data) throws GameActionException {
-        if (channel < 0 || channel > GameConstants.BROADCAST_MAX_CHANNELS)
-            throw new GameActionException(CANT_DO_THAT,
-                    "Can only use radio channels from 0 to "
-                            + GameConstants.BROADCAST_MAX_CHANNELS
-                            + ", inclusive");
-
-        robot.addBroadcast(channel, data);
+    public Message readSignal() {
+    	return robot.retrieveNextSignal();
     }
-
+    
     @Override
-    public int readBroadcast(int channel) throws GameActionException {
-        if (channel < 0 || channel > GameConstants.BROADCAST_MAX_CHANNELS)
-            throw new GameActionException(CANT_DO_THAT,
-                    "Can only use radio channels from 0 to "
-                            + GameConstants.BROADCAST_MAX_CHANNELS
-                            + ", inclusive");
-
-        Integer queued = robot.getQueuedBroadcastFor(channel);
-        if (queued != null) {
-            return queued;
-        }
-
-        return gameWorld.getMessage(robot.getTeam(), channel);
+    public Message[] emptySignalQueue() {
+    	return robot.retrieveAllSignals();
+    }
+    
+    @Override
+    public void broadcastMessage(Message mess, int rad)  throws GameActionException {
+    	if (mess == null) {
+    		throw new GameActionException(CANT_DO_THAT, "Cannot broadcast a null message.");
+    	}
+    	if (mess instanceof MessageSignal) {
+    		throw new GameActionException(CANT_DO_THAT, "Use broadcastMessageSignal to send a message signal.");
+    	}
+    	robot.broadcastSignal(mess, rad);
+    }
+    
+    @Override
+    public void broadcastMessageSignal(MessageSignal mess, int rad)  throws GameActionException {
+    	if (mess == null) {
+    		throw new GameActionException(CANT_DO_THAT, "Cannot broadcast a null message.");
+    	}
+    	if (!robot.getType().canMessageSignal()) {
+    		throw new GameActionException(CANT_DO_THAT, 
+    				"Unit type " + robot.getType().name() + " cannot send a message signal; " +
+                    "only ARCHON and SCOUT can send message signals.");
+    	}
+    	robot.broadcastSignal(mess, rad);
     }
 
+    
     // ***********************************
     // ****** BUILDING/SPAWNING **********
     // ***********************************
