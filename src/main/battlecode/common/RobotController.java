@@ -392,11 +392,11 @@ public interface RobotController {
      * Retrieve the next message waiting in your incoming message queue. Also
      * removes the message from the queue.
      *
-     * @return next Message object in your queue, or null if your queue is
+     * @return next Signal object in your queue, or null if your queue is
      *         empty.
      */
     
-    Message readSignal();
+    Signal readSignal();
     
     /**
      * Retrieves an array of all the messages in your incoming message queue.
@@ -406,29 +406,30 @@ public interface RobotController {
      * @return all the Messages in your message queue
      */
     
-    Message[] emptySignalQueue();
+    Signal[] emptySignalQueue();
     
     /**
      * Broadcasts a regular signal over a specific integer radius. The signal is
      * immediately added to the incoming message queues of all robots in
      * your broadcast range (except for the sending robot).
      *
-     * @param msg the message you want to broadcast; cannot be <code>null</code>.
      * @param rad the radius over which the signal is broadcasted
      */
     
-    void broadcastMessage(Message mess, int rad)  throws GameActionException;
+    void broadcastSignal(int rad)  throws GameActionException;
     
     /**
      * Broadcasts a message signal over a specific integer radius. The signal is
      * immediately added to the incoming message queues of all robots in
      * your broadcast range (except for the sending robot).
      *
-     * @param msg the message signal you want to broadcast; cannot be <code>null</code>.
+     * @param message1 the first integer to broadcast
+     * @param message2 the second integer to broadcast
      * @param rad the radius over which the signal is broadcasted
      */
     
-    void broadcastMessageSignal(MessageSignal mess, int rad)  throws GameActionException;
+    void broadcastMessageSignal(int message1, int message2, int rad)  throws
+            GameActionException;
 
     // ***********************************
     // ****** BUILDING/SPAWNING **********

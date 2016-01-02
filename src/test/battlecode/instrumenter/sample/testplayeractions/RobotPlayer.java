@@ -11,7 +11,7 @@ import battlecode.common.*;
 public class RobotPlayer {
     public static void run(RobotController rc) throws GameActionException {
         rc.addMatchObservation("text");
-        rc.readBroadcast(0);
+        rc.readSignal();
         rc.resign();
         rc.senseNearbyRobots();
         rc.setTeamMemory(0, 0);

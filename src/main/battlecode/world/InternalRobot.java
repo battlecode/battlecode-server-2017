@@ -1,15 +1,11 @@
 package battlecode.world;
 
 import battlecode.common.*;
-import battlecode.world.signal.Signal;
-import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.TypeChangeSignal;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Optional;
-import java.util.*;
 
 /**
  * The representation of a robot used by the server.
@@ -35,7 +31,7 @@ public class InternalRobot {
     private int bytecodesUsed;
     private int prevBytecodesUsed;
     private boolean healthChanged;    
-    private ArrayList<Message> signalqueue;
+    private ArrayList<Signal> signalqueue;
     private int roundsAlive;
     private int buildDelay;
     private int repairCount;
@@ -83,7 +79,7 @@ public class InternalRobot {
         this.prevBytecodesUsed = 0;
         this.healthChanged = true;
         
-        this.signalqueue = new ArrayList<Message>();
+        this.signalqueue = new ArrayList<Signal>();
 
         this.roundsAlive = 0;
 
@@ -323,27 +319,27 @@ public class InternalRobot {
     // ****** BROADCAST METHODS ********
     // *********************************
 
-    public void receiveSignal(Message mess) {
+    public void receiveSignal(Signal mess) {
     	signalqueue.add(mess);
     }
     
-    public Message retrieveNextSignal() {
+    public Signal retrieveNextSignal() {
     	if (signalqueue.size() == 0) {
     		return null;
     	}
     	return signalqueue.remove(0);
     }
     
-    public Message[] retrieveAllSignals() {
+    public Signal[] retrieveAllSignals() {
     	int numMessages = signalqueue.size();
-    	Message[] queue = new Message[numMessages];
+    	Signal[] queue = new Signal[numMessages];
     	for(int i = 0; i < numMessages; i++) {
     		queue[i] = signalqueue.remove(0);
     	}
     	return queue;
     }
     
-    public void broadcastSignal(Message mess, int rad) {
+    public void broadcastSignal(Signal mess, int rad) {
     	InternalRobot[] receiving = gameWorld.getAllRobotsWithinRadiusSq(location, rad);
     	for(int i = 0; i < receiving.length; i++) {
     		if(!equals(receiving[i])) {
@@ -356,7 +352,7 @@ public class InternalRobot {
     // ****** ACTION METHODS ***********
     // *********************************
 
-    public void activateCoreAction(Signal s, double attackDelay, double
+    public void activateCoreAction(battlecode.world.signal.Signal s, double attackDelay, double
             movementDelay) {
         gameWorld.visitSignal(s);
 
@@ -364,7 +360,7 @@ public class InternalRobot {
         addCoreDelay(movementDelay);
     }
 
-    public void activateAttack(Signal s, double attackDelay, double
+    public void activateAttack(battlecode.world.signal.Signal s, double attackDelay, double
             movementDelay) {
         gameWorld.visitSignal(s);
 

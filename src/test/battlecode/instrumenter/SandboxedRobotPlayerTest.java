@@ -53,7 +53,7 @@ public class SandboxedRobotPlayerTest {
         // Make sure that the player called the correct methods
 
         verify(rc).addMatchObservation("text");
-        verify(rc).readBroadcast(0);
+        verify(rc).readSignal();
         verify(rc).resign();
         verify(rc).senseNearbyRobots();
         verify(rc).setTeamMemory(0, 0);
@@ -67,17 +67,17 @@ public class SandboxedRobotPlayerTest {
         player.step();
 
         assertFalse(player.getTerminated());
-        verify(rc).broadcast(0, 0);
+        verify(rc).broadcastSignal(1);
 
         player.step();
 
         assertFalse(player.getTerminated());
-        verify(rc).broadcast(0, 1);
+        verify(rc).broadcastSignal(2);
 
         player.step();
 
         assertTrue(player.getTerminated());
-        verify(rc).broadcast(0, 2);
+        verify(rc).broadcastSignal(3);
     }
 
     @Test
@@ -101,8 +101,8 @@ public class SandboxedRobotPlayerTest {
 
         player.step();
 
-        verify(rc).broadcast(0, 0);
-        // broadcast() is 25 bytecodes, +3 extra
-        assertEquals(player.getBytecodesUsed(), 28);
+        verify(rc).broadcastSignal(1);
+        // broadcast() is 25 bytecodes, +2 extra
+        assertEquals(player.getBytecodesUsed(), 27);
     }
 }

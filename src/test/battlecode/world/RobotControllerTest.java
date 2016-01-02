@@ -4,9 +4,7 @@ import battlecode.common.*;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for RobotController. These are where the gameplay tests are.
@@ -147,9 +145,9 @@ public class RobotControllerTest {
             if (id == soldierA) { // All robots kill themselves
                 rc.attackLocation(new MapLocation(oX, oY));
             } else if (id == soldierB) {
-                rc.attackLocation(new MapLocation(oX+3, oY+2));
+                rc.attackLocation(new MapLocation(oX + 3, oY + 2));
             } else if (id == stdZombie) {
-                rc.attackLocation(new MapLocation(oX+3, oY+3));
+                rc.attackLocation(new MapLocation(oX + 3, oY + 3));
             }
         });
 
@@ -165,9 +163,9 @@ public class RobotControllerTest {
         assertEquals(game.getWorld().getRubble(new MapLocation(oX + 1, oY + 1)),
                 99 * (1 - GameConstants.RUBBLE_CLEAR_PERCENTAGE) - GameConstants
                         .RUBBLE_CLEAR_FLAT_AMOUNT, EPSILON);
-        assertEquals(game.getWorld().getRubble(new MapLocation(oX+3, oY+2)),
+        assertEquals(game.getWorld().getRubble(new MapLocation(oX + 3, oY + 2)),
                 0, EPSILON); // soldierB turns into zombie and doesn't leave rubble
-        assertEquals(game.getWorld().getRubble(new MapLocation(oX+3, oY+3)),
+        assertEquals(game.getWorld().getRubble(new MapLocation(oX + 3, oY + 3)),
                 60, EPSILON); // dead zombie leaves rubble
         assertEquals(game.getWorld().getRobot(new MapLocation(oX+3, oY+2)).getType(),
                 RobotType.STANDARDZOMBIE); // soldierB actually did turn into a zombie
@@ -707,6 +705,68 @@ public class RobotControllerTest {
                 assertEquals(nearby[0].location, new MapLocation(oX, oY));
                 assertEquals(nearby[0].type, RobotType.SOLDIER);
                 assertEquals(nearby[0].team, Team.A);
+            }
+        });
+    }
+
+    /**
+     * Test signaling behavior
+     */
+    @Test
+    public void testSignaling() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 1000);
+
+        GameMap map = mapGen.getMap("test");
+
+        TestGame game = new TestGame(map);
+
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int archon = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+        final int soldier = game.spawn(oX, oY + 4, RobotType.SOLDIER, Team.B);
+        final int guard = game.spawn(oX, oY + 5, RobotType.GUARD, Team.B);
+
+        game.round((id, rc) -> {
+            if (id == archon) {
+                rc.broadcastMessageSignal(123, 456, 24);
+            } else if (id == soldier) {
+                rc.broadcastSignal(2);
+            } else if (id == guard) {
+                rc.broadcastSignal(10000);
+            }
+        });
+
+        // verify messages
+        game.round((id, rc) -> {
+            if (id == archon) {
+                Signal[] queue = rc.emptySignalQueue();
+                assertEquals(queue.length, 1);
+                assertEquals(queue[0].getMessage(), null);
+                assertEquals(queue[0].getID(), guard);
+                assertEquals(queue[0].getLocation(), new MapLocation(oX, oY +
+                        5));
+                assertEquals(queue[0].getTeam(), Team.B);
+            } else if (id == soldier) {
+                Signal first = rc.readSignal();
+                Signal second = rc.readSignal();
+                Signal third = rc.readSignal();
+                assertArrayEquals(first.getMessage(), new int[]{123, 456});
+                assertEquals(first.getID(), archon);
+                assertEquals(first.getLocation(), new MapLocation(oX, oY));
+                assertEquals(first.getTeam(), Team.A);
+                assertArrayEquals(second.getMessage(), null);
+                assertEquals(second.getID(), guard);
+                assertEquals(second.getLocation(), new MapLocation(oX, oY + 5));
+                assertEquals(second.getTeam(), Team.B);
+                assertEquals(third, null);
+            } else if (id == guard) {
+                Signal[] queue = rc.emptySignalQueue();
+                assertEquals(queue.length, 1);
+                assertEquals(queue[0].getMessage(), null);
+                assertEquals(queue[0].getTeam(), Team.B);
+                assertEquals(queue[0].getLocation(), new MapLocation(oX, oY +
+                        4));
+                assertEquals(queue[0].getID(), soldier);
             }
         });
     }
