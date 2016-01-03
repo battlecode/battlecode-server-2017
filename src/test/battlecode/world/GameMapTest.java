@@ -37,11 +37,11 @@ public class GameMapTest {
     @Test
     public void testTournamentLegal() {
         final GameMap horizSymmetricDen = new TestMapGenerator(3,1, 0)
-        .withRobot(RobotType.ARCHON, Team.A, 0,0)
-        .withRobot(RobotType.ARCHON, Team.B, 2,0)
-        .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 1, 0)
-        .withParts(0,0, 50.0).withParts(1,0, 20.0).withParts(2,0, 50.0)
-        .withRubble(0,0, 100.0).withRubble(2,0, 100).getMap("horizSymmetric");
+                .withRobot(RobotType.ARCHON, Team.A, 0,0)
+                .withRobot(RobotType.ARCHON, Team.B, 2,0)
+                .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 1, 0)
+                .withParts(0,0, 50.0).withParts(1,0, 20.0).withParts(2,0, 50.0)
+                .withRubble(0,0, 100.0).withRubble(2,0, 100).getMap("horizSymmetric");
         // Den lies on a line of symmetry, so fails
         assertFalse(horizSymmetricDen.isTournamentLegal());
         
