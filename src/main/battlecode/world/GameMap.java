@@ -62,7 +62,7 @@ public class GameMap implements Serializable {
      * Maps a den MapLocation to its ZombieSpawnSchedule
      */
     @JsonIgnore
-    private transient final HashMap<MapLocation, ZombieSpawnSchedule> zombieSpawnMap;// = new HashMap<MapLocation,ZombieSpawnSchedule>();
+    private transient final HashMap<MapLocation, ZombieSpawnSchedule> zombieSpawnMap;
     
     /**
      * Boolean values representing the different types of symmetry the map has
@@ -517,10 +517,33 @@ public class GameMap implements Serializable {
     }
     
     /**
-     * @return True if the map is symmetric in some way
+     * @return True if the map is symmetric in some way and ZOMBIEDENs are not
+     * located on lines of symmetry.
      */
     @JsonIgnore
     public boolean isTournamentLegal() {
+        // First, check to make sure there aren't any ZOMBIEDENs on lines of symmetry
+        for(InitialRobotInfo robot : initialRobots) {
+            final MapLocation origin = new MapLocation(0, 0);
+            final MapLocation loc = robot.getLocation(origin);
+            final int x = loc.x, y = loc.y;
+            if(robot.type == RobotType.ZOMBIEDEN) {
+                if(symVert) {
+                    if(y == height - y - 1) return false;
+                } else if (symHoriz) {
+                    if(x == width - x - 1) return false;
+                } else if (symNegDiag) {
+                    if(x == height - y - 1 && y == width - x - 1) return false;
+                } else if (symPosDiag) {
+                    if(x == y) return false;
+                } else if (symRot) {
+                    if(x == width - x - 1 && y == height - y - 1) return false;
+                } else {
+                    return false;
+                }
+            }
+        }
+        // Make sure the map has some sort of symmetry
         return (symVert || symHoriz || symNegDiag || symPosDiag || symRot);
     }
 
