@@ -403,7 +403,7 @@ public interface RobotController {
      * All messages will be removed from the queue. If there are no messages in
      * the queue, this method returns a zero-length array.
      *
-     * @return all the Messages in your message queue
+     * @return all the Signals in your message queue
      */
     
     Signal[] emptySignalQueue();

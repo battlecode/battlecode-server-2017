@@ -5,7 +5,7 @@ import battlecode.common.Team;
 import battlecode.world.DominationFactor;
 import battlecode.world.control.NullControlProvider;
 import battlecode.world.control.ZombieControlProvider;
-import battlecode.world.signal.Signal;
+import battlecode.world.signal.InternalSignal;
 import battlecode.serial.*;
 import battlecode.world.GameMap;
 import battlecode.world.GameWorld;
@@ -121,22 +121,22 @@ public class Match {
     }
 
     /**
-     * Sends a signal directly to the game engine, possibly altering the match
+     * Sends a internalSignal directly to the game engine, possibly altering the match
      * state.
      *
-     * @param signal the signal to send to the engine
-     * @return the currentSignals that represent the effect of the alteration, or an
-     *         empty signal array if there was no effect
+     * @param internalSignal the internalSignal to send to the engine
+     * @return the currentInternalSignals that represent the effect of the alteration, or an
+     *         empty internalSignal array if there was no effect
      */
-    public InjectDelta inject(Signal signal) {
+    public InjectDelta inject(InternalSignal internalSignal) {
         assert isInitialized();
 
         try {
-            return new InjectDelta(true, gameWorld.inject(signal));
+            return new InjectDelta(true, gameWorld.inject(internalSignal));
         } catch (final RuntimeException e) {
             System.err.println("Injection failure: "+e.getMessage());
             e.printStackTrace();
-            return new InjectDelta(false, new Signal[0]);
+            return new InjectDelta(false, new InternalSignal[0]);
         }
     }
 
@@ -150,11 +150,11 @@ public class Match {
     }
 
     /**
-     * Runs the next round, returning a delta containing all the currentSignals raised
+     * Runs the next round, returning a delta containing all the currentInternalSignals raised
      * during that round. Notifies observers of anything other than a successful
      * delta-producing run.
      *
-     * @return the currentSignals generated for the next round of the game, or null if
+     * @return the currentInternalSignals generated for the next round of the game, or null if
      *         the engine's result was a breakpoint or completion
      */
     public RoundDelta getRound() {

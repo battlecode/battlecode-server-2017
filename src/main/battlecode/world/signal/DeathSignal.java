@@ -5,7 +5,7 @@ package battlecode.world.signal;
  *
  * @author Matt
  */
-public class DeathSignal implements Signal {
+public class DeathSignal implements InternalSignal {
 
     private static final long serialVersionUID = 8518453257317948520L;
 

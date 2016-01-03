@@ -9,7 +9,7 @@ import java.util.Map;
  *
  * @author Matt
  */
-public class BroadcastSignal implements Signal {
+public class BroadcastSignal implements InternalSignal {
 
     private static final long serialVersionUID = 8603786984259160822L;
 

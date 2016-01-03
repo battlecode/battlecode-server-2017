@@ -1,8 +1,8 @@
 package battlecode.world.signal;
 
 /**
- * Implemented by objects that can absorb currentSignals.
+ * Implemented by objects that can absorb currentInternalSignals.
  */
 public interface SignalHandler {
-    void visitSignal(Signal s);
+    void visitSignal(InternalSignal s);
 }

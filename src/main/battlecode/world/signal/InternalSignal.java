@@ -35,4 +35,4 @@ import java.io.Serializable;
         @Type(value = TeamResourceSignal.class, name="teamResource"),
         @Type(value = TypeChangeSignal.class, name="typeChange"),
 })
-public interface Signal extends Serializable {}
+public interface InternalSignal extends Serializable {}

@@ -7,11 +7,11 @@ import java.util.HashMap;
 
 /**
  * A signal handler that delegates to other signal handling methods, which it discovers
- * automatically.  The following criteria are used for determining if a method should handle currentSignals:
+ * automatically.  The following criteria are used for determining if a method should handle currentInternalSignals:
  * <p/>
  * - If the method has a {@link DiscoverSignal} annotation, that is respected.
  * - Otherwise, a method is discovered if it is public, its name starts with "visit", and it takes a single
- * parameter that is a subclass of {@link Signal} (but not Signal itself).
+ * parameter that is a subclass of {@link InternalSignal} (but not InternalSignal itself).
  * Currently it uses reflection, which is kind of inelegant and slow (but probably not slow enough to matter).  I guess we could avoid reflection and instead create classes on the fly.
  */
 @SuppressWarnings("ALL")
@@ -46,8 +46,8 @@ public class AutoSignalHandler implements SignalHandler {
                 else
                     shouldAdd = method.getName().startsWith("visit") &&
                             parameters.length == 1 &&
-                            Signal.class.isAssignableFrom(parameters[0]) &&
-                            !parameters[0].equals(Signal.class);
+                            InternalSignal.class.isAssignableFrom(parameters[0]) &&
+                            !parameters[0].equals(InternalSignal.class);
                 if (shouldAdd) {
                     //System.out.println("Adding signal handler "+method);
                     Method old = methodMap.put(parameters[0], method);
@@ -68,13 +68,13 @@ public class AutoSignalHandler implements SignalHandler {
     }
 
     @SuppressWarnings("unchecked")
-    public void visitSignal(Signal signal) {
-        Class<?> cls = signal.getClass();
+    public void visitSignal(InternalSignal internalSignal) {
+        Class<?> cls = internalSignal.getClass();
         do {
             Method method = methodMap.get(cls);
             if (method != null)
                 try {
-                    method.invoke(myObject, signal);
+                    method.invoke(myObject, internalSignal);
                 } catch (Exception e) {
                     if (e instanceof InvocationTargetException)
                         handleException(e.getCause());
@@ -83,7 +83,7 @@ public class AutoSignalHandler implements SignalHandler {
                 }
             cls = cls.getSuperclass();
         }
-        while (Signal.class.isAssignableFrom(cls));
+        while (InternalSignal.class.isAssignableFrom(cls));
     }
 
 }

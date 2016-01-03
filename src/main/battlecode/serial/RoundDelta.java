@@ -1,6 +1,6 @@
 package battlecode.serial;
 
-import battlecode.world.signal.Signal;
+import battlecode.world.signal.InternalSignal;
 import battlecode.world.signal.IndicatorStringSignal;
 
 import java.io.IOException;
@@ -15,22 +15,22 @@ public class RoundDelta implements ServerEvent {
 
     private static final long serialVersionUID = 1667367676711924140L;
 
-    private Signal[] signals;
+    private InternalSignal[] internalSignals;
 
     public RoundDelta() {
     }
 
-    public RoundDelta(Signal[] signals) {
-        this.signals = signals;
+    public RoundDelta(InternalSignal[] internalSignals) {
+        this.internalSignals = internalSignals;
         foldIndicatorSignals();
     }
 
-    public Signal[] getSignals() {
-        return signals;
+    public InternalSignal[] getInternalSignals() {
+        return internalSignals;
     }
 
-    public void setSignals(Signal[] signals) {
-        this.signals = signals;
+    public void setInternalSignals(InternalSignal[] internalSignals) {
+        this.internalSignals = internalSignals;
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -62,23 +62,23 @@ public class RoundDelta implements ServerEvent {
 
     private void foldIndicatorSignals() {
         HashMap<IndicatorString, Integer> folded = new HashMap<>();
-        for (int i = 0; i < signals.length; i++) {
-            if (signals[i] instanceof IndicatorStringSignal) {
-                IndicatorString is = new IndicatorString((IndicatorStringSignal) signals[i]);
+        for (int i = 0; i < internalSignals.length; i++) {
+            if (internalSignals[i] instanceof IndicatorStringSignal) {
+                IndicatorString is = new IndicatorString((IndicatorStringSignal) internalSignals[i]);
                 Integer prevSignal = folded.get(is);
                 if (prevSignal != null) {
-                    signals[prevSignal] = null;
+                    internalSignals[prevSignal] = null;
                 }
                 folded.put(is, i);
             }
         }
-        ArrayList<Signal> foldedSignals = new ArrayList<>(signals.length);
-        for (Signal signal : signals) {
-            if (signal != null) {
-                foldedSignals.add(signal);
+        ArrayList<InternalSignal> foldedInternalSignals = new ArrayList<>(internalSignals.length);
+        for (InternalSignal internalSignal : internalSignals) {
+            if (internalSignal != null) {
+                foldedInternalSignals.add(internalSignal);
             }
         }
-        signals = new Signal[foldedSignals.size()];
-        foldedSignals.toArray(signals);
+        internalSignals = new InternalSignal[foldedInternalSignals.size()];
+        foldedInternalSignals.toArray(internalSignals);
     }
 }

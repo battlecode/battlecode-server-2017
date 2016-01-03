@@ -6,7 +6,7 @@ import battlecode.common.Team;
 /**
  * Signifies that a robot has requested a debug indicator dot be created.
  */
-public class IndicatorDotSignal implements Signal {
+public class IndicatorDotSignal implements InternalSignal {
 
     public final int robotID;
     public final Team team;

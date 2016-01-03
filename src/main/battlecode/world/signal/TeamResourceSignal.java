@@ -6,7 +6,7 @@ import battlecode.common.Team;
 /**
  * Signifies a new quantity of resources (parts) for a team.
  */
-public class TeamResourceSignal implements Signal {
+public class TeamResourceSignal implements InternalSignal {
 
     /**
      * The team

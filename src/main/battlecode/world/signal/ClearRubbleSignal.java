@@ -7,7 +7,7 @@ import battlecode.common.MapLocation;
  *
  * @author axc
  */
-public class ClearRubbleSignal implements Signal {
+public class ClearRubbleSignal implements InternalSignal {
 
     private static final long serialVersionUID = -6853620834787044985L;
 

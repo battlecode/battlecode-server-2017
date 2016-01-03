@@ -7,7 +7,7 @@ import battlecode.world.InternalRobot;
  *
  * @author axc
  */
-public class InfectionSignal implements Signal {
+public class InfectionSignal implements InternalSignal {
 
     private static final long serialVersionUID = 6617731219527155785L;
 

@@ -2,6 +2,7 @@ package battlecode.world;
 
 import battlecode.common.*;
 import battlecode.world.signal.DeathSignal;
+import battlecode.world.signal.InternalSignal;
 import battlecode.world.signal.TypeChangeSignal;
 
 import java.util.ArrayList;
@@ -352,7 +353,7 @@ public class InternalRobot {
     // ****** ACTION METHODS ***********
     // *********************************
 
-    public void activateCoreAction(battlecode.world.signal.Signal s, double attackDelay, double
+    public void activateCoreAction(InternalSignal s, double attackDelay, double
             movementDelay) {
         gameWorld.visitSignal(s);
 
@@ -360,7 +361,7 @@ public class InternalRobot {
         addCoreDelay(movementDelay);
     }
 
-    public void activateAttack(battlecode.world.signal.Signal s, double attackDelay, double
+    public void activateAttack(InternalSignal s, double attackDelay, double
             movementDelay) {
         gameWorld.visitSignal(s);
 

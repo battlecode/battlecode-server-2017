@@ -1,16 +1,13 @@
 package battlecode.world.signal;
 
 import battlecode.common.MapLocation;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
-import battlecode.world.InternalRobot;
 
 /**
  * Signifies that a neutral robot is being activated by an archon.
  *
  * @author adamd
  */
-public class ActivationSignal implements Signal {
+public class ActivationSignal implements InternalSignal {
 
     private static final long serialVersionUID = -5655877873179895292L;
 
@@ -25,7 +22,7 @@ public class ActivationSignal implements Signal {
     private final MapLocation loc;
 
     /**
-     * Signal for an archon activating a neutral robot.
+     * InternalSignal for an archon activating a neutral robot.
      *
      * @param robotID the ID of the robot who is doing the activating.
      * @param loc the location of the robot
