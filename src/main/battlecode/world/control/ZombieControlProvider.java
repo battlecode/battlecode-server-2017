@@ -4,7 +4,7 @@ import battlecode.common.*;
 import battlecode.server.ErrorReporter;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
-import battlecode.world.ZombieSpawnSchedule;
+import battlecode.common.ZombieSpawnSchedule;
 
 import java.util.*;
 

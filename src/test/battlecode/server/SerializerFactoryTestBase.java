@@ -10,7 +10,7 @@ import battlecode.serial.*;
 import battlecode.server.serializer.Serializer;
 import battlecode.server.serializer.SerializerFactory;
 import battlecode.world.GameMap;
-import battlecode.world.ZombieSpawnSchedule;
+import battlecode.common.ZombieSpawnSchedule;
 import battlecode.world.signal.*;
 import org.junit.Ignore;
 

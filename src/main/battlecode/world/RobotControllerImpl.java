@@ -88,6 +88,12 @@ public final class RobotControllerImpl implements RobotController {
         return gameWorld.getCurrentRound();
     }
 
+    @Override
+    public ZombieSpawnSchedule getZombieSpawnSchedule() {
+        return new ZombieSpawnSchedule(gameWorld.getGameMap()
+                .getZombieSpawnSchedule());
+    }
+
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************
@@ -539,7 +545,11 @@ public final class RobotControllerImpl implements RobotController {
         assertNotNull(dir);
         assertNotNull(type);
         MapLocation loc = getLocation().add(dir);
-        return isPathableInternal(type, loc) && hasBuildRequirements(type);
+        if(robot.getType() == RobotType.ZOMBIEDEN) {
+            return gameWorld.isEmpty(loc);
+        } else {
+            return isPathableInternal(type, loc) && hasBuildRequirements(type);
+        }
     }
 
     @Override
@@ -567,7 +577,8 @@ public final class RobotControllerImpl implements RobotController {
         assertHaveResource(cost);
 
         MapLocation loc = getLocation().add(dir);
-        assertIsPathable(type, loc);
+        if(robot.getType() != RobotType.ZOMBIEDEN)
+            assertIsPathable(type, loc);
         
         int delay = type.buildTurns;
         robot.activateCoreAction(

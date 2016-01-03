@@ -71,4 +71,22 @@ public class ZombieCount implements Serializable, Comparable<ZombieCount> {
             return this.count - other.count;
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ZombieCount that = (ZombieCount) o;
+
+        if (count != that.count) return false;
+        return type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = type.hashCode();
+        result = 31 * result + count;
+        return result;
+    }
 }

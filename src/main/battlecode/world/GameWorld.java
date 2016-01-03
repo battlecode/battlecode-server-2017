@@ -324,6 +324,10 @@ public class GameWorld implements SignalHandler {
                 .RUBBLE_OBSTRUCTION_THRESH || type.ignoresRubble) &&
                 gameObjectsByLoc.get(loc) == null;
     }
+    
+    public boolean isEmpty(MapLocation loc) {
+        return gameMap.onTheMap(loc) && gameObjectsByLoc.get(loc) == null;
+    }
 
     protected boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
         MapLocation myLoc = ir.getLocation();
