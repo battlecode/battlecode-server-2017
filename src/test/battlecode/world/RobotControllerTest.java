@@ -4,6 +4,7 @@ import battlecode.common.*;
 
 import org.junit.Test;
 
+import static org.junit.Assert.*;
 import java.util.ArrayList;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -764,6 +765,79 @@ public class RobotControllerTest {
                 assertEquals(nearby[0].location, new MapLocation(oX, oY));
                 assertEquals(nearby[0].type, RobotType.SOLDIER);
                 assertEquals(nearby[0].team, Team.A);
+            }
+        });
+    }
+
+    /**
+     * Test signaling behavior
+     */
+    @Test
+    public void testSignaling() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 1000);
+
+        GameMap map = mapGen.getMap("test");
+
+        TestGame game = new TestGame(map);
+
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int archon = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+        final int soldier = game.spawn(oX, oY + 4, RobotType.SOLDIER, Team.B);
+        final int guard = game.spawn(oX, oY + 5, RobotType.GUARD, Team.B);
+
+        game.round((id, rc) -> {
+            if (id == archon) {
+                rc.broadcastMessageSignal(123, 456, 24);
+                assertEquals(rc.getCoreDelay(), GameConstants
+                        .BROADCAST_BASE_DELAY_INCREASE, EPSILON);
+                assertEquals(rc.getWeaponDelay(), GameConstants
+                        .BROADCAST_BASE_DELAY_INCREASE, EPSILON);
+            } else if (id == soldier) {
+                rc.broadcastSignal(2);
+            } else if (id == guard) {
+                rc.broadcastSignal(10000);
+                double x = 10000.0 / RobotType.GUARD.sensorRadiusSquared - 2;
+                assertEquals(rc.getCoreDelay(), GameConstants
+                        .BROADCAST_BASE_DELAY_INCREASE + x * GameConstants
+                        .BROADCAST_ADDITIONAL_DELAY_INCREASE, EPSILON);
+                assertEquals(rc.getWeaponDelay(), GameConstants
+                        .BROADCAST_BASE_DELAY_INCREASE + x * GameConstants
+                        .BROADCAST_ADDITIONAL_DELAY_INCREASE, EPSILON);
+            }
+        });
+
+        // verify messages
+        game.round((id, rc) -> {
+            if (id == archon) {
+                Signal[] queue = rc.emptySignalQueue();
+                assertEquals(queue.length, 1);
+                assertEquals(queue[0].getMessage(), null);
+                assertEquals(queue[0].getRobotID(), guard);
+                assertEquals(queue[0].getLocation(), new MapLocation(oX, oY +
+                        5));
+                assertEquals(queue[0].getTeam(), Team.B);
+            } else if (id == soldier) {
+                Signal first = rc.readSignal();
+                Signal second = rc.readSignal();
+                Signal third = rc.readSignal();
+                assertArrayEquals(first.getMessage(), new int[]{123, 456});
+                assertEquals(first.getRobotID(), archon);
+                assertEquals(first.getLocation(), new MapLocation(oX, oY));
+                assertEquals(first.getTeam(), Team.A);
+                assertArrayEquals(second.getMessage(), null);
+                assertEquals(second.getRobotID(), guard);
+                assertEquals(second.getLocation(), new MapLocation(oX, oY + 5));
+                assertEquals(second.getTeam(), Team.B);
+                assertEquals(third, null);
+            } else if (id == guard) {
+                Signal[] queue = rc.emptySignalQueue();
+                assertEquals(queue.length, 1);
+                assertEquals(queue[0].getMessage(), null);
+                assertEquals(queue[0].getTeam(), Team.B);
+                assertEquals(queue[0].getLocation(), new MapLocation(oX, oY +
+                        4));
+                assertEquals(queue[0].getRobotID(), soldier);
             }
         });
     }

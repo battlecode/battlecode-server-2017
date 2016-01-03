@@ -9,7 +9,7 @@ import battlecode.common.Team;
  *
  * @author adamd
  */
-public class BuildSignal implements Signal {
+public class BuildSignal implements InternalSignal {
 
     private static final long serialVersionUID = -5655877873179815892L;
 

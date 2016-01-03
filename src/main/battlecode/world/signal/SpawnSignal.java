@@ -10,7 +10,7 @@ import battlecode.world.InternalRobot;
  *
  * @author adamd
  */
-public class SpawnSignal implements Signal {
+public class SpawnSignal implements InternalSignal {
 
     public static final int NO_ID = -1;
 
@@ -44,7 +44,7 @@ public class SpawnSignal implements Signal {
     private final int delay;
 
     /**
-     * Signal the world to a robot.
+     * InternalSignal the world to a robot.
      *
      * @param robotID the robot's id, or NO_ID if the id is TBD.
      * @param parentID the robot's parent id, or NO_ID if there is no parent.

@@ -3,7 +3,7 @@ package battlecode.world.signal;
 /**
  * Signifies that the control bits of a robot have just changed.
  */
-public class ControlBitsSignal implements Signal {
+public class ControlBitsSignal implements InternalSignal {
 
     private static final long serialVersionUID = -4229507739170593943L;
 

@@ -114,7 +114,7 @@ public class Server implements Runnable, NotificationHandler {
 
     @Override
     public void visitInjectNotification(InjectNotification n) {
-        InjectDelta result = matches.peek().inject(n.getSignal());
+        InjectDelta result = matches.peek().inject(n.getInternalSignal());
 
         for (Proxy p : proxies) {
             try {

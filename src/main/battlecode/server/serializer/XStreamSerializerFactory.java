@@ -5,8 +5,8 @@ import battlecode.common.RobotType;
 import battlecode.common.ZombieCount;
 import battlecode.world.DominationFactor;
 import battlecode.world.GameMap;
+import battlecode.world.signal.InternalSignal;
 import battlecode.common.ZombieSpawnSchedule;
-import battlecode.world.signal.Signal;
 import battlecode.serial.ExtensibleMetadata;
 import battlecode.serial.RoundDelta;
 import com.thoughtworks.xstream.XStream;
@@ -133,13 +133,14 @@ public class XStreamSerializerFactory implements SerializerFactory {
 
         public void marshal(Object value, HierarchicalStreamWriter writer,
                             MarshallingContext context) {
-            context.convertAnother(((RoundDelta) value).getSignals());
+            context.convertAnother(((RoundDelta) value).getInternalSignals());
         }
 
         public Object unmarshal(HierarchicalStreamReader reader,
                                 UnmarshallingContext context) {
             RoundDelta rd = new RoundDelta();
-            rd.setSignals((Signal[]) context.convertAnother(rd, Signal[].class));
+            rd.setInternalSignals((InternalSignal[]) context.convertAnother
+                    (rd, InternalSignal[].class));
             return rd;
         }
 

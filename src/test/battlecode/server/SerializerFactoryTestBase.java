@@ -2,9 +2,10 @@ package battlecode.server;
 
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
+import battlecode.common.Signal;
 import battlecode.common.Team;
 import battlecode.serial.notification.*;
-import battlecode.world.signal.Signal;
+import battlecode.world.signal.InternalSignal;
 import battlecode.serial.*;
 import battlecode.server.serializer.Serializer;
 import battlecode.server.serializer.SerializerFactory;
@@ -69,9 +70,10 @@ public abstract class SerializerFactoryTestBase {
     // An array with a sample object from every type of thing we could ever want to serialize / deserialize.
     private static final ServerEvent[] serverEvents = new ServerEvent[] {
             new MatchHeader(gameMap, teamMemories, 0, 3),
-            new RoundDelta(new Signal[] {
+            new RoundDelta(new InternalSignal[] {
                     new AttackSignal(57, new MapLocation(1,1)),
-                    new BroadcastSignal(57, Team.B, new HashMap<>()),
+                    new BroadcastSignal(57, new Signal(new MapLocation(1, 1),
+                            57, Team.A), 24),
                     new BuildSignal(57, new MapLocation(1,1), RobotType.GUARD, Team.A, 50),
                     new BytecodesUsedSignal(new int[] {5, 6}, new int[] {17, 32}),
                     new ClearRubbleSignal(57, new MapLocation(1, 1), 5),
@@ -94,7 +96,7 @@ public abstract class SerializerFactoryTestBase {
             }),
             new MatchFooter(Team.A, teamMemories),
             new GameStats(),
-            new InjectDelta(true, new Signal[0]),
+            new InjectDelta(true, new InternalSignal[0]),
             new PauseEvent(),
             new ExtensibleMetadata()
 

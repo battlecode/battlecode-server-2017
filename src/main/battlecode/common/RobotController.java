@@ -399,33 +399,47 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Broadcasts a message to the global message board.
+     * Retrieve the next message waiting in your incoming message queue. Also
+     * removes the message from the queue.
      *
-     * @param channel
-     *            the channel to write to, from 0 to
-     *            <code>BROADCAST_MAX_CHANNELS</code>.
-     * @param data
-     *            one int's worth of data to write.
-     * @throws GameActionException
-     *             if the channel is invalid.
-     *
-     * @battlecode.doc.costlymethod
+     * @return next Signal object in your queue, or null if your queue is
+     *         empty.
      */
-    void broadcast(int channel, int data) throws GameActionException;
-
+    
+    Signal readSignal();
+    
     /**
-     * Retrieves the message stored at the given radio channel.
+     * Retrieves an array of all the messages in your incoming message queue.
+     * All messages will be removed from the queue. If there are no messages in
+     * the queue, this method returns a zero-length array.
      *
-     * @param channel
-     *            radio channel to query, from 0 to
-     *            <code>BROADCAST_MAX_CHANNELS</code>.
-     * @return data currently stored on the channel.
-     * @throws GameActionException
-     *             if the channel is invalid.
-     *
-     * @battlecode.doc.costlymethod
+     * @return all the Signals in your message queue
      */
-    int readBroadcast(int channel) throws GameActionException;
+    
+    Signal[] emptySignalQueue();
+    
+    /**
+     * Broadcasts a regular signal over a specific integer radius. The signal is
+     * immediately added to the incoming message queues of all robots in
+     * your broadcast range (except for the sending robot).
+     *
+     * @param radius the radius over which the signal is broadcasted
+     */
+    
+    void broadcastSignal(int radius)  throws GameActionException;
+    
+    /**
+     * Broadcasts a message signal over a specific integer radius. The signal is
+     * immediately added to the incoming message queues of all robots in
+     * your broadcast range (except for the sending robot).
+     *
+     * @param message1 the first integer to broadcast
+     * @param message2 the second integer to broadcast
+     * @param radius the radius over which the signal is broadcasted
+     */
+    
+    void broadcastMessageSignal(int message1, int message2, int radius)  throws
+            GameActionException;
 
     // ***********************************
     // ****** BUILDING/SPAWNING **********

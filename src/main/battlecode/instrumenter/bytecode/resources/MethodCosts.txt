@@ -18,7 +18,8 @@ battlecode/common/MapLocation/toString                             5     false
 battlecode/common/MapLocation/valueOf                              25    false
 battlecode/common/RobotController/addMatchObservation         0     true
 battlecode/common/RobotController/attackLocation              0     true
-battlecode/common/RobotController/broadcast                   25    true
+battlecode/common/RobotController/broadcastSignal             25    true
+battlecode/common/RobotController/broadcastMessageSignal      25    true
 battlecode/common/RobotController/build                       0     true
 battlecode/common/RobotController/canAttackLocation           10    true
 battlecode/common/RobotController/canBuild                    10    true
@@ -27,6 +28,7 @@ battlecode/common/RobotController/canSenseLocation            5     true
 battlecode/common/RobotController/canSenseRobot               5     true
 battlecode/common/RobotController/clearRubble                 0     true
 battlecode/common/RobotController/disintegrate                0     true
+battlecode/common/RobotController/emptySignalQueue            5     true
 battlecode/common/RobotController/explode                     0     true
 battlecode/common/RobotController/getControlBits              0     true
 battlecode/common/RobotController/getCoreDelay                1     true
@@ -53,7 +55,7 @@ battlecode/common/RobotController/mine                        0     true
 battlecode/common/RobotController/move                        0     true
 battlecode/common/RobotController/onTheMap                    5     true
 battlecode/common/RobotController/pack                        0     true
-battlecode/common/RobotController/readBroadcast               5     true
+battlecode/common/RobotController/readSignal                  5     true
 battlecode/common/RobotController/resign                      0     true
 battlecode/common/RobotController/senseNearbyRobots           100   true
 battlecode/common/RobotController/senseParts                  5     true

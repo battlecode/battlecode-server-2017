@@ -7,7 +7,7 @@ import battlecode.common.MapLocation;
  *
  * @author axc
  */
-public class RubbleChangeSignal implements Signal {
+public class RubbleChangeSignal implements InternalSignal {
 
     private static final long serialVersionUID = -6853620834724044985L;
 

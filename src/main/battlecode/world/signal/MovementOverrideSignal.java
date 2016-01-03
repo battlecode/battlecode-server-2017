@@ -7,7 +7,7 @@ import battlecode.common.MapLocation;
  *
  * @author Matt
  */
-public class MovementOverrideSignal implements Signal {
+public class MovementOverrideSignal implements InternalSignal {
 
     private static final long serialVersionUID = -5689176900158693078L;
 

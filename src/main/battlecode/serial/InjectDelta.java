@@ -1,6 +1,6 @@
 package battlecode.serial;
 
-import battlecode.world.signal.Signal;
+import battlecode.world.signal.InternalSignal;
 
 /**
  * Changes to a game world as the result of a signal injection.
@@ -9,17 +9,17 @@ import battlecode.world.signal.Signal;
  */
 public class InjectDelta implements ServerEvent {
     private final boolean success;
-    private final Signal[] signals;
+    private final InternalSignal[] internalSignals;
 
     /**
      * Create a new injection delta.
      *
      * @param success whether the injection was successful
-     * @param signals the signals created by the injection, if it was successful.
+     * @param internalSignals the internalSignals created by the injection, if it was successful.
      */
-    public InjectDelta(boolean success, Signal[] signals) {
+    public InjectDelta(boolean success, InternalSignal[] internalSignals) {
         this.success = success;
-        this.signals = signals;
+        this.internalSignals = internalSignals;
     }
 
     /**
@@ -30,11 +30,11 @@ public class InjectDelta implements ServerEvent {
     }
 
     /**
-     * @return an array containing the currentSignals representing changes
+     * @return an array containing the currentInternalSignals representing changes
      *         to the game world; must not be modified.
      */
-    public Signal[] getSignals() {
-        return this.signals;
+    public InternalSignal[] getInternalSignals() {
+        return this.internalSignals;
     }
 
     /**

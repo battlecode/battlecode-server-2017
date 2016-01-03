@@ -1,30 +1,30 @@
 package battlecode.serial.notification;
 
-import battlecode.world.signal.Signal;
+import battlecode.world.signal.InternalSignal;
 
 /**
- * Signals the server to inject a signal into the next round of the running
+ * Signals the server to inject a internalSignal into the next round of the running
  * match.
  *
  * @author james
  */
 public class InjectNotification implements Notification {
-    private final Signal signal;
+    private final InternalSignal internalSignal;
 
     /**
-     * Create a new injection signal.
+     * Create a new injection internalSignal.
      *
-     * @param signal the signal to be injected
+     * @param internalSignal the internalSignal to be injected
      */
-    public InjectNotification(Signal signal) {
-        this.signal = signal;
+    public InjectNotification(InternalSignal internalSignal) {
+        this.internalSignal = internalSignal;
     }
 
     /**
-     * @return the signal to be injected
+     * @return the internalSignal to be injected
      */
-    public Signal getSignal() {
-        return signal;
+    public InternalSignal getInternalSignal() {
+        return internalSignal;
     }
 
     @Override

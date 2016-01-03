@@ -5,7 +5,7 @@ package battlecode.world.signal;
  *
  * @author adamd
  */
-public class IndicatorStringSignal implements Signal {
+public class IndicatorStringSignal implements InternalSignal {
 
     private static final long serialVersionUID = -8277652765209879399L;
 

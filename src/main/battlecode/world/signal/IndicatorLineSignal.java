@@ -6,7 +6,7 @@ import battlecode.common.Team;
 /**
  * Signifies that a robot has requested a debug indicator line be created.
  */
-public class IndicatorLineSignal implements Signal {
+public class IndicatorLineSignal implements InternalSignal {
 
     public final int robotID;
     public final Team team;

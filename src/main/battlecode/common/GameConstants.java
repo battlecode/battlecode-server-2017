@@ -38,20 +38,31 @@ public interface GameConstants {
     /** The number of indicator strings that a player can associate with a robot */
     int NUMBER_OF_INDICATOR_STRINGS = 3;
 
-    /** The maximum read/write-able of radio channel number */
-    int BROADCAST_MAX_CHANNELS = 65535;
-
     /** The bytecode penalty that is imposed each time an exception is thrown */
     int EXCEPTION_BYTECODE_PENALTY = 500;
 
     /** Number of bytecodes per turn that don't cost supply. */
     int FREE_BYTECODES = 2000;
 
-    /** Bytecodes executed per unit of supply. */
-    int BYTECODES_PER_SUPPLY = 1000;
-
     /** Maximum archons that can appear on a map (per team). */
     int NUMBER_OF_ARCHONS_MAX = 6;
+
+    /** Represents the multiple of the sightRange for which the cost is fixed. */
+    double BROADCAST_RANGE_MULTIPLIER = 2;
+
+    /** Represents the base bytecode cost of a broadcast. */
+    int BROADCAST_BASE_BYTECODE_COST = 100;
+
+    /** Represents the base delay increase of a broadcast. */
+    double BROADCAST_BASE_DELAY_INCREASE = 0.05;
+
+    /** The additional bytecode cost of broadcasting beyond the base cost. See
+     * specs for the formula. */
+    int BROADCAST_ADDITIONAL_BYTECODE_COST = 10;
+
+    /** The additional delay increase of broadcasting beyond the base cost.
+     *  See specs for the formula. */
+    double BROADCAST_ADDITIONAL_DELAY_INCREASE = 0.03;
 
     // *********************************
     // ****** PARTS *******************
@@ -94,7 +105,7 @@ public interface GameConstants {
     double VIPER_INFECTION_DAMAGE = 2;
     
     /** Amount of damage a den does to surrounding units when it's blockaded and can't spawn */
-    int DEN_SPLASH_DAMAGE = 10;
+    double DEN_SPLASH_DAMAGE = 10;
     
     /** Minimum attack range of a Turret */
     int TURRET_MINIMUM_RANGE = 5;

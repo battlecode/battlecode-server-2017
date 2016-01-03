@@ -5,7 +5,7 @@ import battlecode.common.RobotType;
 /**
  * Signifies that a robot had its type changed.
  */
-public class TypeChangeSignal implements Signal {
+public class TypeChangeSignal implements InternalSignal {
 
     private static final long serialVersionUID = -6853620837777044985L;
 

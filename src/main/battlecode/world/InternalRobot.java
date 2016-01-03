@@ -1,12 +1,11 @@
 package battlecode.world;
 
 import battlecode.common.*;
-import battlecode.world.signal.Signal;
-import battlecode.world.signal.BroadcastSignal;
 import battlecode.world.signal.DeathSignal;
+import battlecode.world.signal.InternalSignal;
 import battlecode.world.signal.TypeChangeSignal;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -32,9 +31,8 @@ public class InternalRobot {
     private int currentBytecodeLimit;
     private int bytecodesUsed;
     private int prevBytecodesUsed;
-    private boolean healthChanged;
-    private boolean broadcasted;
-    private HashMap<Integer, Integer> broadcastMap;
+    private boolean healthChanged;    
+    private ArrayList<Signal> signalqueue;
     private int roundsAlive;
     private int buildDelay;
     private int repairCount;
@@ -81,9 +79,9 @@ public class InternalRobot {
         this.bytecodesUsed = 0;
         this.prevBytecodesUsed = 0;
         this.healthChanged = true;
+        
+        this.signalqueue = new ArrayList<Signal>();
 
-        this.broadcasted = false;
-        this.broadcastMap = new HashMap<>();
         this.roundsAlive = 0;
 
         this.controller = new RobotControllerImpl(gameWorld, this);
@@ -322,24 +320,31 @@ public class InternalRobot {
     // ****** BROADCAST METHODS ********
     // *********************************
 
-    public void addBroadcast(int channel, int data) {
-        broadcastMap.put(channel, data);
-        broadcasted = true;
+    public void receiveSignal(Signal mess) {
+        signalqueue.add(mess);
     }
 
-    public Integer getQueuedBroadcastFor(int channel) {
-        return broadcastMap.get(channel);
+    public Signal retrieveNextSignal() {
+        if (signalqueue.size() == 0) {
+            return null;
+        }
+        return signalqueue.remove(0);
     }
 
-    public boolean hasBroadcasted() {
-        return broadcasted;
+    public Signal[] retrieveAllSignals() {
+        int numMessages = signalqueue.size();
+        Signal[] queue = new Signal[numMessages];
+        for (int i = 0; i < numMessages; i++) {
+            queue[i] = signalqueue.remove(0);
+        }
+        return queue;
     }
 
     // *********************************
     // ****** ACTION METHODS ***********
     // *********************************
 
-    public void activateCoreAction(Signal s, double attackDelay, double
+    public void activateCoreAction(InternalSignal s, double attackDelay, double
             movementDelay) {
         gameWorld.visitSignal(s);
 
@@ -347,7 +352,7 @@ public class InternalRobot {
         addCoreDelay(movementDelay);
     }
 
-    public void activateAttack(Signal s, double attackDelay, double
+    public void activateAttack(InternalSignal s, double attackDelay, double
             movementDelay) {
         gameWorld.visitSignal(s);
 
@@ -406,13 +411,6 @@ public class InternalRobot {
         this.prevBytecodesUsed = this.bytecodesUsed;
         roundsAlive++;
         
-        // broadcasts
-        if (broadcasted) {
-            gameWorld.visitSignal(new BroadcastSignal(this.getID(), this.getTeam(), broadcastMap));
-            broadcastMap = new HashMap<>();
-            broadcasted = false;
-        }
-
         processBeingInfected();
     }
 

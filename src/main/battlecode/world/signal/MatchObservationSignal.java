@@ -5,7 +5,7 @@ package battlecode.world.signal;
  *
  * @author jmstein
  */
-public class MatchObservationSignal implements Signal {
+public class MatchObservationSignal implements InternalSignal {
 
     private static final long serialVersionUID = -8277652765201239399L;
 

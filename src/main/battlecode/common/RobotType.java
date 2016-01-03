@@ -226,6 +226,17 @@ public enum RobotType {
     public boolean canBuild() {
         return this == ARCHON || this == ZOMBIEDEN;
     }
+    
+    /**
+     * Returns whether the robot can send a message signal.
+     *
+     * @return whether the robot can send a message signal.
+     */
+
+    public boolean canMessageSignal() {
+        return this == ARCHON || this == SCOUT;
+    }
+
 
     /**
      * Returns whether the robot is buildable.

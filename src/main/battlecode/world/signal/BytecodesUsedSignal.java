@@ -7,7 +7,7 @@ import battlecode.world.InternalRobot;
  *
  * @author adamd
  */
-public class BytecodesUsedSignal implements Signal {
+public class BytecodesUsedSignal implements InternalSignal {
 
     private static final long serialVersionUID = 6617731359077155785L;
 

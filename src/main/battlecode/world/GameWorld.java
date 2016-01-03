@@ -5,7 +5,7 @@ import battlecode.server.ErrorReporter;
 import battlecode.server.GameState;
 import battlecode.util.SquareArray;
 import battlecode.world.signal.AutoSignalHandler;
-import battlecode.world.signal.Signal;
+import battlecode.world.signal.InternalSignal;
 import battlecode.world.signal.SignalHandler;
 import battlecode.serial.GameStats;
 import battlecode.world.control.RobotControlProvider;
@@ -31,8 +31,8 @@ public class GameWorld implements SignalHandler {
     protected Team winner = null;
     protected final String teamAName;
     protected final String teamBName;
-    protected final List<Signal> currentSignals;
-    protected final List<Signal> injectedSignals;
+    protected final List<InternalSignal> currentInternalSignals;
+    protected final List<InternalSignal> injectedInternalSignals;
     protected final long[][] teamMemory;
     protected final long[][] oldTeamMemory;
     protected final Map<Integer, InternalRobot> gameObjectsByID;
@@ -67,8 +67,8 @@ public class GameWorld implements SignalHandler {
         teamAName = teamA;
         teamBName = teamB;
         gameObjectsByID = new LinkedHashMap<>();
-        currentSignals = new ArrayList<>();
-        injectedSignals = new ArrayList<>();
+        currentInternalSignals = new ArrayList<>();
+        injectedInternalSignals = new ArrayList<>();
         idGenerator = new IDGenerator(gm.getSeed());
         teamMemory = new long[2][oldTeamMemory[0].length];
         this.oldTeamMemory = oldTeamMemory;
@@ -195,14 +195,14 @@ public class GameWorld implements SignalHandler {
      * Synchronized because you shouldn't call this and runRound() at the same time,
      * but their order of being executed isn't guaranteed.
      *
-     * @param injectedSignal the signal to inject
+     * @param injectedInternalSignal the signal to inject
      * @return signals that result from the injected signal (including the injected signal)
      * @throws RuntimeException if the signal injection fails
      */
-    public synchronized Signal[] inject(Signal injectedSignal) throws RuntimeException {
+    public synchronized InternalSignal[] inject(InternalSignal injectedInternalSignal) throws RuntimeException {
         clearAllSignals();
 
-        visitSignal(injectedSignal);
+        visitSignal(injectedInternalSignal);
 
         return getAllSignals(false);
 
@@ -308,15 +308,15 @@ public class GameWorld implements SignalHandler {
      *
      * @param s the signal
      */
-    private void addSignal(Signal s) {
-        currentSignals.add(s);
+    private void addSignal(InternalSignal s) {
+        currentInternalSignals.add(s);
     }
 
     /**
      * Clear all processed signals from the last round / injection.
      */
     private void clearAllSignals() {
-        currentSignals.clear();
+        currentInternalSignals.clear();
     }
 
     public boolean canMove(MapLocation loc, RobotType type) {
@@ -659,7 +659,7 @@ public class GameWorld implements SignalHandler {
         }
     }
 
-    public Signal[] getAllSignals(boolean includeBytecodesUsedSignal) {
+    public InternalSignal[] getAllSignals(boolean includeBytecodesUsedSignal) {
         ArrayList<InternalRobot> allRobots = new ArrayList<>();
         for (InternalRobot obj : gameObjectsByID.values()) {
             if (obj == null)
@@ -670,10 +670,10 @@ public class GameWorld implements SignalHandler {
         InternalRobot[] robots = allRobots.toArray(new InternalRobot[allRobots.size()]);
 
         if (includeBytecodesUsedSignal) {
-            currentSignals.add(new BytecodesUsedSignal(robots));
+            currentInternalSignals.add(new BytecodesUsedSignal(robots));
         }
-        currentSignals.add(new RobotDelaySignal(robots));
-        currentSignals.add(new InfectionSignal(robots));
+        currentInternalSignals.add(new RobotDelaySignal(robots));
+        currentInternalSignals.add(new InfectionSignal(robots));
 
         HealthChangeSignal healthChange = new HealthChangeSignal(robots);
 
@@ -683,10 +683,10 @@ public class GameWorld implements SignalHandler {
         }
 
         if (healthChange.getRobotIDs().length > 0) {
-            currentSignals.add(healthChange);
+            currentInternalSignals.add(healthChange);
         }
 
-        return currentSignals.toArray(new Signal[currentSignals.size()]);
+        return currentInternalSignals.toArray(new InternalSignal[currentInternalSignals.size()]);
     }
 
     // ******************************
@@ -695,7 +695,7 @@ public class GameWorld implements SignalHandler {
 
     SignalHandler signalHandler = new AutoSignalHandler(this);
 
-    public void visitSignal(Signal s) {
+    public void visitSignal(InternalSignal s) {
         signalHandler.visitSignal(s);
     }
 
@@ -775,7 +775,27 @@ public class GameWorld implements SignalHandler {
 
     @SuppressWarnings("unused")
     public void visitBroadcastSignal(BroadcastSignal s) {
-        radio.get(s.getRobotTeam()).putAll(s.broadcastMap);
+        int robotID = s.getRobotID();
+        InternalRobot robot = getObjectByID(robotID);
+        MapLocation location = robot.getLocation();
+        int radius = s.getRadius();
+        Signal mess = s.getSignal();
+        InternalRobot[] receiving = getAllRobotsWithinRadiusSq(location,
+                radius);
+        for (int i = 0; i < receiving.length; i++) {
+            if (robot != receiving[i]) {
+                receiving[i].receiveSignal(mess);
+            }
+        }
+
+        // delay costs
+        double x = (radius / (double) robot.getType().sensorRadiusSquared) - 2;
+        double delayIncrease = GameConstants.BROADCAST_BASE_DELAY_INCREASE +
+                GameConstants.BROADCAST_ADDITIONAL_DELAY_INCREASE * (Math.max
+                        (0, x));
+        robot.addCoreDelay(delayIncrease);
+        robot.addWeaponDelay(delayIncrease);
+
         addSignal(s);
     }
 
