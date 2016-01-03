@@ -5,7 +5,7 @@ import battlecode.common.RobotType;
 import battlecode.common.ZombieCount;
 import battlecode.world.DominationFactor;
 import battlecode.world.GameMap;
-import battlecode.world.ZombieSpawnSchedule;
+import battlecode.common.ZombieSpawnSchedule;
 import battlecode.world.signal.Signal;
 import battlecode.serial.ExtensibleMetadata;
 import battlecode.serial.RoundDelta;

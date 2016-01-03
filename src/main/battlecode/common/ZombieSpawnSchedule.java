@@ -1,7 +1,5 @@
-package battlecode.world;
+package battlecode.common;
 
-import battlecode.common.RobotType;
-import battlecode.common.ZombieCount;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
@@ -17,6 +15,8 @@ public class ZombieSpawnSchedule implements Serializable {
     /**
      * A map from round numbers to a list of ZombieCounts, specifying the
      * types and numbers of zombies that spawn during each round (per den).
+     *
+     * Each round only appears at most once.
      */
     private Map<Integer, ArrayList<ZombieCount>> map;
 
