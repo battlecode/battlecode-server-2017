@@ -4,13 +4,12 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.serial.notification.*;
-import battlecode.world.DominationFactor;
 import battlecode.world.signal.Signal;
 import battlecode.serial.*;
 import battlecode.server.serializer.Serializer;
 import battlecode.server.serializer.SerializerFactory;
 import battlecode.world.GameMap;
-import battlecode.world.ZombieSpawnSchedule;
+import battlecode.common.ZombieSpawnSchedule;
 import battlecode.world.signal.*;
 import org.junit.Ignore;
 

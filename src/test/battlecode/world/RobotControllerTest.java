@@ -4,6 +4,10 @@ import battlecode.common.*;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
@@ -147,9 +151,9 @@ public class RobotControllerTest {
             if (id == soldierA) { // All robots kill themselves
                 rc.attackLocation(new MapLocation(oX, oY));
             } else if (id == soldierB) {
-                rc.attackLocation(new MapLocation(oX+3, oY+2));
+                rc.attackLocation(new MapLocation(oX + 3, oY + 2));
             } else if (id == stdZombie) {
-                rc.attackLocation(new MapLocation(oX+3, oY+3));
+                rc.attackLocation(new MapLocation(oX + 3, oY + 3));
             }
         });
 
@@ -165,9 +169,9 @@ public class RobotControllerTest {
         assertEquals(game.getWorld().getRubble(new MapLocation(oX + 1, oY + 1)),
                 99 * (1 - GameConstants.RUBBLE_CLEAR_PERCENTAGE) - GameConstants
                         .RUBBLE_CLEAR_FLAT_AMOUNT, EPSILON);
-        assertEquals(game.getWorld().getRubble(new MapLocation(oX+3, oY+2)),
+        assertEquals(game.getWorld().getRubble(new MapLocation(oX + 3, oY + 2)),
                 0, EPSILON); // soldierB turns into zombie and doesn't leave rubble
-        assertEquals(game.getWorld().getRubble(new MapLocation(oX+3, oY+3)),
+        assertEquals(game.getWorld().getRubble(new MapLocation(oX + 3, oY + 3)),
                 60, EPSILON); // dead zombie leaves rubble
         assertEquals(game.getWorld().getRobot(new MapLocation(oX+3, oY+2)).getType(),
                 RobotType.STANDARDZOMBIE); // soldierB actually did turn into a zombie
@@ -675,6 +679,49 @@ public class RobotControllerTest {
 
         assertEquals(game.getWorld().getRubble(new MapLocation(oX + 1, oY)),
                 RobotType.RANGEDZOMBIE.maxHealth * 1.2, EPSILON);
+    }
+
+    /**
+     * Test getting the zombie spawn schedule, and makes sure that modifying
+     * this schedule doesn't change the schedule for the actual game.
+     */
+    @Test
+    public void testGetZombieSpawnSchedule() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 1000)
+                .withZombieSpawn(100, RobotType.FASTZOMBIE, 30)
+                .withZombieSpawn(500, RobotType.RANGEDZOMBIE, 50)
+                .withZombieSpawn(500, RobotType.BIGZOMBIE, 4)
+                .withZombieSpawn(1000, RobotType.STANDARDZOMBIE, 10);
+
+        GameMap map = mapGen.getMap("test");
+
+        TestGame game = new TestGame(map);
+
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int archon = game.spawn(oX, oY + 1, RobotType.ARCHON, Team.A);
+
+        game.round((id, rc) -> {
+            if (id == archon) {
+                ZombieSpawnSchedule zombieSpawnSchedule = rc
+                        .getZombieSpawnSchedule();
+                assertThat(zombieSpawnSchedule.getRounds(), contains(100,
+                        500, 1000));
+                ArrayList<ZombieCount> count100 = zombieSpawnSchedule
+                        .getScheduleForRound(100);
+                assertThat(count100, contains(new ZombieCount(RobotType
+                        .FASTZOMBIE, 30)));
+                ArrayList<ZombieCount> count500 = zombieSpawnSchedule
+                        .getScheduleForRound(500);
+                assertThat(count500, contains(new ZombieCount(RobotType
+                        .RANGEDZOMBIE, 50), new ZombieCount(RobotType
+                        .BIGZOMBIE, 4)));
+                ArrayList<ZombieCount> count1000 = zombieSpawnSchedule
+                        .getScheduleForRound(1000);
+                assertThat(count1000, contains(new ZombieCount(RobotType
+                        .STANDARDZOMBIE, 10)));
+            }
+        });
     }
 
     /**

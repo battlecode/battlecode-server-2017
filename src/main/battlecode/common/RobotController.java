@@ -40,6 +40,16 @@ public interface RobotController {
      */
     int getRoundNum();
 
+    /**
+     * Returns a copy of the zombie spawn schedule for the game. Any attempts
+     * to modify this zombie spawn schedule will not change the actual
+     * schedule for the game.
+     *
+     * @return a copy of the zombie spawn schedule for the game.
+     * @battlecode.doc.costlymethod
+     */
+    ZombieSpawnSchedule getZombieSpawnSchedule();
+
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************

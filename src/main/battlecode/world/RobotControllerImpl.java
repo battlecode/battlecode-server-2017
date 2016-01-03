@@ -88,6 +88,11 @@ public final class RobotControllerImpl implements RobotController {
         return gameWorld.getCurrentRound();
     }
 
+    @Override
+    public ZombieSpawnSchedule getZombieSpawnSchedule() {
+        return gameWorld.getGameMap().getZombieSpawnSchedule();
+    }
+
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************
