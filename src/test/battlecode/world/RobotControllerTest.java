@@ -753,7 +753,7 @@ public class RobotControllerTest {
                 Signal[] queue = rc.emptySignalQueue();
                 assertEquals(queue.length, 1);
                 assertEquals(queue[0].getMessage(), null);
-                assertEquals(queue[0].getID(), guard);
+                assertEquals(queue[0].getRobotID(), guard);
                 assertEquals(queue[0].getLocation(), new MapLocation(oX, oY +
                         5));
                 assertEquals(queue[0].getTeam(), Team.B);
@@ -762,11 +762,11 @@ public class RobotControllerTest {
                 Signal second = rc.readSignal();
                 Signal third = rc.readSignal();
                 assertArrayEquals(first.getMessage(), new int[]{123, 456});
-                assertEquals(first.getID(), archon);
+                assertEquals(first.getRobotID(), archon);
                 assertEquals(first.getLocation(), new MapLocation(oX, oY));
                 assertEquals(first.getTeam(), Team.A);
                 assertArrayEquals(second.getMessage(), null);
-                assertEquals(second.getID(), guard);
+                assertEquals(second.getRobotID(), guard);
                 assertEquals(second.getLocation(), new MapLocation(oX, oY + 5));
                 assertEquals(second.getTeam(), Team.B);
                 assertEquals(third, null);
@@ -777,7 +777,7 @@ public class RobotControllerTest {
                 assertEquals(queue[0].getTeam(), Team.B);
                 assertEquals(queue[0].getLocation(), new MapLocation(oX, oY +
                         4));
-                assertEquals(queue[0].getID(), soldier);
+                assertEquals(queue[0].getRobotID(), soldier);
             }
         });
     }

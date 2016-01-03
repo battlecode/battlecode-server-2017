@@ -1,38 +1,117 @@
 package battlecode.common;
 
-public class Signal {
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.io.Serializable;
+
+/**
+ * This class contains information about a signal that can be broadcasted
+ * between robots as a form of communication.
+ *
+ * There are two types of signals. Basic signals contain just the robotID, team,
+ * and location of the robot that broadcasted it. Message signals can only be
+ * broadcasted by ARCHONs and SCOUTs and can also hold a message, which
+ * contains two integers.
+ */
+public class Signal implements Serializable {
+
+    private static final long serialVersionUID = -8945913587066072824L;
+
+    /**
+     * The location of the broadcasting robot.
+     */
     private MapLocation location;
-    private int ID;
+
+    /**
+     * The robotID of the broadcasting robot.
+     */
+    private int robotID;
+
+    /**
+     * The team of the broadcasting robot.
+     */
     private Team team;
+
+    /**
+     * An array of two integers to represent the message included in the
+     * signal, or null if there was no message.
+     */
     private int[] message;
 
-    public Signal(MapLocation ml, int id, Team t) {
+    /**
+     * Creates a basic signal with the given location, robotID, and team.
+     *
+     * @param location the location to include in the signal.
+     * @param robotID the robotID to include in the signal.
+     * @param team the team to include in the signal.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public Signal(MapLocation location, int robotID, Team team) {
 
-        this.location = ml;
-        this.ID = id;
-        this.team = t;
+        this.location = location;
+        this.robotID = robotID;
+        this.team = team;
         this.message = null;
 
     }
 
-    public Signal(MapLocation ml, int id, Team t, int signal1, int signal2) {
+    /**
+     * Creates a message signal with the given location, robotID, and team.
+     *
+     * @param location the location to include in the signal.
+     * @param robotID the robotID to include in the signal.
+     * @param team the team to include in the signal.
+     * @param signal1 the first integer to send in the message.
+     * @param signal2 the second integer to send in the message.
+*    @battlecode.doc.costlymethod
+     */
+    public Signal(MapLocation location, int robotID, Team team, int signal1, int signal2) {
 
-        this.location = ml;
-        this.ID = id;
-        this.team = t;
+        this.location = location;
+        this.robotID = robotID;
+        this.team = team;
         this.message = new int[]{signal1, signal2};
 
     }
 
-    public int getID() {
-        return ID;
+    /**
+     * Returns the robotID included in the signal.
+     * @return the robotID included in the signal.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public int getRobotID() {
+        return robotID;
     }
 
+    /**
+     * Returns the robotID included in the signal. Same as getRobotID().
+     * @return the robotID included in the signal.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    @JsonIgnore
+    public int getID() {
+        return robotID;
+    }
+
+    /**
+     * Returns the location included in the signal.
+     * @return the location included in the signal.
+     *
+     * @battlecode.doc.costlymethod
+     */
     public MapLocation getLocation() {
         return location;
     }
 
+    /**
+     * Returns the team included in the signal.
+     * @return the team included in the signal.
+     *
+     * @battlecode.doc.costlymethod
+     */
     public Team getTeam() {
         return team;
     }
@@ -49,4 +128,10 @@ public class Signal {
         return message;
     }
 
+    /**
+     * For use by serializers.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    private Signal() { this(null, 0, Team.A); }
 }
