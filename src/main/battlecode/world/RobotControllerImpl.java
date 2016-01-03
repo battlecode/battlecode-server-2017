@@ -1,7 +1,6 @@
 package battlecode.world;
 
 import battlecode.common.*;
-import battlecode.common.Signal;
 import battlecode.instrumenter.RobotDeathException;
 import battlecode.world.signal.*;
 
@@ -476,33 +475,33 @@ public final class RobotControllerImpl implements RobotController {
 
     @Override
     public Signal readSignal() {
-    	return robot.retrieveNextSignal();
+        return robot.retrieveNextSignal();
     }
-    
+
     @Override
     public Signal[] emptySignalQueue() {
-    	return robot.retrieveAllSignals();
+        return robot.retrieveAllSignals();
     }
-    
+
     @Override
-    public void broadcastSignal(int rad)  throws GameActionException {
-    	robot.broadcastSignal(new Signal(getLocation(), getID(), getTeam()),
+    public void broadcastSignal(int rad) throws GameActionException {
+        robot.broadcastSignal(new Signal(getLocation(), getID(), getTeam()),
                 rad);
     }
-    
+
     @Override
     public void broadcastMessageSignal(int message1, int message2, int rad)
             throws GameActionException {
-    	if (!robot.getType().canMessageSignal()) {
-    		throw new GameActionException(CANT_DO_THAT, 
-    				"Unit type " + robot.getType().name() + " cannot send a message signal; " +
-                    "only ARCHON and SCOUT can send message signals.");
-    	}
-    	robot.broadcastSignal(new Signal(getLocation(), getID(), getTeam(),
-                        message1, message2), rad);
+        if (!robot.getType().canMessageSignal()) {
+            throw new GameActionException(CANT_DO_THAT,
+                    "Unit type " + robot.getType().name() + " cannot send a " +
+                            "message signal; only ARCHON and SCOUT can send " +
+                            "message signals.");
+        }
+        robot.broadcastSignal(new Signal(getLocation(), getID(), getTeam(),
+                message1, message2), rad);
     }
 
-    
     // ***********************************
     // ****** BUILDING/SPAWNING **********
     // ***********************************

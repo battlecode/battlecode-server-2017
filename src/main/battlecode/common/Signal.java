@@ -1,20 +1,20 @@
 package battlecode.common;
 
 public class Signal {
-	
-	private MapLocation location;
-	private int ID;
-	private Team team;
+
+    private MapLocation location;
+    private int ID;
+    private Team team;
     private int[] message;
 
-	public Signal(MapLocation ml, int id, Team t) {
-		
-		this.location = ml;
-		this.ID = id;
-		this.team = t;
+    public Signal(MapLocation ml, int id, Team t) {
+
+        this.location = ml;
+        this.ID = id;
+        this.team = t;
         this.message = null;
 
-	}
+    }
 
     public Signal(MapLocation ml, int id, Team t, int signal1, int signal2) {
 
@@ -24,7 +24,7 @@ public class Signal {
         this.message = new int[]{signal1, signal2};
 
     }
-	
+
     public int getID() {
         return ID;
     }

@@ -321,32 +321,33 @@ public class InternalRobot {
     // *********************************
 
     public void receiveSignal(Signal mess) {
-    	signalqueue.add(mess);
+        signalqueue.add(mess);
     }
-    
+
     public Signal retrieveNextSignal() {
-    	if (signalqueue.size() == 0) {
-    		return null;
-    	}
-    	return signalqueue.remove(0);
+        if (signalqueue.size() == 0) {
+            return null;
+        }
+        return signalqueue.remove(0);
     }
-    
+
     public Signal[] retrieveAllSignals() {
-    	int numMessages = signalqueue.size();
-    	Signal[] queue = new Signal[numMessages];
-    	for(int i = 0; i < numMessages; i++) {
-    		queue[i] = signalqueue.remove(0);
-    	}
-    	return queue;
+        int numMessages = signalqueue.size();
+        Signal[] queue = new Signal[numMessages];
+        for (int i = 0; i < numMessages; i++) {
+            queue[i] = signalqueue.remove(0);
+        }
+        return queue;
     }
-    
+
     public void broadcastSignal(Signal mess, int rad) {
-    	InternalRobot[] receiving = gameWorld.getAllRobotsWithinRadiusSq(location, rad);
-    	for(int i = 0; i < receiving.length; i++) {
-    		if(!equals(receiving[i])) {
-        		receiving[i].receiveSignal(mess);
-    		}
-    	}
+        InternalRobot[] receiving = gameWorld.getAllRobotsWithinRadiusSq
+                (location, rad);
+        for (int i = 0; i < receiving.length; i++) {
+            if (!equals(receiving[i])) {
+                receiving[i].receiveSignal(mess);
+            }
+        }
     }
 
     // *********************************

@@ -234,7 +234,7 @@ public enum RobotType {
      */
 
     public boolean canMessageSignal() {
-    	return this == ARCHON || this == SCOUT;
+        return this == ARCHON || this == SCOUT;
     }
 
 
