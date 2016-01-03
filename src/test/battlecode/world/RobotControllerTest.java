@@ -729,10 +729,21 @@ public class RobotControllerTest {
         game.round((id, rc) -> {
             if (id == archon) {
                 rc.broadcastMessageSignal(123, 456, 24);
+                assertEquals(rc.getCoreDelay(), GameConstants
+                        .BROADCAST_BASE_DELAY_INCREASE, EPSILON);
+                assertEquals(rc.getWeaponDelay(), GameConstants
+                        .BROADCAST_BASE_DELAY_INCREASE, EPSILON);
             } else if (id == soldier) {
                 rc.broadcastSignal(2);
             } else if (id == guard) {
                 rc.broadcastSignal(10000);
+                double x = 10000.0 / RobotType.GUARD.sensorRadiusSquared - 2;
+                assertEquals(rc.getCoreDelay(), GameConstants
+                        .BROADCAST_BASE_DELAY_INCREASE + x * GameConstants
+                        .BROADCAST_ADDITIONAL_DELAY_INCREASE, EPSILON);
+                assertEquals(rc.getWeaponDelay(), GameConstants
+                        .BROADCAST_BASE_DELAY_INCREASE + x * GameConstants
+                        .BROADCAST_ADDITIONAL_DELAY_INCREASE, EPSILON);
             }
         });
 

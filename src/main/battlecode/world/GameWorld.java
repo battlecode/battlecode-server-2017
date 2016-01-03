@@ -772,16 +772,26 @@ public class GameWorld implements SignalHandler {
     @SuppressWarnings("unused")
     public void visitBroadcastSignal(BroadcastSignal s) {
         int robotID = s.getRobotID();
-        MapLocation location = getObjectByID(robotID).getLocation();
+        InternalRobot robot = getObjectByID(robotID);
+        MapLocation location = robot.getLocation();
         int radius = s.getRadius();
         Signal mess = s.getSignal();
         InternalRobot[] receiving = getAllRobotsWithinRadiusSq(location,
                 radius);
         for (int i = 0; i < receiving.length; i++) {
-            if (!equals(receiving[i])) {
+            if (robot != receiving[i]) {
                 receiving[i].receiveSignal(mess);
             }
         }
+
+        // delay costs
+        double x = (radius / (double) robot.getType().sensorRadiusSquared) - 2;
+        double delayIncrease = GameConstants.BROADCAST_BASE_DELAY_INCREASE +
+                GameConstants.BROADCAST_ADDITIONAL_DELAY_INCREASE * (Math.max
+                        (0, x));
+        robot.addCoreDelay(delayIncrease);
+        robot.addWeaponDelay(delayIncrease);
+
         addSignal(s);
     }
 
