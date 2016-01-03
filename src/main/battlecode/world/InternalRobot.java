@@ -340,16 +340,6 @@ public class InternalRobot {
         return queue;
     }
 
-    public void broadcastSignal(Signal mess, int rad) {
-        InternalRobot[] receiving = gameWorld.getAllRobotsWithinRadiusSq
-                (location, rad);
-        for (int i = 0; i < receiving.length; i++) {
-            if (!equals(receiving[i])) {
-                receiving[i].receiveSignal(mess);
-            }
-        }
-    }
-
     // *********************************
     // ****** ACTION METHODS ***********
     // *********************************

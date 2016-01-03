@@ -1,5 +1,6 @@
 package battlecode.world.signal;
 
+import battlecode.common.Signal;
 import battlecode.common.Team;
 
 import java.util.Map;
@@ -19,25 +20,24 @@ public class BroadcastSignal implements InternalSignal {
     public final int robotID;
 
     /**
-     * The team of the robot that broadcasted the message.
+     * The message broadcasted.
      */
-    public final Team robotTeam;
+    public final Signal signal;
 
     /**
-     * The map from broadcast index to broadcasted integer.
+     * The radius of the broadcast.
      */
-    public final Map<Integer, Integer> broadcastMap;
+    public final int radius;
 
     /**
      * Creates a signal for a robot broad
      * @param robotID       the id of the robot that broadcast the message
-     * @param robotTeam     the team the robot broadcast to
-     * @param broadcastMap  the map of broadcast index to new broadcast value used in this broadcast.
+     * @param signal        the signal broadcasted
      */
-    public BroadcastSignal(int robotID, Team robotTeam, Map<Integer, Integer> broadcastMap) {
+    public BroadcastSignal(int robotID, Signal signal, int radius) {
         this.robotID = robotID;
-        this.robotTeam = robotTeam;
-        this.broadcastMap = broadcastMap;
+        this.signal = signal;
+        this.radius = radius;
     }
 
     /**
@@ -50,12 +50,21 @@ public class BroadcastSignal implements InternalSignal {
     }
 
     /**
-     * Returns the team of the robot that just broadcasted.
+     * Returns the signal just broadcasted.
      *
-     * @return the messaging robot's Team
+     * @return the signal
      */
-    public Team getRobotTeam() {
-        return robotTeam;
+    public Signal getSignal() {
+        return signal;
+    }
+
+    /**
+     * Returns the radius of the broadcast.
+     *
+     * @return the radius of the broadcast.
+     */
+    public int getRadius() {
+        return radius;
     }
 
     /**
@@ -63,6 +72,6 @@ public class BroadcastSignal implements InternalSignal {
      */
     @SuppressWarnings("unused")
     private BroadcastSignal() {
-        this(0, null, null);
+        this(0, null, 0);
     }
 }

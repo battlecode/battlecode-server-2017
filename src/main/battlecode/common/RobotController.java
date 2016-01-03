@@ -413,10 +413,10 @@ public interface RobotController {
      * immediately added to the incoming message queues of all robots in
      * your broadcast range (except for the sending robot).
      *
-     * @param rad the radius over which the signal is broadcasted
+     * @param radius the radius over which the signal is broadcasted
      */
     
-    void broadcastSignal(int rad)  throws GameActionException;
+    void broadcastSignal(int radius)  throws GameActionException;
     
     /**
      * Broadcasts a message signal over a specific integer radius. The signal is
@@ -425,10 +425,10 @@ public interface RobotController {
      *
      * @param message1 the first integer to broadcast
      * @param message2 the second integer to broadcast
-     * @param rad the radius over which the signal is broadcasted
+     * @param radius the radius over which the signal is broadcasted
      */
     
-    void broadcastMessageSignal(int message1, int message2, int rad)  throws
+    void broadcastMessageSignal(int message1, int message2, int radius)  throws
             GameActionException;
 
     // ***********************************

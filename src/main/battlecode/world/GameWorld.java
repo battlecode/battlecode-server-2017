@@ -771,7 +771,17 @@ public class GameWorld implements SignalHandler {
 
     @SuppressWarnings("unused")
     public void visitBroadcastSignal(BroadcastSignal s) {
-        radio.get(s.getRobotTeam()).putAll(s.broadcastMap);
+        int robotID = s.getRobotID();
+        MapLocation location = getObjectByID(robotID).getLocation();
+        int radius = s.getRadius();
+        Signal mess = s.getSignal();
+        InternalRobot[] receiving = getAllRobotsWithinRadiusSq(location,
+                radius);
+        for (int i = 0; i < receiving.length; i++) {
+            if (!equals(receiving[i])) {
+                receiving[i].receiveSignal(mess);
+            }
+        }
         addSignal(s);
     }
 
