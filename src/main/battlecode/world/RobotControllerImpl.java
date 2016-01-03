@@ -90,7 +90,8 @@ public final class RobotControllerImpl implements RobotController {
 
     @Override
     public ZombieSpawnSchedule getZombieSpawnSchedule() {
-        return gameWorld.getGameMap().getZombieSpawnSchedule();
+        return new ZombieSpawnSchedule(gameWorld.getGameMap()
+                .getZombieSpawnSchedule());
     }
 
     // *********************************

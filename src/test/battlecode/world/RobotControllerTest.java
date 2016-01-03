@@ -720,8 +720,18 @@ public class RobotControllerTest {
                         .getScheduleForRound(1000);
                 assertThat(count1000, contains(new ZombieCount(RobotType
                         .STANDARDZOMBIE, 10)));
+
+                // now try to modify zombieSpawnSchedule
+                zombieSpawnSchedule.add(1500, RobotType.STANDARDZOMBIE, 8);
             }
         });
+
+        // Make sure things didn't change.
+        ZombieSpawnSchedule zombieSpawnSchedule = game.getWorld()
+                .getGameMap().getZombieSpawnSchedule();
+        assertEquals(zombieSpawnSchedule.getRounds().size(), 3);
+        assertThat(zombieSpawnSchedule.getRounds(), contains(100,
+                500, 1000));
     }
 
     /**
