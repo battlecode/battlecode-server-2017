@@ -26,11 +26,17 @@ public class GameMap implements Serializable {
 
     /**
      * The initial rubble on the map.
+     *
+     * IMPORTANT NOTE: it is accessed in [y][x] order,
+     * in order to make serialization less wonky!
      */
     private final double[][] initialRubble;
 
     /**
      * The initial parts on the map.
+     *
+     * IMPORTANT NOTE: it is accessed in [y][x] order,
+     * in order to make serialization less wonky!
      */
     private final double[][] initialParts;
 
@@ -61,13 +67,12 @@ public class GameMap implements Serializable {
     /**
      * Maps a den MapLocation to its ZombieSpawnSchedule
      */
-    @JsonIgnore
-    private transient final HashMap<MapLocation, ZombieSpawnSchedule> zombieSpawnMap;
+    private transient HashMap<MapLocation, ZombieSpawnSchedule> zombieSpawnMap;
     
     /**
-     * Boolean values representing the different types of symmetry the map has
+     * Boolean values representing the different types of symmetry the map has;
+     * computed lazily.
      */
-    @JsonIgnore
     private transient boolean symVert, symHoriz, symRot, symNegDiag, symPosDiag;
     
     /**
@@ -93,11 +98,11 @@ public class GameMap implements Serializable {
     public GameMap(GameMap gm) {
         this.width = gm.width;
         this.height = gm.height;
-        this.initialRubble = new double[this.width][this.height];
-        this.initialParts = new double[this.width][this.height];
-        for (int i = 0; i < this.width; i++) {
-            System.arraycopy(gm.initialRubble[i], 0, this.initialRubble[i], 0, this.height);
-            System.arraycopy(gm.initialParts[i], 0, this.initialParts[i], 0, this.height);
+        this.initialRubble = new double[this.height][this.width];
+        this.initialParts = new double[this.height][this.width];
+        for (int i = 0; i < this.height; i++) {
+            System.arraycopy(gm.initialRubble[i], 0, this.initialRubble[i], 0, this.width);
+            System.arraycopy(gm.initialParts[i], 0, this.initialParts[i], 0, this.width);
         }
 
         this.origin = gm.origin;
@@ -106,16 +111,13 @@ public class GameMap implements Serializable {
         this.mapName = gm.mapName;
         this.zombieSpawnSchedule = new ZombieSpawnSchedule(gm.zombieSpawnSchedule);
         this.initialRobots = gm.getInitialRobots();
-        updateSymmetries();
-        this.zombieSpawnMap = buildZombieSpawnMap(this.zombieSpawnSchedule);
     }
 
     /**
-     * Creates a GameMap with the given parameters. Note: the rubble and
-     * parts arrays should be indexed such that rubble[x][y] gives you the
-     * rubble at coordinate (x, y). This is weird if you're used to imagining
-     * the first index as the row and the second index as the column, because
-     * here it's the other way around.
+     * Creates a GameMap with the given parameters. Note: the rubble and parts
+     * arrays should be indexed such that rubble[y][x] gives you the rubble at
+     * coordinate (x, y). The first index is the row, the second index is the
+     * column.
      *
      * The map will be initialized with a pseudorandom origin between (0, 0) and
      * (500, 500), based on the seed.
@@ -139,13 +141,13 @@ public class GameMap implements Serializable {
         if (mapProperties.containsKey(MapProperties.WIDTH)) {
             this.width = mapProperties.get(MapProperties.WIDTH);
         } else {
-            this.width = initialRubble.length;
+            this.width = initialRubble[0].length;
         }
 
         if (mapProperties.containsKey(MapProperties.HEIGHT)) {
             this.height = mapProperties.get(MapProperties.HEIGHT);
         } else {
-            this.height = initialRubble[0].length;
+            this.height = initialRubble.length;
         }
 
         if (mapProperties.containsKey(MapProperties.SEED)) {
@@ -168,10 +170,7 @@ public class GameMap implements Serializable {
         this.zombieSpawnSchedule = zombieSpawnSchedule;
         this.mapName = mapName;
         this.initialRobots = initialRobots;
-        updateSymmetries();
-        this.zombieSpawnMap = buildZombieSpawnMap(this.zombieSpawnSchedule);
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -269,18 +268,9 @@ public class GameMap implements Serializable {
             return 0;
         }
 
-        return initialRubble[x - origin.x][y - origin.y];
+        return initialRubble[y - origin.y][x - origin.x];
     }
 
-    /**
-     * Returns a two-dimensional array of rubble data for this map.
-     *
-     * @return the map's rubble in a 2D array
-     */
-    public double[][] getInitialRubble() {
-        return initialRubble;
-    }
-    
     /**
      * Determines the amount of parts on the map at the
      * given location.
@@ -293,16 +283,7 @@ public class GameMap implements Serializable {
         if (!onTheMap(x, y))
             return 0.0;
 
-        return initialParts[x - origin.x][y - origin.y];
-    }
-
-    /**
-     * Returns a two-dimensional array of ore data for this map.
-     *
-     * @return the map's ore in a 2D array
-     */
-    public double[][] getInitialParts() {
-        return initialParts;
+        return initialParts[y - origin.y][x - origin.x];
     }
 
     /**
@@ -367,6 +348,8 @@ public class GameMap implements Serializable {
      */
     @JsonIgnore
     public ZombieSpawnSchedule getZombieSpawnSchedule(MapLocation denLoc) {
+        computeLazyValues();
+
         return this.zombieSpawnMap.get(denLoc);
     }
     
@@ -455,7 +438,6 @@ public class GameMap implements Serializable {
     /**
      * Updates the map's symmetry types
      */
-    @JsonIgnore
     public void updateSymmetries() {
         // The different possible symmetries.
         symVert = true;
@@ -522,6 +504,8 @@ public class GameMap implements Serializable {
      */
     @JsonIgnore
     public boolean isTournamentLegal() {
+        computeLazyValues();
+
         // First, check to make sure there aren't any ZOMBIEDENs on lines of symmetry
         for(InitialRobotInfo robot : initialRobots) {
             final MapLocation origin = new MapLocation(0, 0);
@@ -654,8 +638,8 @@ public class GameMap implements Serializable {
      * @return whether the tiles are the same
      */
     private boolean sameTile(int x1, int y1, int x2, int y2) {
-        return initialRubble[x1][y1] == initialRubble[x2][y2] &&
-                initialParts[x1][y1] == initialParts[x2][y2];
+        return initialRubble[y1][x1] == initialRubble[y2][x2] &&
+                initialParts[y1][x1] == initialParts[y2][x2];
     }
 
     /**
@@ -681,6 +665,16 @@ public class GameMap implements Serializable {
             return r2.team != Team.ZOMBIE
                     && r2.team != Team.NEUTRAL
                     && r2.team != r1.team;
+        }
+    }
+
+    /**
+     * Computes symmetries and ZombieSpawnMap.
+     */
+    private synchronized void computeLazyValues() {
+        if (this.zombieSpawnMap == null) {
+            updateSymmetries();
+            this.zombieSpawnMap = buildZombieSpawnMap(this.zombieSpawnSchedule);
         }
     }
 
