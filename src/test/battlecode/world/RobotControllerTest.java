@@ -47,21 +47,20 @@ public class RobotControllerTest {
         // This creates the actual game.
         TestGame game = new TestGame(map);
 
-        // Let's spawn a soldier for each team. The integers represent IDs.
+        // Let's spawn a robot for each team. The integers represent IDs.
         int oX = game.getOriginX();
         int oY = game.getOriginY();
-        final int soldierA = game.spawn(oX, oY, RobotType.SOLDIER, Team.A);
+        final int archonA = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
         final int soldierB = game.spawn(oX + 1, oY + 1, RobotType.SOLDIER, Team
                 .B);
-        InternalRobot soldierABot = game.getBot(soldierA);
-        InternalRobot soldierBBot = game.getBot(soldierB);
+        InternalRobot archonABot = game.getBot(archonA);
 
-        assertEquals(soldierABot.getLocation(), new MapLocation(oX, oY));
+        assertEquals(archonABot.getLocation(), new MapLocation(oX, oY));
 
         // The following specifies the code to be executed in the next round.
         // Bytecodes are not counted, and yields are automatic at the end.
         game.round((id, rc) -> {
-            if (id == soldierA) {
+            if (id == archonA) {
                 rc.move(Direction.EAST);
             } else if (id == soldierB) {
                 // do nothing
@@ -69,22 +68,22 @@ public class RobotControllerTest {
         });
 
         // Let's assert that things happened properly.
-        assertEquals(soldierABot.getLocation(), new MapLocation(oX + 1, oY));
+        assertEquals(archonABot.getLocation(), new MapLocation(oX + 1, oY));
         assertEquals(game.getWorld().resources(Team.A), 30 + GameConstants
-                .PARTS_INITIAL_AMOUNT, EPSILON);
+                .PARTS_INITIAL_AMOUNT + GameConstants.ARCHON_PART_INCOME, EPSILON);
 
         // Lets 10 rounds go by.
         game.waitRounds(10);
 
         // Let's make sure that robots can attack each other.
         game.round((id, rc) -> {
-            if (id == soldierA) {
-                rc.attackLocation(new MapLocation(oX + 1, oY + 1));
+            if (id == soldierB) {
+                rc.attackLocation(new MapLocation(oX + 1, oY));
             }
         });
 
         // Makes sure that the attack did damage.
-        assertEquals(soldierBBot.getHealthLevel(), 46, EPSILON);
+        assertEquals(archonABot.getHealthLevel(), 996, EPSILON);
     }
 
     /**
@@ -274,7 +273,7 @@ public class RobotControllerTest {
         final int soldier = game.spawn(oX, oY, RobotType.SOLDIER, Team.B);
         // robots to clear rubble and take parts
         final int soldier2 = game.spawn(oX, oY + 6, RobotType.SOLDIER, Team.A);
-        final int soldier3 = game.spawn(oX + 6, oY, RobotType.SOLDIER, Team.A);
+        final int archon3 = game.spawn(oX + 6, oY, RobotType.ARCHON, Team.A);
         MapLocation loc1 = new MapLocation(oX, oY + 5);
         MapLocation loc2 = new MapLocation(oX + 5, oY);
 
@@ -323,7 +322,7 @@ public class RobotControllerTest {
         game.round((id, rc) -> {
             if (id == soldier2) {
                 rc.clearRubble(Direction.NORTH);
-            } else if (id == soldier3) {
+            } else if (id == archon3) {
                 rc.move(Direction.WEST); // get parts
             }
         });
