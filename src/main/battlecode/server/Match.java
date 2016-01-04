@@ -109,7 +109,7 @@ public class Match {
         );
         teamProvider.registerControlProvider(
                 Team.ZOMBIE,
-                new ZombieControlProvider()
+                new ZombieControlProvider(options.getBoolean("bc.game.disable-zombies"))
         );
         teamProvider.registerControlProvider(
                 Team.NEUTRAL,
