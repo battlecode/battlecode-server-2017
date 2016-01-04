@@ -183,7 +183,6 @@ public interface RobotController {
      * @return whether there is a robot at the given location.
      * @throws GameActionException
      *             if <code>loc</code> is not within sensor range
-     *             (CANT_SENSE_THAT).
      *
      * @battlecode.doc.costlymethod
      */
@@ -198,7 +197,6 @@ public interface RobotController {
      * @return the robot at the given location.
      * @throws GameActionException
      *             if <code>loc</code> is not within sensor range
-     *             (CANT_SENSE_THAT).
      *
      * @battlecode.doc.costlymethod
      */
