@@ -123,10 +123,6 @@ public interface RobotController {
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
 
-    // TODO: seems weird that onTheMap throws GameActionExceptions for things
-    // that can't be sensed while senseRubble and senseParts return -1 for
-    // thosee
-
     /**
      * Senses whether a MapLocation is on the map. Will throw an exception if
      * the location is not currently within sensor range.
