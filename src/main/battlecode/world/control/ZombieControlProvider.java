@@ -60,10 +60,13 @@ public class ZombieControlProvider implements RobotControlProvider {
      */
     private Random random;
 
+    private boolean disableSpawning;
+    
     /**
      * Create a ZombieControlProvider.
      */
-    public ZombieControlProvider() {
+    public ZombieControlProvider(boolean disableSpawning) {
+        this.disableSpawning = disableSpawning;
         this.denQueues = new HashMap<>();
     }
 
@@ -110,7 +113,9 @@ public class ZombieControlProvider implements RobotControlProvider {
     @Override
     public void runRobot(InternalRobot robot) {
         if (robot.getType() == RobotType.ZOMBIEDEN) {
-            processZombieDen(robot);
+            if(!disableSpawning) {
+                processZombieDen(robot);
+            }
         } else if (robot.getType().isZombie) {
             processZombie(robot);
         } else {
