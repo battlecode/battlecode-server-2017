@@ -16,6 +16,11 @@ battlecode/common/MapLocation/isAdjacentTo                         5     false
 battlecode/common/MapLocation/subtract                             5     false
 battlecode/common/MapLocation/toString                             5     false
 battlecode/common/MapLocation/valueOf                              25    false
+battlecode/common/Signal/getRobotID                             1      false
+battlecode/common/Signal/getID                                  1      false
+battlecode/common/Signal/getLocation                            1      false
+battlecode/common/Signal/getTeam                                1      false
+battlecode/common/Signal/getMessage                             1      false
 battlecode/common/RobotController/addMatchObservation         0     true
 battlecode/common/RobotController/attackLocation              0     true
 battlecode/common/RobotController/broadcastSignal             100   true
