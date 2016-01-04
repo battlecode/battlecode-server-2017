@@ -183,7 +183,8 @@
                 packagenames="battlecode.common.*"
                 destdir="${javadoc.common.destdir}"
                 windowtitle="Battlecode ${year}"
-                link="http://docs.oracle.com/javase/8/docs/api/">
+                link="http://docs.oracle.com/javase/8/docs/api/"
+				verbose="true">
             <classpath refid="classpath-libs"/>
             <classpath location="${pkg.build.dir}"/>
 
