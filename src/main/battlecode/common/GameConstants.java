@@ -87,10 +87,7 @@ public interface GameConstants {
     
     /** Damage a robot receives from a Viper's infection per turn */
     double VIPER_INFECTION_DAMAGE = 2;
-    
-    /** Amount of damage a den does to surrounding units when it's blockaded and can't spawn */
-    double DEN_SPLASH_DAMAGE = 10;
-    
+
     /** Minimum attack range of a Turret */
     int TURRET_MINIMUM_RANGE = 5;
 
