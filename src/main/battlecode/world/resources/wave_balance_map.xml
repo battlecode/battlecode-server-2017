@@ -160,10 +160,10 @@
     <initialRobots>
       <initial-robot originOffsetX="0" originOffsetY="0" type="ARCHON" team="B"/>
       <initial-robot originOffsetX="5" originOffsetY="5" type="ARCHON" team="A"/>
-	  <initial-robot originOffsetX="44" originOffsetY="46" type="ZOMBIEDEN" team="ZOMBIE"/>
 	  <initial-robot originOffsetX="46" originOffsetY="44" type="ZOMBIEDEN" team="ZOMBIE"/>
-	  <initial-robot originOffsetX="45" originOffsetY="30" type="ZOMBIEDEN" team="ZOMBIE"/>
+	  <initial-robot originOffsetX="44" originOffsetY="46" type="ZOMBIEDEN" team="ZOMBIE"/>
 	  <initial-robot originOffsetX="30" originOffsetY="45" type="ZOMBIEDEN" team="ZOMBIE"/>
+	  <initial-robot originOffsetX="45" originOffsetY="30" type="ZOMBIEDEN" team="ZOMBIE"/>
     </initialRobots>
   </game-map>
 </object-stream>
