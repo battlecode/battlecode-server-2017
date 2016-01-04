@@ -424,6 +424,7 @@ public interface RobotController {
      * your broadcast range (except for the sending robot).
      *
      * @param radius the radius over which the signal is broadcasted
+     * @throws GameActionException if radius is negative
      */
     
     void broadcastSignal(int radius)  throws GameActionException;
@@ -436,6 +437,8 @@ public interface RobotController {
      * @param message1 the first integer to broadcast
      * @param message2 the second integer to broadcast
      * @param radius the radius over which the signal is broadcasted
+     * @throws GameActionException if radius is negative or this robot 
+                cannot send message signals
      */
     
     void broadcastMessageSignal(int message1, int message2, int radius)  throws
@@ -497,7 +500,8 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Activates the neutral robot at the given location.
+     * Activates the neutral robot at the given location, converting it to a robot
+     * of the same type but on your team.
      *
      * @param loc the location of the robot to activate.
      * @throws GameActionException if the location is out of range (needs to
@@ -511,25 +515,25 @@ public interface RobotController {
      * range.
      *
      * @param loc the location of the robot to repair.
-     * @throws GameActionException if the location is out of range, if there
-     *  is no robot there, if the robot is from the wrong team, or if you
-     *  already repaired this turn.
+     * @throws GameActionException if this robot is not an archon, the location 
+     *  is out of range, if there is no robot there, if the robot is from the 
+     *  wrong team, or if you already repaired this turn.
      */
     void repair(MapLocation loc) throws GameActionException;
 
     /**
-     * Turret only. Transforms the turret into a TTM after a short delay.
+     * Turret only. Transforms the turret into a TTM and increases delays.
      *
-     * @throws GameActionException if this robot cannot pack
+     * @throws GameActionException if this robot is not a Turret
      *
      * @battlecode.doc.costlymethod
      */
     void pack() throws GameActionException;
 
     /**
-     * TTM only. Transforms the TTM into a turret after a short delay.
+     * TTM only. Transforms the TTM into a turret and increases delays.
      *
-     * @throws GameActionException if this robot cannot unpack
+     * @throws GameActionException if this robot is not a TTM
      *
      * @battlecode.doc.costlymethod
      */
