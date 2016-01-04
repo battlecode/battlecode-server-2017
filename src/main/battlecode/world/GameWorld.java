@@ -925,12 +925,14 @@ public class GameWorld implements SignalHandler {
     public void visitMovementSignal(MovementSignal s) {
         InternalRobot r = getObjectByID(s.getRobotID());
         r.setLocation(s.getNewLoc());
-        double newParts = takeParts(r.getLocation());
-        adjustResources(r.getTeam(), newParts);
-        addSignal(s);
-        if (newParts > 0) {
-            addSignal(new PartsChangeSignal(s.getNewLoc(), 0));
+        if (r.getType() == RobotType.ARCHON) {
+            double newParts = takeParts(r.getLocation());
+            adjustResources(r.getTeam(), newParts);
+            if (newParts > 0) {
+                addSignal(new PartsChangeSignal(s.getNewLoc(), 0));
+            }
         }
+        addSignal(s);
     }
 
     @SuppressWarnings("unused")
