@@ -316,8 +316,7 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Queues a rubble clear in the given direction to be executed at the end
-     * of the turn.
+     * Clears rubble in the specified direction.
      *
      * @param dir
      *            the direction to clear rubble in.
@@ -350,8 +349,7 @@ public interface RobotController {
     boolean canMove(Direction dir);
 
     /**
-     * Queues a move in the given direction to be performed at the end of this
-     * turn.
+     * Moves in the given direction.
      *
      * @param dir
      *            the direction to move in.
@@ -382,8 +380,7 @@ public interface RobotController {
     boolean canAttackLocation(MapLocation loc);
 
     /**
-     * Queues an attack on the given location to be performed at the end of this
-     * turn.
+     * Attacks the given location.
      *
      * @param loc
      *            the location to attack.
