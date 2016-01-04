@@ -11,52 +11,6 @@ import java.util.*;
  */
 @Ignore
 public class TestMapGenerator {
-    public static String getSymbol(RobotType type) {
-        switch (type) {
-            case ZOMBIEDEN: return "z";
-            case STANDARDZOMBIE: return "s";
-            case RANGEDZOMBIE: return "r";
-            case FASTZOMBIE: return "f";
-            case BIGZOMBIE: return "b";
-            case ARCHON: return "a";
-            case SCOUT: return "c";
-            case SOLDIER: return "o";
-            case GUARD: return "g";
-            case VIPER: return "v";
-            case TURRET: return "t";
-            case TTM: return "m";
-            default: return "x";
-        }
-    }
-
-    public static String getSymbol(Team team) {
-        switch (team) {
-            case A: return "a";
-            case B: return "b";
-            case NEUTRAL: return "n";
-            case ZOMBIE: return "z";
-            default: return "n";
-        }
-    }
-
-    /**
-     * For the purposes of this map generator, gives a unique String for
-     * each (robot, team) combination.
-     *
-     * p will be parts.
-     * r will be rubble.
-     *
-     * Lower case will be used for team A and upper case will be used for
-     * team B.
-     *
-     * @param type type of the robot.
-     * @param team team of the robot.
-     * @return a unique String to represent the (robot, team) for map
-     * writing purposes.
-     */
-    public static String getSymbol(RobotType type, Team team) {
-        return getSymbol(type) + getSymbol(team);
-    }
 
     /** Width of the map. */
     private Integer width;
@@ -66,9 +20,9 @@ public class TestMapGenerator {
     private Integer seed;
     /** Number of rounds for the game. */
     private Integer rounds;
-    /** The rubble on the map. Defaults to no rubble. x is the first index. */
+    /** The rubble on the map. Defaults to no rubble. x is the second index. */
     private double[][] rubble;
-    /** The parts on the map. Defaults to no parts. x is the first index. */
+    /** The parts on the map. Defaults to no parts. x is the second index. */
     private double[][] parts;
     /** The map's zombie spawn schedule. Defaults to no zombies. */
     private ZombieSpawnSchedule zSchedule;
@@ -87,8 +41,8 @@ public class TestMapGenerator {
         this.height = height;
         this.seed = GameConstants.GAME_DEFAULT_SEED;
         this.rounds = rounds;
-        this.rubble = new double[width][height];
-        this.parts = new double[width][height];
+        this.rubble = new double[height][width];
+        this.parts = new double[height][width];
         this.zSchedule = new ZombieSpawnSchedule();
         this.robots = new ArrayList<>();
     }
@@ -116,15 +70,15 @@ public class TestMapGenerator {
 
         this.seed = GameConstants.GAME_DEFAULT_SEED;
         this.rounds = rounds;
-        this.parts = new double[width][height];
-        this.rubble = new double[width][height];
+        this.parts = new double[height][width];
+        this.rubble = new double[height][width];
         for (int i = 0; i < height; ++i) {
             StringTokenizer st = new StringTokenizer(map[i]);
             for (int j = 0; j < width; ++j) {
                 String next = st.nextToken();
                 int value = Integer.parseInt(next.substring(1));
-                this.rubble[j][i] = next.startsWith("n") ? value : 0;
-                this.parts[j][i] = next.startsWith("p") ? value : 0;
+                this.rubble[i][j] = next.startsWith("n") ? value : 0;
+                this.parts[i][j] = next.startsWith("p") ? value : 0;
             }
         }
 
@@ -161,7 +115,7 @@ public class TestMapGenerator {
      * @return itself, after the parts value has been updated
      */
     public TestMapGenerator withParts(int x, int y, double partsValue) {
-        this.parts[x][y] = partsValue;
+        this.parts[y][x] = partsValue;
         return this;
     }
 
@@ -173,7 +127,7 @@ public class TestMapGenerator {
      * @param partsValue the new parts value
      */
     public void setParts(int x, int y, double partsValue) {
-        this.parts[x][y] = partsValue;
+        this.parts[y][x] = partsValue;
     }
 
     /**
@@ -185,7 +139,7 @@ public class TestMapGenerator {
      * @return itself, after the rubble value has been updated
      */
     public TestMapGenerator withRubble(int x, int y, double rubbleValue) {
-        this.rubble[x][y] = rubbleValue;
+        this.rubble[y][x] = rubbleValue;
         return this;
     }
 
@@ -197,7 +151,7 @@ public class TestMapGenerator {
      * @param rubbleValue the new rubble value
      */
     public void setRubble(int x, int y, double rubbleValue) {
-        this.rubble[x][y] = rubbleValue;
+        this.rubble[y][x] = rubbleValue;
     }
 
     /**

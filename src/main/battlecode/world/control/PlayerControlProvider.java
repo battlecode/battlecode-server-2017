@@ -55,9 +55,14 @@ public class PlayerControlProvider implements RobotControlProvider {
         IndividualClassLoader.reset();
     }
 
-     @Override
+    @Override
     public void matchEnded() {
-         // TODO clean up threads?
+         for (final SandboxedRobotPlayer player : this.sandboxes.values()) {
+            if (player != null && !player.getTerminated()) {
+                player.terminate();
+            }
+         }
+         this.sandboxes.clear();
     }
 
     @Override
