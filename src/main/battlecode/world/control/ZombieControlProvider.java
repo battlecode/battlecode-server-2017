@@ -65,6 +65,11 @@ public class ZombieControlProvider implements RobotControlProvider {
     /**
      * Create a ZombieControlProvider.
      */
+    public ZombieControlProvider() {
+        this.disableSpawning = false;
+        this.denQueues = new HashMap<>();
+    }
+    
     public ZombieControlProvider(boolean disableSpawning) {
         this.disableSpawning = disableSpawning;
         this.denQueues = new HashMap<>();
