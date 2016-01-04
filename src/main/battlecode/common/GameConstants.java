@@ -26,12 +26,6 @@ public interface GameConstants {
     // ****** GAME PARAMETERS **********
     // *********************************
 
-    /** The minimum possible round at which the game may be forced to end */
-    int ROUND_MIN_LIMIT = 2000;
-
-    /** The maximum possible round at which the game may be forced to end */
-    int ROUND_MAX_LIMIT = 4000;
-
     /** The number of longs that your team can remember between games. */
     int TEAM_MEMORY_LENGTH = 32;
 
@@ -41,24 +35,14 @@ public interface GameConstants {
     /** The bytecode penalty that is imposed each time an exception is thrown */
     int EXCEPTION_BYTECODE_PENALTY = 500;
 
-    /** Number of bytecodes per turn that don't cost supply. */
-    int FREE_BYTECODES = 2000;
-
     /** Maximum archons that can appear on a map (per team). */
     int NUMBER_OF_ARCHONS_MAX = 6;
 
     /** Represents the multiple of the sightRange for which the cost is fixed. */
     double BROADCAST_RANGE_MULTIPLIER = 2;
 
-    /** Represents the base bytecode cost of a broadcast. */
-    int BROADCAST_BASE_BYTECODE_COST = 100;
-
     /** Represents the base delay increase of a broadcast. */
     double BROADCAST_BASE_DELAY_INCREASE = 0.05;
-
-    /** The additional bytecode cost of broadcasting beyond the base cost. See
-     * specs for the formula. */
-    int BROADCAST_ADDITIONAL_BYTECODE_COST = 10;
 
     /** The additional delay increase of broadcasting beyond the base cost.
      *  See specs for the formula. */
@@ -72,7 +56,7 @@ public interface GameConstants {
     double PARTS_INITIAL_AMOUNT = 200;
     
     /** The part income per turn per archon */
-    double ARCHON_PART_INCOME = 1;
+    double ARCHON_PART_INCOME = 0.75;
 
     /** The parts reward for destroying a zomie den */
     double DEN_PART_REWARD = 300;
@@ -104,9 +88,6 @@ public interface GameConstants {
     /** Damage a robot receives from a Viper's infection per turn */
     double VIPER_INFECTION_DAMAGE = 2;
     
-    /** Amount of damage a den does to surrounding units when it's blockaded and can't spawn */
-    double DEN_SPLASH_DAMAGE = 10;
-    
     /** Minimum attack range of a Turret */
     int TURRET_MINIMUM_RANGE = 5;
 
@@ -119,7 +100,7 @@ public interface GameConstants {
     /** Archon activation range. */
     int ARCHON_ACTIVATION_RANGE = 2;
 
-    /** Amount of damage robots take when standing next to dens that are spawning. **/
+    /** Amount of damage robots take when standing next to dens that are blocked from spawning. **/
     double DEN_SPAWN_PROXIMITY_DAMAGE = 10.0;
 
     /** Number of turns that elapse for the zombie outbreak level to increase */
