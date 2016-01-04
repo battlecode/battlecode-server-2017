@@ -180,7 +180,9 @@ public class SandboxedRobotPlayer {
                 if (e.getCause() instanceof RobotDeathException) {
                     return;
                 }
-                ErrorReporter.report(e, false);
+                ErrorReporter.report(e.getCause(), false);
+            } catch (final RobotDeathException e) {
+                return;
             } finally {
                 // Ensure that we know we're terminated.
                 this.terminated = true;
