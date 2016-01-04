@@ -88,6 +88,9 @@ public interface GameConstants {
     /** Damage a robot receives from a Viper's infection per turn */
     double VIPER_INFECTION_DAMAGE = 2;
     
+    /** Amount of damage a den does to surrounding units when it's blockaded and can't spawn */
+    double DEN_SPLASH_DAMAGE = 10;
+    
     /** Minimum attack range of a Turret */
     int TURRET_MINIMUM_RANGE = 5;
 
@@ -100,7 +103,7 @@ public interface GameConstants {
     /** Archon activation range. */
     int ARCHON_ACTIVATION_RANGE = 2;
 
-    /** Amount of damage robots take when standing next to dens that are blocked from spawning. **/
+    /** Amount of damage robots take when standing next to dens that are spawning. **/
     double DEN_SPAWN_PROXIMITY_DAMAGE = 10.0;
 
     /** Number of turns that elapse for the zombie outbreak level to increase */
