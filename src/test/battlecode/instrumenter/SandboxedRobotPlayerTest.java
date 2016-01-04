@@ -102,7 +102,7 @@ public class SandboxedRobotPlayerTest {
         player.step();
 
         verify(rc).broadcastSignal(1);
-        // broadcast() is 25 bytecodes, +2 extra
-        assertEquals(player.getBytecodesUsed(), 27);
+        // broadcast() is 100 bytecodes, +2 extra
+        assertEquals(player.getBytecodesUsed(), 102);
     }
 }

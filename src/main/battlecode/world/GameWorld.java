@@ -760,13 +760,6 @@ public class GameWorld implements SignalHandler {
                 }
             }
             break;
-        case ZOMBIEDEN:
-            InternalRobot[] denTargets = getAllRobotsWithinRadiusSq(targetLoc,0);
-            
-            for (InternalRobot target : denTargets) {
-                target.takeDamage(GameConstants.DEN_SPLASH_DAMAGE);
-            }
-            break;
         default:
             // ERROR, should never happen
         }
