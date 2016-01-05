@@ -93,7 +93,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    TTM             (false, false, 0,  TURRET,    0,  10, 50,   0,  0,    2,   0, 2, 24,     2000,  0, RANGEDZOMBIE, false),
+    TTM             (false, false, 0,  TURRET,    0,  10, 100,  0,  0,    2,   0, 2, 24,     2000,  0, RANGEDZOMBIE, false),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
 	;
 
