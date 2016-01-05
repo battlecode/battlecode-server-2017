@@ -157,22 +157,12 @@ public final class RobotControllerImpl implements RobotController {
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
 
-    /**
-     * Determine if our robot can sense a location
-     *
-     * @param loc the location to test
-     * @return whether we can sense the location
-     */
+    @Override
     public boolean canSense(MapLocation loc) {
         return robot.canSense(loc);
     }
 
-    /**
-     * Determine if our robot can sense a robot
-     *
-     * @param obj the robot to test
-     * @return whether we can sense the robot
-     */
+    @Override
     public boolean canSense(InternalRobot obj) {
         return obj.exists() && canSense(obj.getLocation());
     }

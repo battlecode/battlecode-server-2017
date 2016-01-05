@@ -840,4 +840,43 @@ public class RobotControllerTest {
             }
         });
     }
+    
+    /**
+     * Tests the canSense(InternalRobot) method and the senseHostileRobots() method
+     */
+    @Test
+    public void testRobotSensing() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int soldier1 = game.spawn(oX, oY, RobotType.SOLDIER,Team.A);
+        final int soldier2 = game.spawn(oX+3, oY+3, RobotType.SOLDIER,Team.A);
+        final int soldier3 = game.spawn(oX+6, oY+6, RobotType.SOLDIER,Team.B);
+        final int zombie = game.spawn(oX+4, oY+2, RobotType.STANDARDZOMBIE, Team.ZOMBIE);
+        InternalRobot soldier1Bot = game.getBot(soldier1);
+        InternalRobot soldier2Bot = game.getBot(soldier2);
+        InternalRobot soldier3Bot = game.getBot(soldier3);
+        
+        game.round((id, rc) -> {
+            if (id == soldier1) {
+                assertTrue(rc.canSense(soldier2Bot));
+                assertFalse(rc.canSense(soldier3Bot));
+                RobotInfo[] hostiles = rc.senseHostileRobots(soldier1Bot.getLocation(),-1);
+                assertEquals(hostiles.length,1);
+            } else if (id == soldier2) {
+                assertTrue(rc.canSense(soldier1Bot));
+                assertTrue(rc.canSense(soldier3Bot));
+                RobotInfo[] hostiles = rc.senseHostileRobots(soldier2Bot.getLocation(),2);
+                assertEquals(hostiles.length,1);
+                hostiles = rc.senseHostileRobots(soldier2Bot.getLocation(),-1);
+                assertEquals(hostiles.length,2);
+            } else if (id == soldier3) {
+                assertTrue(rc.canSense(soldier2Bot));
+                assertFalse(rc.canSense(soldier1Bot));                
+            } else if (id == zombie) {
+            }
+        });
+    }
 }

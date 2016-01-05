@@ -1,5 +1,7 @@
 package battlecode.common;
 
+import battlecode.world.InternalRobot;
+
 /**
  * A RobotController allows contestants to make their robot sense and interact
  * with the game world. When a contestant's <code>RobotPlayer</code> is
@@ -158,6 +160,22 @@ public interface RobotController {
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
 
+    /**
+     * Determine if our robot can sense a location
+     *
+     * @param loc the location to test
+     * @return whether we can sense the location
+     */
+    boolean canSense(MapLocation loc);
+    
+    /**
+     * Determine if our robot can sense a robot
+     *
+     * @param obj the robot to test
+     * @return whether we can sense the robot
+     */
+    boolean canSense(InternalRobot obj);
+    
     /**
      * Senses whether a MapLocation is on the map. Will throw an exception if
      * the location is not currently within sensor range.
