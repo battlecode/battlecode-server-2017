@@ -132,30 +132,39 @@ public final class RobotControllerImpl implements RobotController {
     public double getHealth() {
         return robot.getHealthLevel();
     }
+    
+    @Override
+    public int getInfectedTurns() {
+        return Math.max(robot.getZombieInfectedTurns(), robot.getViperInfectedTurns());
+    }
+    
+    @Override
+    public int getZombieInfectedTurns() {
+        return robot.getZombieInfectedTurns();
+    }
+    
+    @Override
+    public int getViperInfectedTurns() {
+        return robot.getViperInfectedTurns();
+    }
+    
+    @Override
+    public boolean isInfected() {
+        return robot.isInfected();
+    }
 
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
 
-    /**
-     * Determine if our robot can sense a location
-     *
-     * @param loc the location to test
-     * @return whether we can sense the location
-     */
+    @Override
     public boolean canSense(MapLocation loc) {
         return robot.canSense(loc);
     }
 
-    /**
-     * Determine if our robot can sense a robot
-     *
-     * @param obj the robot to test
-     * @return whether we can sense the robot
-     */
+    @Override
     public boolean canSense(InternalRobot obj) {
-        return obj.exists()
-                && (obj.getTeam() == getTeam() || canSense(obj.getLocation()));
+        return obj.exists() && canSense(obj.getLocation());
     }
 
     /**
@@ -298,6 +307,33 @@ public final class RobotControllerImpl implements RobotController {
             final Team team) {
 
         return senseNearbyRobots(robot.getLocation(), radiusSquared, team);
+    }
+    
+    @Override
+    public RobotInfo[] senseHostileRobots(MapLocation center, int radiusSquared) {
+        assertNotNull(center);
+
+        final Collection<InternalRobot> allRobots = gameWorld.allObjects();
+        final List<RobotInfo> robots = new ArrayList<>();
+
+        final boolean useRadius = radiusSquared >= 0;
+        final Team enemyTeam = robot.getTeam().opponent();
+
+        for (final InternalRobot o : allRobots) {
+            if (!canSense(o))
+                continue;
+            if (o.equals(robot))
+                continue;
+            if (useRadius
+                    && o.getLocation()
+                    .distanceSquaredTo(center) > radiusSquared)
+                continue;
+            
+            if(o.getTeam() == enemyTeam || o.getTeam() == Team.ZOMBIE)
+                robots.add(o.getRobotInfo());
+        }
+
+        return robots.toArray(new RobotInfo[robots.size()]);
     }
 
     // ***********************************

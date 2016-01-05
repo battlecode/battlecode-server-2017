@@ -1,5 +1,7 @@
 package battlecode.common;
 
+import battlecode.world.InternalRobot;
+
 /**
  * A RobotController allows contestants to make their robot sense and interact
  * with the game world. When a contestant's <code>RobotPlayer</code> is
@@ -118,11 +120,62 @@ public interface RobotController {
      * @battlecode.doc.costlymethod
      */
     double getHealth();
+    
+    /**
+     * Gets the number of turns the robot will remain infected. If the robot dies
+     * while this value is greater than zero, it will turn into a zombie. This is
+     * the same thing as max(zombieInfectedTurns,viperInfectedTurns).
+     * 
+     * @return number of remaining infected turns.
+     */
+    int getInfectedTurns();
+    
+    /**
+     * Gets the number of turns the robot will remain infected from a zombie's attack.
+     * Unlike viperInfectedTurns, the unit WILL NOT take damage during these turns. The
+     * unit will turn into a zombie if it dies while infected.
+     * 
+     * @return number of remaining zombie infected turns.
+     */
+    int getZombieInfectedTurns();
+    
+    /**
+     * Gets the number of turns the robot will remain infected from a viper's attack.
+     * Unlike zombieInfectedTurns, the unit WILL take damage during these turns. The
+     * unit will turn into a zombie if it dies while infected.
+     * 
+     * @return number of remaining viper infected turns.
+     */
+    int getViperInfectedTurns();
+    
+    /**
+     * Returns true if the robot is infected (either from a viper or a zombie). If the
+     * robot dies while this is true, it will become a zombie.
+     * 
+     * @return true if the robot is infected
+     */
+    boolean isInfected();
 
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
 
+    /**
+     * Determine if our robot can sense a location
+     *
+     * @param loc the location to test
+     * @return whether we can sense the location
+     */
+    boolean canSense(MapLocation loc);
+    
+    /**
+     * Determine if our robot can sense a robot
+     *
+     * @param obj the robot to test
+     * @return whether we can sense the robot
+     */
+    boolean canSense(InternalRobot obj);
+    
     /**
      * Senses whether a MapLocation is on the map. Will throw an exception if
      * the location is not currently within sensor range.
@@ -280,6 +333,19 @@ public interface RobotController {
      */
     RobotInfo[] senseNearbyRobots(MapLocation center, int radiusSquared,
             Team team);
+    
+    /**
+     * Returns all hostile (zombie or enemy team) robots that can be sensed
+     * within a certain radius of a specified location.
+     * 
+     * @param center
+     *            center of the given search radius.
+     * @param radiusSquared
+     *            return objects this distance away from the center. If -1 is
+     *            passed, robots from the whole map are returned.
+     * @return array of class type of game objects.
+     */
+    RobotInfo[] senseHostileRobots(MapLocation center, int radiusSquared);
 
     // ***********************************
     // ****** READINESS METHODS **********
