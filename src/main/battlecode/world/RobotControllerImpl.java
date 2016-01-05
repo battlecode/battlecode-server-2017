@@ -174,8 +174,7 @@ public final class RobotControllerImpl implements RobotController {
      * @return whether we can sense the robot
      */
     public boolean canSense(InternalRobot obj) {
-        return obj.exists()
-                && (obj.getTeam() == getTeam() || canSense(obj.getLocation()));
+        return obj.exists() && canSense(obj.getLocation());
     }
 
     /**
