@@ -318,6 +318,33 @@ public final class RobotControllerImpl implements RobotController {
 
         return senseNearbyRobots(robot.getLocation(), radiusSquared, team);
     }
+    
+    @Override
+    public RobotInfo[] senseHostileRobots(MapLocation center, int radiusSquared) {
+        assertNotNull(center);
+
+        final Collection<InternalRobot> allRobots = gameWorld.allObjects();
+        final List<RobotInfo> robots = new ArrayList<>();
+
+        final boolean useRadius = radiusSquared >= 0;
+        final Team enemyTeam = robot.getTeam().opponent();
+
+        for (final InternalRobot o : allRobots) {
+            if (!canSense(o))
+                continue;
+            if (o.equals(robot))
+                continue;
+            if (useRadius
+                    && o.getLocation()
+                    .distanceSquaredTo(center) > radiusSquared)
+                continue;
+            
+            if(o.getTeam() == enemyTeam || o.getTeam() == Team.ZOMBIE)
+                robots.add(o.getRobotInfo());
+        }
+
+        return robots.toArray(new RobotInfo[robots.size()]);
+    }
 
     // ***********************************
     // ****** READINESS METHODS **********

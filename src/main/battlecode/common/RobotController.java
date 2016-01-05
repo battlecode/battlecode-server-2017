@@ -315,6 +315,19 @@ public interface RobotController {
      */
     RobotInfo[] senseNearbyRobots(MapLocation center, int radiusSquared,
             Team team);
+    
+    /**
+     * Returns all hostile (zombie or enemy team) robots that can be sensed
+     * within a certain radius of a specified location.
+     * 
+     * @param center
+     *            center of the given search radius.
+     * @param radiusSquared
+     *            return objects this distance away from the center. If -1 is
+     *            passed, robots from the whole map are returned.
+     * @return array of class type of game objects.
+     */
+    RobotInfo[] senseHostileRobots(MapLocation center, int radiusSquared);
 
     // ***********************************
     // ****** READINESS METHODS **********
