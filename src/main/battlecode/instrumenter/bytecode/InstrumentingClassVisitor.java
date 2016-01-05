@@ -112,7 +112,11 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
      * @inheritDoc
      */
     public void visitInnerClass(String name, String outerName, String innerName, int access) {
-        super.visitInnerClass(ClassReferenceUtil.classReference(name, teamPackageName, checkDisallowed), ClassReferenceUtil.classReference(outerName, teamPackageName, checkDisallowed), innerName, access);
+        super.visitInnerClass(
+                ClassReferenceUtil.classReference(name, teamPackageName, checkDisallowed),
+                ClassReferenceUtil.classReference(outerName, teamPackageName, checkDisallowed),
+                innerName, access
+        );
     }
 
 }
