@@ -854,6 +854,7 @@ public class RobotControllerTest {
         final int soldier1 = game.spawn(oX, oY, RobotType.SOLDIER,Team.A);
         final int soldier2 = game.spawn(oX+3, oY+3, RobotType.SOLDIER,Team.A);
         final int soldier3 = game.spawn(oX+6, oY+6, RobotType.SOLDIER,Team.B);
+        final int soldier4 = game.spawn(oX+10, oY+10, RobotType.SOLDIER,Team.A);
         final int zombie = game.spawn(oX+4, oY+2, RobotType.STANDARDZOMBIE, Team.ZOMBIE);
         InternalRobot soldier1Bot = game.getBot(soldier1);
         InternalRobot soldier2Bot = game.getBot(soldier2);
@@ -865,6 +866,8 @@ public class RobotControllerTest {
                 assertFalse(rc.canSense(soldier3Bot));
                 RobotInfo[] hostiles = rc.senseHostileRobots(soldier1Bot.getLocation(),-1);
                 assertEquals(hostiles.length,1);
+                RobotInfo[] allRobots = rc.senseNearbyRobots();
+                assertEquals(allRobots.length, 2);
             } else if (id == soldier2) {
                 assertTrue(rc.canSense(soldier1Bot));
                 assertTrue(rc.canSense(soldier3Bot));
@@ -872,9 +875,13 @@ public class RobotControllerTest {
                 assertEquals(hostiles.length,1);
                 hostiles = rc.senseHostileRobots(soldier2Bot.getLocation(),-1);
                 assertEquals(hostiles.length,2);
+                RobotInfo[] allRobots = rc.senseNearbyRobots();
+                assertEquals(allRobots.length, 3);
             } else if (id == soldier3) {
                 assertTrue(rc.canSense(soldier2Bot));
-                assertFalse(rc.canSense(soldier1Bot));                
+                assertFalse(rc.canSense(soldier1Bot));
+                RobotInfo[] allRobots = rc.senseNearbyRobots();
+                assertEquals(allRobots.length, 2);
             } else if (id == zombie) {
             }
         });
