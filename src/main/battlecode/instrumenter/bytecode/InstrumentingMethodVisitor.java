@@ -87,6 +87,9 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                 case INSN:
                     visitInsnNode((InsnNode) node);
                     break;
+                case INVOKE_DYNAMIC_INSN:
+                    visitInvokeDynamicInsnNode((InvokeDynamicInsnNode) node);
+                    break;
                 case LDC_INSN:
                     visitLdcInsnNode((LdcInsnNode) node);
                     break;
@@ -206,9 +209,29 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         }
     }
 
+    private void visitInvokeDynamicInsnNode(InvokeDynamicInsnNode n) {
+        // should only be used for creating lambdas in java 8 (not scala)
+        n.desc = methodDescReference(n.desc);
+        for (int i = 0; i < n.bsmArgs.length; i++) {
+            final Object arg = n.bsmArgs[i];
+
+            if (arg instanceof Type) {
+                Type t = (Type) arg;
+                n.bsmArgs[i] = Type.getType(methodDescReference(t.getDescriptor()));
+            } else if (arg instanceof Handle) {
+                Handle h = (Handle) arg;
+                n.bsmArgs[i] = new Handle(
+                        h.getTag(),
+                        classReference(h.getOwner()),
+                        h.getName(),
+                        methodDescReference(h.getDesc())
+                );
+            }
+        }
+    }
+
     private void visitMethodInsnNode(MethodInsnNode n) {
         // do various function replacements
-
         if (n.name.equals("hashCode") && n.desc.equals("()I") && n.getOpcode() != INVOKESTATIC) {
             bytecodeCtr++;
             endOfBasicBlock(n);

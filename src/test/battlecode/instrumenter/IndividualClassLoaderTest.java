@@ -189,4 +189,11 @@ public class IndividualClassLoaderTest {
             fail("Didn't outlaw illegal class: "+className);
         }
     }
+
+    @Test
+    public void testLambdas() throws Exception {
+        Class<?> c = l1.loadClass("instrumentertest.UsesLambda");
+
+        c.getMethod("run").invoke(null);
+    }
 }

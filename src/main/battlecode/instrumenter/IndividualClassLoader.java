@@ -8,6 +8,8 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
@@ -159,7 +161,6 @@ public class IndividualClassLoader extends ClassLoader {
                 byte[] classBytes;
                 try {
                     classBytes = instrument(name, false, teamPackageName);
-                    //dumpToFile(name,classBytes);
                 } catch (InstrumentationException ie) {
                     teamsWithErrors.add(teamPackageName);
                     throw ie;
@@ -209,5 +210,15 @@ public class IndividualClassLoader extends ClassLoader {
         ClassVisitor cv = new InstrumentingClassVisitor(cw, teamPackageName, false, checkDisallowed);
         cr.accept(cv, 0);        //passing false lets debug info be included in the transformation, so players get line numbers in stack traces
         return cw.toByteArray();
+    }
+
+    @SuppressWarnings("unused")
+    private void dumpToFile(String name, byte[] bytes) {
+        try {
+            Files.write(Paths.get("instrumented", name + ".class"), bytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }
