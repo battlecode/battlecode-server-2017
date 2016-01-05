@@ -571,6 +571,14 @@ public final class RobotControllerImpl implements RobotController {
             );
         }
 
+        if (type.spawnSource != robot.getType()) {
+            throw new GameActionException(
+                    CANT_DO_THAT,
+                    "Unit type " + type.name() + " cannot be built by " +
+                            robot.getType().name()
+            );
+        }
+
         assertIsCoreReady();
 
         double cost = type.partCost;
