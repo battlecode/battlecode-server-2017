@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -705,21 +706,30 @@ public class RobotControllerTest {
             if (id == archon) {
                 ZombieSpawnSchedule zombieSpawnSchedule = rc
                         .getZombieSpawnSchedule();
-                assertThat(zombieSpawnSchedule.getRounds(), contains(100,
-                        500, 1000));
-                ArrayList<ZombieCount> count100 = zombieSpawnSchedule
-                        .getScheduleForRound(100);
-                assertThat(count100, contains(new ZombieCount(RobotType
-                        .FASTZOMBIE, 30)));
-                ArrayList<ZombieCount> count500 = zombieSpawnSchedule
-                        .getScheduleForRound(500);
-                assertThat(count500, contains(new ZombieCount(RobotType
-                        .RANGEDZOMBIE, 50), new ZombieCount(RobotType
-                        .BIGZOMBIE, 4)));
-                ArrayList<ZombieCount> count1000 = zombieSpawnSchedule
-                        .getScheduleForRound(1000);
-                assertThat(count1000, contains(new ZombieCount(RobotType
-                        .STANDARDZOMBIE, 10)));
+
+                assertArrayEquals(
+                        new int[] {100, 500, 1000},
+                        zombieSpawnSchedule.getRounds()
+                );
+                assertArrayEquals(
+                        new ZombieCount[] {
+                                new ZombieCount(RobotType.FASTZOMBIE, 30)
+                        },
+                        zombieSpawnSchedule.getScheduleForRound(100)
+                );
+                assertArrayEquals(
+                        new ZombieCount[] {
+                                new ZombieCount(RobotType.RANGEDZOMBIE, 50),
+                                new ZombieCount(RobotType.BIGZOMBIE, 4)
+                        },
+                        zombieSpawnSchedule.getScheduleForRound(500)
+                );
+                assertArrayEquals(
+                        new ZombieCount[] {
+                                new ZombieCount(RobotType.STANDARDZOMBIE, 10)
+                        },
+                        zombieSpawnSchedule.getScheduleForRound(1000)
+                );
 
                 // now try to modify zombieSpawnSchedule
                 zombieSpawnSchedule.add(1500, RobotType.STANDARDZOMBIE, 8);
@@ -729,9 +739,8 @@ public class RobotControllerTest {
         // Make sure things didn't change.
         ZombieSpawnSchedule zombieSpawnSchedule = game.getWorld()
                 .getGameMap().getZombieSpawnSchedule();
-        assertEquals(zombieSpawnSchedule.getRounds().size(), 3);
-        assertThat(zombieSpawnSchedule.getRounds(), contains(100,
-                500, 1000));
+        assertEquals(zombieSpawnSchedule.getRounds().length, 3);
+        assertArrayEquals(zombieSpawnSchedule.getRounds(), new int[] {100, 500, 1000});
     }
 
     /**

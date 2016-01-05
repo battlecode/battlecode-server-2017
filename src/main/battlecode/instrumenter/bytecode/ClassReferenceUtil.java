@@ -104,14 +104,11 @@ public class ClassReferenceUtil {
         if (className.startsWith("java/util/invoke") || // Don't override JVM internals
                 className.startsWith("java/util/jar") ||
                 className.startsWith("java/util/zip") ||
-                className.startsWith("java/util/stream") ||
-                className.startsWith("java/util/function") ||
                 className.equals("java/util/Iterator") ||
                 className.equals("java/util/concurrent/TimeUnit"))
             return false;
 
         if (className.startsWith("java/util/") ||
-                className.startsWith("java/text") ||
                 className.startsWith("java/math/"))
             return true;
 

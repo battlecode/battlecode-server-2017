@@ -198,7 +198,7 @@ public class GameMap implements Serializable {
             return false;
         if (!this.mapName.equals(other.mapName)) return false;
         if (!this.origin.equals(other.origin)) return false;
-        if (!this.zombieSpawnSchedule.equivalentTo(other.zombieSpawnSchedule)) return false;
+        if (!this.zombieSpawnSchedule.equals(other.zombieSpawnSchedule)) return false;
 
         return Arrays.equals(this.initialRobots, other.initialRobots);
     }
@@ -337,10 +337,8 @@ public class GameMap implements Serializable {
      */
     @JsonIgnore
     public ZombieCount[] getZombieSpawnSchedule(int round) {
-        final List<ZombieCount> sched = zombieSpawnSchedule.getScheduleForRound(round);
-        return sched.toArray(new ZombieCount[sched.size()]);
+        return zombieSpawnSchedule.getScheduleForRound(round);
     }
-
 
     /**
      * @param denLoc the location of the den
@@ -607,10 +605,8 @@ public class GameMap implements Serializable {
         int numberDens = denLocs.size();
         
         // Divide ZombieSpawnSchedule between the dens
-        Collection<Integer> spawnScheduleRounds = schedule.getRounds();
-        for(int round : spawnScheduleRounds) {
-            ArrayList<ZombieCount> roundMap = schedule.getScheduleForRound(round);
-            for(ZombieCount zombieCount : roundMap) {
+        for(int round : schedule.getRounds()) {
+            for(ZombieCount zombieCount : schedule.getScheduleForRound(round)) {
                 // First, divide as evenly as we can
                 int evenlyDivided = zombieCount.getCount() / numberDens;
                 int leftOver = zombieCount.getCount() % numberDens;
