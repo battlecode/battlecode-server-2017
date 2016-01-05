@@ -118,6 +118,41 @@ public interface RobotController {
      * @battlecode.doc.costlymethod
      */
     double getHealth();
+    
+    /**
+     * Gets the number of turns the robot will remain infected. If the robot dies
+     * while this value is greater than zero, it will turn into a zombie. This is
+     * the same thing as max(zombieInfectedTurns,viperInfectedTurns).
+     * 
+     * @return number of remaining infected turns.
+     */
+    int getInfectedTurns();
+    
+    /**
+     * Gets the number of turns the robot will remain infected from a zombie's attack.
+     * Unlike viperInfectedTurns, the unit WILL NOT take damage during these turns. The
+     * unit will turn into a zombie if it dies while infected.
+     * 
+     * @return number of remaining zombie infected turns.
+     */
+    int getZombieInfectedTurns();
+    
+    /**
+     * Gets the number of turns the robot will remain infected from a viper's attack.
+     * Unlike zombieInfectedTurns, the unit WILL take damage during these turns. The
+     * unit will turn into a zombie if it dies while infected.
+     * 
+     * @return number of remaining viper infected turns.
+     */
+    int getViperInfectedTurns();
+    
+    /**
+     * Returns true if the robot is infected (either from a viper or a zombie). If the
+     * robot dies while this is true, it will become a zombie.
+     * 
+     * @return true if the robot is infected
+     */
+    boolean isInfected();
 
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****

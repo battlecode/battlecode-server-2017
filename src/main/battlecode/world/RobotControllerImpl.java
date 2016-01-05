@@ -132,6 +132,26 @@ public final class RobotControllerImpl implements RobotController {
     public double getHealth() {
         return robot.getHealthLevel();
     }
+    
+    @Override
+    public int getInfectedTurns() {
+        return Math.max(robot.getZombieInfectedTurns(), robot.getViperInfectedTurns());
+    }
+    
+    @Override
+    public int getZombieInfectedTurns() {
+        return robot.getZombieInfectedTurns();
+    }
+    
+    @Override
+    public int getViperInfectedTurns() {
+        return robot.getViperInfectedTurns();
+    }
+    
+    @Override
+    public boolean isInfected() {
+        return robot.isInfected();
+    }
 
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
