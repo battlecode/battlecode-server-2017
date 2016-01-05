@@ -769,6 +769,38 @@ public class RobotControllerTest {
     }
 
     /**
+     * Makes sure that you can't build stuff that you're not supposed to build.
+     */
+    @Test
+    public void testArchonCantBuildZombie() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 1000);
+
+        GameMap map = mapGen.getMap("test");
+
+        TestGame game = new TestGame(map);
+
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int archon = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+        final int den = game.spawn(oX + 5, oY + 5, RobotType.ZOMBIEDEN, Team
+                .ZOMBIE);
+
+        game.round((id, rc) -> {
+            if (id == archon) {
+                boolean exception = false;
+                try {
+                    rc.build(Direction.SOUTH_EAST, RobotType.RANGEDZOMBIE);
+                } catch (GameActionException e) {
+                    exception = true;
+                }
+                assertTrue(exception);
+            } else if (id == den) {
+                rc.build(Direction.SOUTH_EAST, RobotType.RANGEDZOMBIE);
+            }
+        });
+    }
+
+    /**
      * Test signaling behavior
      */
     @Test
