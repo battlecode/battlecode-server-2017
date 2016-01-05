@@ -395,6 +395,8 @@ public interface RobotController {
      *
      * @return next Signal object in your queue, or null if your queue is
      *         empty.
+     *
+     * @battlecode.doc.costlymethod
      */
     
     Signal readSignal();
@@ -405,6 +407,8 @@ public interface RobotController {
      * the queue, this method returns a zero-length array.
      *
      * @return all the Signals in your message queue
+     *
+     * @battlecode.doc.costlymethod
      */
     
     Signal[] emptySignalQueue();
@@ -416,6 +420,8 @@ public interface RobotController {
      *
      * @param radius the radius over which the signal is broadcasted
      * @throws GameActionException if radius is negative
+     *
+     * @battlecode.doc.costlymethod
      */
     
     void broadcastSignal(int radius)  throws GameActionException;
@@ -429,7 +435,9 @@ public interface RobotController {
      * @param message2 the second integer to broadcast
      * @param radius the radius over which the signal is broadcasted
      * @throws GameActionException if radius is negative or this robot 
-                cannot send message signals
+     *      cannot send message signals
+     *
+     * @battlecode.doc.costlymethod
      */
     
     void broadcastMessageSignal(int message1, int message2, int radius)  throws
@@ -498,6 +506,8 @@ public interface RobotController {
      * @throws GameActionException if the location is out of range (needs to
      * be adjacent), if there is no robot there, or if the robot is not a
      * neutral robot.
+     *
+     * @battlecode.doc.costlymethod
      */
     void activate(MapLocation loc) throws GameActionException;
 
