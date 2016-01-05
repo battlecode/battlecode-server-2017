@@ -478,17 +478,19 @@ public interface RobotController {
     boolean canBuild(Direction dir, RobotType type);
 
     /**
-     * Builds a structure in the given direction, queued for the end of the
-     * turn. The structure will initially be inactive for a number of turns
-     * (during which this robot cannot move or attack). After a number of turns,
-     * the structure will become active.
+     * Builds a structure in the given direction.The structure will initially
+     * be inactive for a number of turns (during which this robot cannot move or
+     * attack). After a number of turns,the structure will become active.
      *
      * @param dir
      *            the direction to bulid in.
      * @param type
      *            the type to build.
      * @throws GameActionException
-     *             if the build is bad.
+     *             if the build is bad: if your robot cannot build, if you
+     *             have coreDelay, if the direction is not a good build
+     *             direction, or if the type you're building cannot be built
+     *             by you.
      *
      * @battlecode.doc.costlymethod
      */
