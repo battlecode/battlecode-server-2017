@@ -13,7 +13,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    ZOMBIEDEN       (true,  true,  0,  null,      0,  0,  5000, 0,  0,    0,   0, 0, -1,     10000, 0, null, false),
+    ZOMBIEDEN       (true,  true,  0,  null,      0,  0,  2000, 0,  0,    0,   0, 0, -1,     10000, 0, null, false),
 	//                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * A normal, boring zombie unit.
