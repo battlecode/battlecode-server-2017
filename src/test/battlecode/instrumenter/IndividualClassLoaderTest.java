@@ -192,7 +192,14 @@ public class IndividualClassLoaderTest {
 
     @Test
     public void testLambdas() throws Exception {
-        Class<?> c = l1.loadClass("instrumentertest.UsesLambda");
+        final Class<?> c = l1.loadClass("instrumentertest.UsesLambda");
+
+        c.getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void testZombieSpawnSchedule() throws Exception {
+        final Class<?> c = l1.loadClass("instrumentertest.UsesSpawnSchedule");
 
         c.getMethod("run").invoke(null);
     }

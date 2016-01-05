@@ -12,13 +12,18 @@ import java.util.*;
 public class ZombieSpawnSchedule implements Serializable {
     private static final long serialVersionUID = -8945913587066092224L;
 
+    // Note: we provide deterministic accessors, so usage of this class is
+    // deterministic, and custom serializers (at least for XML), so that
+    // serialization is deterministic, even though HashMap is nondeterministic.
+    // TODO: deterministic serialization for JSON.
+
     /**
      * A map from round numbers to a list of ZombieCounts, specifying the
      * types and numbers of zombies that spawn during each round (per den).
      *
-     * Each round only appears at most once.
+     * Each zombie type only appears at most once.
      */
-    private Map<Integer, ArrayList<ZombieCount>> map;
+    private Map<Integer, Map<RobotType, Integer>> map;
 
     /**
      * Creates an empty zombie spawn schedule.
@@ -33,13 +38,9 @@ public class ZombieSpawnSchedule implements Serializable {
      * @param other the ZombieSpawnSchedule to copy.
      */
     public ZombieSpawnSchedule(ZombieSpawnSchedule other) {
-        map = new HashMap<>();
-        for (int round : other.getRounds()) {
-            ArrayList<ZombieCount> counts = new ArrayList<>();
-            for (ZombieCount zc : other.getScheduleForRound(round)) {
-                counts.add(new ZombieCount(zc));
-            }
-            map.put(round, counts);
+        map = new HashMap<>(other.map.size());
+        for (int round : other.map.keySet()) {
+            map.put(round, new HashMap<>(other.map.get(round)));
         }
     }
 
@@ -51,35 +52,51 @@ public class ZombieSpawnSchedule implements Serializable {
      * @param count the number of zombies spawned per den.
      */
     public void add(int round, RobotType type, int count) {
-        if (!map.containsKey(round)) {
-            map.put(round, new ArrayList<>());
+        if (map.containsKey(round)) {
+            map.get(round).put(type, count);
+        } else {
+            Map<RobotType, Integer> mapForRound = new HashMap<>();
+            mapForRound.put(type, count);
+            map.put(round, mapForRound);
         }
-        map.get(round).add(new ZombieCount(type, count));
     }
 
     /**
-     * Returns the rounds for which there are zombie spawns.
+     * Returns the rounds for which there are zombie spawns,
+     * sorted.
      *
      * @return the rounds for which there are zombie spawns.
      */
     @JsonIgnore
-    public Collection<Integer> getRounds() {
-        return map.keySet();
+    public int[] getRounds() {
+        final int[] result = new int[map.size()];
+        int i = 0;
+        for (int key : map.keySet()) {
+            result[i] = key;
+            i++;
+        }
+
+        Arrays.sort(result);
+
+        return result;
     }
 
     /**
-     * Returns the zombie spawns on a given round. MODIFYING THIS RESULT WILL
-     * DIRECTLY MODIFY THE ZOMBIE SPAWN SCHEDULE.
+     * Returns the zombie spawns on a given round, sorted by type (in enum order).
      *
      * @param round the round for which we want to know the zombie spawn
      *              schedule for.
-     * @return an array list of zombie counts for that round.
+     * @return an array of zombie counts for that round.
      */
-    public ArrayList<ZombieCount> getScheduleForRound(int round) {
+    @JsonIgnore
+    public ZombieCount[] getScheduleForRound(int round) {
         if (!map.containsKey(round)) {
-            return new ArrayList<>();
+            return new ZombieCount[0];
         } else {
-            return map.get(round);
+            return map.get(round).entrySet().stream()
+                    .map(e -> new ZombieCount(e.getKey(), e.getValue()))
+                    .sorted()
+                    .toArray(ZombieCount[]::new);
         }
     }
 
@@ -87,31 +104,20 @@ public class ZombieSpawnSchedule implements Serializable {
      * Returns whether two zombie spawn schedules are equivalent. Their
      * zombie counts can be in different orders even if they are equivalent.
      *
-     * @param other the zombie spawn schedule to compare to.
+     * @param otherObj the zombie spawn schedule to compare to.
      * @return whether the two zombie spawn schedules are equivalent.
      */
-    public boolean equivalentTo(ZombieSpawnSchedule other) {
-        if (!map.keySet().equals(other.map.keySet())) return false;
+    @Override
+    public boolean equals(Object otherObj) {
+        if (!(otherObj instanceof ZombieSpawnSchedule)) return false;
 
-        for (int round : this.map.keySet()) {
-            ArrayList<ZombieCount> mine = this.map.get(round);
-            ArrayList<ZombieCount> theirs = other.map.get(round);
+        ZombieSpawnSchedule other = (ZombieSpawnSchedule) otherObj;
 
-            if (mine.size() != theirs.size()) return false;
+        return this.map.equals(other.map);
+    }
 
-            ArrayList<ZombieCount> mineSorted = new ArrayList<>(mine);
-            Collections.sort(mineSorted);
-
-            ArrayList<ZombieCount> theirsSorted = new ArrayList<>(theirs);
-            Collections.sort(theirsSorted);
-
-            for (int i = 0; i < mineSorted.size(); ++i) {
-                if (mineSorted.get(i).compareTo(theirsSorted.get(i)) != 0) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+    @Override
+    public int hashCode() {
+        return map.hashCode();
     }
 }
