@@ -3,6 +3,7 @@ package battlecode.world;
 import battlecode.common.*;
 import battlecode.world.signal.DeathSignal;
 import battlecode.world.signal.InternalSignal;
+import battlecode.world.signal.RepairSignal;
 import battlecode.world.signal.TypeChangeSignal;
 
 import java.util.ArrayList;
@@ -408,8 +409,7 @@ public class InternalRobot {
      */
     public void repair(InternalRobot other) {
         repairCount++;
-
-        other.changeHealthLevel(GameConstants.ARCHON_REPAIR_AMOUNT);
+        gameWorld.visitSignal(new RepairSignal(getID(), other.getID()));
     }
 
     // *********************************
