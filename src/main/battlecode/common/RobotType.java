@@ -85,7 +85,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    TURRET          (false,  false, 0,  ARCHON,   75, 25, 100,  18, 48,   0,   3, 3, 24,     2000,  0, RANGEDZOMBIE, false),
+    TURRET          (false,  false, 0,  ARCHON,   75, 25, 100,  18, 48,   0,   3, 3, 24,     10000,  0, RANGEDZOMBIE, false),
     //                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * Turret - Transport Mode: the mobile version of a {@link #TURRET TURRET}.
@@ -93,7 +93,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    TTM             (false, false, 0,  TURRET,    0,  10, 100,  0,  0,    2,   0, 2, 24,     2000,  0, RANGEDZOMBIE, false),
+    TTM             (false, false, 0,  TURRET,    0,  10, 100,  0,  0,    2,   0, 2, 24,     10000,  0, RANGEDZOMBIE, false),
     //                                            PC  TC  HP    ATK RNG   MVD  AD CD
     ;
 
