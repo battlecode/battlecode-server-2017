@@ -903,15 +903,15 @@ public class RobotControllerTest {
         
         game.round((id, rc) -> {
             if (id == soldier1) {
-                assertTrue(rc.canSense(soldier2Bot));
-                assertFalse(rc.canSense(soldier3Bot));
+                assertTrue(rc.canSenseRobot(soldier2));
+                assertFalse(rc.canSenseRobot(soldier3));
                 RobotInfo[] hostiles = rc.senseHostileRobots(soldier1Bot.getLocation(),-1);
                 assertEquals(hostiles.length,1);
                 RobotInfo[] allRobots = rc.senseNearbyRobots();
                 assertEquals(allRobots.length, 2);
             } else if (id == soldier2) {
-                assertTrue(rc.canSense(soldier1Bot));
-                assertTrue(rc.canSense(soldier3Bot));
+                assertTrue(rc.canSenseRobot(soldier1));
+                assertTrue(rc.canSenseRobot(soldier3));
                 RobotInfo[] hostiles = rc.senseHostileRobots(soldier2Bot.getLocation(),2);
                 assertEquals(hostiles.length,1);
                 hostiles = rc.senseHostileRobots(soldier2Bot.getLocation(),-1);
@@ -919,8 +919,8 @@ public class RobotControllerTest {
                 RobotInfo[] allRobots = rc.senseNearbyRobots();
                 assertEquals(allRobots.length, 3);
             } else if (id == soldier3) {
-                assertTrue(rc.canSense(soldier2Bot));
-                assertFalse(rc.canSense(soldier1Bot));
+                assertTrue(rc.canSenseRobot(soldier2));
+                assertFalse(rc.canSenseRobot(soldier1));
                 RobotInfo[] allRobots = rc.senseNearbyRobots();
                 assertEquals(allRobots.length, 2);
             } else if (id == zombie) {

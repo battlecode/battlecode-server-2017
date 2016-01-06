@@ -588,7 +588,8 @@ public interface RobotController {
     void repair(MapLocation loc) throws GameActionException;
 
     /**
-     * Turret only. Transforms the turret into a TTM.
+     * Turret only. Transforms the turret into a TTM. Will increase both your
+     * delays. It's okay to use this if you have delays though.
      *
      * @throws GameActionException if this robot is not a Turret.
      *
@@ -597,7 +598,8 @@ public interface RobotController {
     void pack() throws GameActionException;
 
     /**
-     * TTM only. Transforms the TTM into a turret.
+     * TTM only. Transforms the TTM into a turret. Will increase both your
+     * delays. It's okay to use this if you have delays though.
      *
      * @throws GameActionException if this robot is not a TTM.
      *
