@@ -708,24 +708,24 @@ public class RobotControllerTest {
                         .getZombieSpawnSchedule();
 
                 assertArrayEquals(
-                        new int[] {100, 500, 1000},
+                        new int[]{100, 500, 1000},
                         zombieSpawnSchedule.getRounds()
                 );
                 assertArrayEquals(
-                        new ZombieCount[] {
+                        new ZombieCount[]{
                                 new ZombieCount(RobotType.FASTZOMBIE, 30)
                         },
                         zombieSpawnSchedule.getScheduleForRound(100)
                 );
                 assertArrayEquals(
-                        new ZombieCount[] {
+                        new ZombieCount[]{
                                 new ZombieCount(RobotType.RANGEDZOMBIE, 50),
                                 new ZombieCount(RobotType.BIGZOMBIE, 4)
                         },
                         zombieSpawnSchedule.getScheduleForRound(500)
                 );
                 assertArrayEquals(
-                        new ZombieCount[] {
+                        new ZombieCount[]{
                                 new ZombieCount(RobotType.STANDARDZOMBIE, 10)
                         },
                         zombieSpawnSchedule.getScheduleForRound(1000)
@@ -740,7 +740,8 @@ public class RobotControllerTest {
         ZombieSpawnSchedule zombieSpawnSchedule = game.getWorld()
                 .getGameMap().getZombieSpawnSchedule();
         assertEquals(zombieSpawnSchedule.getRounds().length, 3);
-        assertArrayEquals(zombieSpawnSchedule.getRounds(), new int[] {100, 500, 1000});
+        assertArrayEquals(zombieSpawnSchedule.getRounds(), new int[]{100,
+                500, 1000});
     }
 
     /**
@@ -924,6 +925,37 @@ public class RobotControllerTest {
                 RobotInfo[] allRobots = rc.senseNearbyRobots();
                 assertEquals(allRobots.length, 2);
             } else if (id == zombie) {
+            }
+        });
+    }
+
+    /**
+     * Makes sure a turret can't attack things within 5 units.
+     */
+    @Test
+    public void testTurretAttackRange() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int turret = game.spawn(oX, oY, RobotType.TURRET, Team.A);
+
+        game.round((id, rc) -> {
+            if (id == turret) {
+                // 5 is bad
+                assertFalse(rc.canAttackLocation(new MapLocation(oX + 2, oY +
+                        1)));
+                // 6 is OK
+                assertTrue(rc.canAttackLocation(new MapLocation(oX + 6, oY)));
+
+                boolean exception = false;
+                try {
+                    rc.attackLocation(new MapLocation(oX + 2, oY + 1));
+                } catch (GameActionException e) {
+                    exception = true;
+                }
+                assertTrue(exception);
             }
         });
     }

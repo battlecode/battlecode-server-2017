@@ -88,8 +88,8 @@ public interface GameConstants {
     /** Damage a robot receives from a Viper's infection per turn */
     double VIPER_INFECTION_DAMAGE = 2;
 
-    /** Minimum attack range of a Turret */
-    int TURRET_MINIMUM_RANGE = 5;
+    /** Minimum attack range (range squared) of a Turret */
+    int TURRET_MINIMUM_RANGE = 6;
 
     /** The factor that delays are multiplied by when a unit moves diagonally. */
     double DIAGONAL_DELAY_MULTIPLIER = 1.4;
@@ -97,7 +97,7 @@ public interface GameConstants {
     /** Amount an archon repairs another bot for. */
     double ARCHON_REPAIR_AMOUNT = 1.0;
 
-    /** Archon activation range. */
+    /** Archon activation range (ranged squared). */
     int ARCHON_ACTIVATION_RANGE = 2;
 
     /** Amount of damage robots take when standing next to dens that are spawning. **/
