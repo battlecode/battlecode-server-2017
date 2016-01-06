@@ -252,12 +252,9 @@ public class InternalRobot {
     }
 
     public void takeDamage(double baseAmount) {
-        healthChanged = true;
-        if (baseAmount < 0) {
-            changeHealthLevel(-baseAmount);
-        } else {
-            changeHealthLevel(-baseAmount);
-        }
+        assert baseAmount >= 0;
+
+        changeHealthLevel(-baseAmount);
     }
 
     public void changeHealthLevel(double amount) {
