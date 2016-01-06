@@ -162,7 +162,12 @@ public final class RobotControllerImpl implements RobotController {
         return robot.canSense(loc);
     }
 
-    @Override
+    /**
+     * Whether you can sense a robot.
+     *
+     * @param obj the robot to test.
+     * @return whether you can sense the robot.
+     */
     public boolean canSense(InternalRobot obj) {
         return obj.exists() && canSense(obj.getLocation());
     }
@@ -526,31 +531,31 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     @Override
-    public void broadcastSignal(int radius) throws GameActionException {
-        if (radius < 0) {
+    public void broadcastSignal(int radiusSquared) throws GameActionException {
+        if (radiusSquared < 0) {
             throw new GameActionException(CANT_DO_THAT, "Cannot broadcast " +
                     "with negative radius.");
         }
         gameWorld.visitBroadcastSignal(new BroadcastSignal(getID(), new
-                Signal(getLocation(), getID(), getTeam()), radius));
+                Signal(getLocation(), getID(), getTeam()), radiusSquared));
     }
 
     @Override
-    public void broadcastMessageSignal(int message1, int message2, int radius)
-            throws GameActionException {
+    public void broadcastMessageSignal(int message1, int message2, int
+            radiusSquared) throws GameActionException {
         if (!robot.getType().canMessageSignal()) {
             throw new GameActionException(CANT_DO_THAT,
                     "Unit type " + robot.getType().name() + " cannot send a " +
                             "message signal; only ARCHON and SCOUT can send " +
                             "message signals.");
         }
-        if (radius < 0) {
+        if (radiusSquared < 0) {
             throw new GameActionException(CANT_DO_THAT, "Cannot broadcast " +
                     "with negative radius.");
         }
         gameWorld.visitBroadcastSignal(new BroadcastSignal(getID(), new Signal
                 (getLocation(), getID(), getTeam(), message1, message2),
-                radius));
+                radiusSquared));
     }
 
     // ***********************************

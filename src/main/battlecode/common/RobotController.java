@@ -17,7 +17,7 @@ public interface RobotController {
 
     /**
      * Gets the number of rounds in the game. After this many rounds, if neither
-     * team has destroyed the enemy HQ, then the tiebreakers will be used.
+     * team has been destroyed, then the tiebreakers will be used.
      *
      * @return the number of rounds in the game.
      *
@@ -68,14 +68,14 @@ public interface RobotController {
     /**
      * Gets the Team of this robot.
      *
-     * @return this robot's Team
+     * @return this robot's Team.
      *
      * @battlecode.doc.costlymethod
      */
     Team getTeam();
 
     /**
-     * Gets this robot's type (SOLDIER, HQ, etc.).
+     * Gets this robot's type (SOLDIER, ARCHON, etc.).
      *
      * @return this robot's type.
      *
@@ -95,6 +95,7 @@ public interface RobotController {
     /**
      * Returns the amount of core delay a robot has accumulated. If the result
      * is strictly less than 1, then the robot can perform a core action.
+     * Core actions include building, activating, clearing rubble, and moving.
      *
      * @return the amount of core delay a robot has accumulated.
      *
@@ -152,7 +153,7 @@ public interface RobotController {
      * Returns true if the robot is infected (either from a viper or a zombie). If the
      * robot dies while this is true, it will become a zombie.
      * 
-     * @return true if the robot is infected
+     * @return true if the robot is infected.
      */
     boolean isInfected();
 
@@ -161,21 +162,13 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Determine if our robot can sense a location
+     * Determine if our robot can sense a location.
      *
-     * @param loc the location to test
-     * @return whether we can sense the location
+     * @param loc the location to test.
+     * @return whether it can sense the location.
      */
     boolean canSense(MapLocation loc);
-    
-    /**
-     * Determine if our robot can sense a robot
-     *
-     * @param obj the robot to test
-     * @return whether we can sense the robot
-     */
-    boolean canSense(InternalRobot obj);
-    
+
     /**
      * Senses whether a MapLocation is on the map. Will throw an exception if
      * the location is not currently within sensor range.
@@ -190,11 +183,11 @@ public interface RobotController {
 
     /**
      * Senses the rubble at the given location. Returns -1 for a location
-     * outside sensor range. Returns 0 for off map locations.
+     * outside sensor range. Returns 0 for off map locations. If a location
+     * is both outside sensor range and off map, -1 will be returned.
      *
-     * @param loc
-     *            the location to check.
-     * @return the amount of rubble at the location
+     * @param loc the location to check.
+     * @return the amount of rubble at the location.
      *
      * @battlecode.doc.costlymethod
      */
@@ -202,22 +195,21 @@ public interface RobotController {
     
     /**
      * Senses the parts at the given location. Returns -1 for a location
-     * outside sensor range. Returns 0 for off map locations.
+     * outside sensor range. Returns 0 for off map locations. If a location
+     * is both outside sensor range and off map, -1 will be returned.
      *
-     * @param loc
-     *            the location to check.
-     * @return the amount of parts at the location
+     * @param loc the location to check.
+     * @return the amount of parts at the location.
      *
      * @battlecode.doc.costlymethod
      */
     double senseParts(MapLocation loc);
 
     /**
-     * Returns true if the given location is within the robot's sensor range, or
-     * within the sensor range of some ally.
+     * Returns true if the given location is within the robot's sensor range.
+     * This is the same as canSense().
      *
-     * @param loc
-     *            the location to check.
+     * @param loc the location to check.
      * @return whether the given location is within the robot's sensor range.
      *
      * @battlecode.doc.costlymethod
@@ -225,27 +217,24 @@ public interface RobotController {
     boolean canSenseLocation(MapLocation loc);
 
     /**
-     * Returns whether there is a robot at the given location.
+     * Returns whether there is a robot (includes dens) at the given
+     * location.
      *
-     * @param loc
-     *            the location to check.
+     * @param loc the location to check.
      * @return whether there is a robot at the given location.
-     * @throws GameActionException
-     *             if <code>loc</code> is not within sensor range
+     * @throws GameActionException if the location is not within sensor range.
      *
      * @battlecode.doc.costlymethod
      */
     boolean isLocationOccupied(MapLocation loc) throws GameActionException;
 
     /**
-     * Returns the robot at the given location, or <code>null</code> if there is
+     * Returns the robot at the given location, or null if there is
      * no object there.
      *
-     * @param loc
-     *            the location to check.
+     * @param loc the location to check.
      * @return the robot at the given location.
-     * @throws GameActionException
-     *             if <code>loc</code> is not within sensor range
+     * @throws GameActionException if the location is not within sensor range.
      *
      * @battlecode.doc.costlymethod
      */
@@ -255,8 +244,7 @@ public interface RobotController {
     /**
      * Returns true if the given robot is within the robot's sensor range.
      * 
-     * @param id
-     *            the ID of the robot to query.
+     * @param id the ID of the robot to query.
      * @return whether the given robot is within the robot's sensor range.
      *
      * @battlecode.doc.costlymethod
@@ -266,8 +254,7 @@ public interface RobotController {
     /**
      * Senses information about a particular robot given its ID.
      * 
-     * @param id
-     *            the ID of the robot to query.
+     * @param id the ID of the robot to query.
      * @return a RobotInfo object for the sensed robot.
      * @throws GameActionException
      *             if the robot cannot be sensed (for example, if it doesn't
@@ -280,7 +267,8 @@ public interface RobotController {
     /**
      * Returns all robots that can be sensed on the map.
      * 
-     * @return array of class type of game objects.
+     * @return array of RobotInfo objects, which contain information about
+     * all the robots you sensed.
      *
      * @battlecode.doc.costlymethod
      */
@@ -293,7 +281,7 @@ public interface RobotController {
      * @param radiusSquared
      *            return objects this distance away from the center. If -1 is
      *            passed, robots from the whole map are returned.
-     * @return array of class type of game objects.
+     * @return array of RobotInfo objects of all the robots you sensed.
      *
      * @battlecode.doc.costlymethod
      */
@@ -309,14 +297,14 @@ public interface RobotController {
      * @param team
      *            filter game objects by the given team. If null is passed, robots from
      *            any team are returned.
-     * @return array of class type of game objects.
+     * @return array of RobotInfo objects of all the robots you sensed.
      *
      * @battlecode.doc.costlymethod
      */
     RobotInfo[] senseNearbyRobots(int radiusSquared, Team team);
 
     /**
-     * Returns all robots of a givin team that can be sensed within a certain
+     * Returns all robots of a given team that can be sensed within a certain
      * radius of a specified location.
      *
      * @param center
@@ -327,7 +315,7 @@ public interface RobotController {
      * @param team
      *            filter game objects by the given team. If null is passed,
      *            objects from all teams are returned.
-     * @return array of class type of game objects.
+     * @return array of RobotInfo objects of the robots you sensed.
      *
      * @battlecode.doc.costlymethod
      */
@@ -343,7 +331,7 @@ public interface RobotController {
      * @param radiusSquared
      *            return objects this distance away from the center. If -1 is
      *            passed, robots from the whole map are returned.
-     * @return array of class type of game objects.
+     * @return array of RobotInfo objects of the robots you sensed.
      */
     RobotInfo[] senseHostileRobots(MapLocation center, int radiusSquared);
 
@@ -353,7 +341,9 @@ public interface RobotController {
 
     /**
      * Returns whether the core delay is strictly less than 1 (whether the robot
-     * can perform a core action in the given turn).
+     * can perform a core action in the given turn). If this is true, then
+     * you can perform core actions, such as clearing rubble, moving,
+     * activating, and building.
      * 
      * @return whether the robot can perform a core action in this turn.
      *
@@ -376,12 +366,13 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Clears rubble in the specified direction.
+     * Clears rubble in the specified direction. If you clear a direction
+     * that is off the map, nothing happens.
      *
      * @param dir
      *            the direction to clear rubble in.
-     * @throws GameActionException
-     *             if the robot cannot move in this direction.
+     * @throws GameActionException if the robot has core delay or if you are
+     * not allowed to clear rubble.
      *
      * @battlecode.doc.costlymethod
      */
@@ -393,16 +384,16 @@ public interface RobotController {
 
     /**
      * Tells whether this robot can move in the given direction, without taking
-     * any sort of delays into account. Takes into account only the map terrain,
-     * positions of other robots, and the current robot's type. Does not take
-     * into account whether this robot is currently active (no core delay), but
-     * will only * return true for units that are capable of movement.
-     * Returns false for the OMNI and NONE directions.
+     * any sort of delays into account. Takes into account only the map
+     * terrain (rubble), positions of other robots, and the current robot's type.
+     * Does not take into account whether this robot is currently active (no
+     * core delay), but will only return true for units that are capable of
+     * movement. Returns false for the OMNI and NONE directions.
      *
      * @param dir
      *            the direction to move in.
-     * @return true if there are no robots or voids preventing this robot from
-     *         moving in the given direction; false otherwise.
+     * @return true if there is nothing preventing this robot from moving in
+     * the given direction; false otherwise (does not account for core delay).
      *
      * @battlecode.doc.costlymethod
      */
@@ -414,7 +405,11 @@ public interface RobotController {
      * @param dir
      *            the direction to move in.
      * @throws GameActionException
-     *             if the robot cannot move in this direction.
+     *             if the robot cannot move in this direction, such as due to
+     *             having core delay, the target location being off the map,
+     *             the robot not being one that is allowed to move, and the
+     *             target destination being occupied with either another
+     *             robot or rubble.
      *
      * @battlecode.doc.costlymethod
      */
@@ -433,19 +428,21 @@ public interface RobotController {
      *            the location to attempt to attack.
      * @return true if the given location is within this robot's attack range.
      *         Does not take into account whether the robot is currently
-     *         attacking.
+     *         attacking or if there is a unit on the target location.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canAttackLocation(MapLocation loc);
 
     /**
-     * Attacks the given location.
+     * Attacks the given location. If the location is empty, nothing will
+     * happen.
      *
      * @param loc
      *            the location to attack.
      * @throws GameActionException
-     *             if the robot cannot attack the given square.
+     *             if the robot cannot attack the given square due to having
+     *             weapon delay or the location being outside your attack range.
      *
      * @battlecode.doc.costlymethod
      */
@@ -464,7 +461,6 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    
     Signal readSignal();
     
     /**
@@ -476,7 +472,6 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    
     Signal[] emptySignalQueue();
     
     /**
@@ -484,38 +479,38 @@ public interface RobotController {
      * immediately added to the incoming message queues of all robots in
      * your broadcast range (except for the sending robot).
      *
-     * @param radius the radius over which the signal is broadcasted
-     * @throws GameActionException if radius is negative
+     * @param radiusSquared the square of the radius over which the signal is
+     *                      broadcasted.
+     * @throws GameActionException if radius is negative.
      *
      * @battlecode.doc.costlymethod
      */
-    
-    void broadcastSignal(int radius)  throws GameActionException;
+    void broadcastSignal(int radiusSquared)  throws GameActionException;
     
     /**
      * Broadcasts a message signal over a specific integer radius. The signal is
      * immediately added to the incoming message queues of all robots in
      * your broadcast range (except for the sending robot).
      *
-     * @param message1 the first integer to broadcast
-     * @param message2 the second integer to broadcast
-     * @param radius the radius over which the signal is broadcasted
+     * @param message1 the first integer to broadcast.
+     * @param message2 the second integer to broadcast.
+     * @param radiusSquared the square of the radius over which the signal is
+     *                      broadcasted.
      * @throws GameActionException if radius is negative or this robot 
-     *      cannot send message signals
+     *      cannot send message signals.
      *
      * @battlecode.doc.costlymethod
      */
-    
-    void broadcastMessageSignal(int message1, int message2, int radius)  throws
-            GameActionException;
+    void broadcastMessageSignal(int message1, int message2, int radiusSquared)
+            throws GameActionException;
 
     // ***********************************
     // ****** BUILDING/SPAWNING **********
     // ***********************************
 
     /**
-     * Returns whether you have the parts and the dependencies to build the given
-     * robot, and that the robot can build structures.
+     * Returns whether you have the parts and dependencies to build the given
+     * robot, and this robot is a valid builder for the target robot.
      *
      * @param type
      *            the type to build.
@@ -526,7 +521,7 @@ public interface RobotController {
     boolean hasBuildRequirements(RobotType type);
 
     /**
-     * Returns whether the robot can build a structure of the given type in the
+     * Returns whether the robot can build a robot of the given type in the
      * given direction, without taking delays into account. Checks dependencies,
      * parts costs, whether the robot can build, and that the given direction is
      * not blocked. Does not check if a robot has sufficiently low coreDelay or
@@ -535,8 +530,8 @@ public interface RobotController {
      * @param dir
      *            the direction to build in.
      * @param type
-     *            the robot type to spawn.
-     * @return whether it is possible to build a building of the given type in
+     *            the robot type to build.
+     * @return whether it is possible to build a robot of the given type in
      *         the given direction.
      *
      * @battlecode.doc.costlymethod
@@ -544,12 +539,12 @@ public interface RobotController {
     boolean canBuild(Direction dir, RobotType type);
 
     /**
-     * Builds a structure in the given direction.The structure will initially
+     * Builds a robot in the given direction. The robot will initially
      * be inactive for a number of turns (during which this robot cannot move or
-     * attack). After a number of turns,the structure will become active.
+     * attack). After a number of turns, the robot will become active.
      *
      * @param dir
-     *            the direction to bulid in.
+     *            the direction to build in.
      * @param type
      *            the type to build.
      * @throws GameActionException
@@ -568,12 +563,14 @@ public interface RobotController {
 
     /**
      * Activates the neutral robot at the given location, converting it to a robot
-     * of the same type but on your team.
+     * of the same type but on your team. The robot will have a new ID. This
+     * method increases your core as if it were a movement action, but does
+     * not affect
      *
      * @param loc the location of the robot to activate.
      * @throws GameActionException if the location is out of range (needs to
-     * be adjacent), if there is no robot there, or if the robot is not a
-     * neutral robot.
+     * be adjacent), if there is no robot there, if the robot is not a
+     * neutral robot, or if you have core delay.
      *
      * @battlecode.doc.costlymethod
      */
@@ -581,7 +578,7 @@ public interface RobotController {
 
     /**
      * Repairs the robot at the given location. The robot must be in attack
-     * range.
+     * range. You can only repair once a turn.
      *
      * @param loc the location of the robot to repair.
      * @throws GameActionException if this robot is not an archon, the location 
@@ -591,18 +588,20 @@ public interface RobotController {
     void repair(MapLocation loc) throws GameActionException;
 
     /**
-     * Turret only. Transforms the turret into a TTM and increases delays.
+     * Turret only. Transforms the turret into a TTM. Will increase both your
+     * delays. It's okay to use this if you have delays though.
      *
-     * @throws GameActionException if this robot is not a Turret
+     * @throws GameActionException if this robot is not a Turret.
      *
      * @battlecode.doc.costlymethod
      */
     void pack() throws GameActionException;
 
     /**
-     * TTM only. Transforms the TTM into a turret and increases delays.
+     * TTM only. Transforms the TTM into a turret. Will increase both your
+     * delays. It's okay to use this if you have delays though.
      *
-     * @throws GameActionException if this robot is not a TTM
+     * @throws GameActionException if this robot is not a TTM.
      *
      * @battlecode.doc.costlymethod
      */
@@ -741,7 +740,9 @@ public interface RobotController {
 
     /**
      * Gets this robot's 'control bits' for debugging purposes. These bits can
-     * be set manually by the user, so a robot can respond to them.
+     * be set manually by the user, so a robot can respond to them. To set
+     * these bits, you must run the client in locksteop mode and right click
+     * the units.
      *
      * @return this robot's control bits
      *
