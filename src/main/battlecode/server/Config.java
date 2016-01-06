@@ -79,14 +79,6 @@ public class Config {
         options.addOption("n", "no-dialog", false, "skip the match dialog");
     }
 
-    public static String version() {
-        try {
-            return new BufferedReader(new FileReader("version.txt")).readLine();
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
     private static Config globalConfig = new Config(new String[0]);
 
     public static void setGlobalConfig(Config config) {
