@@ -3,8 +3,6 @@ package battlecode.server.proxy;
 import battlecode.serial.ServerEvent;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -42,7 +40,7 @@ public class ProxyWriter {
     /**
      * The proxies to write to.
      */
-    private final List<Proxy> proxies;
+    private final Proxy[] proxies;
 
     /**
      * The object enqueued to shut down the worker thread.
@@ -64,15 +62,18 @@ public class ProxyWriter {
      * @param proxies the proxies to write to.
      * @param debug   whether to print debug info to stdout.
      */
-    public ProxyWriter(final List<Proxy> proxies, final boolean debug) {
-        this.proxies = new ArrayList<>(proxies);
+    public ProxyWriter(final Proxy[] proxies, final boolean debug) {
+        this.proxies = proxies;
         this.debug = debug;
         this.writeQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
         this.poisonPill = new ServerEvent() {};
-
         this.workThread = new Thread(this::work);
 
         workThread.start();
+
+        for (Proxy proxy : this.proxies) {
+            debug("using proxy: "+proxy);
+        }
     }
 
     /**
@@ -133,6 +134,7 @@ public class ProxyWriter {
     /**
      * Shut down the worker thread, after sending all pending messages.
      * Blocks until messages are sent.
+     * Closes all proxies.
      */
     public synchronized void terminate() {
         enqueue(poisonPill);
@@ -142,6 +144,14 @@ public class ProxyWriter {
         } catch (final InterruptedException e) {
             // Shutting down, nothing to do
             debug("interrupted before worker thread could be joined");
+        }
+
+        for (Proxy proxy : proxies) {
+            try {
+                proxy.close();
+            } catch (IOException e) {
+                debug("couldn't close proxy: "+proxy);
+            }
         }
     }
 

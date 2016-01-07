@@ -19,7 +19,7 @@ public class Server implements Runnable, NotificationHandler {
     /**
      * The proxies to use for writing match data.
      */
-    private List<Proxy> proxies = null;
+    private final ProxyWriter proxyWriter;
 
     /**
      * A queue of matches that this server has yet to run.
@@ -72,8 +72,8 @@ public class Server implements Runnable, NotificationHandler {
         this.finished = new ArrayDeque<>();
 
         this.mode = mode;
-        this.proxies = new ArrayList<>();
-        Collections.addAll(this.proxies, proxies);
+
+        this.proxyWriter = new ProxyWriter(proxies, options.getBoolean("bc.server.debug"));
 
         this.options = options;
         this.state = State.NOT_READY;
@@ -84,13 +84,7 @@ public class Server implements Runnable, NotificationHandler {
     @Override
     public void visitPauseNotification(PauseNotification n) {
         state = State.PAUSED;
-        for (Proxy p : proxies) {
-            try {
-                p.writeEvent(new PauseEvent());
-            } catch (IOException e) {
-                warn("debug mode notification propagation failed");
-            }
-        }
+        proxyWriter.enqueue(new PauseEvent());
     }
 
     @Override
@@ -116,13 +110,7 @@ public class Server implements Runnable, NotificationHandler {
     public void visitInjectNotification(InjectNotification n) {
         InjectDelta result = matches.peek().inject(n.getInternalSignal());
 
-        for (Proxy p : proxies) {
-            try {
-                p.writeEvent(result);
-            } catch (IOException e) {
-                warn("debug mode signal handler failed");
-            }
-        }
+        proxyWriter.enqueue(result);
     }
 
     @Override
@@ -158,12 +146,6 @@ public class Server implements Runnable, NotificationHandler {
      * matches.
      */
     public void run() {
-        for (Proxy p : this.proxies) {
-            debug("using proxy " + p.getClass().getSimpleName());
-        }
-
-        final ProxyWriter proxyWriter = new ProxyWriter(proxies, options.getBoolean("bc.server.debug"));
-
         int aWins = 0, bWins = 0;
 
         while (!matches.isEmpty()) {
@@ -201,16 +183,7 @@ public class Server implements Runnable, NotificationHandler {
             }
         }
 
-        // Make sure to write out all messages before closing proxies.
         proxyWriter.terminate();
-
-        for (Proxy p : proxies) {
-            try {
-                p.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
 
@@ -241,11 +214,9 @@ public class Server implements Runnable, NotificationHandler {
 
         // Compute the header and send it to all listeners.
         MatchHeader header = match.getHeader();
+        proxyWriter.enqueue(header);
         ExtensibleMetadata exHeader = match.getHeaderMetadata();
-        for (Proxy p : proxies) {
-            p.writeEvent(header);
-            p.writeEvent(exHeader);
-        }
+        proxyWriter.enqueue(exHeader);
 
         this.state = State.RUNNING;
 
@@ -277,15 +248,7 @@ public class Server implements Runnable, NotificationHandler {
 
                     if (GameState.BREAKPOINT.equals(match.getGameState())) {
                         this.state = State.PAUSED;
-                        for (Proxy p : proxies) {
-                            try {
-                                p.writeEvent(new PauseEvent());
-                            } catch (IOException e) {
-                                error("Couldn't write pause notification to " +
-                                        "proxy " + p + ": " + e);
-                                e.printStackTrace();
-                            }
-                        }
+                        proxyWriter.enqueue(new PauseEvent());
                     } else if (GameState.DONE.equals(match.getGameState())) {
                         this.state = State.FINISHED;
                     }
