@@ -26,7 +26,7 @@ public class ClassReferenceUtil {
     /**
      * The resource, relative to this .java/.class file, to load disallowed packages from
      */
-    private final static String DISALLOWED_RESOURCE_FILE = "resources/AllowedPackages.txt";
+    private final static String DISALLOWED_RESOURCE_FILE = "resources/DisallowedClasses.txt";
 
     /**
      * Packages for which the player is allowed to use any of the contained classes;
