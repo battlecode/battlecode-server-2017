@@ -370,8 +370,8 @@ public class InternalRobot {
         gameWorld.decrementRobotTypeCount(getTeam(), getType());
         gameWorld.incrementRobotTypeCount(getTeam(), newType);
         type = newType;
-        coreDelay += 10;
-        weaponDelay += 10;
+        coreDelay += GameConstants.TURRET_TRANSFORM_DELAY;
+        weaponDelay += GameConstants.TURRET_TRANSFORM_DELAY;
 
         gameWorld.visitSignal(new TypeChangeSignal(ID, newType));
     }
