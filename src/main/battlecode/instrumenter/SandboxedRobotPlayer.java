@@ -101,8 +101,8 @@ public class SandboxedRobotPlayer {
         Class<?> robotPlayer;
         try {
             robotPlayer = individualLoader.loadClass(teamName + "." + playerClassName, true);
-        } catch (Exception e) {
-            throw new InstrumentationException("Couldn't sandbox player class", e);
+        } catch (ClassNotFoundException e) {
+            throw new InstrumentationException("Couldn't load player class: "+e.getMessage(), e);
         }
 
         // Load RobotPlayer.run()

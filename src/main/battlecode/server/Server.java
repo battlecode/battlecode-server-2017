@@ -335,7 +335,7 @@ public class Server implements Runnable, NotificationHandler {
      * @param msg the error message to display
      */
     public static void fail(String msg) {
-        System.err.printf("[server:fatal] %s\n", msg);
+        System.out.printf("[server:fatal] %s\n", msg);
         System.exit(-1);
     }
 
@@ -347,7 +347,7 @@ public class Server implements Runnable, NotificationHandler {
      */
     public static void error(String msg) {
         for (String line : msg.split("\n")) {
-            System.err.printf("[server:error] %s\n", line);
+            System.out.printf("[server:error] %s\n", line);
         }
         throw new RuntimeException(msg);
     }
@@ -359,7 +359,7 @@ public class Server implements Runnable, NotificationHandler {
      */
     public static void warn(String msg) {
         for (String line : msg.split("\n")) {
-            System.err.printf("[server:warning] %s\n", line);
+            System.out.printf("[server:warning] %s\n", line);
         }
     }
 
