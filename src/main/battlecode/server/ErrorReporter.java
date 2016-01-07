@@ -13,60 +13,43 @@ public class ErrorReporter {
     }
 
     public static void report(String message, boolean ourFault) {
-        printHeader();
-        System.out.println(message);
+        Server.warn(message);
         if (ourFault) {
-            System.out.print("\n\n");
+            Server.warn("\n\n");
             printReportString();
         }
-        printFooter();
     }
 
     public static void report(String message, String thingsToTry) {
-        printHeader();
-        System.out.println(message);
-        System.out.print("\n\n");
+        Server.warn(message + "\n\n");
         printThingsToTry(thingsToTry);
-        printFooter();
     }
 
     public static void report(Throwable e, boolean ourFault) {
-        printHeader();
         e.printStackTrace();
         if (ourFault) {
-            System.out.print("\n\n");
+            Server.warn("\n\n");
             printReportString();
         }
-        printFooter();
     }
 
     public static void report(Throwable e, String thingsToTry) {
-        printHeader();
         e.printStackTrace();
-        System.out.print("\n\n");
+        Server.warn("\n\n");
         printThingsToTry(thingsToTry);
-        printFooter();
-    }
-
-    private static void printHeader() {
-        System.out.println("~~~~~~~ERROR~~~~~~~");
-    }
-
-    private static void printFooter() {
-        System.out.println("~~~~~~~~~~~~~~~~~~~");
     }
 
     private static void printThingsToTry(String thingsToTry) {
-        System.out.println("Please try the following:");
-        System.out.println(thingsToTry);
-        System.out.println("\n\nIf that doesn't work....");
+        Server.warn("Please try the following:");
+        Server.warn(thingsToTry);
+        Server.warn("\n\nIf that doesn't work....");
         printReportString();
     }
 
     private static void printReportString() {
-        System.out.format("java version \"%s\"\n", System.getProperty("java.version"));
-        System.out.format("%s (build %s, %s)\n\n", System.getProperty("java.vm.name"), System.getProperty("java.vm.version"), System.getProperty("java.vm.info"));
-        System.out.println("Please report this to the 6.370 devs, by posting to the forum\n"
+        Server.warn(String.format("java version \"%s\"\n", System.getProperty("java.version")));
+        Server.warn(String.format("%s (build %s, %s)\n\n", System.getProperty("java.vm.name"), System.getProperty("java.vm.version"), System.getProperty("java.vm.info")));
+        Server.warn("Please report this to the 6.370 devs, by posting to the forum\n"
                 + "under the \"bugs\" thread.  Include a copy of this printout and\n"
                 + "a brief description of the bug, including whether it's consistent\n"
                 + "or sporadic.  Thanks!");

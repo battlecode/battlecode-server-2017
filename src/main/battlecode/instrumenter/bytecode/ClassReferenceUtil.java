@@ -161,7 +161,7 @@ public class ClassReferenceUtil {
 
         if (checkDisallowed) {
             if (disallowedClasses.contains(className) || !isInAllowedPackage(className)) {
-                throw new InstrumentationException("Illegal class: " + className + "\nThis class cannot be referenced by player " + teamPackageName);
+                throw new InstrumentationException("Illegal class: " + className + "\n    this class cannot be referenced by player " + teamPackageName);
             }
         }
         if (className.equals("java/security/SecureRandom")) {

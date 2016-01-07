@@ -86,7 +86,7 @@ public class FileProxy implements Proxy {
         try {
             FileUtils.moveFile(temp, file);
         } catch(final IOError e) {
-            Server.warn("unable to rename match file");
+            Server.warn("unable to rename match file "+e.getMessage());
         }
     }
 

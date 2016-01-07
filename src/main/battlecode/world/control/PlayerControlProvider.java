@@ -1,8 +1,10 @@
 package battlecode.world.control;
 
 import battlecode.instrumenter.IndividualClassLoader;
+import battlecode.instrumenter.InstrumentationException;
 import battlecode.instrumenter.SandboxedRobotPlayer;
 import battlecode.server.Config;
+import battlecode.server.ErrorReporter;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
 
@@ -67,21 +69,34 @@ public class PlayerControlProvider implements RobotControlProvider {
 
     @Override
     public void robotSpawned(InternalRobot robot) {
-        final SandboxedRobotPlayer player = new SandboxedRobotPlayer(
-                teamName,
-                PLAYER_CLASS_NAME,
-                robot.getController(),
-                gameWorld.getMapSeed()
-        );
+        try {
+            final SandboxedRobotPlayer player = new SandboxedRobotPlayer(
+                    teamName,
+                    PLAYER_CLASS_NAME,
+                    robot.getController(),
+                    gameWorld.getMapSeed()
+            );
+            this.sandboxes.put(robot.getID(), player);
+        } catch (InstrumentationException e) {
+            ErrorReporter.report("Error while loading player "+teamName+"."+PLAYER_CLASS_NAME+": "+e.getMessage(), false);
+            robot.suicide();
+        } catch (RuntimeException e) {
+            ErrorReporter.report(e, true);
+            robot.suicide();
+        }
 
-        this.sandboxes.put(robot.getID(), player);
     }
 
     @Override
     public void robotKilled(InternalRobot robot) {
-        assert this.sandboxes.containsKey(robot.getID());
+        // Note that a robot may be killed even if it is not in Sandboxes, if
+        // there was an error while loading it.
 
-        this.sandboxes.get(robot.getID()).terminate();
+        final SandboxedRobotPlayer player = this.sandboxes.get(robot.getID());
+
+        if (player != null) {
+            this.sandboxes.get(robot.getID()).terminate();
+        }
 
         this.sandboxes.put(robot.getID(), null);
     }
@@ -94,7 +109,7 @@ public class PlayerControlProvider implements RobotControlProvider {
 
     @Override
     public void runRobot(InternalRobot robot) {
-        assert this.sandboxes.containsKey(robot.getID());
+        assert this.sandboxes.get(robot.getID()) != null;
 
         final SandboxedRobotPlayer player = this.sandboxes.get(robot.getID());
 

@@ -335,7 +335,7 @@ public class Server implements Runnable, NotificationHandler {
      * @param msg the error message to display
      */
     public static void fail(String msg) {
-        System.err.printf("[server:FATAL] %s\n", msg);
+        System.out.printf("[server:fatal] %s\n", msg);
         System.exit(-1);
     }
 
@@ -346,7 +346,9 @@ public class Server implements Runnable, NotificationHandler {
      * @param msg the error message to display
      */
     public static void error(String msg) {
-        System.err.printf("[server:ERROR] %s\n", msg);
+        for (String line : msg.split("\n")) {
+            System.out.printf("[server:error] %s\n", line);
+        }
         throw new RuntimeException(msg);
     }
 
@@ -356,7 +358,9 @@ public class Server implements Runnable, NotificationHandler {
      * @param msg the warning message to display
      */
     public static void warn(String msg) {
-        System.err.printf("[server:WARNING] %s\n", msg);
+        for (String line : msg.split("\n")) {
+            System.out.printf("[server:warning] %s\n", line);
+        }
     }
 
     /**
@@ -366,7 +370,10 @@ public class Server implements Runnable, NotificationHandler {
      * @param msg the message to display
      */
     public static void say(String msg) {
-        System.out.printf("[server] %s\n", msg);
+        for (String line : msg.split("\n")) {
+            System.out.printf("[server] %s\n", line);
+        }
+
     }
 
     /**
@@ -375,7 +382,10 @@ public class Server implements Runnable, NotificationHandler {
      * @param msg the debug message to display
      */
     public void debug(String msg) {
-        if (options.getBoolean("bc.server.debug"))
-            System.out.printf("[server:debug] %s\n", msg);
+        if (options.getBoolean("bc.server.debug")) {
+            for (String line : msg.split("\n")) {
+                System.out.printf("[server:debug] %s\n", line);
+            }
+        }
     }
 }

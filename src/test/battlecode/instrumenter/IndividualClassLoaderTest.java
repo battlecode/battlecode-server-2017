@@ -203,4 +203,12 @@ public class IndividualClassLoaderTest {
 
         c.getMethod("run").invoke(null);
     }
+
+    @Test
+    public void testStringFormat() throws Exception {
+        final Class<?> c = l1.loadClass("instrumentertest.StringFormat");
+
+        c.getMethod("run").invoke(null);
+
+    }
 }
