@@ -150,7 +150,7 @@ public class ProxyWriter {
             try {
                 proxy.close();
             } catch (IOException e) {
-                debug("couldn't close proxy: "+proxy);
+                debug("couldn't close proxy: "+proxy+": "+e.getMessage());
             }
         }
     }
