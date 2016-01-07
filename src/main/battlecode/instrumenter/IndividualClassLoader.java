@@ -145,11 +145,8 @@ public class IndividualClassLoader extends ClassLoader {
                 try {
                     classBytes = instrument(name, true, teamPackageName);
                 } catch (InstrumentationException e) {
-                        teamsWithErrors.add(teamPackageName);
-                        throw new InstrumentationException("Can't find the class \"" + name + "\". "
-                                    + "Make sure the team name is spelled correctly. "
-                                    + "Make sure the .class files are in the right directory (teams/teamname/*.class)",
-                                    e);
+                    teamsWithErrors.add(teamPackageName);
+                    throw e;
                 }
 
                 finishedClass = saveAndDefineClass(name, classBytes);

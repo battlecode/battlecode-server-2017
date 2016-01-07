@@ -83,6 +83,8 @@ public class SandboxedRobotPlayer {
      * @param playerClassName the name of the class to be loaded
      *                        (e.g. RobotPlayer)
      * @param robotController           the robot we're loading a player for
+     * @throws InstrumentationException if the player doesn't work for some reason
+     * @throws RuntimeException if our code fails for some reason
      */
     public SandboxedRobotPlayer(String teamName, String playerClassName, RobotController robotController,
                                 int seed)
@@ -138,8 +140,8 @@ public class SandboxedRobotPlayer {
                     .loadClass("battlecode.instrumenter.inject.System");
             setSystemOutMethod = system.getMethod("setSystemOut", PrintStream.class);
 
-        } catch (Exception e) {
-            throw new InstrumentationException("Couldn't load RobotMonitor", e);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Couldn't load RobotMonitor", e);
         }
 
         // Used to pause the RobotPlayer main thread.
@@ -148,7 +150,6 @@ public class SandboxedRobotPlayer {
                 synchronized (notifier) {
                     // Unpause the main thread, which is waiting on the player thread
                     notifier.notifyAll();
-
 
                     // Wait for the main thread to restart us
                     notifier.wait();
@@ -213,11 +214,11 @@ public class SandboxedRobotPlayer {
      *
      * @param limit the new limit
      */
-    public synchronized void setBytecodeLimit(int limit) {
+    public synchronized void setBytecodeLimit(int limit) throws InstrumentationException {
         try {
             setBytecodeLimitMethod.invoke(null, limit);
-        } catch (Exception e) {
-            throw new InstrumentationException("Error invoking RobotMonitor methods", e);
+        } catch (ReflectiveOperationException e) {
+            ErrorReporter.report(e, true);
         }
     }
 
@@ -227,14 +228,14 @@ public class SandboxedRobotPlayer {
     public synchronized void step() throws InstrumentationException {
         // Is the RobotPlayer terminated?
         if (terminated) {
-            throw new RuntimeException("step called after robot killed");
+            throw new RuntimeException("Step called after robot killed");
         }
 
         // Update the robot's information
         try {
             setSystemOutMethod.invoke(null, getOut());
-        } catch (Exception e) {
-            throw new InstrumentationException("Error invoking RobotMonitor methods", e);
+        } catch (ReflectiveOperationException e) {
+            ErrorReporter.report(e, true);
         }
 
 
@@ -260,8 +261,8 @@ public class SandboxedRobotPlayer {
 
         try {
             killMethod.invoke(null);
-        } catch (Exception e) {
-            throw new InstrumentationException("Error invoking RobotMonitor methods", e);
+        } catch (ReflectiveOperationException e) {
+            ErrorReporter.report(e, true);
         }
 
         // Step to make the robot die.
@@ -271,11 +272,12 @@ public class SandboxedRobotPlayer {
     /**
      * @return the bytecodes used by the player during the most recent step() call.
      */
-    public synchronized int getBytecodesUsed() {
+    public synchronized int getBytecodesUsed() throws InstrumentationException {
         try {
             return (Integer) getBytecodeNumMethod.invoke(null);
-        } catch (Exception e) {
-            throw new InstrumentationException("Error invoking RobotMonitor methods", e);
+        } catch (ReflectiveOperationException e) {
+            ErrorReporter.report(e, true);
+            return 0;
         }
     }
 

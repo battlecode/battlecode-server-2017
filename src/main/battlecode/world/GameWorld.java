@@ -989,9 +989,12 @@ public class GameWorld implements SignalHandler {
             gameObjectsByLoc.put(s.getLoc(), robot);
         }
 
-        controlProvider.robotSpawned(robot);
-
+        // Robot might be killed during creation if player
+        // contains errors; enqueue the spawn before we
+        // tell the control provider about it
         addSignal(s);
+
+        controlProvider.robotSpawned(robot);
     }
 
     @SuppressWarnings("unused")
