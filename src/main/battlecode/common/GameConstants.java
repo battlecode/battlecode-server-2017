@@ -91,6 +91,9 @@ public interface GameConstants {
     /** Minimum attack range (range squared) of a Turret */
     int TURRET_MINIMUM_RANGE = 6;
 
+    /** Time to transform between Turret and TTM */
+    int TURRET_TRANSFORM_DELAY = 10;
+
     /** The factor that delays are multiplied by when a unit moves diagonally. */
     double DIAGONAL_DELAY_MULTIPLIER = 1.4;
 
