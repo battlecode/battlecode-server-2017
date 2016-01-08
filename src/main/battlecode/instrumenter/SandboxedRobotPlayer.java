@@ -176,7 +176,6 @@ public class SandboxedRobotPlayer {
                 // Run the robot!
                 runMethod.invoke(null, robotController);
                 // If we get here, we've returned from the 'run' method. Tell the user.
-                System.out.println("testtesttest");
                 System.out.println("Your " + robotController.getType().toString() + " " +
                         robotController.getID() + " at location " + robotController.getLocation().toString()
                         + " died in round " +robotController.getRoundNum() +
