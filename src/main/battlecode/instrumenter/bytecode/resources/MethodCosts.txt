@@ -29,6 +29,7 @@ battlecode/common/RobotController/build                       0     true
 battlecode/common/RobotController/canAttackLocation           10    true
 battlecode/common/RobotController/canBuild                    10    true
 battlecode/common/RobotController/canMove                     10    true
+battlecode/common/RobotController/canSense                    5     true
 battlecode/common/RobotController/canSenseLocation            5     true
 battlecode/common/RobotController/canSenseRobot               5     true
 battlecode/common/RobotController/clearRubble                 0     true
