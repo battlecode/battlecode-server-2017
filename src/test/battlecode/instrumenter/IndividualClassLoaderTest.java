@@ -215,4 +215,24 @@ public class IndividualClassLoaderTest {
     public void testCantReflect() throws Exception {
         l1.loadClass("instrumentertest.Reflection");
     }
+
+    @Test(expected=InstrumentationException.class)
+    public void testCantReferenceIllegalMethod() throws Exception {
+        l1.loadClass("instrumentertest.IllegalMethodReference");
+    }
+
+    @Test
+    public void testCanUseLambda() throws Exception {
+        l1.loadClass("instrumentertest.LegalMethodReference");
+    }
+
+    @Test
+    public void testMathRandom() throws Exception {
+        l1.loadClass("instrumentertest.CallsMathRandom");
+    }
+
+    @Test
+    public void testCanUseEnumMap() throws Exception {
+        l1.loadClass("instrumentertest.UsesEnumMap");
+    }
 }

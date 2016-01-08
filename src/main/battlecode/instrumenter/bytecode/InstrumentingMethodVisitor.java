@@ -220,6 +220,44 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                 n.bsmArgs[i] = Type.getType(methodDescReference(t.getDescriptor()));
             } else if (arg instanceof Handle) {
                 Handle h = (Handle) arg;
+
+                if (checkDisallowed) {
+                    checkDisallowedMethod(h.getOwner(), h.getName(), h.getDesc());
+                }
+
+                // Feast your eyes.
+                // You can't take a reference to a method that requires instrumentation,
+                // since all of our instrumentation occurs at the call site...
+                // at least not without some serious creativity on our parts (dynamically
+                // creating lambdas maybe?).
+                // Make sure this is kept up to date with visitMethodInsnNode.
+                // @author James Gilles, in penance.
+                if ((h.getName().equals("hashCode") && h.getDesc().equals("()I") && n.getOpcode() != INVOKESTATIC)
+                        || (h.getOwner().equals("java/util/Random") && h.getName().equals("<init>") && h.getDesc().equals("()V"))
+                        || (h.getOwner().equals("java/lang/String") && ((h.getName().equals("<init>") && h.getDesc().equals("([B)V"))
+                            || (h.getName().equals("<init>") && h.getDesc().equals("([BII)V"))
+                            || (h.getName().equals("getBytes") && h.getDesc().equals("()[B"))
+                            || instrumentedStringFuncs.contains(h.getName())))
+                        || ((h.getOwner().equals("java/lang/Math") || h.getOwner().equals("java/lang/StrictMath"))
+                            && h.getName().equals("random"))
+                        || (h.getName().equals("printStackTrace") && h.getDesc().equals("()V") &&
+                            (h.getOwner() == null || h.getOwner().equals("java/lang/Throwable")
+                                || isSuperClass(h.getOwner(), "java/lang/Throwable")))
+                        || MethodCostUtil.getMethodData(h.getOwner(), h.getName()) != null) {
+
+                    final String owner = h.getOwner().replace("/",".");
+
+                    if (h.getName().equals("<init>")) {
+                        throw new InstrumentationException("Due to instrumentation limitations,\n" +
+                                "    you can't take a reference to " + owner + "::new;\n" +
+                                "    use (<args>) -> new " + owner + "(<args>) instead.");
+                    } else {
+                        throw new InstrumentationException("Due to instrumentation limitations,\n" +
+                                "    you can't take a reference to " + owner + "::" + h.getName() + ";\n" +
+                                "    use (<args>) -> " + owner + "." + h.getName() +"(<args>) instead.");
+                    }
+                }
+
                 n.bsmArgs[i] = new Handle(
                         h.getTag(),
                         classReference(h.getOwner()),
@@ -264,41 +302,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 
         // check for banned functions
         if (checkDisallowed) {
-            // do wait/notify monitoring
-            if ((n.desc.equals("()V") && (n.name.equals("wait") || n.name.equals("notify") || n.name.equals("notifyAll")))
-                    || (n.name.equals("wait") && (n.desc.equals("(J)V") || n.desc.equals("(JI)V")))) {
-                throw new InstrumentationException("Illegal method: Object." + n.name + "() cannot be called by a player.");
-            }
-
-            if (n.owner.equals("java/lang/Class") && n.name.equals("forName")) {
-                throw new InstrumentationException("Illegal method in" + className + ": Class.forName() may not be called by a player.");
-            }
-
-            if (n.owner.equals("java/io/PrintStream") && n.name.equals("<init>") && n.desc.startsWith("(Ljava/lang/String;")) {
-                throw new InstrumentationException("Illegal method in" + className + ": You may not use PrintStream to open files.");
-            }
-
-            if (n.owner.equals("java/lang/String") && n.name.equals("intern")) {
-                throw new InstrumentationException("Illegal method in " + className + ": String.intern() cannot be called by a player.");
-            }
-
-            if (n.owner.equals("java/lang/System") && (
-                    n.name.equals("getSecurityManager") ||
-                    n.name.equals("setSecurityManager") ||
-                    n.name.equals("currentTimeMillis") ||
-                    n.name.equals("nanoTime") ||
-                    n.name.equals("getenv") ||
-                    n.name.equals("gc") ||
-                    n.name.equals("runFinalization") ||
-                    n.name.equals("runFinalizersOnExit") ||
-                    n.name.equals("load") ||
-                    n.name.equals("loadLibrary") ||
-                    n.name.equals("mapLibraryName"))) {
-                throw new InstrumentationException("Illegal method in " + className
-                        + ": System." + name + "() " + "cannot be called by a player.");
-
-            }
-
+            checkDisallowedMethod(n.owner, n.name, n.desc);
         }
 
         boolean endBasicBlock = n.owner.startsWith(teamPackageName) || classReference(n.owner).startsWith("instrumented") || n.owner.startsWith("battlecode");
@@ -339,6 +343,57 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         if (endBasicBlock)
             endOfBasicBlock(n);
 
+    }
+
+    /**
+     * Throws an exception if a method is disallowed.
+     *
+     * @param owner the owner (declaring class) of the method
+     * @param methodName the name of the method
+     * @param desc the method descriptor
+     * @throws InstrumentationException if the method is disallowed.
+     */
+    void checkDisallowedMethod(String owner, String methodName, String desc) throws InstrumentationException {
+        // do wait/notify monitoring
+        if ((desc.equals("()V") && (methodName.equals("wait") || methodName.equals("notify") || methodName.equals("notifyAll")))
+                || (methodName.equals("wait") && (desc.equals("(J)V") || desc.equals("(JI)V")))) {
+            throw new InstrumentationException("Illegal method: Object." + methodName + "() cannot be called by a player.");
+        }
+
+        if (owner.equals("java/lang/Class")) {
+            throw new InstrumentationException("Illegal method in " + className + ": Class."+methodName+" may not be called by a player.");
+        }
+
+        if (owner.equals("java/io/PrintStream") && methodName.equals("<init>") && desc.startsWith("(Ljava/lang/String;")) {
+            throw new InstrumentationException("Illegal method in " + className + ": You may not use PrintStream to open files.");
+        }
+
+        if (owner.equals("java/lang/String") && methodName.equals("intern")) {
+            throw new InstrumentationException("Illegal method in " + className + ": String.intern() cannot be called by a player.");
+        }
+
+        if (owner.equals("java/lang/System") && (
+                methodName.equals("getSecurityManager") ||
+                methodName.equals("setSecurityManager") ||
+                methodName.equals("currentTimeMillis") ||
+                methodName.equals("nanoTime") ||
+                methodName.equals("getenv") ||
+                methodName.equals("gc") ||
+                methodName.equals("runFinalization") ||
+                methodName.equals("runFinalizersOnExit") ||
+                methodName.equals("load") ||
+                methodName.equals("loadLibrary") ||
+                methodName.equals("mapLibraryName"))) {
+            throw new InstrumentationException("Illegal method in " + className
+                    + ": System." + methodName + "() " + "cannot be called by a player.");
+        }
+
+        // We can't outlaw classes in java.lang.invoke because the JVM uses them,
+        // but we can prevent the user from using them.
+        if (owner.startsWith("java/lang/invoke/")) {
+            throw new InstrumentationException("Illegal method in " + className
+                    + ": " + owner + "." + methodName + " cannot be directly called by a player.");
+        }
     }
 
     private void visitMultiANewArrayInsnNode(MultiANewArrayInsnNode n) {

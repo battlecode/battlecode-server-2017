@@ -7,7 +7,6 @@ java/io/FileReader
 java/io/FileWriter
 java/io/RandomAccessFile
 java/io/SerializablePermission
-java/lang/Class
 java/lang/ClassLoader
 java/lang/Compiler
 java/lang/InheritableThreadLocal
@@ -20,6 +19,8 @@ java/lang/SecurityManager
 java/lang/Thread
 java/lang/ThreadGroup
 java/lang/ThreadLocal
+java/lang/invoke/SwitchPoint
+java/lang/invoke/MethodHandleProxies
 java/util/Calendar
 java/util/Currency
 java/util/Date

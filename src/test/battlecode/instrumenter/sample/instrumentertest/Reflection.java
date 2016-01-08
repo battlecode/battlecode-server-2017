@@ -5,5 +5,7 @@ package instrumentertest;
  */
 @SuppressWarnings("unused")
 public class Reflection {
-    private static final Class<Reflection> c = Reflection.class;
+    static {
+        Reflection.class.getClassLoader();
+    }
 }

@@ -122,7 +122,7 @@ public final class RobotMonitor {
      *
      * @return the random seed for this robot
      */
-    public static int getRandomSeed() {
+    public static long getRandomSeed() {
         return randomSeed;
     }
 
