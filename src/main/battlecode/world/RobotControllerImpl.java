@@ -140,7 +140,8 @@ public final class RobotControllerImpl implements RobotController {
     
     @Override
     public int getInfectedTurns() {
-        return Math.max(robot.getZombieInfectedTurns(), robot.getViperInfectedTurns());
+        return Math.max(robot.getZombieInfectedTurns(), robot
+                .getViperInfectedTurns());
     }
     
     @Override
@@ -156,6 +157,16 @@ public final class RobotControllerImpl implements RobotController {
     @Override
     public boolean isInfected() {
         return robot.isInfected();
+    }
+
+    @Override
+    public int getBasicSignalCount() {
+        return robot.getBasicSignalCount();
+    }
+
+    @Override
+    public int getMessageSignalCount() {
+        return robot.getMessageSignalCount();
     }
 
     // ***********************************

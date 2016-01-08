@@ -960,6 +960,9 @@ public class RobotControllerTest {
                 for(int i = 0; i < GameConstants.MESSAGE_SIGNALS_PER_TURN+1; i++) {
                     try {
                         rc.broadcastMessageSignal(123, 456, 24);
+                        if (i < GameConstants.MESSAGE_SIGNALS_PER_TURN) {
+                            assertEquals(rc.getMessageSignalCount(), i + 1);
+                        }
                     } catch(Exception e) {
                         messageException = true;
                     }
@@ -971,6 +974,10 @@ public class RobotControllerTest {
                 }
                 assertTrue(simpleException);
                 assertTrue(messageException);
+                assertEquals(rc.getMessageSignalCount(), GameConstants
+                        .MESSAGE_SIGNALS_PER_TURN);
+                assertEquals(rc.getBasicSignalCount(), GameConstants
+                        .BASIC_SIGNALS_PER_TURN);
             } else if (id == soldier) {
             }
         });
@@ -978,6 +985,8 @@ public class RobotControllerTest {
         // Soldier receives 25 signals
         game.round((id, rc) -> {
             if (id == archon) {
+                assertEquals(rc.getBasicSignalCount(), 0);
+                assertEquals(rc.getMessageSignalCount(), 0);
             } else if (id == soldier) {
                 Signal[] signals = rc.emptySignalQueue();
                 assertEquals(signals.length,GameConstants.BASIC_SIGNALS_PER_TURN+
