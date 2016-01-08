@@ -34,12 +34,14 @@ battlecode/common/RobotController/canSenseRobot               5     true
 battlecode/common/RobotController/clearRubble                 0     true
 battlecode/common/RobotController/disintegrate                0     true
 battlecode/common/RobotController/emptySignalQueue            5     true
+battlecode/common/RobotController/getBasicSignalCount         1     true
 battlecode/common/RobotController/getControlBits              0     true
 battlecode/common/RobotController/getCoreDelay                1     true
 battlecode/common/RobotController/getHealth                   1     true
 battlecode/common/RobotController/getID                       1     true
 battlecode/common/RobotController/getInfectedTurns            1     true
 battlecode/common/RobotController/getLocation                 1     true
+battlecode/common/RobotController/getMessageSignalCount       1     true
 battlecode/common/RobotController/getRobotCount               20    true
 battlecode/common/RobotController/getRoundLimit               1     true
 battlecode/common/RobotController/getRoundNum                 1     true
