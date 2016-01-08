@@ -165,6 +165,22 @@ public interface RobotController {
      */
     boolean isInfected();
 
+    /**
+     * Returns the number of basic signals this robot has sent so far this turn.
+     *
+     * @return the number of basic signals this robot has sent so far this turn.
+     */
+    int getBasicSignalCount();
+
+    /**
+     * Returns the number of message signals this robot has sent so far this
+     * turn.
+     *
+     * @return the number of message signals this robot has sent so far this
+     * turn.
+     */
+    int getMessageSignalCount();
+
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
