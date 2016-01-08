@@ -36,6 +36,8 @@ public class InternalRobot {
     private int roundsAlive;
     private int buildDelay;
     private int repairCount;
+    private int basicSignalCount;
+    private int messageSignalCount;
 
     /**
      * Used to avoid recreating the same RobotInfo object over and over.
@@ -72,6 +74,8 @@ public class InternalRobot {
         this.zombieInfectedTurns = 0;
         this.viperInfectedTurns = 0;
         this.repairCount = 0;
+        this.basicSignalCount = 0;
+        this.messageSignalCount = 0;
 
         this.controlBits = 0;
 
@@ -151,7 +155,15 @@ public class InternalRobot {
     public int getRepairCount() {
         return repairCount;
     }
+    
+    public int getBasicSignalCount() {
+        return basicSignalCount;
+    }
 
+    public int getMessageSignalCount() {
+        return messageSignalCount;
+    }
+    
     public double getMaxHealth() {
         return maxHealth;
     }
@@ -319,6 +331,9 @@ public class InternalRobot {
 
     public void receiveSignal(Signal mess) {
         signalqueue.add(mess);
+        if(signalqueue.size() > GameConstants.SIGNAL_QUEUE_MAX_SIZE) {
+            signalqueue.remove(0);
+        }
     }
 
     public Signal retrieveNextSignal() {
@@ -335,6 +350,14 @@ public class InternalRobot {
             queue[i] = signalqueue.remove(0);
         }
         return queue;
+    }
+    
+    public void incrementBasicSignalCount() {
+        basicSignalCount++;
+    }
+    
+    public void incrementMessageSignalCount() {
+        messageSignalCount++;
     }
 
     // *********************************
@@ -400,6 +423,8 @@ public class InternalRobot {
     public void processBeginningOfTurn() {
         decrementDelays();
         repairCount = 0;
+        basicSignalCount = 0;
+        messageSignalCount = 0;
 
         this.currentBytecodeLimit = getType().bytecodeLimit;
     }

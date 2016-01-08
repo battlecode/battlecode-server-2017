@@ -108,7 +108,20 @@ public interface GameConstants {
 
     /** Number of turns that elapse for the zombie outbreak level to increase */
     int OUTBREAK_TIMER = 300;
+    
+    // *********************************
+    // ****** MESSAGING ****************
+    // *********************************
 
+    /** The maximum size of the message queue. Any more messages push the oldest message out */
+    int SIGNAL_QUEUE_MAX_SIZE = 1000;
+    
+    /** The maximum number of basic signals a robot can send per turn */
+    int BASIC_SIGNALS_PER_TURN = 5;
+    
+    /** The maximum number of message signals a robot can send per turn */
+    int MESSAGE_SIGNALS_PER_TURN = 20;
+    
     // *********************************
     // ****** GAMEPLAY PROPERTIES ******
     // *********************************

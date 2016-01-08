@@ -934,6 +934,77 @@ public class RobotControllerTest {
         });
     }
     
+    @Test
+    public void testSignalLimits() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 1000);
+
+        GameMap map = mapGen.getMap("test");
+
+        TestGame game = new TestGame(map);
+
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int archon = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+        final int soldier = game.spawn(oX, oY + 1, RobotType.SOLDIER, Team.B);
+        
+        // Archon sends max amount in one turn
+        game.round((id, rc) -> {
+            if (id == archon) {
+                boolean simpleException = false;
+                boolean messageException = false;
+                for(int i = 0; i < GameConstants.MESSAGE_SIGNALS_PER_TURN+1; i++) {
+                    try {
+                        rc.broadcastMessageSignal(123, 456, 24);
+                    } catch(Exception e) {
+                        messageException = true;
+                    }
+                    try {
+                        rc.broadcastSignal(24);
+                    } catch(Exception e) {
+                        simpleException = true;
+                    }
+                }
+                assertTrue(simpleException);
+                assertTrue(messageException);
+            } else if (id == soldier) {
+            }
+        });
+        
+        // Soldier receives 25 signals
+        game.round((id, rc) -> {
+            if (id == archon) {
+            } else if (id == soldier) {
+                Signal[] signals = rc.emptySignalQueue();
+                assertEquals(signals.length,GameConstants.BASIC_SIGNALS_PER_TURN+
+                        GameConstants.MESSAGE_SIGNALS_PER_TURN);
+            }
+        });
+        
+        // Now archon sends 1020 signals
+        for(int turn = 0; turn < 1020/20; turn++) {
+            final int turnToPass = turn; // Necessary to access inside lambda
+            game.round((id, rc) -> {
+                if (id == archon) {
+                    for(int i = 0; i < 20; i++) {
+                        rc.broadcastMessageSignal(i, turnToPass, 24);
+                    }
+                } else if (id == soldier) {
+                }
+            });
+        }
+        
+        // Soldier can only see 1000 most recent
+        game.round((id, rc) -> {
+            if (id == archon) {
+            } else if (id == soldier) {
+                Signal[] signals = rc.emptySignalQueue();
+                assertEquals(signals.length,GameConstants.SIGNAL_QUEUE_MAX_SIZE);
+                assertEquals(signals[0].getMessage()[0],0);
+                assertEquals(signals[0].getMessage()[1],1);
+            }
+        });
+    }
+    
     /**
      * Tests the canSense(InternalRobot) method and the senseHostileRobots() method
      */
