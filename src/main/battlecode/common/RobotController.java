@@ -370,6 +370,8 @@ public interface RobotController {
      *            return objects this distance away from the center. If -1 is
      *            passed, robots from the whole map are returned.
      * @return array of RobotInfo objects of the robots you sensed.
+     *
+     * @battlecode.doc.costlymethod
      */
     RobotInfo[] senseHostileRobots(MapLocation center, int radiusSquared);
 
@@ -622,6 +624,8 @@ public interface RobotController {
      * @throws GameActionException if this robot is not an archon, the location 
      *  is out of range, if there is no robot there, if the robot is from the 
      *  wrong team, or if you already repaired this turn.
+     *
+     * @battlecode.doc.costlymethod
      */
     void repair(MapLocation loc) throws GameActionException;
 
