@@ -209,6 +209,10 @@ public class IndividualClassLoaderTest {
         final Class<?> c = l1.loadClass("instrumentertest.StringFormat");
 
         c.getMethod("run").invoke(null);
+    }
 
+    @Test(expected=InstrumentationException.class)
+    public void testCantReflect() throws Exception {
+        l1.loadClass("instrumentertest.Reflection");
     }
 }
