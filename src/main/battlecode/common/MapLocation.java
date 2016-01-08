@@ -144,6 +144,10 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      * @battlecode.doc.costlymethod
      */
     public final Direction directionTo(MapLocation location) {
+        if(location == null) {
+            return null;
+        }
+        
         double dx = location.x - this.x;
         double dy = location.y - this.y;
 

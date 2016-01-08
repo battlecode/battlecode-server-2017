@@ -119,13 +119,18 @@ public class Signal implements Serializable {
     /**
      * Returns the message associated with this signal, or null if the signal
      * was a basic (regular) signal. If it's not null, the integer array will
-     * always have length 2.
+     * always have length 2. Returns a copy so this.message can't be
+     * modified by the receiver.
      *
      * @return the message associated with this signal, or null if the signal
      * had no message.
      */
     public int[] getMessage() {
-        return message;
+        if(message == null) {
+            return null;
+        } else {
+            return message.clone();
+        }
     }
 
     /**
