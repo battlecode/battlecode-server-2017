@@ -222,6 +222,11 @@ public class IndividualClassLoaderTest {
     }
 
     @Test
+    public void testCanUseLambda() throws Exception {
+        l1.loadClass("instrumentertest.LegalMethodReference");
+    }
+
+    @Test
     public void testMathRandom() throws Exception {
         l1.loadClass("instrumentertest.CallsMathRandom");
     }

@@ -10,5 +10,6 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class UsesEnumMap {
+    // This is allowed, even though using a Class<?> for anything else isn't.
     public static final Map<Team, Integer> enumMap = new EnumMap<>(Team.class);
 }
