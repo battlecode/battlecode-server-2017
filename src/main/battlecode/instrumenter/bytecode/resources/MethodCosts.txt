@@ -21,6 +21,7 @@ battlecode/common/Signal/getID                                  1      false
 battlecode/common/Signal/getLocation                            1      false
 battlecode/common/Signal/getTeam                                1      false
 battlecode/common/Signal/getMessage                             1      false
+battlecode/common/RobotController/activate                    0     true
 battlecode/common/RobotController/addMatchObservation         0     true
 battlecode/common/RobotController/attackLocation              0     true
 battlecode/common/RobotController/broadcastSignal             100   true
@@ -65,6 +66,7 @@ battlecode/common/RobotController/move                        0     true
 battlecode/common/RobotController/onTheMap                    5     true
 battlecode/common/RobotController/pack                        0     true
 battlecode/common/RobotController/readSignal                  5     true
+battlecode/common/RobotController/repair                      0     true
 battlecode/common/RobotController/resign                      0     true
 battlecode/common/RobotController/senseNearbyRobots           100   true
 battlecode/common/RobotController/senseHostileRobots          100   true

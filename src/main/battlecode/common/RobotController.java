@@ -136,6 +136,8 @@ public interface RobotController {
      * the same thing as max(zombieInfectedTurns,viperInfectedTurns).
      * 
      * @return number of remaining infected turns.
+     *
+     * @battlecode.doc.costlymethod
      */
     int getInfectedTurns();
     
@@ -145,6 +147,8 @@ public interface RobotController {
      * unit will turn into a zombie if it dies while infected.
      * 
      * @return number of remaining zombie infected turns.
+     *
+     * @battlecode.doc.costlymethod
      */
     int getZombieInfectedTurns();
     
@@ -154,6 +158,8 @@ public interface RobotController {
      * unit will turn into a zombie if it dies while infected.
      * 
      * @return number of remaining viper infected turns.
+     *
+     * @battlecode.doc.costlymethod
      */
     int getViperInfectedTurns();
     
@@ -162,6 +168,8 @@ public interface RobotController {
      * robot dies while this is true, it will become a zombie.
      * 
      * @return true if the robot is infected.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean isInfected();
 
@@ -169,6 +177,8 @@ public interface RobotController {
      * Returns the number of basic signals this robot has sent so far this turn.
      *
      * @return the number of basic signals this robot has sent so far this turn.
+     *
+     * @battlecode.doc.costlymethod
      */
     int getBasicSignalCount();
 
@@ -178,6 +188,8 @@ public interface RobotController {
      *
      * @return the number of message signals this robot has sent so far this
      * turn.
+     *
+     * @battlecode.doc.costlymethod
      */
     int getMessageSignalCount();
 
@@ -190,6 +202,8 @@ public interface RobotController {
      *
      * @param loc the location to test.
      * @return whether it can sense the location.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean canSense(MapLocation loc);
 
