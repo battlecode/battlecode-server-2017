@@ -396,48 +396,6 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         }
     }
 
-    /**
-     * Necessary because ASM has separate constants for handles and bytecodes
-     * @param opcode the opcode to convert
-     * @return the handle code for the opcode
-     */
-    private int opcodeToHandleCode(int opcode) {
-        switch (opcode) {
-            case INVOKESTATIC:
-                return H_INVOKESTATIC;
-            case INVOKESPECIAL:
-                return H_INVOKESPECIAL;
-            case INVOKEINTERFACE:
-                return H_INVOKEINTERFACE;
-            case INVOKEVIRTUAL:
-                return H_INVOKEVIRTUAL;
-            default:
-                throw new InstrumentationException("Invalid opcode to convert: "+opcode+
-                    "(valid: "+INVOKESTATIC+", "+INVOKESPECIAL+", "+INVOKEINTERFACE+", "+INVOKEVIRTUAL+")");
-        }
-    }
-
-    /**
-     * Necessary because ASM has separate constants for handles and bytecodes
-     * @param handleCode the handle code to convert
-     * @return the opcode for the handle code
-     */
-    private int handleCodeToOpcode(int handleCode) {
-        switch (handleCode) {
-            case H_INVOKESTATIC:
-                return INVOKESTATIC;
-            case H_INVOKESPECIAL:
-                return INVOKESPECIAL;
-            case H_INVOKEINTERFACE:
-                return INVOKEINTERFACE;
-            case H_INVOKEVIRTUAL:
-                return INVOKEVIRTUAL;
-            default:
-                throw new InstrumentationException("Invalid handle code to convert: "+handleCode+
-                    "(valid: "+H_INVOKESTATIC+", "+INVOKESPECIAL+", "+INVOKEINTERFACE+", "+INVOKEVIRTUAL+")");
-        }
-    }
-
     private void visitMultiANewArrayInsnNode(MultiANewArrayInsnNode n) {
         bytecodeCtr++;
         n.desc = classDescReference(n.desc);
