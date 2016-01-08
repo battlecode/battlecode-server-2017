@@ -36,7 +36,7 @@ public interface GameConstants {
     int EXCEPTION_BYTECODE_PENALTY = 500;
 
     /** Maximum archons that can appear on a map (per team). */
-    int NUMBER_OF_ARCHONS_MAX = 6;
+    int NUMBER_OF_ARCHONS_MAX = 4;
 
     /** Represents the multiple of the sightRange for which the cost is fixed. */
     double BROADCAST_RANGE_MULTIPLIER = 2;
@@ -53,7 +53,7 @@ public interface GameConstants {
     // *********************************
 
     /** The amount that each team starts with */
-    double PARTS_INITIAL_AMOUNT = 200;
+    double PARTS_INITIAL_AMOUNT = 300;
     
     /** The part income per turn per archon */
     double ARCHON_PART_INCOME = 0.75;
