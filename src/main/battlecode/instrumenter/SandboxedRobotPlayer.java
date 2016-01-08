@@ -175,6 +175,12 @@ public class SandboxedRobotPlayer {
                 pauseMethod.invoke(null);
                 // Run the robot!
                 runMethod.invoke(null, robotController);
+                // If we get here, we've returned from the 'run' method. Tell the user.
+                System.out.println("testtesttest");
+                System.out.println("Your " + robotController.getType().toString() + " " +
+                        robotController.getID() + " at location " + robotController.getLocation().toString()
+                        + " died in round " +robotController.getRoundNum() +
+                        " because it returned from its run() method!");
             } catch (final IllegalAccessException e) {
                 ErrorReporter.report(e, true);
             } catch (final InvocationTargetException e) {
