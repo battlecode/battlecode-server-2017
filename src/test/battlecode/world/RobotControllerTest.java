@@ -145,9 +145,9 @@ public class RobotControllerTest {
         // Die to make sure that the robot produces rubble.
         // The damage taken is to make sure the rubble is based on max
         // health, not previous health.
-        soldierABot.takeDamage(47);
-        soldierBBot.takeDamage(45);
-        stdZombieBot.takeDamage(58);
+        soldierABot.takeDamage(RobotType.SOLDIER.maxHealth - 3);
+        soldierBBot.takeDamage(RobotType.SOLDIER.maxHealth - 3);
+        stdZombieBot.takeDamage(RobotType.STANDARDZOMBIE.maxHealth - 2);
         game.round((id, rc) -> {
             if (id == soldierA) { // All robots kill themselves
                 rc.attackLocation(new MapLocation(oX, oY));
