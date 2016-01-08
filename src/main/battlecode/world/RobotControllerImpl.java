@@ -31,7 +31,7 @@ public final class RobotControllerImpl implements RobotController {
      * The robot this controller controls.
      */
     private final InternalRobot robot;
-
+    
     /**
      * Create a new RobotControllerImpl
      *
@@ -536,8 +536,14 @@ public final class RobotControllerImpl implements RobotController {
             throw new GameActionException(CANT_DO_THAT, "Cannot broadcast " +
                     "with negative radius.");
         }
+        if (robot.getBasicSignalCount() >= GameConstants.BASIC_SIGNALS_PER_TURN) {
+            throw new GameActionException(CANT_DO_THAT, "Cannot broadcast " +
+                    "more than "+GameConstants.BASIC_SIGNALS_PER_TURN + " basic " +
+                    "signals per turn");
+        }
         gameWorld.visitBroadcastSignal(new BroadcastSignal(getID(), new
                 Signal(getLocation(), getID(), getTeam()), radiusSquared));
+        robot.incrementBasicSignalCount();
     }
 
     @Override
@@ -553,9 +559,15 @@ public final class RobotControllerImpl implements RobotController {
             throw new GameActionException(CANT_DO_THAT, "Cannot broadcast " +
                     "with negative radius.");
         }
+        if (robot.getMessageSignalCount() >= GameConstants.MESSAGE_SIGNALS_PER_TURN) {
+            throw new GameActionException(CANT_DO_THAT, "Cannot broadcast " +
+                    "more than "+GameConstants.MESSAGE_SIGNALS_PER_TURN + " message " +
+                    "signals per turn");
+        }
         gameWorld.visitBroadcastSignal(new BroadcastSignal(getID(), new Signal
                 (getLocation(), getID(), getTeam(), message1, message2),
                 radiusSquared));
+        robot.incrementMessageSignalCount();
     }
 
     // ***********************************
