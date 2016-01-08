@@ -94,6 +94,11 @@ public final class RobotControllerImpl implements RobotController {
                 .getZombieSpawnSchedule());
     }
 
+    @Override
+    public int getRobotCount() {
+        return gameWorld.getRobotCount(getTeam());
+    }
+
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************
