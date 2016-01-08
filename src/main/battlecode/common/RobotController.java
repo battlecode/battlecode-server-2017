@@ -52,6 +52,14 @@ public interface RobotController {
      */
     ZombieSpawnSchedule getZombieSpawnSchedule();
 
+    /**
+     * Returns the number of robots on your team, including your archons.
+     *
+     * @return the number of robots on your team, including your archon.s
+     * @battlecode.doc.costlymethod
+     */
+    int getRobotCount();
+
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************

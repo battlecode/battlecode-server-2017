@@ -57,6 +57,7 @@ public class GameWorld implements SignalHandler {
 
     private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<>(
             Team.class);
+    private int[] robotCount = new int[4];
 
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, RobotControlProvider cp,
@@ -452,6 +453,18 @@ public class GameWorld implements SignalHandler {
     // ****** COUNTING ROBOTS **********
     // *********************************
 
+    public int getRobotCount(Team team) {
+        return robotCount[team.ordinal()];
+    }
+
+    public void incrementRobotCount(Team team) {
+        robotCount[team.ordinal()]++;
+    }
+
+    public void decrementRobotCount(Team team) {
+        robotCount[team.ordinal()]--;
+    }
+
     // only returns active robots
     public int getRobotTypeCount(Team team, RobotType type) {
         if (robotTypeCount.get(team).containsKey(type)) {
@@ -591,10 +604,12 @@ public class GameWorld implements SignalHandler {
         }
 
         // free parts
-        teamResources[Team.A.ordinal()] += GameConstants.ARCHON_PART_INCOME
-                * getRobotTypeCount(Team.A, RobotType.ARCHON);
-        teamResources[Team.B.ordinal()] += GameConstants.ARCHON_PART_INCOME
-                * getRobotTypeCount(Team.B, RobotType.ARCHON);
+        teamResources[Team.A.ordinal()] += Math.max(0.0, GameConstants
+                .ARCHON_PART_INCOME - GameConstants.PART_INCOME_UNIT_PENALTY
+                * getRobotCount(Team.A));
+        teamResources[Team.B.ordinal()] += Math.max(0.0, GameConstants
+                .ARCHON_PART_INCOME - GameConstants.PART_INCOME_UNIT_PENALTY
+                * getRobotCount(Team.B));
 
         // Add signals for team resources
         for (final Team team : Team.values()) {
@@ -864,6 +879,7 @@ public class GameWorld implements SignalHandler {
         }
 
         decrementRobotTypeCount(obj.getTeam(), obj.getType());
+        decrementRobotCount(obj.getTeam());
 
         if (obj.getType() == RobotType.ARCHON && obj.getTeam().isPlayer()) {
             int totalArchons = getRobotTypeCount(obj.getTeam(),
@@ -982,6 +998,7 @@ public class GameWorld implements SignalHandler {
                 );
 
         incrementRobotTypeCount(s.getTeam(), s.getType());
+        incrementRobotCount(s.getTeam());
 
         gameObjectsByID.put(s.getRobotID(), robot);
 

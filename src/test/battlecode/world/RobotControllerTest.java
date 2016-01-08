@@ -71,7 +71,8 @@ public class RobotControllerTest {
         // Let's assert that things happened properly.
         assertEquals(archonABot.getLocation(), new MapLocation(oX + 1, oY));
         assertEquals(game.getWorld().resources(Team.A), 30 + GameConstants
-                .PARTS_INITIAL_AMOUNT + GameConstants.ARCHON_PART_INCOME, EPSILON);
+                .PARTS_INITIAL_AMOUNT + GameConstants.ARCHON_PART_INCOME -
+                        GameConstants.PART_INCOME_UNIT_PENALTY, EPSILON);
 
         // Lets 10 rounds go by.
         game.waitRounds(10);
@@ -494,7 +495,8 @@ public class RobotControllerTest {
 
         assertEquals(game.getWorld().resources(Team.A), GameConstants
                 .PARTS_INITIAL_AMOUNT - RobotType.SOLDIER.partCost +
-                GameConstants.ARCHON_PART_INCOME, EPSILON);
+                GameConstants.ARCHON_PART_INCOME - 2 * GameConstants
+                        .PART_INCOME_UNIT_PENALTY, EPSILON);
     }
 
     /**
@@ -532,9 +534,12 @@ public class RobotControllerTest {
         });
 
         assertEquals(game.getWorld().resources(Team.A), GameConstants
-                .PARTS_INITIAL_AMOUNT, EPSILON);
+                .PARTS_INITIAL_AMOUNT + GameConstants.ARCHON_PART_INCOME -
+                GameConstants.PART_INCOME_UNIT_PENALTY, EPSILON);
         assertEquals(game.getWorld().resources(Team.B), GameConstants
-                .PARTS_INITIAL_AMOUNT + GameConstants.DEN_PART_REWARD, EPSILON);
+                .PARTS_INITIAL_AMOUNT + GameConstants.ARCHON_PART_INCOME -
+                GameConstants.PART_INCOME_UNIT_PENALTY + GameConstants
+                .DEN_PART_REWARD, EPSILON);
     }
 
     /**
@@ -928,7 +933,7 @@ public class RobotControllerTest {
             } else if (id == soldier) {
                 Signal unmodified = rc.readSignal();
                 int data[] = unmodified.getMessage();
-                assertArrayEquals(data,new int[]{123,456});
+                assertArrayEquals(data, new int[]{123, 456});
             } else if (id == guard) {
             }
         });
@@ -1080,5 +1085,63 @@ public class RobotControllerTest {
                 assertTrue(exception);
             }
         });
+    }
+
+    /**
+     * Makes sure that parts income is dependent on how many units you have.
+     */
+    @Test
+    public void testPartIncome() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int bot1 = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+        final int bot2 = game.spawn(oX, oY + 1, RobotType.ARCHON, Team.A);
+        final int bot3 = game.spawn(oX, oY + 2, RobotType.SOLDIER, Team.A);
+        final int bot4 = game.spawn(oX, oY + 3, RobotType.TTM, Team.B);
+
+        game.round((id, rc) -> {
+        });
+
+        assertEquals(game.getWorld().resources(Team.A), GameConstants
+                .PARTS_INITIAL_AMOUNT + GameConstants.ARCHON_PART_INCOME - 3
+                * GameConstants.PART_INCOME_UNIT_PENALTY, EPSILON);
+        assertEquals(game.getWorld().resources(Team.B), GameConstants
+                .PARTS_INITIAL_AMOUNT + GameConstants.ARCHON_PART_INCOME - 1
+                * GameConstants.PART_INCOME_UNIT_PENALTY, EPSILON);
+        assertEquals(3, game.getWorld().getRobotCount(Team.A));
+
+        InternalRobot bot3Bot = game.getBot(bot3);
+        bot3Bot.takeDamage(bot3Bot.getHealthLevel());
+        InternalRobot bot4Bot = game.getBot(bot4);
+        bot4Bot.takeDamage(bot4Bot.getHealthLevel());
+        game.round((id, rc) -> {
+        });
+
+        assertEquals(game.getWorld().resources(Team.A), GameConstants
+                .PARTS_INITIAL_AMOUNT + 2 * GameConstants.ARCHON_PART_INCOME - 5
+                * GameConstants.PART_INCOME_UNIT_PENALTY, EPSILON);
+        assertEquals(game.getWorld().resources(Team.B), GameConstants
+                .PARTS_INITIAL_AMOUNT + 2 * GameConstants.ARCHON_PART_INCOME - 1
+                * GameConstants.PART_INCOME_UNIT_PENALTY, EPSILON);
+
+        assertEquals(2, game.getWorld().getRobotCount(Team.A));
+
+        game.round((id, rc) -> {
+            if (id == bot1) {
+                rc.build(Direction.EAST, RobotType.TURRET);
+            }
+        });
+
+        assertEquals(game.getWorld().resources(Team.A), GameConstants
+                .PARTS_INITIAL_AMOUNT + 3 * GameConstants.ARCHON_PART_INCOME - 8
+                * GameConstants.PART_INCOME_UNIT_PENALTY - RobotType.TURRET
+                .partCost, EPSILON);
+        assertEquals(game.getWorld().resources(Team.B), GameConstants
+                .PARTS_INITIAL_AMOUNT + 3 * GameConstants.ARCHON_PART_INCOME - 1
+                * GameConstants.PART_INCOME_UNIT_PENALTY, EPSILON);
+        assertEquals(3, game.getWorld().getRobotCount(Team.A));
     }
 }
