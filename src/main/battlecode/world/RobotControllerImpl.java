@@ -669,7 +669,6 @@ public final class RobotControllerImpl implements RobotController {
 
         assertIsCoreReady();
 
-        robot.repair(target);
         robot.activateCoreAction(new ActivationSignal(robot.getID(), loc),
                 0, robot.getType().movementDelay);
     }
