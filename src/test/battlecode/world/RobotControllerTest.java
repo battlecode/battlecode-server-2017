@@ -884,6 +884,57 @@ public class RobotControllerTest {
     }
     
     /**
+     * Test case to ensure issue #174 in battlecode-server is fixed
+     * (test fails before exploit is fixed)
+     */
+    @Test
+    public void testSignalExploit() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 1000);
+
+        GameMap map = mapGen.getMap("test");
+
+        TestGame game = new TestGame(map);
+
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int archon = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+        final int soldier = game.spawn(oX, oY + 1, RobotType.SOLDIER, Team.B);
+        final int guard = game.spawn(oX, oY + 2, RobotType.GUARD, Team.B);
+        
+        // Fist, archon sends a message
+        game.round((id, rc) -> {
+            if (id == archon) {
+                rc.broadcastMessageSignal(123, 456, 24);
+            } else if (id == soldier) {
+            } else if (id == guard) {
+            }
+        });
+        
+        // Guard modifies message
+        game.round((id, rc) -> {
+            if (id == archon) {
+            } else if (id == soldier) {
+            } else if (id == guard) {
+                Signal unmodified = rc.readSignal();
+                int data[] = unmodified.getMessage();
+                data[0] = 1337;
+                data[1] = 42069;
+            }
+        });
+        
+        // Soldier receives original message
+        game.round((id, rc) -> {
+            if (id == archon) {
+            } else if (id == soldier) {
+                Signal unmodified = rc.readSignal();
+                int data[] = unmodified.getMessage();
+                assertArrayEquals(data,new int[]{123,456});
+            } else if (id == guard) {
+            }
+        });
+    }
+    
+    /**
      * Tests the canSense(InternalRobot) method and the senseHostileRobots() method
      */
     @Test
