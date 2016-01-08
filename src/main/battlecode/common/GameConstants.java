@@ -56,13 +56,13 @@ public interface GameConstants {
     double PARTS_INITIAL_AMOUNT = 300;
     
     /** The part income per turn (independent of number of archons).  */
-    double ARCHON_PART_INCOME = 5;
+    double ARCHON_PART_INCOME = 2;
 
     /** The decrease in part income per turn per unit that you have. */
-    double PART_INCOME_UNIT_PENALTY = 0.02;
+    double PART_INCOME_UNIT_PENALTY = 0.01;
 
     /** The parts reward for destroying a zomie den */
-    double DEN_PART_REWARD = 300;
+    double DEN_PART_REWARD = 200;
 
     // *********************************
     // ****** RUBBLE *******************
