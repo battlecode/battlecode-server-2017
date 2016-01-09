@@ -70,6 +70,7 @@ battlecode/common/RobotController/repair                      0     true
 battlecode/common/RobotController/resign                      0     true
 battlecode/common/RobotController/senseNearbyRobots           100   true
 battlecode/common/RobotController/senseHostileRobots          100   true
+battlecode/common/RobotController/sensePartLocations          100   true
 battlecode/common/RobotController/senseParts                  5     true
 battlecode/common/RobotController/senseRobot                  25    true
 battlecode/common/RobotController/senseRobotAtLocation        20    true
