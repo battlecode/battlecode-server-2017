@@ -1,7 +1,5 @@
 package battlecode.common;
 
-import java.util.HashMap;
-
 import battlecode.world.InternalRobot;
 
 /**
