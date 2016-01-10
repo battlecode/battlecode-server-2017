@@ -229,6 +229,25 @@ public final class RobotControllerImpl implements RobotController {
 
         return -1;
     }
+    
+    @Override
+    public MapLocation[] sensePartLocations(int radiussquared) {
+        ArrayList<MapLocation> returnVals = new ArrayList<MapLocation>();
+        int fetchRadius;
+        if(radiussquared < 0) {
+            fetchRadius = robot.getType().sensorRadiusSquared;
+        } else {
+            fetchRadius = Math.min(radiussquared, robot.getType().sensorRadiusSquared);
+        }
+        MapLocation[] nearbyLocs = MapLocation.getAllMapLocationsWithinRadiusSq(robot.getLocation(), fetchRadius);
+        for(MapLocation loc : nearbyLocs) {
+            if(gameWorld.getParts(loc) > 0) {
+                returnVals.add(loc);
+            }
+        }
+        return returnVals.toArray(new MapLocation[returnVals.size()]);
+    }
+
 
     @Override
     public boolean canSenseLocation(MapLocation loc) {

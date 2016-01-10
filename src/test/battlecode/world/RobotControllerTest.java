@@ -5,6 +5,7 @@ import battlecode.common.*;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -265,7 +266,8 @@ public class RobotControllerTest {
         final double partsVal = 30;
         TestMapGenerator mapGen = new TestMapGenerator(100, 100, 100)
                 .withRubble(0, 5, rubbleVal)
-                .withParts(5, 0, partsVal);
+                .withParts(5, 0, partsVal)
+                .withParts(20,0, partsVal);
         GameMap map = mapGen.getMap("test");
         TestGame game = new TestGame(map);
         int oX = game.getOriginX();
@@ -287,6 +289,16 @@ public class RobotControllerTest {
             } else if (id == soldier) {
                 assertEquals(rc.senseRubble(loc1), -1, EPSILON);
                 assertEquals(rc.senseParts(loc2), -1, EPSILON);
+                MapLocation[] partLocs = rc.sensePartLocations(-1);
+                assertEquals(partLocs.length,0);
+            } else if (id == archon3) {
+                MapLocation[] partLocs = rc.sensePartLocations(-1);
+                assertEquals(partLocs.length,1);
+                assertEquals(partLocs[0],loc2);
+                partLocs = rc.sensePartLocations(0);
+                assertEquals(partLocs.length,0);
+                partLocs = rc.sensePartLocations(1000);
+                assertEquals(partLocs.length,1);
             }
         });
 

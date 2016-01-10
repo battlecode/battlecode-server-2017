@@ -242,6 +242,21 @@ public interface RobotController {
      * @battlecode.doc.costlymethod
      */
     double senseParts(MapLocation loc);
+    
+    /**
+     * Senses nearby MapLocations with nonzero parts within a certain radius.
+     * Only MapLocations within the robot's sense radius will be returned.
+     *
+     * 
+     * @param radiussquared
+     *            return part locations this distance away from robot's location.
+     *            If -1 is passed, locations from the robot's entire sensor radius
+     *            are returned.
+     * @return list of MapLocations that contain parts
+     * 
+     * @battlecode.doc.costlymethod
+     */
+    MapLocation[] sensePartLocations(int radiussquared);
 
     /**
      * Returns true if the given location is within the robot's sensor range.
