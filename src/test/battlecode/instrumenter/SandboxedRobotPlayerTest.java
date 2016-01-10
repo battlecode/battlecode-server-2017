@@ -124,11 +124,23 @@ public class SandboxedRobotPlayerTest {
             return null;
         }).when(rc).disintegrate();
 
-        System.out.println("STEPPING");
-
         player.step();
 
         // And if the method returns, we know we have no deadlocks.
+        assertTrue(player.getTerminated());
+    }
+
+    @Test
+    public void testStaticInitialization() throws Exception {
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerstatic", "RobotPlayer", rc, 0);
+        player.setBytecodeLimit(10000);
+
+        // Player calls "yield" in static initializer
+        player.step();
+        assertFalse(player.getTerminated());
+
+        // Player terminates when actual "run" starts
+        player.step();
         assertTrue(player.getTerminated());
     }
 }
