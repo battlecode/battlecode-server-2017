@@ -23,6 +23,10 @@ import java.lang.reflect.Modifier;
  * Do NOT call its methods from multiple threads. Seriously. It will break
  * in confusing and insidious ways.
  *
+ * However, it is okay if the thread SandboxedRobotPlayer is managing calls
+ * into SandboxedRobotPlayer. This is still "single-threaded" use, since
+ * there's only one thread operating at a time.
+ *
  * @author james
  */
 public class SandboxedRobotPlayer {
