@@ -73,7 +73,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 
     private void instrumentationException(String description)
     {
-        throw new InstrumentationException(String.format("In method %s/%s:\n%s",className,name,description));
+        throw new InstrumentationException(String.format("In method %s.%s:%s:\n%s",className,name,desc,description));
     }
 
     public void visitMaxs(int maxStack, int maxLocals) {
