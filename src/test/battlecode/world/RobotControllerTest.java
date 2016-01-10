@@ -1165,4 +1165,25 @@ public class RobotControllerTest {
                 * GameConstants.PART_INCOME_UNIT_PENALTY, EPSILON);
         assertEquals(3, game.getWorld().getRobotCount(Team.A));
     }
+
+    /**
+     * Make sure no error is thrown if you try to clear rubble on an off map
+     * location.
+     */
+    @Test
+    public void testClearRubbleOffMap() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int bot1 = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+
+
+        game.round((id, rc) -> {
+            if (id == bot1) {
+                rc.clearRubble(Direction.NORTH);
+            }
+        });
+    }
 }
