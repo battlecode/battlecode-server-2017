@@ -107,29 +107,6 @@ public class SandboxedRobotPlayer {
         // Create classloader sandbox
         individualLoader = new IndividualClassLoader(teamName);
 
-        // Load player in sandbox
-        Class<?> robotPlayer;
-        try {
-            robotPlayer = individualLoader.loadClass(teamName + "." + playerClassName, true);
-        } catch (ClassNotFoundException e) {
-            throw new InstrumentationException("Couldn't load player class: "+e.getMessage(), e);
-        }
-
-        // Load RobotPlayer.run()
-        final Method runMethod;
-        try {
-            runMethod = robotPlayer.getMethod("run", RobotController.class);
-        } catch (NoSuchMethodException e) {
-            throw new InstrumentationException(robotPlayer.getSimpleName() + ".run(RobotController) not found",
-                    e);
-        } catch (SecurityException e) {
-            throw new InstrumentationException(robotPlayer.getSimpleName() + ".run(RobotController) is not public",
-                    e);
-        }
-        if ((runMethod.getModifiers() & Modifier.STATIC) == 0) {
-            throw new InstrumentationException(robotPlayer.getSimpleName() + ".run(RobotController) is not static");
-        }
-
         // Load monitor / monitor methods
         // Used to initialize the RobotMonitor for the player
         final Method initMethod;
@@ -184,7 +161,7 @@ public class SandboxedRobotPlayer {
                 // Pause immediately
                 pauseMethod.invoke(null);
                 // Run the robot!
-                runMethod.invoke(null, robotController);
+                loadAndRunPlayer(teamName, playerClassName);
                 // If we get here, we've returned from the 'run' method. Tell the user.
                 System.out.println(robotController.getTeam().toString() + "'s "
                         + robotController.getType().toString() + " " +
@@ -223,6 +200,41 @@ public class SandboxedRobotPlayer {
         } catch (InterruptedException e) {
             throw new RuntimeException("Unexpected interruption initializing sandbox", e);
         }
+    }
+
+    /**
+     * Load the player class and invoke "run", counting bytecode as we go.
+     * We do this after the rest of the player state is initialized, so that
+     * static initialization will be counted as part of the bytecode used of
+     * the first step.
+     */
+    private void loadAndRunPlayer(String teamName, String playerClassName)
+            throws InvocationTargetException, IllegalAccessException, InstrumentationException {
+        // Load player in sandbox
+        Class<?> robotPlayer;
+        try {
+            robotPlayer = individualLoader.loadClass(teamName + "." + playerClassName, true);
+        } catch (ClassNotFoundException e) {
+            throw new InstrumentationException("Couldn't load player class: "+e.getMessage(), e);
+        }
+
+        // Load RobotPlayer.run()
+        final Method runMethod;
+        try {
+            runMethod = robotPlayer.getMethod("run", RobotController.class);
+        } catch (NoSuchMethodException e) {
+            throw new InstrumentationException(robotPlayer.getSimpleName() + ".run(RobotController) not found",
+                    e);
+        } catch (SecurityException e) {
+            throw new InstrumentationException(robotPlayer.getSimpleName() + ".run(RobotController) is not public",
+                    e);
+        }
+        if ((runMethod.getModifiers() & Modifier.STATIC) == 0) {
+            throw new InstrumentationException(robotPlayer.getSimpleName() + ".run(RobotController) is not static");
+        }
+
+        // Run!
+        runMethod.invoke(null, robotController);
     }
 
     /**

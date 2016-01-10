@@ -366,7 +366,11 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         }
 
         if (owner.equals("java/lang/Class")) {
-            instrumentationException("Illegal method in " + className + ": Class."+methodName+" may not be called by a player.");
+            // There are some methods called automatically by Java
+            // that we need to enable
+            if (!methodName.equals("desiredAssertionStatus")) {
+                instrumentationException("Illegal method in " + className + ": Class." + methodName + " may not be called by a player.");
+            }
         }
 
         if (owner.equals("java/io/PrintStream") && methodName.equals("<init>") && desc.startsWith("(Ljava/lang/String;")) {
