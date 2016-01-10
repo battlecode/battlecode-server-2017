@@ -19,12 +19,17 @@ import java.lang.reflect.Modifier;
  * Closely bound to RobotMonitor; RobotMonitor exists inside the sandbox,
  * this exists as a container for the sandbox.
  *
+ * This class is NOT THREAD SAFE, even though it uses threads internally.
+ * Do NOT call its methods from multiple threads. Seriously. It will break
+ * in confusing and insidious ways.
+ *
+ * However, it is okay if the thread SandboxedRobotPlayer is managing calls
+ * into SandboxedRobotPlayer. This is still "single-threaded" use, since
+ * there's only one thread operating at a time.
+ *
  * @author james
  */
 public class SandboxedRobotPlayer {
-
-    // Note: The methods of this class should be called one-at-a-time.
-    // To enforce this, they are synchronized.
 
     /**
      * The controller for the robot we're controlling.
@@ -75,6 +80,11 @@ public class SandboxedRobotPlayer {
      * The object used to trade of control between threads.
      */
     private final Object notifier;
+
+    /**
+     * Whether or not we are currently running, i.e. in "step".
+     */
+    private boolean running;
 
     /**
      * Create a new sandboxed robot player.
@@ -220,7 +230,7 @@ public class SandboxedRobotPlayer {
      *
      * @param limit the new limit
      */
-    public synchronized void setBytecodeLimit(int limit) throws InstrumentationException {
+    public void setBytecodeLimit(int limit) throws InstrumentationException {
         try {
             setBytecodeLimitMethod.invoke(null, limit);
         } catch (ReflectiveOperationException e) {
@@ -231,7 +241,7 @@ public class SandboxedRobotPlayer {
     /**
      * Take a step on the RobotPlayer thread, blocking until it's completed.
      */
-    public synchronized void step() throws InstrumentationException {
+    public void step() throws InstrumentationException {
         // Is the RobotPlayer terminated?
         if (terminated) {
             throw new RuntimeException("Step called after robot killed");
@@ -247,11 +257,17 @@ public class SandboxedRobotPlayer {
 
         try {
             synchronized (notifier) {
+                // We are now running the robot!
+                running = true;
+
                 // Unpause the robot's thread
                 notifier.notifyAll();
 
                 // Pause this thread until the robot ends turn or dies
                 notifier.wait();
+
+                // Main thread reactivated: no longer running.
+                running = false;
             }
         } catch (InterruptedException e) {
             throw new RuntimeException("Unexpected interruption", e);
@@ -262,23 +278,49 @@ public class SandboxedRobotPlayer {
      * Kills a RobotPlayer control thread immediately.
      * Does nothing if the player is already killed.
      */
-    public synchronized void terminate() throws InstrumentationException {
-        if (terminated) return;
-
-        try {
-            killMethod.invoke(null);
-        } catch (ReflectiveOperationException e) {
-            ErrorReporter.report(e, true);
+    public void terminate() throws InstrumentationException {
+        if (terminated) {
+            System.err.println("[server:debug] Attempting to kill already-terminated robot?");
+            return;
         }
 
-        // Step to make the robot die.
-        step();
+        if (running) {
+            // We're currently running, which means that terminate() has been
+            // called from *inside* the running robot thread (because nobody
+            // would violate the class contract and call SandboxedRobotPlayer
+            // methods from multiple threads, right?)
+            // We need to allow internal logic to finish executing, and then
+            // kill the running thread. So, we set the "shouldDie" flag, and
+            // the next time RobotMonitor.incrementBytecodes is called, it will
+            // kill the robot.
+            // This isn't ideal, since it means that players will be able to
+            // execute zero-cost actions after "dying", like (maybe?) returning
+            // from run(), which could issue nonsensical warnings. However, it's
+            // the best solution I can think of.
+            try {
+                killMethod.invoke(null);
+            } catch (ReflectiveOperationException e) {
+                ErrorReporter.report(e, true);
+            }
+        } else {
+            // We're not running.
+            // Set the "shouldDie" flag and then step to finish the job.
+
+            try {
+                killMethod.invoke(null);
+            } catch (ReflectiveOperationException e) {
+                ErrorReporter.report(e, true);
+            }
+
+            // Step to make the robot die.
+            step();
+        }
     }
 
     /**
      * @return the bytecodes used by the player during the most recent step() call.
      */
-    public synchronized int getBytecodesUsed() throws InstrumentationException {
+    public int getBytecodesUsed() throws InstrumentationException {
         try {
             return (Integer) getBytecodeNumMethod.invoke(null);
         } catch (ReflectiveOperationException e) {
@@ -290,7 +332,7 @@ public class SandboxedRobotPlayer {
     /**
      * Whether the player controlling this robot is terminated.
      */
-    public synchronized boolean getTerminated() {
+    public boolean getTerminated() {
         return terminated;
     }
 
