@@ -108,6 +108,11 @@ public final class RobotMonitor {
      */
     @SuppressWarnings("unused")
     public static void incrementBytecodes(int numBytecodes) {
+        // If we should die, then... do that.
+        if (shouldDie) {
+            killer.kill();
+        }
+
         bytecodesLeft -= numBytecodes;
 
         while (bytecodesLeft <= 0) {
@@ -143,7 +148,7 @@ public final class RobotMonitor {
      * Must be called from the robot's main thread.
      */
     public static void reactivate() {
-
+        // If we should die, then... do that.
         if (shouldDie) {
             killer.kill();
         }
