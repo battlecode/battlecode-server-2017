@@ -426,8 +426,21 @@ public final class RobotControllerImpl implements RobotController {
                     "the direction OMNI.");
         }
 
+        MapLocation target = getLocation().add(dir);
+
+        // Ignore off map locations.
+        if (!gameWorld.getGameMap().onTheMap(target)) {
+            throw new GameActionException(CANT_DO_THAT, "You cannot clear " +
+                    "rubble in a location that is off the map.");
+        }
+
+        // Ignore locations with no rubble to clear.
+        if (gameWorld.getRubble(target) == 0) {
+            return;
+        }
+
         robot.activateCoreAction(new ClearRubbleSignal(robot.getID(),
-                        getLocation().add(dir), (int) (robot.getType()
+                        target, (int) (robot.getType()
                         .movementDelay)),
                 robot.getType().cooldownDelay, robot.getType().movementDelay);
     }

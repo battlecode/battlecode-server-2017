@@ -421,13 +421,15 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Clears rubble in the specified direction. If you clear a direction
-     * that is off the map, nothing happens.
+     * Clears rubble in the specified direction. If you clear rubble in a
+     * direction that is off the map, an exception will be thrown. If you
+     * clear rubble in a location with no rubble, nothing happens.
      *
      * @param dir
      *            the direction to clear rubble in.
-     * @throws GameActionException if the robot has core delay or if you are
-     * not allowed to clear rubble.
+     * @throws GameActionException if the robot has core delay, if you are
+     * not allowed to clear rubble, or if you clear in a direction that is
+     * off the map.
      *
      * @battlecode.doc.costlymethod
      */
