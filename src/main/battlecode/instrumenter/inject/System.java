@@ -6,6 +6,7 @@ import battlecode.instrumenter.stream.PrintStreamWrapper;
 
 import java.io.*;
 import java.nio.channels.Channel;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -62,6 +63,17 @@ public final class System {
         props.setProperty("user.name", "who knows?");
         props.setProperty("user.home", "who knows?");
         props.setProperty("user.dir", "who knows?");
+
+        // Copy bc.testing stuff
+        for (Map.Entry<Object, Object> entry : java.lang.System.getProperties().entrySet()) {
+            if (entry.getKey() instanceof String) {
+                String key = (String) entry.getKey();
+
+                if (key.startsWith("bc.testing")) {
+                    props.put(key, entry.getValue());
+                }
+            }
+        }
     }
 
     /**

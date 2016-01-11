@@ -123,6 +123,8 @@ public class SandboxedRobotPlayer {
             pauseMethod = monitor.getMethod("pause");
             initMethod = monitor.getMethod("init", Pauser.class, Killer.class, int.class);
 
+            // Note: loading this here also keeps any initialization we do in System
+            // from inflicting its bytecode cost on the player.
             Class<?> system = individualLoader
                     .loadClass("battlecode.instrumenter.inject.System");
             setSystemOutMethod = system.getMethod("setSystemOut", PrintStream.class);
