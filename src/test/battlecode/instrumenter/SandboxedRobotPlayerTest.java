@@ -157,4 +157,15 @@ public class SandboxedRobotPlayerTest {
         player.step();
         assertTrue(player.getTerminated());
     }
+
+    @Test
+    public void testBcTesting() throws Exception {
+        System.setProperty("bc.testing.should.terminate", "true");
+
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersystem", "RobotPlayer", rc, 0);
+        player.setBytecodeLimit(200);
+
+        player.step();
+        assertTrue(player.getTerminated());
+    }
 }
