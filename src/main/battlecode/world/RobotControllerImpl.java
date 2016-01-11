@@ -430,7 +430,8 @@ public final class RobotControllerImpl implements RobotController {
 
         // Ignore off map locations.
         if (!gameWorld.getGameMap().onTheMap(target)) {
-            return;
+            throw new GameActionException(CANT_DO_THAT, "You cannot clear " +
+                    "rubble in a location that is off the map.");
         }
 
         // Ignore locations with no rubble to clear.

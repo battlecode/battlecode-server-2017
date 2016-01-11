@@ -1042,7 +1042,7 @@ public class RobotControllerTest {
         int oX = game.getOriginX();
         int oY = game.getOriginY();
         final int soldier1 = game.spawn(oX, oY, RobotType.SOLDIER,Team.A);
-        final int soldier2 = game.spawn(oX+3, oY+3, RobotType.SOLDIER,Team.A);
+        final int soldier2 = game.spawn(oX + 3, oY + 3, RobotType.SOLDIER, Team.A);
         final int soldier3 = game.spawn(oX+6, oY+6, RobotType.SOLDIER,Team.B);
         final int soldier4 = game.spawn(oX+10, oY+10, RobotType.SOLDIER,Team.A);
         final int zombie = game.spawn(oX+4, oY+2, RobotType.STANDARDZOMBIE, Team.ZOMBIE);
@@ -1054,17 +1054,19 @@ public class RobotControllerTest {
             if (id == soldier1) {
                 assertTrue(rc.canSenseRobot(soldier2));
                 assertFalse(rc.canSenseRobot(soldier3));
-                RobotInfo[] hostiles = rc.senseHostileRobots(soldier1Bot.getLocation(),-1);
-                assertEquals(hostiles.length,1);
+                RobotInfo[] hostiles = rc.senseHostileRobots(soldier1Bot
+                        .getLocation(), -1);
+                assertEquals(hostiles.length, 1);
                 RobotInfo[] allRobots = rc.senseNearbyRobots();
                 assertEquals(allRobots.length, 2);
             } else if (id == soldier2) {
                 assertTrue(rc.canSenseRobot(soldier1));
                 assertTrue(rc.canSenseRobot(soldier3));
-                RobotInfo[] hostiles = rc.senseHostileRobots(soldier2Bot.getLocation(),2);
-                assertEquals(hostiles.length,1);
-                hostiles = rc.senseHostileRobots(soldier2Bot.getLocation(),-1);
-                assertEquals(hostiles.length,2);
+                RobotInfo[] hostiles = rc.senseHostileRobots(soldier2Bot
+                        .getLocation(), 2);
+                assertEquals(hostiles.length, 1);
+                hostiles = rc.senseHostileRobots(soldier2Bot.getLocation(), -1);
+                assertEquals(hostiles.length, 2);
                 RobotInfo[] allRobots = rc.senseNearbyRobots();
                 assertEquals(allRobots.length, 3);
             } else if (id == soldier3) {
@@ -1167,7 +1169,7 @@ public class RobotControllerTest {
     }
 
     /**
-     * Make sure no error is thrown if you try to clear rubble on an off map
+     * Make sure an error is thrown if you try to clear rubble on an off map
      * location.
      */
     @Test
@@ -1182,7 +1184,13 @@ public class RobotControllerTest {
 
         game.round((id, rc) -> {
             if (id == bot1) {
-                rc.clearRubble(Direction.NORTH);
+                boolean exception = false;
+                try {
+                    rc.clearRubble(Direction.NORTH);
+                } catch (GameActionException e) {
+                    exception = true;
+                }
+                assertTrue(exception);
             }
         });
     }
