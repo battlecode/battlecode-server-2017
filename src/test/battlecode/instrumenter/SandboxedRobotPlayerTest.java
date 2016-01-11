@@ -143,4 +143,18 @@ public class SandboxedRobotPlayerTest {
         player.step();
         assertTrue(player.getTerminated());
     }
+
+    @Test
+    public void testBytecodeOveruse() throws Exception {
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerbytecode", "RobotPlayer", rc, 0);
+        player.setBytecodeLimit(200);
+
+        for (int i = 0; i < 5; i++) {
+            player.step();
+            assertFalse(player.getTerminated());
+        }
+
+        player.step();
+        assertTrue(player.getTerminated());
+    }
 }
