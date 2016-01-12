@@ -123,6 +123,8 @@ public class SandboxedRobotPlayer {
             pauseMethod = monitor.getMethod("pause");
             initMethod = monitor.getMethod("init", Pauser.class, Killer.class, int.class);
 
+            // Note: loading this here also keeps any initialization we do in System
+            // from inflicting its bytecode cost on the player.
             Class<?> system = individualLoader
                     .loadClass("battlecode.instrumenter.inject.System");
             setSystemOutMethod = system.getMethod("setSystemOut", PrintStream.class);
@@ -175,6 +177,8 @@ public class SandboxedRobotPlayer {
                     return;
                 }
                 ErrorReporter.report(e.getCause(), false);
+            } catch (final InstrumentationException e) {
+                ErrorReporter.report("Error instrumenting " + teamName + ": " + e.getMessage(), false);
             } catch (final RobotDeathException e) {
                 return;
             } finally {
@@ -242,7 +246,7 @@ public class SandboxedRobotPlayer {
      *
      * @param limit the new limit
      */
-    public void setBytecodeLimit(int limit) throws InstrumentationException {
+    public void setBytecodeLimit(int limit) {
         try {
             setBytecodeLimitMethod.invoke(null, limit);
         } catch (ReflectiveOperationException e) {
@@ -253,7 +257,7 @@ public class SandboxedRobotPlayer {
     /**
      * Take a step on the RobotPlayer thread, blocking until it's completed.
      */
-    public void step() throws InstrumentationException {
+    public void step() {
         // Is the RobotPlayer terminated?
         if (terminated) {
             throw new RuntimeException("Step called after robot killed");
@@ -290,7 +294,7 @@ public class SandboxedRobotPlayer {
      * Kills a RobotPlayer control thread immediately.
      * Does nothing if the player is already killed.
      */
-    public void terminate() throws InstrumentationException {
+    public void terminate() {
         if (terminated) {
             return;
         }
@@ -331,7 +335,7 @@ public class SandboxedRobotPlayer {
     /**
      * @return the bytecodes used by the player during the most recent step() call.
      */
-    public int getBytecodesUsed() throws InstrumentationException {
+    public int getBytecodesUsed() {
         try {
             return (Integer) getBytecodeNumMethod.invoke(null);
         } catch (ReflectiveOperationException e) {

@@ -4,6 +4,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import battlecode.server.Config;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -153,6 +154,17 @@ public class SandboxedRobotPlayerTest {
             player.step();
             assertFalse(player.getTerminated());
         }
+
+        player.step();
+        assertTrue(player.getTerminated());
+    }
+
+    @Test
+    public void testBcTesting() throws Exception {
+        Config.getGlobalConfig().set("bc.testing.should.terminate", "true");
+
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersystem", "RobotPlayer", rc, 0);
+        player.setBytecodeLimit(200);
 
         player.step();
         assertTrue(player.getTerminated());

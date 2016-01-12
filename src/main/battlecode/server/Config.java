@@ -210,4 +210,11 @@ public class Config {
     public void setBoolean(String key, boolean value) {
         this.properties.setProperty(key, String.valueOf(value));
     }
+
+    /**
+     * @return all of the keys in the configuration
+     */
+    public String[] getKeys() {
+        return this.properties.keySet().stream().toArray(String[]::new);
+    }
 }

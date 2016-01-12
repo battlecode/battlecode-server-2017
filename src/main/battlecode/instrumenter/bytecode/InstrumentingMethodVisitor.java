@@ -382,17 +382,20 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         }
 
         if (owner.equals("java/lang/System") && (
-                methodName.equals("getSecurityManager") ||
-                methodName.equals("setSecurityManager") ||
                 methodName.equals("currentTimeMillis") ||
-                methodName.equals("nanoTime") ||
-                methodName.equals("getenv") ||
                 methodName.equals("gc") ||
-                methodName.equals("runFinalization") ||
-                methodName.equals("runFinalizersOnExit") ||
+                methodName.equals("getProperties") ||
+                methodName.equals("getSecurityManager") ||
+                methodName.equals("getenv") ||
                 methodName.equals("load") ||
                 methodName.equals("loadLibrary") ||
-                methodName.equals("mapLibraryName"))) {
+                methodName.equals("mapLibraryName") ||
+                methodName.equals("nanoTime") ||
+                methodName.equals("runFinalization") ||
+                methodName.equals("runFinalizersOnExit") ||
+                methodName.equals("setProperties") ||
+                methodName.equals("setSecurityManager")
+        )) {
             instrumentationException("Illegal method in " + className
                     + ": System." + methodName + "() " + "cannot be called by a player.");
         }
