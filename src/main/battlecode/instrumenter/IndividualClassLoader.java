@@ -108,11 +108,7 @@ public class IndividualClassLoader extends ClassLoader {
 
         synchronized (teamPackageName) {
 
-            // check if the team we're loading already has errors
-            if (teamsWithErrors.contains(teamPackageName)) {
-                throw new InstrumentationException("Team is known to have errors: " +
-                        teamPackageName);
-            }
+
 
             // this is the class we'll return
             Class finishedClass;
@@ -141,6 +137,17 @@ public class IndividualClassLoader extends ClassLoader {
                 cr.accept(cw, 0);
                 finishedClass = saveAndDefineClass(name, cw.toByteArray());
             } else if (name.startsWith(teamPackageName)) {
+
+                // Check if the team we're loading already has errors.
+                // Note that we only do this check when loading team
+                // classes - we'll only get team loading failures when
+                // loading team classes, which keeps the engine consistent
+                // in where its failures happen.
+                if (teamsWithErrors.contains(teamPackageName)) {
+                    throw new InstrumentationException("Team is known to have errors: " +
+                            teamPackageName);
+                }
+
                 final byte[] classBytes;
                 try {
                     classBytes = instrument(name, true, teamPackageName);
