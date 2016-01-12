@@ -57,7 +57,7 @@ public class Server implements Runnable, NotificationHandler {
      * operation.
      */
     public enum Mode {
-        HEADLESS, LOCAL, SCRIMMAGE, TOURNAMENT, TESTS, AUTOTEST, MATCH
+        HEADLESS, LOCAL, SCRIMMAGE, TOURNAMENT
     }
 
     /**
@@ -170,7 +170,7 @@ public class Server implements Runnable, NotificationHandler {
 
                 // Allow best of three scrimmages -- single game scrims should still work fine
                 //TODO:This "win mode" should probably be something from the database
-                if (mode == Mode.TOURNAMENT || mode == Mode.SCRIMMAGE || mode == Mode.AUTOTEST || mode == Mode.MATCH) {
+                if (mode == Mode.TOURNAMENT || mode == Mode.SCRIMMAGE) {
                     if (aWins == 2 || bWins == 2)
                         break;
                 }
@@ -193,8 +193,7 @@ public class Server implements Runnable, NotificationHandler {
      */
     private void runMatch(final Match match, final ProxyWriter proxyWriter) throws Exception {
         if (Mode.HEADLESS.equals(mode) || Mode.SCRIMMAGE.equals(mode)
-                || Mode.TOURNAMENT.equals(mode) || Mode.TESTS.equals(mode)
-                || Mode.AUTOTEST.equals(mode) || Mode.MATCH.equals(mode)) {
+                || Mode.TOURNAMENT.equals(mode)) {
             this.state = State.RUNNING;
             this.runUntil = Integer.MAX_VALUE;
         }
