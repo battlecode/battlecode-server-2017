@@ -116,10 +116,6 @@ public final class System {
         return null;
     }
 
-    public static Properties getProperties() {
-        return props;
-    }
-
     public static String lineSeparator() {
         return "\n";
     }
@@ -132,10 +128,6 @@ public final class System {
 
     public static int identityHashCode(Object x) {
         return ObjectHashCode.identityHashCode(x);
-    }
-
-    public static void setProperties(Properties props) {
-        battlecode.instrumenter.inject.System.props = props;
     }
 
     public static String getProperty(String key) {
