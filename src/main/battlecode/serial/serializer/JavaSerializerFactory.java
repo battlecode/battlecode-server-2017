@@ -1,4 +1,4 @@
-package battlecode.server.serializer;
+package battlecode.serial.serializer;
 
 import java.io.*;
 
