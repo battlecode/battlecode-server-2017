@@ -666,11 +666,6 @@ public class GameWorld implements SignalHandler {
 
         if (winner != null) {
             running = false;
-            for (InternalRobot o : gameObjectsByID.values()) {
-                if (o != null) {
-                    controlProvider.robotKilled(o);
-                }
-            }
         }
     }
 

@@ -294,7 +294,6 @@ public class SandboxedRobotPlayer {
      */
     public void terminate() throws InstrumentationException {
         if (terminated) {
-            System.err.println("[server:debug] Attempting to kill already-terminated robot?");
             return;
         }
 
