@@ -3,6 +3,7 @@ package battlecode.instrumenter.inject;
 import battlecode.instrumenter.RobotDeathException;
 import battlecode.instrumenter.stream.EOFInputStream;
 import battlecode.instrumenter.stream.PrintStreamWrapper;
+import battlecode.server.Config;
 
 import java.io.*;
 import java.nio.channels.Channel;
@@ -64,14 +65,12 @@ public final class System {
         props.setProperty("user.home", "who knows?");
         props.setProperty("user.dir", "who knows?");
 
-        // Copy bc.testing stuff
-        for (Map.Entry<Object, Object> entry : java.lang.System.getProperties().entrySet()) {
-            if (entry.getKey() instanceof String) {
-                String key = (String) entry.getKey();
+        Config global = Config.getGlobalConfig();
 
-                if (key.startsWith("bc.testing")) {
-                    props.put(key, entry.getValue());
-                }
+        // Copy bc.testing stuff
+        for (String key : global.getKeys()) {
+            if (key.startsWith("bc.testing")) {
+                props.put(key, global.get(key));
             }
         }
     }

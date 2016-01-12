@@ -4,6 +4,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import battlecode.server.Config;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -160,7 +161,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testBcTesting() throws Exception {
-        System.setProperty("bc.testing.should.terminate", "true");
+        Config.getGlobalConfig().set("bc.testing.should.terminate", "true");
 
         SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersystem", "RobotPlayer", rc, 0);
         player.setBytecodeLimit(200);
