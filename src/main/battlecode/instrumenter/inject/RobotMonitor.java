@@ -153,6 +153,10 @@ public final class RobotMonitor {
             killer.kill();
         }
 
-        bytecodesLeft += BYTECODE_LIMIT;
+        if (bytecodesLeft < 0) {
+            bytecodesLeft += BYTECODE_LIMIT;
+        } else {
+            bytecodesLeft = BYTECODE_LIMIT;
+        }
     }
 }
