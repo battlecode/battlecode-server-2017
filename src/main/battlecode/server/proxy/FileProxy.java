@@ -98,4 +98,9 @@ public class FileProxy implements Proxy {
         }
         serializer.serialize(message);
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " { target: " + file + " }";
+    }
 }

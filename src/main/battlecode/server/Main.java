@@ -1,6 +1,7 @@
 package battlecode.server;
 
 import battlecode.serial.notification.GameNotification;
+import battlecode.serial.notification.TerminateNotification;
 import battlecode.server.proxy.FileProxy;
 import battlecode.server.proxy.Proxy;
 import battlecode.server.serializer.JavaSerializerFactory;
@@ -22,13 +23,19 @@ public class Main {
 
             final Proxy proxy = new FileProxy(saveFile, serializerFactory);
 
-            final Server server = new Server(options, Server.Mode.HEADLESS, proxy);
+            final Server server = new Server(options, false);
 
             new GameNotification(new GameInfo(
-                options.get("bc.game.team-a"),
-                options.get("bc.game.team-b"),
-                options.get("bc.game.maps").split(",")
+                    options.get("bc.game.team-a"),
+                    null,
+                    options.get("bc.game.team-b"),
+                    null,
+                    options.get("bc.game.maps").split(","),
+                    new Proxy[] { proxy },
+                    false
             )).accept(server);
+
+            new TerminateNotification().accept(server);
 
             server.run();
         } catch (IOException e) {

@@ -59,12 +59,13 @@ public class PlayerControlProvider implements RobotControlProvider {
 
     @Override
     public void matchEnded() {
-         for (final SandboxedRobotPlayer player : this.sandboxes.values()) {
-            if (player != null && !player.getTerminated()) {
-                player.terminate();
-            }
-         }
-         this.sandboxes.clear();
+        for (final SandboxedRobotPlayer player : this.sandboxes.values()) {
+           if (player != null && !player.getTerminated()) {
+               player.terminate();
+           }
+        }
+        this.sandboxes = null;
+        this.gameWorld = null;
     }
 
     @Override

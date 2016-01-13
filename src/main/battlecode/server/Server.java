@@ -1,13 +1,21 @@
 package battlecode.server;
 
+import battlecode.common.GameConstants;
 import battlecode.common.Team;
 import battlecode.serial.*;
 import battlecode.serial.notification.*;
-import battlecode.server.proxy.Proxy;
 import battlecode.server.proxy.ProxyWriter;
+import battlecode.world.DominationFactor;
+import battlecode.world.GameMap;
+import battlecode.world.GameMapIO;
+import battlecode.world.GameWorld;
+import battlecode.world.control.*;
+import battlecode.world.signal.InternalSignal;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Runs matches. Specifically, this class forms a pipeline connecting match and
@@ -15,21 +23,21 @@ import java.util.*;
  * match data sink.
  */
 public class Server implements Runnable, NotificationHandler {
+    /**
+     * The GameInfo that signals the server to terminate when it is encountered on the game queue.
+     */
+    private static final GameInfo POISON = new GameInfo(null, null, null, null, null, null, false) {};
 
     /**
      * The proxies to use for writing match data.
      */
-    private final ProxyWriter proxyWriter;
+    private ProxyWriter proxyWriter;
 
     /**
-     * A queue of matches that this server has yet to run.
+     * The queue of games to run.
+     * When the server encounters the GameInfo POISON, it terminates.
      */
-    private final Deque<Match> matches;
-
-    /**
-     * A list of matches that this server has already run.
-     */
-    private final Deque<Match> finished;
+    private final BlockingQueue<GameInfo> gameQueue;
 
     /**
      * The state of the match that the server is running (or about to run).
@@ -47,9 +55,16 @@ public class Server implements Runnable, NotificationHandler {
     private final Config options;
 
     /**
-     * The server's mode.
+     * Whether to wait for notifications to control match run state, or to just
+     * run all matches immediately.
      */
-    private Mode mode;
+    private final boolean interactive;
+
+    /**
+     * The GameWorld the server is currently operating on.
+     */
+    private GameWorld currentWorld;
+
 
     /**
      * The server's mode affects how notifications are handled, whether or not
@@ -57,23 +72,22 @@ public class Server implements Runnable, NotificationHandler {
      * operation.
      */
     public enum Mode {
-        HEADLESS, LOCAL, SCRIMMAGE, TOURNAMENT
+        HEADLESS,
+        LOCAL,
+        SCRIMMAGE,
+        TOURNAMENT
     }
 
     /**
      * Initializes a new server.
      *
      * @param options the configuration to use
-     * @param mode the mode to run the server in
-     * @param proxies the proxies to send messages to
+     * @param interactive whether to wait for notifications to control the match run state
      */
-    public Server(Config options, Mode mode, Proxy... proxies) {
-        this.matches = new ArrayDeque<>();
-        this.finished = new ArrayDeque<>();
+    public Server(Config options, boolean interactive) {
+        this.gameQueue = new LinkedBlockingQueue<>();
 
-        this.mode = mode;
-
-        this.proxyWriter = new ProxyWriter(proxies, options.getBoolean("bc.server.debug"));
+        this.interactive = interactive;
 
         this.options = options;
         this.state = State.NOT_READY;
@@ -83,17 +97,20 @@ public class Server implements Runnable, NotificationHandler {
 
     @Override
     public void visitPauseNotification(PauseNotification n) {
+        System.out.println("PAUSENOTIFICATION "+n);
         state = State.PAUSED;
         proxyWriter.enqueue(new PauseEvent());
     }
 
     @Override
     public void visitStartNotification(StartNotification n) {
-                                                          state = State.READY;
-                                                                              }
+        System.out.println("STARTNOTIFICATION "+n);
+        state = State.READY;
+    }
 
     @Override
     public void visitRunNotification(RunNotification n) {
+        System.out.println("RUNNOTIFICATION "+n);
         if (state != State.PAUSED) {
             state = State.RUNNING;
             runUntil = n.getRounds();
@@ -102,42 +119,36 @@ public class Server implements Runnable, NotificationHandler {
 
     @Override
     public void visitResumeNotification(ResumeNotification n) {
+        System.out.println("RESUMENOT "+n);
         if (state == State.PAUSED)
             state = State.RUNNING;
     }
 
     @Override
     public void visitInjectNotification(InjectNotification n) {
-        InjectDelta result = matches.peek().inject(n.getInternalSignal());
+        assert isRunningMatch();
+
+        InjectDelta result;
+
+        try {
+            result = new InjectDelta(true, currentWorld.inject(n.getInternalSignal()));
+        } catch (final RuntimeException e) {
+            warn("Injection failure: " + e.getMessage());
+            e.printStackTrace();
+            result = new InjectDelta(false, new InternalSignal[0]);
+        }
 
         proxyWriter.enqueue(result);
     }
 
     @Override
     public void visitGameNotification(GameNotification n) {
-        synchronized (matches) {
-            if (!matches.isEmpty()) {
-                return;
-            }
-        }
+        this.gameQueue.add(n.getInfo());
+    }
 
-        try {
-            GameInfo info = n.getInfo();
-
-            int matchCount = info.getMaps().length;
-            int matchNumber = 0;
-            for (String map : info.getMaps()) {
-                if (map.endsWith(".xml"))
-                    map = map.substring(0, map.indexOf('.'));
-                Match match = new Match(info, map, options,
-                        matchNumber++, matchCount);
-                debug("queuing match " + match);
-                matches.add(match);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("couldn't start the match: " + e.getMessage());
-        }
+    @Override
+    public void visitTerminateNotification(TerminateNotification n) {
+        this.gameQueue.add(POISON);
     }
 
     /**
@@ -146,79 +157,149 @@ public class Server implements Runnable, NotificationHandler {
      * matches.
      */
     public void run() {
-        int aWins = 0, bWins = 0;
-
-        while (!matches.isEmpty()) {
-            Match match = matches.peek();
-            if (!finished.isEmpty())
-                match.setInitialTeamMemory(finished.getLast()
-                        .getComputedTeamMemory());
-
+        while (true) {
+            final GameInfo currentGame;
             try {
-                debug("running match " + match);
-                match.initialize();
-                runMatch(match, proxyWriter);
-                finished.add(match);
-                matches.remove(match);
+                currentGame = gameQueue.take();
+            } catch (InterruptedException e) {
+                warn("Interrupted while waiting for next game!");
+                e.printStackTrace();
+                Thread.currentThread().interrupt();
+                return;
+            }
 
-                if (match.getWinner() == Team.A)
-                    aWins++;
-                else if (match.getWinner() == Team.B)
-                    bWins++;
+            // Note: ==, not .equals()
+            if (currentGame == POISON) {
+                debug("Shutting down server");
+                return;
+            }
 
-                match.finish();
+            debug("Running: "+currentGame);
 
-                // Allow best of three scrimmages -- single game scrims should still work fine
-                //TODO:This "win mode" should probably be something from the database
-                if (mode == Mode.TOURNAMENT || mode == Mode.SCRIMMAGE) {
-                    if (aWins == 2 || bWins == 2)
-                        break;
+            // Set up our proxy writer
+            this.proxyWriter = new ProxyWriter(
+                    currentGame.getProxies(),
+                    options.getBoolean("bc.server.debug")
+            );
+
+            // Set up our control provider
+            final RobotControlProvider prov = createControlProvider(currentGame);
+
+            // We start with zeroed team memories.
+            long[][] teamMemory = new long[2][GameConstants.TEAM_MEMORY_LENGTH];
+
+            // Count wins
+            int aWins = 0, bWins = 0;
+
+            // Loop through the maps in the current game
+            for (int matchIndex = 0; matchIndex < currentGame.getMaps().length; matchIndex++) {
+
+                Team winner;
+                try {
+                    winner = runMatch(currentGame, matchIndex, prov, teamMemory, proxyWriter);
+                } catch (Exception e) {
+                    ErrorReporter.report(e);
+                    this.state = State.ERROR;
+                    return; // TODO
                 }
 
-            } catch (Exception e) {
-                ErrorReporter.report(e);
-                error("couldn't run match: ");
+                switch (winner) {
+                    case A:
+                        aWins++;
+                        break;
+                    case B:
+                        bWins++;
+                        break;
+                    default:
+                        warn("Team "+winner+" won???");
+                }
 
-                this.state = State.ERROR;
+                teamMemory = currentWorld.getTeamMemory();
+                currentWorld = null;
+
+                if (currentGame.isBestOfThree()) {
+                    if (aWins == 2 || bWins == 2) {
+                        break;
+                    }
+                }
             }
-        }
 
-        proxyWriter.terminate();
+            // Terminate our proxy writer
+            proxyWriter.terminate();
+        }
     }
 
 
     /**
-     * Runs a match; configures the controller and list of proxies, and starts
-     * running the game in a separate thread.
+     * @return the winner of the match
+     * @throws Exception if the match fails to run for some reason
      */
-    private void runMatch(final Match match, final ProxyWriter proxyWriter) throws Exception {
-        if (Mode.HEADLESS.equals(mode) || Mode.SCRIMMAGE.equals(mode)
-                || Mode.TOURNAMENT.equals(mode)) {
+    private Team runMatch(GameInfo currentGame,
+                          int matchIndex,
+                          RobotControlProvider prov,
+                          long[][] teamMemory,
+                          ProxyWriter proxyWriter) throws Exception {
+
+        final String mapName = currentGame.getMaps()[matchIndex];
+
+        // Load the map for the match
+        final GameMap loadedMap;
+        try {
+            loadedMap = GameMapIO.loadMap(mapName, new File(options.get("bc.game.map-path")));
+            debug("running map " + loadedMap);
+        } catch (IOException e) {
+            warn("Couldn't load map " + mapName + ", skipping");
+            throw e;
+        }
+
+
+        // Create the game world!
+        currentWorld = new GameWorld(loadedMap, prov, currentGame.getTeamA(), currentGame.getTeamB(), teamMemory);
+
+
+        // Get started
+        if (interactive) {
+            // TODO necessary?
+            // Poll for RUNNING, if we're in interactive mode
+            while (!State.RUNNING.equals(state)) {
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException e) {}
+            }
+        } else {
+            // Start the game immediately if we're not in interactive mode
             this.state = State.RUNNING;
             this.runUntil = Integer.MAX_VALUE;
         }
 
-        // Poll for RUNNING, if mode == Mode.LOCAL
-        while (!State.RUNNING.equals(state)) {
-            try {
-                Thread.sleep(250);
-            } catch (InterruptedException e) {
-            }
-        }
 
+        // Print an
         long startTime = System.currentTimeMillis();
-
         say("-------------------- Match Starting --------------------");
-        say(match.toString());
+        say(String.format("%s vs. %s on %s", currentGame.getTeamA(), currentGame.getTeamB(), mapName));
+
 
         // Compute the header and send it to all listeners.
-        MatchHeader header = match.getHeader();
+        MatchHeader header = new MatchHeader(
+                loadedMap,
+                teamMemory,
+                matchIndex,
+                currentGame.getMaps().length // match count
+        );
         proxyWriter.enqueue(header);
-        ExtensibleMetadata exHeader = match.getHeaderMetadata();
-        proxyWriter.enqueue(exHeader);
 
-        this.state = State.RUNNING;
+        // And the other part of the header
+        // TODO: merge this into MatchHeader
+        ExtensibleMetadata ex = new ExtensibleMetadata();
+        ex.put("type", "header");
+        ex.put("team-a", currentGame.getTeamA());
+        ex.put("team-b", currentGame.getTeamB());
+        ex.put("maps", currentGame.getMaps());
+        proxyWriter.enqueue(ex);
 
+        //this.state = State.RUNNING;
+
+        // Used to count throttles
         int count = 0;
 
         final String throttle = options.get("bc.server.throttle");
@@ -229,30 +310,29 @@ public class Server implements Runnable, NotificationHandler {
         // If there are more rounds to be run, run them and
         // and send the round (and optionally stats) bytes to
         // recipients.
-        while (match.hasMoreRounds()) {
+        while (currentWorld.isRunning()) {
 
             // If not paused/stopped:
             switch (this.state) {
 
                 case RUNNING:
 
-                    if (match.getRoundNumber() == runUntil) {
+                    if (currentWorld.getCurrentRound() + 1 == runUntil) {
                         Thread.sleep(25);
                         break;
                     }
 
-                    final RoundDelta round = match.getRound();
-                    if (round == null)
-                        break;
+                    GameState state = currentWorld.runRound();
 
-                    if (GameState.BREAKPOINT.equals(match.getGameState())) {
+                    if (GameState.BREAKPOINT.equals(state)) {
                         this.state = State.PAUSED;
                         proxyWriter.enqueue(new PauseEvent());
-                    } else if (GameState.DONE.equals(match.getGameState())) {
+                    } else if (GameState.DONE.equals(state)) {
                         this.state = State.FINISHED;
+                        break;
                     }
 
-                    proxyWriter.enqueue(round);
+                    proxyWriter.enqueue(new RoundDelta(currentWorld.getAllSignals(true)));
 
                     if (count++ == throttleCount) {
                         if (doYield)
@@ -271,48 +351,116 @@ public class Server implements Runnable, NotificationHandler {
         }
 
         // Compute footer data.
-        GameStats gameStats = match.getGameStats();
-        MatchFooter footer = match.getFooter();
-
+        GameStats gameStats = currentWorld.getGameStats();
         proxyWriter.enqueue(gameStats);
+
+        MatchFooter footer = new MatchFooter(currentWorld.getWinner(), currentWorld.getTeamMemory());
         proxyWriter.enqueue(footer);
 
-        say(match.getWinnerString());
+        say(getWinnerString(currentGame, currentWorld.getWinner(), currentWorld.getCurrentRound()));
         say("-------------------- Match Finished --------------------");
 
         double timeDiff = (System.currentTimeMillis() - startTime) / 1000.0;
         debug(String.format("match completed in %.4g seconds", timeDiff));
 
         this.state = State.FINISHED;
+
+        return currentWorld.getWinner();
     }
 
+    /**
+     * @return TODO
+     */
     public State getState() {
         return this.state;
     }
 
     /**
-     * This method is used to display error messages. Invoking it terminates the
-     * program.
+     * Create a RobotControlProvider for a game.
      *
-     * @param msg the error message to display
+     * @param game the game to provide control for
+     * @return a fresh control provider for the game
      */
-    public static void fail(String msg) {
-        System.out.printf("[server:fatal] %s\n", msg);
-        System.exit(-1);
+    private RobotControlProvider createControlProvider(GameInfo game) {
+        // Strictly speaking, this should probably be somewhere in battlecode.world
+        // Whatever
+
+        final TeamControlProvider teamProvider = new TeamControlProvider();
+
+        teamProvider.registerControlProvider(
+                Team.A,
+                new PlayerControlProvider(game.getTeamA())
+        );
+        teamProvider.registerControlProvider(
+                Team.B,
+                new PlayerControlProvider(game.getTeamB())
+        );
+        teamProvider.registerControlProvider(
+                Team.ZOMBIE,
+                new ZombieControlProvider(options.getBoolean("bc.game.disable-zombies"))
+        );
+        teamProvider.registerControlProvider(
+                Team.NEUTRAL,
+                new NullControlProvider()
+        );
+
+        return teamProvider;
+    }
+
+
+    /**
+     * Produces a string for the winner of the match.
+     *
+     * @return A string representing the match's winner.
+     */
+    public String getWinnerString(GameInfo game, Team winner, int roundNumber) {
+
+        String teamName;
+
+        switch (winner) {
+            case A:
+                teamName = game.getTeamA() + " (A)";
+                break;
+
+            case B:
+                teamName = game.getTeamB() + " (B)";
+                break;
+
+            default:
+                teamName = "nobody";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < (50 - teamName.length()) / 2; i++)
+            sb.append(' ');
+        sb.append(teamName);
+        sb.append(" wins (round ").append(roundNumber).append(")");
+
+        sb.append("\nReason: ");
+        GameStats stats = currentWorld.getGameStats();
+        DominationFactor dom = stats.getDominationFactor();
+        if (dom == DominationFactor.DESTROYED)
+            sb.append("The winning team won by destruction.");
+        else if (dom == DominationFactor.PWNED)
+            sb.append("The winning team won on tiebreakers (more Archons remaining).");
+        else if (dom == DominationFactor.OWNED)
+            sb.append("The winning team won on tiebreakers (more Archon health).");
+        else if (dom == DominationFactor.BARELY_BEAT)
+            sb.append("The winning team won on tiebreakers (more Parts)");
+        else if (dom == DominationFactor.WON_BY_DUBIOUS_REASONS)
+            sb.append("The winning team won arbitrarily.");
+
+        return sb.toString();
     }
 
     /**
-     * This method is used to display non-fatal error messages, issuing a
-     * RuntimeException instead of terminating the Server.
-     *
-     * @param msg the error message to display
+     * @return whether we are actively running a match
      */
-    public static void error(String msg) {
-        for (String line : msg.split("\n")) {
-            System.out.printf("[server:error] %s\n", line);
-        }
-        throw new RuntimeException(msg);
+    public boolean isRunningMatch() {
+        return currentWorld != null && currentWorld.isRunning();
     }
+
+
 
     /**
      * This method is used to display warning messages with formatted output.
