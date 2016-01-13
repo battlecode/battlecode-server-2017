@@ -165,7 +165,10 @@ public class GameWorld implements SignalHandler {
                 robot.processBeginningOfTurn();
                 this.controlProvider.runRobot(robot);
                 robot.setBytecodesUsed(this.controlProvider.getBytecodesUsed(robot));
-                robot.processEndOfTurn();
+                
+                if(robot.getHealthLevel() > 0) { // Only processEndOfTurn if robot is still alive
+                    robot.processEndOfTurn();
+                }
                 // If the robot terminates but the death signal has not yet
                 // been visited:
                 if (this.controlProvider.getTerminated(robot) && gameObjectsByID
