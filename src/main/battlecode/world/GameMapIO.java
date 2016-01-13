@@ -183,6 +183,8 @@ public final class GameMapIO {
             try {
                 if (!loadMap(map, mapPath).isTournamentLegal()) {
                     System.err.println("Illegal map: " + map);
+                } else {
+                    System.out.println("Valid map: " + map);
                 }
             } catch (Exception e) {
                 System.err.println("Couldn't load map: "+map);

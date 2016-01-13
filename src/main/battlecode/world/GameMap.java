@@ -504,12 +504,15 @@ public class GameMap implements Serializable {
     public boolean isTournamentLegal() {
         computeLazyValues();
 
+        int nArchons = 0;
+        int nZombieDens = 0;
+
         // First, check to make sure there aren't any ZOMBIEDENs on lines of symmetry
         for(InitialRobotInfo robot : initialRobots) {
             final MapLocation origin = new MapLocation(0, 0);
             final MapLocation loc = robot.getLocation(origin);
             final int x = loc.x, y = loc.y;
-            if(robot.type == RobotType.ZOMBIEDEN) {
+            if (robot.type == RobotType.ZOMBIEDEN) {
                 if(symVert) {
                     if(y == height - y - 1) return false;
                 } else if (symHoriz) {
@@ -523,8 +526,44 @@ public class GameMap implements Serializable {
                 } else {
                     return false;
                 }
+
+                // All zombie dens must be on the zombie team
+                if (robot.team != Team.ZOMBIE) {
+                    return false;
+                }
+                nZombieDens++;
+            } else if (robot.type == RobotType.ARCHON) {
+                // We cannot have zombie archons
+                if (robot.team == Team.ZOMBIE) {
+                    return false;
+                }
+                if (robot.team == Team.A || robot.team == Team.B) {
+                    nArchons++;
+                }
+            } else {
+                // All remaining initial robots must be neutral.
+                if (robot.team != Team.NEUTRAL) {
+                    return false;
+                }
+
+                // No neutral zombies allowed.
+                if (robot.type.isZombie) {
+                    return false;
+                }
             }
         }
+
+        if (nArchons % 2 == 1) {
+            return false;
+        }
+        if (nArchons / 2 > GameConstants.NUMBER_OF_ARCHONS_MAX || nArchons ==
+                0) {
+            return false;
+        }
+        if (nZombieDens == 0) {
+            return false;
+        }
+
         // Make sure the map has some sort of symmetry
         return (symVert || symHoriz || symNegDiag || symPosDiag || symRot);
     }
