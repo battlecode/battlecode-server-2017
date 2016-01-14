@@ -1,19 +1,9 @@
 package battlecode.world;
 
 import battlecode.common.*;
-
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 /**
  * Unit tests for RobotController. These are where the gameplay tests are.
@@ -1291,5 +1281,48 @@ public class RobotControllerTest {
 
         // Make sure Team B was the winner
         assertEquals(game.getWorld().getWinner(), Team.B);
+    }
+
+    /**
+     * Test getting initial archon locations.
+     */
+    @Test
+    public void testGetInitialArchonLocations() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100)
+                .withRobot(RobotType.ARCHON, Team.A, 0, 0)
+                .withRobot(RobotType.SOLDIER, Team.A, 1, 1)
+                .withRobot(RobotType.ARCHON, Team.B, 3, 3)
+                .withRobot(RobotType.GUARD, Team.B, 4, 4)
+                .withRobot(RobotType.ARCHON, Team.NEUTRAL, 5, 5)
+                .withRobot(RobotType.SCOUT, Team.A, 0, 1)
+                .withRobot(RobotType.ARCHON, Team.B, 2, 2)
+                .withRobot(RobotType.ARCHON, Team.B, 2, 3);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int bot1 = game.spawn(oX + 6, oY + 6, RobotType.ARCHON,
+                Team.A);
+
+        game.round((id, rc) -> {
+            if (id == bot1) {
+                MapLocation[] locsA = rc.getInitialArchonLocations(Team.A);
+                MapLocation[] locsB = rc.getInitialArchonLocations(Team.B);
+                MapLocation[] locsN = rc.getInitialArchonLocations(Team
+                        .NEUTRAL);
+                MapLocation[] locsZ = rc.getInitialArchonLocations(Team
+                        .ZOMBIE);
+
+                assertEquals(locsZ.length, 0);
+                assertEquals(locsN.length, 0);
+
+                assertEquals(locsA.length, 1);
+                assertEquals(locsB.length, 3);
+                assertEquals(locsA[0], new MapLocation(oX, oY));
+                assertEquals(locsB[0], new MapLocation(oX + 2, oY + 2));
+                assertEquals(locsB[1], new MapLocation(oX + 2, oY + 3));
+                assertEquals(locsB[2], new MapLocation(oX + 3, oY + 3));
+            }
+        });
     }
 }

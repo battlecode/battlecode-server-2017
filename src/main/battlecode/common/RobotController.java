@@ -60,6 +60,21 @@ public interface RobotController {
      */
     int getRobotCount();
 
+    /**
+     * Returns a list of the INITIAL locations of the archons of a particular
+     * team. The locations will be sorted by increasing x, with ties broken by
+     * increasing y. Will return empty lists if you query for NEUTRAL or ZOMBIE.
+     *
+     * @param t the team whose archons you want to query the initial
+     *          locations for. Will return empty lists if you query for
+     *          NEUTRAL or ZOMBIE.
+     * @return a list of the INITIAL locations of the archons of that team,
+     * or empty lists for team NEUTRAL and ZOMBIE.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    MapLocation[] getInitialArchonLocations(Team t);
+
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************

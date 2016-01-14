@@ -99,6 +99,27 @@ public final class RobotControllerImpl implements RobotController {
         return gameWorld.getRobotCount(getTeam());
     }
 
+    @Override
+    public MapLocation[] getInitialArchonLocations(Team t) {
+        if (t == Team.ZOMBIE || t == Team.NEUTRAL) {
+            return new MapLocation[0];
+        } else {
+            GameMap.InitialRobotInfo[] initialRobots = gameWorld.getGameMap()
+                    .getInitialRobots();
+            ArrayList<MapLocation> archonLocs = new ArrayList<MapLocation>();
+            for (GameMap.InitialRobotInfo initial : initialRobots) {
+                if (initial.type == RobotType.ARCHON && initial.team == t) {
+                    archonLocs.add(initial.getLocation(gameWorld.getGameMap()
+                            .getOrigin()));
+                }
+            }
+            MapLocation[] array = archonLocs.toArray(new
+                    MapLocation[archonLocs.size()]);
+            Arrays.sort(array);
+            return array;
+        }
+    }
+
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************
