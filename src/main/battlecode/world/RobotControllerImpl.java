@@ -513,7 +513,7 @@ public final class RobotControllerImpl implements RobotController {
 
         robot.activateCoreAction(new MovementSignal(robot.getID(),
                         getLocation().add(d), (int) (robot.getType()
-                        .movementDelay * factor1)),
+                        .movementDelay * factor1 * factor3)),
                 robot.getType().cooldownDelay * factor2 * factor3,
                 robot.getType().movementDelay * factor1 * factor3);
     }
