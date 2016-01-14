@@ -1181,7 +1181,6 @@ public class RobotControllerTest {
         int oY = game.getOriginY();
         final int bot1 = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
 
-
         game.round((id, rc) -> {
             if (id == bot1) {
                 boolean exception = false;
@@ -1193,5 +1192,42 @@ public class RobotControllerTest {
                 assertTrue(exception);
             }
         });
+    }
+
+    /**
+     * If both teams lose their last archon in the same round (but not
+     * necessarily the same turn), the one who loses the archon last should win.
+     */
+    @Test
+    public void testDoubleArchonDeath() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int bot1 = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+        final int bot2 = game.spawn(oX, oY + 1, RobotType.ARCHON, Team.B);
+        final int bot3 = game.spawn(oX + 1, oY, RobotType.SOLDIER, Team.A);
+        final int bot4 = game.spawn(oX + 1, oY + 1, RobotType.SOLDIER, Team.B);
+
+        InternalRobot bot1Bot = game.getBot(bot1);
+        InternalRobot bot2Bot = game.getBot(bot2);
+        bot1Bot.takeDamage(RobotType.ARCHON.maxHealth - 1);
+        bot2Bot.takeDamage(RobotType.ARCHON.maxHealth - 1);
+
+        game.round((id, rc) -> {
+            if (id == bot3) {
+                rc.attackLocation(new MapLocation(oX, oY));
+            } else if (id == bot4) {
+                rc.attackLocation(new MapLocation(oX, oY + 1));
+            }
+        });
+
+        // Make sure both archons died
+        assertEquals(bot1Bot.getHealthLevel(), -3, EPSILON);
+        assertEquals(bot2Bot.getHealthLevel(), -3, EPSILON);
+
+        // Make sure Team B was the winner
+        assertEquals(game.getWorld().getWinner(), Team.B);
     }
 }
