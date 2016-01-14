@@ -42,6 +42,7 @@ battlecode/common/RobotController/getCoreDelay                1     true
 battlecode/common/RobotController/getHealth                   1     true
 battlecode/common/RobotController/getID                       1     true
 battlecode/common/RobotController/getInfectedTurns            1     true
+battlecode/common/RobotController/getInitialArchonLocations   100   true
 battlecode/common/RobotController/getLocation                 1     true
 battlecode/common/RobotController/getMessageSignalCount       1     true
 battlecode/common/RobotController/getRobotCount               20    true
