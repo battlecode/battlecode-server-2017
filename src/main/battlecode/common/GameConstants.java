@@ -92,7 +92,7 @@ public interface GameConstants {
     double GUARD_DEFENSE_THRESHOLD = 10;
     
     /** Amount of damage guards can block */
-    double GUARD_DAMAGE_REDUCTION = 5;
+    double GUARD_DAMAGE_REDUCTION = 4;
     
     /** Damage a robot receives from a Viper's infection per turn */
     double VIPER_INFECTION_DAMAGE = 2;

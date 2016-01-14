@@ -55,7 +55,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    SCOUT           (false, false, 0,  ARCHON,    40, 15, 100,  0,  0,    1.4, 0, 1, 53,     20000, 0, FASTZOMBIE, true),
+    SCOUT           (false, false, 0,  ARCHON,    25, 20, 80,   0,  0,    1.4, 0, 1, 53,     20000, 0, FASTZOMBIE, true),
     //                                            PC  TC  HP    ATK RNG   MVD  AD CD
     /**
      * An all-around ranged unit.
