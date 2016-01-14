@@ -156,7 +156,7 @@ public class ZombieControlProviderTest {
 
         // Zombie should have attacked guard once
         assertEquals(RobotType.GUARD.maxHealth - RobotType.BIGZOMBIE.attackPower,
-                guard.getHealthLevel(),
+                guard.getHealthLevel() - GameConstants.GUARD_DAMAGE_REDUCTION,
                 1e-9);
     }
 
