@@ -1026,7 +1026,7 @@ public class RobotControllerTest {
                 Signal[] signals = rc.emptySignalQueue();
                 assertEquals(signals.length,GameConstants.SIGNAL_QUEUE_MAX_SIZE);
                 assertEquals(signals[0].getMessage()[0],0);
-                assertEquals(signals[0].getMessage()[1],1);
+                assertEquals(signals[0].getMessage()[1], 1);
             }
         });
     }
@@ -1108,6 +1108,33 @@ public class RobotControllerTest {
                 assertTrue(exception);
             }
         });
+    }
+
+    /**
+     * Makes sure that if you spawn on a parts location, you pick it up.
+     */
+    @Test
+    public void testSpawningOnParts() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100)
+                .withParts(0, 0, 100)
+                .withParts(0, 1, 100);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int bot1 = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+        final int bot2 = game.spawn(oX, oY + 1, RobotType.ARCHON, Team.NEUTRAL);
+
+        game.round((id, rc) -> {
+        });
+
+        assertEquals(game.getWorld().getParts(new MapLocation(oX, oY)), 0,
+                EPSILON);
+        assertEquals(game.getWorld().resources(Team.A), GameConstants
+                .PARTS_INITIAL_AMOUNT + GameConstants.ARCHON_PART_INCOME -
+                GameConstants.PART_INCOME_UNIT_PENALTY + 100, EPSILON);
+        assertEquals(game.getWorld().getParts(new MapLocation(oX, oY + 1)), 100,
+                EPSILON);
     }
 
     /**
