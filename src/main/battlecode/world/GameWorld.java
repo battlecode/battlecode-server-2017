@@ -882,7 +882,7 @@ public class GameWorld implements SignalHandler {
         if (obj.getType() == RobotType.ARCHON && obj.getTeam().isPlayer()) {
             int totalArchons = getRobotTypeCount(obj.getTeam(),
                     RobotType.ARCHON);
-            if (totalArchons == 0) {
+            if (totalArchons == 0 && winner == null) {
                 setWinner(obj.getTeam().opponent(),
                         DominationFactor.DESTROYED);
             }
