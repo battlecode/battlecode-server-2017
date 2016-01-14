@@ -68,7 +68,8 @@ public interface RobotController {
      * @param t the team whose archons you want to query the initial
      *          locations for. Will return empty lists if you query for
      *          NEUTRAL or ZOMBIE.
-     * @return a list of the INITIAL locations of your archon.
+     * @return a list of the INITIAL locations of the archons of that team,
+     * or empty lists for team NEUTRAL and ZOMBIE.
      *
      * @battlecode.doc.costlymethod
      */
