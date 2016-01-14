@@ -88,6 +88,12 @@ public interface GameConstants {
     /** Guard's attack is scaled by this when attacking a Zombie opponent. */
     double GUARD_ZOMBIE_MULTIPLIER = 2;
     
+    /** Guard takes less damage from attacks dealing more than this much damage. */
+    double GUARD_DEFENSE_THRESHOLD = 10;
+    
+    /** Amount of damage guards can block */
+    double GUARD_DAMAGE_REDUCTION = 5;
+    
     /** Damage a robot receives from a Viper's infection per turn */
     double VIPER_INFECTION_DAMAGE = 2;
 
