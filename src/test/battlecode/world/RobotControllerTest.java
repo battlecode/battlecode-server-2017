@@ -1044,7 +1044,7 @@ public class RobotControllerTest {
         final int soldier1 = game.spawn(oX, oY, RobotType.SOLDIER,Team.A);
         final int soldier2 = game.spawn(oX + 3, oY + 3, RobotType.SOLDIER, Team.A);
         final int soldier3 = game.spawn(oX+6, oY+6, RobotType.SOLDIER,Team.B);
-        final int soldier4 = game.spawn(oX+10, oY+10, RobotType.SOLDIER,Team.A);
+        final int soldier4 = game.spawn(oX + 10, oY + 10, RobotType.SOLDIER, Team.A);
         final int zombie = game.spawn(oX+4, oY+2, RobotType.STANDARDZOMBIE, Team.ZOMBIE);
         InternalRobot soldier1Bot = game.getBot(soldier1);
         InternalRobot soldier2Bot = game.getBot(soldier2);
@@ -1166,6 +1166,41 @@ public class RobotControllerTest {
                 .PARTS_INITIAL_AMOUNT + 3 * GameConstants.ARCHON_PART_INCOME - 1
                 * GameConstants.PART_INCOME_UNIT_PENALTY, EPSILON);
         assertEquals(3, game.getWorld().getRobotCount(Team.A));
+    }
+
+    /**
+     * Verifies guard damage reduction.
+     */
+    @Test
+    public void testGuardDamageReduction() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int bot1 = game.spawn(oX, oY, RobotType.BIGZOMBIE, Team.ZOMBIE);
+        final int bot2 = game.spawn(oX + 1, oY, RobotType.SOLDIER, Team.A);
+        final int bot3 = game.spawn(oX, oY + 1, RobotType.GUARD, Team.B);
+        InternalRobot guard = game.getBot(bot3);
+
+        game.round((id, rc) -> {
+            if (id == bot2) {
+                rc.attackLocation(new MapLocation(oX, oY + 1));
+            }
+        });
+
+        assertEquals(guard.getHealthLevel(), guard.getMaxHealth() - RobotType
+                .SOLDIER.attackPower, EPSILON);
+
+        game.round((id, rc) -> {
+            if (id == bot1) {
+                rc.attackLocation(new MapLocation(oX, oY + 1));
+            }
+        });
+
+        assertEquals(guard.getHealthLevel(), guard.getMaxHealth() - RobotType
+                .SOLDIER.attackPower - RobotType.BIGZOMBIE.attackPower +
+                GameConstants.GUARD_DAMAGE_REDUCTION, EPSILON);
     }
 
     /**
