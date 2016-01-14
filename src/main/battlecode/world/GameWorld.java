@@ -1002,6 +1002,15 @@ public class GameWorld implements SignalHandler {
 
         if (s.getLoc() != null) {
             gameObjectsByLoc.put(s.getLoc(), robot);
+
+            // If you are an archon, pick up parts on that location.
+            if (s.getType() == RobotType.ARCHON && s.getTeam().isPlayer()) {
+                double newParts = takeParts(s.getLoc());
+                adjustResources(s.getTeam(), newParts);
+                if (newParts > 0) {
+                    addSignal(new PartsChangeSignal(s.getLoc(), 0));
+                }
+            }
         }
 
         // Robot might be killed during creation if player
