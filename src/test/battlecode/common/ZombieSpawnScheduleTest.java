@@ -3,10 +3,15 @@ package battlecode.common;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class ZombieSpawnScheduleTest {
 
@@ -25,22 +30,23 @@ public class ZombieSpawnScheduleTest {
         z.add(10000, RobotType.FASTZOMBIE, 15);
 
         int[] rounds = z.getRounds();
-        assertThat(Arrays.asList(rounds), contains(0, 100, 150, 10000));
+        assertArrayEquals(rounds, new int[]{0, 100, 150, 10000});
 
         ZombieCount[] round0 = z.getScheduleForRound(0);
-        assertThat(Arrays.asList(round0), containsInAnyOrder(new ZombieCount
-                (RobotType.FASTZOMBIE, 10), new ZombieCount(RobotType
-                .BIGZOMBIE, 5)));
+        assertThat(Arrays.asList(round0), containsInAnyOrder(equalTo(new
+                ZombieCount
+                (RobotType.FASTZOMBIE, 1)), equalTo(new ZombieCount(RobotType
+                .BIGZOMBIE, 5))));
         ZombieCount[] round100 = z.getScheduleForRound(100);
         assertThat(Arrays.asList(round100), containsInAnyOrder(new ZombieCount
                 (RobotType.STANDARDZOMBIE, 6), new ZombieCount(RobotType
                 .RANGEDZOMBIE, 123)));
         ZombieCount[] round150 = z.getScheduleForRound(150);
-        assertThat(Arrays.asList(round100), containsInAnyOrder(new ZombieCount
+        assertThat(Arrays.asList(round150), containsInAnyOrder(new ZombieCount
                 (RobotType.STANDARDZOMBIE, 25), new ZombieCount(RobotType
                 .BIGZOMBIE, 123)));
         ZombieCount[] round10000 = z.getScheduleForRound(10000);
-        assertThat(Arrays.asList(round100), containsInAnyOrder(new ZombieCount
+        assertThat(Arrays.asList(round10000), containsInAnyOrder(new ZombieCount
                 (RobotType.FASTZOMBIE, 25)));
         ZombieCount[] round2 = z.getScheduleForRound(2);
         assertEquals(round2.length, 0);
