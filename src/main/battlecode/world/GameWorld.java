@@ -811,16 +811,9 @@ public class GameWorld implements SignalHandler {
 
     @SuppressWarnings("unused")
     public void visitBuildSignal(BuildSignal s) {
-        InternalRobot parent;
         int parentID = s.getParentID();
-        MapLocation loc;
-        if (parentID == 0) {
-            parent = null;
-            loc = s.getLoc();
-        } else {
-            parent = getObjectByID(parentID);
-            loc = s.getLoc();
-        }
+        MapLocation loc = s.getLoc();
+        InternalRobot parent = getObjectByID(parentID);
 
         int cost = s.getType().partCost;
         adjustResources(s.getTeam(), -cost);
