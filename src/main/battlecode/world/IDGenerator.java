@@ -76,7 +76,7 @@ public class IDGenerator {
         this.cursor = 0;
 
         for (int i = 0; i < ID_BLOCK_SIZE; i++) {
-            this.reservedIDs[i] = this.nextIDBlock + i;
+            this.reservedIDs[i] = this.nextIDBlock + i + 1;
         }
 
         // fisher-yates shuffle
