@@ -234,7 +234,7 @@
             <zombie-count type="STANDARDZOMBIE" count="20"/>
             <zombie-count type="BIGZOMBIE" count="8"/>
         </round>
-        <round number="270">
+        <round number="2700">
             <zombie-count type="STANDARDZOMBIE" count="20"/>
             <zombie-count type="BIGZOMBIE" count="10"/>
         </round>
