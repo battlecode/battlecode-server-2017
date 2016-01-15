@@ -143,7 +143,7 @@ public class ZombieControlProvider implements RobotControlProvider {
         final Map<RobotType, Integer> spawnQueue = denQueues.get(rc.getID());
 
         final ZombieSpawnSchedule zSchedule = world.getGameMap().getZombieSpawnSchedule(den.getLocation());
-        
+
         // Update the spawn queue with the values from this round.
         for (ZombieCount count : zSchedule.getScheduleForRound(world.getCurrentRound())) {
             final int currentCount = spawnQueue.get(count.getType());
