@@ -81,55 +81,54 @@
     <!-- ramping -->
     <zombieSpawnSchedule>
         <round number="150">
-            <zombie-count type="STANDARDZOMBIE" count="12"/>
-            <zombie-count type="RANGEDZOMBIE" count="6"/>
+            <zombie-count type="STANDARDZOMBIE" count="8"/>
+            <zombie-count type="RANGEDZOMBIE" count="4"/>
         </round>
         <round number="300">
-            <zombie-count type="STANDARDZOMBIE" count="12"/>
-            <zombie-count type="RANGEDZOMBIE" count="6"/>
+            <zombie-count type="STANDARDZOMBIE" count="8"/>
+            <zombie-count type="RANGEDZOMBIE" count="4"/>
         </round>
         <round number="600">
-            <zombie-count type="STANDARDZOMBIE" count="12"/>
-            <zombie-count type="RANGEDZOMBIE" count="6"/>
-            <zombie-count type="BIGZOMBIE" count="0"/>
+            <zombie-count type="STANDARDZOMBIE" count="8"/>
+            <zombie-count type="RANGEDZOMBIE" count="4"/>
         </round>
         <round number="900">
-            <zombie-count type="STANDARDZOMBIE" count="12"/>
-            <zombie-count type="RANGEDZOMBIE" count="6"/>
+            <zombie-count type="STANDARDZOMBIE" count="8"/>
+            <zombie-count type="RANGEDZOMBIE" count="4"/>
             <zombie-count type="BIGZOMBIE" count="2"/>
         </round>
         <round number="1200">
-            <zombie-count type="STANDARDZOMBIE" count="16"/>
-            <zombie-count type="RANGEDZOMBIE" count="8"/>
+            <zombie-count type="STANDARDZOMBIE" count="12"/>
+            <zombie-count type="RANGEDZOMBIE" count="4"/>
             <zombie-count type="BIGZOMBIE" count="2"/>
         </round>
         <round number="1500">
-            <zombie-count type="STANDARDZOMBIE" count="16"/>
-            <zombie-count type="RANGEDZOMBIE" count="8"/>
+            <zombie-count type="STANDARDZOMBIE" count="12"/>
+            <zombie-count type="RANGEDZOMBIE" count="6"/>
             <zombie-count type="BIGZOMBIE" count="4"/>
         </round>
         <round number="1800">
-            <zombie-count type="STANDARDZOMBIE" count="20"/>
-            <zombie-count type="RANGEDZOMBIE" count="12"/>
-            <zombie-count type="FASTZOMBIE" count="10"/>
+            <zombie-count type="STANDARDZOMBIE" count="16"/>
+            <zombie-count type="RANGEDZOMBIE" count="8"/>
+            <zombie-count type="FASTZOMBIE" count="6"/>
             <zombie-count type="BIGZOMBIE" count="4"/>
         </round>
         <round number="2100">
-            <zombie-count type="STANDARDZOMBIE" count="20"/>
-            <zombie-count type="RANGEDZOMBIE" count="12"/>
-            <zombie-count type="FASTZOMBIE" count="10"/>
+            <zombie-count type="STANDARDZOMBIE" count="16"/>
+            <zombie-count type="RANGEDZOMBIE" count="8"/>
+            <zombie-count type="FASTZOMBIE" count="6"/>
             <zombie-count type="BIGZOMBIE" count="4"/>
         </round>
         <round number="2400">
-            <zombie-count type="STANDARDZOMBIE" count="30"/>
-            <zombie-count type="RANGEDZOMBIE" count="20"/>
-            <zombie-count type="FASTZOMBIE" count="20"/>
+            <zombie-count type="STANDARDZOMBIE" count="20"/>
+            <zombie-count type="RANGEDZOMBIE" count="14"/>
+            <zombie-count type="FASTZOMBIE" count="14"/>
             <zombie-count type="BIGZOMBIE" count="6"/>
         </round>
         <round number="2700">
-            <zombie-count type="STANDARDZOMBIE" count="30"/>
-            <zombie-count type="RANGEDZOMBIE" count="20"/>
-            <zombie-count type="FASTZOMBIE" count="20"/>
+            <zombie-count type="STANDARDZOMBIE" count="20"/>
+            <zombie-count type="RANGEDZOMBIE" count="14"/>
+            <zombie-count type="FASTZOMBIE" count="14"/>
             <zombie-count type="BIGZOMBIE" count="6"/>
         </round>
     </zombieSpawnSchedule>
