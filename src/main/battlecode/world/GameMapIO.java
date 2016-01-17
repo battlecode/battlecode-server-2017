@@ -1,8 +1,8 @@
 package battlecode.world;
 
 import battlecode.server.Config;
-import battlecode.server.serializer.Serializer;
-import battlecode.server.serializer.XStreamSerializerFactory;
+import battlecode.serial.serializer.Serializer;
+import battlecode.serial.serializer.XStreamSerializerFactory;
 
 import java.io.*;
 import java.net.URISyntaxException;

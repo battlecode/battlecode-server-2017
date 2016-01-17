@@ -613,7 +613,7 @@ public class GameMap implements Serializable {
                 for(MapLocation denLoc : denLocs) {
                     returnMap.get(denLoc).add(round, zombieCount.getType(), evenlyDivided);
                 }
-                
+
                 // Now, iterate individually for all leftover
                 for (int i=0; i<leftOver; i++) {
                     returnMap.get(denLocs.get(currentIndex)).add(round, zombieCount.getType(), 1);

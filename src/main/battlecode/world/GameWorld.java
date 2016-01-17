@@ -165,7 +165,10 @@ public class GameWorld implements SignalHandler {
                 robot.processBeginningOfTurn();
                 this.controlProvider.runRobot(robot);
                 robot.setBytecodesUsed(this.controlProvider.getBytecodesUsed(robot));
-                robot.processEndOfTurn();
+                
+                if(robot.getHealthLevel() > 0) { // Only processEndOfTurn if robot is still alive
+                    robot.processEndOfTurn();
+                }
                 // If the robot terminates but the death signal has not yet
                 // been visited:
                 if (this.controlProvider.getTerminated(robot) && gameObjectsByID
@@ -760,7 +763,11 @@ public class GameWorld implements SignalHandler {
                 }
 
                 double damage = (attacker.getAttackPower()) * rate;
-                target.takeDamage(damage);
+                if (target.getType() == RobotType.GUARD && damage > GameConstants.GUARD_DEFENSE_THRESHOLD) {
+                    target.takeDamage(damage - GameConstants.GUARD_DAMAGE_REDUCTION);
+                } else {
+                    target.takeDamage(damage);
+                }
 
                 // Reward parts to destroyer of zombie den
                 if (target.getType() == RobotType.ZOMBIEDEN && target
@@ -804,16 +811,9 @@ public class GameWorld implements SignalHandler {
 
     @SuppressWarnings("unused")
     public void visitBuildSignal(BuildSignal s) {
-        InternalRobot parent;
         int parentID = s.getParentID();
-        MapLocation loc;
-        if (parentID == 0) {
-            parent = null;
-            loc = s.getLoc();
-        } else {
-            parent = getObjectByID(parentID);
-            loc = s.getLoc();
-        }
+        MapLocation loc = s.getLoc();
+        InternalRobot parent = getObjectByID(parentID);
 
         int cost = s.getType().partCost;
         adjustResources(s.getTeam(), -cost);
@@ -879,7 +879,7 @@ public class GameWorld implements SignalHandler {
         if (obj.getType() == RobotType.ARCHON && obj.getTeam().isPlayer()) {
             int totalArchons = getRobotTypeCount(obj.getTeam(),
                     RobotType.ARCHON);
-            if (totalArchons == 0) {
+            if (totalArchons == 0 && winner == null) {
                 setWinner(obj.getTeam().opponent(),
                         DominationFactor.DESTROYED);
             }
@@ -999,6 +999,15 @@ public class GameWorld implements SignalHandler {
 
         if (s.getLoc() != null) {
             gameObjectsByLoc.put(s.getLoc(), robot);
+
+            // If you are an archon, pick up parts on that location.
+            if (s.getType() == RobotType.ARCHON && s.getTeam().isPlayer()) {
+                double newParts = takeParts(s.getLoc());
+                adjustResources(s.getTeam(), newParts);
+                if (newParts > 0) {
+                    addSignal(new PartsChangeSignal(s.getLoc(), 0));
+                }
+            }
         }
 
         // Robot might be killed during creation if player

@@ -1,6 +1,6 @@
 package battlecode.server;
 
-import battlecode.server.serializer.JsonSerializerFactory;
+import battlecode.serial.serializer.JsonSerializerFactory;
 import org.junit.Test;
 
 import java.io.IOException;

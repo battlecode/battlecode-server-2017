@@ -4,9 +4,9 @@ import battlecode.serial.notification.GameNotification;
 import battlecode.serial.notification.TerminateNotification;
 import battlecode.server.proxy.FileProxy;
 import battlecode.server.proxy.Proxy;
-import battlecode.server.serializer.JavaSerializerFactory;
-import battlecode.server.serializer.SerializerFactory;
-import battlecode.server.serializer.XStreamSerializerFactory;
+import battlecode.serial.serializer.JavaSerializerFactory;
+import battlecode.serial.serializer.SerializerFactory;
+import battlecode.serial.serializer.XStreamSerializerFactory;
 
 import java.io.IOException;
 

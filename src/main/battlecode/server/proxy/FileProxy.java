@@ -3,8 +3,8 @@ package battlecode.server.proxy;
 import battlecode.serial.PauseEvent;
 import battlecode.serial.ServerEvent;
 import battlecode.server.Server;
-import battlecode.server.serializer.Serializer;
-import battlecode.server.serializer.SerializerFactory;
+import battlecode.serial.serializer.Serializer;
+import battlecode.serial.serializer.SerializerFactory;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;

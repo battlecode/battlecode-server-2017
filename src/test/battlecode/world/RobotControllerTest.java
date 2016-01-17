@@ -1,19 +1,9 @@
 package battlecode.world;
 
 import battlecode.common.*;
-
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 /**
  * Unit tests for RobotController. These are where the gameplay tests are.
@@ -1026,7 +1016,7 @@ public class RobotControllerTest {
                 Signal[] signals = rc.emptySignalQueue();
                 assertEquals(signals.length,GameConstants.SIGNAL_QUEUE_MAX_SIZE);
                 assertEquals(signals[0].getMessage()[0],0);
-                assertEquals(signals[0].getMessage()[1],1);
+                assertEquals(signals[0].getMessage()[1], 1);
             }
         });
     }
@@ -1044,7 +1034,7 @@ public class RobotControllerTest {
         final int soldier1 = game.spawn(oX, oY, RobotType.SOLDIER,Team.A);
         final int soldier2 = game.spawn(oX + 3, oY + 3, RobotType.SOLDIER, Team.A);
         final int soldier3 = game.spawn(oX+6, oY+6, RobotType.SOLDIER,Team.B);
-        final int soldier4 = game.spawn(oX+10, oY+10, RobotType.SOLDIER,Team.A);
+        final int soldier4 = game.spawn(oX + 10, oY + 10, RobotType.SOLDIER, Team.A);
         final int zombie = game.spawn(oX+4, oY+2, RobotType.STANDARDZOMBIE, Team.ZOMBIE);
         InternalRobot soldier1Bot = game.getBot(soldier1);
         InternalRobot soldier2Bot = game.getBot(soldier2);
@@ -1111,6 +1101,33 @@ public class RobotControllerTest {
     }
 
     /**
+     * Makes sure that if you spawn on a parts location, you pick it up.
+     */
+    @Test
+    public void testSpawningOnParts() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100)
+                .withParts(0, 0, 100)
+                .withParts(0, 1, 100);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int bot1 = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+        final int bot2 = game.spawn(oX, oY + 1, RobotType.ARCHON, Team.NEUTRAL);
+
+        game.round((id, rc) -> {
+        });
+
+        assertEquals(game.getWorld().getParts(new MapLocation(oX, oY)), 0,
+                EPSILON);
+        assertEquals(game.getWorld().resources(Team.A), GameConstants
+                .PARTS_INITIAL_AMOUNT + GameConstants.ARCHON_PART_INCOME -
+                GameConstants.PART_INCOME_UNIT_PENALTY + 100, EPSILON);
+        assertEquals(game.getWorld().getParts(new MapLocation(oX, oY + 1)), 100,
+                EPSILON);
+    }
+
+    /**
      * Makes sure that parts income is dependent on how many units you have.
      */
     @Test
@@ -1169,6 +1186,41 @@ public class RobotControllerTest {
     }
 
     /**
+     * Verifies guard damage reduction.
+     */
+    @Test
+    public void testGuardDamageReduction() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int bot1 = game.spawn(oX, oY, RobotType.BIGZOMBIE, Team.ZOMBIE);
+        final int bot2 = game.spawn(oX + 1, oY, RobotType.SOLDIER, Team.A);
+        final int bot3 = game.spawn(oX, oY + 1, RobotType.GUARD, Team.B);
+        InternalRobot guard = game.getBot(bot3);
+
+        game.round((id, rc) -> {
+            if (id == bot2) {
+                rc.attackLocation(new MapLocation(oX, oY + 1));
+            }
+        });
+
+        assertEquals(guard.getHealthLevel(), guard.getMaxHealth() - RobotType
+                .SOLDIER.attackPower, EPSILON);
+
+        game.round((id, rc) -> {
+            if (id == bot1) {
+                rc.attackLocation(new MapLocation(oX, oY + 1));
+            }
+        });
+
+        assertEquals(guard.getHealthLevel(), guard.getMaxHealth() - RobotType
+                .SOLDIER.attackPower - RobotType.BIGZOMBIE.attackPower +
+                GameConstants.GUARD_DAMAGE_REDUCTION, EPSILON);
+    }
+
+    /**
      * Make sure an error is thrown if you try to clear rubble on an off map
      * location.
      */
@@ -1181,7 +1233,6 @@ public class RobotControllerTest {
         int oY = game.getOriginY();
         final int bot1 = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
 
-
         game.round((id, rc) -> {
             if (id == bot1) {
                 boolean exception = false;
@@ -1191,6 +1242,86 @@ public class RobotControllerTest {
                     exception = true;
                 }
                 assertTrue(exception);
+            }
+        });
+    }
+
+    /**
+     * If both teams lose their last archon in the same round (but not
+     * necessarily the same turn), the one who loses the archon last should win.
+     */
+    @Test
+    public void testDoubleArchonDeath() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int bot1 = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+        final int bot2 = game.spawn(oX, oY + 1, RobotType.ARCHON, Team.B);
+        final int bot3 = game.spawn(oX + 1, oY, RobotType.SOLDIER, Team.A);
+        final int bot4 = game.spawn(oX + 1, oY + 1, RobotType.SOLDIER, Team.B);
+
+        InternalRobot bot1Bot = game.getBot(bot1);
+        InternalRobot bot2Bot = game.getBot(bot2);
+        bot1Bot.takeDamage(RobotType.ARCHON.maxHealth - 1);
+        bot2Bot.takeDamage(RobotType.ARCHON.maxHealth - 1);
+
+        game.round((id, rc) -> {
+            if (id == bot3) {
+                rc.attackLocation(new MapLocation(oX, oY));
+            } else if (id == bot4) {
+                rc.attackLocation(new MapLocation(oX, oY + 1));
+            }
+        });
+
+        // Make sure both archons died
+        assertEquals(bot1Bot.getHealthLevel(), -3, EPSILON);
+        assertEquals(bot2Bot.getHealthLevel(), -3, EPSILON);
+
+        // Make sure Team B was the winner
+        assertEquals(game.getWorld().getWinner(), Team.B);
+    }
+
+    /**
+     * Test getting initial archon locations.
+     */
+    @Test
+    public void testGetInitialArchonLocations() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100)
+                .withRobot(RobotType.ARCHON, Team.A, 0, 0)
+                .withRobot(RobotType.SOLDIER, Team.A, 1, 1)
+                .withRobot(RobotType.ARCHON, Team.B, 3, 3)
+                .withRobot(RobotType.GUARD, Team.B, 4, 4)
+                .withRobot(RobotType.ARCHON, Team.NEUTRAL, 5, 5)
+                .withRobot(RobotType.SCOUT, Team.A, 0, 1)
+                .withRobot(RobotType.ARCHON, Team.B, 2, 2)
+                .withRobot(RobotType.ARCHON, Team.B, 2, 3);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int bot1 = game.spawn(oX + 6, oY + 6, RobotType.ARCHON,
+                Team.A);
+
+        game.round((id, rc) -> {
+            if (id == bot1) {
+                MapLocation[] locsA = rc.getInitialArchonLocations(Team.A);
+                MapLocation[] locsB = rc.getInitialArchonLocations(Team.B);
+                MapLocation[] locsN = rc.getInitialArchonLocations(Team
+                        .NEUTRAL);
+                MapLocation[] locsZ = rc.getInitialArchonLocations(Team
+                        .ZOMBIE);
+
+                assertEquals(locsZ.length, 0);
+                assertEquals(locsN.length, 0);
+
+                assertEquals(locsA.length, 1);
+                assertEquals(locsB.length, 3);
+                assertEquals(locsA[0], new MapLocation(oX, oY));
+                assertEquals(locsB[0], new MapLocation(oX + 2, oY + 2));
+                assertEquals(locsB[1], new MapLocation(oX + 2, oY + 3));
+                assertEquals(locsB[2], new MapLocation(oX + 3, oY + 3));
             }
         });
     }
