@@ -16,15 +16,15 @@ import java.util.List;
  * @author james
  */
 public class IndividualClassLoaderTest {
+    private IndividualClassLoader.Cache sharedCache;
     private IndividualClassLoader l1;
     private IndividualClassLoader l2;
 
     @Before
     public void resetIndividualClassLoader() throws Exception {
-        IndividualClassLoader.reset();
-
-        l1 = new IndividualClassLoader("instrumentertest");
-        l2 = new IndividualClassLoader("instrumentertest");
+        sharedCache = new IndividualClassLoader.Cache();
+        l1 = new IndividualClassLoader("instrumentertest", sharedCache);
+        l2 = new IndividualClassLoader("instrumentertest", sharedCache);
 
         // Set up noop RobotMonitors.
 
@@ -117,11 +117,8 @@ public class IndividualClassLoaderTest {
     // Should give already-loaded system classes for most things.
     @Test
     public void testNoUnnecessaryReloads() throws ClassNotFoundException {
-        final IndividualClassLoader l
-                = new IndividualClassLoader("instrumentertest");
-
         for (Class<?> theClass : NEVER_RELOAD) {
-            assertEquals(theClass, l.loadClass(theClass.getName()));
+            assertEquals(theClass, l1.loadClass(theClass.getName()));
         }
     }
 
@@ -182,7 +179,6 @@ public class IndividualClassLoaderTest {
                 l1.loadClass(className);
             } catch (InstrumentationException e) {
                 // Reset teamsWithErrors.
-                IndividualClassLoader.reset();
                 continue;
             }
 
@@ -234,5 +230,10 @@ public class IndividualClassLoaderTest {
     @Test
     public void testCanUseEnumMap() throws Exception {
         l1.loadClass("instrumentertest.UsesEnumMap");
+    }
+
+    @Test
+    public void testLoadFromJar() throws Exception {
+        assertTrue(false);
     }
 }

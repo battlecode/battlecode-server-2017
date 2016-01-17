@@ -18,6 +18,7 @@ import static org.mockito.Mockito.*;
  */
 public class SandboxedRobotPlayerTest {
 
+    IndividualClassLoader.Cache cache;
     RobotController rc;
 
     @Before
@@ -32,11 +33,13 @@ public class SandboxedRobotPlayerTest {
         when(rc.getID()).thenReturn(0);
         when(rc.getLocation()).thenReturn(new MapLocation(0, 0));
         when(rc.getRoundNum()).thenReturn(0);
+
+        cache = new IndividualClassLoader.Cache();
     }
 
     @Test
     public void testLifecycleEmptyPlayer() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerempty", "RobotPlayer", rc, 0);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerempty", rc, 0, cache);
 
         player.setBytecodeLimit(10000);
 
@@ -49,7 +52,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testRobotControllerMethodsCalled() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayeractions", "RobotPlayer", rc, 0);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayeractions", rc, 0, cache);
 
         player.setBytecodeLimit(10000);
 
@@ -68,7 +71,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testYield() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerclock", "RobotPlayer", rc, 0);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerclock", rc, 0, cache);
         player.setBytecodeLimit(10000);
 
         player.step();
@@ -89,7 +92,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testBytecodeCountingWorks() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerloopforever", "RobotPlayer", rc, 0);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerloopforever", rc, 0, cache);
         player.setBytecodeLimit(100);
 
         player.step();
@@ -103,7 +106,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testBytecodeCountsCorrect() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerclock", "RobotPlayer", rc, 0);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerclock", rc, 0, cache);
         player.setBytecodeLimit(10000);
 
         player.step();
@@ -115,7 +118,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test(timeout=300)
     public void testAvoidDeadlocks() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersuicide", "RobotPlayer", rc, 0);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersuicide", rc, 0, cache);
         player.setBytecodeLimit(10);
 
         // Attempt to kill the player when it calls "disintegrate"
@@ -133,7 +136,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testStaticInitialization() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerstatic", "RobotPlayer", rc, 0);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerstatic", rc, 0, cache);
         player.setBytecodeLimit(10000);
 
         // Player calls "yield" in static initializer
@@ -147,7 +150,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testBytecodeOveruse() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerbytecode", "RobotPlayer", rc, 0);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerbytecode", rc, 0, cache);
         player.setBytecodeLimit(200);
 
         for (int i = 0; i < 5; i++) {
@@ -163,7 +166,7 @@ public class SandboxedRobotPlayerTest {
     public void testBcTesting() throws Exception {
         Config.getGlobalConfig().set("bc.testing.should.terminate", "true");
 
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersystem", "RobotPlayer", rc, 0);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersystem", rc, 0, cache);
         player.setBytecodeLimit(200);
 
         player.step();

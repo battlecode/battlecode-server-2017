@@ -152,7 +152,7 @@ public class Server implements Runnable, NotificationHandler {
     }
 
     /**
-     * Runs the server. The server will wait for some match info (which
+     * Runs the server. The server will wait for some game info (which
      * specifies the teams and set of maps to run) and then begin running
      * matches.
      */
@@ -389,11 +389,11 @@ public class Server implements Runnable, NotificationHandler {
 
         teamProvider.registerControlProvider(
                 Team.A,
-                new PlayerControlProvider(game.getTeamA())
+                new PlayerControlProvider(game.getTeamA(), game.getTeamAClasses())
         );
         teamProvider.registerControlProvider(
                 Team.B,
-                new PlayerControlProvider(game.getTeamB())
+                new PlayerControlProvider(game.getTeamB(), game.getTeamBClasses())
         );
         teamProvider.registerControlProvider(
                 Team.ZOMBIE,

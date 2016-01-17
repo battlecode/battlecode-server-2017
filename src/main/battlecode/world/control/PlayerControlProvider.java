@@ -8,6 +8,7 @@ import battlecode.server.ErrorReporter;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +21,11 @@ import java.util.Map;
  */
 public class PlayerControlProvider implements RobotControlProvider {
 
-    public static final String PLAYER_CLASS_NAME = "RobotPlayer";
+    /**
+     * The cache shared between the classloaders of all players
+     * loaded by this control provider.
+     */
+    private final IndividualClassLoader.Cache sharedCache;
 
     /**
      * The sandboxed robot players we're using to control robots;
@@ -30,7 +35,7 @@ public class PlayerControlProvider implements RobotControlProvider {
      * will have a value of null, so that the classloader it uses
      * can be reclaimed.
      */
-    private Map<Integer, SandboxedRobotPlayer> sandboxes;
+    private final Map<Integer, SandboxedRobotPlayer> sandboxes;
 
     /**
      * The GameWorld we're providing for.
@@ -44,17 +49,25 @@ public class PlayerControlProvider implements RobotControlProvider {
 
     /**
      * Create a new PlayerControlProvider.
+     *
+     * @param teamName the name / package of the team we're loading
+     * @param teamURL the url of the classes for the team;
+     *                null to load from the system classpath
      */
-    public PlayerControlProvider(String teamName) {
+    public PlayerControlProvider(String teamName, URL teamURL) {
         this.teamName = teamName;
+        this.sandboxes = new HashMap<>(); // GameWorld maintains order for us
+
+        if (teamURL == null) {
+            this.sharedCache = new IndividualClassLoader.Cache();
+        } else {
+            this.sharedCache = new IndividualClassLoader.Cache(teamURL);
+        }
     }
 
     @Override
     public void matchStarted(GameWorld gameWorld) {
-        this.sandboxes = new HashMap<>(); // GameWorld maintains order for us
         this.gameWorld = gameWorld;
-
-        IndividualClassLoader.reset();
     }
 
     @Override
@@ -64,7 +77,7 @@ public class PlayerControlProvider implements RobotControlProvider {
                player.terminate();
            }
         }
-        this.sandboxes = null;
+        this.sandboxes.clear();
         this.gameWorld = null;
     }
 
@@ -73,13 +86,13 @@ public class PlayerControlProvider implements RobotControlProvider {
         try {
             final SandboxedRobotPlayer player = new SandboxedRobotPlayer(
                     teamName,
-                    PLAYER_CLASS_NAME,
                     robot.getController(),
-                    gameWorld.getMapSeed()
+                    gameWorld.getMapSeed(),
+                    sharedCache
             );
             this.sandboxes.put(robot.getID(), player);
         } catch (InstrumentationException e) {
-            ErrorReporter.report("Error while loading player "+teamName+"."+PLAYER_CLASS_NAME+": "+e.getMessage(), false);
+            ErrorReporter.report("Error while loading player "+teamName+": "+e.getMessage(), false);
             robot.suicide();
         } catch (RuntimeException e) {
             ErrorReporter.report(e, true);
