@@ -13,5 +13,13 @@ import java.io.IOException;
  */
 @FunctionalInterface
 public interface ProxyFactory {
+    /**
+     * Create a proxy for a game
+     *
+     * @param info information about the game the
+     * @return a new proxy, or null if the factory decides not to create a
+     *         proxy.
+     * @throws IOException if creating the proxy fails
+     */
     Proxy createProxy(GameInfo info) throws IOException;
 }

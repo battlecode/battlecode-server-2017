@@ -122,7 +122,9 @@ public class FileProxy implements Proxy {
 
         @Override
         public Proxy createProxy(GameInfo info) throws IOException {
-            return new FileProxy(info.getSaveFile(), serializerFactory);
+            return info.getSaveFile() == null ?
+                    null :
+                    new FileProxy(info.getSaveFile(), serializerFactory);
         }
     }
 }

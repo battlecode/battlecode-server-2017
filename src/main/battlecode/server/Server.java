@@ -169,6 +169,8 @@ public class Server implements Runnable, NotificationHandler {
      * matches.
      */
     public void run() {
+        // Note that this loop only runs once on the client.
+        // Running it multiple times may break things.
         while (true) {
             final GameInfo currentGame;
             try {
@@ -198,9 +200,12 @@ public class Server implements Runnable, NotificationHandler {
                                 throw new RuntimeException(e);
                             }
                         })
+                        .filter(p -> p != null)
                         .toArray(Proxy[]::new);
             } catch (RuntimeException e) {
-                warn("Unable to create proxies: "+e.getCause().getMessage());
+                warn("Unable to create proxies: ");
+                e.printStackTrace();
+
                 e.getCause().printStackTrace();
                 return;
             }
