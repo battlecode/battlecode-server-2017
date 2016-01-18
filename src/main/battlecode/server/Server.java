@@ -109,20 +109,17 @@ public class Server implements Runnable, NotificationHandler {
 
     @Override
     public void visitPauseNotification(PauseNotification n) {
-        System.out.println("PAUSENOTIFICATION "+n);
         state = State.PAUSED;
         proxyWriter.enqueue(new PauseEvent());
     }
 
     @Override
     public void visitStartNotification(StartNotification n) {
-        System.out.println("STARTNOTIFICATION "+n);
         state = State.READY;
     }
 
     @Override
     public void visitRunNotification(RunNotification n) {
-        System.out.println("RUNNOTIFICATION "+n);
         if (state != State.PAUSED) {
             state = State.RUNNING;
             runUntil = n.getRounds();
@@ -131,7 +128,6 @@ public class Server implements Runnable, NotificationHandler {
 
     @Override
     public void visitResumeNotification(ResumeNotification n) {
-        System.out.println("RESUMENOT "+n);
         if (state == State.PAUSED)
             state = State.RUNNING;
     }

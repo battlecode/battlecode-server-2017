@@ -264,9 +264,14 @@ public class IndividualClassLoaderTest {
 
         Class<?> jarClass = jarLoader.loadClass("instrumentertest.Nothing");
 
+        System.out.println(jarClass.getName());
+
         URL jarClassLocation = jarClass.getResource("Nothing.class");
 
+        System.out.println(jarClassLocation.toString());
+
         // EXTREMELY scientific
+
         assertTrue(jarClassLocation.toString().startsWith("jar:"));
         assertTrue(jarClassLocation.toString().contains(jar.toURI().toURL().toString()));
 

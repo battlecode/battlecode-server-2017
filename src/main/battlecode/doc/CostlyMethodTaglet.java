@@ -1,5 +1,6 @@
 package battlecode.doc;
 
+import battlecode.instrumenter.IndividualClassLoader;
 import battlecode.instrumenter.bytecode.MethodCostUtil;
 import com.sun.javadoc.Tag;
 import com.sun.tools.doclets.Taglet;
@@ -13,6 +14,10 @@ import java.util.Map;
 public class CostlyMethodTaglet implements Taglet {
 
     public static final String TAG_NAME = "battlecode.doc.costlymethod";
+
+    // Used to look up method costs
+    private final static IndividualClassLoader LOADER =
+        new IndividualClassLoader("", new IndividualClassLoader.Cache());
 
     @SuppressWarnings("unused")
     public static void register(Map<String, Taglet> map) {
@@ -60,7 +65,7 @@ public class CostlyMethodTaglet implements Taglet {
                 fileName.length() - 5); // remove .java
 
         final MethodCostUtil.MethodData data =
-                MethodCostUtil.getMethodData(className, methodName);
+                MethodCostUtil.getMethodData(className, methodName, LOADER);
 
         final int cost;
 

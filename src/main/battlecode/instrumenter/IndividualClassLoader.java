@@ -1,6 +1,5 @@
 package battlecode.instrumenter;
 
-import battlecode.instrumenter.bytecode.ClassReaderUtil;
 import battlecode.instrumenter.bytecode.InstrumentingClassVisitor;
 import battlecode.server.ErrorReporter;
 import org.objectweb.asm.ClassReader;
@@ -63,8 +62,9 @@ public class IndividualClassLoader extends ClassLoader {
     public IndividualClassLoader(String teamPackageName, Cache sharedCache)
             throws InstrumentationException {
 
-        // use the sharedCache classloader to actually find resources
-        super(sharedCache.getLoader());
+        // use our classloader as a parent, rather than the default
+        // system classloader
+        super(IndividualClassLoader.class.getClassLoader());
 
         this.sharedCache = sharedCache;
 
@@ -97,106 +97,107 @@ public class IndividualClassLoader extends ClassLoader {
             return loadedCache.get(name);
         }
 
-        synchronized (teamPackageName) {
+        // this is the class we'll return
+        Class finishedClass;
 
-            // this is the class we'll return
-            Class finishedClass;
+        if (sharedCache.hasCached(name)) {
+            byte[] classBytes = sharedCache.getCached(name);
+            finishedClass = defineClass(null, classBytes, 0, classBytes.length);
+        } else if (alwaysRedefine.contains(name)) {
+            // We want each robot to have its own copy of this class
+            // so that it isn't possible to send messages by calling
+            // hashCode repeatedly.  But we don't want to instrument it.
+            // So just add its raw bytes to the instrumented classes cache.
 
-            if (sharedCache.hasCached(name)) {
-                byte[] classBytes = sharedCache.getCached(name);
-                finishedClass = defineClass(null, classBytes, 0, classBytes.length);
-            } else if (alwaysRedefine.contains(name)) {
-                // We want each robot to have its own copy of this class
-                // so that it isn't possible to send messages by calling
-                // hashCode repeatedly.  But we don't want to instrument it.
-                // So just add its raw bytes to the instrumented classes cache.
+            ClassReader cr = reader(name);
 
-                ClassReader cr;
+            ClassWriter cw = new ClassWriter(cr, COMPUTE_MAXS);
+            cr.accept(cw, 0);
+            finishedClass = saveAndDefineClass(name, cw.toByteArray());
+        } else if (name.startsWith(teamPackageName)) {
 
-                try {
-                    cr = ClassReaderUtil.reader(name);
-                } catch (IOException e) {
-                    throw new InstrumentationException(
-                            "Couldn't load required class: "+name,
-                            e
-                    );
-                }
-
-                ClassWriter cw = new ClassWriter(cr, COMPUTE_MAXS);
-                cr.accept(cw, 0);
-                finishedClass = saveAndDefineClass(name, cw.toByteArray());
-            } else if (name.startsWith(teamPackageName)) {
-
-                // Check if the team we're loading already has errors.
-                // Note that we only do this check when loading team
-                // classes - we'll only get team loading failures when
-                // loading team classes, which keeps the engine consistent
-                // in where its failures happen.
-                if (sharedCache.getError(teamPackageName)) {
-                    throw new InstrumentationException("Team is known to have errors: " +
-                            teamPackageName);
-                }
-
-                final byte[] classBytes;
-                try {
-                    classBytes = instrument(name, true, teamPackageName);
-                } catch (InstrumentationException e) {
-                    sharedCache.setError(teamPackageName);
-                    throw e;
-                }
-
-                finishedClass = saveAndDefineClass(name, classBytes);
-            } else if (name.startsWith("instrumented.")) {
-                // Each robot has its own version of java.util classes.
-                // If permgen space becomes a problem, we could make it so
-                // that only one copy of these classes is loaded, but
-                // we would need to modify ObjectHashCode.
-                byte[] classBytes;
-                try {
-                    classBytes = instrument(name, false, teamPackageName);
-                } catch (InstrumentationException ie) {
-                    sharedCache.setError(teamPackageName);
-                    throw ie;
-                }
-
-                finishedClass = saveAndDefineClass(name, classBytes);
-            } else {
-                // Load class normally; note that we use the dotted form of the name.
-                finishedClass = super.loadClass(name, resolve);
+            // Check if the team we're loading already has errors.
+            // Note that we only do this check when loading team
+            // classes - we'll only get team loading failures when
+            // loading team classes, which keeps the engine consistent
+            // in where its failures happen.
+            if (sharedCache.getError(teamPackageName)) {
+                throw new InstrumentationException("Team is known to have errors: " +
+                        teamPackageName);
             }
 
-            if (resolve)
-                resolveClass(finishedClass);
+            final byte[] classBytes;
+            try {
+                classBytes = instrument(name, true);
+            } catch (InstrumentationException e) {
+                sharedCache.setError(teamPackageName);
+                throw e;
+            }
 
-            loadedCache.put(name, finishedClass);
+            finishedClass = saveAndDefineClass(name, classBytes);
+        } else if (name.startsWith("instrumented.")) {
+            // Each robot has its own version of java.util classes.
+            // If permgen space becomes a problem, we could make it so
+            // that only one copy of these classes is loaded, but
+            // we would need to modify ObjectHashCode.
+            byte[] classBytes;
+            try {
+                classBytes = instrument(name, false);
+            } catch (InstrumentationException ie) {
+                sharedCache.setError(teamPackageName);
+                throw ie;
+            }
 
-            return finishedClass;
+            finishedClass = saveAndDefineClass(name, classBytes);
+        } else {
+            // Load class normally; note that we use the dotted form of the name.
+            finishedClass = super.loadClass(name, resolve);
+        }
 
+        if (resolve)
+            resolveClass(finishedClass);
+
+        loadedCache.put(name, finishedClass);
+
+        return finishedClass;
+    }
+
+    @Override
+    public URL getResource(String name) {
+        // We override getResource to have it look in the correct places for things;
+        // in the team package jar if it's a team resource, on the normal classpath
+        // otherwise
+        if (name.startsWith(teamPackageName)) {
+            return sharedCache.getLoader().getResource(name);
+        } else {
+            return super.getResource(name);
         }
     }
 
     /**
      * Get a ClassReader for a class.
      *
-     * @param className the name of the class
+     * @param className the name of the class, using .s or /s
      * @return a reader for the class
      * @throws InstrumentationException if the class can't be found
      */
-    private ClassReader reader(String className) throws InstrumentationException {
+    public ClassReader reader(String className) throws InstrumentationException {
         String uninstrumentedName;
-        if (className.startsWith("instrumented.")) {
+        if (className.startsWith("instrumented.") ||
+                className.startsWith("instrumented/")) {
             uninstrumentedName = className.substring(13);
         } else {
             uninstrumentedName = className;
         }
 
         String finalName = uninstrumentedName.replace('.', '/') + ".class";
+
         try {
             return new ClassReader(getResourceAsStream(finalName));
         } catch (IOException e) {
             ErrorReporter.report("Can't find the class \"" + className + "\"",
                     "Make sure the team name is spelled correctly.\n" +
-                    "Make sure the .class files are in the right directory (teams/teamname/*.class)");
+                    "Make sure the .class files are in the right directory (src/teamname/*.class)");
             throw new InstrumentationException("Can't load class "+className, e);
         }
     }
@@ -213,10 +214,12 @@ public class IndividualClassLoader extends ClassLoader {
 
     }
 
-    public byte[] instrument(String className, boolean checkDisallowed, String teamPackageName) throws InstrumentationException {
+    public byte[] instrument(String className, boolean checkDisallowed) throws InstrumentationException {
+
         ClassReader cr = reader(className);
+
         ClassWriter cw = new ClassWriter(COMPUTE_MAXS); // passing true sets maxLocals and maxStack, so we don't have to
-        ClassVisitor cv = new InstrumentingClassVisitor(cw, teamPackageName, false, checkDisallowed);
+        ClassVisitor cv = new InstrumentingClassVisitor(cw, this, teamPackageName, false, checkDisallowed);
         cr.accept(cv, 0);        //passing false lets debug info be included in the transformation, so players get line numbers in stack traces
         return cw.toByteArray();
     }
@@ -267,22 +270,18 @@ public class IndividualClassLoader extends ClassLoader {
          */
         public Cache(final URL classURL) {
             this.loader = new URLClassLoader(
-                    new URL[] { classURL },
-                    getClass().getClassLoader()
+                    new URL[] { classURL }
             ) {
                 @Override
                 public URL getResource(String name) {
                     // We override getResource because by default URLClassLoader
                     // tries to load files from the system classpath before the
-                    // url classpath, but we want it the other way around.
+                    // url classpath, but we only want to load files from
+                    // the player classpath.
 
-                    URL url = findResource(name);
+                    URL result = findResource(name);
 
-                    if (url == null) {
-                        url = getParent().getResource(name);
-                    }
-
-                    return url;
+                    return result;
                 }
             };
 

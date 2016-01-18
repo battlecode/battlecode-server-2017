@@ -1,5 +1,6 @@
 package battlecode.instrumenter.bytecode;
 
+import battlecode.instrumenter.IndividualClassLoader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -16,6 +17,9 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
     private final String teamPackageName;
     private final boolean silenced;
 
+    // Used to find other class files, which is occasionally necessary.
+    private IndividualClassLoader loader;
+
     // We check contestants' code for disallowed packages.
     // But some builtin Java libraries use disallowed packages so
     // don't check those.
@@ -27,9 +31,15 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
      * @param cv                  the ClassVisitor that should be used to read the class
      * @param teamPackageName     the package name of the team for which this class is being instrumented
      * @param silenced            whether System.out should be silenced for this class
+     * @param checkDisallowed     whether to check for disallowed classes and methods
      */
-    public InstrumentingClassVisitor(final ClassVisitor cv, final String teamPackageName, boolean silenced, boolean checkDisallowed) {
+    public InstrumentingClassVisitor(final ClassVisitor cv,
+                                     final IndividualClassLoader loader,
+                                     final String teamPackageName,
+                                     boolean silenced,
+                                     boolean checkDisallowed) {
         super(Opcodes.ASM5, cv);
+        this.loader = loader;
         this.teamPackageName = teamPackageName;
         this.silenced = silenced;
         this.checkDisallowed = checkDisallowed;
@@ -82,7 +92,7 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
                 ClassReferenceUtil.methodSignatureReference(signature, teamPackageName, checkDisallowed),
                 exceptions);
         // create a new InstrumentingMethodVisitor, and let it loose on this method
-        return mv == null ? null : new InstrumentingMethodVisitor(mv, className, access, name, desc, signature, exceptions, teamPackageName, silenced, checkDisallowed);
+        return mv == null ? null : new InstrumentingMethodVisitor(mv, loader, className, access, name, desc, signature, exceptions, teamPackageName, silenced, checkDisallowed);
     }
 
     /**
