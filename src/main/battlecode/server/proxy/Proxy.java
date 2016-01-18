@@ -2,6 +2,7 @@ package battlecode.server.proxy;
 
 import battlecode.serial.ServerEvent;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 /**
@@ -12,7 +13,7 @@ import java.io.IOException;
  * instance, a proxy that writes an individual file for each match could check
  * if passed objects were MatchFooters to know when to start a new file.
  */
-public interface Proxy {
+public interface Proxy extends Closeable {
     /**
      * Tries to write the given object to the recipient.
      *
@@ -25,7 +26,7 @@ public interface Proxy {
     void writeEvent(final ServerEvent message) throws IOException;
 
     /**
-     * Closes the connection.
+     * Closes the connection. Called after a game is run.
      *
      * @throws IOException if the connection cannot be closed.
      */

@@ -2,6 +2,7 @@ package battlecode.server.proxy;
 
 import battlecode.serial.PauseEvent;
 import battlecode.serial.ServerEvent;
+import battlecode.server.GameInfo;
 import battlecode.server.Server;
 import battlecode.serial.serializer.Serializer;
 import battlecode.serial.serializer.SerializerFactory;
@@ -47,13 +48,13 @@ public class FileProxy implements Proxy {
      * Creates a new FileProxy that utilizes the file given by the specified
      * filename.
      *
-     * @param fileName The name of the file to write to.
+     * @param saveFile The name of the file to write to.
      * @param serializerFactory The serializerFactory to create a serializer with.
      * @throws IOException if the file cannot be opened or written to.
      */
-    public FileProxy(String fileName, SerializerFactory serializerFactory) throws IOException {
+    public FileProxy(File saveFile, SerializerFactory serializerFactory) throws IOException {
         // Create directories if necessary.
-        this.file = new File(fileName);
+        this.file = saveFile;
         if (!file.exists() && file.getParentFile() != null)
             file.getParentFile().mkdirs();
 
@@ -102,5 +103,26 @@ public class FileProxy implements Proxy {
     @Override
     public String toString() {
         return getClass().getSimpleName() + " { target: " + file + " }";
+    }
+
+    /**
+     * A factory for file proxies.
+     */
+    public static class Factory implements ProxyFactory {
+        private SerializerFactory serializerFactory;
+
+        /**
+         * Create a new serializer factory
+         * @param serializerFactory the factory used to create serializers for
+         *                          proxies created by this factory.
+         */
+        public Factory(SerializerFactory serializerFactory) {
+            this.serializerFactory = serializerFactory;
+        }
+
+        @Override
+        public Proxy createProxy(GameInfo info) throws IOException {
+            return new FileProxy(info.getSaveFile(), serializerFactory);
+        }
     }
 }

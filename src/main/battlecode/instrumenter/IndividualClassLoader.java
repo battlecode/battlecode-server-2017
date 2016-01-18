@@ -259,14 +259,33 @@ public class IndividualClassLoader extends ClassLoader {
         /**
          * Create a cache for classes loaded from a URL, or the local classpath.
          * The URL can point to a jar file or a directory containing class
-         * files.
-         * Resources will be searched for on the local classpath and then at
-         * the URL.
+         * files, preferably locally - running arbitrary code from the internet
+         * is a bad idea, even if we do try to instrument it.
+         * Resources will be searched for at the URL and then locally.
          *
          * @param classURL the URL to load clases from
          */
         public Cache(final URL classURL) {
-            this.loader = new URLClassLoader(new URL[] { classURL }, getClass().getClassLoader());
+            this.loader = new URLClassLoader(
+                    new URL[] { classURL },
+                    getClass().getClassLoader()
+            ) {
+                @Override
+                public URL getResource(String name) {
+                    // We override getResource because by default URLClassLoader
+                    // tries to load files from the system classpath before the
+                    // url classpath, but we want it the other way around.
+
+                    URL url = findResource(name);
+
+                    if (url == null) {
+                        url = getParent().getResource(name);
+                    }
+
+                    return url;
+                }
+            };
+
             this.instrumentedClasses = new HashMap<>();
             this.teamsWithErrors = new HashSet<>();
         }

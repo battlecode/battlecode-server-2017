@@ -4,6 +4,8 @@ import battlecode.common.GameConstants;
 import battlecode.common.Team;
 import battlecode.serial.*;
 import battlecode.serial.notification.*;
+import battlecode.server.proxy.Proxy;
+import battlecode.server.proxy.ProxyFactory;
 import battlecode.server.proxy.ProxyWriter;
 import battlecode.world.DominationFactor;
 import battlecode.world.GameMap;
@@ -14,6 +16,7 @@ import battlecode.world.signal.InternalSignal;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -27,6 +30,11 @@ public class Server implements Runnable, NotificationHandler {
      * The GameInfo that signals the server to terminate when it is encountered on the game queue.
      */
     private static final GameInfo POISON = new GameInfo(null, null, null, null, null, null, false) {};
+
+    /**
+     * The factories to use to create proxies for new games.
+     */
+    private final ProxyFactory[] proxyFactories;
 
     /**
      * The proxies to use for writing match data.
@@ -82,10 +90,14 @@ public class Server implements Runnable, NotificationHandler {
      * Initializes a new server.
      *
      * @param options the configuration to use
-     * @param interactive whether to wait for notifications to control the match run state
+     * @param interactive whether to wait for notifications to control the
+     *                    match run state
+     * @param proxyFactories the factories to use to create proxies for each
+     *                       game (decoupled enough for you?)
      */
-    public Server(Config options, boolean interactive) {
+    public Server(Config options, boolean interactive, ProxyFactory... proxyFactories) {
         this.gameQueue = new LinkedBlockingQueue<>();
+        this.proxyFactories = proxyFactories;
 
         this.interactive = interactive;
 
@@ -176,9 +188,26 @@ public class Server implements Runnable, NotificationHandler {
 
             debug("Running: "+currentGame);
 
+            final Proxy[] gameProxies;
+            try {
+                gameProxies = Arrays.stream(proxyFactories)
+                        .map(f -> {
+                            try {
+                                return f.createProxy(currentGame);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                        .toArray(Proxy[]::new);
+            } catch (RuntimeException e) {
+                warn("Unable to create proxies: "+e.getCause().getMessage());
+                e.getCause().printStackTrace();
+                return;
+            }
+
             // Set up our proxy writer
             this.proxyWriter = new ProxyWriter(
-                    currentGame.getProxies(),
+                    gameProxies,
                     options.getBoolean("bc.server.debug")
             );
 

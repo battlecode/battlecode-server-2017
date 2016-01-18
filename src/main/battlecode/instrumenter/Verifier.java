@@ -14,7 +14,7 @@ public class Verifier {
     public static void main(String[] args) {
         String teamPackageName = args[0];
         try {
-            IndividualClassLoader icl = new IndividualClassLoader(teamPackageName);
+            IndividualClassLoader icl = new IndividualClassLoader(teamPackageName, new IndividualClassLoader.Cache());
             icl.loadClass(teamPackageName + ".RobotPlayer");
         } catch (Exception e) {
             System.out.println(e.getMessage());

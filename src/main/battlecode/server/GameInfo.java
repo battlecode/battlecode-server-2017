@@ -2,6 +2,7 @@ package battlecode.server;
 
 import battlecode.server.proxy.Proxy;
 
+import java.io.File;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.Arrays;
@@ -48,29 +49,38 @@ public class GameInfo implements Serializable {
     private final boolean bestOfThree;
 
     /**
-     * The proxies that the match should write to.
+     * The file the game should be saved to, or null
+     * if it shouldn't be saved.
+     * The match will not be saved
      */
-    private final Proxy[] proxies;
+    private final File saveFile;
+
 
     /**
      * Create a GameInfo.
      *
-     * @param teamA the A team
+     * @param teamA the package of A team
+     * @param teamAClasses the location of team A classes - directory or jar,
+     *                     or null to use the system classpath
      * @param teamB the B team
-     * @param maps the maps to play on
+     * @param teamBClasses the location of team B classes
+     * @param maps the names maps to play on
+     * @param saveFile the file to save to if the server is configured to save
+     *                 matches, or null to never save
+     * @param bestOfThree whether the game is best of three
      */
     public GameInfo(String teamA, URL teamAClasses,
                     String teamB, URL teamBClasses,
                     String[] maps,
-                    Proxy[] proxies,
+                    File saveFile,
                     boolean bestOfThree) {
         this.teamA = teamA;
         this.teamAClasses = teamAClasses;
         this.teamB = teamB;
         this.teamBClasses = teamBClasses;
         this.maps = maps;
+        this.saveFile = saveFile;
         this.bestOfThree = bestOfThree;
-        this.proxies = proxies;
     }
 
     /**
@@ -109,18 +119,17 @@ public class GameInfo implements Serializable {
     }
 
     /**
+     * @return the save file this game should be saved to, or null if it shouldn't be saved
+     */
+    public File getSaveFile() {
+        return this.saveFile;
+    }
+
+    /**
      * @return whether the game is best of three
      */
     public boolean isBestOfThree() {
         return bestOfThree;
-    }
-
-    /**
-     * @return the proxies that the game should write to.
-     *         DO NOT MODIFY THE RETURNED ARRAY.
-     */
-    public Proxy[] getProxies() {
-        return proxies;
     }
 
     @Override

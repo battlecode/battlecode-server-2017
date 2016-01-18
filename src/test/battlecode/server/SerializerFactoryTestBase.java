@@ -5,6 +5,7 @@ import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
 import battlecode.serial.notification.*;
+import battlecode.server.proxy.Proxy;
 import battlecode.world.signal.InternalSignal;
 import battlecode.serial.*;
 import battlecode.serial.serializer.Serializer;
@@ -16,6 +17,7 @@ import org.junit.Ignore;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
@@ -123,8 +125,10 @@ public abstract class SerializerFactoryTestBase {
                     url,
                     "teamb",
                     null,
-                    new String[] {"map-1"})
-            )
+                    new String[] {"map-1"},
+                    new File("save-file.rms"),
+                    false
+            ))
 
     };
 

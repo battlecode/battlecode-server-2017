@@ -1,14 +1,20 @@
 package battlecode.instrumenter;
 
-import battlecode.instrumenter.inject.RobotMonitor;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Tests for IndividualClassLoader.
@@ -234,6 +240,35 @@ public class IndividualClassLoaderTest {
 
     @Test
     public void testLoadFromJar() throws Exception {
-        assertTrue(false);
+        File jar = Files.createTempFile("battlecode-test", ".jar").toFile();
+
+        jar.deleteOnExit();
+
+        ZipOutputStream z = new ZipOutputStream(new FileOutputStream(jar));
+
+        ZipEntry classEntry = new ZipEntry("instrumentertest/Nothing.class");
+
+        z.putNextEntry(classEntry);
+
+        IOUtils.copy(getClass().getClassLoader().getResourceAsStream("instrumentertest/Nothing.class"),
+                z
+        );
+
+        z.closeEntry();
+        z.close();
+
+        IndividualClassLoader jarLoader = new IndividualClassLoader(
+                "instrumentertest",
+                new IndividualClassLoader.Cache(jar.toURI().toURL())
+        );
+
+        Class<?> jarClass = jarLoader.loadClass("instrumentertest.Nothing");
+
+        URL jarClassLocation = jarClass.getResource("Nothing.class");
+
+        // EXTREMELY scientific
+        assertTrue(jarClassLocation.toString().startsWith("jar:"));
+        assertTrue(jarClassLocation.toString().contains(jar.toURI().toURL().toString()));
+
     }
 }
