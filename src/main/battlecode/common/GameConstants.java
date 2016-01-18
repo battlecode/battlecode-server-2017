@@ -118,6 +118,18 @@ public interface GameConstants {
     /** Number of turns that elapse for the zombie outbreak level to increase */
     int OUTBREAK_TIMER = 300;
     
+    /** Armageddon: number of turns in day/night cycle **/
+    int ARMAGEDDON_DAY_TIMER = 300;
+    int ARMAGEDDON_NIGHT_TIMER = 900;
+    
+    /** Armageddon: day/night outbreak multiplier **/
+    double ARMAGEDDON_DAY_OUTBREAK_MULTIPLIER = 0.5;
+    double ARMAGEDDON_NIGHT_OUTBREAK_MULTIPLIER = 3.0;
+    
+    //** Armageddon: zombie regeneration levels night and day **/
+    double ARMAGEDDON_DAY_ZOMBIE_REGENERATION = -0.2;
+    double ARMAGEDDON_NIGHT_ZOMBIE_REGENERATION = 0.05;
+    
     // *********************************
     // ****** MESSAGING ****************
     // *********************************

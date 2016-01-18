@@ -9,8 +9,8 @@ import battlecode.common.ZombieSpawnSchedule;
 import java.util.*;
 
 /**
- * The control provider for zombies.
- * Doesn't use instrumentation or anything, just plain-old logic.
+ * The control provider for zombies. Doesn't use instrumentation or anything,
+ * just plain-old logic.
  *
  * @author james
  */
@@ -24,25 +24,25 @@ public class ZombieControlProvider implements RobotControlProvider {
      * The directions a zombie cares about.
      */
     private static final Direction[] DIRECTIONS = {
-            Direction.NORTH,
-            Direction.NORTH_EAST,
-            Direction.EAST,
-            Direction.EAST,
-            Direction.SOUTH_EAST,
-            Direction.SOUTH,
-            Direction.SOUTH_WEST,
-            Direction.WEST,
-            Direction.NORTH_WEST
+        Direction.NORTH,
+        Direction.NORTH_EAST,
+        Direction.EAST,
+        Direction.EAST,
+        Direction.SOUTH_EAST,
+        Direction.SOUTH,
+        Direction.SOUTH_WEST,
+        Direction.WEST,
+        Direction.NORTH_WEST
     };
 
     /**
      * The types & order to spawn zombie robots in.
      */
     private static final RobotType[] ZOMBIE_TYPES = {
-            RobotType.STANDARDZOMBIE,
-            RobotType.RANGEDZOMBIE,
-            RobotType.FASTZOMBIE,
-            RobotType.BIGZOMBIE
+        RobotType.STANDARDZOMBIE,
+        RobotType.RANGEDZOMBIE,
+        RobotType.FASTZOMBIE,
+        RobotType.BIGZOMBIE
     };
 
     /**
@@ -61,7 +61,7 @@ public class ZombieControlProvider implements RobotControlProvider {
     private Random random;
 
     private boolean disableSpawning;
-    
+
     /**
      * Create a ZombieControlProvider.
      */
@@ -69,7 +69,7 @@ public class ZombieControlProvider implements RobotControlProvider {
         this.disableSpawning = false;
         this.denQueues = new HashMap<>();
     }
-    
+
     public ZombieControlProvider(boolean disableSpawning) {
         this.disableSpawning = disableSpawning;
         this.denQueues = new HashMap<>();
@@ -93,10 +93,12 @@ public class ZombieControlProvider implements RobotControlProvider {
     }
 
     @Override
-    public void roundStarted() {}
+    public void roundStarted() {
+    }
 
     @Override
-    public void roundEnded() {}
+    public void roundEnded() {
+    }
 
     @Override
     public void robotSpawned(InternalRobot robot) {
@@ -113,12 +115,13 @@ public class ZombieControlProvider implements RobotControlProvider {
     }
 
     @Override
-    public void robotKilled(InternalRobot robot) {}
+    public void robotKilled(InternalRobot robot) {
+    }
 
     @Override
     public void runRobot(InternalRobot robot) {
         if (robot.getType() == RobotType.ZOMBIEDEN) {
-            if(!disableSpawning) {
+            if (!disableSpawning) {
                 processZombieDen(robot);
             }
         } else if (robot.getType().isZombie) {
@@ -151,8 +154,8 @@ public class ZombieControlProvider implements RobotControlProvider {
         }
 
         // Spawn as many available robots as possible
-        spawnAllPossible(rc,spawnQueue);
-        
+        spawnAllPossible(rc, spawnQueue);
+
         // Now we've tried every direction. If we still have things in queue, damage surrounding robots
         RobotType next = null;
         for (RobotType type : ZOMBIE_TYPES) {
@@ -162,20 +165,21 @@ public class ZombieControlProvider implements RobotControlProvider {
         }
         if (next != null) {
             // There are still things in queue, so attack all locations
-            for (int dirOffset=0; dirOffset < DIRECTIONS.length; dirOffset++) {
+            for (int dirOffset = 0; dirOffset < DIRECTIONS.length; dirOffset++) {
                 final InternalRobot block = world.getObject(rc.getLocation().add(DIRECTIONS[dirOffset]));
                 if (block != null && block.getTeam() != Team.ZOMBIE) {
                     block.takeDamage(GameConstants.DEN_SPAWN_PROXIMITY_DAMAGE);
                 }
             }
-            
+
             // Now spawn in remaining locations
-            spawnAllPossible(rc,spawnQueue);
+            spawnAllPossible(rc, spawnQueue);
         }
     }
-    
+
     /**
      * Spawn as of the queued robots as space allows
+     *
      * @param rc a robotcontroller
      * @param spawnQueue the queue of robots to be spawned
      */
@@ -221,11 +225,11 @@ public class ZombieControlProvider implements RobotControlProvider {
             if (closestRobot != null && rc.canAttackLocation(closestRobot.location)) {
                 // If target is in range, attack it and end turn
                 if (rc.isWeaponReady()) {
-					rc.attackLocation(closestRobot.location);
-				}
+                    rc.attackLocation(closestRobot.location);
+                }
                 return;
             }
-            if (!rc.isCoreReady()) {
+            if (!rc.isCoreReady() || (world.getGameMap().isArmageddon() && world.isArmageddonDaytime())) {
                 // We can't do anything.
                 return;
             }
@@ -273,21 +277,20 @@ public class ZombieControlProvider implements RobotControlProvider {
             }
 
             // Try to clear rubble instead
-
             final MapLocation preferredTarget = rc.getLocation().add(preferredDirection);
             if (!rc.isLocationOccupied(preferredTarget) && rc.onTheMap(preferredTarget)
                     && rc.senseRubble(preferredTarget) >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
                 rc.clearRubble(preferredDirection);
                 return;
             }
-			
-			if (rc.isLocationOccupied(preferredTarget) && rc.senseRobotAtLocation(preferredTarget).team == Team.NEUTRAL) {
-				if (rc.isWeaponReady()) {
-					rc.attackLocation(preferredTarget);
-					return;
-				}
-			}
-			
+
+            if (rc.isLocationOccupied(preferredTarget) && rc.senseRobotAtLocation(preferredTarget).team == Team.NEUTRAL) {
+                if (rc.isWeaponReady()) {
+                    rc.attackLocation(preferredTarget);
+                    return;
+                }
+            }
+
         } catch (Exception e) {
             ErrorReporter.report(e, true);
         }

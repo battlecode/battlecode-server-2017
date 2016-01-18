@@ -131,7 +131,7 @@ public class Server implements Runnable, NotificationHandler {
                     map = map.substring(0, map.indexOf('.'));
                 Match match = new Match(info, map, options,
                         matchNumber++, matchCount);
-                debug("queuing match " + match);
+                debug("queuing match " + info);
                 matches.add(match);
             }
         } catch (Exception e) {
@@ -155,7 +155,7 @@ public class Server implements Runnable, NotificationHandler {
                         .getComputedTeamMemory());
 
             try {
-                debug("running match " + match);
+                debug("running match " + match.getInfo());
                 match.initialize();
                 runMatch(match, proxyWriter);
                 finished.add(match);
