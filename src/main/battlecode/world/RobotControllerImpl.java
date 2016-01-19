@@ -1,27 +1,26 @@
 package battlecode.world;
 
 import battlecode.common.*;
+import static battlecode.common.GameActionExceptionType.*;
 import battlecode.instrumenter.RobotDeathException;
 import battlecode.world.signal.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static battlecode.common.GameActionExceptionType.*;
-
 /**
- * The actual implementation of RobotController.
- * Its methods *must* be called from a player thread.
+ * The actual implementation of RobotController. Its methods *must* be called
+ * from a player thread.
  *
- * It is theoretically possible to have multiple for a single InternalRobot,
- * but that may cause problems in practice, and anyway why would you want to?
+ * It is theoretically possible to have multiple for a single InternalRobot, but
+ * that may cause problems in practice, and anyway why would you want to?
  *
  * All overriden methods should assertNotNull() all of their (Object) arguments,
  * if those objects are not explicitly stated to be nullable.
  */
 public final class RobotControllerImpl implements RobotController {
+
     /**
      * The world the robot controlled by this controller inhabits.
      */
@@ -31,7 +30,7 @@ public final class RobotControllerImpl implements RobotController {
      * The robot this controller controls.
      */
     private final InternalRobot robot;
-    
+
     /**
      * Create a new RobotControllerImpl
      *
@@ -46,7 +45,6 @@ public final class RobotControllerImpl implements RobotController {
     // *********************************
     // ******** INTERNAL METHODS *******
     // *********************************
-
     /**
      * @return the robot this controller is connected to
      */
@@ -60,8 +58,9 @@ public final class RobotControllerImpl implements RobotController {
      * @param o the object to test
      */
     private static void assertNotNull(Object o) {
-        if (o == null)
+        if (o == null) {
             throw new NullPointerException("Argument has an invalid null value");
+        }
     }
 
     @Override
@@ -72,7 +71,6 @@ public final class RobotControllerImpl implements RobotController {
     // *********************************
     // ****** GLOBAL QUERY METHODS *****
     // *********************************
-
     @Override
     public int getRoundLimit() {
         return gameWorld.getGameMap().getRounds();
@@ -113,8 +111,7 @@ public final class RobotControllerImpl implements RobotController {
                             .getOrigin()));
                 }
             }
-            MapLocation[] array = archonLocs.toArray(new
-                    MapLocation[archonLocs.size()]);
+            MapLocation[] array = archonLocs.toArray(new MapLocation[archonLocs.size()]);
             Arrays.sort(array);
             return array;
         }
@@ -123,7 +120,6 @@ public final class RobotControllerImpl implements RobotController {
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************
-
     @Override
     public int getID() {
         return robot.getID();
@@ -158,23 +154,23 @@ public final class RobotControllerImpl implements RobotController {
     public double getHealth() {
         return robot.getHealthLevel();
     }
-    
+
     @Override
     public int getInfectedTurns() {
         return Math.max(robot.getZombieInfectedTurns(), robot
                 .getViperInfectedTurns());
     }
-    
+
     @Override
     public int getZombieInfectedTurns() {
         return robot.getZombieInfectedTurns();
     }
-    
+
     @Override
     public int getViperInfectedTurns() {
         return robot.getViperInfectedTurns();
     }
-    
+
     @Override
     public boolean isInfected() {
         return robot.isInfected();
@@ -193,7 +189,6 @@ public final class RobotControllerImpl implements RobotController {
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
-
     @Override
     public boolean canSense(MapLocation loc) {
         return robot.canSense(loc);
@@ -216,7 +211,7 @@ public final class RobotControllerImpl implements RobotController {
     public void assertCanSense(MapLocation loc) throws GameActionException {
         if (!canSense(loc)) {
             throw new GameActionException(OUT_OF_RANGE,
-                    loc+" is not within this robot's sensor range.");
+                    loc + " is not within this robot's sensor range.");
         }
     }
 
@@ -225,8 +220,8 @@ public final class RobotControllerImpl implements RobotController {
         if (canSense(loc)) {
             return gameWorld.getGameMap().onTheMap(loc);
         }
-        throw new GameActionException(OUT_OF_RANGE, "Location " + loc + " " +
-                "is currently out of sensor range.");
+        throw new GameActionException(OUT_OF_RANGE, "Location " + loc + " "
+                + "is currently out of sensor range.");
     }
 
     @Override
@@ -250,25 +245,24 @@ public final class RobotControllerImpl implements RobotController {
 
         return -1;
     }
-    
+
     @Override
     public MapLocation[] sensePartLocations(int radiussquared) {
         ArrayList<MapLocation> returnVals = new ArrayList<MapLocation>();
         int fetchRadius;
-        if(radiussquared < 0) {
+        if (radiussquared < 0) {
             fetchRadius = robot.getType().sensorRadiusSquared;
         } else {
             fetchRadius = Math.min(radiussquared, robot.getType().sensorRadiusSquared);
         }
         MapLocation[] nearbyLocs = MapLocation.getAllMapLocationsWithinRadiusSq(robot.getLocation(), fetchRadius);
-        for(MapLocation loc : nearbyLocs) {
-            if(gameWorld.getParts(loc) > 0) {
+        for (MapLocation loc : nearbyLocs) {
+            if (gameWorld.getParts(loc) > 0) {
                 returnVals.add(loc);
             }
         }
         return returnVals.toArray(new MapLocation[returnVals.size()]);
     }
-
 
     @Override
     public boolean canSenseLocation(MapLocation loc) {
@@ -336,16 +330,20 @@ public final class RobotControllerImpl implements RobotController {
         final boolean useTeam = team != null;
 
         for (final InternalRobot o : allRobots) {
-            if (!canSense(o))
+            if (!canSense(o)) {
                 continue;
-            if (o.equals(robot))
+            }
+            if (o.equals(robot)) {
                 continue;
+            }
             if (useRadius
                     && o.getLocation()
-                    .distanceSquaredTo(center) > radiusSquared)
+                    .distanceSquaredTo(center) > radiusSquared) {
                 continue;
-            if (useTeam && o.getTeam() != team)
+            }
+            if (useTeam && o.getTeam() != team) {
                 continue;
+            }
 
             robots.add(o.getRobotInfo());
         }
@@ -369,7 +367,7 @@ public final class RobotControllerImpl implements RobotController {
 
         return senseNearbyRobots(robot.getLocation(), radiusSquared, team);
     }
-    
+
     @Override
     public RobotInfo[] senseHostileRobots(MapLocation center, int radiusSquared) {
         assertNotNull(center);
@@ -381,17 +379,21 @@ public final class RobotControllerImpl implements RobotController {
         final Team enemyTeam = robot.getTeam().opponent();
 
         for (final InternalRobot o : allRobots) {
-            if (!canSense(o))
+            if (!canSense(o)) {
                 continue;
-            if (o.equals(robot))
+            }
+            if (o.equals(robot)) {
                 continue;
+            }
             if (useRadius
                     && o.getLocation()
-                    .distanceSquaredTo(center) > radiusSquared)
+                    .distanceSquaredTo(center) > radiusSquared) {
                 continue;
-            
-            if(o.getTeam() == enemyTeam || o.getTeam() == Team.ZOMBIE)
+            }
+
+            if (o.getTeam() == enemyTeam || o.getTeam() == Team.ZOMBIE) {
                 robots.add(o.getRobotInfo());
+            }
         }
 
         return robots.toArray(new RobotInfo[robots.size()]);
@@ -400,7 +402,6 @@ public final class RobotControllerImpl implements RobotController {
     // ***********************************
     // ****** READINESS METHODS **********
     // ***********************************
-
     /**
      * @throws GameActionException if our core is not ready
      */
@@ -424,7 +425,6 @@ public final class RobotControllerImpl implements RobotController {
     // ***************************
     // ********* RUBBLE **********
     // ***************************
-
     /**
      * @throws GameActionException if we are not a rubble clearing unit type
      */
@@ -443,16 +443,16 @@ public final class RobotControllerImpl implements RobotController {
         assertIsRubbleClearingUnit();
 
         if (dir == null || dir.equals(Direction.OMNI)) {
-            throw new IllegalArgumentException("You cannot clear rubble in " +
-                    "the direction OMNI.");
+            throw new IllegalArgumentException("You cannot clear rubble in "
+                    + "the direction OMNI.");
         }
 
         MapLocation target = getLocation().add(dir);
 
         // Ignore off map locations.
         if (!gameWorld.getGameMap().onTheMap(target)) {
-            throw new GameActionException(CANT_DO_THAT, "You cannot clear " +
-                    "rubble in a location that is off the map.");
+            throw new GameActionException(CANT_DO_THAT, "You cannot clear "
+                    + "rubble in a location that is off the map.");
         }
 
         // Ignore locations with no rubble to clear.
@@ -461,15 +461,13 @@ public final class RobotControllerImpl implements RobotController {
         }
 
         robot.activateCoreAction(new ClearRubbleSignal(robot.getID(),
-                        target, (int) (robot.getType()
-                        .movementDelay)),
+                target, (int) (robot.getType().movementDelay)),
                 robot.getType().cooldownDelay, robot.getType().movementDelay);
     }
 
     // ***********************************
     // ****** MOVEMENT METHODS ***********
     // ***********************************
-
     /**
      * Determine if it is possible for a robot to move to the target location.
      *
@@ -494,14 +492,15 @@ public final class RobotControllerImpl implements RobotController {
     /**
      * @param type the type to check
      * @param loc the location to check
-     * @throws GameActionException if robots of the type cannot move to the location
+     * @throws GameActionException if robots of the type cannot move to the
+     * location
      */
     public void assertIsPathable(RobotType type, MapLocation loc)
             throws GameActionException {
         if (!isPathableInternal(type, loc)) {
-            throw new GameActionException(CANT_MOVE_THERE, "Cannot move robot" +
-                    " of given type to that location. There might be too much" +
-                            " rubble.");
+            throw new GameActionException(CANT_MOVE_THERE, "Cannot move robot"
+                    + " of given type to that location. There might be too much"
+                    + " rubble.");
         }
     }
 
@@ -529,12 +528,11 @@ public final class RobotControllerImpl implements RobotController {
         double factor1 = (d.isDiagonal() ? GameConstants.DIAGONAL_DELAY_MULTIPLIER
                 : 1.0); //
         double factor2 = 1.0;
-        double factor3 = (!getType().ignoresRubble && gameWorld.getRubble(getLocation().add(d)) >=
-                GameConstants.RUBBLE_SLOW_THRESH) ? 2.0 : 1.0;
+        double factor3 = (!getType().ignoresRubble && gameWorld.getRubble(getLocation().add(d))
+                >= GameConstants.RUBBLE_SLOW_THRESH) ? 2.0 : 1.0;
 
         robot.activateCoreAction(new MovementSignal(robot.getID(),
-                        getLocation().add(d), (int) (robot.getType()
-                        .movementDelay * factor1 * factor3)),
+                getLocation().add(d), (int) (robot.getType().movementDelay * factor1 * factor3)),
                 robot.getType().cooldownDelay * factor2 * factor3,
                 robot.getType().movementDelay * factor1 * factor3);
     }
@@ -542,7 +540,6 @@ public final class RobotControllerImpl implements RobotController {
     // **********************************
     // ********* ATTACK METHODS *********
     // **********************************
-
     /**
      * @param loc the location to check
      * @return whether this robot can attack the location
@@ -562,12 +559,13 @@ public final class RobotControllerImpl implements RobotController {
     public void attackLocation(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
 
-        if (!isWeaponReady())
+        if (!isWeaponReady()) {
             throw new GameActionException(
                     NOT_ACTIVE,
                     "This robot has weapon delay " + getWeaponDelay()
-                            + " and cannot attack. "
+                    + " and cannot attack. "
             );
+        }
         if (!robot.getType().canAttack()) {
             throw new GameActionException(
                     CANT_DO_THAT,
@@ -588,7 +586,6 @@ public final class RobotControllerImpl implements RobotController {
     // ***********************************
     // ****** BROADCAST METHODS **********
     // ***********************************
-
     @Override
     public Signal readSignal() {
         return robot.retrieveNextSignal();
@@ -602,39 +599,36 @@ public final class RobotControllerImpl implements RobotController {
     @Override
     public void broadcastSignal(int radiusSquared) throws GameActionException {
         if (radiusSquared < 0) {
-            throw new GameActionException(CANT_DO_THAT, "Cannot broadcast " +
-                    "with negative radius.");
+            throw new GameActionException(CANT_DO_THAT, "Cannot broadcast "
+                    + "with negative radius.");
         }
         if (robot.getBasicSignalCount() >= GameConstants.BASIC_SIGNALS_PER_TURN) {
-            throw new GameActionException(CANT_DO_THAT, "Cannot broadcast " +
-                    "more than "+GameConstants.BASIC_SIGNALS_PER_TURN + " basic " +
-                    "signals per turn");
+            throw new GameActionException(CANT_DO_THAT, "Cannot broadcast "
+                    + "more than " + GameConstants.BASIC_SIGNALS_PER_TURN + " basic "
+                    + "signals per turn");
         }
-        gameWorld.visitBroadcastSignal(new BroadcastSignal(getID(), new
-                Signal(getLocation(), getID(), getTeam()), radiusSquared));
+        gameWorld.visitBroadcastSignal(new BroadcastSignal(getID(), new Signal(getLocation(), getID(), getTeam()), radiusSquared));
         robot.incrementBasicSignalCount();
     }
 
     @Override
-    public void broadcastMessageSignal(int message1, int message2, int
-            radiusSquared) throws GameActionException {
+    public void broadcastMessageSignal(int message1, int message2, int radiusSquared) throws GameActionException {
         if (!robot.getType().canMessageSignal()) {
             throw new GameActionException(CANT_DO_THAT,
-                    "Unit type " + robot.getType().name() + " cannot send a " +
-                            "message signal; only ARCHON and SCOUT can send " +
-                            "message signals.");
+                    "Unit type " + robot.getType().name() + " cannot send a "
+                    + "message signal; only ARCHON and SCOUT can send "
+                    + "message signals.");
         }
         if (radiusSquared < 0) {
-            throw new GameActionException(CANT_DO_THAT, "Cannot broadcast " +
-                    "with negative radius.");
+            throw new GameActionException(CANT_DO_THAT, "Cannot broadcast "
+                    + "with negative radius.");
         }
         if (robot.getMessageSignalCount() >= GameConstants.MESSAGE_SIGNALS_PER_TURN) {
-            throw new GameActionException(CANT_DO_THAT, "Cannot broadcast " +
-                    "more than "+GameConstants.MESSAGE_SIGNALS_PER_TURN + " message " +
-                    "signals per turn");
+            throw new GameActionException(CANT_DO_THAT, "Cannot broadcast "
+                    + "more than " + GameConstants.MESSAGE_SIGNALS_PER_TURN + " message "
+                    + "signals per turn");
         }
-        gameWorld.visitBroadcastSignal(new BroadcastSignal(getID(), new Signal
-                (getLocation(), getID(), getTeam(), message1, message2),
+        gameWorld.visitBroadcastSignal(new BroadcastSignal(getID(), new Signal(getLocation(), getID(), getTeam(), message1, message2),
                 radiusSquared));
         robot.incrementMessageSignalCount();
     }
@@ -642,7 +636,6 @@ public final class RobotControllerImpl implements RobotController {
     // ***********************************
     // ****** BUILDING/SPAWNING **********
     // ***********************************
-
     /**
      * @param amount the amount to check
      * @throws GameActionException if our resources are not >= amount
@@ -658,8 +651,7 @@ public final class RobotControllerImpl implements RobotController {
     public boolean hasBuildRequirements(RobotType type) {
         assertNotNull(type);
         return robot.getType().canBuild() && type.isBuildable()
-                && type.partCost <= gameWorld.resources(getTeam()) && type
-                .spawnSource == robot.getType();
+                && type.partCost <= gameWorld.resources(getTeam()) && type.spawnSource == robot.getType();
     }
 
     @Override
@@ -667,7 +659,7 @@ public final class RobotControllerImpl implements RobotController {
         assertNotNull(dir);
         assertNotNull(type);
         MapLocation loc = getLocation().add(dir);
-        if(robot.getType() == RobotType.ZOMBIEDEN) {
+        if (robot.getType() == RobotType.ZOMBIEDEN) {
             return gameWorld.isEmpty(loc);
         } else {
             return isPathableInternal(type, loc) && hasBuildRequirements(type);
@@ -682,8 +674,8 @@ public final class RobotControllerImpl implements RobotController {
         if (!robot.getType().canBuild()) {
             throw new GameActionException(
                     CANT_DO_THAT,
-                    "Unit type " + robot.getType().name() + " cannot build; " +
-                            "only ARCHON can build."
+                    "Unit type " + robot.getType().name() + " cannot build; "
+                    + "only ARCHON can build."
             );
         }
         if (!type.isBuildable()) {
@@ -696,8 +688,8 @@ public final class RobotControllerImpl implements RobotController {
         if (type.spawnSource != robot.getType()) {
             throw new GameActionException(
                     CANT_DO_THAT,
-                    "Unit type " + type.name() + " cannot be built by " +
-                            robot.getType().name()
+                    "Unit type " + type.name() + " cannot be built by "
+                    + robot.getType().name()
             );
         }
 
@@ -707,9 +699,10 @@ public final class RobotControllerImpl implements RobotController {
         assertHaveResource(cost);
 
         MapLocation loc = getLocation().add(dir);
-        if(robot.getType() != RobotType.ZOMBIEDEN)
+        if (robot.getType() != RobotType.ZOMBIEDEN) {
             assertIsPathable(type, loc);
-        
+        }
+
         int delay = type.buildTurns;
         robot.activateCoreAction(
                 new BuildSignal(robot.getID(),
@@ -721,14 +714,13 @@ public final class RobotControllerImpl implements RobotController {
     // ***********************************
     // ****** OTHER ACTION METHODS *******
     // ***********************************
-
     @Override
     public void activate(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
 
         if (robot.getType() != RobotType.ARCHON) {
-            throw new GameActionException(CANT_DO_THAT, "Only archons can" +
-                    " activate.");
+            throw new GameActionException(CANT_DO_THAT, "Only archons can"
+                    + " activate.");
         }
 
         if (getLocation().distanceSquaredTo(loc) > GameConstants.ARCHON_ACTIVATION_RANGE) {
@@ -740,12 +732,12 @@ public final class RobotControllerImpl implements RobotController {
 
         InternalRobot target = gameWorld.getRobot(loc);
         if (target == null) {
-            throw new GameActionException(NO_ROBOT_THERE, "No robot there to " +
-                    "activate.");
+            throw new GameActionException(NO_ROBOT_THERE, "No robot there to "
+                    + "activate.");
         }
         if (target.getTeam() != Team.NEUTRAL) {
-            throw new GameActionException(CANT_DO_THAT, "Can only activate " +
-                    "robots that are NEUTRAL.");
+            throw new GameActionException(CANT_DO_THAT, "Can only activate "
+                    + "robots that are NEUTRAL.");
         }
 
         assertIsCoreReady();
@@ -759,8 +751,8 @@ public final class RobotControllerImpl implements RobotController {
         assertNotNull(loc);
 
         if (robot.getType() != RobotType.ARCHON) {
-            throw new GameActionException(CANT_DO_THAT, "Only archons can" +
-                    " repair.");
+            throw new GameActionException(CANT_DO_THAT, "Only archons can"
+                    + " repair.");
         }
 
         if (!gameWorld.canAttackSquare(robot, loc)) {
@@ -772,28 +764,28 @@ public final class RobotControllerImpl implements RobotController {
 
         InternalRobot target = gameWorld.getRobot(loc);
         if (target == null) {
-            throw new GameActionException(NO_ROBOT_THERE, "No robot there to " +
-                    "repair.");
+            throw new GameActionException(NO_ROBOT_THERE, "No robot there to "
+                    + "repair.");
         }
         if (target.getTeam() != robot.getTeam()) {
-            throw new GameActionException(CANT_DO_THAT, "Can only repair " +
-                    "robots on your own team.");
+            throw new GameActionException(CANT_DO_THAT, "Can only repair "
+                    + "robots on your own team.");
         }
 
         if (robot.getRepairCount() >= 1) {
-            throw new GameActionException(CANT_DO_THAT, "Can only repair " +
-                    "once per turn.");
+            throw new GameActionException(CANT_DO_THAT, "Can only repair "
+                    + "once per turn.");
         }
         if (target.getType() == RobotType.ARCHON) {
-            throw new GameActionException(CANT_DO_THAT, "Can only repair " +
-                    "non-Archon robots.");
+            throw new GameActionException(CANT_DO_THAT, "Can only repair "
+                    + "non-Archon robots.");
         }
         robot.repair(target);
     }
 
     @Override
     public void pack() throws GameActionException {
-        if(robot.getType().equals(RobotType.TURRET)) {
+        if (robot.getType().equals(RobotType.TURRET)) {
             robot.transform(RobotType.TTM);
         } else {
             throw new GameActionException(CANT_DO_THAT,
@@ -803,7 +795,7 @@ public final class RobotControllerImpl implements RobotController {
 
     @Override
     public void unpack() throws GameActionException {
-        if(robot.getType().equals(RobotType.TTM)) {
+        if (robot.getType().equals(RobotType.TTM)) {
             robot.transform(RobotType.TURRET);
         } else {
             throw new GameActionException(CANT_DO_THAT,
@@ -828,7 +820,6 @@ public final class RobotControllerImpl implements RobotController {
     // ***********************************
     // ******** TEAM MEMORY **************
     // ***********************************
-
     @Override
     public void setTeamMemory(int index, long value) {
         gameWorld.setTeamMemory(robot.getTeam(), index, value);
@@ -848,13 +839,13 @@ public final class RobotControllerImpl implements RobotController {
     // ***********************************
     // ******** DEBUG METHODS ************
     // ***********************************
-
     @Override
     public void setIndicatorString(int stringIndex, String newString) {
         assertNotNull(newString);
         if (stringIndex >= 0
-                && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS)
+                && stringIndex < GameConstants.NUMBER_OF_INDICATOR_STRINGS) {
             gameWorld.visitSignal((new IndicatorStringSignal(robot.getID(), stringIndex, newString)));
+        }
     }
 
     @Override
@@ -886,5 +877,10 @@ public final class RobotControllerImpl implements RobotController {
     @Override
     public boolean isArmageddonDaytime() {
         return gameWorld.isArmageddonDaytime();
+    }
+
+    @Override
+    public boolean isArmageddon() {
+        return gameWorld.getGameMap().isArmageddon();
     }
 }
