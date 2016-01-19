@@ -882,4 +882,9 @@ public final class RobotControllerImpl implements RobotController {
         assertNotNull(observation);
         gameWorld.visitSignal((new MatchObservationSignal(robot.getID(), observation)));
     }
+
+    @Override
+    public boolean isArmageddonDaytime() {
+        return gameWorld.isArmageddonDaytime();
+    }
 }

@@ -157,6 +157,7 @@ public class Server implements Runnable, NotificationHandler {
     @Override
     public void visitTerminateNotification(TerminateNotification n) {
         this.gameQueue.add(POISON);
+
     }
 
     /**
@@ -202,7 +203,6 @@ public class Server implements Runnable, NotificationHandler {
                 warn("Unable to create proxies: ");
                 e.printStackTrace();
 
-                e.getCause().printStackTrace();
                 return;
             }
 
@@ -456,6 +456,10 @@ public class Server implements Runnable, NotificationHandler {
                 teamName = game.getTeamB() + " (B)";
                 break;
 
+            case ZOMBIE:
+                teamName = "The Zombie Horde";
+                break;
+
             default:
                 teamName = "nobody";
         }
@@ -469,16 +473,30 @@ public class Server implements Runnable, NotificationHandler {
         sb.append("\nReason: ");
         GameStats stats = currentWorld.getGameStats();
         DominationFactor dom = stats.getDominationFactor();
-        if (dom == DominationFactor.DESTROYED)
-            sb.append("The winning team won by destruction.");
-        else if (dom == DominationFactor.PWNED)
-            sb.append("The winning team won on tiebreakers (more Archons remaining).");
-        else if (dom == DominationFactor.OWNED)
-            sb.append("The winning team won on tiebreakers (more Archon health).");
-        else if (dom == DominationFactor.BARELY_BEAT)
-            sb.append("The winning team won on tiebreakers (more Parts)");
-        else if (dom == DominationFactor.WON_BY_DUBIOUS_REASONS)
-            sb.append("The winning team won arbitrarily.");
+
+        switch (dom) {
+            case DESTROYED:
+                sb.append("The winning team won by destruction.");
+                break;
+            case PWNED:
+                sb.append("The winning team won on tiebreakers (more Archons remaining).");
+                break;
+            case OWNED:
+                sb.append("The winning team won on tiebreakers (more Archon health).");
+                break;
+            case BARELY_BEAT:
+                sb.append("The winning team won on tiebreakers (more Parts)");
+                break;
+            case WON_BY_DUBIOUS_REASONS:
+                sb.append("The winning team won arbitrarily.");
+                break;
+            case ZOMBIFIED:
+                sb.append("The Zombies have comsumed your team");
+                break;
+            case CLEANSED:
+                sb.append("You have eradicated the Zombies");
+                break;
+        }
 
         return sb.toString();
     }

@@ -63,7 +63,8 @@ public abstract class SerializerFactoryTestBase {
             parts,
             zSchedule,
             initialRobots,
-            "Test Map");
+            "Test Map",
+            false);
 
     private static final long[][] teamMemories = new long[][] {
             new long[] {1, 2, 3, 4, 5},

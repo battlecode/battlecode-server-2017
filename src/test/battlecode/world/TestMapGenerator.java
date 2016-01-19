@@ -232,7 +232,8 @@ public class TestMapGenerator {
                 parts,
                 zSchedule,
                 outputRobots,
-                mapName
+                mapName,
+                false
         );
     }
 }

@@ -1,5 +1,7 @@
 package battlecode.common;
 
+import battlecode.server.Config;
+
 /**
  * Contains details on various attributes of the different robots. All of this information is in the specs in a more organized form.
  */
@@ -317,6 +319,29 @@ public enum RobotType {
         }
     }
 
+    public double getOutbreakMultiplier(int round, boolean isArmgageddon) {
+        if (isArmgageddon) {
+            return (round % (GameConstants.ARMAGEDDON_DAY_TIMER + GameConstants.ARMAGEDDON_NIGHT_TIMER)) < GameConstants.ARMAGEDDON_DAY_TIMER 
+                    ? GameConstants.ARMAGEDDON_DAY_OUTBREAK_MULTIPLIER : GameConstants.ARMAGEDDON_NIGHT_OUTBREAK_MULTIPLIER;
+        }
+        
+        int outbreakLevel = round / GameConstants.OUTBREAK_TIMER;
+        switch (outbreakLevel) {
+            case 0: return 1.00;
+            case 1: return 1.10;
+            case 2: return 1.20;
+            case 3: return 1.30;
+            case 4: return 1.50;
+            case 5: return 1.70;
+            case 6: return 2.00;
+            case 7: return 2.30;
+            case 8: return 2.60;
+            case 9: return 3.00;
+            default:
+                return 3.00 + (outbreakLevel - 9);
+        }
+    }
+    
     /**
      * Returns the attack power of a unit spawned on the given round, taking
      * outbreak into account.
@@ -327,6 +352,14 @@ public enum RobotType {
     public double attackPower(int round) {
         if (this.isZombie) {
             return attackPower * getOutbreakMultiplier(round);
+        } else {
+            return attackPower;
+        }
+    }
+    
+    public double attackPower(int round, boolean isArmageddon) {
+        if (this.isZombie) {
+            return attackPower * getOutbreakMultiplier(round, isArmageddon);
         } else {
             return attackPower;
         }
@@ -342,6 +375,14 @@ public enum RobotType {
     public double maxHealth(int round) {
         if (this.isZombie) {
             return maxHealth * getOutbreakMultiplier(round);
+        } else {
+            return maxHealth;
+        }
+    }
+    
+    public double maxHealth(int round, boolean isArmageddon) {
+        if (this.isZombie) {
+            return maxHealth * getOutbreakMultiplier(round, isArmageddon);
         } else {
             return maxHealth;
         }

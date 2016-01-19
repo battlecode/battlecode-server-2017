@@ -23,5 +23,13 @@ public enum DominationFactor {
     /**
      * Win by destroying enemy Archons.
      */
-    DESTROYED
+    DESTROYED,
+    /**
+     * Armageddon: Destroyed by the zombies
+     */
+    ZOMBIFIED,
+    /**
+     * Armageddon: Zombies cleansed
+     */
+    CLEANSED
 }

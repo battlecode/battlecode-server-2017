@@ -69,7 +69,9 @@ public class Config {
         defaults.setProperty("bc.game.disable-zombies", "false");
 
         defaults.setProperty("bc.dialog.skip", "false");
-
+        
+        
+        defaults.setProperty("match.zombie-armageddon", "false");
 
         // Command-line options.
         options = new Options();
