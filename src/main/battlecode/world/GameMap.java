@@ -2,6 +2,7 @@ package battlecode.world;
 
 import battlecode.common.*;
 
+import battlecode.server.Server;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
@@ -62,7 +63,6 @@ public class GameMap implements Serializable {
     /**
      * If this is an Armageddon map
      */
-    
     private final boolean armageddon;
 
     /**
@@ -74,13 +74,89 @@ public class GameMap implements Serializable {
      * Maps a den MapLocation to its ZombieSpawnSchedule
      */
     private transient HashMap<MapLocation, ZombieSpawnSchedule> zombieSpawnMap;
-    
+
+    public enum Symmetry {
+        VERTICAL,
+        HORIZONTAL,
+        ROTATIONAL,
+        NEGATIVE_DIAGONAL,
+        POSITIVE_DIAGONAL,
+        NONE;
+
+        /**
+         * Get an opposite MapLocation, based on a map size and a zero origin.
+         *
+         * @param loc a MapLocation based on a ZERO ORIGIN
+         * @param width the width of the map
+         * @param height the height of the map
+         * @return the opposite map location based on a ZERO ORIGIN,
+         *         or null if there is no opposite
+         */
+        public MapLocation getOpposite(MapLocation loc, int width, int height) {
+            final int x, y;
+
+            switch (this) {
+                case VERTICAL:
+                    x = loc.x;
+                    y = height - loc.y - 1;
+                    break;
+                case HORIZONTAL:
+                    x = width - loc.x - 1;
+                    y = loc.y;
+                    break;
+                case ROTATIONAL:
+                    x = width - loc.x - 1;
+                    y = height - loc.y - 1;
+                    break;
+                case NEGATIVE_DIAGONAL:
+                    if (width != height) {
+                        throw new RuntimeException("Can't have negative diagonal map" +
+                                " with different width ("+width+") and height ("+height+")");
+                    }
+
+                    x = height - loc.y - 1;
+                    y = width - loc.x - 1;
+                    break;
+                case POSITIVE_DIAGONAL:
+                    if (width != height) {
+                        throw new RuntimeException("Can't have negative diagonal map" +
+                                " with different width ("+width+") and height ("+height+")");
+                    }
+
+                    x = loc.y;
+                    y = loc.x;
+                    break;
+                default:
+                    return null;
+            }
+
+            return new MapLocation(x, y);
+        }
+
+        /**
+         * Get an opposite MapLocation, based on a map size and origin
+         *
+         * @param loc the initial map location
+         * @param width the width of the map
+         * @param height the height of the map
+         * @param origin the origin of the map
+         * @return the opposite map location, or null if there is none
+         */
+        public MapLocation getOpposite(MapLocation loc, int width, int height, MapLocation origin) {
+            MapLocation zeroBasedResult = getOpposite(loc.add(-origin.x, -origin.y), width, height);
+
+            return zeroBasedResult == null?
+                    null :
+                    origin.add(zeroBasedResult.x, zeroBasedResult.y);
+        }
+    }
+
+
     /**
-     * Boolean values representing the different types of symmetry the map has;
-     * computed lazily.
+     * The type of symmetry the map has; computed lazily.
      */
-    private transient boolean symVert, symHoriz, symRot, symNegDiag, symPosDiag;
-    
+    private transient Symmetry symmetry;
+
     /**
      * The robots to spawn on the map; MapLocations are in world space -
      * i.e. in game correct MapLocations that need to have the origin
@@ -336,23 +412,12 @@ public class GameMap implements Serializable {
     public boolean isArmageddon() {
         return armageddon;
     }
-    
-    
 
     /**
      * @return the zombie spawn schedule for the map.
      */
     public ZombieSpawnSchedule getZombieSpawnSchedule() {
         return zombieSpawnSchedule;
-    }
-
-    /**
-     * @param round the round to look up
-     * @return an array of ZombieCounts for that round
-     */
-    @JsonIgnore
-    public ZombieCount[] getZombieSpawnSchedule(int round) {
-        return zombieSpawnSchedule.getScheduleForRound(round);
     }
 
     /**
@@ -365,7 +430,7 @@ public class GameMap implements Serializable {
 
         return this.zombieSpawnMap.get(denLoc);
     }
-    
+
     /**
      * Gets the origin (i.e., upper left corner) of the map
      *
@@ -373,6 +438,16 @@ public class GameMap implements Serializable {
      */
     public MapLocation getOrigin() {
         return origin;
+    }
+
+    /**
+     * @return the symmetry of the map
+     */
+    @JsonIgnore
+    public Symmetry getSymmetry() {
+        computeLazyValues();
+
+        return symmetry;
     }
 
     /**
@@ -451,8 +526,11 @@ public class GameMap implements Serializable {
     /**
      * Updates the map's symmetry types
      */
-    public void updateSymmetries() {
+    private void updateSymmetries() {
         // The different possible symmetries.
+
+        boolean symVert, symHoriz, symRot, symNegDiag, symPosDiag;
+
         symVert = true;
         symHoriz = true;
         symRot = true;
@@ -509,6 +587,52 @@ public class GameMap implements Serializable {
                 );
             }
         }
+
+        this.symmetry = null;
+
+        if (symVert) {
+            this.symmetry = Symmetry.VERTICAL;
+        }
+        if (symHoriz) {
+            if (this.symmetry != null) {
+                Server.warn("Multiple map symmetries on "+mapName+", using "+this.symmetry);
+                return;
+            }
+
+            this.symmetry = Symmetry.HORIZONTAL;
+        }
+
+        if (symRot) {
+            if (this.symmetry != null) {
+                Server.warn("Multiple map symmetries on "+mapName+", using "+this.symmetry);
+                return;
+            }
+
+            this.symmetry = Symmetry.ROTATIONAL;
+        }
+
+        if (symNegDiag) {
+            if (this.symmetry != null) {
+                Server.warn("Multiple map symmetries on "+mapName+", using "+this.symmetry);
+                return;
+            }
+
+            this.symmetry = Symmetry.NEGATIVE_DIAGONAL;
+        }
+
+        if (symPosDiag) {
+            if (this.symmetry != null) {
+                Server.warn("Multiple map symmetries on "+mapName+", using "+this.symmetry);
+                return;
+            }
+
+            this.symmetry = Symmetry.POSITIVE_DIAGONAL;
+        }
+
+        if (this.symmetry == null) {
+            Server.warn("Asymmetric map: "+mapName);
+            this.symmetry = Symmetry.NONE;
+        }
     }
     
     /**
@@ -520,28 +644,19 @@ public class GameMap implements Serializable {
         computeLazyValues();
 
         // First, check to make sure there aren't any ZOMBIEDENs on lines of symmetry
+
+        final MapLocation zeroOrigin = new MapLocation(0, 0);
+
         for(InitialRobotInfo robot : initialRobots) {
-            final MapLocation origin = new MapLocation(0, 0);
-            final MapLocation loc = robot.getLocation(origin);
-            final int x = loc.x, y = loc.y;
+            final MapLocation loc = robot.getLocation(zeroOrigin);
+
             if(robot.type == RobotType.ZOMBIEDEN) {
-                if(symVert) {
-                    if(y == height - y - 1) return false;
-                } else if (symHoriz) {
-                    if(x == width - x - 1) return false;
-                } else if (symNegDiag) {
-                    if(x == height - y - 1 && y == width - x - 1) return false;
-                } else if (symPosDiag) {
-                    if(x == y) return false;
-                } else if (symRot) {
-                    if(x == width - x - 1 && y == height - y - 1) return false;
-                } else {
-                    return false;
-                }
+                if (loc.equals(symmetry.getOpposite(loc, this.width, this.height))) return false;
             }
         }
+
         // Make sure the map has some sort of symmetry
-        return (symVert || symHoriz || symNegDiag || symPosDiag || symRot);
+        return symmetry != Symmetry.NONE;
     }
 
     /**
@@ -556,10 +671,10 @@ public class GameMap implements Serializable {
         HashMap<MapLocation,ZombieSpawnSchedule> returnMap = new HashMap<MapLocation,ZombieSpawnSchedule>();
         
         // Used for robot lookups by location
-        final MapLocation origin = new MapLocation(0, 0);
+        final MapLocation zeroOrigin = new MapLocation(0, 0);
         final Map<MapLocation, InitialRobotInfo> byLoc =
                 Arrays.stream(initialRobots).collect(Collectors.toMap(
-                        (robot) -> robot.getLocation(origin),
+                        (robot) -> robot.getLocation(zeroOrigin),
                         (robot) -> robot
                 ));
         
@@ -568,28 +683,14 @@ public class GameMap implements Serializable {
         for (MapLocation loc : byLoc.keySet()) {
 
             InitialRobotInfo r1 = byLoc.get(loc);
-            final int x = loc.x, y = loc.y;
 
             if(r1.type == RobotType.ZOMBIEDEN && denLocs.indexOf(loc) == -1) {
                 // Add this location
-                denLocs.add(r1.getLocation(origin));
-                
+                denLocs.add(r1.getLocation(zeroOrigin));
+
                 // Now find symmetric pair
-                MapLocation newLocation;
-                if(symVert) {
-                    newLocation = new MapLocation(x, height - y - 1);
-                } else if (symHoriz) {
-                    newLocation = new MapLocation(width - x - 1, y);
-                } else if (symNegDiag) {
-                    newLocation = new MapLocation(height - y - 1, width - x - 1);
-                } else if (symPosDiag) {
-                    newLocation = new MapLocation(y, x);
-                } else if (symRot) {
-                    newLocation = new MapLocation(width - x - 1, height - y - 1);
-                } else {
-                    newLocation = null; // Map is not symmetric, so no pair
-                }
-                
+                final MapLocation newLocation = this.symmetry.getOpposite(loc, this.width, this.height);
+
                 // Add the symmetric pair
                 if (newLocation != null && oppositeRobots(r1,byLoc.get(newLocation)) && denLocs.indexOf(newLocation) == -1) {
                     denLocs.add(newLocation);
@@ -638,7 +739,7 @@ public class GameMap implements Serializable {
         }
         return returnMap;
     }
-    
+
     /**
      * Return whether two map tiles have the same properties.
      *
@@ -683,7 +784,10 @@ public class GameMap implements Serializable {
      * Computes symmetries and ZombieSpawnMap.
      */
     private synchronized void computeLazyValues() {
-        if (this.zombieSpawnMap == null) {
+        if (this.symmetry == null || this.zombieSpawnMap == null) {
+            this.symmetry = null;
+            this.zombieSpawnMap = null;
+
             updateSymmetries();
             this.zombieSpawnMap = buildZombieSpawnMap(this.zombieSpawnSchedule);
         }
