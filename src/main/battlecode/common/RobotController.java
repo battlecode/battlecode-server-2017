@@ -41,6 +41,16 @@ public interface RobotController {
      * @battlecode.doc.costlymethod
      */
     int getRoundNum();
+    
+    
+    /**
+     * Armageddon:
+     * Returns if it is daytime in zombie armageddon
+     * @return true if it is daytime, false if it is nightime
+     * 
+     * @battlecode.doc.costlymethod
+     */
+    boolean isArmageddonDaytime();
 
     /**
      * Returns a copy of the zombie spawn schedule for the game. Any attempts

@@ -8,6 +8,7 @@ import battlecode.world.signal.AutoSignalHandler;
 import battlecode.world.signal.InternalSignal;
 import battlecode.world.signal.SignalHandler;
 import battlecode.serial.GameStats;
+import battlecode.server.Config;
 import battlecode.world.control.RobotControlProvider;
 import battlecode.world.signal.*;
 
@@ -63,7 +64,7 @@ public class GameWorld implements SignalHandler {
     public GameWorld(GameMap gm, RobotControlProvider cp,
                      String teamA, String teamB,
                      long[][] oldTeamMemory) {
-
+        
         currentRound = -1;
         teamAName = teamA;
         teamBName = teamB;
@@ -600,6 +601,11 @@ public class GameWorld implements SignalHandler {
         return currentRound >= gameMap.getRounds() - 1;
     }
 
+    public boolean isArmageddonDaytime() {
+        return !gameMap.isArmageddon() || 
+                (currentRound % (GameConstants.ARMAGEDDON_DAY_TIMER + GameConstants.ARMAGEDDON_NIGHT_TIMER)) < GameConstants.ARMAGEDDON_DAY_TIMER;
+    }
+    
     public void processEndOfRound() {
         // process all gameobjects
         for (InternalRobot gameObject : gameObjectsByID.values()) {
@@ -880,9 +886,13 @@ public class GameWorld implements SignalHandler {
             int totalArchons = getRobotTypeCount(obj.getTeam(),
                     RobotType.ARCHON);
             if (totalArchons == 0 && winner == null) {
-                setWinner(obj.getTeam().opponent(),
+                if (gameMap.isArmageddon())  setWinner(Team.ZOMBIE, 
+                        DominationFactor.ZOMBIFIED); 
+                else setWinner(obj.getTeam().opponent(),
                         DominationFactor.DESTROYED);
             }
+        } else if (gameMap.isArmageddon() && obj.getTeam() == Team.ZOMBIE && getRobotCount(Team.ZOMBIE) == 0) {
+            setWinner(Team.A, DominationFactor.CLEANSED);
         }
 
         // update rubble

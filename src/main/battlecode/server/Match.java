@@ -70,11 +70,12 @@ public class Match {
     /**
      * Creates a new match with the given parameters and options.
      *
-     * @param info    the teams and map to use when running this match
-     * @param options options relevant to match creation (i.e., default map path)
+     * @param info the teams and map to use when running this match
+     * @param options options relevant to match creation (i.e., default map
+     * path)
      */
     public Match(GameInfo info, String map, Config options, int number,
-                 int count) {
+            int count) {
         this.info = info;
         this.map = map;
         this.options = options;
@@ -121,12 +122,12 @@ public class Match {
     }
 
     /**
-     * Sends a internalSignal directly to the game engine, possibly altering the match
-     * state.
+     * Sends a internalSignal directly to the game engine, possibly altering the
+     * match state.
      *
      * @param internalSignal the internalSignal to send to the engine
-     * @return the currentInternalSignals that represent the effect of the alteration, or an
-     *         empty internalSignal array if there was no effect
+     * @return the currentInternalSignals that represent the effect of the
+     * alteration, or an empty internalSignal array if there was no effect
      */
     public InjectDelta inject(InternalSignal internalSignal) {
         assert isInitialized();
@@ -134,7 +135,7 @@ public class Match {
         try {
             return new InjectDelta(true, gameWorld.inject(internalSignal));
         } catch (final RuntimeException e) {
-            System.err.println("Injection failure: "+e.getMessage());
+            System.err.println("Injection failure: " + e.getMessage());
             e.printStackTrace();
             return new InjectDelta(false, new InternalSignal[0]);
         }
@@ -150,12 +151,12 @@ public class Match {
     }
 
     /**
-     * Runs the next round, returning a delta containing all the currentInternalSignals raised
-     * during that round. Notifies observers of anything other than a successful
-     * delta-producing run.
+     * Runs the next round, returning a delta containing all the
+     * currentInternalSignals raised during that round. Notifies observers of
+     * anything other than a successful delta-producing run.
      *
-     * @return the currentInternalSignals generated for the next round of the game, or null if
-     *         the engine's result was a breakpoint or completion
+     * @return the currentInternalSignals generated for the next round of the
+     * game, or null if the engine's result was a breakpoint or completion
      */
     public RoundDelta getRound() {
 
@@ -167,8 +168,9 @@ public class Match {
         // Run the next round.
         gameState = gameWorld.runRound();
 
-        if (gameState == GameState.DONE)
+        if (gameState == GameState.DONE) {
             return null;
+        }
 
         // Serialize the changes to the GameWorld.
         return new RoundDelta(gameWorld.getAllSignals(true));
@@ -230,11 +232,12 @@ public class Match {
      * Gets the winner of this match.
      *
      * @return the Team that has won the match, or null if the match has not yet
-     *         finished
+     * finished
      */
     public Team getWinner() {
-        if (hasMoreRounds())
+        if (hasMoreRounds()) {
             return null;
+        }
         return gameWorld.getWinner();
     }
 
@@ -260,34 +263,41 @@ public class Match {
             case A:
                 teamName = info.getTeamA() + " (A)";
                 break;
-
             case B:
                 teamName = info.getTeamB() + " (B)";
                 break;
-
+            case ZOMBIE:
+                teamName = "The Zombie Horde";
+                break;
             default:
                 teamName = "nobody";
         }
 
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < (50 - teamName.length()) / 2; i++)
+        for (int i = 0; i < (50 - teamName.length()) / 2; i++) {
             sb.append(' ');
+        }
         sb.append(teamName);
         sb.append(" wins (round ").append(getRoundNumber()).append(")");
 
         sb.append("\nReason: ");
         GameStats stats = gameWorld.getGameStats();
         DominationFactor dom = stats.getDominationFactor();
-        if (dom == DominationFactor.DESTROYED)
+        if (dom == DominationFactor.DESTROYED) {
             sb.append("The winning team won by destruction.");
-        else if (dom == DominationFactor.PWNED)
+        } else if (dom == DominationFactor.PWNED) {
             sb.append("The winning team won on tiebreakers (more Archons remaining).");
-        else if (dom == DominationFactor.OWNED)
+        } else if (dom == DominationFactor.OWNED) {
             sb.append("The winning team won on tiebreakers (more Archon health).");
-        else if (dom == DominationFactor.BARELY_BEAT)
+        } else if (dom == DominationFactor.BARELY_BEAT) {
             sb.append("The winning team won on tiebreakers (more Parts)");
-        else if (dom == DominationFactor.WON_BY_DUBIOUS_REASONS)
+        } else if (dom == DominationFactor.WON_BY_DUBIOUS_REASONS) {
             sb.append("Team ").append(getWinner()).append(" won arbitrarily.");
+        } else if (dom == DominationFactor.ZOMBIFIED) {
+            sb.append("The Zombies have comsumed your team");
+        } else if (dom == DominationFactor.CLEANSED) {
+            sb.append("You have eradicated the Zombies");
+        }
 
         return sb.toString();
     }
@@ -301,18 +311,27 @@ public class Match {
     }
 
     public long[][] getComputedTeamMemory() {
-        if (computedTeamMemory == null)
+        if (computedTeamMemory == null) {
             return this.gameWorld.getTeamMemory();
-
-        else return computedTeamMemory;
+        } else {
+            return computedTeamMemory;
+        }
     }
 
     /**
      * @return the number of the most recently computed round, where the first
-     *         round is 1 (0 if no rounds have been run yet)
+     * round is 1 (0 if no rounds have been run yet)
      */
     public int getRoundNumber() {
         return gameWorld.getCurrentRound() + 1;
+    }
+
+    /**
+     * 
+     * @return the game info
+     */
+    public GameInfo getInfo() {
+        return info;
     }
 
     /**
@@ -325,7 +344,8 @@ public class Match {
 
     @Override
     public String toString() {
-        return String.format("%s vs. %s on %s", info.getTeamA(), info
-                .getTeamB(), map);
+        
+        return String.format("%s vs. %s on %s", info.getTeamA(), 
+                gameWorld.getGameMap().isArmageddon() ? "The Zombies" : info.getTeamB(), map);
     }
 }

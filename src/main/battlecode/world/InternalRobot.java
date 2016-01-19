@@ -65,9 +65,9 @@ public class InternalRobot {
         this.type = type;
         this.buildDelay = buildDelay;
 
-        this.maxHealth = type.maxHealth(gw.getCurrentRound());
+        this.maxHealth = type.maxHealth(gw.getCurrentRound(), gameWorld.getGameMap().isArmageddon());
         this.healthLevel = maxHealth;
-        this.attackPower = type.attackPower(gw.getCurrentRound());
+        this.attackPower = type.attackPower(gw.getCurrentRound(), gameWorld.getGameMap().isArmageddon());
 
         this.coreDelay = 0.0;
         this.weaponDelay = 0.0;
@@ -434,6 +434,12 @@ public class InternalRobot {
         roundsAlive++;
         
         processBeingInfected();
+        
+        if (gameWorld.getGameMap().isArmageddon()) {
+            if (team == Team.ZOMBIE && type != RobotType.ZOMBIEDEN) {
+                changeHealthLevel(gameWorld.isArmageddonDaytime() ? GameConstants.ARMAGEDDON_DAY_ZOMBIE_REGENERATION : GameConstants.ARMAGEDDON_NIGHT_ZOMBIE_REGENERATION );
+            }
+        }
     }
 
     public void processEndOfRound() {}

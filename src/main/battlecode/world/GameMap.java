@@ -58,6 +58,12 @@ public class GameMap implements Serializable {
      * The name of the map
      */
     private final String mapName;
+    
+    /**
+     * If this is an Armageddon map
+     */
+    
+    private final boolean armageddon;
 
     /**
      * The zombie spawn schedule for the map
@@ -109,6 +115,7 @@ public class GameMap implements Serializable {
         this.seed = gm.seed;
         this.rounds = gm.rounds;
         this.mapName = gm.mapName;
+        this.armageddon = gm.armageddon;
         this.zombieSpawnSchedule = new ZombieSpawnSchedule(gm.zombieSpawnSchedule);
         this.initialRobots = gm.getInitialRobots();
     }
@@ -137,7 +144,8 @@ public class GameMap implements Serializable {
                    double[][] initialParts,
                    ZombieSpawnSchedule zombieSpawnSchedule,
                    InitialRobotInfo[] initialRobots,
-                   String mapName) {
+                   String mapName,
+                   boolean isArmageddon) {
         if (mapProperties.containsKey(MapProperties.WIDTH)) {
             this.width = mapProperties.get(MapProperties.WIDTH);
         } else {
@@ -170,6 +178,7 @@ public class GameMap implements Serializable {
         this.zombieSpawnSchedule = zombieSpawnSchedule;
         this.mapName = mapName;
         this.initialRobots = initialRobots;
+        this.armageddon = isArmageddon;
     }
 
     @Override
@@ -323,6 +332,12 @@ public class GameMap implements Serializable {
     public int getSeed() {
         return seed;
     }
+
+    public boolean isArmageddon() {
+        return armageddon;
+    }
+    
+    
 
     /**
      * @return the zombie spawn schedule for the map.
@@ -690,5 +705,6 @@ public class GameMap implements Serializable {
         this.zombieSpawnSchedule = null;
         this.initialRobots = null;
         this.zombieSpawnMap = null;
+        this.armageddon = false;
     }
 }
