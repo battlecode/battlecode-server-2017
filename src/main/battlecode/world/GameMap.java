@@ -650,8 +650,31 @@ public class GameMap implements Serializable {
         for(InitialRobotInfo robot : initialRobots) {
             final MapLocation loc = robot.getLocation(zeroOrigin);
 
-            if(robot.type == RobotType.ZOMBIEDEN) {
-                if (loc.equals(symmetry.getOpposite(loc, this.width, this.height))) return false;
+            if(robot.type == RobotType.ZOMBIEDEN && robot.team == Team.ZOMBIE) {
+                if (loc.equals(symmetry.getOpposite(loc, this.width, this.height))) {
+                    return false;
+                }
+
+                // Check to see if this den is significantly closer to one team than other
+                int closestADist = Integer.MAX_VALUE;
+                int closestBDist = Integer.MAX_VALUE;
+                for (InitialRobotInfo otherBot : initialRobots) {
+                    if(otherBot.team == Team.A) {
+                        closestADist = Math.min(closestADist, loc.distanceSquaredTo(otherBot.getLocation(zeroOrigin)));
+                    } else if (otherBot.team == Team.B) {
+                        closestBDist = Math.min(closestBDist, loc.distanceSquaredTo(otherBot.getLocation(zeroOrigin)));
+                    }
+                }
+                if (Math.abs(closestADist-closestBDist) < 5) {
+                    Server.warn("Map "+mapName+" is not tournament legal. Den distanceSquared difference is <5");
+                    return false; // Must be at least a flat distance greater
+                }
+                if ((closestADist < closestBDist && closestADist*1.3 > closestBDist) ||
+                        (closestBDist < closestADist && closestBDist*1.3 > closestADist)) {
+                    Server.warn("Map "+mapName+" is not tournament legal. Den distanceSquared difference is <30%");
+                    return false;
+                }
+                
             }
         }
 
