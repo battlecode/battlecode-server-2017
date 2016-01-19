@@ -1,14 +1,20 @@
 package battlecode.instrumenter;
 
-import battlecode.instrumenter.inject.RobotMonitor;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Tests for IndividualClassLoader.
@@ -16,15 +22,15 @@ import java.util.List;
  * @author james
  */
 public class IndividualClassLoaderTest {
+    private IndividualClassLoader.Cache sharedCache;
     private IndividualClassLoader l1;
     private IndividualClassLoader l2;
 
     @Before
     public void resetIndividualClassLoader() throws Exception {
-        IndividualClassLoader.reset();
-
-        l1 = new IndividualClassLoader("instrumentertest");
-        l2 = new IndividualClassLoader("instrumentertest");
+        sharedCache = new IndividualClassLoader.Cache();
+        l1 = new IndividualClassLoader("instrumentertest", sharedCache);
+        l2 = new IndividualClassLoader("instrumentertest", sharedCache);
 
         // Set up noop RobotMonitors.
 
@@ -117,11 +123,8 @@ public class IndividualClassLoaderTest {
     // Should give already-loaded system classes for most things.
     @Test
     public void testNoUnnecessaryReloads() throws ClassNotFoundException {
-        final IndividualClassLoader l
-                = new IndividualClassLoader("instrumentertest");
-
         for (Class<?> theClass : NEVER_RELOAD) {
-            assertEquals(theClass, l.loadClass(theClass.getName()));
+            assertEquals(theClass, l1.loadClass(theClass.getName()));
         }
     }
 
@@ -182,7 +185,6 @@ public class IndividualClassLoaderTest {
                 l1.loadClass(className);
             } catch (InstrumentationException e) {
                 // Reset teamsWithErrors.
-                IndividualClassLoader.reset();
                 continue;
             }
 
@@ -234,5 +236,40 @@ public class IndividualClassLoaderTest {
     @Test
     public void testCanUseEnumMap() throws Exception {
         l1.loadClass("instrumentertest.UsesEnumMap");
+    }
+
+    @Test
+    public void testLoadFromJar() throws Exception {
+        File jar = Files.createTempFile("battlecode-test", ".jar").toFile();
+
+        jar.deleteOnExit();
+
+        ZipOutputStream z = new ZipOutputStream(new FileOutputStream(jar));
+
+        ZipEntry classEntry = new ZipEntry("instrumentertest/Nothing.class");
+
+        z.putNextEntry(classEntry);
+
+        IOUtils.copy(getClass().getClassLoader().getResourceAsStream("instrumentertest/Nothing.class"),
+                z
+        );
+
+        z.closeEntry();
+        z.close();
+
+        IndividualClassLoader jarLoader = new IndividualClassLoader(
+                "instrumentertest",
+                new IndividualClassLoader.Cache(jar.toURI().toURL())
+        );
+
+        Class<?> jarClass = jarLoader.loadClass("instrumentertest.Nothing");
+
+        URL jarClassLocation = jarClass.getResource("Nothing.class");
+
+        // EXTREMELY scientific
+
+        assertTrue(jarClassLocation.toString().startsWith("jar:"));
+        assertTrue(jarClassLocation.toString().contains(jar.toURI().toURL().toString()));
+
     }
 }

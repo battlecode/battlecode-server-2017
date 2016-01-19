@@ -9,7 +9,6 @@ public interface NotificationHandler {
      * Processes a start notification.
      *
      * @param n the notification to process
-     * @return the result of processing
      */
     void visitStartNotification(StartNotification n);
 
@@ -17,7 +16,6 @@ public interface NotificationHandler {
      * Processes a pause notification.
      *
      * @param n the notification to process
-     * @return the result of processing
      */
     void visitPauseNotification(PauseNotification n);
 
@@ -25,7 +23,6 @@ public interface NotificationHandler {
      * Processes a run notification.
      *
      * @param n the notification to process
-     * @return the result of processing
      */
     void visitRunNotification(RunNotification n);
 
@@ -33,7 +30,6 @@ public interface NotificationHandler {
      * Processes a resume notification.
      *
      * @param n the notification to process
-     * @return the result of processing
      */
     void visitResumeNotification(ResumeNotification n);
 
@@ -41,7 +37,6 @@ public interface NotificationHandler {
      * Processes an inject notification.
      *
      * @param n the notification to process
-     * @return the result of processing
      */
     void visitInjectNotification(InjectNotification n);
 
@@ -49,7 +44,13 @@ public interface NotificationHandler {
      * Processes a game notification.
      *
      * @param n the notification to process
-     * @return the result of processing
      */
     void visitGameNotification(GameNotification n);
+
+    /**
+     * Processes a termination notification.
+     *
+     * @param n the notification to process
+     */
+    void visitTerminateNotification(TerminateNotification n);
 }

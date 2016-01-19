@@ -31,6 +31,8 @@ import java.lang.reflect.Modifier;
  */
 public class SandboxedRobotPlayer {
 
+    public static final String PLAYER_CLASS_NAME = "RobotPlayer";
+
     /**
      * The controller for the robot we're controlling.
      */
@@ -89,15 +91,17 @@ public class SandboxedRobotPlayer {
     /**
      * Create a new sandboxed robot player.
      *
-     * @param teamName        the name of the team to create a player for
-     * @param playerClassName the name of the class to be loaded
-     *                        (e.g. RobotPlayer)
-     * @param robotController           the robot we're loading a player for
+     * @param teamName          the name of the team to create a player for
+     * @param robotController   the robot we're loading a player for
+     * @param seed              the seed the robot should use for random operations
+     * @param sharedCache       the cache our classloader should use
      * @throws InstrumentationException if the player doesn't work for some reason
      * @throws RuntimeException if our code fails for some reason
      */
-    public SandboxedRobotPlayer(String teamName, String playerClassName, RobotController robotController,
-                                int seed)
+    public SandboxedRobotPlayer(String teamName,
+                                RobotController robotController,
+                                int seed,
+                                IndividualClassLoader.Cache sharedCache)
             throws InstrumentationException {
         this.robotController = robotController;
         this.seed = seed;
@@ -105,7 +109,7 @@ public class SandboxedRobotPlayer {
         this.notifier = new Object();
 
         // Create classloader sandbox
-        individualLoader = new IndividualClassLoader(teamName);
+        individualLoader = new IndividualClassLoader(teamName, sharedCache);
 
         // Load monitor / monitor methods
         // Used to initialize the RobotMonitor for the player
@@ -163,7 +167,7 @@ public class SandboxedRobotPlayer {
                 // Pause immediately
                 pauseMethod.invoke(null);
                 // Run the robot!
-                loadAndRunPlayer(teamName, playerClassName);
+                loadAndRunPlayer(teamName, PLAYER_CLASS_NAME);
                 // If we get here, we've returned from the 'run' method. Tell the user.
                 System.out.println(robotController.getTeam().toString() + "'s "
                         + robotController.getType().toString() + " " +
@@ -190,7 +194,7 @@ public class SandboxedRobotPlayer {
                     notifier.notifyAll();
                 }
             }
-        }, teamName + "." + playerClassName + " #"+ robotController.getID());
+        }, teamName + "." + PLAYER_CLASS_NAME + " #"+ robotController.getID());
 
 
         // Wait for thread to tell us it's ready

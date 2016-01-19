@@ -886,12 +886,15 @@ public class GameWorld implements SignalHandler {
             int totalArchons = getRobotTypeCount(obj.getTeam(),
                     RobotType.ARCHON);
             if (totalArchons == 0 && winner == null) {
-                if (gameMap.isArmageddon())  setWinner(Team.ZOMBIE, 
-                        DominationFactor.ZOMBIFIED); 
-                else setWinner(obj.getTeam().opponent(),
-                        DominationFactor.DESTROYED);
+                if (gameMap.isArmageddon()) {
+                    setWinner(Team.ZOMBIE, DominationFactor.ZOMBIFIED);
+                } else {
+                    setWinner(obj.getTeam().opponent(), DominationFactor.DESTROYED);
+                }
             }
-        } else if (gameMap.isArmageddon() && obj.getTeam() == Team.ZOMBIE && getRobotCount(Team.ZOMBIE) == 0) {
+        } else if (gameMap.isArmageddon()
+                && obj.getTeam() == Team.ZOMBIE
+                && getRobotCount(Team.ZOMBIE) == 0) {
             setWinner(Team.A, DominationFactor.CLEANSED);
         }
 

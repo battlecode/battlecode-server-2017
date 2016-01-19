@@ -1,6 +1,7 @@
 package battlecode.instrumenter.bytecode;
 
 import battlecode.common.GameConstants;
+import battlecode.instrumenter.IndividualClassLoader;
 import battlecode.server.ErrorReporter;
 import battlecode.instrumenter.InstrumentationException;
 import org.objectweb.asm.*;
@@ -28,6 +29,9 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
     private final String className;    // the class to which this method belongs
     private final boolean checkDisallowed;
 
+    // used to load other class files
+    private final IndividualClassLoader loader;
+
     // all the exception handlers we've seen in the code
     private final Set<LabelNode> exceptionHandlers = new HashSet<>();
     private final Set<LabelNode> tryCatchStarts = new HashSet<>();
@@ -47,8 +51,19 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 
     private MethodVisitor methodWriter;
 
-    public InstrumentingMethodVisitor(final MethodVisitor mv, final String className, final int access, final String methodName, final String methodDesc, final String signature, final String[] exceptions, final String teamPackageName, boolean silenced, boolean checkDisallowed) {
+    public InstrumentingMethodVisitor(final MethodVisitor mv,
+                                      final IndividualClassLoader loader,
+                                      final String className,
+                                      final int access,
+                                      final String methodName,
+                                      final String methodDesc,
+                                      final String signature,
+                                      final String[] exceptions,
+                                      final String teamPackageName,
+                                      boolean silenced,
+                                      boolean checkDisallowed) {
         super(ASM5, access, methodName, methodDesc, signature, exceptions);
+        this.loader = loader;
         this.teamPackageName = teamPackageName;
         this.className = className;
         this.checkDisallowed = checkDisallowed;
@@ -248,7 +263,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                         || (h.getName().equals("printStackTrace") && h.getDesc().equals("()V") &&
                             (h.getOwner() == null || h.getOwner().equals("java/lang/Throwable")
                                 || isSuperClass(h.getOwner(), "java/lang/Throwable")))
-                        || MethodCostUtil.getMethodData(h.getOwner(), h.getName()) != null) {
+                        || MethodCostUtil.getMethodData(h.getOwner(), h.getName(), loader) != null) {
 
                     final String owner = h.getOwner().replace("/",".");
 
@@ -312,7 +327,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 
         boolean endBasicBlock = n.owner.startsWith(teamPackageName) || classReference(n.owner).startsWith("instrumented") || n.owner.startsWith("battlecode");
 
-        MethodCostUtil.MethodData data = MethodCostUtil.getMethodData(n.owner, n.name);
+        MethodCostUtil.MethodData data = MethodCostUtil.getMethodData(n.owner, n.name, loader);
         if (data != null) {
             bytecodeCtr += data.cost;
             endBasicBlock = data.shouldEndRound;
@@ -467,16 +482,9 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
      * @param superclass - interface or superclass to test as an ancestor
      * @throws InstrumentationException if class <code>owner</code> cannot be found
      */
-    private static boolean isSuperClass(String owner, String superclass) {
-        ClassReader cr;
-
-        try {
-            cr = ClassReaderUtil.reader(owner);
-        } catch (IOException ioe) {
-            throw new InstrumentationException("Can't find the class \"" + owner + "\"");
-        }
-
-        InterfaceReader ir = new InterfaceReader();
+    private boolean isSuperClass(String owner, String superclass) {
+        ClassReader cr = loader.reader(owner);
+        InterfaceReader ir = new InterfaceReader(loader);
         cr.accept(ir, ClassReader.SKIP_DEBUG);
         return Arrays.asList(ir.getInterfaces()).contains(superclass);
     }

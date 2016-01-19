@@ -1,5 +1,6 @@
 package battlecode.instrumenter.bytecode;
 
+import battlecode.instrumenter.IndividualClassLoader;
 import battlecode.instrumenter.InstrumentationException;
 import battlecode.server.ErrorReporter;
 import org.objectweb.asm.*;
@@ -19,25 +20,19 @@ import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
  */
 class InterfaceReader extends ClassVisitor {
 
-    // this will store the final result of which interfaces are transitively implemented
+    /**
+     * Used to read relevant class files.
+     */
+    private IndividualClassLoader loader;
+
+    /**
+     * store the final result of which interfaces are transitively implemented
+     */
     private String[] interfaces = null;
 
-    public InterfaceReader() {
+    public InterfaceReader(IndividualClassLoader loader) {
         super(Opcodes.ASM5);
-    }
-
-    public InterfaceReader(String className) {
-        super(Opcodes.ASM5);
-        ClassReader cr;
-        try {
-            cr = ClassReaderUtil.reader(className);
-        } catch (IOException ioe) {
-            ErrorReporter.report("Can't find the class \"" + className + "\", and this wasn't caught until the MethodData stage.", true);
-            throw new InstrumentationException();
-        }
-        InterfaceReader ir = new InterfaceReader();
-        cr.accept(ir, SKIP_DEBUG);
-
+        this.loader = loader;
     }
 
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
@@ -54,13 +49,8 @@ class InterfaceReader extends ClassVisitor {
         HashSet<String> result2 = new HashSet<>();
         for (String i : result) {
             ClassReader cr;
-            try {
-                cr = ClassReaderUtil.reader(i);
-            } catch (IOException ioe) {
-                ErrorReporter.report("Can't find the class \"" + i + "\", and this wasn't caught until the InterfaceReader stage.", true);
-                continue;
-            }
-            InterfaceReader ir = new InterfaceReader();
+            cr = loader.reader(i);
+            InterfaceReader ir = new InterfaceReader(loader);
             cr.accept(ir, SKIP_DEBUG);
             String[] ret = ir.getInterfaces();
 

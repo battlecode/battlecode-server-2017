@@ -1,39 +1,45 @@
 package battlecode.server;
 
 import battlecode.serial.notification.GameNotification;
+import battlecode.serial.notification.TerminateNotification;
 import battlecode.server.proxy.FileProxy;
 import battlecode.server.proxy.Proxy;
 import battlecode.serial.serializer.JavaSerializerFactory;
 import battlecode.serial.serializer.SerializerFactory;
 import battlecode.serial.serializer.XStreamSerializerFactory;
 
+import java.io.File;
 import java.io.IOException;
 
 public class Main {
 
     private static void runHeadless(Config options, String saveFile) {
-        try {
-            final SerializerFactory serializerFactory;
-            if (options.getBoolean("bc.server.output-xml")) {
-                serializerFactory = new XStreamSerializerFactory();
-            } else {
-                serializerFactory = new JavaSerializerFactory();
-            }
-
-            final Proxy proxy = new FileProxy(saveFile, serializerFactory);
-
-            final Server server = new Server(options, Server.Mode.HEADLESS, proxy);
-
-            new GameNotification(new GameInfo(
-                options.get("bc.game.team-a"),
-                options.get("bc.game.team-b"),
-                options.get("bc.game.maps").split(",")
-            )).accept(server);
-
-            server.run();
-        } catch (IOException e) {
-            e.printStackTrace();
+        final SerializerFactory serializerFactory;
+        if (options.getBoolean("bc.server.output-xml")) {
+            serializerFactory = new XStreamSerializerFactory();
+        } else {
+            serializerFactory = new JavaSerializerFactory();
         }
+
+        final Server server = new Server(
+                options,
+                false,
+                new FileProxy.Factory(serializerFactory)
+        );
+
+        new GameNotification(new GameInfo(
+                options.get("bc.game.team-a"),
+                null,
+                options.get("bc.game.team-b"),
+                null,
+                options.get("bc.game.maps").split(","),
+                new File(saveFile),
+                false
+        )).accept(server);
+
+        new TerminateNotification().accept(server);
+
+        server.run();
     }
 
     public static Config setupConfig(String[] args) {

@@ -5,6 +5,7 @@ import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
 import battlecode.serial.notification.*;
+import battlecode.server.proxy.Proxy;
 import battlecode.world.signal.InternalSignal;
 import battlecode.serial.*;
 import battlecode.serial.serializer.Serializer;
@@ -16,7 +17,9 @@ import org.junit.Ignore;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -103,13 +106,31 @@ public abstract class SerializerFactoryTestBase {
 
     };
 
+    private static final URL url;
+    static {
+        try {
+            url = new URL("https://example.com/battlecode-team.jar");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static final Notification[] notifications = new Notification[] {
             PauseNotification.INSTANCE,
             ResumeNotification.INSTANCE,
             RunNotification.forever(),
             StartNotification.INSTANCE,
             new InjectNotification(new MovementOverrideSignal(0, new MapLocation(0, 0))),
-            new GameNotification(new GameInfo("teama", "teamb", new String[] {"map-1"}))
+            new GameNotification(new GameInfo(
+                    "teama",
+                    url,
+                    "teamb",
+                    null,
+                    new String[] {"map-1"},
+                    new File("save-file.rms"),
+                    false
+            ))
+
     };
 
     /**

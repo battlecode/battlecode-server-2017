@@ -3,11 +3,9 @@ package battlecode.common;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -15,6 +13,7 @@ import static org.junit.Assert.assertNotEquals;
 
 public class ZombieSpawnScheduleTest {
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testBasic() {
         ZombieSpawnSchedule z = new ZombieSpawnSchedule();
