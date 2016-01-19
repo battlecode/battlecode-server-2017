@@ -264,11 +264,7 @@ public class IndividualClassLoaderTest {
 
         Class<?> jarClass = jarLoader.loadClass("instrumentertest.Nothing");
 
-        System.out.println(jarClass.getName());
-
         URL jarClassLocation = jarClass.getResource("Nothing.class");
-
-        System.out.println(jarClassLocation.toString());
 
         // EXTREMELY scientific
 
