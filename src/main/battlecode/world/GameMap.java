@@ -538,6 +538,27 @@ public class GameMap implements Serializable {
                 } else {
                     return false;
                 }
+                
+                // Check to see if this den is significantly closer to one team than other
+                int closestADist = 1000;
+                int closestBDist = 1000;
+                for(InitialRobotInfo otherBot : initialRobots) {
+                    if(otherBot.team == Team.A) {
+                        closestADist = Math.min(closestADist, (int)Math.sqrt(loc.distanceSquaredTo(otherBot.getLocation(origin))));
+                    } else if (otherBot.team == Team.B) {
+                        closestBDist = Math.min(closestBDist, (int)Math.sqrt(loc.distanceSquaredTo(otherBot.getLocation(origin))));
+                    }
+                }
+                if(Math.abs(closestADist-closestBDist) < 5) {
+                    System.out.println("Map is not tournament legal. Den distance difference is <5");
+                    return false; // Must be at least a flat distance greater
+                }
+                if((closestADist < closestBDist && closestADist*1.3 > closestBDist) ||
+                        (closestBDist < closestADist && closestBDist*1.3 > closestADist)) {
+                    System.out.println("Map is not tournament legal. Den distance difference is <30%");
+                    return false;
+                }
+                
             }
         }
         // Make sure the map has some sort of symmetry
