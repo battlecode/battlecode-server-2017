@@ -102,7 +102,8 @@ public abstract class SerializerFactoryTestBase {
             new GameStats(),
             new InjectDelta(true, new InternalSignal[0]),
             new PauseEvent(),
-            new ExtensibleMetadata()
+            new ExtensibleMetadata(),
+            new StoredConstants()
 
     };
 

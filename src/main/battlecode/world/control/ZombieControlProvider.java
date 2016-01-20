@@ -2,6 +2,8 @@ package battlecode.world.control;
 
 import battlecode.common.*;
 import battlecode.server.ErrorReporter;
+import battlecode.server.Server;
+import battlecode.world.GameMap;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
 import battlecode.common.ZombieSpawnSchedule;
@@ -26,7 +28,6 @@ public class ZombieControlProvider implements RobotControlProvider {
     private static final Direction[] DIRECTIONS = {
         Direction.NORTH,
         Direction.NORTH_EAST,
-        Direction.EAST,
         Direction.EAST,
         Direction.SOUTH_EAST,
         Direction.SOUTH,
@@ -93,12 +94,10 @@ public class ZombieControlProvider implements RobotControlProvider {
     }
 
     @Override
-    public void roundStarted() {
-    }
+    public void roundStarted() {}
 
     @Override
-    public void roundEnded() {
-    }
+    public void roundEnded() {}
 
     @Override
     public void robotSpawned(InternalRobot robot) {
@@ -115,8 +114,7 @@ public class ZombieControlProvider implements RobotControlProvider {
     }
 
     @Override
-    public void robotKilled(InternalRobot robot) {
-    }
+    public void robotKilled(InternalRobot robot) {}
 
     @Override
     public void runRobot(InternalRobot robot) {
@@ -187,9 +185,14 @@ public class ZombieControlProvider implements RobotControlProvider {
         // Walk around the den, attempting to spawn zombies.
         // We choose a random direction to start spawning so that we don't prefer to spawn zombies
         // to the north.
-        final int startingDirection = random.nextInt(DIRECTIONS.length);
+        final int startingDirection = getSpawnDirection(rc.getLocation());
+        final int chirality = getSpawnChirality(rc.getLocation());
+
         for (int dirOffset = 0; dirOffset < DIRECTIONS.length; dirOffset++) {
-            final Direction dir = DIRECTIONS[(startingDirection + dirOffset) % DIRECTIONS.length];
+            final Direction dir = DIRECTIONS[
+                    Math.floorMod(startingDirection + dirOffset*chirality, DIRECTIONS.length)
+            ];
+
             // Pull the next zombie type to spawn from the queue
             RobotType next = null;
             for (RobotType type : ZOMBIE_TYPES) {
@@ -294,6 +297,91 @@ public class ZombieControlProvider implements RobotControlProvider {
         } catch (Exception e) {
             ErrorReporter.report(e, true);
         }
+    }
+
+    // just some memoization
+    private final Map<MapLocation, Integer> directionCache = new HashMap<>();
+    private final Map<MapLocation, Integer> chiralityCache = new HashMap<>();
+
+    /**
+     * Get the direction to spawn the first available zombie in.
+     *
+     * @param loc the location of the zombie den
+     * @return an index into DIRECTIONS that represents the first
+     *         direction to spawn in
+     */
+    private int getSpawnDirection(MapLocation loc) {
+        if (directionCache.containsKey(loc)) {
+            return directionCache.get(loc);
+        }
+
+        final GameMap map = world.getGameMap();
+
+        final MapLocation closest = Arrays.stream(map.getInitialRobots())
+                .filter(r -> r.type == RobotType.ARCHON)
+                .map(r -> r.getLocation(map.getOrigin()))
+                .min((l1, l2) -> Integer.compare(
+                        l1.distanceSquaredTo(loc),
+                        l2.distanceSquaredTo(loc)
+                ))
+                .orElseGet(() -> {
+                    Server.warn("Zombie den: No initial archons on map, spawning towards middle; may not be fair");
+                    return map.getOrigin().add(map.getWidth() / 2, map.getHeight() / 2);
+                });
+
+        final int direction = Arrays.asList(DIRECTIONS).indexOf(loc.directionTo(closest));
+
+        if (direction == -1) {
+            throw new RuntimeException("Zombie den: can't find direction towards "+closest+
+                    " from "+loc+", this is a bug.");
+        }
+
+        directionCache.put(loc, direction);
+
+        return direction;
+    }
+
+    /**
+     * Get the clock direction to spawn zombies in, after the first zombie.
+     *
+     * @param loc the location of the zombie den
+     * @return 1 for clockwise, -1 for counterclockwise
+     */
+    private int getSpawnChirality(MapLocation loc) {
+        if (chiralityCache.containsKey(loc)) {
+            return chiralityCache.get(loc);
+        }
+
+        final GameMap map = world.getGameMap();
+
+        int chir;
+
+        if (map.getSymmetry() == GameMap.Symmetry.ROTATIONAL
+                || map.getSymmetry() == GameMap.Symmetry.NONE) {
+            // always spawn zombies clockwise
+            chir = 1;
+        } else {
+            // this is somewhat obtuse
+            // basically, chirality should be opposite on opposite sides of the line of symmetry
+            // so we get the opposite location of this location over the line of symmetry
+            // and compare them
+            // and have the guarantee that loc.compareTo(opp) == -opp.compareTo(loc),
+            // since MapLocations have a total order, and loc != opp
+            // and take the sign of that to get 1 and -1;
+            // so getSpawnChirality(opp) == -getSpawnChirality(loc)
+            chir = Integer.signum(loc.compareTo(map.getSymmetry()
+                    .getOpposite(loc, map.getWidth(), map.getHeight(), map.getOrigin())));
+
+            // or 0, if loc is on line of symmetry
+            if (chir == 0) {
+                Server.warn("Zombie den on line of symmetry, spawning clockwise");
+                chir = 1;
+            }
+        }
+
+        chiralityCache.put(loc, chir);
+
+        return chir;
     }
 
     @Override
