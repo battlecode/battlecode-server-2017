@@ -212,6 +212,9 @@ public class Server implements Runnable, NotificationHandler {
                     options.getBoolean("bc.server.debug")
             );
 
+            // Serialize engine metadata
+
+
             // Set up our control provider
             final RobotControlProvider prov = createControlProvider(currentGame);
 
