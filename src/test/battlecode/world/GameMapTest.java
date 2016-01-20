@@ -107,20 +107,20 @@ public class GameMapTest {
         assertTrue(negDiagSymmetric.isTournamentLegal());
         
         final GameMap closeDens = new TestMapGenerator(3,3, 0)
-        .withRobot(RobotType.ARCHON, Team.A, 0,0)
-        .withRobot(RobotType.ARCHON, Team.B, 2,2)
-        .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 0,1)
-        .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 2,1)
-        .getMap("closeDense");
+                .withRobot(RobotType.ARCHON, Team.A, 0,0)
+                .withRobot(RobotType.ARCHON, Team.B, 2,2)
+                .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 0,1)
+                .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 2,1)
+                .getMap("closeDens");
 
         assertFalse(closeDens.isTournamentLegal());
         
         final GameMap farDens = new TestMapGenerator(31,31, 0)
-        .withRobot(RobotType.ARCHON, Team.A, 0,0)
-        .withRobot(RobotType.ARCHON, Team.B, 30,30)
-        .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 0,1)
-        .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 30,29)
-        .getMap("farDens");
+                .withRobot(RobotType.ARCHON, Team.A, 0,0)
+                .withRobot(RobotType.ARCHON, Team.B, 30,30)
+                .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 0,1)
+                .withRobot(RobotType.ZOMBIEDEN, Team.ZOMBIE, 30,29)
+                .getMap("farDens");
         
         assertTrue(farDens.isTournamentLegal());
     }
