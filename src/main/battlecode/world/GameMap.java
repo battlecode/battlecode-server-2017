@@ -643,6 +643,37 @@ public class GameMap implements Serializable {
     public boolean isTournamentLegal() {
         computeLazyValues();
 
+        if (armageddon) {
+            // the rules are different on armageddon maps?
+            int aCount = 0, zCount = 0;
+            for (InitialRobotInfo robot : initialRobots) {
+                switch (robot.team) {
+                    case B:
+                        Server.warn("Map "+mapName+" is not tournament legal. " +
+                                "Team B is not permitted in armageddon maps.");
+                        return false;
+                    case A:
+                        aCount++;
+                        break;
+                    case ZOMBIE:
+                        zCount++;
+                        break;
+                }
+            }
+
+            if (aCount == 0) {
+                Server.warn("Map "+mapName+" is not tournament legal. " +
+                        "Armageddon maps require playable (Team.A) robots.");
+                return false;
+            }
+
+            if (zCount == 0) {
+                Server.warn("Map "+mapName+" is not tournament legal. " +
+                        "Armageddon maps require zombie (Team.ZOMBIE) robots.");
+                return false;
+            }
+        }
+
         // First, check to make sure there aren't any ZOMBIEDENs on lines of symmetry
 
         final MapLocation zeroOrigin = new MapLocation(0, 0);
@@ -665,6 +696,12 @@ public class GameMap implements Serializable {
                         closestBDist = Math.min(closestBDist, loc.distanceSquaredTo(otherBot.getLocation(zeroOrigin)));
                     }
                 }
+
+                if (closestADist == Integer.MAX_VALUE || closestBDist == Integer.MAX_VALUE) {
+                    Server.warn("Map "+mapName+" is not tournament legal. No playable robots?");
+                    return false;
+                }
+
                 if (Math.abs(closestADist-closestBDist) < 5) {
                     Server.warn("Map "+mapName+" is not tournament legal. Den distanceSquared difference is <5");
                     return false; // Must be at least a flat distance greater
