@@ -16,6 +16,7 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
     private String className;
     private final String teamPackageName;
     private final boolean silenced;
+    private final boolean debugMethodsEnabled;
 
     // Used to find other class files, which is occasionally necessary.
     private IndividualClassLoader loader;
@@ -37,12 +38,14 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
                                      final IndividualClassLoader loader,
                                      final String teamPackageName,
                                      boolean silenced,
-                                     boolean checkDisallowed) {
+                                     boolean checkDisallowed,
+                                     boolean debugMethodsEnabled) {
         super(Opcodes.ASM5, cv);
         this.loader = loader;
         this.teamPackageName = teamPackageName;
         this.silenced = silenced;
         this.checkDisallowed = checkDisallowed;
+        this.debugMethodsEnabled = debugMethodsEnabled;
     }
 
     /**
@@ -92,7 +95,20 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
                 ClassReferenceUtil.methodSignatureReference(signature, teamPackageName, checkDisallowed),
                 exceptions);
         // create a new InstrumentingMethodVisitor, and let it loose on this method
-        return mv == null ? null : new InstrumentingMethodVisitor(mv, loader, className, access, name, desc, signature, exceptions, teamPackageName, silenced, checkDisallowed);
+        return mv == null ? null : new InstrumentingMethodVisitor(
+                mv,
+                loader,
+                className,
+                access,
+                name,
+                desc,
+                signature,
+                exceptions,
+                teamPackageName,
+                silenced,
+                checkDisallowed,
+                debugMethodsEnabled
+        );
     }
 
     /**

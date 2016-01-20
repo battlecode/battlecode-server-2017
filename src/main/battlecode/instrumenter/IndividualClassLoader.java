@@ -1,6 +1,7 @@
 package battlecode.instrumenter;
 
 import battlecode.instrumenter.bytecode.InstrumentingClassVisitor;
+import battlecode.server.Config;
 import battlecode.server.ErrorReporter;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -128,7 +129,11 @@ public class IndividualClassLoader extends ClassLoader {
 
             final byte[] classBytes;
             try {
-                classBytes = instrument(name, true);
+                classBytes = instrument(
+                        name,
+                        true,
+                        Config.getGlobalConfig().getBoolean("bc.engine.debug-methods")
+                );
             } catch (InstrumentationException e) {
                 sharedCache.setError(teamPackageName);
                 throw e;
@@ -142,7 +147,7 @@ public class IndividualClassLoader extends ClassLoader {
             // we would need to modify ObjectHashCode.
             byte[] classBytes;
             try {
-                classBytes = instrument(name, false);
+                classBytes = instrument(name, false, false);
             } catch (InstrumentationException ie) {
                 sharedCache.setError(teamPackageName);
                 throw ie;
@@ -214,12 +219,21 @@ public class IndividualClassLoader extends ClassLoader {
 
     }
 
-    public byte[] instrument(String className, boolean checkDisallowed) throws InstrumentationException {
+    public byte[] instrument(String className,
+                             boolean checkDisallowed,
+                             boolean debugMethodsEnabled) throws InstrumentationException {
 
         ClassReader cr = reader(className);
 
         ClassWriter cw = new ClassWriter(COMPUTE_MAXS); // passing true sets maxLocals and maxStack, so we don't have to
-        ClassVisitor cv = new InstrumentingClassVisitor(cw, this, teamPackageName, false, checkDisallowed);
+        ClassVisitor cv = new InstrumentingClassVisitor(
+                cw,
+                this,
+                teamPackageName,
+                false,
+                checkDisallowed,
+                debugMethodsEnabled
+        );
         cr.accept(cv, 0);        //passing false lets debug info be included in the transformation, so players get line numbers in stack traces
         return cw.toByteArray();
     }
