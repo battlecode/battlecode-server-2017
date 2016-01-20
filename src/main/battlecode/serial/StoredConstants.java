@@ -69,13 +69,13 @@ public final class StoredConstants implements ServerEvent {
                 typeValues.put(field.getName(), field.get(type));
             }
             for (Method method : RobotType.class.getDeclaredMethods()) {
-                if (method.isSynthetic() || method.isBridge() ||
-                        (method.getModifiers() & staticOrPrivate) != 0) {
+                if (method.isSynthetic() || method.isBridge()
+                        || (method.getModifiers() & staticOrPrivate) != 0
+                        || method.getParameterCount() != 0) {
                     continue;
                 }
-                if (method.getParameterCount() == 0) {
-                    typeValues.put(method.getName(), method.invoke(type));
-                }
+
+                typeValues.put(method.getName(), method.invoke(type));
             }
 
             robotTypes.put(type.name(), typeValues);
