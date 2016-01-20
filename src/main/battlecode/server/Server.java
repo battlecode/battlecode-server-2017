@@ -213,7 +213,7 @@ public class Server implements Runnable, NotificationHandler {
             );
 
             // Serialize engine metadata
-
+            proxyWriter.enqueue(new StoredConstants());
 
             // Set up our control provider
             final RobotControlProvider prov = createControlProvider(currentGame);
