@@ -22,5 +22,6 @@ import java.io.Serializable;
         @Type(value = MatchHeader.class, name = "matchHeader"),
         @Type(value = PauseEvent.class, name = "pauseEvent"),
         @Type(value = RoundDelta.class, name = "roundDelta"),
+        @Type(value = StoredConstants.class, name = "storedConstants"),
         })
 public interface ServerEvent extends Serializable {}
