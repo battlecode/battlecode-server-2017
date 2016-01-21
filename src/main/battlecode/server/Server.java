@@ -275,10 +275,7 @@ public class Server implements Runnable, NotificationHandler {
                           long[][] teamMemory,
                           ProxyWriter proxyWriter) throws Exception {
 
-        String mapName = currentGame.getMaps()[matchIndex];
-        if (mapName.endsWith(".xml")) {
-            mapName = mapName.substring(0, mapName.indexOf('.'));
-        }
+        final String mapName = currentGame.getMaps()[matchIndex];
 
         // Load the map for the match
         final GameMap loadedMap;

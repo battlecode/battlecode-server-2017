@@ -43,8 +43,11 @@ public final class GameMapIO {
      */
     public static GameMap loadMap(String mapName, File mapDir)
             throws IOException {
-
         final GameMap result;
+
+        if (mapName.endsWith(".xml")) {
+            mapName = mapName.substring(0, mapName.indexOf('.'));
+        }
 
         final File mapFile = new File(mapDir, mapName + ".xml");
         if (mapFile.exists()) {
