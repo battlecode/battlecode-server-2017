@@ -263,8 +263,13 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             case ARETURN:
             case RETURN:
                 endOfBasicBlock(n);
-                if (name.startsWith("debug_") && name.endsWith("V")) {
-                    instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "decrementDebugLevel", "()V", false));
+                if (name.startsWith("debug_") && desc.endsWith("V")) {
+                    instructions.insertBefore(n, new MethodInsnNode(
+                            INVOKESTATIC,
+                            "battlecode/instrumenter/inject/RobotMonitor",
+                            "decrementDebugLevel", "()V",
+                            false
+                    ));
                 }
                 break;
             case ATHROW:
