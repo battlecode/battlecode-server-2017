@@ -46,6 +46,7 @@ public class Config {
         defaults.setProperty("bc.engine.silence-d", "false");
         defaults.setProperty("bc.engine.upkeep", "true");
         defaults.setProperty("bc.engine.breakpoints", "false");
+        defaults.setProperty("bc.engine.debug-methods", "false");
 
         // TODO clean up
         defaults.setProperty("bc.client.opengl", "false");

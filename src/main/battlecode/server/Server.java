@@ -243,6 +243,8 @@ public class Server implements Runnable, NotificationHandler {
                     case B:
                         bWins++;
                         break;
+                    case ZOMBIE:
+                        if (currentWorld.getGameMap().isArmageddon()) break;
                     default:
                         warn("Team "+winner+" won???");
                 }

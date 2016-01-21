@@ -24,10 +24,13 @@ import static org.objectweb.asm.tree.AbstractInsnNode.*;
  *    (e.g. Object.hashCode(), Math.random(), Throwable.printStackTrace())
  */
 public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
-	
+
+    private final static String DEBUG_PREFIX = "debug_";
+
     private final String teamPackageName;
     private final String className;    // the class to which this method belongs
     private final boolean checkDisallowed;
+    private final boolean debugMethodsEnabled;
 
     // used to load other class files
     private final IndividualClassLoader loader;
@@ -61,13 +64,16 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                                       final String[] exceptions,
                                       final String teamPackageName,
                                       boolean silenced,
-                                      boolean checkDisallowed) {
+                                      boolean checkDisallowed,
+                                      boolean debugMethodsEnabled) {
         super(ASM5, access, methodName, methodDesc, signature, exceptions);
+        this.methodWriter = mv;
+
         this.loader = loader;
         this.teamPackageName = teamPackageName;
         this.className = className;
         this.checkDisallowed = checkDisallowed;
-        methodWriter = mv;
+        this.debugMethodsEnabled = debugMethodsEnabled;
     }
 
     protected String classReference(String name) {
@@ -145,7 +151,11 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         }
         startLabel = new LabelNode(new Label());
         instructions.insert(startLabel);
+
         boolean anyTryCatch = tryCatchBlocks.size() > 0;
+        if (debugMethodsEnabled && name.startsWith(DEBUG_PREFIX)) {
+            addDebugHandler();
+        }
         if (anyTryCatch) {
             addRobotDeathHandler();
         }
@@ -174,7 +184,52 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             n = n.getNext();
         return n;
     }
-    
+
+    @SuppressWarnings("unchecked")
+    private void addDebugHandler() {
+        // will be injected at the end of the method
+        final LabelNode debugEndLabel = new LabelNode(new Label());
+
+        // we wrap the method in a try / finally to enable debug mode
+        tryCatchBlocks.add(new TryCatchBlockNode(
+                startLabel,    // start our "try" at the beginning of the method
+                debugEndLabel, // end at the end of the method
+                debugEndLabel, // start the "finally" at the end of the method
+                null           // catch any exception for finally
+        ));
+
+        // at the beginning of the method, call "incrementDebugLevel"
+        instructions.insertBefore(nextInstruction(instructions.getFirst()),
+                new MethodInsnNode(
+                        INVOKESTATIC, // static method
+                        "battlecode/instrumenter/inject/RobotMonitor", // class
+                        "incrementDebugLevel", "()V", // method / desc
+                        false // not an interfact method
+                )
+        );
+
+        // add debug label to the end
+        instructions.add(debugEndLabel);
+
+        // create a new stack frame
+        instructions.add(new FrameNode(
+                F_FULL, // a full new one
+                0, new Object[0], // with no local variables
+                1, new Object[]{"java/lang/Throwable"} // but maybe an exception on the stack
+        ));
+
+        // call decrementDebugLevel
+        instructions.add(new MethodInsnNode(
+                INVOKESTATIC,
+                "battlecode/instrumenter/inject/RobotMonitor",
+                "decrementDebugLevel", "()V",
+                false
+        ));
+
+        // throw any exception that's on the stack
+        instructions.add(new InsnNode(ATHROW));
+    }
+
     @SuppressWarnings("unchecked")	// This is to fix the warning from the add() to tryCatchBlocks
     private void addRobotDeathHandler() {
         LabelNode robotDeathLabel = new LabelNode(new Label());
