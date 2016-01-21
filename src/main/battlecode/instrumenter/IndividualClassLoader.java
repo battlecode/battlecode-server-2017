@@ -139,8 +139,6 @@ public class IndividualClassLoader extends ClassLoader {
                 throw e;
             }
 
-            dumpToFile(name, classBytes);
-
             finishedClass = saveAndDefineClass(name, classBytes);
         } else if (name.startsWith("instrumented.")) {
             // Each robot has its own version of java.util classes.
