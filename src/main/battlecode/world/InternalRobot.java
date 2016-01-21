@@ -266,10 +266,16 @@ public class InternalRobot {
     public void takeDamage(double baseAmount) {
         assert baseAmount >= 0;
 
-        changeHealthLevel(-baseAmount);
+        changeHealthLevel(-baseAmount, null);
     }
 
-    public void changeHealthLevel(double amount) {
+    public void takeDamage(double baseAmount, RobotType attackerType) {
+        assert baseAmount >= 0;
+
+        changeHealthLevel(-baseAmount, attackerType);
+    }
+
+    public void changeHealthLevel(double amount, RobotType source) {
         healthChanged = true;
         healthLevel += amount;
         if (healthLevel > maxHealth) {
@@ -277,7 +283,12 @@ public class InternalRobot {
         }
 
         if (healthLevel <= 0) {
-            gameWorld.visitDeathSignal(new DeathSignal(ID));
+            if (source == RobotType.TURRET) {
+                gameWorld.visitDeathSignal(new DeathSignal(ID,
+                        DeathSignal.RobotDeathCause.TURRET));
+            } else {
+                gameWorld.visitDeathSignal(new DeathSignal(ID));
+            }
         }
     }
 
@@ -409,7 +420,7 @@ public class InternalRobot {
     public void repair(InternalRobot other) {
         repairCount++;
 
-        other.changeHealthLevel(GameConstants.ARCHON_REPAIR_AMOUNT);
+        other.changeHealthLevel(GameConstants.ARCHON_REPAIR_AMOUNT, getType());
     }
 
     // *********************************
@@ -437,7 +448,10 @@ public class InternalRobot {
         
         if (gameWorld.getGameMap().isArmageddon()) {
             if (team == Team.ZOMBIE && type != RobotType.ZOMBIEDEN) {
-                changeHealthLevel(gameWorld.isArmageddonDaytime() ? GameConstants.ARMAGEDDON_DAY_ZOMBIE_REGENERATION : GameConstants.ARMAGEDDON_NIGHT_ZOMBIE_REGENERATION );
+                changeHealthLevel(gameWorld.isArmageddonDaytime() ?
+                        GameConstants.ARMAGEDDON_DAY_ZOMBIE_REGENERATION :
+                        GameConstants.ARMAGEDDON_NIGHT_ZOMBIE_REGENERATION,
+                        null);
             }
         }
     }
