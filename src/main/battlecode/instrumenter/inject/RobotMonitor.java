@@ -16,12 +16,13 @@ import java.io.PrintStream;
  * @author adamd
  */
 public final class RobotMonitor {
-    private static int BYTECODE_LIMIT;
+    private static int bytecodeLimit;
 
     private static int randomSeed;
 
     private static int bytecodesLeft;
     private static boolean shouldDie;
+    private static int debugLevel;
 
     private static SandboxedRobotPlayer.Pauser pauser;
     private static SandboxedRobotPlayer.Killer killer;
@@ -42,6 +43,8 @@ public final class RobotMonitor {
                             int seed) {
         shouldDie = false;
         bytecodesLeft = 0;
+        debugLevel = 0;
+
         randomSeed = seed;
         pauser = thePauser;
         killer = theKiller;
@@ -54,7 +57,7 @@ public final class RobotMonitor {
      */
     @SuppressWarnings("unused")
     public static void setBytecodeLimit(int limit) {
-        BYTECODE_LIMIT = limit;
+        bytecodeLimit = limit;
     }
 
     /**
@@ -84,7 +87,7 @@ public final class RobotMonitor {
      */
     @SuppressWarnings("unused")
     public static int getBytecodeNum() {
-        return BYTECODE_LIMIT - getBytecodesLeft();
+        return bytecodeLimit - getBytecodesLeft();
     }
 
     /**
@@ -113,12 +116,35 @@ public final class RobotMonitor {
             killer.kill();
         }
 
-        bytecodesLeft -= numBytecodes;
+        if (debugLevel == 0) {
+            bytecodesLeft -= numBytecodes;
 
-        while (bytecodesLeft <= 0) {
-            pause();
+            while (bytecodesLeft <= 0) {
+                pause();
+            }
         }
     }
+
+    /**
+     * Called when entering a debug_ method.
+     *
+     * THIS METHOD IS CALLED BY THE INSTRUMENTER.
+     */
+    @SuppressWarnings("unused")
+    public static void incrementDebugLevel() {
+        debugLevel++;
+    }
+
+    /**
+     * Called when exiting a debug_ method.
+     *
+     * THIS METHOD IS CALLED BY THE INSTRUMENTER.
+     */
+    @SuppressWarnings("unused")
+    public static void decrementDebugLevel() {
+        debugLevel--;
+    }
+
 
     /**
      * Used to construct new Random instances.
@@ -154,9 +180,9 @@ public final class RobotMonitor {
         }
 
         if (bytecodesLeft < 0) {
-            bytecodesLeft += BYTECODE_LIMIT;
+            bytecodesLeft += bytecodeLimit;
         } else {
-            bytecodesLeft = BYTECODE_LIMIT;
+            bytecodesLeft = bytecodeLimit;
         }
     }
 }

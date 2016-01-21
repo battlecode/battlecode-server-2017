@@ -172,4 +172,26 @@ public class SandboxedRobotPlayerTest {
         player.step();
         assertTrue(player.getTerminated());
     }
+
+    @Test
+    public void testDebugMethodsEnabled() throws Exception {
+        Config.getGlobalConfig().set("bc.engine.debug-methods", "true");
+
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerdebug", rc, 0, cache);
+        player.setBytecodeLimit(100);
+
+        player.step();
+        assertTrue(player.getTerminated());
+    }
+
+    @Test
+    public void testDebugMethodsDisabled() throws Exception {
+        Config.getGlobalConfig().set("bc.engine.debug-methods", "false");
+
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerdebug", rc, 0, cache);
+        player.setBytecodeLimit(100);
+
+        player.step();
+        assertFalse(player.getTerminated());
+    }
 }
