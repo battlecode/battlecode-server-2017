@@ -1,6 +1,7 @@
 package battlecode.instrumenter.inject;
 
 import battlecode.instrumenter.SandboxedRobotPlayer;
+import battlecode.server.ErrorReporter;
 
 import java.io.PrintStream;
 
@@ -143,6 +144,10 @@ public final class RobotMonitor {
     @SuppressWarnings("unused")
     public static void decrementDebugLevel() {
         debugLevel--;
+        if (debugLevel < 0) {
+            ErrorReporter.report("Debug level below zero, this should be impossible!", true);
+            killRobot();
+        }
     }
 
 
