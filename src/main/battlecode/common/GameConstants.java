@@ -123,8 +123,8 @@ public interface GameConstants {
     int ARMAGEDDON_NIGHT_TIMER = 900;
     
     /** Armageddon: day/night outbreak multiplier **/
-    double ARMAGEDDON_DAY_OUTBREAK_MULTIPLIER = 0.5;
-    double ARMAGEDDON_NIGHT_OUTBREAK_MULTIPLIER = 3.0;
+    double ARMAGEDDON_DAY_OUTBREAK_MULTIPLIER = 1.0;
+    double ARMAGEDDON_NIGHT_OUTBREAK_MULTIPLIER = 2.0;
     
     //** Armageddon: zombie regeneration levels night and day **/
     double ARMAGEDDON_DAY_ZOMBIE_REGENERATION = -0.2;

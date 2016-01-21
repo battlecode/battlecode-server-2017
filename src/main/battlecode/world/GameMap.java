@@ -630,7 +630,7 @@ public class GameMap implements Serializable {
         }
 
         if (this.symmetry == null) {
-            Server.warn("Asymmetric map: "+mapName);
+            if (!isArmageddon()) Server.warn("Asymmetric map: "+mapName);
             this.symmetry = Symmetry.NONE;
         }
     }
