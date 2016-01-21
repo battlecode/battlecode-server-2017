@@ -46,7 +46,7 @@ public final class GameMapIO {
         final GameMap result;
 
         if (mapName.endsWith(".xml")) {
-            mapName = mapName.substring(0, mapName.indexOf('.'));
+            mapName = mapName.substring(0, mapName.lastIndexOf('.'));
         }
 
         final File mapFile = new File(mapDir, mapName + ".xml");

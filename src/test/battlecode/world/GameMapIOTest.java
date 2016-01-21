@@ -53,4 +53,32 @@ public class GameMapIOTest {
 
         assertTrue(inputMap.equals(outputMap));
     }
+
+    /**
+     * Basic round trip test like above, except makes sure that it's okay if
+     * the map name also contains ".xml" in it.
+     *
+     * @throws IOException shouldn't happen.
+     */
+    @Test(timeout=5000)
+    public void testExtensionInFileName() throws IOException {
+        int width = 50;
+        int height = 80;
+        int rounds = 2123;
+
+        TestMapGenerator gen = new TestMapGenerator(width, height, rounds);
+
+        final GameMap inputMap = gen.getMap("basicMap");
+
+        final File tempDir = Files.createTempDirectory("battlecode-test").toFile();
+        tempDir.deleteOnExit();
+
+        GameMapIO.writeMap(inputMap, tempDir);
+
+        assertTrue(GameMapIO.getAvailableMaps(tempDir.toString()).contains("basicMap"));
+
+        final GameMap outputMap = GameMapIO.loadMap("basicMap.xml", tempDir);
+
+        assertTrue(inputMap.equals(outputMap));
+    }
 }
