@@ -153,7 +153,8 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         instructions.insert(startLabel);
 
         boolean anyTryCatch = tryCatchBlocks.size() > 0;
-        if (debugMethodsEnabled && name.startsWith(DEBUG_PREFIX)) {
+
+        if (debugMethodsEnabled && name.startsWith(DEBUG_PREFIX) && desc.endsWith("V")) {
             addDebugHandler();
         }
         if (anyTryCatch) {
@@ -190,7 +191,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         // will be injected at the end of the method
         final LabelNode debugEndLabel = new LabelNode(new Label());
 
-        // we wrap the method in a try / finally to enable debug mode
+        // we wrap the method in a try / catch to enable debug mode
         tryCatchBlocks.add(new TryCatchBlockNode(
                 startLabel,    // start our "try" at the beginning of the method
                 debugEndLabel, // end at the end of the method
@@ -204,7 +205,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                         INVOKESTATIC, // static method
                         "battlecode/instrumenter/inject/RobotMonitor", // class
                         "incrementDebugLevel", "()V", // method / desc
-                        false // not an interfact method
+                        false // not an interface method
                 )
         );
 
@@ -215,7 +216,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         instructions.add(new FrameNode(
                 F_FULL, // a full new one
                 0, new Object[0], // with no local variables
-                1, new Object[]{"java/lang/Throwable"} // but maybe an exception on the stack
+                1, new Object[]{"java/lang/Throwable"} // but an exception on the stack
         ));
 
         // call decrementDebugLevel
@@ -226,7 +227,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                 false
         ));
 
-        // throw any exception that's on the stack
+        // throw the exception that brought us into the catch block
         instructions.add(new InsnNode(ATHROW));
     }
 
@@ -262,6 +263,9 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             case ARETURN:
             case RETURN:
                 endOfBasicBlock(n);
+                if (name.startsWith("debug_") && name.endsWith("V")) {
+                    instructions.insertBefore(n, new MethodInsnNode(INVOKESTATIC, "battlecode/engine/instrumenter/RobotMonitor", "decrementDebugLevel", "()V", false));
+                }
                 break;
             case ATHROW:
                 endOfBasicBlock(n);
@@ -318,6 +322,8 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                         || (h.getName().equals("printStackTrace") && h.getDesc().equals("()V") &&
                             (h.getOwner() == null || h.getOwner().equals("java/lang/Throwable")
                                 || isSuperClass(h.getOwner(), "java/lang/Throwable")))
+                        || (h.getName().startsWith(DEBUG_PREFIX) && h.getDesc().endsWith("V") &&
+                            h.getOwner().startsWith("teamPackageName/"))
                         || MethodCostUtil.getMethodData(h.getOwner(), h.getName(), loader) != null) {
 
                     final String owner = h.getOwner().replace("/",".");
@@ -398,7 +404,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             n.owner = "instrumented/battlecode/instrumenter/inject/InstrumentableFunctions";
         }
 
-        //hax the e.printStackTrace() method calls
+        // hax the e.printStackTrace() method calls
         // This isn't quite the correct behavior.  If
         // we wanted to do the correct thing always
         // we would use reflection at runtime to
@@ -413,6 +419,41 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             // replace class names
             n.owner = classReference(n.owner);
             n.desc = methodDescReference(n.desc);
+
+            // are we calling a disabled debug method?
+            if (!debugMethodsEnabled && n.name.startsWith("debug_")
+                    && n.desc.endsWith("V") && n.owner.startsWith(teamPackageName)) {
+
+                // if debug methods aren't enabled, we remove the call to the debug method
+                // first, pop the arguments from the stack
+                // arguments are popped in reverse order, so add instructions to newInsns
+                // using insert, not add
+                InsnList newInsns = new InsnList();
+                for (Type t : Type.getArgumentTypes(n.desc)) {
+                    switch (t.getSize()) {
+                        case 1:
+                            //System.out.println("pop "+className+" "+methodName);
+                            newInsns.insert(new InsnNode(POP));
+                            break;
+                        case 2:
+                            newInsns.insert(new InsnNode(POP2));
+                            break;
+                        default:
+                            ErrorReporter.report("Illegal type size: not 1 or 2", true);
+                            throw new InstrumentationException();
+                    }
+                }
+                // next, pop the class on which the method would be called
+                if (n.getOpcode() != INVOKESTATIC)
+                    newInsns.add(new InsnNode(POP));
+                // if we remove the method call and don't add any instructions then we could end up with a FrameNode that does not have an instruction following it.  asm seems not to like this.
+                if (newInsns.getFirst() == null)
+                    newInsns.add(new InsnNode(NOP));
+                instructions.insertBefore(n, newInsns);
+                instructions.remove(n);
+                // no function was called so don't end the basic block
+                endBasicBlock = false;
+            }
         }
 
         if (endBasicBlock)

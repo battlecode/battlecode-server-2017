@@ -188,10 +188,10 @@ public class SandboxedRobotPlayerTest {
     public void testDebugMethodsDisabled() throws Exception {
         Config.getGlobalConfig().set("bc.engine.debug-methods", "false");
 
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerdebug", rc, 0, cache);
-        player.setBytecodeLimit(100);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayernodebug", rc, 0, cache);
+        player.setBytecodeLimit(200);
 
         player.step();
-        assertFalse(player.getTerminated());
+        assertTrue(player.getTerminated());
     }
 }
