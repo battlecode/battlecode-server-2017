@@ -1325,4 +1325,55 @@ public class RobotControllerTest {
             }
         });
     }
+
+    /**
+     * Deaths by turret should only produce 1/3 rubble. Normal deaths should
+     * produce full rubble. Death by activation should produce no rubble.
+     */
+    @Test
+    public void testDeathCauses() throws GameActionException {
+        TestMapGenerator mapGen = new TestMapGenerator(10, 10, 100);
+        GameMap map = mapGen.getMap("test");
+        TestGame game = new TestGame(map);
+        int oX = game.getOriginX();
+        int oY = game.getOriginY();
+        final int turret = game.spawn(oX + 5, oY + 5, RobotType.TURRET, Team.A);
+        final int soldier = game.spawn(oX, oY + 1, RobotType.SOLDIER, Team
+                .A);
+        final int archon = game.spawn(oX + 1, oY + 3, RobotType.ARCHON, Team.A);
+        final int bot1 = game.spawn(oX + 1, oY + 1, RobotType.SOLDIER, Team.B);
+        final int bot2 = game.spawn(oX + 2, oY + 1, RobotType.SOLDIER, Team.B);
+        final int bot3 = game.spawn(oX + 1, oY + 2, RobotType.SOLDIER, Team
+                .NEUTRAL);
+
+        InternalRobot bot1Bot = game.getBot(bot1);
+        InternalRobot bot2Bot = game.getBot(bot2);
+        InternalRobot bot3Bot = game.getBot(bot3);
+        bot1Bot.takeDamage(RobotType.SOLDIER.maxHealth - 1);
+        bot2Bot.takeDamage(RobotType.SOLDIER.maxHealth - 1);
+        bot3Bot.takeDamage(RobotType.SOLDIER.maxHealth - 1);
+
+        game.round((id, rc) -> {
+            if (id == turret) {
+                rc.attackLocation(new MapLocation(oX + 1, oY + 1));
+            } else if (id == soldier) {
+                rc.attackLocation(new MapLocation(oX + 2, oY + 1));
+            } else if (id == archon) {
+                rc.activate(new MapLocation(oX + 1, oY + 2));
+            }
+        });
+
+        // Death by turret should leave 1/3 rubble.
+        assertEquals(game.getWorld().getRubble(new MapLocation(oX + 1, oY +
+                1)), RobotType.SOLDIER.maxHealth * GameConstants
+                .RUBBLE_FROM_TURRET_FACTOR, EPSILON);
+
+        // Death by normal attack should leave 100% rubble.
+        assertEquals(game.getWorld().getRubble(new MapLocation(oX + 2, oY +
+                1)), RobotType.SOLDIER.maxHealth, EPSILON);
+
+        // Death by activation should leave 0 rubble.
+        assertEquals(game.getWorld().getRubble(new MapLocation(oX + 1, oY +
+                2)), 0, EPSILON);
+    }
 }

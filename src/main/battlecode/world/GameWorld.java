@@ -724,7 +724,8 @@ public class GameWorld implements SignalHandler {
         MapLocation targetLoc = s.getLoc();
         InternalRobot toBeActivated = getRobot(targetLoc);
 
-        visitDeathSignal(new DeathSignal(toBeActivated.getID(), true));
+        visitDeathSignal(new DeathSignal(toBeActivated.getID(), DeathSignal
+                .RobotDeathCause.ACTIVATION));
 
         spawnRobot(
                 toBeActivated.getType(),
@@ -770,9 +771,10 @@ public class GameWorld implements SignalHandler {
 
                 double damage = (attacker.getAttackPower()) * rate;
                 if (target.getType() == RobotType.GUARD && damage > GameConstants.GUARD_DEFENSE_THRESHOLD) {
-                    target.takeDamage(damage - GameConstants.GUARD_DAMAGE_REDUCTION);
+                    target.takeDamage(damage - GameConstants
+                            .GUARD_DAMAGE_REDUCTION, attacker.getType());
                 } else {
-                    target.takeDamage(damage);
+                    target.takeDamage(damage, attacker.getType());
                 }
 
                 // Reward parts to destroyer of zombie den
@@ -864,7 +866,6 @@ public class GameWorld implements SignalHandler {
 
         int ID = s.getObjectID();
         InternalRobot obj = getObjectByID(ID);
-        boolean isDeathByActivation = s.isDeathByActivation();
 
         if (obj == null) {
             throw new RuntimeException("visitDeathSignal of nonexistent robot: "+s.getObjectID());
@@ -899,8 +900,13 @@ public class GameWorld implements SignalHandler {
         }
 
         // update rubble
-        if (!isDeathByActivation && !obj.isInfected()) {
-            alterRubble(loc, getRubble(loc) + obj.getMaxHealth());
+        if (s.getCause() != DeathSignal.RobotDeathCause.ACTIVATION && !obj
+                .isInfected()) {
+            double rubbleFactor = 1.0;
+            if (s.getCause() == DeathSignal.RobotDeathCause.TURRET) {
+                rubbleFactor = GameConstants.RUBBLE_FROM_TURRET_FACTOR;
+            }
+            alterRubble(loc, getRubble(loc) + rubbleFactor * obj.getMaxHealth());
             addSignal(new RubbleChangeSignal(loc, getRubble(loc)));
         }
 
@@ -909,7 +915,8 @@ public class GameWorld implements SignalHandler {
         gameObjectsByLoc.remove(loc);
 
         // if it was an infected robot, create a Zombie in its place.
-        if (obj.isInfected() && !isDeathByActivation) {
+        if (obj.isInfected() && s.getCause() != DeathSignal.RobotDeathCause
+                .ACTIVATION) {
             RobotType zombieType = obj.getType().turnsInto; // Type of Zombie this unit turns into
 
             // Create new Zombie

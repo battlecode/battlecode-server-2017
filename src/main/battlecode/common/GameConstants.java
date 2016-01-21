@@ -81,6 +81,9 @@ public interface GameConstants {
     /** Flat amount of rubble removed with each clear. */
     double RUBBLE_CLEAR_FLAT_AMOUNT = 10;
 
+    /** The fraction of rubble produced from a turret kill. */
+    double RUBBLE_FROM_TURRET_FACTOR = 1.0 / 3.0;
+
     // *********************************
     // ****** UNIT PROPERTIES **********
     // *********************************
@@ -117,7 +120,11 @@ public interface GameConstants {
 
     /** Number of turns that elapse for the zombie outbreak level to increase */
     int OUTBREAK_TIMER = 300;
-    
+
+    // *********************************
+    // ****** ARMAGEDDON ***************
+    // *********************************
+
     /** Armageddon: number of turns in day/night cycle **/
     int ARMAGEDDON_DAY_TIMER = 300;
     int ARMAGEDDON_NIGHT_TIMER = 900;
@@ -126,7 +133,7 @@ public interface GameConstants {
     double ARMAGEDDON_DAY_OUTBREAK_MULTIPLIER = 1.0;
     double ARMAGEDDON_NIGHT_OUTBREAK_MULTIPLIER = 2.0;
     
-    //** Armageddon: zombie regeneration levels night and day **/
+    /** Armageddon: zombie regeneration levels night and day **/
     double ARMAGEDDON_DAY_ZOMBIE_REGENERATION = -0.2;
     double ARMAGEDDON_NIGHT_ZOMBIE_REGENERATION = 0.05;
     
