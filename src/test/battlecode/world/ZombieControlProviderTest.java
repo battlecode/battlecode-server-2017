@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Test that zombies behave according to the spec.
@@ -195,5 +196,56 @@ public class ZombieControlProviderTest {
         assertEquals(RobotType.SOLDIER.maxHealth, soldier.getHealthLevel(), 1e-9);
         assertEquals(RobotType.STANDARDZOMBIE.maxHealth, zombie.getHealthLevel(), 1e-9);
 
+    }
+    
+    // Test has ~1:3,000,000,000 chance of failing due to randomness
+    @Test
+    public void testRandomAttacking() {
+        final GameMap map = new TestMapGenerator(10, 10, 100)
+        .withRobot(RobotType.STANDARDZOMBIE, Team.ZOMBIE, 2, 2)
+        .withRobot(RobotType.SOLDIER, Team.A, 2, 3)
+        .withRobot(RobotType.SOLDIER, Team.A, 2, 1)
+        .withRobot(RobotType.SOLDIER, Team.B, 1, 2)
+        .withRobot(RobotType.GUARD, Team.B, 1, 1)
+        .getMap("map");
+        
+        final GameWorld world = new GameWorld(map, zombieControlProvider, "", "", new long[2][GameConstants.TEAM_MEMORY_LENGTH]);
+        
+        InternalRobot[] soldiers = new InternalRobot[3];
+        int soldierPointer = 0;
+        InternalRobot guard = null;
+        InternalRobot zombie = null;
+        
+        for (final InternalRobot robot : world.getAllGameObjects()) {
+            if (robot.getTeam() == Team.ZOMBIE) {
+                zombie = robot;
+            } else if (robot.getType() == RobotType.SOLDIER) {
+                soldiers[soldierPointer] = robot;
+                soldierPointer++;
+            } else if (robot.getType() == RobotType.GUARD) {
+                guard = robot;
+            }
+        }
+        assertEquals(soldierPointer,3); // sanity check
+        
+        // Will kill one soldier iff the zombie hits the same one every time
+        int roundsToRun = (int)(RobotType.SOLDIER.maxHealth / RobotType.STANDARDZOMBIE.attackPower * 2);
+        
+        for(int i = 0; i < roundsToRun; i++) {
+            world.runRound();
+        }
+        
+        boolean someoneDied = false;
+        for(InternalRobot soldier : soldiers) {
+            if(soldier.getHealthLevel() <= 0) {
+                someoneDied = true;
+                break;
+            }
+        }
+        
+        //Only happens if same robot attacked 20 times in a row
+        assertFalse(someoneDied);
+        //Should never attack guard (slightly further)
+        assertEquals(guard.getHealthLevel(),RobotType.GUARD.maxHealth,1e-9);
     }
 }
