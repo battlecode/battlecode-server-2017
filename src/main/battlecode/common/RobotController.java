@@ -348,7 +348,7 @@ public interface RobotController {
      * Returns all robots that can be sensed on the map.
      *
      * The order in which the robots are returned is based on the execution
-     * order of the robots. Robots moving earlier in a round are appear
+     * order of the robots. Robots moving earlier in a round appear
      * earlier in the returned list.
      *
      * @return array of RobotInfo objects, which contain information about all
@@ -363,7 +363,7 @@ public interface RobotController {
      * robot.
      *
      * The order in which the robots are returned is based on the execution
-     * order of the robots. Robots moving earlier in a round are appear
+     * order of the robots. Robots moving earlier in a round appear
      * earlier in the returned list.
      *
      * @param radiusSquared return objects this distance away from the center.
@@ -379,7 +379,7 @@ public interface RobotController {
      * radius of the robot.
      *
      * The order in which the robots are returned is based on the execution
-     * order of the robots. Robots moving earlier in a round are appear
+     * order of the robots. Robots moving earlier in a round appear
      * earlier in the returned list.
      *
      * @param radiusSquared return objects this distance away from the center.
@@ -397,7 +397,7 @@ public interface RobotController {
      * radius of a specified location.
      *
      * The order in which the robots are returned is based on the execution
-     * order of the robots. Robots moving earlier in a round are appear
+     * order of the robots. Robots moving earlier in a round appear
      * earlier in the returned list.
      *
      * @param center center of the given search radius.
