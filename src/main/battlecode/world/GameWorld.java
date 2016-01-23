@@ -131,7 +131,7 @@ public class GameWorld implements SignalHandler {
             );
         }
         
-        rand = new Random();
+        rand = new Random(gameMap.getSeed());
     }
 
     /**
