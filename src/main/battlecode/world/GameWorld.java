@@ -59,6 +59,7 @@ public class GameWorld implements SignalHandler {
     private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<>(
             Team.class);
     private int[] robotCount = new int[4];
+    private Random rand;
 
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, RobotControlProvider cp,
@@ -129,6 +130,8 @@ public class GameWorld implements SignalHandler {
                     Optional.empty()
             );
         }
+        
+        rand = new Random(gameMap.getSeed());
     }
 
     /**
@@ -414,23 +417,26 @@ public class GameWorld implements SignalHandler {
      */
     public RobotInfo getNearestPlayerControlled(MapLocation loc) {
         int distSq = Integer.MAX_VALUE;
-        MapLocation closest = null;
+        ArrayList<MapLocation> closest = null;
         for (InternalRobot robot : gameObjectsByID.values()) {
             if (!robot.getTeam().isPlayer()) continue;
-
+            
             MapLocation newLoc = robot.getLocation();
             int newDistSq = newLoc.distanceSquaredTo(loc);
             if (newDistSq < distSq) {
-                closest = newLoc;
+                closest = new ArrayList<MapLocation>();
+                closest.add(newLoc);
                 distSq = newDistSq;
+            } else if (newDistSq == distSq) {
+                closest.add(newLoc);
             }
         }
 
         if (closest == null) {
             return null;
         }
-
-        return gameObjectsByLoc.get(closest).getRobotInfo();
+        
+        return gameObjectsByLoc.get(closest.get(rand.nextInt(closest.size()))).getRobotInfo();
     }
 
     // *********************************
