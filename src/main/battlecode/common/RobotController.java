@@ -46,6 +46,8 @@ public interface RobotController {
      * Armageddon: Returns if the game type is zombie armageddon
      *
      * @return true if game is armageddon mode
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean isArmageddon();
 
@@ -345,6 +347,10 @@ public interface RobotController {
     /**
      * Returns all robots that can be sensed on the map.
      *
+     * The order in which the robots are returned is based on the execution
+     * order of the robots. Robots moving earlier in a round are appear
+     * earlier in the returned list.
+     *
      * @return array of RobotInfo objects, which contain information about all
      * the robots you sensed.
      *
@@ -355,6 +361,10 @@ public interface RobotController {
     /**
      * Returns all robots that can be sensed within a certain radius of the
      * robot.
+     *
+     * The order in which the robots are returned is based on the execution
+     * order of the robots. Robots moving earlier in a round are appear
+     * earlier in the returned list.
      *
      * @param radiusSquared return objects this distance away from the center.
      * If -1 is passed, robots from the whole map are returned.
@@ -367,6 +377,10 @@ public interface RobotController {
     /**
      * Returns all robots of a given team that can be sensed within a certain
      * radius of the robot.
+     *
+     * The order in which the robots are returned is based on the execution
+     * order of the robots. Robots moving earlier in a round are appear
+     * earlier in the returned list.
      *
      * @param radiusSquared return objects this distance away from the center.
      * If -1 is passed, robots from the whole map are returned.
@@ -381,6 +395,10 @@ public interface RobotController {
     /**
      * Returns all robots of a given team that can be sensed within a certain
      * radius of a specified location.
+     *
+     * The order in which the robots are returned is based on the execution
+     * order of the robots. Robots moving earlier in a round are appear
+     * earlier in the returned list.
      *
      * @param center center of the given search radius.
      * @param radiusSquared return objects this distance away from the center.
@@ -397,6 +415,10 @@ public interface RobotController {
     /**
      * Returns all hostile (zombie or enemy team) robots that can be sensed
      * within a certain radius of a specified location.
+     *
+     * The order in which the robots are returned is based on the execution
+     * order of the robots. Robots moving earlier in a round are appear
+     * earlier in the returned list.
      *
      * @param center center of the given search radius.
      * @param radiusSquared return objects this distance away from the center.

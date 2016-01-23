@@ -58,6 +58,8 @@ battlecode/common/RobotController/getViperInfectedTurns       1     true
 battlecode/common/RobotController/getZombieInfectedTurns      1     true
 battlecode/common/RobotController/getZombieSpawnSchedule      1     true
 battlecode/common/RobotController/hasBuildRequirements        5     true
+battlecode/common/RobotController/isArmageddon                0     true
+battlecode/common/RobotController/isArmageddonDayTime         1     true
 battlecode/common/RobotController/isBuildingSomething         1     true
 battlecode/common/RobotController/isCoreReady                 5     true
 battlecode/common/RobotController/isLocationOccupied          20    true
