@@ -678,8 +678,33 @@ public class GameMap implements Serializable {
 
         final MapLocation zeroOrigin = new MapLocation(0, 0);
 
+        int nArchonCount = 0;
+        int archonCount = 0;
+        int denCount = 0;
+
         for(InitialRobotInfo robot : initialRobots) {
             final MapLocation loc = robot.getLocation(zeroOrigin);
+
+            if (robot.type == RobotType.ARCHON && robot.team == Team.NEUTRAL) {
+                nArchonCount++;
+            }
+            if (robot.type == RobotType.ARCHON && robot.team != Team.NEUTRAL) {
+                archonCount++;
+            }
+
+            if (robot.type == RobotType.ZOMBIEDEN) {
+                denCount++;
+            }
+
+            if (robot.type.isZombie && robot.team != Team.ZOMBIE) {
+                Server.warn("a zombie is not zombie");
+                return false;
+            }
+
+            if (!robot.type.isZombie && robot.team == Team.ZOMBIE) {
+                Server.warn("a non zombie is zombie");
+                return false;
+            }
 
             if(robot.type == RobotType.ZOMBIEDEN && robot.team == Team.ZOMBIE) {
                 if (loc.equals(symmetry.getOpposite(loc, this.width, this.height))) {
@@ -713,6 +738,40 @@ public class GameMap implements Serializable {
                 }
                 
             }
+        }
+
+        if (denCount == 0 ){
+            Server.warn("no dens");
+            return false;
+        }
+
+        if (nArchonCount > 4) {
+            Server.warn("too many neutral archons");
+            return false;
+        }
+
+        if (archonCount == 0 || archonCount > 8) {
+            Server.warn("too many initial archons");
+            return false;
+        }
+
+        // Make sure round number is 3000
+        if (getRounds() != 3000) {
+            Server.warn("has to be 3000 rounds");
+            return false;
+        }
+
+        // Make sure map size is valid
+        if (getWidth() < 30 || getHeight() < 30 || getWidth() > 80 ||
+                getHeight() > 80) {
+            Server.warn("bad size");
+            return false;
+        }
+
+        // Make sure there are zombies
+        if (getZombieSpawnSchedule().getRounds().length == 0) {
+            Server.warn("no zombies");
+            return false;
         }
 
         // Make sure the map has some sort of symmetry
