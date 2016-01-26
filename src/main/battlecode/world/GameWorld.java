@@ -514,7 +514,7 @@ public class GameWorld implements SignalHandler {
     
     public void alterRubble(MapLocation loc, double amount) {
         rubble.set(loc.x - gameMap.getOrigin().x, loc.y - gameMap.getOrigin().y,
-                Math.max(0.0, amount));
+                Math.min(GameConstants.RUBBLE_MAXIMUM, Math.max(0.0, amount)));
     }
 
     // *********************************

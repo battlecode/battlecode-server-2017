@@ -68,6 +68,9 @@ public interface GameConstants {
     // ****** RUBBLE *******************
     // *********************************
 
+    /** The maximum rubble on a single tile. */
+    double RUBBLE_MAXIMUM = 1_000_000;
+
     /** The threshold of rubble that robots (except SCOUTs) can't move
      * through. */
     double RUBBLE_OBSTRUCTION_THRESH = 100;

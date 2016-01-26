@@ -674,6 +674,19 @@ public class GameMap implements Serializable {
             }
         }
 
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (initialRubble[y][x] > GameConstants.RUBBLE_MAXIMUM
+                        || initialRubble[y][x] < 0) {
+                    Server.warn("Map "+mapName+" is not tournament legal. "+
+                        "Rubble amount "+initialRubble[y][x]+" at "+x+","+y+" is not"+
+                        "valid."
+                    );
+                    return false;
+                }
+            }
+        }
+
         // First, check to make sure there aren't any ZOMBIEDENs on lines of symmetry
 
         final MapLocation zeroOrigin = new MapLocation(0, 0);
