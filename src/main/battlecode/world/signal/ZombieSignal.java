@@ -14,7 +14,7 @@ public class ZombieSignal {
 
     public static final int NO_ID = -1;
 
-    private static final long serialVersionUID = -1397820162120189142085185L;
+    private static final long serialVersionUID = -2119512914514211319119914493519L;
 
     /**
      * The new robot's ID
