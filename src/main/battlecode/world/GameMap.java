@@ -678,9 +678,9 @@ public class GameMap implements Serializable {
 
         final MapLocation zeroOrigin = new MapLocation(0, 0);
 
-        int nArchonCount = 0;
-        int archonCount = 0;
-        int denCount = 0;
+        int nArchonCount = 0; // neutral archons
+        int archonCount = 0; // archons that aren't neutral
+        int denCount = 0; // zombie den count
 
         for(InitialRobotInfo robot : initialRobots) {
             final MapLocation loc = robot.getLocation(zeroOrigin);
@@ -697,12 +697,12 @@ public class GameMap implements Serializable {
             }
 
             if (robot.type.isZombie && robot.team != Team.ZOMBIE) {
-                Server.warn("a zombie is not zombie");
+                Server.warn("Cannot have a zombie not on team ZOMBIE.");
                 return false;
             }
 
             if (!robot.type.isZombie && robot.team == Team.ZOMBIE) {
-                Server.warn("a non zombie is zombie");
+                Server.warn("Cannot have a non-zombie on team ZOMBIE.");
                 return false;
             }
 
@@ -741,36 +741,38 @@ public class GameMap implements Serializable {
         }
 
         if (denCount == 0 ){
-            Server.warn("no dens");
+            Server.warn("No dens.");
             return false;
         }
 
         if (nArchonCount > 4) {
-            Server.warn("too many neutral archons");
+            Server.warn("Too many neutral archons.");
             return false;
         }
 
-        if (archonCount == 0 || archonCount > 8) {
-            Server.warn("too many initial archons");
+        if (archonCount == 0 || archonCount > GameConstants
+                .NUMBER_OF_ARCHONS_MAX * 2) {
+            Server.warn("Bad number of initial archons.");
             return false;
         }
 
         // Make sure round number is 3000
-        if (getRounds() != 3000) {
-            Server.warn("has to be 3000 rounds");
+        if (getRounds() != GameConstants.GAME_DEFAULT_ROUNDS) {
+            Server.warn("Game must be 3000 rounds.");
             return false;
         }
 
         // Make sure map size is valid
-        if (getWidth() < 30 || getHeight() < 30 || getWidth() > 80 ||
-                getHeight() > 80) {
-            Server.warn("bad size");
+        if (getWidth() < GameConstants.MAP_MIN_WIDTH || getHeight() <
+                GameConstants.MAP_MIN_HEIGHT || getWidth() >
+                GameConstants.MAP_MAX_WIDTH || getHeight() > GameConstants.MAP_MAX_HEIGHT) {
+            Server.warn("Map size is out of bounds.");
             return false;
         }
 
         // Make sure there are zombies
         if (getZombieSpawnSchedule().getRounds().length == 0) {
-            Server.warn("no zombies");
+            Server.warn("There are no zombies.");
             return false;
         }
 
