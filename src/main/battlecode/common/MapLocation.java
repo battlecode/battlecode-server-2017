@@ -2,6 +2,8 @@ package battlecode.common;
 
 import org.apache.commons.lang3.StringUtils;
 
+import battlecode.schema.*;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -15,11 +17,11 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
     /**
      * The x-coordinate.
      */
-    public final int x;
+    public final float x;
     /**
      * The y-coordinate.
      */
-    public final int y;
+    public final float y;
 
     /**
      * Creates a new MapLocation representing the location
@@ -30,13 +32,23 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      *
      * @battlecode.doc.costlymethod
      */
-    public MapLocation(int x, int y) {
+    public MapLocation(float x, float y) {
         this.x = x;
         this.y = y;
     }
+    
+    /**
+     * Creates a new MapLocation from a Vec (flatbuffer object)
+     * 
+     * @param v Vec object
+     */
+    public MapLocation(Vec v) {
+        this.x = v.x();
+        this.y = v.y();
+    }
 
     /**
-     * A comparison function for MapLocations. Smaller rows go first, with ties broken by smaller columns.
+     * A comparison function for MapLocations. Smaller x values go first, with ties broken by smaller y values.
      *
      * @param other the MapLocation to compare to.
      * @return whether this MapLocation goes before the other one.
@@ -45,9 +57,17 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      */
     public int compareTo(MapLocation other) {
         if (x != other.x) {
-            return x - other.x;
+            if(x < other.x)
+                return -1;
+            else
+                return 1;
         } else {
-            return y - other.y;
+            if(y < other.y)
+                return -1;
+            else if (y > other.y)
+                return 1;
+            else
+                return 0;
         }
     }
 
@@ -76,9 +96,7 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      */
     @Override
     public int hashCode() {
-
-        return this.x * 13 + this.y * 23;
-
+        return Float.floatToIntBits(this.x) * 13 + Float.floatToIntBits(this.y) * 23;
     }
 
     public static MapLocation valueOf(String s) {
@@ -97,7 +115,7 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      * @battlecode.doc.costlymethod
      */
     public String toString() {
-        return String.format("[%d, %d]", this.x, this.y);
+        return String.format("[%f, %f]", this.x, this.y);
     }
 
     /**
@@ -109,10 +127,10 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      *
      * @battlecode.doc.costlymethod
      */
-    public final int distanceSquaredTo(MapLocation location) {
-        int dx = this.x - location.x;
-        int dy = this.y - location.y;
-        return dx * dx + dy * dy;
+    public final double distanceTo(MapLocation location) {
+        float dx = this.x - location.x;
+        float dy = this.y - location.y;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     /**
@@ -125,12 +143,8 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      *
      * @battlecode.doc.costlymethod
      */
-    public final boolean isAdjacentTo(MapLocation location) {
-
-        int distTo = this.distanceSquaredTo(location);
-
-        return distTo == 1 || distTo == 2;
-
+    public final boolean isWithinDistance(MapLocation location, float dist) {
+        return this.distanceTo(location) <= dist;
     }
 
     /**
@@ -148,38 +162,10 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
             return null;
         }
         
-        double dx = location.x - this.x;
-        double dy = location.y - this.y;
+        float dx = location.x - this.x;
+        float dy = location.y - this.y;
 
-        if (Math.abs(dx) >= 2.414 * Math.abs(dy)) {
-            if (dx > 0) {
-                return Direction.EAST;
-            } else if (dx < 0) {
-                return Direction.WEST;
-            } else {
-                return Direction.OMNI;
-            }
-        } else if (Math.abs(dy) >= 2.414 * Math.abs(dx)) {
-            if (dy > 0) {
-                return Direction.SOUTH;
-            } else {
-                return Direction.NORTH;
-            }
-        } else {
-            if (dy > 0) {
-                if (dx > 0) {
-                    return Direction.SOUTH_EAST;
-                } else {
-                    return Direction.SOUTH_WEST;
-                }
-            } else {
-                if (dx > 0) {
-                    return Direction.NORTH_EAST;
-                } else {
-                    return Direction.NORTH_WEST;
-                }
-            }
-        }
+        return new Direction(dx,dy);
     }
 
     /**
@@ -222,7 +208,7 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      *
      * @battlecode.doc.costlymethod
      */
-    public final MapLocation add(int dx, int dy) {
+    public final MapLocation add(float dx, float dy) {
         return new MapLocation(x + dx, y + dy);
     }
 
@@ -238,43 +224,6 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      */
     public final MapLocation subtract(Direction direction) {
         return this.add(direction.opposite());
-    }
-
-	/**
-	 * Returns an array of all MapLocations within a certain radius squared 
-	 * of a specified location (cannot be called with radiusSquared greater than 100).
-	 *
-	 * @param center the center of the search
-	 * @param radiusSquared the radius of the search, which must be at most 100.
-	 * @return all MapLocations (both on the map and outside the map) within 
-	 * radiusSquared distance of center.
-     * @throws IllegalArgumentException if the radiusSquared is greater than 100 or is negative.
-	 *
-     * @battlecode.doc.costlymethod
-     */
-    public static MapLocation[] getAllMapLocationsWithinRadiusSq(MapLocation center, int radiusSquared) {
-        ArrayList<MapLocation> locations = new ArrayList<>();
-
-        if (radiusSquared > 100 || radiusSquared < 0) {
-            throw new IllegalArgumentException("radiusSquared argument for getAllMapLocationsWithinRadiusSq cannot be greater than 100 or negative. However, since Battlecode is open source, you are free to use the source code of this method to implement it yourself.");
-        }    
-
-        int radius = (int) Math.sqrt(radiusSquared);
-
-        int minXPos = center.x - radius;
-        int maxXPos = center.x + radius;
-        int minYPos = center.y - radius;
-        int maxYPos = center.y + radius;
-
-        for (int x = minXPos; x <= maxXPos; x++) {
-            for (int y = minYPos; y <= maxYPos; y++) {
-                MapLocation loc = new MapLocation(x, y);
-                if (loc.distanceSquaredTo(center) <= radiusSquared)
-                    locations.add(loc);
-            }
-        }
-
-        return locations.toArray(new MapLocation[locations.size()]);
     }
 
     /**
