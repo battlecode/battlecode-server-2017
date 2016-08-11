@@ -1,7 +1,5 @@
 package instrumentertest;
 
-import battlecode.common.ZombieSpawnSchedule;
-
 /**
  * @author james
  */

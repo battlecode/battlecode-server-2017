@@ -5,13 +5,11 @@ import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
 import battlecode.serial.notification.*;
-import battlecode.server.proxy.Proxy;
 import battlecode.world.signal.InternalSignal;
 import battlecode.serial.*;
 import battlecode.serial.serializer.Serializer;
 import battlecode.serial.serializer.SerializerFactory;
 import battlecode.world.GameMap;
-import battlecode.common.ZombieSpawnSchedule;
 import battlecode.world.signal.*;
 import org.junit.Ignore;
 

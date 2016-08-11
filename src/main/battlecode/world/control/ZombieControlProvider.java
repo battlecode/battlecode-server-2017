@@ -6,7 +6,6 @@ import battlecode.server.Server;
 import battlecode.world.GameMap;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
-import battlecode.common.ZombieSpawnSchedule;
 
 import java.util.*;
 

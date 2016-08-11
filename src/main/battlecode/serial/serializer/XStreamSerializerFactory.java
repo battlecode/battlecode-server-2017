@@ -2,11 +2,9 @@ package battlecode.serial.serializer;
 
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
-import battlecode.common.ZombieCount;
 import battlecode.world.DominationFactor;
 import battlecode.world.GameMap;
 import battlecode.world.signal.InternalSignal;
-import battlecode.common.ZombieSpawnSchedule;
 import battlecode.serial.ExtensibleMetadata;
 import battlecode.serial.RoundDelta;
 import com.thoughtworks.xstream.XStream;
