@@ -1,22 +1,60 @@
 package battlecode.common;
 
+/**
+ * This class is an immutable representation of a direction
+ * in the battlecode world.
+ */
 public class Direction {
-    
-    public final float dx, dy;
 
+    /**
+     * The radians at which this direction is facing based off of
+     * the unit circle; i.e. facing right would have 0.0 radians,
+     * up would have PI/2 radians, etc.
+     * Note: radians = [0, 2*Math.PI)
+     */
+    public final double radians;
+
+    /**
+     * @param radians the radians at which you wish this direction
+     *                to represent based off of the unit circle
+     */
+    Direction(double radians){
+        this.radians = radians % (2*Math.PI);
+    }
+
+    /**
+     * Creates a new Direction instance to represent the direction
+     * in which the vector created by dx and dy points. Requires
+     * dx or dy to be non-zero
+     *
+     * @param dx the x component of the vector
+     * @param dy the y component of the vector
+     */
+    Direction(double dx, double dy) {
+        this.radians = Math.atan2(dy, dx) % (2*Math.PI);
+    }
+
+    /**
+     * Creates a new Direction instance to represent the direction
+     * in which the vector from start to finish points. Requires
+     * start and finish to not be the same location
+     *
+     * @param start the starting point of the vector
+     * @param finish the ending point of the vector
+     */
     Direction(MapLocation start, MapLocation finish) {
-        this.dx = finish.x-start.x;
-        this.dy = finish.y-start.y;
+        this(finish.x - start.x, finish.y - start.y);
     }
-    
-    Direction(float dx, float dy) {
-        this.dx = dx;
-        this.dy = dy;
-    }
-    
-    Direction(double angleDegrees, double radius) {
-        this.dx = (float)(radius*Math.cos(Math.toRadians(angleDegrees)));
-        this.dy = (float)(radius*Math.sin(Math.toRadians(angleDegrees)));
+
+    /**
+     * Computes the angle in degrees at which this direction faces
+     *
+     * @return the angle in degrees this direction faces
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public double getAngleDegrees() {
+        return Math.toDegrees(radians);
     }
 
     /**
@@ -27,7 +65,7 @@ public class Direction {
      * @battlecode.doc.costlymethod
      */
     public Direction opposite() {
-        return new Direction(-dx,-dy);
+        return rotateLeftRads(Math.PI);
     }
 
     /**
@@ -35,14 +73,12 @@ public class Direction {
      * of this one.
      * 
      * @param angleDegrees number of degrees to rotate.
-     *
      * @return the direction angleDegrees degrees left of this one.
      * 
      * @battlecode.doc.costlymethod
      */
-    public Direction rotateLeft(double angleDegrees) {
-        double angleRads = Math.toDegrees(angleDegrees);
-        return rotateLeftRads(angleRads);
+    public Direction rotateLeftDegrees(double angleDegrees) {
+        return rotateLeftRads(Math.toRadians(angleDegrees));
     }
 
     /**
@@ -50,14 +86,12 @@ public class Direction {
      * one.
      * 
      * @param angleDegrees number of degrees to rotate.
-     *
      * @return the direction angleDegrees right of this one.
      *
      * @battlecode.doc.costlymethod
      */
-    public Direction rotateRight(double angleDegrees) {
-        double angleRads = Math.toDegrees(angleDegrees);
-        return rotateLeftRads(-angleRads);
+    public Direction rotateRightDegrees(double angleDegrees) {
+        return rotateRightRads(Math.toRadians(angleDegrees));
     }
     
     /**
@@ -65,13 +99,12 @@ public class Direction {
      * of this one.
      * 
      * @param angleRads number of radians to rotate.
-     * 
      * @return the direction angleRads left of this one.
+     *
+     * @battlecode.doc.costlymethod
      */
     public Direction rotateLeftRads(double angleRads) {
-        double newDx = dx * Math.cos(angleRads) - dy * Math.sin(angleRads);
-        double newDy = dx * Math.sin(angleRads) + dy * Math.cos(angleRads);
-        return new Direction((float)newDx,(float)newDy);
+        return new Direction(this.radians + angleRads);
     }
     
     /**
@@ -79,24 +112,22 @@ public class Direction {
      * this one.
      * 
      * @param angleRads number of radians to rotate.
-     * 
      * @return the direction angleRads right of this one.
+     *
+     * @battlecode.doc.costlymethod
      */
     public Direction rotateRightRads(double angleRads) {
         return rotateLeftRads(-angleRads);
     }
-    
-    /**
-     * Rescales the direction vector to have a new radius
-     * 
-     * @param radius the new radius for the direction
-     * 
-     * @return a direction with the new radius
-     */
-    public Direction rescale(double radius) {
-        double scalar = radius/Math.sqrt(dx*dx+dy*dy);
-        float newDx = (float)(dx*scalar);
-        float newDy = (float)(dy*scalar);
-        return new Direction(newDx,newDy);
+
+    public int hashCode() {
+        return Float.floatToIntBits((float)radians) * 13;
+    }
+
+    @Override
+    public String toString() {
+        return  "Direction: " +
+                "radians=" + radians +
+                ", degrees=" + Math.toDegrees(radians);
     }
 }

@@ -1,5 +1,7 @@
 package battlecode.common;
 
+import java.util.Map;
+
 /**
  * A RobotController allows contestants to make their robot sense and interact
  * with the game world. When a contestant's <code>RobotPlayer</code> is
@@ -12,647 +14,180 @@ public interface RobotController {
     // *********************************
     // ****** GLOBAL QUERY METHODS *****
     // *********************************
-    /**
-     * Gets the number of rounds in the game. After this many rounds, if neither
-     * team has been destroyed, then the tiebreakers will be used.
-     *
-     * @return the number of rounds in the game.
-     *
-     * @battlecode.doc.costlymethod
-     */
+
     int getRoundLimit();
 
-    /**
-     * Gets the team's total parts.
-     *
-     * @return the team's total parts.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    double getTeamParts();
+    int getCurrentRound();
 
-    /**
-     * Returns the current round number, where round 0 is the first round of the
-     * match.
-     *
-     * @return the current round number, where 0 is the first round of the
-     * match.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    int getRoundNum();
+    double getTeamBullets();
 
-    /**
-     * Armageddon: Returns if the game type is zombie armageddon
-     *
-     * @return true if game is armageddon mode
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean isArmageddon();
+    int getTeamVictoryPoints();
 
-    /**
-     * Armageddon: Returns if it is daytime in zombie armageddon
-     *
-     * @return true if it is daytime, false if it is nightime
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean isArmageddonDaytime();
+    int getOpponentVictoryPoints();
 
-    /**
-     * Returns a copy of the zombie spawn schedule for the game. Any attempts to
-     * modify this zombie spawn schedule will not change the actual schedule for
-     * the game.
-     *
-     * @return a copy of the zombie spawn schedule for the game.
-     * @battlecode.doc.costlymethod
-     */
-    ZombieSpawnSchedule getZombieSpawnSchedule();
-
-    /**
-     * Returns the number of robots on your team, including your archons.
-     *
-     * @return the number of robots on your team, including your archon.s
-     * @battlecode.doc.costlymethod
-     */
     int getRobotCount();
 
-    /**
-     * Returns a list of the INITIAL locations of the archons of a particular
-     * team. The locations will be sorted by increasing x, with ties broken by
-     * increasing y. Will return empty lists if you query for NEUTRAL or ZOMBIE.
-     *
-     * @param t the team whose archons you want to query the initial locations
-     * for. Will return empty lists if you query for NEUTRAL or ZOMBIE.
-     * @return a list of the INITIAL locations of the archons of that team, or
-     * empty lists for team NEUTRAL and ZOMBIE.
-     *
-     * @battlecode.doc.costlymethod
-     */
+    int getTreeCount();
+
     MapLocation[] getInitialArchonLocations(Team t);
 
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************
-    /**
-     * Use this method to access your ID.
-     *
-     * @return the ID of the robot.
-     *
-     * @battlecode.doc.costlymethod
-     */
+
     int getID();
 
-    /**
-     * Gets the Team of this robot.
-     *
-     * @return this robot's Team.
-     *
-     * @battlecode.doc.costlymethod
-     */
     Team getTeam();
 
-    /**
-     * Gets this robot's type (SOLDIER, ARCHON, etc.).
-     *
-     * @return this robot's type.
-     *
-     * @battlecode.doc.costlymethod
-     */
     RobotType getType();
 
-    /**
-     * Gets the robot's current location.
-     *
-     * @return this robot's current location.
-     *
-     * @battlecode.doc.costlymethod
-     */
     MapLocation getLocation();
 
-    /**
-     * Returns the amount of core delay a robot has accumulated. If the result
-     * is strictly less than 1, then the robot can perform a core action. Core
-     * actions include building, activating, clearing rubble, and moving.
-     *
-     * @return the amount of core delay a robot has accumulated.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    double getCoreDelay();
-
-    /**
-     * Returns the amount of weapon delay a robot has accumulated. If the result
-     * is strictly less than 1, then the robot can attack.
-     *
-     * @return the number of weapon delay a robot has accumulated.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    double getWeaponDelay();
-
-    /**
-     * Gets the robot's current health.
-     *
-     * @return this robot's current health.
-     *
-     * @battlecode.doc.costlymethod
-     */
     double getHealth();
 
-    /**
-     * Gets the number of turns the robot will remain infected. If the robot
-     * dies while this value is greater than zero, it will turn into a zombie.
-     * This is the same thing as max(zombieInfectedTurns,viperInfectedTurns).
-     *
-     * @return number of remaining infected turns.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    int getInfectedTurns();
+    double getCoreDelay();
 
-    /**
-     * Gets the number of turns the robot will remain infected from a zombie's
-     * attack. Unlike viperInfectedTurns, the unit WILL NOT take damage during
-     * these turns. The unit will turn into a zombie if it dies while infected.
-     *
-     * @return number of remaining zombie infected turns.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    int getZombieInfectedTurns();
-
-    /**
-     * Gets the number of turns the robot will remain infected from a viper's
-     * attack. Unlike zombieInfectedTurns, the unit WILL take damage during
-     * these turns. The unit will turn into a zombie if it dies while infected.
-     *
-     * @return number of remaining viper infected turns.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    int getViperInfectedTurns();
-
-    /**
-     * Returns true if the robot is infected (either from a viper or a zombie).
-     * If the robot dies while this is true, it will become a zombie.
-     *
-     * @return true if the robot is infected.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean isInfected();
-
-    /**
-     * Returns the number of basic signals this robot has sent so far this turn.
-     *
-     * @return the number of basic signals this robot has sent so far this turn.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    int getBasicSignalCount();
-
-    /**
-     * Returns the number of message signals this robot has sent so far this
-     * turn.
-     *
-     * @return the number of message signals this robot has sent so far this
-     * turn.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    int getMessageSignalCount();
+    double getWeaponDelay();
 
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
-    /**
-     * Determine if our robot can sense a location.
-     *
-     * @param loc the location to test.
-     * @return whether it can sense the location.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean canSense(MapLocation loc);
 
-    /**
-     * Senses whether a MapLocation is on the map. Will throw an exception if
-     * the location is not currently within sensor range.
-     *
-     * @param loc the location to check.
-     * @return true if the location is on the map, and false if it is not.
-     * @throws GameActionException if the location is not within sensor range.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean onTheMap(MapLocation loc) throws GameActionException;
+    boolean onTheMap(MapLocation loc);
 
-    /**
-     * Senses the rubble at the given location. Returns -1 for a location
-     * outside sensor range. Returns 0 for off map locations. If a location is
-     * both outside sensor range and off map, -1 will be returned.
-     *
-     * @param loc the location to check.
-     * @return the amount of rubble at the location.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    double senseRubble(MapLocation loc);
-
-    /**
-     * Senses the parts at the given location. Returns -1 for a location outside
-     * sensor range. Returns 0 for off map locations. If a location is both
-     * outside sensor range and off map, -1 will be returned.
-     *
-     * @param loc the location to check.
-     * @return the amount of parts at the location.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    double senseParts(MapLocation loc);
-
-    /**
-     * Senses nearby MapLocations with nonzero parts within a certain radius.
-     * Only MapLocations within the robot's sense radius will be returned.
-     *
-     *
-     * @param radiussquared return part locations this distance away from
-     * robot's location. If -1 is passed, locations from the robot's entire
-     * sensor radius are returned.
-     * @return list of MapLocations that contain parts
-     *
-     * @battlecode.doc.costlymethod
-     */
-    MapLocation[] sensePartLocations(int radiussquared);
-
-    /**
-     * Returns true if the given location is within the robot's sensor range.
-     * This is the same as canSense().
-     *
-     * @param loc the location to check.
-     * @return whether the given location is within the robot's sensor range.
-     *
-     * @battlecode.doc.costlymethod
-     */
     boolean canSenseLocation(MapLocation loc);
 
-    /**
-     * Returns whether there is a robot (includes dens) at the given location.
-     *
-     * @param loc the location to check.
-     * @return whether there is a robot at the given location.
-     * @throws GameActionException if the location is not within sensor range.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean isLocationOccupied(MapLocation loc) throws GameActionException;
+    boolean isLocationOccupied(MapLocation loc);
 
-    /**
-     * Returns the robot at the given location, or null if there is no object
-     * there.
-     *
-     * @param loc the location to check.
-     * @return the robot at the given location.
-     * @throws GameActionException if the location is not within sensor range.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    RobotInfo senseRobotAtLocation(MapLocation loc)
-            throws GameActionException;
+    TreeInfo senseTreeAtLocation(MapLocation loc);
 
-    /**
-     * Returns true if the given robot is within the robot's sensor range.
-     *
-     * @param id the ID of the robot to query.
-     * @return whether the given robot is within the robot's sensor range.
-     *
-     * @battlecode.doc.costlymethod
-     */
+    RobotInfo senseRobotAtLocation(MapLocation loc);
+
+    boolean canSenseTree(int id);
+
     boolean canSenseRobot(int id);
 
-    /**
-     * Senses information about a particular robot given its ID.
-     *
-     * @param id the ID of the robot to query.
-     * @return a RobotInfo object for the sensed robot.
-     * @throws GameActionException if the robot cannot be sensed (for example,
-     * if it doesn't exist or is out of sight range).
-     *
-     * @battlecode.doc.costlymethod
-     */
-    RobotInfo senseRobot(int id) throws GameActionException;
+    TreeInfo senseTree(int id);
 
-    /**
-     * Returns all robots that can be sensed on the map.
-     *
-     * The order in which the robots are returned is based on the execution
-     * order of the robots. Robots moving earlier in a round appear
-     * earlier in the returned list.
-     *
-     * @return array of RobotInfo objects, which contain information about all
-     * the robots you sensed.
-     *
-     * @battlecode.doc.costlymethod
-     */
+    RobotInfo senseRobot(int id);
+
     RobotInfo[] senseNearbyRobots();
 
-    /**
-     * Returns all robots that can be sensed within a certain radius of the
-     * robot.
-     *
-     * The order in which the robots are returned is based on the execution
-     * order of the robots. Robots moving earlier in a round appear
-     * earlier in the returned list.
-     *
-     * @param radiusSquared return objects this distance away from the center.
-     * If -1 is passed, robots from the whole map are returned.
-     * @return array of RobotInfo objects of all the robots you sensed.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    RobotInfo[] senseNearbyRobots(int radiusSquared);
+    RobotInfo[] senseNearbyRobots(int radius);
 
-    /**
-     * Returns all robots of a given team that can be sensed within a certain
-     * radius of the robot.
-     *
-     * The order in which the robots are returned is based on the execution
-     * order of the robots. Robots moving earlier in a round appear
-     * earlier in the returned list.
-     *
-     * @param radiusSquared return objects this distance away from the center.
-     * If -1 is passed, robots from the whole map are returned.
-     * @param team filter game objects by the given team. If null is passed,
-     * robots from any team are returned.
-     * @return array of RobotInfo objects of all the robots you sensed.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    RobotInfo[] senseNearbyRobots(int radiusSquared, Team team);
+    RobotInfo[] senseNearbyRobots(int radius, Team team);
 
-    /**
-     * Returns all robots of a given team that can be sensed within a certain
-     * radius of a specified location.
-     *
-     * The order in which the robots are returned is based on the execution
-     * order of the robots. Robots moving earlier in a round appear
-     * earlier in the returned list.
-     *
-     * @param center center of the given search radius.
-     * @param radiusSquared return objects this distance away from the center.
-     * If -1 is passed, robots from the whole map are returned.
-     * @param team filter game objects by the given team. If null is passed,
-     * objects from all teams are returned.
-     * @return array of RobotInfo objects of the robots you sensed.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    RobotInfo[] senseNearbyRobots(MapLocation center, int radiusSquared,
-            Team team);
+    RobotInfo[] senseNearbyRobots(MapLocation center, int radius, Team team);
 
-    /**
-     * Returns all hostile (zombie or enemy team) robots that can be sensed
-     * within a certain radius of a specified location.
-     *
-     * The order in which the robots are returned is based on the execution
-     * order of the robots. Robots moving earlier in a round are appear
-     * earlier in the returned list.
-     *
-     * @param center center of the given search radius.
-     * @param radiusSquared return objects this distance away from the center.
-     * If -1 is passed, robots from the whole map are returned.
-     * @return array of RobotInfo objects of the robots you sensed.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    RobotInfo[] senseHostileRobots(MapLocation center, int radiusSquared);
+    TreeInfo[] senseNearbyTrees();
+
+    TreeInfo[] senseNearbyTrees(int radius);
+
+    TreeInfo[] senseNearbyTrees(int radius, Team team);
+
+    TreeInfo[] senseNearbyTrees(MapLocation center, int radius, Team team);
+
+    BulletInfo[] senseNearbyBullets();
+
+    BulletInfo[] senseNearbyBullets(int radius);
+
+    BulletInfo[] senseNearbyBullets(MapLocation center, int radius);
+
+    RobotInfo[] senseBroadcastingRobots();
+
+    RobotInfo[] senseBroadcastingRobots(Team t);
+
+    RobotInfo[] senseBroadcastingRobotLocations();
+
+    RobotInfo[] senseBroadcastingRobotLocations(Team t);
+
 
     // ***********************************
     // ****** READINESS METHODS **********
     // ***********************************
-    /**
-     * Returns whether the core delay is strictly less than 1 (whether the robot
-     * can perform a core action in the given turn). If this is true, then you
-     * can perform core actions, such as clearing rubble, moving, activating,
-     * and building.
-     *
-     * @return whether the robot can perform a core action in this turn.
-     *
-     * @battlecode.doc.costlymethod
-     */
+
     boolean isCoreReady();
 
-    /**
-     * Returns whether the weapon delay is less than 1 (whether the robot can
-     * attack in the given turn).
-     *
-     * @return whether the robot is able to attack in the current turn.
-     *
-     * @battlecode.doc.costlymethod
-     */
     boolean isWeaponReady();
-
-    // ***********************************
-    // ****** RUBBLE METHODS *************
-    // ***********************************
-    /**
-     * Clears rubble in the specified direction. If you clear rubble in a
-     * direction that is off the map, an exception will be thrown. If you clear
-     * rubble in a location with no rubble, nothing happens.
-     *
-     * @param dir the direction to clear rubble in.
-     * @throws GameActionException if the robot has core delay, if you are not
-     * allowed to clear rubble, or if you clear in a direction that is off the
-     * map.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void clearRubble(Direction dir) throws GameActionException;
 
     // ***********************************
     // ****** MOVEMENT METHODS ***********
     // ***********************************
-    /**
-     * Tells whether this robot can move in the given direction, without taking
-     * any sort of delays into account. Takes into account only the map terrain
-     * (rubble), positions of other robots, and the current robot's type. Does
-     * not take into account whether this robot is currently active (no core
-     * delay), but will only return true for units that are capable of movement.
-     * Returns false for the OMNI and NONE directions.
-     *
-     * @param dir the direction to move in.
-     * @return true if there is nothing preventing this robot from moving in the
-     * given direction; false otherwise (does not account for core delay).
-     *
-     * @battlecode.doc.costlymethod
-     */
+
     boolean canMove(Direction dir);
 
-    /**
-     * Moves in the given direction.
-     *
-     * @param dir the direction to move in.
-     * @throws GameActionException if the robot cannot move in this direction,
-     * such as due to having core delay, the target location being off the map,
-     * the robot not being one that is allowed to move, and the target
-     * destination being occupied with either another robot or rubble.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void move(Direction dir) throws GameActionException;
+    boolean canMove(Direction dir, double scale);
+
+    void move(Direction dir);
+
+    void move(Direction dir, double scale);
 
     // ***********************************
     // ****** ATTACK METHODS *************
     // ***********************************
-    /**
-     * Returns whether the given location is within the robot's attack range.
-     * Does not take into account whether the robot is currently attacking or
-     * has the delay to do so.
-     *
-     * @param loc the location to attempt to attack.
-     * @return true if the given location is within this robot's attack range.
-     * Does not take into account whether the robot is currently attacking or if
-     * there is a unit on the target location.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean canAttackLocation(MapLocation loc);
 
-    /**
-     * Attacks the given location. If the location is empty, nothing will
-     * happen.
-     *
-     * @param loc the location to attack.
-     * @throws GameActionException if the robot cannot attack the given square
-     * due to having weapon delay or the location being outside your attack
-     * range.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void attackLocation(MapLocation loc) throws GameActionException;
+    void strike();
+
+    void fireSingleShot(Direction dir);
+
+    void fireTriadShot(Direction dir);
+
+    void firePentadShot(Direction dir);
 
     // ***********************************
-    // ****** BROADCAST METHODS **********
+    // ****** TREE METHODS ***************
     // ***********************************
-    /**
-     * Retrieve the next message waiting in your incoming message queue. Also
-     * removes the message from the queue.
-     *
-     * @return next Signal object in your queue, or null if your queue is empty.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    Signal readSignal();
+
+    void cut(MapLocation loc);
+
+    void shake(MapLocation loc);
+
+    void water(MapLocation loc);
+
+    boolean canInteractWithTree(MapLocation loc);
+
+    // ***********************************
+    // ****** SIGNALING METHODS **********
+    // ***********************************
 
     /**
-     * Retrieves an array of all the messages in your incoming message queue.
-     * All messages will be removed from the queue. If there are no messages in
-     * the queue, this method returns a zero-length array.
-     *
-     * @return all the Signals in your message queue
-     *
-     * @battlecode.doc.costlymethod
+     * Broadcasts a message to the global message board.
+     * The data is not written until the end of the robot's turn.
+     * @param channel - the channel to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
+     * @param data - one int's worth of data to write
+     * @throws GameActionException if the channel is invalid
      */
-    Signal[] emptySignalQueue();
+    public void broadcast(int channel, int data) throws GameActionException;
 
     /**
-     * Broadcasts a regular signal over a specific integer radius. The signal is
-     * immediately added to the incoming message queues of all robots in your
-     * broadcast range (except for the sending robot).
-     *
-     * @param radiusSquared the square of the radius over which the signal is
-     * broadcasted.
-     * @throws GameActionException if radius is negative.
-     *
-     * @battlecode.doc.costlymethod
+     * Retrieves the message stored at the given radio channel.
+     * @param channel - radio channel to query, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
+     * @return data currently stored on the channel
+     * @throws GameActionException  if the channel is invalid
      */
-    void broadcastSignal(int radiusSquared) throws GameActionException;
-
-    /**
-     * Broadcasts a message signal over a specific integer radius. The signal is
-     * immediately added to the incoming message queues of all robots in your
-     * broadcast range (except for the sending robot).
-     *
-     * @param message1 the first integer to broadcast.
-     * @param message2 the second integer to broadcast.
-     * @param radiusSquared the square of the radius over which the signal is
-     * broadcasted.
-     * @throws GameActionException if radius is negative or this robot cannot
-     * send message signals.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void broadcastMessageSignal(int message1, int message2, int radiusSquared)
-            throws GameActionException;
+    public int readBroadcast(int channel) throws GameActionException;
 
     // ***********************************
     // ****** BUILDING/SPAWNING **********
     // ***********************************
-    /**
-     * Returns whether you have the parts and dependencies to build the given
-     * robot, and this robot is a valid builder for the target robot.
-     *
-     * @param type the type to build.
-     * @return whether the requirements to build are met.
-     *
-     * @battlecode.doc.costlymethod
-     */
+
     boolean hasBuildRequirements(RobotType type);
 
-    /**
-     * Returns whether the robot can build a robot of the given type in the
-     * given direction, without taking delays into account. Checks dependencies,
-     * parts costs, whether the robot can build, and that the given direction is
-     * not blocked. Does not check if a robot has sufficiently low coreDelay or
-     * not.
-     *
-     * @param dir the direction to build in.
-     * @param type the robot type to build.
-     * @return whether it is possible to build a robot of the given type in the
-     * given direction.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean canBuild(Direction dir, RobotType type);
+    boolean canBuild(RobotType type, Direction dir);
 
-    /**
-     * Builds a robot in the given direction. The robot will initially be
-     * inactive for a number of turns (during which this robot cannot move or
-     * attack). After a number of turns, the robot will become active.
-     *
-     * @param dir the direction to build in.
-     * @param type the type to build.
-     * @throws GameActionException if the build is bad: if your robot cannot
-     * build, if you have coreDelay, if the direction is not a good build
-     * direction, or if the type you're building cannot be built by you.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void build(Direction dir, RobotType type) throws GameActionException;
+    void hire(Direction dir);
+
+    void plant(RobotType type, Direction dir);
 
     // ***********************************
     // ****** OTHER ACTION METHODS *******
     // ***********************************
-    /**
-     * Activates the neutral robot at the given location, converting it to a
-     * robot of the same type but on your team. The robot will have a new ID.
-     * This method increases your core as if it were a movement action, but does
-     * not affect
-     *
-     * @param loc the location of the robot to activate.
-     * @throws GameActionException if the location is out of range (needs to be
-     * adjacent), if there is no robot there, if the robot is not a neutral
-     * robot, or if you have core delay.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void activate(MapLocation loc) throws GameActionException;
+
+    void donate(int bullets);
 
     /**
-     * Repairs the robot at the given location. The robot must be in attack
-     * range. You can only repair once a turn.
+     * Repairs the robot at the given location. The robot must be within the
+     * archons action radius. You can only repair once a turn.
      *
      * @param loc the location of the robot to repair.
      * @throws GameActionException if this robot is not an archon, the location
@@ -662,26 +197,6 @@ public interface RobotController {
      * @battlecode.doc.costlymethod
      */
     void repair(MapLocation loc) throws GameActionException;
-
-    /**
-     * Turret only. Transforms the turret into a TTM. Will increase both your
-     * delays. It's okay to use this if you have delays though.
-     *
-     * @throws GameActionException if this robot is not a Turret.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void pack() throws GameActionException;
-
-    /**
-     * TTM only. Transforms the TTM into a turret. Will increase both your
-     * delays. It's okay to use this if you have delays though.
-     *
-     * @throws GameActionException if this robot is not a TTM.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void unpack() throws GameActionException;
 
     /**
      * Kills your robot and ends the current round. Never fails.
@@ -700,6 +215,7 @@ public interface RobotController {
     // ***********************************
     // ******** TEAM MEMORY **************
     // ***********************************
+
     /**
      * Sets the team's "memory", which is saved for the next game in the match.
      * The memory is an array of {@link GameConstants#TEAM_MEMORY_LENGTH} longs.
@@ -754,6 +270,7 @@ public interface RobotController {
     // ***********************************
     // ******** DEBUG METHODS ************
     // ***********************************
+
     /**
      * Sets one of this robot's 'indicator strings' for debugging purposes.
      * These strings are displayed in the client. This method has no effect on
@@ -794,7 +311,7 @@ public interface RobotController {
      * @battlecode.doc.costlymethod
      */
     void setIndicatorLine(MapLocation from, MapLocation to, int red,
-            int green, int blue);
+                          int green, int blue);
 
     /**
      * Gets this robot's 'control bits' for debugging purposes. These bits can
@@ -818,4 +335,5 @@ public interface RobotController {
      * @battlecode.doc.costlymethod
      */
     void addMatchObservation(String observation);
+
 }

@@ -7,56 +7,56 @@ import battlecode.server.Config;
  */
 public enum RobotType {
 
-    // spawnSource, maxHealth, plantCost, bodyRadius, bulletSpeed, attackPower, actionRadius, sightRadius, bulletSightRadius, movementDelay, attackDelay, cooldownDelay, bytecodeLimit
+    // spawnSource, maxHealth, bulletCost, bodyRadius, bulletSpeed, attackPower, actionRadius, sightRadius, bulletSightRadius, movementDelay, attackDelay, cooldownDelay, bytecodeLimit
     /**
      * An important unit that cannot be constructed; builds other robots.
      *
      * @battlecode.doc.robottype
      */
-    ARCHON          (null,    1000,   -1,  2, -1, -1,  1,  5, 17,  2, -1,  1, 20000),
-    //                          HP    PC  BR  BS  AP  AR  SR BSR MVD  AD  CD    BCL
+    ARCHON          (null,    1000,   -1,   2,  -1,  -1,   3,   7,  15,   2,  -1,  1, 20000),
+    //                          HP    BC   BR   BS   AP   AR   SR  BSR  MVD   AD   CD    BCL
     /**
      * The main producer unit to make other units and trees; can't build Archons or other Gardeners
      *
      * @battlecode.doc.robottype
      */
-    GARDENER        (ARCHON,   100,  100,  1, -1, -1,  1,  5, 11,  2, -1,  1, 10000),
-    //                          HP    PC  BR  BS  AP  AR  SR BSR MVD  AD  CD    BCL
+    GARDENER        (ARCHON,   100,  100,   1,  -1,  -1,   3,   5,  10,   2,  -1,   1, 10000),
+    //                          HP    BC   BR   BS   AP   AR   SR  BSR  MVD   AD   CD    BCL
     /**
      * A melee based unit that specializes at cutting down trees
      *
      * @battlecode.doc.robottype
      */
-    LUMBERJACK      (GARDENER,  80,  100,  1, -1,1.5,  1,  5, 10,  1,  2,  1, 10000),
-    //                          HP    PC  BR  BS  AP  AR  SR BSR MVD  AD  CD    BCL
+    LUMBERJACK      (GARDENER,  70,  100,   1,  -1, 1.5,   2,   5,  10,   2,   2,   1, 10000),
+    //                          HP    BC   BR   BS   AP   AR   SR  BSR  MVD   AD   CD    BCL
     /**
      * The basic fighting unit
      *
      * @battlecode.doc.robottype
      */
-    RECRUIT         (GARDENER,  70,  100,  1,  1,  2,  1,  5, 10,  1,  2,  1, 10000),
-    //                          HP    PC  BR  BS  AP  AR  SR BSR MVD  AD  CD    BCL
+    RECRUIT         (GARDENER,  70,  100,   1,   1,   1,   1,   5,  10,   1,   2,   1, 10000),
+    //                          HP    BC   BR   BS   AP   AR   SR  BSR  MVD   AD   CD    BCL
     /**
      * A slightly better fighting unit
      *
      * @battlecode.doc.robottype
      */
-    SOLDIER         (GARDENER,  60,  100,  1,1.5,  2,  1,  5, 10,  1,  2,  1, 10000),
-    //                          HP    PC  BR  BS  AP  AR  SR BSR MVD  AD  CD    BCL
+    SOLDIER         (GARDENER,  80,  130,   1,   1,   1,   1,   5,  10,   1,   2,   1, 10000),
+    //                          HP    BC   BR   BS   AP   AR   SR  BSR  MVD   AD   CD    BCL
     /**
      * A strong fighting unit
      *
      * @battlecode.doc.robottype
      */
-    TANK            (GARDENER, 100,  100,  2,  2,  7,  1,  5, 10,  1,  2,  1, 10000),
-    //                          HP    PC  BR  BS  AP  AR  SR BSR MVD  AD  CD    BCL
+    TANK            (GARDENER, 125,  200,   1,   1,   1,   1,   5,  10,   1,   2,   1, 10000),
+    //                          HP    BC   BR   BS   AP   AR   SR  BSR  MVD   AD   CD    BCL
     /**
      * An unit that specializes in movement
      *
      * @battlecode.doc.robottype
      */
-    SCOUT           (GARDENER,  80,  100,  1,  1,  1,  1,  5, 10,  1,  2,  1, 10000),
-    //                          HP    PC  BR  BS  AP  AR  SR BSR MVD  AD  CD    BCL
+    SCOUT           (GARDENER,  80,   80,   1,   1,   1,   1,   5,  10,   1,   2,   1, 20000),
+    //                          HP    BC   BR   BS   AP   AR   SR  BSR  MVD   AD   CD    BCL
     ;
     
     /**
@@ -70,9 +70,9 @@ public enum RobotType {
     public final double maxHealth;
 
     /**
-     * Cost for planting the robot.
+     * Cost for creating the robot.
      */
-    public final int plantCost;
+    public final int bulletCost;
 
     /**
      * Radius for the robot.
@@ -169,12 +169,12 @@ public enum RobotType {
         return spawnSource == GARDENER;
     }
     
-    RobotType(RobotType spawnSource, int maxHealth, int plantCost, int bodyRadius, int bulletSpeed, double attackPower,
+    RobotType(RobotType spawnSource, int maxHealth, int bulletCost, int bodyRadius, int bulletSpeed, double attackPower,
               int actionRadius, int sightRadius, int bulletSightRadius, double movementDelay, double attackDelay,
               double cooldownDelay, int bytecodeLimit) {
         this.spawnSource        = spawnSource;
         this.maxHealth          = maxHealth;
-        this.plantCost          = plantCost;
+        this.bulletCost         = bulletCost;
         this.bodyRadius         = bodyRadius;
         this.bulletSpeed        = bulletSpeed;
         this.attackPower        = attackPower;

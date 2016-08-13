@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import battlecode.schema.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 /**
  * This class is an immutable representation of two-dimensional coordinates
@@ -86,7 +85,6 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
         }
 
         return (((MapLocation) obj).x == this.x) && (((MapLocation) obj).y == this.y);
-
     }
 
     /**
@@ -103,8 +101,8 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
         String[] coord = StringUtils.replaceChars(s, "[](){}", null).split(",");
         if (coord.length != 2)
             throw new IllegalArgumentException("Invalid map location string");
-        int x = Integer.valueOf(coord[0].trim());
-        int y = Integer.valueOf(coord[1].trim());
+        float x = Float.valueOf(coord[0].trim());
+        float y = Float.valueOf(coord[1].trim());
 
         return new MapLocation(x, y);
     }
@@ -119,11 +117,11 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
     }
 
     /**
-     * Computes the square of the distance from this location to the specified
+     * Computes the Euclidean distance from this location to the specified
      * location.
      *
-     * @param location the location to compute the distance squared to
-     * @return the distance to the given location squared
+     * @param location the location to compute the distance to
+     * @return the distance to the given location
      *
      * @battlecode.doc.costlymethod
      */
@@ -134,11 +132,27 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
     }
 
     /**
-     * Determines whether this location is adjacent to the specified
-     * location. Note that squares cannot be adjacent to themselves.
+     * Computes the squared distance from this location to the specified
+     * location.
+     *
+     * @param location the location to compute the squared distance to
+     * @return the squared distance to the given location
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final double distanceSquaredTo(MapLocation location) {
+        float dx = this.x - location.x;
+        float dy = this.y - location.y;
+        return dx * dx + dy * dy;
+    }
+
+    /**
+     * Determines whether this location is within a specified distance
+     * from target location.
      *
      * @param location the location to test
-     * @return true if the given location is adjacent to this one,
+     * @param dist the distance for the location to be within
+     * @return true if the given location is within dist to this one,
      *         or false if it isn't
      *
      * @battlecode.doc.costlymethod
@@ -148,9 +162,51 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
     }
 
     /**
+     * Determines whether this location is within the action radius of the
+     * given robot
+     *
+     * @param robot the robot to test
+     * @return true if this location is within robot's action radius,
+     *         false otherwise
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final boolean isWithinActionRadius(RobotInfo robot){
+        return isWithinDistance(robot.location, robot.type.actionRadius);
+    }
+
+    /**
+     * Determines whether this location is within the sight radius of the
+     * given robot
+     *
+     * @param robot the robot to test
+     * @return true if this location is within robot's sight radius,
+     *         false otherwise
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final boolean isWithinSightRadius(RobotInfo robot){
+        return isWithinDistance(robot.location, robot.type.sightRadius);
+    }
+
+    /**
+     * Determines whether this location is within the bullet sight radius of the
+     * given robot
+     *
+     * @param robot the robot to test
+     * @return true if this location is within robot's bullet sight radius,
+     *         false otherwise
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final boolean isWithinBulletSightRadius(RobotInfo robot){
+        return isWithinDistance(robot.location, robot.type.bulletSightRadius);
+    }
+
+    /**
      * Returns the Direction from this MapLocation to <code>location</code>.
-     * If the locations are equal this method returns Direction.OMNI. If
-     * <code>location</code> is null then the return value is Direction.NONE.
+     * If <code>location</code> is null then the return value is null.
+     * If <code>location</code> equals this location then the return value is null.
      *
      * @param location The location to which the Direction will be calculated
      * @return The Direction to <code>location</code> from this MapLocation.
@@ -161,41 +217,74 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
         if(location == null) {
             return null;
         }
-        
-        float dx = location.x - this.x;
-        float dy = location.y - this.y;
-
-        return new Direction(dx,dy);
+        if(this.equals(location)){
+            return null;
+        }
+        return new Direction(this,location);
     }
 
     /**
      * Returns a new MapLocation object representing a location
-     * one square from this one in the given direction.
+     * one unit in distance from this one in the given direction.
      *
      * @param direction the direction to add to this location
-     * @return a MapLocation for the location one square in the given
-     *         direction, or this location if the direction is NONE or OMNI
+     * @return a MapLocation for the location one unit in distance in the given
+     *         direction.
      *
      * @battlecode.doc.costlymethod
      */
     public final MapLocation add(Direction direction) {
-
-        return new MapLocation(x + direction.dx, y + direction.dy);
+        float dx = (float)Math.cos(direction.radians);
+        float dy = (float)Math.sin(direction.radians);
+        return new MapLocation(x + dx, y + dy);
     }
 
     /**
      * Returns a new MapLocation object representing a location
-     * {@code multiple} squares from this one in the given direction.
+     * {@code dist} units away from this one in the given direction.
      *
      * @param direction the direction to add to this location
-     * @param multiple  the number of squares to add
-     * @return a MapLocation for the location one square in the given
-     *         direction, or this location if the direction is NONE or OMNI
+     * @param dist  the distance the locations should be apart
+     * @return a MapLocation for the location dist away from this location
+     *         in the given direction.
      *
      * @battlecode.doc.costlymethod
      */
-    public final MapLocation add(Direction direction, int multiple) {
-        return new MapLocation(x + multiple * direction.dx, y + multiple * direction.dy);
+    public final MapLocation add(Direction direction, double dist) {
+        float dx = (float)(dist * Math.cos(direction.radians));
+        float dy = (float)(dist * Math.sin(direction.radians));
+        return new MapLocation(x + dx, y + dy);
+    }
+
+    /**
+     * Returns a new MapLocation object representing a location
+     * one unit in distance from this one in the opposite direction
+     * of the given direction.
+     *
+     * @param direction the direction to subtract from this location
+     * @return a MapLocation for the location one unit in distance in the
+     *         opposite of the given direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final MapLocation subtract(Direction direction) {
+        return this.add(direction.opposite());
+    }
+
+    /**
+     * Returns a new MapLocation object representing a location
+     * {@code dist} units in distance from this one in the opposite direction
+     * of the given direction.
+     *
+     * @param direction the direction to subtract from this location
+     * @param dist  the distance the locations should be apart
+     * @return a MapLocation for the location dist away from this location
+     *         in the opposite of the given direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final MapLocation subtract(Direction direction, double dist) {
+        return this.add(direction.opposite(), dist);
     }
 
     /**
@@ -208,22 +297,8 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      *
      * @battlecode.doc.costlymethod
      */
-    public final MapLocation add(float dx, float dy) {
+    public final MapLocation translate(float dx, float dy) {
         return new MapLocation(x + dx, y + dy);
-    }
-
-    /**
-     * Returns a new MapLocation object representing a location
-     * one square from this one in the opposite of the given direction.
-     *
-     * @param direction the direction to subtract from this location
-     * @return a MapLocation for the location one square opposite the given
-     *         direction, or this location if the direction is NONE or OMNI
-     *
-     * @battlecode.doc.costlymethod
-     */
-    public final MapLocation subtract(Direction direction) {
-        return this.add(direction.opposite());
     }
 
     /**

@@ -33,13 +33,7 @@ public class Signal implements Serializable {
     private Team team;
 
     /**
-     * An array of two integers to represent the message included in the
-     * signal, or null if there was no message.
-     */
-    private int[] message;
-
-    /**
-     * Creates a basic signal with the given location, robotID, and team.
+     * Creates a signal with the given location, robotID, and team.
      *
      * @param location the location to include in the signal.
      * @param robotID the robotID to include in the signal.
@@ -52,26 +46,6 @@ public class Signal implements Serializable {
         this.location = location;
         this.robotID = robotID;
         this.team = team;
-        this.message = null;
-
-    }
-
-    /**
-     * Creates a message signal with the given location, robotID, and team.
-     *
-     * @param location the location to include in the signal.
-     * @param robotID the robotID to include in the signal.
-     * @param team the team to include in the signal.
-     * @param signal1 the first integer to send in the message.
-     * @param signal2 the second integer to send in the message.
-*    @battlecode.doc.costlymethod
-     */
-    public Signal(MapLocation location, int robotID, Team team, int signal1, int signal2) {
-
-        this.location = location;
-        this.robotID = robotID;
-        this.team = team;
-        this.message = new int[]{signal1, signal2};
 
     }
 
@@ -114,23 +88,6 @@ public class Signal implements Serializable {
      */
     public Team getTeam() {
         return team;
-    }
-
-    /**
-     * Returns the message associated with this signal, or null if the signal
-     * was a basic (regular) signal. If it's not null, the integer array will
-     * always have length 2. Returns a copy so this.message can't be
-     * modified by the receiver.
-     *
-     * @return the message associated with this signal, or null if the signal
-     * had no message.
-     */
-    public int[] getMessage() {
-        if(message == null) {
-            return null;
-        } else {
-            return message.clone();
-        }
     }
 
     /**
