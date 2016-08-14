@@ -15,135 +15,733 @@ public interface RobotController {
     // ****** GLOBAL QUERY METHODS *****
     // *********************************
 
+    /**
+     * Gets the number of rounds in the game. After this many rounds, if neither
+     * team has been destroyed, then the tiebreakers will be used.
+     *
+     * @return the number of rounds in the game.
+     *
+     * @battlecode.doc.costlymethod
+     */
     int getRoundLimit();
 
-    int getCurrentRound();
+    /**
+     * Returns the current round number, where round 0 is the first round of the
+     * match.
+     *
+     * @return the current round number, where 0 is the first round of the
+     * match.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    int getRoundNum();
 
+    /**
+     * Gets the team's total bullet supply.
+     *
+     * @return the team's total bullet supply.
+     *
+     * @battlecode.doc.costlymethod
+     */
     double getTeamBullets();
 
+    /**
+     * Gets the team's total victory points.
+     *
+     * @return the team's total victory points.
+     *
+     * @battlecode.doc.costlymethod
+     */
     int getTeamVictoryPoints();
 
+    /**
+     * Gets the opponent's total victory points.
+     *
+     * @return the opponent's total victory points.
+     *
+     * @battlecode.doc.costlymethod
+     */
     int getOpponentVictoryPoints();
 
+    /**
+     * Returns the number of robots on your team, including your archons.
+     * If this number ever reaches zero, the opposing team will automatically
+     * win by destruction.
+     *
+     * @return the number of robots on your team, including your archons.
+     *
+     * @battlecode.doc.costlymethod
+     */
     int getRobotCount();
 
+    /**
+     * Returns the number of trees on your team.
+     *
+     * @return the number of trees on your team.
+     *
+     * @battlecode.doc.costlymethod
+     */
     int getTreeCount();
 
+    /**
+     * Returns a list of the INITIAL locations of the archons of a particular
+     * team. The locations will be sorted by increasing x, with ties broken by
+     * increasing y. Will return an empty list if you query for NEUTRAL.
+     *
+     * @param t the team whose archons you want to query the initial locations
+     * for. Will return an empty list if you query for NEUTRAL.
+     * @return a list of the INITIAL locations of the archons of that team, or
+     * an empty list for team NEUTRAL.
+     *
+     * @battlecode.doc.costlymethod
+     */
     MapLocation[] getInitialArchonLocations(Team t);
 
     // *********************************
     // ****** UNIT QUERY METHODS *******
     // *********************************
 
+    /**
+     * Use this method to access your ID.
+     *
+     * @return the ID of this robot.
+     *
+     * @battlecode.doc.costlymethod
+     */
     int getID();
 
+    /**
+     * Gets the Team of this robot.
+     *
+     * @return this robot's Team.
+     *
+     * @battlecode.doc.costlymethod
+     */
     Team getTeam();
 
+    /**
+     * Gets this robot's type (SOLDIER, ARCHON, etc.).
+     *
+     * @return this robot's type.
+     *
+     * @battlecode.doc.costlymethod
+     */
     RobotType getType();
 
+    /**
+     * Gets this robot's current location.
+     *
+     * @return this robot's current location.
+     *
+     * @battlecode.doc.costlymethod
+     */
     MapLocation getLocation();
 
+    /**
+     * Gets this robot's current health.
+     *
+     * @return this robot's current health.
+     *
+     * @battlecode.doc.costlymethod
+     */
     double getHealth();
 
+    /**
+     * Returns the amount of core delay this robot has accumulated. If the result
+     * is strictly less than 1, then the robot can perform a core action. Core
+     * actions include hiring, planting, chopping, and moving.
+     *
+     * @return the amount of core delay this robot has accumulated.
+     *
+     * @battlecode.doc.costlymethod
+     */
     double getCoreDelay();
 
+    /**
+     * Returns the amount of weapon delay this robot has accumulated. If the result
+     * is strictly less than 1, then the robot can attack.
+     *
+     * @return the amount of weapon delay this robot has accumulated.
+     *
+     * @battlecode.doc.costlymethod
+     */
     double getWeaponDelay();
 
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
     // ***********************************
 
-    boolean onTheMap(MapLocation loc);
+    /**
+     * Senses whether a MapLocation is on the map. Will throw an exception if
+     * the location is not currently within sensor range.
+     *
+     * @param loc the location to check.
+     * @return true if the location is on the map, and false if it is not.
+     * @throws GameActionException if the location is not within sensor range.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean onTheMap(MapLocation loc) throws GameActionException;
 
+    /**
+     * Returns true if the given location is within the robot's sensor range.
+     *
+     * @param loc the location to check.
+     * @return whether the given location is within the robot's sensor range.
+     *
+     * @battlecode.doc.costlymethod
+     */
     boolean canSenseLocation(MapLocation loc);
 
-    boolean isLocationOccupied(MapLocation loc);
+    /**
+     * Returns whether there is a robot or tree at the given location.
+     *
+     * @param loc the location to check.
+     * @return whether there is a robot or tree at the given location.
+     * @throws GameActionException if the location is not within sensor range.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean isLocationOccupied(MapLocation loc) throws GameActionException;
 
-    TreeInfo senseTreeAtLocation(MapLocation loc);
+    /**
+     * Returns the tree at the given location, or null if there is no tree
+     * there.
+     *
+     * @param loc the location to check.
+     * @return the tree at the given location.
+     * @throws GameActionException if the location is not within sensor range.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    TreeInfo senseTreeAtLocation(MapLocation loc) throws GameActionException;
 
-    RobotInfo senseRobotAtLocation(MapLocation loc);
+    /**
+     * Returns the robot at the given location, or null if there is no robot
+     * there.
+     *
+     * @param loc the location to check.
+     * @return the robot at the given location.
+     * @throws GameActionException if the location is not within sensor range.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    RobotInfo senseRobotAtLocation(MapLocation loc) throws GameActionException;
 
+    /**
+     * Returns true if the given tree is within this robot's sensor range.
+     *
+     * @param id the ID of the robot to query.
+     * @return whether the given robot is within this robot's sensor range.
+     *
+     * @battlecode.doc.costlymethod
+     */
     boolean canSenseTree(int id);
 
+    /**
+     * Returns true if the given robot is within this robot's sensor range.
+     *
+     * @param id the ID of the robot to query.
+     * @return whether the given robot is within this robot's sensor range.
+     *
+     * @battlecode.doc.costlymethod
+     */
     boolean canSenseRobot(int id);
 
-    TreeInfo senseTree(int id);
+    /**
+     * Returns true if the given bullet is within the robot's bullet
+     * sight range.
+     *
+     * @param id the ID of the bullet to query.
+     * @return whether the given bullet is within this robot's bullet
+     *         sight range.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean canSenseBullet(int id);
 
-    RobotInfo senseRobot(int id);
+    /**
+     * Senses information about a particular tree given its ID.
+     *
+     * @param id the ID of the tree to query.
+     * @return a TreeInfo object for the sensed tree.
+     * @throws GameActionException if the tree cannot be sensed (for example,
+     * if it doesn't exist or is out of sight range).
+     *
+     * @battlecode.doc.costlymethod
+     */
+    TreeInfo senseTree(int id) throws GameActionException;
 
+    /**
+     * Senses information about a particular robot given its ID.
+     *
+     * @param id the ID of the robot to query.
+     * @return a RobotInfo object for the sensed robot.
+     * @throws GameActionException if the robot cannot be sensed (for example,
+     * if it doesn't exist or is out of sight range).
+     *
+     * @battlecode.doc.costlymethod
+     */
+    RobotInfo senseRobot(int id) throws GameActionException;
+
+    /**
+     * Senses information about a particular bullet given its ID.
+     *
+     * @param id the ID of the bullet to query.
+     * @return a BulletInfo object for the sensed bullet.
+     * @throws GameActionException if the bullet cannot be sensed (for example,
+     * if it doesn't exist or is out of sight range).
+     *
+     * @battlecode.doc.costlymethod
+     */
+    BulletInfo senseBullet(int id) throws GameActionException;
+
+    /**
+     * Returns all robots that can be sensed on the map.
+     *
+     * The order in which the robots are returned is based on the execution
+     * order of the robots. Robots moving earlier in a round appear
+     * earlier in the returned list.
+     *
+     * @return array of RobotInfo objects, which contain information about all
+     * the robots you sensed.
+     *
+     * @battlecode.doc.costlymethod
+     */
     RobotInfo[] senseNearbyRobots();
 
+    /**
+     * Returns all robots that can be sensed within a certain radius of this
+     * robot.
+     *
+     * The order in which the robots are returned is based on the execution
+     * order of the robots. Robots moving earlier in a round appear
+     * earlier in the returned list.
+     *
+     * @param radius return robots this distance away from the center of
+     * this robot. If -1 is passed, robots from the whole map are returned.
+     * @return array of RobotInfo objects of all the robots you sensed.
+     *
+     * @battlecode.doc.costlymethod
+     */
     RobotInfo[] senseNearbyRobots(int radius);
 
+    /**
+     * Returns all robots of a given team that can be sensed within a certain
+     * radius of this robot.
+     *
+     * The order in which the robots are returned is based on the execution
+     * order of the robots. Robots moving earlier in a round appear
+     * earlier in the returned list.
+     *
+     * @param radius return robots this distance away from the center of
+     * this robot. If -1 is passed, robots from the whole map are returned.
+     * @param team filter game objects by the given team. If null is passed,
+     * robots from any team are returned.
+     * @return array of RobotInfo objects of all the robots you sensed.
+     *
+     * @battlecode.doc.costlymethod
+     */
     RobotInfo[] senseNearbyRobots(int radius, Team team);
 
+    /**
+     * Returns all robots of a given team that can be sensed within a certain
+     * radius of a specified location.
+     *
+     * The order in which the robots are returned is based on the execution
+     * order of the robots. Robots moving earlier in a round appear
+     * earlier in the returned list.
+     *
+     * @param center center of the given search radius.
+     * @param radius return robots this distance away from the given center
+     * location. If -1 is passed, robots from the whole map are returned.
+     * @param team filter game objects by the given team. If null is passed,
+     * objects from all teams are returned.
+     * @return array of RobotInfo objects of the robots you sensed.
+     *
+     * @battlecode.doc.costlymethod
+     */
     RobotInfo[] senseNearbyRobots(MapLocation center, int radius, Team team);
 
+    /**
+     * Returns all trees that can be sensed on the map.
+     *
+     * @return array of TreeInfo objects, which contain information about all
+     * the trees you sensed.
+     *
+     * @battlecode.doc.costlymethod
+     */
     TreeInfo[] senseNearbyTrees();
 
+    /**
+     * Returns all trees that can be sensed within a certain radius of this
+     * robot.
+     *
+     * @param radius return trees this distance away from the center of
+     * this robot. If -1 is passed, trees from the whole map are returned.
+     * @return array of TreeInfo objects of all the trees you sensed.
+     *
+     * @battlecode.doc.costlymethod
+     */
     TreeInfo[] senseNearbyTrees(int radius);
 
+    /**
+     * Returns all trees of a given team that can be sensed within a certain
+     * radius of this robot.
+     *
+     * @param radius return trees this distance away from the center of
+     * this robot. If -1 is passed, trees from the whole map are returned.
+     * @param team filter game objects by the given team. If null is passed,
+     * robots from any team are returned.
+     * @return array of TreeInfo objects of all the trees you sensed.
+     *
+     * @battlecode.doc.costlymethod
+     */
     TreeInfo[] senseNearbyTrees(int radius, Team team);
 
+    /**
+     * Returns all trees of a given team that can be sensed within a certain
+     * radius of a specified location.
+     *
+     * @param center center of the given search radius.
+     * @param radius return trees this distance away from given center
+     * location. If -1 is passed, trees from the whole map are returned.
+     * @param team filter game objects by the given team. If null is passed,
+     * objects from all teams are returned.
+     * @return array of TreeInfo objects of the trees you sensed.
+     *
+     * @battlecode.doc.costlymethod
+     */
     TreeInfo[] senseNearbyTrees(MapLocation center, int radius, Team team);
 
+    /**
+     * Returns all bullets that can be sensed on the map.
+     *
+     * @return array of BulletInfo objects, which contain information about all
+     * the bullets you sensed.
+     *
+     * @battlecode.doc.costlymethod
+     */
     BulletInfo[] senseNearbyBullets();
 
+    /**
+     * Returns all bullets that can be sensed within a certain radius of this
+     * robot.
+     *
+     * @param radius return bullets this distance away from the center of
+     * this robot. If -1 is passed, bullets from the whole map are returned.
+     * @return array of BulletInfo objects of all the bullets you sensed.
+     *
+     * @battlecode.doc.costlymethod
+     */
     BulletInfo[] senseNearbyBullets(int radius);
 
+    /**
+     * Returns all bullets that can be sensed within a certain
+     * radius of a specified location.
+     *
+     * @param center center of the given search radius.
+     * @param radius return bullets this distance away from the given center
+     * location. If -1 is passed, bullets from the whole map are returned.
+     * @return array of TreeInfo objects of the bullets you sensed.
+     *
+     * @battlecode.doc.costlymethod
+     */
     BulletInfo[] senseNearbyBullets(MapLocation center, int radius);
 
+    /**
+     * Returns an array of all the robots that have broadcasted in the
+     * last round (unconstrained by sensor range or distance).
+     *
+     * @return an array of all robots that have broadcasted in the last round.
+     *
+     * @battlecode.doc.costlymethod
+     */
     RobotInfo[] senseBroadcastingRobots();
 
+    /**
+     * Returns an array of all the robots that have broadcasted in the
+     * last round, filtered by team (unconstrained by sensor range or distance)
+     *
+     * @param t - filter robots by the given team.
+     * @return an array of all robots of the given team that have
+     * broadcasted in the last round.
+     *
+     * battlecode.doc.costlymethod
+     */
     RobotInfo[] senseBroadcastingRobots(Team t);
 
-    RobotInfo[] senseBroadcastingRobotLocations();
+    /**
+     * Returns an array of all the locations of the robots that have
+     * broadcasted in the last round (unconstrained by sensor range or distance)
+     *
+     * @return an array of all the locations of the robots that have
+     * broadcasted in the last round.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    MapLocation[] senseBroadcastingRobotLocations();
 
-    RobotInfo[] senseBroadcastingRobotLocations(Team t);
+    /**
+     * Returns an array of all the locations of the robots that have broadcasted
+     * in the last round, filtered by team (unconstrained by sensor range or distance)
+     *
+     * @param t - filter robots by the given team.
+     * @return an array of all the locations of the robots of the
+     * given team that have broadcasted in the last round.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    MapLocation[] senseBroadcastingRobotLocations(Team t);
 
 
     // ***********************************
     // ****** READINESS METHODS **********
     // ***********************************
 
+    /**
+     * Returns whether the core delay is strictly less than 1 (whether the robot
+     * can perform a core action in the given turn). If this is true, then you
+     * can perform core actions, such as moving, hiring, chopping, and planting.
+     *
+     * @return whether the robot can perform a core action in this turn.
+     *
+     * @battlecode.doc.costlymethod
+     */
     boolean isCoreReady();
 
+    /**
+     * Returns whether the weapon delay is less than 1 (whether the robot can
+     * attack in the given turn).
+     *
+     * @return whether the robot is able to attack in the current turn.
+     *
+     * @battlecode.doc.costlymethod
+     */
     boolean isWeaponReady();
 
     // ***********************************
     // ****** MOVEMENT METHODS ***********
     // ***********************************
 
+    /**
+     * Tells whether this robot can move one stride in the given direction,
+     * without taking any sort of delays into account. Takes into account only
+     * the positions of trees, positions of other robots, and the edge of the
+     * game map. Does not take into account whether this robot is currently
+     * active (no core delay).  Note that one stride is equivalent to this
+     * robot's body radius in Euclidean distance.
+     *
+     * @param dir the direction to move in.
+     * @return true if there is nothing preventing this robot from moving one
+     * stride in the given direction; false otherwise (does not account for
+     * core delay).
+     *
+     * @battlecode.doc.costlymethod
+     */
     boolean canMove(Direction dir);
 
+    /**
+     * Tells whether this robot can move scale strides in the given
+     * direction, without taking any sort of delays into account. Takes into
+     * account only the positions of trees, positions of other robots, and the
+     * edge of the game map. Does not take into account whether this robot is
+     * currently active (no core delay). Note that one stride is equivalent to
+     * this robot's body radius in Euclidean distance so scale strides is
+     * equivalent to scale times this robot's body radius in Euclidean distance.
+     *
+     * @param dir the direction to move in.
+     * @param scale the scale of a stride you wish to check. Must be be
+     * from 0 to 1 (inclusive).
+     * @return true if there is nothing preventing this robot from moving scale
+     * strides in the given direction; false otherwise (does not account for
+     * core delay).
+     *
+     * @battlecode.doc.costlymethod
+     */
     boolean canMove(Direction dir, double scale);
 
-    void move(Direction dir);
+    /**
+     * Moves one stride in the given direction. Note that one stride is equivalent
+     * to this robot's body radius in Euclidean distance.
+     *
+     * @param dir the direction to move in.
+     * @throws GameActionException if the robot cannot move one stride in this
+     * direction, such as due to having core delay, the target location being
+     * off the map, and the target destination being occupied with either
+     * another robot or a tree.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void move(Direction dir) throws GameActionException;
 
-    void move(Direction dir, double scale);
+    /**
+     * Moves scale strides in the given direction. Note that one stride is
+     * equivalent to this robot's body radius in Euclidean distance so scale
+     * strides is equivalent to scale times this robot's body radius in
+     * Euclidean distance.
+     *
+     * @param dir the direction to move in.
+     * @param scale the scale of a stride you wish to move. Must be be
+     * from 0 to 1 (inclusive).
+     * @throws GameActionException if the robot cannot move scale strides in this
+     * direction, such as due to having core delay, the target location being
+     * off the map, and the target destination being occupied with either
+     * another robot or a tree.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void move(Direction dir, double scale) throws GameActionException;
 
     // ***********************************
     // ****** ATTACK METHODS *************
     // ***********************************
 
-    void strike();
+    /**
+     * Strikes and deals damage to all other robots and trees within this
+     * robot's action radius. Note that only Lumberjacks can perform
+     * this function.
+     *
+     * @throws GameActionException if the robot is not of type LUMBERJACK or
+     * cannot attack due to having weapon delay.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void strike() throws GameActionException;
 
-    void fireSingleShot(Direction dir);
+    /**
+     * Tells whether there is enough bullets in your bullet supply to
+     * fire a single shot.
+     *
+     * @return true if there are enough bullets in the bullet supply
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean canSingleShot();
 
-    void fireTriadShot(Direction dir);
+    /**
+     * Tells whether there is enough bullets in your bullet supply to
+     * fire a triad shot.
+     *
+     * @return true if there are enough bullets in the bullet supply
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean canTriadShot();
 
-    void firePentadShot(Direction dir);
+    /**
+     * Tells whether there is enough bullets in your bullet supply to
+     * fire a pentad shot.
+     *
+     * @return true if there are enough bullets in the bullet supply
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean canPentadShot();
+
+    /**
+     * Fires a single bullet in the direction dir at the cost of one bullet
+     * from your team's supply. The speed and damage of the bullet is determined
+     * from the type of this robot.
+     *
+     * @param dir the direction you wish to fire the bullet.
+     * @throws GameActionException if this robot is not of a type that can
+     * fire bullets (ARCHON, GARDENER, etc.), cannot attack due to having
+     * weapon delay, or for having insufficient bullets in the bullet supply.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void fireSingleShot(Direction dir) throws GameActionException;
+
+    /**
+     * Fires a three bullets with the center bullet in the direction dir and
+     * with a spread of 20 degrees for the other bullets.  This function costs
+     * four bullets from your team's supply. The speed and damage of the
+     * bullets is determined from the type of this robot.
+     *
+     * @param dir the direction you wish to fire the center bullet.
+     * @throws GameActionException if this robot is not of a type that can
+     * fire triad shots (ARCHON, GARDENER, etc.), cannot attack due to having
+     * weapon delay, or for having insufficient bullets in the bullet supply.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void fireTriadShot(Direction dir) throws GameActionException;
+
+    /**
+     * Fires a five bullets with the center bullet in the direction dir and
+     * with a spread of 15 degrees for the other bullets.  This function costs
+     * six bullets from your team's supply. The speed and damage of the
+     * bullets is determined from the type of this robot.
+     *
+     * @param dir the direction you wish to fire the center bullet.
+     * @throws GameActionException if this robot is not of a type that can
+     * fire pentad shots (ARCHON, GARDENER, etc.), cannot attack due to having
+     * weapon delay, or for having insufficient bullets in the bullet supply.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void firePentadShot(Direction dir) throws GameActionException;
 
     // ***********************************
     // ****** TREE METHODS ***************
     // ***********************************
 
-    void cut(MapLocation loc);
+    /**
+     * Chops the target tree at location loc. This action is considered a
+     * core action.
+     *
+     * @param loc the location of the tree you wish to chop, does not
+     * have to be the center of the tree
+     * @throws GameActionException if the given location does not contain
+     * a tree or if the tree (not location) is outside this robot's action
+     * radius
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void chop(MapLocation loc) throws GameActionException;
 
-    void shake(MapLocation loc);
+    /**
+     * Shakes the target tree at location loc for all the bullets held within
+     * the tree; these bullets will be added to your team's bullet supply. This
+     * method can only be used once per turn per robot.
+     *
+     * @param loc the location of the tree you wish to shake, does not
+     * have to be the center of the tree
+     * @throws GameActionException if the given location does not contain
+     * a tree or if the tree (not location) is outside this robot's action
+     * radius
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void shake(MapLocation loc) throws GameActionException;
 
-    void water(MapLocation loc);
+    /**
+     * Waters the target tree at location loc, healing 10 health to the tree.
+     * This method can only be used once per turn per robot and only with robots
+     * of type GARDENER.
+     *
+     * @param loc the location of the tree you wish to water, does not
+     * have to be the center of the tree
+     * @throws GameActionException if the given location does not contain
+     * a tree, if the tree (not location) is outside this robot's action
+     * radius, or this robot is not of type GARDENER
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void water(MapLocation loc) throws GameActionException;
 
+    /**
+     * Determines whether or not there is a tree at location loc and if so if the
+     * tree is within the action radius of this robot and can therefore be
+     * interacted with through chop(), shake(), or water().
+     *
+     * @param loc the location you wish to test
+     * @return true if there is a tree located at loc and if said tree is
+     * within the action radius of this robot
+     *
+     * @battlecode.doc.costlymethod
+     */
     boolean canInteractWithTree(MapLocation loc);
 
     // ***********************************
@@ -151,43 +749,144 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Broadcasts a message to the global message board.
+     * Broadcasts a message to the team-shared array at index channel.
      * The data is not written until the end of the robot's turn.
-     * @param channel - the channel to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
+     *
+     * @param channel - the index to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
      * @param data - one int's worth of data to write
      * @throws GameActionException if the channel is invalid
+     *
+     * @battlecode.doc.costlymethod
      */
-    public void broadcast(int channel, int data) throws GameActionException;
+    void broadcast(int channel, int data) throws GameActionException;
 
     /**
-     * Retrieves the message stored at the given radio channel.
-     * @param channel - radio channel to query, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
+     * Retrieves the message stored in the team-shared array at index channel.
+     *
+     * @param channel the index to query, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
      * @return data currently stored on the channel
      * @throws GameActionException  if the channel is invalid
+     *
+     * @battlecode.doc.costlymethod
      */
-    public int readBroadcast(int channel) throws GameActionException;
+    int readBroadcast(int channel) throws GameActionException;
 
     // ***********************************
     // ****** BUILDING/SPAWNING **********
     // ***********************************
 
-    boolean hasBuildRequirements(RobotType type);
+    /**
+     * Returns whether you have the bullets and dependencies to build the given
+     * robot, and this robot is a valid builder for the target robot.
+     *
+     * @param type the type to build.
+     * @return whether the requirements to build are met.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean hasRobotBuildRequirements(RobotType type);
 
-    boolean canBuild(RobotType type, Direction dir);
+    /**
+     * Returns whether you have the bullets and dependencies to build a
+     * bullet tree, and this robot is a valid builder for a bullet tree.
+     *
+     * @return whether the requirements to build are met.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean hasTreeBuildRequirements();
 
-    void hire(Direction dir);
+    /**
+     * Returns whether the robot can build a robot of the given type in the
+     * given direction, without taking delays into account. Checks dependencies,
+     * bullet costs, whether the robot can build, and that the given direction is
+     * not blocked. Does not check if a robot has sufficiently low coreDelay or
+     * not.
+     *
+     * @param dir the direction to build in.
+     * @param type the robot type to build.
+     * @return whether it is possible to build a robot of the given type in the
+     * given direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean canBuildRobot(RobotType type, Direction dir);
 
-    void plant(RobotType type, Direction dir);
+    /**
+     * Returns whether the robot can build a bullet tree in the given direction,
+     * without taking delays into account. Checks dependencies, bullet costs,
+     * whether the robot can build, and that the given direction is
+     * not blocked. Does not check if a robot has sufficiently low coreDelay or
+     * not.
+     *
+     * @param dir the direction to build in.
+     * @return whether it is possible to build a bullet tree in the
+     * given direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean canBuildTree(Direction dir);
+
+    /**
+     * Hires a Gardener in the given direction. This is a core action.
+     *
+     * @param dir the direction to spawn the GARDENER unit.
+     * @throws GameActionException if the build is bad: if you don't have enough
+     * bullets, if you have coreDelay, if the direction is not a good build
+     * direction, or if you are not of type ARCHON.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void hireGardener(Direction dir) throws GameActionException;
+
+    /**
+     * Plants/Builds a robot of the given type in the given direction.
+     * This is a core action.
+     *
+     * @param dir the direction to spawn the unit.
+     * @param type the type of robot to build
+     * @throws GameActionException if the build is bad: if you don't have enough
+     * bullets, if you have coreDelay, if the direction is not a good build
+     * direction, or if you are not of type GARDENER.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void plantRobot(RobotType type, Direction dir) throws GameActionException;
+
+    /**
+     * Plants a bullet tree in the given direction. This is a core action.
+     *
+     * @param dir the direction to plant the bullet tree.
+     * @throws GameActionException if the build is bad: if you don't have enough
+     * bullets, if you have coreDelay, if the direction is not a good build
+     * direction, or if you are not of type GARDENER.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void plantBulletTree(Direction dir) throws  GameActionException;
 
     // ***********************************
     // ****** OTHER ACTION METHODS *******
     // ***********************************
 
-    void donate(int bullets);
+    /**
+     * Donates the given amount of bullets to the reforestation fund in
+     * exchange for one victory point per ten bullets donated.  Note there
+     * are no fractions of victory points, meaning, for example, donating
+     * 11 bullets will only result in 1 victory point, not 1.1 victory points.
+     *
+     * @param bullets the amount of bullets you wish to donate
+     * @throws GameActionException if you have less bullets in your bullet
+     * supply than the amount of bullet you wish to donate.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void donate(int bullets) throws GameActionException;
 
     /**
      * Repairs the robot at the given location. The robot must be within the
-     * archons action radius. You can only repair once a turn.
+     * archon's action radius. You can only repair once a turn. Note this
+     * only works on robots, not trees.
      *
      * @param loc the location of the robot to repair.
      * @throws GameActionException if this robot is not an archon, the location
