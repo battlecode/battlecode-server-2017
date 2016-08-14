@@ -36,8 +36,12 @@ public class GameWorld implements SignalHandler {
     protected final List<InternalSignal> injectedInternalSignals;
     protected final long[][] teamMemory;
     protected final long[][] oldTeamMemory;
-    protected final Map<Integer, InternalRobot> gameObjectsByID;
-    protected final IDGenerator idGenerator;
+    protected final Map<Integer, InternalRobot> gameRobotsByID;
+    protected final Map<Integer, InternalTree> gameTreesByID;
+    protected final Map<Integer, InternalBullet> gameBulletsByID;
+    protected final IDGenerator idGeneratorRobots;
+    protected final IDGenerator idGeneratorTrees;
+    protected final IDGenerator idGeneratorBullets;
 
     private final GameMap gameMap;
 
@@ -45,20 +49,18 @@ public class GameWorld implements SignalHandler {
 
     private final GameStats gameStats = new GameStats(); // end-of-game stats
 
-    private double[] teamResources = new double[4];
+    private int[] teamVictoryPoints = new int[3];
+    private double[] teamBulletSupplies = new double[3];
+    private int[][] teamSharedArrays = new int[3][GameConstants.BROADCAST_MAX_CHANNELS];
 
-    private Map<Team, Set<InternalRobot>> baseArchons = new EnumMap<>(Team.class);
-    private final Map<MapLocation, InternalRobot> gameObjectsByLoc = new HashMap<>();
-
-    private SquareArray.Double rubble;
-    private SquareArray.Double parts;
-
-    private Map<Team, Map<Integer, Integer>> radio = new EnumMap<>(
-            Team.class);
+    private final RobotMap robotMap = new RobotMap();
+    private final TreeMap treeMap = new TreeMap();
+    private final BulletMap bulletMap = new BulletMap();
 
     private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<>(
             Team.class);
-    private int[] robotCount = new int[4];
+    private int[] robotCount = new int[3];
+    private int[] treeCount = new int[3];
     private Random rand;
 
     @SuppressWarnings("unchecked")
@@ -90,9 +92,6 @@ public class GameWorld implements SignalHandler {
                 RobotType.class));
         robotTypeCount.put(Team.ZOMBIE, new EnumMap<>(
                 RobotType.class));
-
-        baseArchons.put(Team.A, new HashSet<>());
-        baseArchons.put(Team.B, new HashSet<>());
 
         adjustResources(Team.A, GameConstants.PARTS_INITIAL_AMOUNT);
         adjustResources(Team.B, GameConstants.PARTS_INITIAL_AMOUNT);
