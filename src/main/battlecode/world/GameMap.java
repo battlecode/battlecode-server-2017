@@ -26,22 +26,6 @@ public class GameMap implements Serializable {
     private final int width, height;
 
     /**
-     * The initial rubble on the map.
-     *
-     * IMPORTANT NOTE: it is accessed in [y][x] order,
-     * in order to make serialization less wonky!
-     */
-    private final double[][] initialRubble;
-
-    /**
-     * The initial parts on the map.
-     *
-     * IMPORTANT NOTE: it is accessed in [y][x] order,
-     * in order to make serialization less wonky!
-     */
-    private final double[][] initialParts;
-
-    /**
      * The coordinates of the origin
      */
     private final MapLocation origin;
@@ -59,21 +43,6 @@ public class GameMap implements Serializable {
      * The name of the map
      */
     private final String mapName;
-    
-    /**
-     * If this is an Armageddon map
-     */
-    private final boolean armageddon;
-
-    /**
-     * The zombie spawn schedule for the map
-     */
-    private final ZombieSpawnSchedule zombieSpawnSchedule;
-
-    /**
-     * Maps a den MapLocation to its ZombieSpawnSchedule
-     */
-    private transient HashMap<MapLocation, ZombieSpawnSchedule> zombieSpawnMap;
 
     public enum Symmetry {
         VERTICAL,
@@ -163,6 +132,13 @@ public class GameMap implements Serializable {
      * subtracted from them to be used to index into the map arrays.
      */
     private final InitialRobotInfo[] initialRobots;
+
+    /**
+     * The trees to spawn on the map; MapLocations are in world space -
+     * i.e. in game correct MapLocations that need to have the origin
+     * subtracted from them to be used to index into the map arrays.
+     */
+    private final InitialTreeInfo[] initialTrees;
 
     /**
      * Represents the various integer properties a GameMap
