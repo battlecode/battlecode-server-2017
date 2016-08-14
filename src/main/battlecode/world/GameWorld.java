@@ -36,14 +36,12 @@ public class GameWorld implements SignalHandler {
     protected final List<InternalSignal> injectedInternalSignals;
     protected final long[][] teamMemory;
     protected final long[][] oldTeamMemory;
-    protected final Map<Integer, InternalRobot> gameRobotsByID;
-    protected final Map<Integer, InternalTree> gameTreesByID;
-    protected final Map<Integer, InternalBullet> gameBulletsByID;
     protected final IDGenerator idGeneratorRobots;
     protected final IDGenerator idGeneratorTrees;
     protected final IDGenerator idGeneratorBullets;
 
     private final GameMap gameMap;
+    private final ObjectMap objectMap;
 
     private final RobotControlProvider controlProvider;
 
@@ -52,10 +50,6 @@ public class GameWorld implements SignalHandler {
     private int[] teamVictoryPoints = new int[3];
     private double[] teamBulletSupplies = new double[3];
     private int[][] teamSharedArrays = new int[3][GameConstants.BROADCAST_MAX_CHANNELS];
-
-    private final RobotMap robotMap = new RobotMap();
-    private final TreeMap treeMap = new TreeMap();
-    private final BulletMap bulletMap = new BulletMap();
 
     private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<>(
             Team.class);
@@ -71,50 +65,25 @@ public class GameWorld implements SignalHandler {
         currentRound = -1;
         teamAName = teamA;
         teamBName = teamB;
-        gameObjectsByID = new LinkedHashMap<>();
         currentInternalSignals = new ArrayList<>();
         injectedInternalSignals = new ArrayList<>();
-        idGenerator = new IDGenerator(gm.getSeed());
+        idGeneratorRobots = new IDGenerator(gm.getSeed());
+        idGeneratorTrees = new IDGenerator(gm.getSeed());
+        idGeneratorBullets = new IDGenerator(gm.getSeed());
         teamMemory = new long[2][oldTeamMemory[0].length];
         this.oldTeamMemory = oldTeamMemory;
 
         gameMap = gm;
+        objectMap = new ObjectMap(gm);
         controlProvider = cp;
-
-        radio.put(Team.A, new HashMap<>());
-        radio.put(Team.B, new HashMap<>());
 
         robotTypeCount.put(Team.A, new EnumMap<>(
                 RobotType.class));
         robotTypeCount.put(Team.B, new EnumMap<>(
                 RobotType.class));
-        robotTypeCount.put(Team.NEUTRAL, new EnumMap<>(
-                RobotType.class));
-        robotTypeCount.put(Team.ZOMBIE, new EnumMap<>(
-                RobotType.class));
 
-        adjustResources(Team.A, GameConstants.PARTS_INITIAL_AMOUNT);
-        adjustResources(Team.B, GameConstants.PARTS_INITIAL_AMOUNT);
-
-        this.rubble = new SquareArray.Double(gm.getWidth(), gm.getHeight());
-        this.parts = new SquareArray.Double(gm.getWidth(), gm.getHeight());
-
-        for (int i = 0; i < gm.getWidth(); i++) {
-            for (int j = 0; j < gm.getHeight(); j++) {
-                this.rubble.set(i, j,
-                        gm.initialRubbleAtLocation(
-                                i + gm.getOrigin().x,
-                                j + gm.getOrigin().y
-                        )
-                );
-                this.parts.set(i, j,
-                        gm.initialPartsAtLocation(
-                                i + gm.getOrigin().x,
-                                j + gm.getOrigin().y
-                        )
-                );
-            }
-        }
+        adjustBulletSupply(Team.A, GameConstants.BULLETS_INITIAL_AMOUNT);
+        adjustBulletSupply(Team.B, GameConstants.BULLETS_INITIAL_AMOUNT);
 
         controlProvider.matchStarted(this);
 
@@ -129,6 +98,8 @@ public class GameWorld implements SignalHandler {
                     Optional.empty()
             );
         }
+
+        // Add the trees contained in the GameMap to this world.
         
         rand = new Random(gameMap.getSeed());
     }
@@ -248,11 +219,6 @@ public class GameWorld implements SignalHandler {
         return gameObjectsByID.containsKey(o.getID());
     }
 
-    public int getMessage(Team t, int channel) {
-        Integer val = radio.get(t).get(channel);
-        return val == null ? 0 : val;
-    }
-
     public GameStats getGameStats() {
         return gameStats;
     }
@@ -301,10 +267,6 @@ public class GameWorld implements SignalHandler {
         return currentRound;
     }
 
-    public InternalRobot getObjectByID(int id) {
-        return gameObjectsByID.get(id);
-    }
-
     // *********************************
     // ****** MISC UTILITIES ***********
     // *********************************
@@ -327,115 +289,15 @@ public class GameWorld implements SignalHandler {
     }
 
     public boolean canMove(MapLocation loc, RobotType type) {
-        return gameMap.onTheMap(loc) && (getRubble(loc) < GameConstants
-                .RUBBLE_OBSTRUCTION_THRESH || type.ignoresRubble) &&
-                gameObjectsByLoc.get(loc) == null;
+        throw new RuntimeException("Implement me!");
     }
     
     public boolean isEmpty(MapLocation loc) {
-        return gameMap.onTheMap(loc) && gameObjectsByLoc.get(loc) == null;
+        throw new RuntimeException("Implement me!");
     }
 
-    protected boolean canAttackSquare(InternalRobot ir, MapLocation loc) {
-        MapLocation myLoc = ir.getLocation();
-        int d = myLoc.distanceSquaredTo(loc);
-        int radius = ir.getType().attackRadiusSquared;
-        if (ir.getType() == RobotType.TURRET) {
-            return (d <= radius && d >= GameConstants.TURRET_MINIMUM_RANGE);
-        }
-        return d <= radius;
-    }
-
-    // TODO: make a faster implementation of this
-    public MapLocation[] getAllMapLocationsWithinRadiusSq(MapLocation center,
-            int radiusSquared) {
-        ArrayList<MapLocation> locations = new ArrayList<>();
-
-        int radius = (int) Math.sqrt(radiusSquared);
-        radius = Math.min(radius, Math.max(GameConstants.MAP_MAX_HEIGHT,
-                GameConstants.MAP_MAX_WIDTH));
-
-        int minXPos = center.x - radius;
-        int maxXPos = center.x + radius;
-        int minYPos = center.y - radius;
-        int maxYPos = center.y + radius;
-
-        for (int x = minXPos; x <= maxXPos; x++) {
-            for (int y = minYPos; y <= maxYPos; y++) {
-                MapLocation loc = new MapLocation(x, y);
-                if (gameMap.onTheMap(loc)
-                        && loc.distanceSquaredTo(center) <= radiusSquared)
-                    locations.add(loc);
-            }
-        }
-
-        return locations.toArray(new MapLocation[locations.size()]);
-    }
-
-    // TODO: make a faster implementation of this
-    protected InternalRobot[] getAllRobotsWithinRadiusSq(MapLocation center,
-            int radiusSquared) {
-        if (radiusSquared == 0) {
-            if (getRobot(center) == null) {
-                return new InternalRobot[0];
-            } else {
-                return new InternalRobot[]{ getRobot(center) };
-            }
-        } else if (radiusSquared < 16) {
-            MapLocation[] locs = getAllMapLocationsWithinRadiusSq(center,
-                    radiusSquared);
-            ArrayList<InternalRobot> robots = new ArrayList<>();
-            for (MapLocation loc : locs) {
-                InternalRobot res = getRobot(loc);
-                if (res != null) {
-                    robots.add(res);
-                }
-            }
-            return robots.toArray(new InternalRobot[robots.size()]);
-        }
-
-        ArrayList<InternalRobot> robots = new ArrayList<>();
-
-        for (InternalRobot o : gameObjectsByID.values()) {
-            if (o == null)
-                continue;
-            if (o.getLocation() != null
-                    && o.getLocation().distanceSquaredTo(center) <= radiusSquared)
-                robots.add(o);
-        }
-
-        return robots.toArray(new InternalRobot[robots.size()]);
-    }
-
-    // Used by zombies.
-
-    /**
-     * @param loc the location to find nearest robots.
-     * @return the info of the nearest player-controlled robot, or null
-     *         if there are no player-controlled robots
-     */
-    public RobotInfo getNearestPlayerControlled(MapLocation loc) {
-        int distSq = Integer.MAX_VALUE;
-        ArrayList<MapLocation> closest = null;
-        for (InternalRobot robot : gameObjectsByID.values()) {
-            if (!robot.getTeam().isPlayer()) continue;
-            
-            MapLocation newLoc = robot.getLocation();
-            int newDistSq = newLoc.distanceSquaredTo(loc);
-            if (newDistSq < distSq) {
-                closest = new ArrayList<MapLocation>();
-                closest.add(newLoc);
-                distSq = newDistSq;
-            } else if (newDistSq == distSq) {
-                closest.add(newLoc);
-            }
-        }
-
-        if (closest == null) {
-            return null;
-        }
-        
-        return gameObjectsByLoc.get(closest.get(rand.nextInt(closest.size()))).getRobotInfo();
+    public boolean isEmpty(MapLocation loc, double radius) {
+        throw new RuntimeException("Implement me!");
     }
 
     // *********************************
@@ -459,13 +321,25 @@ public class GameWorld implements SignalHandler {
     }
 
     // *********************************
-    // ****** COUNTING ROBOTS **********
+    // ****** COUNTING METHODS *********
     // *********************************
 
     public int getRobotCount(Team team) {
         return robotCount[team.ordinal()];
     }
 
+    public int getTreeCount(Team team) {
+        return treeCount[team.ordinal()];
+    }
+
+    public int getRobotTypeCount(Team team, RobotType type) {
+        if (robotTypeCount.get(team).containsKey(type)) {
+            return robotTypeCount.get(team).get(type);
+        } else {
+            return 0;
+        }
+    }
+    
     public void incrementRobotCount(Team team) {
         robotCount[team.ordinal()]++;
     }
@@ -474,13 +348,12 @@ public class GameWorld implements SignalHandler {
         robotCount[team.ordinal()]--;
     }
 
-    // only returns active robots
-    public int getRobotTypeCount(Team team, RobotType type) {
-        if (robotTypeCount.get(team).containsKey(type)) {
-            return robotTypeCount.get(team).get(type);
-        } else {
-            return 0;
-        }
+    public void incrementTreeCount(Team team) {
+        treeCount[team.ordinal()]++;
+    }
+
+    public void decrementTreeCount(Team team) {
+        treeCount[team.ordinal()]--;
     }
 
     public void incrementRobotTypeCount(Team team, RobotType type) {
@@ -492,57 +365,29 @@ public class GameWorld implements SignalHandler {
         }
     }
     
-    // decrement from active robots (used during TTM <-> Turret transform)
     public void decrementRobotTypeCount(Team team, RobotType type) {
         Integer currentCount = getRobotTypeCount(team, type);
         robotTypeCount.get(team).put(type,currentCount - 1);
     }
 
     // *********************************
-    // ****** RUBBLE METHODS **********
+    // ***** BULLET/VP METHODS *********
     // *********************************
-    public double getRubble(MapLocation loc) {
-        if (!gameMap.onTheMap(loc)) {
-            return 0;
-        }
-        return rubble.get(
-                loc.x - gameMap.getOrigin().x,
-                loc.y - gameMap.getOrigin().y
-        );
-    }
-    
-    public void alterRubble(MapLocation loc, double amount) {
-        rubble.set(loc.x - gameMap.getOrigin().x, loc.y - gameMap.getOrigin().y,
-                Math.max(0.0, amount));
+
+    public void adjustBulletSupply(Team t, double amount) {
+        teamBulletSupplies[t.ordinal()] += amount;
     }
 
-    // *********************************
-    // ****** PARTS METHODS ************
-    // *********************************
-    public double getParts(MapLocation loc) {
-        if (!gameMap.onTheMap(loc)) {
-            return 0;
-        }
-        return parts.get(
-                loc.x - gameMap.getOrigin().x,
-                loc.y - gameMap.getOrigin().y
-        );
+    public double getBulletSupply(Team t) {
+        return teamBulletSupplies[t.ordinal()];
     }
 
-    public double takeParts(MapLocation loc) { // Remove parts from location
-        double prevVal = getParts(loc);
-
-        parts.set(loc.x - gameMap.getOrigin().x, loc.y - gameMap.getOrigin().y,
-                0.0);
-        return prevVal;
+    public void adjustVictoryPoints(Team t, int amount) {
+        teamVictoryPoints[t.ordinal()] += amount;
     }
 
-    protected void adjustResources(Team t, double amount) {
-        teamResources[t.ordinal()] += amount;
-    }
-
-    public double resources(Team t) {
-        return teamResources[t.ordinal()];
+    public int getVictoryPoints(Team t) {
+        return teamVictoryPoints[t.ordinal()];
     }
 
     // *********************************
@@ -606,11 +451,6 @@ public class GameWorld implements SignalHandler {
         return currentRound >= gameMap.getRounds() - 1;
     }
 
-    public boolean isArmageddonDaytime() {
-        return !gameMap.isArmageddon() || 
-                (currentRound % (GameConstants.ARMAGEDDON_DAY_TIMER + GameConstants.ARMAGEDDON_NIGHT_TIMER)) < GameConstants.ARMAGEDDON_DAY_TIMER;
-    }
-    
     public void processEndOfRound() {
         // process all gameobjects
         for (InternalRobot gameObject : gameObjectsByID.values()) {
@@ -714,7 +554,7 @@ public class GameWorld implements SignalHandler {
     }
 
     // ******************************
-    // SIGNAL HANDLER METHODS
+    // *** SIGNAL HANDLER METHODS ***
     // ******************************
 
     SignalHandler signalHandler = new AutoSignalHandler(this);
