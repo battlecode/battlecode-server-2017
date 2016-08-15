@@ -13,20 +13,14 @@ import java.util.Optional;
  *
  * Should only ever be created by GameWorld in the visitSpawnSignal method.
  */
-public class InternalRobot {
+public class InternalRobot extends InternalBody {
     private RobotType type;
-    private final int ID;
-    private Team team;
-    private MapLocation location;
-    private final GameWorld gameWorld;
     private final RobotControllerImpl controller;
     private double maxHealth;
     private double healthLevel;
     private double attackPower;
     private double coreDelay;
     private double weaponDelay;
-    private int zombieInfectedTurns;
-    private int viperInfectedTurns;
     private long controlBits;
     private int currentBytecodeLimit;
     private int bytecodesUsed;
@@ -35,7 +29,6 @@ public class InternalRobot {
     private ArrayList<Signal> signalqueue;
     private int roundsAlive;
     private int buildDelay;
-    private int repairCount;
     private int basicSignalCount;
     private int messageSignalCount;
 
@@ -55,25 +48,20 @@ public class InternalRobot {
      * @param parent the parent of the robot, if one exists
      */
     @SuppressWarnings("unchecked")
-    public InternalRobot(GameWorld gw, int id, RobotType type, MapLocation loc, Team team,
-            int buildDelay, Optional<InternalRobot> parent) {
-
-        this.ID = id;
-        this.team = team;
-        this.gameWorld = gw;
-        this.location = loc;
+    public InternalRobot(int ID, MapLocation location, GameWorld gameWorld, RobotType type, byte team, int buildDelay, Optional<InternalRobot> parent) {
+   // public InternalRobot(GameWorld gw, int id, RobotType type, MapLocation loc, Team team,
+   //         int buildDelay, Optional<InternalRobot> parent) { TODO: remove
+        super(ID, location, gameWorld, type.radius(), team);
+        
         this.type = type;
         this.buildDelay = buildDelay;
 
-        this.maxHealth = type.maxHealth(gw.getCurrentRound(), gameWorld.getGameMap().isArmageddon());
+        this.maxHealth = type.maxHealth();
         this.healthLevel = maxHealth;
-        this.attackPower = type.attackPower(gw.getCurrentRound(), gameWorld.getGameMap().isArmageddon());
+        this.attackPower = type.attackPower();
 
         this.coreDelay = 0.0;
         this.weaponDelay = 0.0;
-        this.zombieInfectedTurns = 0;
-        this.viperInfectedTurns = 0;
-        this.repairCount = 0;
         this.basicSignalCount = 0;
         this.messageSignalCount = 0;
 
@@ -91,16 +79,8 @@ public class InternalRobot {
         this.controller = new RobotControllerImpl(gameWorld, this);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        return o != null && (o instanceof InternalRobot)
-                && ((InternalRobot) o).getID() == ID;
-    }
 
-    @Override
-    public int hashCode() {
-        return ID;
-    }
+
 
     // *********************************
     // ****** QUERY METHODS ************
@@ -134,34 +114,6 @@ public class InternalRobot {
 
     public int getRoundsAlive() {
         return roundsAlive;
-    }
-
-    public int getID() {
-        return ID;
-    }
-
-    public Team getTeam() {
-        return team;
-    }
-
-    public MapLocation getLocation() {
-        return location;
-    }
-
-    public boolean exists() {
-        return gameWorld.exists(this);
-    }
-
-    public int getRepairCount() {
-        return repairCount;
-    }
-    
-    public int getBasicSignalCount() {
-        return basicSignalCount;
-    }
-
-    public int getMessageSignalCount() {
-        return messageSignalCount;
     }
     
     public double getMaxHealth() {
@@ -218,42 +170,7 @@ public class InternalRobot {
         if (type.sensorRadiusSquared == -1) {
             return true;
         }
-        return location.distanceSquaredTo(target) <= type.sensorRadiusSquared;
-    }
-
-    // *********************************
-    // ****** ZOMBIE METHODS ***********
-    // *********************************
-
-    public int getZombieInfectedTurns() {
-        return zombieInfectedTurns;
-    }
-    
-    public int getViperInfectedTurns() {
-        return viperInfectedTurns;
-    }
-    
-    public boolean isInfected() {
-        return (zombieInfectedTurns > 0 || viperInfectedTurns > 0);
-    }
-
-    public void setInfected(InternalRobot attacker) {
-        if (attacker.getType() == RobotType.VIPER) {
-            viperInfectedTurns = attacker.getType().infectTurns;
-        } else if (attacker.getType().isZombie) {
-            zombieInfectedTurns = attacker.getType().infectTurns;
-        }
-    }
-
-    public void processBeingInfected() { // TODO: Call this somewhere where it runs for each robot every turn
-        if (viperInfectedTurns > 0) {
-            takeDamage(GameConstants.VIPER_INFECTION_DAMAGE);
-            viperInfectedTurns--;
-        }
-        if (zombieInfectedTurns > 0) {
-            zombieInfectedTurns--;
-        }
-    }
+        return getLocation().distanceTo(target) <= type.sensorRadius;
 
     // *********************************
     // ****** HEALTH METHODS ***********
@@ -284,7 +201,7 @@ public class InternalRobot {
 
         if (healthLevel <= 0) {
             if (source == RobotType.TURRET) {
-                gameWorld.visitDeathSignal(new DeathSignal(ID,
+                gameWorld.visitDeathSignal(new DeathSignal(ID, // TODO: Remove signals
                         DeathSignal.RobotDeathCause.TURRET));
             } else {
                 gameWorld.visitDeathSignal(new DeathSignal(ID));
@@ -443,8 +360,6 @@ public class InternalRobot {
     public void processEndOfTurn() {
         this.prevBytecodesUsed = this.bytecodesUsed;
         roundsAlive++;
-        
-        processBeingInfected();
         
         if (gameWorld.getGameMap().isArmageddon()) {
             if (team == Team.ZOMBIE && type != RobotType.ZOMBIEDEN) {
