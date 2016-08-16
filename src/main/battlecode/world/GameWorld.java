@@ -28,25 +28,16 @@ public class GameWorld implements SignalHandler {
     protected boolean running = true;
 
     protected Team winner = null;
-    protected final String teamAName;
-    protected final String teamBName;
-    protected final long[][] teamMemory;
-    protected final long[][] oldTeamMemory;
     protected final IDGenerator idGeneratorRobots;
     protected final IDGenerator idGeneratorTrees;
     protected final IDGenerator idGeneratorBullets;
 
     private final GameMap gameMap;
-    private final ObjectInfo objectMap;
+    private final TeamInfo teamInfo;
+    private final ObjectInfo objectInfo;
 
     private final RobotControlProvider controlProvider;
-
-    private final GameStats gameStats = new GameStats(); // end-of-game stats
-
-    private int[] teamVictoryPoints = new int[3];
-    private double[] teamBulletSupplies = new double[3];
-    private int[][] teamSharedArrays = new int[3][GameConstants.BROADCAST_MAX_CHANNELS];
-
+    private final GameStats gameStats = new GameStats();
     private Random rand;
 
     @SuppressWarnings("unchecked")
@@ -54,39 +45,24 @@ public class GameWorld implements SignalHandler {
                      String teamA, String teamB,
                      long[][] oldTeamMemory) {
         
-        currentRound = -1;
-        teamAName = teamA;
-        teamBName = teamB;
-        idGeneratorRobots = new IDGenerator(gm.getSeed());
-        idGeneratorTrees = new IDGenerator(gm.getSeed());
-        idGeneratorBullets = new IDGenerator(gm.getSeed());
-        teamMemory = new long[2][oldTeamMemory[0].length];
-        this.oldTeamMemory = oldTeamMemory;
+        this.currentRound = -1;
+        this.idGeneratorRobots = new IDGenerator(gm.getSeed());
+        this.idGeneratorTrees = new IDGenerator(gm.getSeed());
+        this.idGeneratorBullets = new IDGenerator(gm.getSeed());
 
-        gameMap = gm;
-        objectMap = new ObjectInfo(gm);
-        controlProvider = cp;
+        this.gameMap = gm;
+        this.objectInfo = new ObjectInfo(gm);
+        this.teamInfo = new TeamInfo(teamA, teamB, oldTeamMemory);
 
-        adjustBulletSupply(Team.A, GameConstants.BULLETS_INITIAL_AMOUNT);
-        adjustBulletSupply(Team.B, GameConstants.BULLETS_INITIAL_AMOUNT);
+        this.controlProvider = cp;
 
         controlProvider.matchStarted(this);
 
         // Add the robots contained in the GameMap to this world.
-        for (GameMap.InitialRobotInfo initialRobot : gameMap.getInitialRobots()) {
-            // Side-effectful constructor; will add robot to relevant stuff
-            spawnRobot(
-                    initialRobot.type,
-                    initialRobot.getLocation(gameMap.getOrigin()),
-                    initialRobot.team,
-                    0,
-                    Optional.empty()
-            );
-        }
 
         // Add the trees contained in the GameMap to this world.
-        
-        rand = new Random(gameMap.getSeed());
+
+        this.rand = new Random(gameMap.getSeed());
     }
 
     /**
@@ -159,42 +135,20 @@ public class GameWorld implements SignalHandler {
         return gameMap.getSeed();
     }
 
-    public GameMap getGameMap() {
-        return gameMap;
-    }
-
-    public InternalRobot getObject(MapLocation loc) {
-        return gameObjectsByLoc.get(loc);
-    }
-
-    public InternalRobot getRobot(MapLocation loc) {
-        return getObject(loc);
-    }
-
-    public Collection<InternalRobot> allObjects() {
-        return gameObjectsByID.values();
-    }
-
-    public InternalRobot[] getAllGameObjects() {
-        return gameObjectsByID.values().toArray(
-                new InternalRobot[gameObjectsByID.size()]);
-    }
-
     public GameStats getGameStats() {
         return gameStats;
     }
 
-    public String getTeamName(Team t) {
-        switch (t) {
-        case A:
-            return teamAName;
-        case B:
-            return teamBName;
-        case NEUTRAL:
-            return "neutralplayer";
-        default:
-            return null;
-        }
+    public GameMap getGameMap() {
+        return gameMap;
+    }
+
+    public TeamInfo getTeamInfo() {
+        return teamInfo;
+    }
+
+    public ObjectInfo getObjectInfo() {
+        return objectInfo;
     }
 
     public Team getWinner() {
@@ -205,47 +159,8 @@ public class GameWorld implements SignalHandler {
         return running;
     }
 
-    public long[][] getTeamMemory() {
-        return teamMemory;
-    }
-
-    public long[][] getOldTeamMemory() {
-        return oldTeamMemory;
-    }
-
-    public void setTeamMemory(Team t, int index, long state) {
-        teamMemory[t.ordinal()][index] = state;
-    }
-
-    public void setTeamMemory(Team t, int index, long state, long mask) {
-        long n = teamMemory[t.ordinal()][index];
-        n &= ~mask;
-        n |= (state & mask);
-        teamMemory[t.ordinal()][index] = n;
-    }
-
     public int getCurrentRound() {
         return currentRound;
-    }
-
-    // *********************************
-    // ***** BULLET/VP METHODS *********
-    // *********************************
-
-    public void adjustBulletSupply(Team t, double amount) {
-        teamBulletSupplies[t.ordinal()] += amount;
-    }
-
-    public double getBulletSupply(Team t) {
-        return teamBulletSupplies[t.ordinal()];
-    }
-
-    public void adjustVictoryPoints(Team t, int amount) {
-        teamVictoryPoints[t.ordinal()] += amount;
-    }
-
-    public int getVictoryPoints(Team t) {
-        return teamVictoryPoints[t.ordinal()];
     }
 
     // *********************************
