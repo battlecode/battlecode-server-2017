@@ -16,7 +16,7 @@ import java.util.*;
  * The primary implementation of the GameWorld interface for containing and
  * modifying the game map and the objects on it.
  */
-public class GameWorld implements SignalHandler {
+public class GameWorld{
     /**
      * The current round we're running.
      */
@@ -78,20 +78,15 @@ public class GameWorld implements SignalHandler {
         }
 
         try {
-            if (this.getCurrentRound() != -1) {
-                this.clearAllSignals();
-            }
             this.processBeginningOfRound();
             this.controlProvider.roundStarted();
 
             // We iterate through the IDs so that we avoid ConcurrentModificationExceptions
             // of an iterator. Kinda gross, but whatever.
-            final int[] idsToRun = gameObjectsByID.keySet().stream()
-                    .mapToInt(i -> i)
-                    .toArray();
+            final int[] idsToRun = objectInfo.getRobotIDs();
 
             for (final int id : idsToRun) {
-                final InternalRobot robot = gameObjectsByID.get(id);
+                final InternalRobot robot = objectInfo.getRobotByID(id);
                 if (robot == null) {
                     // Robot might have died earlier in the iteration; skip it
                     continue;
@@ -106,8 +101,7 @@ public class GameWorld implements SignalHandler {
                 }
                 // If the robot terminates but the death signal has not yet
                 // been visited:
-                if (this.controlProvider.getTerminated(robot) && gameObjectsByID
-                        .get(id) != null) {
+                if (this.controlProvider.getTerminated(robot) && objectInfo.getRobotByID(id) != null) {
                     robot.suicide();
                 }
             }
@@ -168,12 +162,14 @@ public class GameWorld implements SignalHandler {
     // *********************************
 
     public void processBeginningOfRound() {
-        currentRound++;
 
-        // process all gameobjects
-        for (InternalRobot gameObject : gameObjectsByID.values()) {
-            gameObject.processBeginningOfRound();
-        }
+    }
+
+    public void setWinner(Team t, DominationFactor d) {
+        winner = t;
+        gameStats.setDominationFactor(d);
+        // running = false;
+
     }
 
     public boolean setWinnerIfNonzero(double n, DominationFactor d) {
@@ -184,87 +180,12 @@ public class GameWorld implements SignalHandler {
         return n != 0;
     }
 
-    public void setWinner(Team t, DominationFactor d) {
-        winner = t;
-        gameStats.setDominationFactor(d);
-        // running = false;
-
-    }
-
     public boolean timeLimitReached() {
         return currentRound >= gameMap.getRounds() - 1;
     }
 
     public void processEndOfRound() {
-        // process all gameobjects
-        for (InternalRobot gameObject : gameObjectsByID.values()) {
-            gameObject.processEndOfRound();
-        }
 
-        // free parts
-        teamResources[Team.A.ordinal()] += Math.max(0.0, GameConstants
-                .ARCHON_PART_INCOME - GameConstants.PART_INCOME_UNIT_PENALTY
-                * getRobotCount(Team.A));
-        teamResources[Team.B.ordinal()] += Math.max(0.0, GameConstants
-                .ARCHON_PART_INCOME - GameConstants.PART_INCOME_UNIT_PENALTY
-                * getRobotCount(Team.B));
-
-        // Add signals for team resources
-        for (final Team team : Team.values()) {
-            addSignal(new TeamResourceSignal(team, teamResources[team.ordinal()]));
-        }
-
-        if (timeLimitReached() && winner == null) {
-            // tiebreak by number of Archons
-            if (!(setWinnerIfNonzero(
-                    getRobotTypeCount(Team.A, RobotType.ARCHON)
-                            - getRobotTypeCount(Team.B, RobotType.ARCHON),
-                    DominationFactor.PWNED))) {
-                // tiebreak by total Archon health
-                double archonDiff = 0.0;
-                double partsDiff = resources(Team.A) - resources(Team.B);
-                int highestAArchonID = 0;
-                int highestBArchonID = 0;
-                InternalRobot[] objs = getAllGameObjects();
-                for (InternalRobot obj : objs) {
-                    if (obj == null) continue;
-
-                    if (obj.getTeam() == Team.A) {
-                        partsDiff += obj.getType().partCost;
-                    } else if (obj.getTeam() == Team.B) {
-                        partsDiff -= obj.getType().partCost;
-                    }
-                    if (obj.getType() == RobotType.ARCHON) {
-                        if (obj.getTeam() == Team.A) {
-                            archonDiff += obj.getHealthLevel();
-                            highestAArchonID = Math.max(highestAArchonID,
-                                    obj.getID());
-                        } else if (obj.getTeam() == Team.B) {
-                            archonDiff -= obj.getHealthLevel();
-                            highestBArchonID = Math.max(highestBArchonID,
-                                    obj.getID());
-                        }
-                    }
-                }
-
-                // total part cost of units + part stockpile
-                if (!(setWinnerIfNonzero(archonDiff, DominationFactor.OWNED))
-                        && !(setWinnerIfNonzero(partsDiff,
-                                DominationFactor.BARELY_BEAT))) {
-                    // just tiebreak by ID
-                    if (highestAArchonID > highestBArchonID)
-                        setWinner(Team.A,
-                                DominationFactor.WON_BY_DUBIOUS_REASONS);
-                    else
-                        setWinner(Team.B,
-                                DominationFactor.WON_BY_DUBIOUS_REASONS);
-                }
-            }
-        }
-
-        if (winner != null) {
-            running = false;
-        }
     }
 
 }
