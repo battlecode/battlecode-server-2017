@@ -121,7 +121,7 @@ public class InternalTree {
 
     @Override
     public String toString() {
-        return String.format("%s:%s#%d", getTeam(), getType(), getID());
+        return String.format("%s:#%d", getTeam(), getID());
     }
 
 }
