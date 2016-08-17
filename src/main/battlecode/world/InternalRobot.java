@@ -1,12 +1,6 @@
 package battlecode.world;
 
 import battlecode.common.*;
-import battlecode.world.signal.DeathSignal;
-import battlecode.world.signal.InternalSignal;
-import battlecode.world.signal.TypeChangeSignal;
-
-import java.util.ArrayList;
-import java.util.Optional;
 
 /**
  * The representation of a robot used by the server.
@@ -44,8 +38,6 @@ public class InternalRobot {
      * @param type the type of the robot
      * @param loc the location of the robot
      * @param team the team of the robot
-     * @param buildDelay the build
-     * @param parent the parent of the robot, if one exists
      */
     @SuppressWarnings("unchecked")
     public InternalRobot(GameWorld gw, int id, RobotType type, MapLocation loc, Team team) {

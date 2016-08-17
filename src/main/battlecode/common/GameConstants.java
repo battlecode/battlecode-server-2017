@@ -42,6 +42,28 @@ public interface GameConstants {
     int NUMBER_OF_ARCHONS_MAX = 3;
 
     // *********************************
+    // ****** TREES ********************
+    // *********************************
+
+    /** The max health of bullet trees */
+    int BULLET_TREE_MAX_HEALTH = 100;
+
+    /** The radius of bullet trees */
+    double BULLET_TREE_RADIUS = .5;
+
+    /** The min radius a neutral tree can have */
+    double NEUTRAL_TREE_MIN_RADIUS = .5;
+
+    /** The max radius a neutral tree can have */
+    double NEUTRAL_TREE_MAX_RADIUS = 10;
+
+    /**
+     * The rate at which the max health of neutral trees are determined;
+     * i.e. maxHealth = NEUTRAL_TREE_HEALTH_RATE * treeRadius
+     */
+    double NEUTRAL_TREE_HEALTH_RATE = 100;
+
+    // *********************************
     // ****** BULLETS ******************
     // *********************************
 
