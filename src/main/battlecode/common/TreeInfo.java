@@ -36,7 +36,7 @@ public class TreeInfo {
      * The current amount of bullets contained within the tree.
      * Note: only NEUTRAL trees can contain bullets
      */
-    public final double bullets;
+    public final double containedBullets;
 
     /**
      * The robot contained within the tree that is obtained upon
@@ -48,13 +48,13 @@ public class TreeInfo {
 
     public TreeInfo(int ID, Team team, MapLocation location,
                     double radius, double health,
-                    double bullets, RobotType containedRobot) {
+                    double containedBullets, RobotType containedRobot) {
         this.ID = ID;
         this.team = team;
         this.location = location;
         this.radius = radius;
         this.health = health;
-        this.bullets = bullets;
+        this.containedBullets = containedBullets;
         this.containedRobot = containedRobot;
     }
 
@@ -70,7 +70,7 @@ public class TreeInfo {
                 ", location=" + location +
                 ", radius=" + radius +
                 ", health=" + health +
-                ", bullets=" + bullets +
+                ", containedBullets=" + containedBullets +
                 ", containedRobot=" + containedRobot +
                 '}';
     }

@@ -45,4 +45,83 @@ public class InternalTree {
         this.roundsAlive = 0;
     }
 
+    // ******************************************
+    // ****** GETTER METHODS ********************
+    // ******************************************
+
+    public GameWorld getGameWorld() {
+        return gameWorld;
+    }
+
+    public int getID() {
+        return ID;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+    public MapLocation getLocation() {
+        return location;
+    }
+
+    public double getHealth() {
+        return health;
+    }
+
+    public double getContainedBullets() {
+        return containedBullets;
+    }
+
+    public RobotType getContainedRobot() {
+        return containedRobot;
+    }
+
+    public int getRoundsAlive() {
+        return roundsAlive;
+    }
+
+    public TreeInfo getTreeInfo() {
+        if (this.cachedTreeInfo != null
+                && this.cachedTreeInfo.ID == ID
+                && this.cachedTreeInfo.team == team
+                && this.cachedTreeInfo.radius == radius
+                && this.cachedTreeInfo.location.equals(location)
+                && this.cachedTreeInfo.containedBullets == containedBullets
+                && this.cachedTreeInfo.containedRobot == containedRobot
+                && this.cachedTreeInfo.health == health) {
+            return this.cachedTreeInfo;
+        }
+        return this.cachedTreeInfo = new TreeInfo(
+                ID, team, location, radius, health, containedBullets, containedRobot);
+    }
+
+    // ******************************************
+    // ****** UPDATE METHODS ********************
+    // ******************************************
+
+    // *********************************
+    // ****** MISC. METHODS ************
+    // *********************************
+
+    @Override
+    public boolean equals(Object o) {
+        return o != null && (o instanceof InternalTree)
+                && ((InternalTree) o).getID() == ID;
+    }
+
+    @Override
+    public int hashCode() {
+        return ID;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s:%s#%d", getTeam(), getType(), getID());
+    }
+
 }
