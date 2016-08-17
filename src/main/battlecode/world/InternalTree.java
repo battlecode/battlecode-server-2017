@@ -1,7 +1,7 @@
 package battlecode.world;
 
 /**
- * Created by Elijah Stiles on 8/14/2016.
+ * The representation of a tree used by the server.
  */
 public class InternalTree {
 }
