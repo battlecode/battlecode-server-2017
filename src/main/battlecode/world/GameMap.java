@@ -62,20 +62,20 @@ public class GameMap implements Serializable {
          *         or null if there is no opposite
          */
         public MapLocation getOpposite(MapLocation loc, int width, int height) {
-            final int x, y;
+            final float x, y;
 
             switch (this) {
                 case VERTICAL:
                     x = loc.x;
-                    y = height - loc.y - 1;
+                    y = height - loc.y ;
                     break;
                 case HORIZONTAL:
-                    x = width - loc.x - 1;
+                    x = width - loc.x ;
                     y = loc.y;
                     break;
                 case ROTATIONAL:
-                    x = width - loc.x - 1;
-                    y = height - loc.y - 1;
+                    x = width - loc.x ;
+                    y = height - loc.y ;
                     break;
                 case NEGATIVE_DIAGONAL:
                     if (width != height) {
@@ -83,8 +83,8 @@ public class GameMap implements Serializable {
                                 " with different width ("+width+") and height ("+height+")");
                     }
 
-                    x = height - loc.y - 1;
-                    y = width - loc.x - 1;
+                    x = height - loc.y ;
+                    y = width - loc.x ;
                     break;
                 case POSITIVE_DIAGONAL:
                     if (width != height) {
@@ -112,14 +112,13 @@ public class GameMap implements Serializable {
          * @return the opposite map location, or null if there is none
          */
         public MapLocation getOpposite(MapLocation loc, int width, int height, MapLocation origin) {
-            MapLocation zeroBasedResult = getOpposite(loc.add(-origin.x, -origin.y), width, height);
+            MapLocation zeroBasedResult = getOpposite(loc.translate(-origin.x, -origin.y), width, height);
 
-            return zeroBasedResult == null?
+            return zeroBasedResult == null ?
                     null :
-                    origin.add(zeroBasedResult.x, zeroBasedResult.y);
+                    origin.translate(zeroBasedResult.x, zeroBasedResult.y);
         }
     }
-
 
     /**
      * The type of symmetry the map has; computed lazily.
@@ -156,27 +155,17 @@ public class GameMap implements Serializable {
     public GameMap(GameMap gm) {
         this.width = gm.width;
         this.height = gm.height;
-        this.initialRubble = new double[this.height][this.width];
-        this.initialParts = new double[this.height][this.width];
-        for (int i = 0; i < this.height; i++) {
-            System.arraycopy(gm.initialRubble[i], 0, this.initialRubble[i], 0, this.width);
-            System.arraycopy(gm.initialParts[i], 0, this.initialParts[i], 0, this.width);
-        }
 
         this.origin = gm.origin;
         this.seed = gm.seed;
         this.rounds = gm.rounds;
         this.mapName = gm.mapName;
-        this.armageddon = gm.armageddon;
-        this.zombieSpawnSchedule = new ZombieSpawnSchedule(gm.zombieSpawnSchedule);
         this.initialRobots = gm.getInitialRobots();
+        this.initialTrees = gm.getInitialTrees();
     }
 
     /**
-     * Creates a GameMap with the given parameters. Note: the rubble and parts
-     * arrays should be indexed such that rubble[y][x] gives you the rubble at
-     * coordinate (x, y). The first index is the row, the second index is the
-     * column.
+     * Creates a GameMap with the given parameters.
      *
      * The map will be initialized with a pseudorandom origin between (0, 0) and
      * (500, 500), based on the seed.
@@ -185,29 +174,24 @@ public class GameMap implements Serializable {
      *
      * @param mapProperties used to specify integer properties of the map
      *                      (width, height, seed, and number of rounds).
-     * @param initialRubble initial rubble array for the map.
-     * @param initialParts initial parts array for the map.
-     * @param zombieSpawnSchedule zombie spawn schedule.
-     * @param initialRobots the robots initially on the map
+     * @param initialRobots the robots initially on the map     
+     * @param initialTrees the trees initially on the map
      * @param mapName name of the map.
      */
     public GameMap(Map<MapProperties, Integer> mapProperties,
-                   double[][] initialRubble,
-                   double[][] initialParts,
-                   ZombieSpawnSchedule zombieSpawnSchedule,
                    InitialRobotInfo[] initialRobots,
-                   String mapName,
-                   boolean isArmageddon) {
+                   InitialTreeInfo[] initialTrees,
+                   String mapName) {
         if (mapProperties.containsKey(MapProperties.WIDTH)) {
             this.width = mapProperties.get(MapProperties.WIDTH);
         } else {
-            this.width = initialRubble[0].length;
+            this.width = 50;
         }
 
         if (mapProperties.containsKey(MapProperties.HEIGHT)) {
             this.height = mapProperties.get(MapProperties.HEIGHT);
         } else {
-            this.height = initialRubble.length;
+            this.height = 50;
         }
 
         if (mapProperties.containsKey(MapProperties.SEED)) {
@@ -225,12 +209,9 @@ public class GameMap implements Serializable {
         final Random rand = new Random(this.seed);
 
         this.origin = new MapLocation(rand.nextInt(500), rand.nextInt(500));
-        this.initialRubble = initialRubble;
-        this.initialParts = initialParts;
-        this.zombieSpawnSchedule = zombieSpawnSchedule;
         this.mapName = mapName;
         this.initialRobots = initialRobots;
-        this.armageddon = isArmageddon;
+        this.initialTrees = initialTrees;
     }
 
     @Override
@@ -242,8 +223,7 @@ public class GameMap implements Serializable {
 
     /**
      * Returns whether two GameMaps are equal. Two equal game maps
-     * have the same information, but their zombie schedules might be in
-     * different orders and their origins do not have to be the same.
+     * have the same information, but their origins do not have to be the same.
      *
      * @param other the other map to compare to.
      * @return whether the two maps are equivalent.
@@ -253,15 +233,11 @@ public class GameMap implements Serializable {
         if (this.width != other.width) return false;
         if (this.height != other.height) return false;
         if (this.seed != other.seed) return false;
-        if (!Arrays.deepEquals(this.initialRubble, other.initialRubble))
-            return false;
-        if (!Arrays.deepEquals(this.initialParts, other.initialParts))
-            return false;
         if (!this.mapName.equals(other.mapName)) return false;
         if (!this.origin.equals(other.origin)) return false;
-        if (!this.zombieSpawnSchedule.equals(other.zombieSpawnSchedule)) return false;
+        if (!Arrays.equals(this.initialRobots, other.initialRobots)) return false;
 
-        return Arrays.equals(this.initialRobots, other.initialRobots);
+        return Arrays.equals(this.initialTrees, other.initialTrees);
     }
 
     /**
@@ -301,7 +277,7 @@ public class GameMap implements Serializable {
      * @return true if the given coordinates are on the map,
      *         false if they're not
      */
-    private boolean onTheMap(int x, int y) {
+    private boolean onTheMap(float x, float y) {
         return (x >= origin.x && y >= origin.y && x < origin.x + width && y < origin.y + height);
     }
 
@@ -317,52 +293,6 @@ public class GameMap implements Serializable {
     }
 
     /**
-     * Determines the amount of rubble on the map at
-     * the given location.
-     *
-     * @param x the x value of the MapLocation to get rubble for.
-     * @param y the y value of the MapLocation to get rubble for.
-     * @return the amount of rubble in the given location, or 0 if off map
-     */
-    public double initialRubbleAtLocation(int x, int y) {
-        if (!onTheMap(x, y)) {
-            return 0;
-        }
-
-        return initialRubble[y - origin.y][x - origin.x];
-    }
-
-    /**
-     * Determines the amount of parts on the map at the
-     * given location.
-     *
-     * @param x the x value of the MapLocation to get parts for.
-     * @param y the y value of the MapLocation to get parts for.
-     * @return the amount of parts in the given location, or 0 if off the map
-     */
-    public double initialPartsAtLocation(int x, int y) {
-        if (!onTheMap(x, y))
-            return 0.0;
-
-        return initialParts[y - origin.y][x - origin.x];
-    }
-
-    /**
-     * Gives the inital robot at a location, if any.
-     *
-     * @param location the location to check
-     * @return the RobotInfo for the robot at that
-     */
-    public Optional<InitialRobotInfo> getInitialRobotAtLocation(MapLocation location) {
-        for (InitialRobotInfo robot : initialRobots) {
-            if (robot.getLocation(origin).equals(location)) {
-                return Optional.of(robot);
-            }
-        }
-        return Optional.empty();
-    }
-
-    /**
      * Get a list of the initial robots on the map.
      *
      * @return the list of starting robots on the map.
@@ -370,6 +300,16 @@ public class GameMap implements Serializable {
      */
     public InitialRobotInfo[] getInitialRobots() {
         return initialRobots;
+    }
+
+    /**
+     * Get a list of the initial trees on the map.
+     *
+     * @return the list of starting trees on the map.
+     *         MUST NOT BE MODIFIED.
+     */
+    public InitialTreeInfo[] getInitialTrees() {
+        return initialTrees;
     }
 
     /**
@@ -383,28 +323,6 @@ public class GameMap implements Serializable {
 
     public int getSeed() {
         return seed;
-    }
-
-    public boolean isArmageddon() {
-        return armageddon;
-    }
-
-    /**
-     * @return the zombie spawn schedule for the map.
-     */
-    public ZombieSpawnSchedule getZombieSpawnSchedule() {
-        return zombieSpawnSchedule;
-    }
-
-    /**
-     * @param denLoc the location of the den
-     * @return the ZombieSpawnSchedule for that den
-     */
-    @JsonIgnore
-    public ZombieSpawnSchedule getZombieSpawnSchedule(MapLocation denLoc) {
-        computeLazyValues();
-
-        return this.zombieSpawnMap.get(denLoc);
     }
 
     /**
@@ -436,7 +354,7 @@ public class GameMap implements Serializable {
         /**
          * The offset from the origin of this robot.
          */
-        public final int originOffsetX, originOffsetY;
+        public final float originOffsetX, originOffsetY;
 
         /**
          * The type of the robot.
@@ -448,7 +366,7 @@ public class GameMap implements Serializable {
          */
         public final Team team;
 
-        public InitialRobotInfo(int originOffsetX, int originOffsetY, RobotType type, Team team) {
+        public InitialRobotInfo(float originOffsetX, float originOffsetY, RobotType type, Team team) {
             this.originOffsetX = originOffsetX;
             this.originOffsetY = originOffsetY;
             this.type = type;
@@ -498,9 +416,86 @@ public class GameMap implements Serializable {
         }
     }
 
+    /**
+     * Information about a tree that starts on the map.
+     */
+    public static final class InitialTreeInfo implements Serializable {
+
+        private static final long serialVersionUID = -2012005687925650L;
+
+        /**
+         * The offset from the origin of this tree.
+         */
+        public final float originOffsetX, originOffsetY;
+
+        /**
+         * The radius of the tree.
+         */
+        public final double radius;
+
+        /**
+         * The team of the robot.
+         */
+        public final Team team;
+
+        public InitialTreeInfo(float originOffsetX, float originOffsetY, double radius, Team team) {
+            this.originOffsetX = originOffsetX;
+            this.originOffsetY = originOffsetY;
+            this.team = team;
+            if(team == Team.NEUTRAL){
+                this.radius = radius;
+            }else{
+                this.radius = GameConstants.BULLET_TREE_RADIUS;
+            }
+        }
+
+        /**
+         * This is a somewhat awkward workaround to deal with the fact
+         * that InitialRobotInfos are often created before a game map,
+         * and therefore don't know their gamemap's origin.
+         *
+         * @param origin the origin of a GameMap
+         * @return the location of this initial robot (not relative to origin)
+         */
+        public MapLocation getLocation(MapLocation origin) {
+            return new MapLocation(
+                    origin.x + originOffsetX,
+                    origin.y + originOffsetY
+            );
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof InitialTreeInfo)) {
+                return false;
+            }
+
+            final InitialTreeInfo that = (InitialTreeInfo) o;
+
+            return this.originOffsetX == that.originOffsetX &&
+                    this.originOffsetY == that.originOffsetY &&
+                    this.radius == that.radius &&
+                    this.team.equals(that.team);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(originOffsetX, originOffsetY, radius, team);
+        }
+
+        /**
+         * For use by serializers.
+         */
+        @SuppressWarnings("unused")
+        private InitialTreeInfo() {
+            this(0, 0, 0, null);
+        }
+    }
+
 
     /**
      * Updates the map's symmetry types
+     * TODO: fix probable floating point errors
      */
     private void updateSymmetries() {
         // The different possible symmetries.
@@ -513,56 +508,81 @@ public class GameMap implements Serializable {
         symNegDiag = height == width; // across the line x=height-y
         symPosDiag = height == width; // across the line x=y
 
-        // First, we check if rubble and parts are symmetric.
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                symVert = symVert && sameTile(x, y, x, height - y - 1);
-                symHoriz = symHoriz && sameTile(x, y, width - x - 1, y);
-                symRot = symRot && sameTile(x, y, width - x - 1, height - y - 1);
-                if (width == height) {
-                    symNegDiag = symNegDiag && sameTile(x, y, height - y - 1, width - x - 1);
-                    symPosDiag = symPosDiag && sameTile(x, y, y, x);
-                }
-            }
-        }
-
         // Next, we check if robots are symmetric.
 
         // The byLoc map is just to speed up robot lookup by-location.
         final MapLocation origin = new MapLocation(0, 0);
-        final Map<MapLocation, InitialRobotInfo> byLoc =
+        final Map<MapLocation, InitialRobotInfo> byLocRobot =
                 Arrays.stream(initialRobots).collect(Collectors.toMap(
                         (robot) -> robot.getLocation(origin),
                         (robot) -> robot
                 ));
 
-        for (MapLocation loc : byLoc.keySet()) {
-            final InitialRobotInfo r1 = byLoc.get(loc);
-            final int x = loc.x, y = loc.y;
+        for (MapLocation loc : byLocRobot.keySet()) {
+            final InitialRobotInfo r1 = byLocRobot.get(loc);
+            final float x = loc.x, y = loc.y;
 
             symVert = symVert && oppositeRobots(
                     r1,
-                    byLoc.get(new MapLocation(x, height - y - 1))
+                    byLocRobot.get(new MapLocation(x, height - y ))
             );
             symHoriz = symHoriz && oppositeRobots(
                     r1,
-                    byLoc.get(new MapLocation(width - x - 1, y))
+                    byLocRobot.get(new MapLocation(width - x , y))
             );
             symRot = symRot && oppositeRobots(
                     r1,
-                    byLoc.get(new MapLocation(width - x - 1, height - y - 1))
+                    byLocRobot.get(new MapLocation(width - x , height - y ))
             );
             if (width == height) {
                 symNegDiag = symNegDiag && oppositeRobots(
                         r1,
-                        byLoc.get(new MapLocation(height - y - 1, width - x - 1))
+                        byLocRobot.get(new MapLocation(height - y , width - x ))
                 );
                 symPosDiag = symPosDiag && oppositeRobots(
                         r1,
-                        byLoc.get(new MapLocation(y, x))
+                        byLocRobot.get(new MapLocation(y, x))
                 );
             }
         }
+
+        // Next, we check if trees are symmetric.
+
+        // The byLoc map is just to speed up robot lookup by-location.
+        final Map<MapLocation, InitialTreeInfo> byLocTree = 
+                Arrays.stream(initialTrees).collect(Collectors.toMap(
+                        (tree) -> tree.getLocation(origin),
+                        (tree) -> tree
+                ));
+
+        for (MapLocation loc : byLocTree.keySet()) {
+            final InitialTreeInfo r1 = byLocTree.get(loc);
+            final float x = loc.x, y = loc.y;
+
+            symVert = symVert && oppositeTrees(
+                    r1,
+                    byLocTree.get(new MapLocation(x, height - y ))
+            );
+            symHoriz = symHoriz && oppositeTrees(
+                    r1,
+                    byLocTree.get(new MapLocation(width - x , y))
+            );
+            symRot = symRot && oppositeTrees(
+                    r1,
+                    byLocTree.get(new MapLocation(width - x , height - y ))
+            );
+            if (width == height) {
+                symNegDiag = symNegDiag && oppositeTrees(
+                        r1,
+                        byLocTree.get(new MapLocation(height - y , width - x ))
+                );
+                symPosDiag = symPosDiag && oppositeTrees(
+                        r1,
+                        byLocTree.get(new MapLocation(y, x))
+                );
+            }
+        }
+
 
         this.symmetry = null;
 
@@ -606,188 +626,19 @@ public class GameMap implements Serializable {
         }
 
         if (this.symmetry == null) {
-            if (!isArmageddon()) Server.warn("Asymmetric map: "+mapName);
             this.symmetry = Symmetry.NONE;
         }
     }
     
     /**
-     * @return True if the map is symmetric in some way and ZOMBIEDENs are not
-     * located on lines of symmetry.
+     * @return True if the map is symmetric in some way.
      */
     @JsonIgnore
     public boolean isTournamentLegal() {
         computeLazyValues();
 
-        if (armageddon) {
-            // the rules are different on armageddon maps?
-            int aCount = 0, zCount = 0;
-            for (InitialRobotInfo robot : initialRobots) {
-                switch (robot.team) {
-                    case B:
-                        Server.warn("Map "+mapName+" is not tournament legal. " +
-                                "Team B is not permitted in armageddon maps.");
-                        return false;
-                    case A:
-                        aCount++;
-                        break;
-                    case ZOMBIE:
-                        zCount++;
-                        break;
-                }
-            }
-
-            if (aCount == 0) {
-                Server.warn("Map "+mapName+" is not tournament legal. " +
-                        "Armageddon maps require playable (Team.A) robots.");
-                return false;
-            }
-
-            if (zCount == 0) {
-                Server.warn("Map "+mapName+" is not tournament legal. " +
-                        "Armageddon maps require zombie (Team.ZOMBIE) robots.");
-                return false;
-            }
-        }
-
-        // First, check to make sure there aren't any ZOMBIEDENs on lines of symmetry
-
-        final MapLocation zeroOrigin = new MapLocation(0, 0);
-
-        for(InitialRobotInfo robot : initialRobots) {
-            final MapLocation loc = robot.getLocation(zeroOrigin);
-
-            if(robot.type == RobotType.ZOMBIEDEN && robot.team == Team.ZOMBIE) {
-                if (loc.equals(symmetry.getOpposite(loc, this.width, this.height))) {
-                    return false;
-                }
-
-                // Check to see if this den is significantly closer to one team than other
-                int closestADist = Integer.MAX_VALUE;
-                int closestBDist = Integer.MAX_VALUE;
-                for (InitialRobotInfo otherBot : initialRobots) {
-                    if(otherBot.team == Team.A) {
-                        closestADist = Math.min(closestADist, loc.distanceSquaredTo(otherBot.getLocation(zeroOrigin)));
-                    } else if (otherBot.team == Team.B) {
-                        closestBDist = Math.min(closestBDist, loc.distanceSquaredTo(otherBot.getLocation(zeroOrigin)));
-                    }
-                }
-
-                if (closestADist == Integer.MAX_VALUE || closestBDist == Integer.MAX_VALUE) {
-                    Server.warn("Map "+mapName+" is not tournament legal. No playable robots?");
-                    return false;
-                }
-
-                if (Math.abs(closestADist-closestBDist) < 5) {
-                    Server.warn("Map "+mapName+" is not tournament legal. Den distanceSquared difference is <5");
-                    return false; // Must be at least a flat distance greater
-                }
-                if ((closestADist < closestBDist && closestADist*1.3 > closestBDist) ||
-                        (closestBDist < closestADist && closestBDist*1.3 > closestADist)) {
-                    Server.warn("Map "+mapName+" is not tournament legal. Den distanceSquared difference is <30%");
-                    return false;
-                }
-                
-            }
-        }
-
         // Make sure the map has some sort of symmetry
         return symmetry != Symmetry.NONE;
-    }
-
-    /**
-     * Divides a ZombieSpawnSchedule symmetrically among all ZOMBIEDENs 
-     * in a map.
-     * 
-     * @param schedule The ZombieSpawnSchedule to divide between ZOMBIEDENs
-     * @return A Map mapping a ZOMBIEDEN's MapLocation to a ZombieSpawnSchedule
-     */
-    private HashMap<MapLocation,ZombieSpawnSchedule> buildZombieSpawnMap(ZombieSpawnSchedule schedule) {
-        
-        HashMap<MapLocation,ZombieSpawnSchedule> returnMap = new HashMap<MapLocation,ZombieSpawnSchedule>();
-        
-        // Used for robot lookups by location
-        final MapLocation zeroOrigin = new MapLocation(0, 0);
-        final Map<MapLocation, InitialRobotInfo> byLoc =
-                Arrays.stream(initialRobots).collect(Collectors.toMap(
-                        (robot) -> robot.getLocation(zeroOrigin),
-                        (robot) -> robot
-                ));
-        
-        // Build list of ZOMBIEDEN Locations (in symmetric order)
-        ArrayList<MapLocation> denLocs = new ArrayList<MapLocation>();
-        for (MapLocation loc : byLoc.keySet()) {
-
-            InitialRobotInfo r1 = byLoc.get(loc);
-
-            if(r1.type == RobotType.ZOMBIEDEN && denLocs.indexOf(loc) == -1) {
-                // Add this location
-                denLocs.add(r1.getLocation(zeroOrigin));
-
-                // Now find symmetric pair
-                final MapLocation newLocation = this.symmetry.getOpposite(loc, this.width, this.height);
-
-                // Add the symmetric pair
-                if (newLocation != null && oppositeRobots(r1,byLoc.get(newLocation)) && denLocs.indexOf(newLocation) == -1) {
-                    denLocs.add(newLocation);
-                } else {
-                    // This should never happen in valid maps, but allows it to work with asymmetric maps (such as tests)
-                }
-            }
-        }
-        
-        // Prevent future divide-by-zero errors
-        if(denLocs.size() == 0) {
-            return returnMap;
-        }
-        
-        // Now we need to shift them to match the actual origin of the map
-        ArrayList<MapLocation> shiftedDenLocs = new ArrayList<MapLocation>();
-        for(MapLocation denLoc : denLocs) {
-            shiftedDenLocs.add(denLoc.add(this.origin.x,this.origin.y));
-        }
-        denLocs = shiftedDenLocs;
-        
-        // Initialize a blank ZombieSpawnSchedule for each location in denLocs
-        for(MapLocation location : denLocs) {
-            returnMap.put(location, new ZombieSpawnSchedule());
-        }
-        
-        int currentIndex = 0; // Index of the ZOMBIEDEN that receives the next zombie
-        int numberDens = denLocs.size();
-        
-        // Divide ZombieSpawnSchedule between the dens
-        for(int round : schedule.getRounds()) {
-            for(ZombieCount zombieCount : schedule.getScheduleForRound(round)) {
-                // First, divide as evenly as we can
-                int evenlyDivided = zombieCount.getCount() / numberDens;
-                int leftOver = zombieCount.getCount() % numberDens;
-                for(MapLocation denLoc : denLocs) {
-                    returnMap.get(denLoc).add(round, zombieCount.getType(), evenlyDivided);
-                }
-
-                // Now, iterate individually for all leftover
-                for (int i=0; i<leftOver; i++) {
-                    returnMap.get(denLocs.get(currentIndex)).add(round, zombieCount.getType(), 1);
-                    currentIndex = (currentIndex+1)%numberDens;
-                }
-            }
-        }
-        return returnMap;
-    }
-
-    /**
-     * Return whether two map tiles have the same properties.
-     *
-     * @param x1 the x coordinate of the first tile
-     * @param y1 the y coordinate of the first tile
-     * @param x2 the x coordinate of the second tile
-     * @param y2 the y coordinate of the second tile
-     * @return whether the tiles are the same
-     */
-    private boolean sameTile(int x1, int y1, int x2, int y2) {
-        return initialRubble[y1][x1] == initialRubble[y2][x2] &&
-                initialParts[y1][x1] == initialParts[y2][x2];
     }
 
     /**
@@ -807,25 +658,35 @@ public class GameMap implements Serializable {
             return false;
         }
 
-        if (r1.team == Team.ZOMBIE || r1.team == Team.NEUTRAL) {
-            return r1.team == r2.team;
-        } else {
-            return r2.team != Team.ZOMBIE
-                    && r2.team != Team.NEUTRAL
-                    && r2.team != r1.team;
-        }
+        return r1.team.opponent() == r2.team;
     }
 
     /**
-     * Computes symmetries and ZombieSpawnMap.
+     * Return whether two trees are considered "opposite",
+     * for the purpose of tournament legality.
+     *
+     * @param t1 the first tree
+     * @param t2 the second tree
+     * @return whether the trees are legal
+     */
+    private boolean oppositeTrees(InitialTreeInfo t1, InitialTreeInfo t2) {
+        if (t1 == null || t2 == null) {
+            return false;
+        }
+
+        if (t1.radius != t2.radius) {
+            return false;
+        }
+
+        return t1.team.opponent() == t2.team;
+    }
+
+    /**
+     * Computes symmetries.
      */
     private synchronized void computeLazyValues() {
-        if (this.symmetry == null || this.zombieSpawnMap == null) {
-            this.symmetry = null;
-            this.zombieSpawnMap = null;
-
+        if (this.symmetry == null) {
             updateSymmetries();
-            this.zombieSpawnMap = buildZombieSpawnMap(this.zombieSpawnSchedule);
         }
     }
 
@@ -837,14 +698,10 @@ public class GameMap implements Serializable {
         this.width = 0;
         this.height = 0;
         this.origin = null;
-        this.initialRubble = null;
-        this.initialParts = null;
         this.seed = 0;
         this.rounds = 0;
         this.mapName = null;
-        this.zombieSpawnSchedule = null;
         this.initialRobots = null;
-        this.zombieSpawnMap = null;
-        this.armageddon = false;
+        this.initialTrees = null;
     }
 }
