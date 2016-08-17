@@ -9,27 +9,19 @@ public enum DominationFactor {
      */
     WON_BY_DUBIOUS_REASONS,
     /**
-     * Win by parts stockpile plus parts cost of controlled robots (tiebreak 3).
+     * Win by bullet supply plus bullet cost of active robots and trees (tiebreak 3).
      */
     BARELY_BEAT,
     /**
-     * Win by more total Archon HP (tiebreak 2).
+     * Win by more bullet trees (tiebreak 2).
      */
     OWNED,
     /**
-     * Win by more Archons remaining (tiebreak 1).
+     * Win by more victory points (tiebreak 1).
      */
     PWNED,
     /**
-     * Win by destroying enemy Archons.
+     * Win by destroying all enemy robots (trees are not considered robots).
      */
-    DESTROYED,
-    /**
-     * Armageddon: Destroyed by the zombies
-     */
-    ZOMBIFIED,
-    /**
-     * Armageddon: Zombies cleansed
-     */
-    CLEANSED
+    DESTROYED
 }

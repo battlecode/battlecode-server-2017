@@ -54,7 +54,7 @@ public class InternalBullet {
         return speed;
     }
 
-    public Direction getDir() {
+    public Direction getDirection() {
         return dir;
     }
 
