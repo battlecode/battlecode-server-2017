@@ -438,14 +438,33 @@ public class GameMap implements Serializable {
          */
         public final Team team;
 
-        public InitialTreeInfo(float originOffsetX, float originOffsetY, double radius, Team team) {
+        /**
+         * The current amount of bullets contained within the tree.
+         * Note: only NEUTRAL trees can contain bullets
+//         */
+        public final double containedBullets;
+
+        /**
+         * The robot contained within the tree that is obtained upon
+         * destroying the tree using the cut() method.  Has a value
+         * of null if no robot is contained within the tree
+         * Note: only NEUTRAL trees can contain robots
+         */
+        public final RobotType containedRobot;
+
+        public InitialTreeInfo(float originOffsetX, float originOffsetY, double radius, Team team,
+                               double containedBullets, RobotType containedRobot) {
             this.originOffsetX = originOffsetX;
             this.originOffsetY = originOffsetY;
             this.team = team;
             if(team == Team.NEUTRAL){
                 this.radius = radius;
+                this.containedRobot = containedRobot;
+                this.containedBullets = containedBullets;
             }else{
                 this.radius = GameConstants.BULLET_TREE_RADIUS;
+                this.containedRobot = null;
+                this.containedBullets = 0;
             }
         }
 
@@ -488,7 +507,7 @@ public class GameMap implements Serializable {
          */
         @SuppressWarnings("unused")
         private InitialTreeInfo() {
-            this(0, 0, 0, null);
+            this(0, 0, 0, null, 0, null);
         }
     }
 
