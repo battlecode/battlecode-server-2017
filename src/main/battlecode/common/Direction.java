@@ -120,6 +120,35 @@ public class Direction {
         return rotateLeftRads(-angleRads);
     }
 
+    /**
+     * Computes the angle between the given direction and this direction in radians.
+     * Returned value will be in the range [0, Math.PI]
+     *
+     * @param other the direction you wish to find the angle between
+     * @return the angle in radians between this direction and the given direction
+     * in the range of [0, Math.PI]
+     */
+    public double radiansBetween(Direction other){
+        double radiansBetween = this.radians - other.radians;
+        radiansBetween = radiansBetween % (2 * Math.PI);
+        if(radiansBetween > Math.PI){
+            radiansBetween = (2 * Math.PI) - radiansBetween;
+        }
+        return radiansBetween;
+    }
+
+    /**
+     * Computes the angle between the given direction and this direction in degrees.
+     * Returned value will be in the range [0, 180]
+     *
+     * @param other the direction you wish to find the angle between
+     * @return the angle in degrees between this direction and the given direction
+     * in the range of [0, 180]
+     */
+    public double degreesBetween(Direction other){
+        return Math.toDegrees(radiansBetween(other));
+    }
+
     public int hashCode() {
         return Float.floatToIntBits((float)radians) * 13;
     }

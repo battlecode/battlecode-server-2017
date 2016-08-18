@@ -100,6 +100,18 @@ public class ObjectInfo {
         return gameBulletsByID.get(id);
     }
 
+    public InternalTree[] getAllTrees(){
+        return gameTreesByID.values().toArray(new InternalTree[gameTreesByID.size()]);
+    }
+
+    public InternalRobot[] getAllRobots(){
+        return gameRobotsByID.values().toArray(new InternalRobot[gameRobotsByID.size()]);
+    }
+
+    public InternalBullet[] getAllBullets(){
+        return gameBulletsByID.values().toArray(new InternalBullet[gameBulletsByID.size()]);
+    }
+
     // ****************************
     // *** ADDING OBJECTS *********
     // ****************************

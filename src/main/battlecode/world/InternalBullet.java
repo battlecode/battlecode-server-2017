@@ -81,6 +81,20 @@ public class InternalBullet {
     // ****** UPDATE METHODS ********************
     // ******************************************
 
+    // ******************************************
+    // ****** CALCULATIONS **********************
+    // ******************************************
+
+    public double calcHitDist(MapLocation bulletStart, MapLocation bulletFinish,
+                              MapLocation targetCenter, double targetRadius){
+        final double minDist = 0;
+        final double maxDist = bulletStart.distanceTo(bulletFinish);
+        final Direction toFinish = bulletStart.directionTo(bulletFinish);
+
+        double degreesBetween = toFinish.degreesBetween(bulletStart.directionTo(targetCenter));
+
+    }
+
     // *********************************
     // ****** MISC. METHODS ************
     // *********************************

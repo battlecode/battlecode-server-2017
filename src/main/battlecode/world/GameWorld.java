@@ -108,7 +108,14 @@ public class GameWorld{
     }
 
     private void updateTrees(){
-
+        final int[] idsToRun = objectInfo.getTreeIDs();
+        double[] totalTreeSupply = new double[3];
+        for(final int id : idsToRun){
+            InternalTree tree = objectInfo.getTreeByID(id);
+            totalTreeSupply[tree.getTeam().ordinal()] += tree.updateTree();
+        }
+        teamInfo.adjustBulletSupply(Team.A, totalTreeSupply[Team.A.ordinal()]);
+        teamInfo.adjustBulletSupply(Team.B, totalTreeSupply[Team.B.ordinal()]);
     }
 
     private void updateRobots(){
@@ -133,7 +140,7 @@ public class GameWorld{
             // If the robot terminates but the death signal has not yet
             // been visited:
             if (this.controlProvider.getTerminated(robot) && objectInfo.getRobotByID(id) != null) {
-                robot.suicide();
+                destroyRobot(id);
             }
         }
     }
@@ -183,30 +190,19 @@ public class GameWorld{
     // *********************************
 
     public void processBeginningOfRound() {
-
+        currentRound++;
     }
 
     public void setWinner(Team t, DominationFactor d)  {
         winner = t;
         gameStats.setDominationFactor(d);
-
-    }
-
-    public boolean setWinnerIfNonzero(double n, DominationFactor d) {
-        if (n > 0)
-            setWinner(Team.A, d);
-        else if (n < 0)
-            setWinner(Team.B, d);
-        return n != 0;
     }
 
     public void setWinnerIfDestruction(){
         if(objectInfo.getRobotCount(Team.A) == 0){
-            this.winner = Team.B;
-            this.gameStats.setDominationFactor(DominationFactor.DESTROYED);
+            setWinner(Team.B, DominationFactor.DESTROYED);
         }else if(objectInfo.getRobotCount(Team.B) == 0){
-            this.winner = Team.A;
-            this.gameStats.setDominationFactor(DominationFactor.DESTROYED);
+            setWinner(Team.A, DominationFactor.DESTROYED);
         }
     }
 

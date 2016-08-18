@@ -104,6 +104,52 @@ public class InternalTree {
     // ****** UPDATE METHODS ********************
     // ******************************************
 
+    private void keepMinHealth(){
+        if(health < 0){
+            this.health = 0;
+        }
+    }
+
+    private void keepMaxHealth(){
+        if(health > 100){
+            this.health = 100;
+        }
+    }
+
+    public void decayTree(){
+        this.health -= 1;
+        keepMinHealth();
+        killTreeIfDead(Team.NEUTRAL);
+    }
+
+    public void growTree(){
+        this.health += 1;
+        keepMaxHealth();
+    }
+
+    public void waterTree(){
+        this.health += 10;
+        keepMaxHealth();
+    }
+
+    public boolean killTreeIfDead(Team destroyedBy){
+        if(health == 0){
+            gameWorld.destroyTree(ID, destroyedBy);
+            return true;
+        }
+        return false;
+    }
+
+    public double updateTree(){
+        if(roundsAlive <= 80){
+            growTree();
+            return 0;
+        }
+
+        decayTree();
+        return this.health * .1;
+    }
+
     // *********************************
     // ****** MISC. METHODS ************
     // *********************************
