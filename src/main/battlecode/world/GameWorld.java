@@ -74,8 +74,6 @@ public class GameWorld{
 
     /**
      * Run a single round of the game.
-     * Synchronized because you shouldn't call this and inject() at the same time,
-     * but their order of being executed isn't guaranteed.
      *
      * @return the state of the game after the round has run.
      */
@@ -88,30 +86,11 @@ public class GameWorld{
             this.processBeginningOfRound();
             this.controlProvider.roundStarted();
 
-            // We iterate through the IDs so that we avoid ConcurrentModificationExceptions
-            // of an iterator. Kinda gross, but whatever.
-            final int[] idsToRun = objectInfo.getRobotIDs();
+            updateRobots();
 
-            for (final int id : idsToRun) {
-                final InternalRobot robot = objectInfo.getRobotByID(id);
-                if (robot == null) {
-                    // Robot might have died earlier in the iteration; skip it
-                    continue;
-                }
+            updateBullets();
 
-                robot.processBeginningOfTurn();
-                this.controlProvider.runRobot(robot);
-                robot.setBytecodesUsed(this.controlProvider.getBytecodesUsed(robot));
-                
-                if(robot.getHealthLevel() > 0) { // Only processEndOfTurn if robot is still alive
-                    robot.processEndOfTurn();
-                }
-                // If the robot terminates but the death signal has not yet
-                // been visited:
-                if (this.controlProvider.getTerminated(robot) && objectInfo.getRobotByID(id) != null) {
-                    robot.suicide();
-                }
-            }
+            updateTrees();
 
             this.controlProvider.roundEnded();
             this.processEndOfRound();
@@ -126,6 +105,41 @@ public class GameWorld{
         }
 
         return GameState.RUNNING;
+    }
+
+    private void updateTrees(){
+
+    }
+
+    private void updateRobots(){
+        // We iterate through the IDs so that we avoid ConcurrentModificationExceptions
+        // of an iterator. Kinda gross, but whatever.
+        final int[] idsToRun = objectInfo.getRobotIDs();
+
+        for (final int id : idsToRun) {
+            final InternalRobot robot = objectInfo.getRobotByID(id);
+            if (robot == null) {
+                // Robot might have died earlier in the iteration; skip it
+                continue;
+            }
+
+            robot.processBeginningOfTurn();
+            this.controlProvider.runRobot(robot);
+            robot.setBytecodesUsed(this.controlProvider.getBytecodesUsed(robot));
+
+            if(robot.getHealth() > 0) { // Only processEndOfTurn if robot is still alive
+                robot.processEndOfTurn();
+            }
+            // If the robot terminates but the death signal has not yet
+            // been visited:
+            if (this.controlProvider.getTerminated(robot) && objectInfo.getRobotByID(id) != null) {
+                robot.suicide();
+            }
+        }
+    }
+
+    private void updateBullets(){
+
     }
 
     // *********************************
@@ -172,10 +186,9 @@ public class GameWorld{
 
     }
 
-    public void setWinner(Team t, DominationFactor d) {
+    public void setWinner(Team t, DominationFactor d)  {
         winner = t;
         gameStats.setDominationFactor(d);
-        // running = false;
 
     }
 
@@ -185,6 +198,16 @@ public class GameWorld{
         else if (n < 0)
             setWinner(Team.B, d);
         return n != 0;
+    }
+
+    public void setWinnerIfDestruction(){
+        if(objectInfo.getRobotCount(Team.A) == 0){
+            this.winner = Team.B;
+            this.gameStats.setDominationFactor(DominationFactor.DESTROYED);
+        }else if(objectInfo.getRobotCount(Team.B) == 0){
+            this.winner = Team.A;
+            this.gameStats.setDominationFactor(DominationFactor.DESTROYED);
+        }
     }
 
     public boolean timeLimitReached() {
@@ -228,6 +251,33 @@ public class GameWorld{
         objectInfo.spawnBullet(bullet);
 
         return ID;
+    }
+
+    // *********************************
+    // ****** DESTROYING ***************
+    // *********************************
+
+    public void destroyTree(int id, Team destroyedBy){
+        InternalTree tree = objectInfo.getTreeByID(id);
+        RobotType toSpawn = tree.getContainedRobot();
+
+        objectInfo.destroyTree(id);
+        if(toSpawn != null && destroyedBy != Team.NEUTRAL){
+            this.spawnRobot(toSpawn, tree.getLocation(), tree.getTeam());
+        }
+    }
+
+    public void destroyRobot(int id){
+        InternalRobot robot = objectInfo.getRobotByID(id);
+
+        controlProvider.robotKilled(robot);
+        objectInfo.destroyRobot(id);
+
+        setWinnerIfDestruction();
+    }
+
+    public void destroyBullet(int id){
+        objectInfo.destroyBullet(id);
     }
 
 }

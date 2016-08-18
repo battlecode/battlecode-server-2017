@@ -154,6 +154,9 @@ public class InternalRobot {
     // ****** UPDATE METHODS ********************
     // ******************************************
 
+    public void setBytecodesUsed(int bytecodesUsed){
+        this.bytecodesUsed = bytecodesUsed;
+    }
 
     // *********************************
     // ****** DELAYS METHODS ***********

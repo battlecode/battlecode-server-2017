@@ -108,7 +108,7 @@ public class ObjectInfo {
         incrementTreeCount(tree.getTeam());
 
         int id = tree.getID();
-        gameRobotsByID.put(id, tree);
+        gameTreesByID.put(id, tree);
 
         MapLocation loc = tree.getLocation();
         int xIndex = convertToXIndex(loc.x);
@@ -131,7 +131,7 @@ public class ObjectInfo {
 
     public void spawnBullet(InternalBullet bullet){
         int id = bullet.getID();
-        gamebulletsByID.put(id, bullet);
+        gameBulletsByID.put(id, bullet);
 
         MapLocation loc = bullet.getLocation();
         int xIndex = convertToXIndex(loc.x);
