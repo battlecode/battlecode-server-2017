@@ -188,4 +188,39 @@ public class GameWorld{
 
     }
 
+    // *********************************
+    // ****** SPAWNING *****************
+    // *********************************
+
+    public int spawnTree(Team team, double radius, MapLocation center,
+                         double containedBullets, RobotType containedRobot){
+        int ID = idGeneratorTrees.nextID();
+
+        InternalTree tree = new InternalTree(
+                this, ID, team, radius, center, containedBullets, containedRobot);
+        objectInfo.spawnTree(tree);
+
+        return ID;
+    }
+
+    public int spawnRobot(RobotType type, MapLocation location, Team team){
+        int ID = idGeneratorRobots.nextID();
+
+        InternalRobot robot = new InternalRobot(this, ID, type, location, team);
+        objectInfo.spawnRobot(robot);
+
+        controlProvider.robotSpawned(robot);
+        return ID;
+    }
+
+    public int spawnBullet(Team team, double speed, MapLocation location, Direction direction){
+        int ID = idGeneratorBullets.nextID();
+
+        InternalBullet bullet = new InternalBullet(
+                this, ID, team, speed, location, direction);
+        objectInfo.spawnBullet(bullet);
+
+        return ID;
+    }
+
 }
