@@ -3,12 +3,8 @@ package battlecode.world;
 import battlecode.common.*;
 import battlecode.server.ErrorReporter;
 import battlecode.server.GameState;
-import battlecode.world.signal.AutoSignalHandler;
-import battlecode.world.signal.InternalSignal;
-import battlecode.world.signal.SignalHandler;
 import battlecode.serial.GameStats;
 import battlecode.world.control.RobotControlProvider;
-import battlecode.world.signal.*;
 
 import java.util.*;
 
