@@ -89,10 +89,34 @@ public class InternalBullet {
                               MapLocation targetCenter, double targetRadius){
         final double minDist = 0;
         final double maxDist = bulletStart.distanceTo(bulletFinish);
+        final double distToTarget = bulletStart.distanceTo(targetCenter);
         final Direction toFinish = bulletStart.directionTo(bulletFinish);
+        final Direction toTarget = bulletStart.directionTo(targetCenter);
 
-        double degreesBetween = toFinish.degreesBetween(bulletStart.directionTo(targetCenter));
+        double radiansBetween = toFinish.radiansBetween(bulletStart.directionTo(targetCenter));
 
+        //Check if the target intersects with the line made between the bullet points
+        double perpDist = Math.abs(distToTarget * Math.sin(radiansBetween));
+        if(perpDist > targetRadius){
+            return -1;
+        }
+
+        //Calculate hitDist
+        double halfChordDist = Math.sqrt(targetRadius * targetRadius - perpDist * perpDist);
+        double hitDist = distToTarget * Math.cos(radiansBetween);
+        if(hitDist < 0){
+            hitDist += halfChordDist;
+            hitDist = hitDist >= 0 ? 0 : hitDist;
+        }else{
+            hitDist -= halfChordDist;
+            hitDist = hitDist < 0 ? 0 : hitDist;
+        }
+
+        //Check invalid hitDists
+        if(hitDist < minDist || hitDist > maxDist){
+            return -1;
+        }
+        return hitDist;
     }
 
     // *********************************
