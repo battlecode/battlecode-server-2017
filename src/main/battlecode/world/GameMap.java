@@ -293,6 +293,21 @@ public class GameMap implements Serializable {
     }
 
     /**
+     * Determines whether or not the specified circle is completely on the map.
+     *
+     * @param loc the center of the circle
+     * @param radius the radius of the circle
+     * @return true if the given circle is on the map,
+     *         false if it's not
+     */
+    public boolean onTheMap(MapLocation loc, float radius){
+        return (onTheMap(loc.translate(-radius, 0)) &&
+                onTheMap(loc.translate(radius, 0)) &&
+                onTheMap(loc.translate(0, -radius)) &&
+                onTheMap(loc.translate(0, radius)));
+    }
+
+    /**
      * Get a list of the initial robots on the map.
      *
      * @return the list of starting robots on the map.
