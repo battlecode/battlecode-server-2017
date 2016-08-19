@@ -27,7 +27,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    LUMBERJACK      (GARDENER,  70,  100,   1,  -1, 1.5,   2,   5,  10,   2,   2,   1, 10000),
+    LUMBERJACK      (GARDENER,  70,  100,   1,  -1, 1.5F,   2,   5,  10,   2,   2,   1, 10000),
     //                          HP    BC   BR   BS   AP   AR   SR  BSR  MVD   AD   CD    BCL
     /**
      * The basic fighting unit
@@ -67,7 +67,7 @@ public enum RobotType {
     /**
      * Maximum health for the robot.
      */
-    public final double maxHealth;
+    public final float maxHealth;
 
     /**
      * Cost for creating the robot.
@@ -87,7 +87,7 @@ public enum RobotType {
     /**
      * Base damage per attack.
      */
-    public final double attackPower;
+    public final float attackPower;
 
     /**
      * Range for performing actions.
@@ -107,17 +107,17 @@ public enum RobotType {
     /**
      * Movement delay: the amount of contribution to core delay from a movement.
      */
-    public final double movementDelay;
+    public final float movementDelay;
 
     /**
      * Attack delay: the amount of contribution to weapon delay from an attack.
      */
-    public final double attackDelay;
+    public final float attackDelay;
 
     /**
      * Cooldown delay: the amount of contribution to core delay from an attack.
      */
-    public final double cooldownDelay;
+    public final float cooldownDelay;
 
     /**
      * Base bytecode limit of this robot (halved if the robot does not have sufficient supply upkeep).
@@ -169,9 +169,9 @@ public enum RobotType {
         return spawnSource == GARDENER;
     }
     
-    RobotType(RobotType spawnSource, int maxHealth, int bulletCost, int bodyRadius, int bulletSpeed, double attackPower,
-              int actionRadius, int sightRadius, int bulletSightRadius, double movementDelay, double attackDelay,
-              double cooldownDelay, int bytecodeLimit) {
+    RobotType(RobotType spawnSource, int maxHealth, int bulletCost, int bodyRadius, int bulletSpeed, float attackPower,
+              int actionRadius, int sightRadius, int bulletSightRadius, float movementDelay, float attackDelay,
+              float cooldownDelay, int bytecodeLimit) {
         this.spawnSource        = spawnSource;
         this.maxHealth          = maxHealth;
         this.bulletCost         = bulletCost;

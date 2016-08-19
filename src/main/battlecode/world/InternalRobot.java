@@ -13,9 +13,9 @@ public class InternalRobot {
     private Team team;
     private RobotType type;
     private MapLocation location;
-    private double weaponDelay;
-    private double coreDelay;
-    private double health;
+    private float weaponDelay;
+    private float coreDelay;
+    private float health;
 
     private long controlBits;
     private int bytecodesUsed;
@@ -45,13 +45,13 @@ public class InternalRobot {
         this.team = team;
         this.type = type;
         this.location = loc;
-        this.weaponDelay = 0.0;
-        this.coreDelay = 0.0;
+        this.weaponDelay = 0;
+        this.coreDelay = 0;
 
         if(type == RobotType.ARCHON || type == RobotType.GARDENER){
             this.health = type.maxHealth;
         }else{
-            this.health = .20 * type.maxHealth;
+            this.health = .20F * type.maxHealth;
         }
 
         this.controlBits = 0;
@@ -95,15 +95,15 @@ public class InternalRobot {
         return location;
     }
 
-    public double getWeaponDelay() {
+    public float getWeaponDelay() {
         return weaponDelay;
     }
 
-    public double getCoreDelay() {
+    public float getCoreDelay() {
         return coreDelay;
     }
 
-    public double getHealth() {
+    public float getHealth() {
         return health;
     }
 
@@ -154,44 +154,70 @@ public class InternalRobot {
     // ****** UPDATE METHODS ********************
     // ******************************************
 
+    private void keepMinHealth(){
+        if(health < 0){
+            this.health = 0;
+        }
+    }
+
+    private void keepMaxHealth(){
+        if(health > this.type.maxHealth){
+            this.health = this.type.maxHealth;
+        }
+    }
+
     public void setBytecodesUsed(int bytecodesUsed){
         this.bytecodesUsed = bytecodesUsed;
+    }
+
+    public void damageRobot(float damage){
+        this.health -= damage;
+        keepMinHealth();
+        killRobotIfDead();
+    }
+
+    public boolean killRobotIfDead(){
+        if(this.health == 0){
+            gameWorld.destroyRobot(this.ID);
+            return true;
+        }
+        return false;
     }
 
     // *********************************
     // ****** DELAYS METHODS ***********
     // *********************************
 
-    public void addCoreDelay(double time) {
+    public void addCoreDelay(float time) {
         coreDelay += time;
     }
 
-    public void addWeaponDelay(double time) {
+    public void addWeaponDelay(float time) {
         weaponDelay += time;
     }
 
-    public void setCoreDelayUpTo(double delay) {
+    public void setCoreDelayUpTo(float delay) {
         coreDelay = Math.max(coreDelay, delay);
     }
 
-    public void setWeaponDelayUpTo(double delay) {
+    public void setWeaponDelayUpTo(float delay) {
         weaponDelay = Math.max(weaponDelay, delay);
     }
 
     public void decrementDelays() {
         // Formula following the "Explanation of Delays" section of game specs
         // (Use previous bytecodes because current bytecode = 0)
-        double amountToDecrement = 1.0 - (0.3 * Math.pow(
-                Math.max(0.0,8000-this.type.bytecodeLimit+this.prevBytecodesUsed)/8000.0,1.5));
+        float amountToDecrement = 1.0F - (0.3F * (float) Math.pow(
+                Math.max(0,8000-this.type.bytecodeLimit+this.prevBytecodesUsed)/8000.0,1.5));
         
         weaponDelay-=amountToDecrement;
         coreDelay-=amountToDecrement;
 
         if (weaponDelay < 0.0) {
-            weaponDelay = 0.0;
+            weaponDelay = 0;
         }
         if (coreDelay < 0.0) {
-            coreDelay = 0.0;
+            coreDelay = 0;
         }
     }
 

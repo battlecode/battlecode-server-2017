@@ -49,32 +49,32 @@ public interface GameConstants {
     int BULLET_TREE_MAX_HEALTH = 100;
 
     /** The radius of bullet trees */
-    double BULLET_TREE_RADIUS = .5;
+    float BULLET_TREE_RADIUS = .5F;
 
     /** The min radius a neutral tree can have */
-    double NEUTRAL_TREE_MIN_RADIUS = .5;
+    float NEUTRAL_TREE_MIN_RADIUS = .5F;
 
     /** The max radius a neutral tree can have */
-    double NEUTRAL_TREE_MAX_RADIUS = 10;
+    float NEUTRAL_TREE_MAX_RADIUS = 10;
 
     /**
      * The rate at which the max health of neutral trees are determined;
      * i.e. maxHealth = NEUTRAL_TREE_HEALTH_RATE * treeRadius
      */
-    double NEUTRAL_TREE_HEALTH_RATE = 100;
+    float NEUTRAL_TREE_HEALTH_RATE = 100;
 
     // *********************************
     // ****** BULLETS ******************
     // *********************************
 
     /** The amount that each team starts with */
-    double BULLETS_INITIAL_AMOUNT = 300;
+    float BULLETS_INITIAL_AMOUNT = 300;
     
     /** The bullet income per turn (independent of number of archons).  */
-    double ARCHON_BULLET_INCOME = 2;
+    float ARCHON_BULLET_INCOME = 2;
 
     /** The decrease in bullet income per turn per bullet that you have. */
-    double BULLET_INCOME_UNIT_PENALTY = 0.01;
+    float BULLET_INCOME_UNIT_PENALTY = 0.01F;
     
     // *********************************
     // ****** MESSAGING ****************
@@ -82,6 +82,13 @@ public interface GameConstants {
 
     /** The size of the team-shared array for signaling*/
     int BROADCAST_MAX_CHANNELS = 1000;
+
+    // *********************************
+    // ****** MISC. ********************
+    // *********************************
+
+    /** The max radius a robot can have */
+    float MAX_ROBOT_RADIUS = 2;
     
     // *********************************
     // ****** GAMEPLAY PROPERTIES ******

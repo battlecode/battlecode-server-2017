@@ -146,7 +146,11 @@ public class GameWorld{
     }
 
     private void updateBullets(){
-
+        final int[] idsToRun = objectInfo.getBulletIDs();
+        for(final int id : idsToRun){
+            InternalBullet bullet = objectInfo.getBulletByID(id);
+            bullet.updateBullet();
+        }
     }
 
     // *********************************
@@ -218,8 +222,8 @@ public class GameWorld{
     // ****** SPAWNING *****************
     // *********************************
 
-    public int spawnTree(Team team, double radius, MapLocation center,
-                         double containedBullets, RobotType containedRobot){
+    public int spawnTree(Team team, float radius, MapLocation center,
+                         float containedBullets, RobotType containedRobot){
         int ID = idGeneratorTrees.nextID();
 
         InternalTree tree = new InternalTree(
@@ -239,11 +243,11 @@ public class GameWorld{
         return ID;
     }
 
-    public int spawnBullet(Team team, double speed, MapLocation location, Direction direction){
+    public int spawnBullet(Team team, float speed, float damage, MapLocation location, Direction direction){
         int ID = idGeneratorBullets.nextID();
 
         InternalBullet bullet = new InternalBullet(
-                this, ID, team, speed, location, direction);
+                this, ID, team, speed, damage, location, direction);
         objectInfo.spawnBullet(bullet);
 
         return ID;

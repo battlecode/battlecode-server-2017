@@ -10,11 +10,11 @@ public class InternalTree {
 
     private final int ID;
     private Team team;
-    private double radius;
+    private float radius;
     private MapLocation location;
-    private double health;
+    private float health;
 
-    private double containedBullets;
+    private float containedBullets;
     private RobotType containedRobot;
 
     private int roundsAlive;
@@ -24,8 +24,8 @@ public class InternalTree {
      */
     private TreeInfo cachedTreeInfo;
 
-    public InternalTree(GameWorld gw, int id, Team team, double radius, MapLocation center,
-                        double containedBullets, RobotType containedRobot) {
+    public InternalTree(GameWorld gw, int id, Team team, float radius, MapLocation center,
+                        float containedBullets, RobotType containedRobot) {
         this.gameWorld = gw;
 
         this.ID = id;
@@ -36,7 +36,7 @@ public class InternalTree {
         if(team == Team.NEUTRAL){
             this.health = GameConstants.NEUTRAL_TREE_HEALTH_RATE * radius;
         }else{
-            this.health = .20 * GameConstants.BULLET_TREE_MAX_HEALTH;
+            this.health = .20F * GameConstants.BULLET_TREE_MAX_HEALTH;
         }
 
         this.containedBullets = containedBullets;
@@ -61,7 +61,7 @@ public class InternalTree {
         return team;
     }
 
-    public double getRadius() {
+    public float getRadius() {
         return radius;
     }
 
@@ -69,11 +69,11 @@ public class InternalTree {
         return location;
     }
 
-    public double getHealth() {
+    public float getHealth() {
         return health;
     }
 
-    public double getContainedBullets() {
+    public float getContainedBullets() {
         return containedBullets;
     }
 
@@ -116,10 +116,14 @@ public class InternalTree {
         }
     }
 
-    public void decayTree(){
-        this.health -= 1;
+    public void damageTree(float damage, Team hitBy){
+        this.health -= damage;
         keepMinHealth();
-        killTreeIfDead(Team.NEUTRAL);
+        killTreeIfDead(hitBy);
+    }
+
+    public void decayTree(){
+        damageTree(1f, Team.NEUTRAL);
     }
 
     public void growTree(){
@@ -140,14 +144,14 @@ public class InternalTree {
         return false;
     }
 
-    public double updateTree(){
+    public float updateTree(){
         if(roundsAlive <= 80){
             growTree();
             return 0;
         }
 
         decayTree();
-        return this.health * .1;
+        return this.health * .1F;
     }
 
     // *********************************

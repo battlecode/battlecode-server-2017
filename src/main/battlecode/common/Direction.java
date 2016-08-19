@@ -12,14 +12,14 @@ public class Direction {
      * up would have PI/2 radians, etc.
      * Note: radians = [0, 2*Math.PI)
      */
-    public final double radians;
+    public final float radians;
 
     /**
      * @param radians the radians at which you wish this direction
      *                to represent based off of the unit circle
      */
-    Direction(double radians){
-        this.radians = radians % (2*Math.PI);
+    public Direction(float radians){
+        this.radians = radians % (2*(float) Math.PI);
     }
 
     /**
@@ -30,8 +30,8 @@ public class Direction {
      * @param dx the x component of the vector
      * @param dy the y component of the vector
      */
-    Direction(double dx, double dy) {
-        this.radians = Math.atan2(dy, dx) % (2*Math.PI);
+    public Direction(float dx, float dy) {
+        this.radians = (float) Math.atan2(dy, dx) % (2 * (float) Math.PI);
     }
 
     /**
@@ -42,7 +42,7 @@ public class Direction {
      * @param start the starting point of the vector
      * @param finish the ending point of the vector
      */
-    Direction(MapLocation start, MapLocation finish) {
+    public Direction(MapLocation start, MapLocation finish) {
         this(finish.x - start.x, finish.y - start.y);
     }
 
@@ -53,8 +53,8 @@ public class Direction {
      *
      * @battlecode.doc.costlymethod
      */
-    public double getAngleDegrees() {
-        return Math.toDegrees(radians);
+    public float getAngleDegrees() {
+        return (float) Math.toDegrees(radians);
     }
 
     /**
@@ -65,7 +65,7 @@ public class Direction {
      * @battlecode.doc.costlymethod
      */
     public Direction opposite() {
-        return rotateLeftRads(Math.PI);
+        return rotateLeftRads((float) Math.PI);
     }
 
     /**
@@ -77,8 +77,8 @@ public class Direction {
      * 
      * @battlecode.doc.costlymethod
      */
-    public Direction rotateLeftDegrees(double angleDegrees) {
-        return rotateLeftRads(Math.toRadians(angleDegrees));
+    public Direction rotateLeftDegrees(float angleDegrees) {
+        return rotateLeftRads((float) Math.toRadians(angleDegrees));
     }
 
     /**
@@ -90,8 +90,8 @@ public class Direction {
      *
      * @battlecode.doc.costlymethod
      */
-    public Direction rotateRightDegrees(double angleDegrees) {
-        return rotateRightRads(Math.toRadians(angleDegrees));
+    public Direction rotateRightDegrees(float angleDegrees) {
+        return rotateRightRads((float) Math.toRadians(angleDegrees));
     }
     
     /**
@@ -103,7 +103,7 @@ public class Direction {
      *
      * @battlecode.doc.costlymethod
      */
-    public Direction rotateLeftRads(double angleRads) {
+    public Direction rotateLeftRads(float angleRads) {
         return new Direction(this.radians + angleRads);
     }
     
@@ -116,7 +116,7 @@ public class Direction {
      *
      * @battlecode.doc.costlymethod
      */
-    public Direction rotateRightRads(double angleRads) {
+    public Direction rotateRightRads(float angleRads) {
         return rotateLeftRads(-angleRads);
     }
 
@@ -128,11 +128,11 @@ public class Direction {
      * @return the angle in radians between this direction and the given direction
      * in the range of [0, Math.PI]
      */
-    public double radiansBetween(Direction other){
-        double radiansBetween = this.radians - other.radians;
-        radiansBetween = radiansBetween % (2 * Math.PI);
+    public float radiansBetween(Direction other){
+        float radiansBetween = this.radians - other.radians;
+        radiansBetween = radiansBetween % (2 * (float) Math.PI);
         if(radiansBetween > Math.PI){
-            radiansBetween = (2 * Math.PI) - radiansBetween;
+            radiansBetween = (2 * (float) Math.PI) - radiansBetween;
         }
         return radiansBetween;
     }
@@ -145,8 +145,8 @@ public class Direction {
      * @return the angle in degrees between this direction and the given direction
      * in the range of [0, 180]
      */
-    public double degreesBetween(Direction other){
-        return Math.toDegrees(radiansBetween(other));
+    public float degreesBetween(Direction other){
+        return (float) Math.toDegrees(radiansBetween(other));
     }
 
     public int hashCode() {

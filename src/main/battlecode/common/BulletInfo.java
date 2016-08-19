@@ -16,7 +16,12 @@ public class BulletInfo {
      * The speed at which the bullet is traveling in
      * terms of units per turn
      */
-    public final double speed;
+    public final float speed;
+
+    /**
+     * The damage this bullet deals on impact
+     */
+    public final float damage;
 
     /**
      * The direction in which the bullet is moving
@@ -28,10 +33,11 @@ public class BulletInfo {
      */
     public final MapLocation location;
 
-    public BulletInfo(int ID, MapLocation location, Direction dir, double speed) {
+    public BulletInfo(int ID, MapLocation location, Direction dir, float speed, float damage) {
         this.ID = ID;
         this.dir = dir;
         this.speed = speed;
+        this.damage = damage;
         this.location = location;
     }
 

@@ -446,7 +446,7 @@ public class GameMap implements Serializable {
         /**
          * The radius of the tree.
          */
-        public final double radius;
+        public final float radius;
 
         /**
          * The team of the robot.
@@ -457,7 +457,7 @@ public class GameMap implements Serializable {
          * The current amount of bullets contained within the tree.
          * Note: only NEUTRAL trees can contain bullets
 //         */
-        public final double containedBullets;
+        public final float containedBullets;
 
         /**
          * The robot contained within the tree that is obtained upon
@@ -467,8 +467,8 @@ public class GameMap implements Serializable {
          */
         public final RobotType containedRobot;
 
-        public InitialTreeInfo(float originOffsetX, float originOffsetY, double radius, Team team,
-                               double containedBullets, RobotType containedRobot) {
+        public InitialTreeInfo(float originOffsetX, float originOffsetY, float radius, Team team,
+                               float containedBullets, RobotType containedRobot) {
             this.originOffsetX = originOffsetX;
             this.originOffsetY = originOffsetY;
             this.team = team;

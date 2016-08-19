@@ -1,5 +1,6 @@
 package battlecode.world;
 
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
@@ -11,9 +12,6 @@ import java.util.*;
  * in the game world.
  */
 public class ObjectInfo {
-    private static final float MAX_TREE_RADIUS = 5;
-    private static final float MAX_ROBOT_RADIUS = 2;
-
     private final int mapWidth;
     private final int mapHeight;
     private final MapLocation mapTopLeft;
@@ -210,10 +208,10 @@ public class ObjectInfo {
 
     public InternalTree[] getAllTreesWithinRadius(MapLocation center, float radius){
         ArrayList<InternalTree> trees = new ArrayList<>();
-        int minXPos = convertToXIndex(center.x - radius - MAX_TREE_RADIUS);
-        int maxXPos = convertToXIndex(center.x + radius + MAX_TREE_RADIUS);
-        int minYPos = convertToYIndex(center.y - radius - MAX_TREE_RADIUS);
-        int maxYPos = convertToYIndex(center.y + radius + MAX_TREE_RADIUS);
+        int minXPos = convertToXIndex(center.x - radius - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
+        int maxXPos = convertToXIndex(center.x + radius + GameConstants.NEUTRAL_TREE_MAX_RADIUS);
+        int minYPos = convertToYIndex(center.y - radius - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
+        int maxYPos = convertToYIndex(center.y + radius + GameConstants.NEUTRAL_TREE_MAX_RADIUS);
 
         for (int x = minXPos; x <= maxXPos; x++) {
             for (int y = minYPos; y <= maxYPos; y++) {
@@ -232,10 +230,10 @@ public class ObjectInfo {
     
     public InternalRobot[] getAllRobotsWithinRadius(MapLocation center, float radius){
         ArrayList<InternalRobot> robots = new ArrayList<>();
-        int minXPos = convertToXIndex(center.x - radius - MAX_ROBOT_RADIUS);
-        int maxXPos = convertToXIndex(center.x + radius + MAX_ROBOT_RADIUS);
-        int minYPos = convertToYIndex(center.y - radius - MAX_ROBOT_RADIUS);
-        int maxYPos = convertToYIndex(center.y + radius + MAX_ROBOT_RADIUS);
+        int minXPos = convertToXIndex(center.x - radius - GameConstants.MAX_ROBOT_RADIUS);
+        int maxXPos = convertToXIndex(center.x + radius + GameConstants.MAX_ROBOT_RADIUS);
+        int minYPos = convertToYIndex(center.y - radius - GameConstants.MAX_ROBOT_RADIUS);
+        int maxYPos = convertToYIndex(center.y + radius + GameConstants.MAX_ROBOT_RADIUS);
 
         for (int x = minXPos; x <= maxXPos; x++) {
             for (int y = minYPos; y <= maxYPos; y++) {

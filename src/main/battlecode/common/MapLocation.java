@@ -125,10 +125,10 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      *
      * @battlecode.doc.costlymethod
      */
-    public final double distanceTo(MapLocation location) {
+    public final float distanceTo(MapLocation location) {
         float dx = this.x - location.x;
         float dy = this.y - location.y;
-        return Math.sqrt(dx * dx + dy * dy);
+        return (float) Math.sqrt(dx * dx + dy * dy);
     }
 
     /**
@@ -140,7 +140,7 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      *
      * @battlecode.doc.costlymethod
      */
-    public final double distanceSquaredTo(MapLocation location) {
+    public final float distanceSquaredTo(MapLocation location) {
         float dx = this.x - location.x;
         float dy = this.y - location.y;
         return dx * dx + dy * dy;
@@ -250,7 +250,7 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      *
      * @battlecode.doc.costlymethod
      */
-    public final MapLocation add(Direction direction, double dist) {
+    public final MapLocation add(Direction direction, float dist) {
         float dx = (float)(dist * Math.cos(direction.radians));
         float dy = (float)(dist * Math.sin(direction.radians));
         return new MapLocation(x + dx, y + dy);
@@ -283,7 +283,7 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      *
      * @battlecode.doc.costlymethod
      */
-    public final MapLocation subtract(Direction direction, double dist) {
+    public final MapLocation subtract(Direction direction, float dist) {
         return this.add(direction.opposite(), dist);
     }
 
