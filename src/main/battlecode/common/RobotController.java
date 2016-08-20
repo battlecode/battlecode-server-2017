@@ -194,6 +194,15 @@ public interface RobotController {
     boolean canSenseLocation(MapLocation loc);
 
     /**
+     * Returns true if any portion of the given circle is within the robot's sensor range.
+     *
+     * @param center the center of the circle to check.
+     * @param radius the radius of the circle to check.
+     * @return whether a portion of the circle is within the robot's sensor range.
+     */
+    boolean canSenseCircle(MapLocation center, float radius);
+
+    /**
      * Returns whether there is a robot or tree at the given location.
      *
      * @param loc the location to check.
@@ -299,10 +308,6 @@ public interface RobotController {
     /**
      * Returns all robots that can be sensed on the map.
      *
-     * The order in which the robots are returned is based on the execution
-     * order of the robots. Robots moving earlier in a round appear
-     * earlier in the returned list.
-     *
      * @return array of RobotInfo objects, which contain information about all
      * the robots you sensed.
      *
@@ -314,25 +319,17 @@ public interface RobotController {
      * Returns all robots that can be sensed within a certain radius of this
      * robot.
      *
-     * The order in which the robots are returned is based on the execution
-     * order of the robots. Robots moving earlier in a round appear
-     * earlier in the returned list.
-     *
      * @param radius return robots this distance away from the center of
      * this robot. If -1 is passed, robots from the whole map are returned.
      * @return array of RobotInfo objects of all the robots you sensed.
      *
      * @battlecode.doc.costlymethod
      */
-    RobotInfo[] senseNearbyRobots(int radius);
+    RobotInfo[] senseNearbyRobots(float radius);
 
     /**
      * Returns all robots of a given team that can be sensed within a certain
      * radius of this robot.
-     *
-     * The order in which the robots are returned is based on the execution
-     * order of the robots. Robots moving earlier in a round appear
-     * earlier in the returned list.
      *
      * @param radius return robots this distance away from the center of
      * this robot. If -1 is passed, robots from the whole map are returned.
@@ -342,15 +339,11 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    RobotInfo[] senseNearbyRobots(int radius, Team team);
+    RobotInfo[] senseNearbyRobots(float radius, Team team);
 
     /**
      * Returns all robots of a given team that can be sensed within a certain
      * radius of a specified location.
-     *
-     * The order in which the robots are returned is based on the execution
-     * order of the robots. Robots moving earlier in a round appear
-     * earlier in the returned list.
      *
      * @param center center of the given search radius.
      * @param radius return robots this distance away from the given center
@@ -361,7 +354,7 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    RobotInfo[] senseNearbyRobots(MapLocation center, int radius, Team team);
+    RobotInfo[] senseNearbyRobots(MapLocation center, float radius, Team team);
 
     /**
      * Returns all trees that can be sensed on the map.
@@ -383,7 +376,7 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    TreeInfo[] senseNearbyTrees(int radius);
+    TreeInfo[] senseNearbyTrees(float radius);
 
     /**
      * Returns all trees of a given team that can be sensed within a certain
@@ -397,7 +390,7 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    TreeInfo[] senseNearbyTrees(int radius, Team team);
+    TreeInfo[] senseNearbyTrees(float radius, Team team);
 
     /**
      * Returns all trees of a given team that can be sensed within a certain
@@ -412,7 +405,7 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    TreeInfo[] senseNearbyTrees(MapLocation center, int radius, Team team);
+    TreeInfo[] senseNearbyTrees(MapLocation center, float radius, Team team);
 
     /**
      * Returns all bullets that can be sensed on the map.
@@ -434,7 +427,7 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    BulletInfo[] senseNearbyBullets(int radius);
+    BulletInfo[] senseNearbyBullets(float radius);
 
     /**
      * Returns all bullets that can be sensed within a certain
@@ -447,7 +440,7 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    BulletInfo[] senseNearbyBullets(MapLocation center, int radius);
+    BulletInfo[] senseNearbyBullets(MapLocation center, float radius);
 
     /**
      * Returns an array of all the robots that have broadcasted in the

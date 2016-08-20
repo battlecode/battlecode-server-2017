@@ -150,17 +150,33 @@ public class ObjectInfo {
     }
 
     // ****************************
+    // *** EXISTS CHECKS **********
+    // ****************************
+
+    public boolean existsTree(int id){
+        return gameTreesByID.containsKey(id);
+    }
+
+    public boolean existsRobot(int id){
+        return gameRobotsByID.containsKey(id);
+    }
+
+    public boolean existsBullet(int id){
+        return gameBulletsByID.containsKey(id);
+    }
+
+    // ****************************
     // *** DESTROYING OBJECTS *****
     // ****************************
 
     public void destroyTree(int id){
         InternalTree tree = getTreeByID(id);
         decrementTreeCount(tree.getTeam());
-        
+
         MapLocation loc = tree.getLocation();
         int xIndex = convertToXIndex(loc.x);
         int yIndex = convertToYIndex(loc.y);
-        
+
         gameTreesByID.remove(id);
         treeLocations[yIndex][xIndex].remove(id);
     }

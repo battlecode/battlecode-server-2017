@@ -150,6 +150,14 @@ public class InternalRobot {
                 ID, team, type, location, coreDelay, weaponDelay, health);
     }
 
+    // **********************************
+    // ****** CHECK METHODS *************
+    // **********************************
+
+    public boolean canSenseLocation(MapLocation toSense){
+        return this.location.distanceTo(toSense) <= this.type.sensorRadius;
+    }
+
     // ******************************************
     // ****** UPDATE METHODS ********************
     // ******************************************

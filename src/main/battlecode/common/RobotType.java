@@ -7,7 +7,7 @@ import battlecode.server.Config;
  */
 public enum RobotType {
 
-    // spawnSource, maxHealth, bulletCost, bodyRadius, bulletSpeed, attackPower, actionRadius, sightRadius, bulletSightRadius, movementDelay, attackDelay, cooldownDelay, bytecodeLimit
+    // spawnSource, maxHealth, bulletCost, bodyRadius, bulletSpeed, attackPower, actionRadius, sensorRadius, bulletSightRadius, movementDelay, attackDelay, cooldownDelay, bytecodeLimit
     /**
      * An important unit that cannot be constructed; builds other robots.
      *
@@ -97,7 +97,7 @@ public enum RobotType {
     /**
      * Range for sensing robots and trees.
      */
-    public final int sightRadius;
+    public final int sensorRadius;
 
     /**
      * Range for sensing bullets.
@@ -170,7 +170,7 @@ public enum RobotType {
     }
     
     RobotType(RobotType spawnSource, int maxHealth, int bulletCost, int bodyRadius, int bulletSpeed, float attackPower,
-              int actionRadius, int sightRadius, int bulletSightRadius, float movementDelay, float attackDelay,
+              int actionRadius, int sensorRadius, int bulletSightRadius, float movementDelay, float attackDelay,
               float cooldownDelay, int bytecodeLimit) {
         this.spawnSource        = spawnSource;
         this.maxHealth          = maxHealth;
@@ -179,7 +179,7 @@ public enum RobotType {
         this.bulletSpeed        = bulletSpeed;
         this.attackPower        = attackPower;
         this.actionRadius       = actionRadius;
-        this.sightRadius        = sightRadius;
+        this.sensorRadius       = sensorRadius;
         this.bulletSightRadius  = bulletSightRadius;
         this.movementDelay      = movementDelay;
         this.attackDelay        = attackDelay;
