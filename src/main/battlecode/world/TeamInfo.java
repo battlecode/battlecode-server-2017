@@ -15,7 +15,7 @@ public class TeamInfo {
     private final long[][] oldTeamMemory;
 
     private int[] teamVictoryPoints = new int[3];
-    private double[] teamBulletSupplies = new double[3];
+    private float[] teamBulletSupplies = new float[3];
     private int[][] teamSharedArrays = new int[3][GameConstants.BROADCAST_MAX_CHANNELS];
 
     public TeamInfo(String teamA, String teamB, long[][] oldTeamMemory){
@@ -57,7 +57,7 @@ public class TeamInfo {
         return teamVictoryPoints[t.ordinal()];
     }
 
-    public double getBulletSupply(Team t) {
+    public float getBulletSupply(Team t) {
         return teamBulletSupplies[t.ordinal()];
     }
 
@@ -65,7 +65,7 @@ public class TeamInfo {
     // ***** UPDATE METHODS ************
     // *********************************
 
-    public void adjustBulletSupply(Team t, double amount) {
+    public void adjustBulletSupply(Team t, float amount) {
         teamBulletSupplies[t.ordinal()] += amount;
     }
 

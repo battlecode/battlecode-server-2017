@@ -105,7 +105,7 @@ public class GameWorld{
 
     private void updateTrees(){
         final int[] idsToRun = objectInfo.getTreeIDs();
-        double[] totalTreeSupply = new double[3];
+        float[] totalTreeSupply = new float[3];
         for(final int id : idsToRun){
             InternalTree tree = objectInfo.getTreeByID(id);
             totalTreeSupply[tree.getTeam().ordinal()] += tree.updateTree();
@@ -190,7 +190,13 @@ public class GameWorld{
     // *********************************
 
     public void processBeginningOfRound() {
+        // Increment round counter
         currentRound++;
+
+        // Process beginning of each robot's round
+        for (InternalRobot robot : objectInfo.getAllRobots()) {
+            robot.processBeginningOfRound();
+        }
     }
 
     public void setWinner(Team t, DominationFactor d)  {
@@ -211,7 +217,72 @@ public class GameWorld{
     }
 
     public void processEndOfRound() {
+        // Process end of each robot's round
+        for (InternalRobot robot : objectInfo.getAllRobots()) {
+            robot.processEndOfRound();
+        }
 
+        // Add the round bullet income
+        teamInfo.adjustBulletSupply(Team.A, Math.max(0, GameConstants.ARCHON_BULLET_INCOME -
+                GameConstants.BULLET_INCOME_UNIT_PENALTY * teamInfo.getBulletSupply(Team.A)));
+        teamInfo.adjustBulletSupply(Team.B, Math.max(0, GameConstants.ARCHON_BULLET_INCOME -
+                GameConstants.BULLET_INCOME_UNIT_PENALTY * teamInfo.getBulletSupply(Team.B)));
+
+        // Check for end of match
+        if (timeLimitReached() && winner == null) {
+            boolean victorDetermined = false;
+
+            // tiebreak by number of victory points
+            if(teamInfo.getVictoryPoints(Team.A) != teamInfo.getVictoryPoints(Team.B)){
+                setWinner(teamInfo.getVictoryPoints(Team.A) > teamInfo.getVictoryPoints(Team.B) ? Team.A : Team.B,
+                        DominationFactor.PWNED);
+                victorDetermined = true;
+            }
+
+            // tiebreak by bullet trees
+            if(!victorDetermined){
+                if(objectInfo.getTreeCount(Team.A) != objectInfo.getTreeCount(Team.B)){
+                    setWinner(objectInfo.getTreeCount(Team.A) > objectInfo.getTreeCount(Team.B) ? Team.A : Team.B,
+                            DominationFactor.OWNED);
+                    victorDetermined = true;
+                }
+            }
+
+            int bestRobotID = Integer.MIN_VALUE;
+            Team bestRobotTeam = null;
+
+            // tiebreak by total bullets
+            if(!victorDetermined){
+                float totalBulletSupplyA = teamInfo.getBulletSupply(Team.A);
+                float totalBulletSupplyB = teamInfo.getBulletSupply(Team.B);
+                for(InternalRobot robot : objectInfo.getAllRobots()){
+                    if(robot.getID() > bestRobotID){
+                        bestRobotID = robot.getID();
+                        bestRobotTeam = robot.getTeam();
+
+                    }
+                    if(robot.getTeam() == Team.A){
+                        totalBulletSupplyA += robot.getType().bulletCost;
+                    }else{
+                        totalBulletSupplyB += robot.getType().bulletCost;
+                    }
+                }
+                if(totalBulletSupplyA != totalBulletSupplyB){
+                    setWinner(totalBulletSupplyA > totalBulletSupplyB ? Team.A : Team.B,
+                            DominationFactor.BARELY_BEAT);
+                    victorDetermined = true;
+                }
+            }
+
+            // tiebreak by robot id
+            if(!victorDetermined){
+                setWinner(bestRobotTeam, DominationFactor.WON_BY_DUBIOUS_REASONS);
+            }
+        }
+
+        if (winner != null) {
+            running = false;
+        }
     }
 
     // *********************************

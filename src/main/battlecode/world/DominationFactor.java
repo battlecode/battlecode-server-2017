@@ -5,11 +5,11 @@ package battlecode.world;
  */
 public enum DominationFactor {
     /**
-     * Win by highest Archon ID (tiebreak 4).
+     * Win by highest robot ID (tiebreak 4).
      */
     WON_BY_DUBIOUS_REASONS,
     /**
-     * Win by bullet supply plus bullet cost of active robots and trees (tiebreak 3).
+     * Win by bullet supply plus bullet cost of active robots (tiebreak 3).
      */
     BARELY_BEAT,
     /**
