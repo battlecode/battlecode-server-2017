@@ -127,4 +127,45 @@ public final class RobotControllerImpl implements RobotController {
             return array;
         }
     }
+
+    // *********************************
+    // ****** UNIT QUERY METHODS *******
+    // *********************************
+
+    @Override
+    public int getID(){
+        return this.robot.getID();
+    }
+
+    @Override
+    public Team getTeam(){
+        return this.robot.getTeam();
+    }
+
+    @Override
+    public RobotType getType(){
+        return this.robot.getType();
+    }
+
+    @Override
+    public MapLocation getLocation(){
+        return this.robot.getLocation();
+    }
+
+    @Override
+    public float getHealth(){
+        return this.robot.getHealth();
+    }
+
+    @Override
+    public float getCoreDelay(){
+        return this.robot.getCoreDelay();
+    }
+
+    @Override
+    public float getWeaponDelay(){
+        return this.robot.getWeaponDelay();
+    }
+
+    
 }
