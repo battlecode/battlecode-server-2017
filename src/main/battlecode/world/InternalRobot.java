@@ -232,6 +232,8 @@ public class InternalRobot {
     public void processBeginningOfTurn() {
         decrementDelays();
         repairCount = 0;
+        waterCount = 0;
+        shakeCount = 0;
     }
 
     public void processEndOfTurn() {
@@ -239,11 +241,13 @@ public class InternalRobot {
         roundsAlive++;
     }
 
-    public void processEndOfRound() {}
+    public void processEndOfRound() {
 
-    // *********************************
-    // ****** MISC. METHODS ************
-    // *********************************
+    }
+
+    // *****************************************
+    // ****** MISC. METHODS ********************
+    // *****************************************
 
     @Override
     public boolean equals(Object o) {
