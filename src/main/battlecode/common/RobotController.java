@@ -43,7 +43,7 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    double getTeamBullets();
+    float getTeamBullets();
 
     /**
      * Gets the team's total victory points.
@@ -144,7 +144,7 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    double getHealth();
+    float getHealth();
 
     /**
      * Returns the amount of core delay this robot has accumulated. If the result
@@ -155,7 +155,7 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    double getCoreDelay();
+    float getCoreDelay();
 
     /**
      * Returns the amount of weapon delay this robot has accumulated. If the result
@@ -165,7 +165,7 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    double getWeaponDelay();
+    float getWeaponDelay();
 
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
@@ -559,7 +559,7 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    boolean canMove(Direction dir, double scale);
+    boolean canMove(Direction dir, float scale);
 
     /**
      * Moves one stride in the given direction. Note that one stride is equivalent
@@ -591,7 +591,7 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    void move(Direction dir, double scale) throws GameActionException;
+    void move(Direction dir, float scale) throws GameActionException;
 
     // ***********************************
     // ****** ATTACK METHODS *************

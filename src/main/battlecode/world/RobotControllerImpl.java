@@ -45,6 +45,7 @@ public final class RobotControllerImpl implements RobotController {
     // *********************************
     // ******** INTERNAL METHODS *******
     // *********************************
+
     /**
      * @return the robot this controller is connected to
      */
@@ -68,5 +69,62 @@ public final class RobotControllerImpl implements RobotController {
         return robot.getID();
     }
 
-    
+    // *********************************
+    // ****** GLOBAL QUERY METHODS *****
+    // *********************************
+
+    @Override
+    public int getRoundLimit(){
+        return gameWorld.getGameMap().getRounds();
+    }
+
+    @Override
+    public int getRoundNum(){
+        return gameWorld.getCurrentRound();
+    }
+
+    @Override
+    public float getTeamBullets(){
+        return gameWorld.getTeamInfo().getBulletSupply(this.robot.getTeam());
+    }
+
+    @Override
+    public int getTeamVictoryPoints(){
+        return gameWorld.getTeamInfo().getVictoryPoints(this.robot.getTeam());
+    }
+
+    @Override
+    public int getOpponentVictoryPoints(){
+        return gameWorld.getTeamInfo().getVictoryPoints(this.robot.getTeam().opponent());
+    }
+
+    @Override
+    public int getRobotCount(){
+        return gameWorld.getObjectInfo().getRobotCount(this.robot.getTeam());
+    }
+
+    @Override
+    public int getTreeCount(){
+        return gameWorld.getObjectInfo().getTreeCount(this.robot.getTeam());
+    }
+
+    @Override
+    public MapLocation[] getInitialArchonLocations(Team t){
+        if (t == Team.NEUTRAL) {
+            return new MapLocation[0];
+        } else {
+            GameMap.InitialRobotInfo[] initialRobots = gameWorld.getGameMap()
+                    .getInitialRobots();
+            ArrayList<MapLocation> archonLocs = new ArrayList<>();
+            for (GameMap.InitialRobotInfo initial : initialRobots) {
+                if (initial.type == RobotType.ARCHON && initial.team == t) {
+                    archonLocs.add(initial.getLocation(gameWorld.getGameMap()
+                            .getOrigin()));
+                }
+            }
+            MapLocation[] array = archonLocs.toArray(new MapLocation[archonLocs.size()]);
+            Arrays.sort(array);
+            return array;
+        }
+    }
 }
