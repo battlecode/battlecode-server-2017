@@ -184,6 +184,17 @@ public interface RobotController {
     boolean onTheMap(MapLocation loc) throws GameActionException;
 
     /**
+     * Senses whether a given circle is completely on the map. Will throw an exception if
+     * the location is not currently within sensor range.
+     *
+     * @param center the center of the circle to check.
+     * @param radius the radius of the circle to check.
+     * @return true if the circle is completely on the map, false otherwise.
+     * @throws GameActionException if any portion of the given circle is not within sensor range.
+     */
+    boolean onTheMap(MapLocation center, float radius) throws GameActionException;
+
+    /**
      * Returns true if the given location is within the robot's sensor range.
      *
      * @param loc the location to check.
@@ -212,6 +223,16 @@ public interface RobotController {
      * @battlecode.doc.costlymethod
      */
     boolean isLocationOccupied(MapLocation loc) throws GameActionException;
+
+    /**
+     * Returns whether there is any robot or tree within a given circle
+     *
+     * @param center the center of the circle to check.
+     * @param radius the radius of the circle to check.
+     * @return whether there is a robot or tree in the given circle.
+     * @throws GameActionException if any portion of the given circle is not within sensor range.
+     */
+    boolean isCircleOccupied(MapLocation center, float radius) throws GameActionException;
 
     /**
      * Returns the tree at the given location, or null if there is no tree
@@ -542,6 +563,7 @@ public interface RobotController {
      * currently active (no core delay). Note that one stride is equivalent to
      * this robot's body radius in Euclidean distance so scale strides is
      * equivalent to scale times this robot's body radius in Euclidean distance.
+     *
      *
      * @param dir the direction to move in.
      * @param scale the scale of a stride you wish to check. Must be be

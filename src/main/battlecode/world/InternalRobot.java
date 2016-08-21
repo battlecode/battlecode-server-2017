@@ -162,6 +162,10 @@ public class InternalRobot {
     // ****** UPDATE METHODS ********************
     // ******************************************
 
+    public void setLocation(MapLocation loc){
+        this.location = loc;
+    }
+
     private void keepMinHealth(){
         if(health < 0){
             this.health = 0;

@@ -207,21 +207,6 @@ public class ObjectInfo {
     // *** PLAYER METHODS *********
     // ****************************
 
-    public boolean onTheMap(MapLocation loc, float radius){
-        return (onTheMap(loc.translate(-radius, 0)) &&
-                onTheMap(loc.translate(radius, 0)) &&
-                onTheMap(loc.translate(0, -radius)) &&
-                onTheMap(loc.translate(0, radius)));
-    }
-
-    public boolean onTheMap(MapLocation loc){
-        return onTheMap(loc.x, loc.y);
-    }
-
-    public boolean onTheMap(float x, float y){
-        return inBounds(x - mapTopLeft.x, y - mapTopLeft.y);
-    }
-
     public InternalTree[] getAllTreesWithinRadius(MapLocation center, float radius){
         ArrayList<InternalTree> trees = new ArrayList<>();
         int minXPos = convertToXIndex(center.x - radius - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
@@ -299,8 +284,7 @@ public class ObjectInfo {
     }
 
     public boolean isEmpty(MapLocation loc, float radius){
-        return  onTheMap(loc, radius) &&
-                getAllTreesWithinRadius(loc, radius).length == 0 &&
+        return getAllTreesWithinRadius(loc, radius).length == 0 &&
                 getAllRobotsWithinRadius(loc, radius).length == 0;
     }
 

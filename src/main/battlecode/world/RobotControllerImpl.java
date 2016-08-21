@@ -3,7 +3,6 @@ package battlecode.world;
 import battlecode.common.*;
 import static battlecode.common.GameActionExceptionType.*;
 import battlecode.instrumenter.RobotDeathException;
-import battlecode.world.signal.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -83,7 +82,7 @@ public final class RobotControllerImpl implements RobotController {
     private void assertCanSenseCircle(MapLocation center, float radius) throws GameActionException {
         if (!canSenseCircle(center, radius)){
             throw new GameActionException(OUT_OF_RANGE,
-                    "The circle target is not within this robot's sensor range.")
+                    "The circle target is not within this robot's sensor range.");
         }
     }
     
@@ -105,6 +104,27 @@ public final class RobotControllerImpl implements RobotController {
         if(!gameWorld.getObjectInfo().existsBullet(id)){
             throw new GameActionException(CANT_SENSE_THAT,
                     id + " does not exist as a bullet");
+        }
+    }
+
+    private void assertIsCoreReady() throws GameActionException{
+        if(!isCoreReady()){
+            throw new GameActionException(NOT_ACTIVE,
+                    "This robot has core delay.");
+        }
+    }
+
+    private void assertIsWeaponReady() throws GameActionException{
+        if(!isWeaponReady()){
+            throw new GameActionException(NOT_ACTIVE,
+                    "This robot has weapon delay.");
+        }
+    }
+
+    private void assertIsPathable(MapLocation loc) throws GameActionException{
+        if(!onTheMap(loc, getType().bodyRadius) || !isCircleOccupied(loc, getType().bodyRadius)){
+            throw new GameActionException(CANT_MOVE_THERE,
+                    "Cannot move robot to that location");
         }
     }
 
@@ -223,6 +243,13 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     @Override
+    public boolean onTheMap(MapLocation center, float radius) throws GameActionException{
+        assertNotNull(center);
+        assertCanSenseCircle(center, radius);
+        return gameWorld.getGameMap().onTheMap(center, radius);
+    }
+
+    @Override
     public boolean canSenseLocation(MapLocation loc) {
         assertNotNull(loc);
         return this.robot.canSenseLocation(loc);
@@ -240,6 +267,11 @@ public final class RobotControllerImpl implements RobotController {
         assertNotNull(loc);
         assertCanSenseLocation(loc);
         return !gameWorld.getObjectInfo().isEmpty(loc, 0);
+    }
+
+    @Override
+    public boolean isCircleOccupied(MapLocation center, float radius) throws GameActionException{
+        return gameWorld.getObjectInfo().isEmpty(center, radius);
     }
 
     @Override
@@ -398,12 +430,65 @@ public final class RobotControllerImpl implements RobotController {
         List<BulletInfo> validSensedBullets = new ArrayList<>();
         for(InternalBullet sensedBullet : allSensedBullets){
             // check if can sense
-            if(!canSenseLocation(sensedBullet.getLocation()){
+            if(!canSenseLocation(sensedBullet.getLocation())){
                 continue;
             }
 
             validSensedBullets.add(sensedBullet.getBulletInfo());
         }
         return validSensedBullets.toArray(new BulletInfo[validSensedBullets.size()]);
+    }
+
+    // ***********************************
+    // ****** READINESS METHODS **********
+    // ***********************************
+
+    @Override
+    public boolean isCoreReady() {
+        return getCoreDelay() < 1;
+    }
+
+    @Override
+    public boolean isWeaponReady() {
+        return getWeaponDelay() < 1;
+    }
+
+    // ***********************************
+    // ****** MOVEMENT METHODS ***********
+    // ***********************************
+
+    @Override
+    public boolean canMove(Direction dir) {
+        assertNotNull(dir);
+        return canMove(dir, 1);
+    }
+
+    @Override
+    public boolean canMove(Direction dir, float scale) {
+        assertNotNull(dir);
+        scale = scale < 0 ? 0 : scale;
+        scale = scale > 1 ? 1 : scale;
+        MapLocation center = getLocation().add(dir, scale * getType().bodyRadius);
+        return gameWorld.getGameMap().onTheMap(center, getType().bodyRadius) &&
+                gameWorld.getObjectInfo().isEmpty(center, getType().bodyRadius);
+    }
+
+    @Override
+    public void move(Direction dir) throws GameActionException {
+        move(dir, 1);
+    }
+
+    @Override
+    public void move(Direction dir, float scale) throws GameActionException {
+        assertNotNull(dir);
+        assertIsCoreReady();
+        scale = scale < 0 ? 0 : scale;
+        scale = scale > 1 ? 1 : scale;
+        MapLocation newLoc = getLocation().add(dir, scale * getType().bodyRadius);
+        assertIsPathable(newLoc);
+
+        this.robot.addCoreDelay(getType().movementDelay);
+        this.robot.setWeaponDelayUpTo(getType().cooldownDelay);
+        this.robot.setLocation(newLoc);
     }
 }
