@@ -613,9 +613,8 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Strikes and deals damage to all other robots and trees within this
-     * robot's action radius. Note that only Lumberjacks can perform
-     * this function.
+     * Strikes and deals damage to all other robots and trees within one stride of
+     * this robot. Note that only Lumberjacks can perform this function.
      *
      * @throws GameActionException if the robot is not of type LUMBERJACK or
      * cannot attack due to having weapon delay.

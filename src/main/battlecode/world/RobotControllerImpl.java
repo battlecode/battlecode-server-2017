@@ -128,6 +128,13 @@ public final class RobotControllerImpl implements RobotController {
         }
     }
 
+    private void assertHaveBulletCosts(float cost) throws GameActionException{
+        if(cost > getTeamBullets()){
+            throw new GameActionException(NOT_ENOUGH_RESOURCE,
+                    "Not enough bullet supply to perform action");
+        }
+    }
+
     @Override
     public int hashCode() {
         return robot.getID();
@@ -490,5 +497,114 @@ public final class RobotControllerImpl implements RobotController {
         this.robot.addCoreDelay(getType().movementDelay);
         this.robot.setWeaponDelayUpTo(getType().cooldownDelay);
         this.robot.setLocation(newLoc);
+    }
+
+    // ***********************************
+    // ****** ATTACK METHODS *************
+    // ***********************************
+
+    /**
+     * Fires specified bullet spread.  Assumes odd number of bullets to fire.
+     *
+     * @param centerDir direction the center bullet should travel
+     * @param toFire number of bullets to fire.
+     * @param spreadDegrees the spread in degrees at which the bullets should fire.
+     */
+    private void fireBulletSpread(Direction centerDir, int toFire, float spreadDegrees){
+        int bulletsPerSide = (toFire - 1) / 2;
+
+        // Fire center bullet
+        gameWorld.spawnBullet(getTeam(), getType().bulletSpeed, getType().attackPower,
+                getLocation().add(centerDir, getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET), centerDir);
+
+        // Fire side bullets
+        for(int i = 1; i <= bulletsPerSide; i++){
+            // Fire left bullet
+            Direction dirLeft = centerDir.rotateLeftDegrees(i * spreadDegrees);
+            gameWorld.spawnBullet(getTeam(), getType().bulletSpeed, getType().attackPower,
+                    getLocation().add(dirLeft, getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET), dirLeft);
+
+            // Fire right bullet
+            Direction dirRight = centerDir.rotateRightDegrees(i * spreadDegrees);
+            gameWorld.spawnBullet(getTeam(), getType().bulletSpeed, getType().attackPower,
+                    getLocation().add(dirRight, getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET), dirRight);
+        }
+    }
+
+    @Override
+    public void strike() throws GameActionException {
+        assertIsWeaponReady();
+
+        this.robot.addWeaponDelay(getType().attackDelay);
+        this.robot.setCoreDelayUpTo(getType().cooldownDelay);
+
+        // Hit adjacent robots
+        for(InternalRobot hitRobot :
+                gameWorld.getObjectInfo().getAllRobotsWithinRadius(getLocation(), 2*getType().bodyRadius)){
+            if(hitRobot.equals(this.robot)){
+                continue;
+            }
+            hitRobot.damageRobot(getType().attackPower);
+        }
+        // Hit adjacent trees
+        for(InternalTree hitTree :
+                gameWorld.getObjectInfo().getAllTreesWithinRadius(getLocation(), 2*getType().bodyRadius)){
+            hitTree.damageTree(getType().attackPower, getTeam());
+        }
+
+    }
+
+    @Override
+    public boolean canSingleShot() {
+        return gameWorld.getTeamInfo().getBulletSupply(getTeam()) >= GameConstants.SINGLE_SHOT_COST;
+    }
+
+    @Override
+    public boolean canTriadShot() {
+        return gameWorld.getTeamInfo().getBulletSupply(getTeam()) >= GameConstants.TRIAD_SHOT_COST;
+    }
+
+    @Override
+    public boolean canPentadShot() {
+        return gameWorld.getTeamInfo().getBulletSupply(getTeam()) >= GameConstants.PENTAD_SHOT_COST;
+    }
+
+    @Override
+    public void fireSingleShot(Direction dir) throws GameActionException {
+        assertNotNull(dir);
+        assertHaveBulletCosts(GameConstants.SINGLE_SHOT_COST);
+        assertIsWeaponReady();
+
+        this.robot.addWeaponDelay(getType().attackDelay);
+        this.robot.setCoreDelayUpTo(getType().cooldownDelay);
+
+        gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -GameConstants.SINGLE_SHOT_COST);
+        fireBulletSpread(dir, 1, 0);
+    }
+
+    @Override
+    public void fireTriadShot(Direction dir) throws GameActionException {
+        assertNotNull(dir);
+        assertHaveBulletCosts(GameConstants.TRIAD_SHOT_COST);
+        assertIsWeaponReady();
+
+        this.robot.addWeaponDelay(getType().attackDelay);
+        this.robot.setCoreDelayUpTo(getType().cooldownDelay);
+
+        gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -GameConstants.TRIAD_SHOT_COST);
+        fireBulletSpread(dir, 3, GameConstants.TRIAD_SPREAD_DEGREES);
+    }
+
+    @Override
+    public void firePentadShot(Direction dir) throws GameActionException {
+        assertNotNull(dir);
+        assertHaveBulletCosts(GameConstants.PENTAD_SHOT_COST);
+        assertIsWeaponReady();
+
+        this.robot.addWeaponDelay(getType().attackDelay);
+        this.robot.setCoreDelayUpTo(getType().cooldownDelay);
+
+        gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -GameConstants.PENTAD_SHOT_COST);
+        fireBulletSpread(dir, 5, GameConstants.PENTAD_SPREAD_DEGREES);
     }
 }
