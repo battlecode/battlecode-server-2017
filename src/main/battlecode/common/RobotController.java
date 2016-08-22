@@ -1005,18 +1005,65 @@ public interface RobotController {
     void donate(int bullets) throws GameActionException;
 
     /**
-     * Repairs the robot at the given location. The robot must be within the
-     * archon's action radius. You can only repair once a turn. Note this
-     * only works on robots, not trees.
+     * Repairs the robot at the given location. The robot must be within one
+     * stride. You can only repair once a turn. Note this action can only be
+     * performed by ARCHONS and only works on robots, not trees.
      *
      * @param loc the location of the robot to repair.
-     * @throws GameActionException if this robot is not an archon, the location
-     * is out of range, if there is no robot there, if the robot is from the
-     * wrong team, or if you already repaired this turn.
+     * @throws GameActionException if this robot is not an archon, the robot
+     * is out of range, if there is no robot there, or if you already repaired
+     * this turn.
      *
      * @battlecode.doc.costlymethod
      */
     void repair(MapLocation loc) throws GameActionException;
+
+    /**
+     * Repairs the robot with the given id. The robot must be within one
+     * stride. You can only repair once a turn. Note this action can only be
+     * performed by ARCHONS and only works on robots, not trees.
+     *
+     * @param id the id of the robot to repair.
+     * @throws GameActionException if this robot is not an archon, the robot
+     * is out of range, if there is no robot with the given id, or if you
+     * already repaired this turn.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void repair(int id) throws GameActionException;
+
+    /**
+     * Determines whether or not this robot can repair a robot, taking into
+     * account how many times this robot has repaired this turn and this
+     * robot's type
+     *
+     * @return true if this robot can repair a robot, false otherwise.
+     */
+    boolean canRepair();
+
+    /**
+     * Determines whether or not there is a robot at location loc and, if so,
+     * if the robot is within one stride of this robot.
+     *
+     * @param loc the location you wish to test
+     * @return true if there is a robot located at loc and if said robot is
+     * within one stride of this robot
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean canInteractWithRobot(MapLocation loc);
+
+    /**
+     * Determines whether or not there is a robot with the given id and, if so,
+     * if the robot is within one stride of this robot.
+     *
+     * @param id the id of the robot you wish to test
+     * @return true if there is a robot with the given id and if siad robot is
+     * within a stride of this robot
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean canInteractWithRobot(int id);
 
     /**
      * Kills your robot and ends the current round. Never fails.

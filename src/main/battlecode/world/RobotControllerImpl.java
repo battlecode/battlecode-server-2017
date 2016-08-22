@@ -769,17 +769,215 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     @Override
-    public boolean canInteractWithTree(MapLocation treeLoc){
-        assertNotNull(treeLoc);
-        InternalTree tree = gameWorld.getObjectInfo().getTreeAtLocation(treeLoc);
+    public boolean canInteractWithTree(MapLocation loc){
+        assertNotNull(loc);
+        InternalTree tree = gameWorld.getObjectInfo().getTreeAtLocation(loc);
         return tree != null &&
                 canInteractWithCircle(tree.getLocation(), tree.getRadius());
     }
 
     @Override
-    public boolean canInteractWithTree(int treeID){
-        InternalTree tree = gameWorld.getObjectInfo().getTreeByID(treeID);
+    public boolean canInteractWithTree(int id){
+        InternalTree tree = gameWorld.getObjectInfo().getTreeByID(id);
         return tree != null &&
                 canInteractWithCircle(tree.getLocation(), tree.getRadius());
+    }
+
+    // ***********************************
+    // ****** BUILDING/SPAWNING **********
+    // ***********************************
+
+    private void assertCanBuildRobot(RobotType type, Direction dir) throws GameActionException{
+        if(!canBuildRobot(type, dir)){
+            throw new GameActionException(CANT_DO_THAT,
+                    "Can't build desired robot in given direction, possibly due to " +
+                            "insufficient bullet supply, this robot can't build, " +
+                            "or the spawn location is occupied");
+        }
+    }
+
+    private void assertCanBuildTree(Direction dir) throws GameActionException{
+        if(!canBuildTree(dir)){
+            throw new GameActionException(CANT_DO_THAT,
+                    "Can't build a bullet tree in given direction, possibly due to " +
+                            "insufficient bullet supply, this robot can't build, " +
+                            "or the spawn location is occupied");
+        }
+    }
+
+    @Override
+    public boolean hasRobotBuildRequirements(RobotType type) {
+        assertNotNull(type);
+        boolean hasBulletCosts = haveBulletCosts(type.bulletCost);
+        boolean validBuilder = getType() == type.spawnSource;
+        return hasBulletCosts && validBuilder;
+    }
+
+    @Override
+    public boolean hasTreeBuildRequirements() {
+        boolean hasBulletCosts = haveBulletCosts(GameConstants.BULLET_TREE_COST);
+        boolean validBuilder = getType() == RobotType.GARDENER;
+        return hasBulletCosts && validBuilder;
+    }
+
+    @Override
+    public boolean canBuildRobot(RobotType type, Direction dir) {
+        assertNotNull(type);
+        assertNotNull(dir);
+        boolean hasBuildRequirements = hasRobotBuildRequirements(type);
+        float spawnDist = getType().bodyRadius +
+                GameConstants.GENERAL_SPAWN_OFFSET +
+                type.bodyRadius;
+        MapLocation spawnLoc = getLocation().add(dir, spawnDist);
+        boolean isClear = gameWorld.getGameMap().onTheMap(spawnLoc, type.bodyRadius) &&
+                gameWorld.getObjectInfo().isEmpty(spawnLoc, type.bodyRadius);
+        return hasBuildRequirements && isClear;
+    }
+
+    @Override
+    public boolean canBuildTree(Direction dir) {
+        assertNotNull(dir);
+        boolean hasBuildRequirements = hasTreeBuildRequirements();
+        float spawnDist = getType().bodyRadius +
+                GameConstants.GENERAL_SPAWN_OFFSET +
+                GameConstants.BULLET_TREE_RADIUS;
+        MapLocation spawnLoc = getLocation().add(dir, spawnDist);
+        boolean isClear =
+                gameWorld.getGameMap().onTheMap(spawnLoc, GameConstants.BULLET_TREE_RADIUS) &&
+                gameWorld.getObjectInfo().isEmpty(spawnLoc, GameConstants.BULLET_TREE_RADIUS);
+        return hasBuildRequirements && isClear;
+    }
+
+    @Override
+    public void hireGardener(Direction dir) throws GameActionException {
+        assertNotNull(dir);
+        assertIsCoreReady();
+        assertCanBuildRobot(RobotType.GARDENER, dir);
+
+        this.robot.addCoreDelay(getType().movementDelay);
+        this.robot.setWeaponDelayUpTo(getType().cooldownDelay);
+        gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -RobotType.GARDENER.bulletCost);
+
+        float spawnDist = getType().bodyRadius +
+                GameConstants.GENERAL_SPAWN_OFFSET +
+                RobotType.GARDENER.bodyRadius;
+        MapLocation spawnLoc = getLocation().add(dir, spawnDist);
+
+        gameWorld.spawnRobot(RobotType.GARDENER, spawnLoc, getTeam());
+    }
+
+    @Override
+    public void plantRobot(RobotType type, Direction dir) throws GameActionException {
+        assertNotNull(dir);
+        assertIsCoreReady();
+        assertCanBuildRobot(type, dir);
+
+        this.robot.addCoreDelay(getType().movementDelay);
+        this.robot.setWeaponDelayUpTo(getType().cooldownDelay);
+        gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -type.bulletCost);
+
+        float spawnDist = getType().bodyRadius +
+                GameConstants.GENERAL_SPAWN_OFFSET +
+                type.bodyRadius;
+        MapLocation spawnLoc = getLocation().add(dir, spawnDist);
+
+        gameWorld.spawnRobot(type, spawnLoc, getTeam());
+    }
+
+    @Override
+    public void plantBulletTree(Direction dir) throws GameActionException {
+        assertNotNull(dir);
+        assertIsCoreReady();
+        assertCanBuildTree(dir);
+
+        this.robot.addCoreDelay(getType().movementDelay);
+        this.robot.setWeaponDelayUpTo(getType().cooldownDelay);
+        gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -GameConstants.BULLET_TREE_COST);
+
+        float spawnDist = getType().bodyRadius +
+                GameConstants.GENERAL_SPAWN_OFFSET +
+                GameConstants.BULLET_TREE_RADIUS;
+        MapLocation spawnLoc = getLocation().add(dir, spawnDist);
+
+        gameWorld.spawnTree(getTeam(), GameConstants.BULLET_TREE_RADIUS, spawnLoc,
+                0, null);
+    }
+
+    // ***********************************
+    // ****** OTHER ACTION METHODS *******
+    // ***********************************
+
+    private void assertCanRepair() throws GameActionException{
+        if(!canRepair()){
+            throw new GameActionException(CANT_DO_THAT,
+                    "Archons can only repair once per turn");
+        }
+    }
+
+    private void assertCanInteractWithRobot(MapLocation robotLoc) throws GameActionException{
+        if(!canInteractWithRobot(robotLoc)){
+            throw new GameActionException(CANT_DO_THAT,
+                    "Can't interact with a robot that doesn't exist or is outside" +
+                            " this robot's stride.");
+        }
+    }
+
+    private void assertCanInteractWithRobot(int robotID) throws GameActionException{
+        if(!canInteractWithRobot(robotID)){
+            throw new GameActionException(CANT_DO_THAT,
+                    "Can't interact with a robot that doesn't exist or is outside" +
+                            " this robot's stride.");
+        }
+    }
+
+    @Override
+    public void donate(int bullets) throws GameActionException{
+        assertHaveBulletCosts(bullets);
+        int gainedVictorPoints = bullets / GameConstants.BULLET_EXCHANGE_RATE;
+        gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -bullets);
+        gameWorld.getTeamInfo().adjustVictoryPoints(getTeam(), gainedVictorPoints);
+    }
+
+    @Override
+    public void repair(MapLocation loc) throws GameActionException {
+        assertNotNull(loc);
+        assertCanRepair();
+        assertCanInteractWithRobot(loc);
+        InternalRobot robot = gameWorld.getObjectInfo().getRobotAtLocation(loc);
+        repairRobot(robot);
+    }
+
+    @Override
+    public void repair(int id) throws GameActionException {
+        assertCanRepair();
+        assertCanInteractWithRobot(id);
+        InternalRobot robot = gameWorld.getObjectInfo().getRobotByID(id);
+        repairRobot(robot);
+    }
+
+    private void repairRobot(InternalRobot robot){
+        robot.incrementRepairCount();
+        robot.repairRobot(GameConstants.REPAIR_HEALTH_REGEN_RATE);
+    }
+
+    @Override
+    public boolean canRepair(){
+        boolean correctType = getType() == RobotType.ARCHON;
+        return correctType && this.robot.getRepairCount() < 1;
+    }
+
+    @Override
+    public boolean canInteractWithRobot(MapLocation loc){
+        assertNotNull(loc);
+        InternalRobot robot = gameWorld.getObjectInfo().getRobotAtLocation(loc);
+        return robot != null &&
+                canInteractWithCircle(robot.getLocation(), robot.getType().bodyRadius);
+    }
+
+    @Override
+    public boolean canInteractWithRobot(int id){
+        InternalRobot robot = gameWorld.getObjectInfo().getRobotByID(id);
+        return robot != null &&
+                canInteractWithCircle(robot.getLocation(), robot.getType().bodyRadius);
     }
 }

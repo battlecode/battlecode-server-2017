@@ -51,6 +51,9 @@ public interface GameConstants {
     /** The radius of bullet trees */
     float BULLET_TREE_RADIUS = .5F;
 
+    /** The cost in bullets to spawn a bullet tree */
+    float BULLET_TREE_COST = 50;
+
     /** The min radius a neutral tree can have */
     float NEUTRAL_TREE_MIN_RADIUS = .5F;
 
@@ -120,6 +123,15 @@ public interface GameConstants {
     // *********************************
     // ****** MISC. ********************
     // *********************************
+
+    /** The number of bullets required for 1 victory point */
+    int BULLET_EXCHANGE_RATE = 10;
+
+    /**
+     * The distance between the edge of the robot spawning a robot/tree
+     * to spawned robot's/tree's edge
+     */
+    float GENERAL_SPAWN_OFFSET = .01f;
 
     /** The amount of health a tree gains when watered */
     float WATER_HEALTH_REGEN_RATE = 10;

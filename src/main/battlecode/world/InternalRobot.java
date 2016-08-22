@@ -30,7 +30,7 @@ public class InternalRobot {
      * Used to avoid recreating the same RobotInfo object over and over.
      */
     private RobotInfo cachedRobotInfo;
-
+    //TODO: Handle run code delay and healing
     /**
      * Create a new internal representation of a robot
      *
@@ -178,6 +178,10 @@ public class InternalRobot {
         this.shakeCount++;
     }
 
+    public void incrementRepairCount() {
+        this.repairCount++;
+    }
+
     private void keepMinHealth(){
         if(health < 0){
             this.health = 0;
@@ -192,6 +196,11 @@ public class InternalRobot {
 
     public void setBytecodesUsed(int bytecodesUsed){
         this.bytecodesUsed = bytecodesUsed;
+    }
+
+    public void repairRobot(float healAmount){
+        this.health += healAmount;
+        keepMaxHealth();
     }
 
     public void damageRobot(float damage){
