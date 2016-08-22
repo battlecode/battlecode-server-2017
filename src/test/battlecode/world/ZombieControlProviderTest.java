@@ -6,7 +6,6 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.world.control.NullControlProvider;
 import battlecode.world.control.TeamControlProvider;
-import battlecode.world.control.ZombieControlProvider;
 import org.junit.Before;
 import org.junit.Test;
 

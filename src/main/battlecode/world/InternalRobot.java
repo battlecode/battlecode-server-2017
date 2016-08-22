@@ -18,6 +18,7 @@ public class InternalRobot {
     private float health;
 
     private long controlBits;
+    private int currentBytecodeLimit;
     private int bytecodesUsed;
     private int prevBytecodesUsed;
 
@@ -30,7 +31,7 @@ public class InternalRobot {
      * Used to avoid recreating the same RobotInfo object over and over.
      */
     private RobotInfo cachedRobotInfo;
-    //TODO: Handle run code delay and healing
+
     /**
      * Create a new internal representation of a robot
      *
@@ -55,6 +56,7 @@ public class InternalRobot {
         }
 
         this.controlBits = 0;
+        this.currentBytecodeLimit = type.bytecodeLimit;
         this.bytecodesUsed = 0;
         this.prevBytecodesUsed = 0;
 
@@ -194,10 +196,6 @@ public class InternalRobot {
         }
     }
 
-    public void setBytecodesUsed(int bytecodesUsed){
-        this.bytecodesUsed = bytecodesUsed;
-    }
-
     public void repairRobot(float healAmount){
         this.health += healAmount;
         keepMaxHealth();
@@ -267,6 +265,10 @@ public class InternalRobot {
         repairCount = 0;
         waterCount = 0;
         shakeCount = 0;
+        if(getRoundsAlive() < 20){
+            this.repairRobot(.04f * getType().maxHealth);
+        }
+        this.currentBytecodeLimit = getType().bytecodeLimit;
     }
 
     public void processEndOfTurn() {
@@ -276,6 +278,32 @@ public class InternalRobot {
 
     public void processEndOfRound() {
 
+    }
+
+    // *********************************
+    // ****** BYTECODE METHODS *********
+    // *********************************
+
+    public boolean canExecuteCode() {
+        if (getHealth() <= 0.0)
+            return false;
+        return roundsAlive >= 20;
+    }
+
+    public void setBytecodesUsed(int numBytecodes) {
+        bytecodesUsed = numBytecodes;
+    }
+
+    public int getBytecodeLimit() {
+        return canExecuteCode() ? this.currentBytecodeLimit : 0;
+    }
+
+    // *********************************
+    // ****** VARIOUS METHODS **********
+    // *********************************
+
+    public void suicide(){
+        gameWorld.destroyRobot(getID());
     }
 
     // *****************************************

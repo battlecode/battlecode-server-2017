@@ -186,7 +186,7 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      * @battlecode.doc.costlymethod
      */
     public final boolean isWithinSightRadius(RobotInfo robot){
-        return isWithinDistance(robot.location, robot.type.sightRadius);
+        return isWithinDistance(robot.location, robot.type.sensorRadius);
     }
 
     /**
