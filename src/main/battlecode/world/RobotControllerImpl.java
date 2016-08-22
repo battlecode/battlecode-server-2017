@@ -422,6 +422,50 @@ public final class RobotControllerImpl implements RobotController {
         return validSensedBullets.toArray(new BulletInfo[validSensedBullets.size()]);
     }
 
+    @Override
+    public RobotInfo[] senseBroadcastingRobots() {
+        return gameWorld.getPreviousBroadcasters();
+    }
+
+    @Override
+    public RobotInfo[] senseBroadcastingRobots(Team t) {
+        assertNotNull(t);
+        if(t == Team.NEUTRAL){
+            return new RobotInfo[0];
+        }
+        List<RobotInfo> validRobots = new ArrayList<>();
+        for(RobotInfo robot : gameWorld.getPreviousBroadcasters()){
+            if(robot.team == t){
+                validRobots.add(robot);
+            }
+        }
+        return validRobots.toArray(new RobotInfo[validRobots.size()]);
+    }
+
+    @Override
+    public MapLocation[] senseBroadcastingRobotLocations() {
+        List<MapLocation> validLocs = new ArrayList<>();
+        for(RobotInfo robot : gameWorld.getPreviousBroadcasters()){
+            validLocs.add(robot.location);
+        }
+        return validLocs.toArray(new MapLocation[validLocs.size()]);
+    }
+
+    @Override
+    public MapLocation[] senseBroadcastingRobotLocations(Team t) {
+        assertNotNull(t);
+        if(t == Team.NEUTRAL){
+            return new MapLocation[0];
+        }
+        List<MapLocation> validLocs = new ArrayList<>();
+        for(RobotInfo robot : gameWorld.getPreviousBroadcasters()){
+            if(robot.team == t){
+                validLocs.add(robot.location);
+            }
+        }
+        return validLocs.toArray(new MapLocation[validLocs.size()]);
+    }
+
     // ***********************************
     // ****** READINESS METHODS **********
     // ***********************************
@@ -784,6 +828,31 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     // ***********************************
+    // ****** SIGNALING METHODS **********
+    // ***********************************
+
+    private void assertValidChannel(int channel) throws GameActionException{
+        if(channel < 0 || channel >= GameConstants.BROADCAST_MAX_CHANNELS){
+            throw new GameActionException(CANT_DO_THAT,
+                    "Broadcasting channel invalid");
+        }
+    }
+
+    @Override
+    public void broadcast(int channel, int data) throws GameActionException {
+        assertValidChannel(channel);
+        gameWorld.addBroadcaster(this.robot.getRobotInfo());
+        gameWorld.getTeamInfo().broadcast(getTeam(), channel, data);
+    }
+
+    @Override
+    public int readBroadcast(int channel) throws GameActionException {
+        assertValidChannel(channel);
+        return gameWorld.getTeamInfo().readBroadcast(getTeam(), channel);
+    }
+
+
+    // ***********************************
     // ****** BUILDING/SPAWNING **********
     // ***********************************
 
@@ -979,5 +1048,70 @@ public final class RobotControllerImpl implements RobotController {
         InternalRobot robot = gameWorld.getObjectInfo().getRobotByID(id);
         return robot != null &&
                 canInteractWithCircle(robot.getLocation(), robot.getType().bodyRadius);
+    }
+
+    @Override
+    public void disintegrate(){
+        throw new RobotDeathException();
+    }
+
+    @Override
+    public void resign(){
+        int[] robotIDs = gameWorld.getObjectInfo().getRobotIDs();
+        for(int id : robotIDs){
+            if(gameWorld.getObjectInfo().getRobotByID(id).getTeam() == getTeam()){
+                gameWorld.destroyRobot(id);
+            }
+        }
+    }
+
+    // ***********************************
+    // ******** TEAM MEMORY **************
+    // ***********************************
+
+    @Override
+    public void setTeamMemory(int index, long value) {
+        gameWorld.getTeamInfo().setTeamMemory(robot.getTeam(), index, value);
+    }
+
+    @Override
+    public void setTeamMemory(int index, long value, long mask) {
+        gameWorld.getTeamInfo().setTeamMemory(robot.getTeam(), index, value, mask);
+    }
+
+    @Override
+    public long[] getTeamMemory() {
+        long[] arr = gameWorld.getTeamInfo().getOldTeamMemory()[robot.getTeam().ordinal()];
+        return Arrays.copyOf(arr, arr.length);
+    }
+
+    // ***********************************
+    // ******** DEBUG METHODS ************
+    // ***********************************
+
+    @Override
+    public long getControlBits() {
+        return robot.getControlBits();
+    }
+
+    // TODO: Implement debug methods
+    @Override
+    public void setIndicatorString(int stringIndex, String newString) {
+        throw new RuntimeException("Implement Me!");
+    }
+
+    @Override
+    public void setIndicatorDot(MapLocation loc, int red, int green, int blue) {
+        throw new RuntimeException("Implement Me!");
+    }
+
+    @Override
+    public void setIndicatorLine(MapLocation from, MapLocation to, int red, int green, int blue) {
+        throw new RuntimeException("Implement Me!");
+    }
+
+    @Override
+    public void addMatchObservation(String observation) {
+        throw new RuntimeException("Implement Me!");
     }
 }

@@ -32,6 +32,9 @@ public class GameWorld{
     private final TeamInfo teamInfo;
     private final ObjectInfo objectInfo;
 
+    private Collection<RobotInfo> previousBroadcasters;
+    private Map<Integer, RobotInfo> currentBroadcasters;
+
     private final RobotControlProvider controlProvider;
     private final GameStats gameStats = new GameStats();
     private Random rand;
@@ -49,6 +52,9 @@ public class GameWorld{
         this.gameMap = gm;
         this.objectInfo = new ObjectInfo(gm);
         this.teamInfo = new TeamInfo(teamA, teamB, oldTeamMemory);
+
+        this.previousBroadcasters = new ArrayList<>();
+        this.currentBroadcasters = new HashMap<>();
 
         this.controlProvider = cp;
 
@@ -192,6 +198,9 @@ public class GameWorld{
     public void processBeginningOfRound() {
         // Increment round counter
         currentRound++;
+
+        // Update broadcast data
+        updateBroadCastData();
 
         // Process beginning of each robot's round
         for (InternalRobot robot : objectInfo.getAllRobots()) {
@@ -345,6 +354,24 @@ public class GameWorld{
 
     public void destroyBullet(int id){
         objectInfo.destroyBullet(id);
+    }
+
+    // *********************************
+    // ****** BROADCASTING *************
+    // *********************************
+
+    private void updateBroadCastData(){
+        this.previousBroadcasters = this.currentBroadcasters.values();
+        this.currentBroadcasters.clear();
+    }
+
+    public void addBroadcaster(RobotInfo robot){
+        this.currentBroadcasters.put(robot.ID, robot);
+    }
+
+    public RobotInfo[] getPreviousBroadcasters(){
+        return this.previousBroadcasters.toArray(
+                new RobotInfo[this.previousBroadcasters.size()]);
     }
 
 }

@@ -507,7 +507,8 @@ public interface RobotController {
 
     /**
      * Returns an array of all the robots that have broadcasted in the
-     * last round, filtered by team (unconstrained by sensor range or distance)
+     * last round, filtered by team (unconstrained by sensor range or distance).
+     * Will return an empty list if you query for NEUTRAL.
      *
      * @param t - filter robots by the given team.
      * @return an array of all robots of the given team that have
@@ -530,7 +531,8 @@ public interface RobotController {
 
     /**
      * Returns an array of all the locations of the robots that have broadcasted
-     * in the last round, filtered by team (unconstrained by sensor range or distance)
+     * in the last round, filtered by team (unconstrained by sensor range or distance).
+     * Will return an empty list if you query for NEUTRAL.
      *
      * @param t - filter robots by the given team.
      * @return an array of all the locations of the robots of the
@@ -1183,7 +1185,7 @@ public interface RobotController {
     /**
      * Gets this robot's 'control bits' for debugging purposes. These bits can
      * be set manually by the user, so a robot can respond to them. To set these
-     * bits, you must run the client in locksteop mode and right click the
+     * bits, you must run the client in lockstep mode and right click the
      * units.
      *
      * @return this robot's control bits

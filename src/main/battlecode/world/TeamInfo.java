@@ -84,4 +84,16 @@ public class TeamInfo {
         teamMemory[t.ordinal()][index] = n;
     }
 
+    // *********************************
+    // ***** UPDATE METHODS ************
+    // *********************************
+
+    public void broadcast(Team t, int channel, int data){
+        this.teamSharedArrays[t.ordinal()][channel] = data;
+    }
+
+    public int readBroadcast(Team t, int channel){
+        return this.teamSharedArrays[t.ordinal()][channel];
+    }
+
 }
