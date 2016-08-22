@@ -63,6 +63,18 @@ public interface GameConstants {
      */
     float NEUTRAL_TREE_HEALTH_RATE = 100;
 
+    /**
+     * The base damage the chop action deals to trees; note that LUMBERJACK
+     * units deal multiple of this damage.
+     */
+    float BASE_CHOP_DAMAGE = 10;
+
+    /**
+     * The multiplier applied to the base chop damage when lumberjacks perform
+     * the chop action on a tree.
+     */
+    float LUMBERJACK_CHOP_DAMAGE_MULTIPLIER = 5;
+
     // *********************************
     // ****** BULLETS ******************
     // *********************************
@@ -108,6 +120,12 @@ public interface GameConstants {
     // *********************************
     // ****** MISC. ********************
     // *********************************
+
+    /** The amount of health a tree gains when watered */
+    float WATER_HEALTH_REGEN_RATE = 10;
+
+    /** The amount of health a robot gains when repaired by an archon */
+    float REPAIR_HEALTH_REGEN_RATE = 1;
 
     /** The max radius a robot can have */
     float MAX_ROBOT_RADIUS = 2;

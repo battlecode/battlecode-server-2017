@@ -185,7 +185,7 @@ public interface RobotController {
 
     /**
      * Senses whether a given circle is completely on the map. Will throw an exception if
-     * the location is not currently within sensor range.
+     * the circle is not completely within sensor range.
      *
      * @param center the center of the circle to check.
      * @param radius the radius of the circle to check.
@@ -211,7 +211,16 @@ public interface RobotController {
      * @param radius the radius of the circle to check.
      * @return whether a portion of the circle is within the robot's sensor range.
      */
-    boolean canSenseCircle(MapLocation center, float radius);
+    boolean canSensePartOfCircle(MapLocation center, float radius);
+
+    /**
+     * Returns true if all of the given circle is within the robot's sensor range.
+     *
+     * @param center the center of the circle to check.
+     * @param radius the radius of the circle to check.
+     * @return whether all of the circle is within the robot's sensor range.
+     */
+    boolean canSenseAllOfCircle(MapLocation center, float radius);
 
     /**
      * Returns whether there is a robot or tree at the given location.
@@ -223,6 +232,28 @@ public interface RobotController {
      * @battlecode.doc.costlymethod
      */
     boolean isLocationOccupied(MapLocation loc) throws GameActionException;
+
+    /**
+     * Returns whether there is a tree at the given location.
+     *
+     * @param loc the location to check.
+     * @return whether there is a tree at the given location.
+     * @throws GameActionException if the location is not within sensor range.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean isLocationOccupiedByTree(MapLocation loc) throws GameActionException;
+
+    /**
+     * Returns whether there is a robot at the given location.
+     *
+     * @param loc the location to check.
+     * @return whether there is a robot at the given location.
+     * @throws GameActionException if the location is not within sensor range.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean isLocationOccupiedByRobot(MapLocation loc) throws GameActionException;
 
     /**
      * Returns whether there is any robot or tree within a given circle
@@ -259,17 +290,19 @@ public interface RobotController {
     RobotInfo senseRobotAtLocation(MapLocation loc) throws GameActionException;
 
     /**
-     * Returns true if the given tree is within this robot's sensor range.
+     * Returns true if the given tree exists and any part of the given tree is
+     * within this robot's sensor range.
      *
-     * @param id the ID of the robot to query.
-     * @return whether the given robot is within this robot's sensor range.
+     * @param id the ID of the tree to query.
+     * @return whether the given tree is within this robot's sensor range.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canSenseTree(int id);
 
     /**
-     * Returns true if the given robot is within this robot's sensor range.
+     * Returns true if the given robot exists and any part of the given robot is
+     * within this robot's sensor range.
      *
      * @param id the ID of the robot to query.
      * @return whether the given robot is within this robot's sensor range.
@@ -279,12 +312,11 @@ public interface RobotController {
     boolean canSenseRobot(int id);
 
     /**
-     * Returns true if the given bullet is within the robot's bullet
-     * sight range.
+     * Returns true if the given bullet exists and if it is within this robot's
+     * sensor range.
      *
      * @param id the ID of the bullet to query.
-     * @return whether the given bullet is within this robot's bullet
-     *         sight range.
+     * @return whether the given bullet is within this robot's sensor range.
      *
      * @battlecode.doc.costlymethod
      */
@@ -543,8 +575,8 @@ public interface RobotController {
      * without taking any sort of delays into account. Takes into account only
      * the positions of trees, positions of other robots, and the edge of the
      * game map. Does not take into account whether this robot is currently
-     * active (no core delay).  Note that one stride is equivalent to this
-     * robot's body radius in Euclidean distance.
+     * active (no core delay).  Note that one stride is equivalent to
+     * 2*getType().bodyRadius in Euclidean distance.
      *
      * @param dir the direction to move in.
      * @return true if there is nothing preventing this robot from moving one
@@ -561,12 +593,11 @@ public interface RobotController {
      * account only the positions of trees, positions of other robots, and the
      * edge of the game map. Does not take into account whether this robot is
      * currently active (no core delay). Note that one stride is equivalent to
-     * this robot's body radius in Euclidean distance so scale strides is
-     * equivalent to scale times this robot's body radius in Euclidean distance.
+     * 2*getType().bodyRadius in Euclidean distance.
      *
      *
      * @param dir the direction to move in.
-     * @param scale the scale of a stride you wish to check. Must be be
+     * @param scale the scale of a stride you wish to check. Must be
      * from 0 to 1 (inclusive).
      * @return true if there is nothing preventing this robot from moving scale
      * strides in the given direction; false otherwise (does not account for
@@ -578,7 +609,7 @@ public interface RobotController {
 
     /**
      * Moves one stride in the given direction. Note that one stride is equivalent
-     * to this robot's body radius in Euclidean distance.
+     * to 2*getType().bodyRadius in Euclidean distance.
      *
      * @param dir the direction to move in.
      * @throws GameActionException if the robot cannot move one stride in this
@@ -592,9 +623,7 @@ public interface RobotController {
 
     /**
      * Moves scale strides in the given direction. Note that one stride is
-     * equivalent to this robot's body radius in Euclidean distance so scale
-     * strides is equivalent to scale times this robot's body radius in
-     * Euclidean distance.
+     * equivalent to 2*getType().bodyRadius in Euclidean distance.
      *
      * @param dir the direction to move in.
      * @param scale the scale of a stride you wish to move. Must be be
@@ -625,9 +654,10 @@ public interface RobotController {
 
     /**
      * Tells whether there is enough bullets in your bullet supply to
-     * fire a single shot.
+     * fire a single shot and if the robot is of an appropriate type.
      *
-     * @return true if there are enough bullets in the bullet supply
+     * @return true if there are enough bullets in the bullet supply and
+     * this robot is of an appropriate type.
      *
      * @battlecode.doc.costlymethod
      */
@@ -635,9 +665,10 @@ public interface RobotController {
 
     /**
      * Tells whether there is enough bullets in your bullet supply to
-     * fire a triad shot.
+     * fire a triad shot and if the robot is of an appropriate type.
      *
-     * @return true if there are enough bullets in the bullet supply
+     * @return true if there are enough bullets in the bullet supply and
+     * this robot is of an appropriate type.
      *
      * @battlecode.doc.costlymethod
      */
@@ -645,22 +676,23 @@ public interface RobotController {
 
     /**
      * Tells whether there is enough bullets in your bullet supply to
-     * fire a pentad shot.
+     * fire a pentad shot and if the robot is of an appropriate type.
      *
-     * @return true if there are enough bullets in the bullet supply
+     * @return true if there are enough bullets in the bullet supply and
+     * this robot is of an appropriate type.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canPentadShot();
 
     /**
-     * Fires a single bullet in the direction dir at the cost of one bullet
-     * from your team's supply. The speed and damage of the bullet is determined
-     * from the type of this robot.
+     * Fires a single bullet in the direction dir at the cost of
+     * GameConstants.SINGLE_SHOT_COST from your team's bullet supply. The speed
+     * and damage of the bullet is determined from the type of this robot.
      *
      * @param dir the direction you wish to fire the bullet.
      * @throws GameActionException if this robot is not of a type that can
-     * fire bullets (ARCHON, GARDENER, etc.), cannot attack due to having
+     * fire single shots (ARCHON, GARDENER, etc.), cannot attack due to having
      * weapon delay, or for having insufficient bullets in the bullet supply.
      *
      * @battlecode.doc.costlymethod
@@ -669,9 +701,10 @@ public interface RobotController {
 
     /**
      * Fires a three bullets with the center bullet in the direction dir and
-     * with a spread of 20 degrees for the other bullets.  This function costs
-     * four bullets from your team's supply. The speed and damage of the
-     * bullets is determined from the type of this robot.
+     * with a spread of GameConstants.TRIAD_SPREAD_DEGREES degrees for the other
+     * bullets.  This function costs GameConstants.TRIAD_SHOT_COST bullets from
+     * your team's supply. The speed and damage of the bullets is determined
+     * from the type of this robot.
      *
      * @param dir the direction you wish to fire the center bullet.
      * @throws GameActionException if this robot is not of a type that can
@@ -684,9 +717,10 @@ public interface RobotController {
 
     /**
      * Fires a five bullets with the center bullet in the direction dir and
-     * with a spread of 15 degrees for the other bullets.  This function costs
-     * six bullets from your team's supply. The speed and damage of the
-     * bullets is determined from the type of this robot.
+     * with a spread of GameConstants.PENTAD_SPREAD_DEGREES degrees for the other
+     * bullets.  This function costs GameConstants.PENTAD_SHOT_COST bullets from
+     * your team's supply. The speed and damage of the bullets is determined
+     * from the type of this robot.
      *
      * @param dir the direction you wish to fire the center bullet.
      * @throws GameActionException if this robot is not of a type that can
@@ -708,55 +742,128 @@ public interface RobotController {
      * @param loc the location of the tree you wish to chop, does not
      * have to be the center of the tree
      * @throws GameActionException if the given location does not contain
-     * a tree or if the tree (not location) is outside this robot's action
-     * radius
+     * a tree, if the tree (not location) is not within one stride of this
+     * robot, or cannot perform action due to having core delay.
      *
      * @battlecode.doc.costlymethod
      */
     void chop(MapLocation loc) throws GameActionException;
 
     /**
+     * Chops the target tree at location loc. This action is considered a
+     * core action.
+     *
+     * @param id the id of the tree you wish to chop.
+     * @throws GameActionException if there isn't a tree with the given id,
+     * if the tree (not location) is not within one stride of this robot,
+     * or cannot perform action due to having core delay.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void chop(int id) throws GameActionException;
+
+    /**
      * Shakes the target tree at location loc for all the bullets held within
-     * the tree; these bullets will be added to your team's bullet supply. This
-     * method can only be used once per turn per robot.
+     * the tree; these bullets will be added to your team's bullet supply.
+     * Robots can only shake once per turn.
      *
      * @param loc the location of the tree you wish to shake, does not
      * have to be the center of the tree
      * @throws GameActionException if the given location does not contain
-     * a tree or if the tree (not location) is outside this robot's action
-     * radius
+     * a tree, if the tree (not location) is not within one stride of this
+     * robot, or if this robot has already shook a tree this turn
      *
      * @battlecode.doc.costlymethod
      */
     void shake(MapLocation loc) throws GameActionException;
 
     /**
-     * Waters the target tree at location loc, healing 10 health to the tree.
-     * This method can only be used once per turn per robot and only with robots
+     * Shakes the target tree at location loc for all the bullets held within
+     * the tree; these bullets will be added to your team's bullet supply.
+     * Robots can only shake once per turn.
+     *
+     * @param id the id of the tree you wish to shake.
+     * @throws GameActionException if there isn't a tree with the given id,
+     * if the tree (not location) is not within one stride of this robot,
+     * or if this robot has already shook a tree this turn
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void shake(int id) throws GameActionException;
+
+    /**
+     * Waters the target tree at location loc, healing
+     * GameConstants.WATER_HEALTH_REGEN_RATE health to the tree.
+     * Robots can only water once per turn and only with robots
      * of type GARDENER.
      *
      * @param loc the location of the tree you wish to water, does not
      * have to be the center of the tree
      * @throws GameActionException if the given location does not contain
-     * a tree, if the tree (not location) is outside this robot's action
-     * radius, or this robot is not of type GARDENER
+     * a tree, if the tree (not location) is not within one stride of this
+     * robot, or this robot is not of type GARDENER
      *
      * @battlecode.doc.costlymethod
      */
     void water(MapLocation loc) throws GameActionException;
 
     /**
-     * Determines whether or not there is a tree at location loc and if so if the
-     * tree is within the action radius of this robot and can therefore be
+     * Waters the target tree at location loc, healing
+     * GameConstants.WATER_HEALTH_REGEN_RATE health to the tree.
+     * Robots can only water once per turn and only with robots
+     * of type GARDENER.
+     *
+     * @param id the id of the tree you wish to water.
+     * @throws GameActionException if there isn't a tree with the given id,
+     * if the tree (not location) is not within one stride of this robot,
+     * or this robot is not of type GARDENER
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void water(int id) throws GameActionException;
+
+    /**
+     * Determines whether or not this robot can water a tree, taking into
+     * account how many times this robot has watered this turn and this
+     * robot's type
+     *
+     * @return true if this robot can water a tree, false otherwise.
+     */
+    boolean canWater();
+
+    /**
+     * Determines whether or not this robot can shake a tree, taking into
+     * account how many times this robot has shook this turn.
+     *
+     * @return true if this robot can shake a tree, false otherwise.
+     */
+    boolean canShake();
+
+    /**
+     * Determines whether or not there is a tree at location loc and, if so,
+     * if the tree is within one stride of this robot and can therefore be
      * interacted with through chop(), shake(), or water().
      *
      * @param loc the location you wish to test
      * @return true if there is a tree located at loc and if said tree is
-     * within the action radius of this robot
+     * within one stride of this robot
      *
      * @battlecode.doc.costlymethod
      */
     boolean canInteractWithTree(MapLocation loc);
+
+    /**
+     * Determines whether or not there is a tree with the given id and, if so,
+     * if the tree is within one stride of this robot and can therefore be
+     * interacted with through chop(), shake(), or water().
+     *
+     * @param id the id of the tree you wish to test
+     * @return true if there is a tree with the given id and if siad tree is
+     * within a stride of this robot
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean canInteractWithTree(int id);
 
     // ***********************************
     // ****** SIGNALING METHODS **********

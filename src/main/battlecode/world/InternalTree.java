@@ -104,6 +104,10 @@ public class InternalTree {
     // ****** UPDATE METHODS ********************
     // ******************************************
 
+    public void resetContainedBullets(){
+        this.containedBullets = 0;
+    }
+
     private void keepMinHealth(){
         if(health < 0){
             this.health = 0;

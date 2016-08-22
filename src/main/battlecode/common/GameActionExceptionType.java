@@ -14,7 +14,7 @@ public enum GameActionExceptionType {
      */
     NOT_ENOUGH_RESOURCE,
     /**
-     * Indicates when a robot tries to move into non-empty square.
+     * Indicates when a robot tries to move into non-empty location.
      */
     CANT_MOVE_THERE,
     /**
@@ -40,4 +40,9 @@ public enum GameActionExceptionType {
      * no suitable robot there.
      */
     NO_ROBOT_THERE,
+    /**
+     * Indicates when a robot tries to perform an action on tree, but there is
+     * no suitable tree there.
+     */
+    NO_TREE_THERE,
 }

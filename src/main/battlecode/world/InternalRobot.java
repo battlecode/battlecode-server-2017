@@ -158,12 +158,24 @@ public class InternalRobot {
         return this.location.distanceTo(toSense) <= this.type.sensorRadius;
     }
 
+    public boolean canInteractWithLocation(MapLocation toInteract){
+        return this.location.distanceTo(toInteract) <= 2*this.type.bodyRadius;
+    }
+
     // ******************************************
     // ****** UPDATE METHODS ********************
     // ******************************************
 
     public void setLocation(MapLocation loc){
         this.location = loc;
+    }
+
+    public void incrementWaterCount(){
+        this.waterCount++;
+    }
+
+    public void incrementShakeCount(){
+        this.shakeCount++;
     }
 
     private void keepMinHealth(){
