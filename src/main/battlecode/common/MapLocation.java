@@ -162,30 +162,29 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
     }
 
     /**
-     * Determines whether this location is within the action radius of the
-     * given robot
+     * Determines whether this location is within one stride of the given robot
      *
      * @param robot the robot to test
-     * @return true if this location is within robot's action radius,
-     *         false otherwise
+     * @return true if this location is within one stride of the given robot,
+     *          false otherwise
      *
      * @battlecode.doc.costlymethod
      */
-    public final boolean isWithinActionRadius(RobotInfo robot){
-        return isWithinDistance(robot.location, robot.type.actionRadius);
+    public final boolean isWithinStrideDistance(RobotInfo robot){
+        return isWithinDistance(robot.location, 2*robot.type.bodyRadius);
     }
 
     /**
-     * Determines whether this location is within the sight radius of the
+     * Determines whether this location is within the sensor radius of the
      * given robot
      *
      * @param robot the robot to test
-     * @return true if this location is within robot's sight radius,
+     * @return true if this location is within the robot's sensor radius,
      *         false otherwise
      *
      * @battlecode.doc.costlymethod
      */
-    public final boolean isWithinSightRadius(RobotInfo robot){
+    public final boolean isWithinSensorRadius(RobotInfo robot){
         return isWithinDistance(robot.location, robot.type.sensorRadius);
     }
 
