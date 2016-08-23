@@ -54,6 +54,12 @@ public interface GameConstants {
     /** The cost in bullets to spawn a bullet tree */
     float BULLET_TREE_COST = 50;
 
+    /** The amount of health bullet trees lose per turn from decay */
+    float BULLET_TREE_DECAY_RATE = 1;
+
+    /** The amount of bullets produced from one unit of health per bullet tree */
+    float BULLET_TREE_BULLET_PRODUCTION_RATE = .1f;
+
     /** The min radius a neutral tree can have */
     float NEUTRAL_TREE_MIN_RADIUS = .5F;
 

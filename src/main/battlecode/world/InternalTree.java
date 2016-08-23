@@ -13,6 +13,7 @@ public class InternalTree {
     private float radius;
     private MapLocation location;
     private float health;
+    private final float maxHealth;
 
     private float containedBullets;
     private RobotType containedRobot;
@@ -35,8 +36,10 @@ public class InternalTree {
 
         if(team == Team.NEUTRAL){
             this.health = GameConstants.NEUTRAL_TREE_HEALTH_RATE * radius;
+            this.maxHealth = GameConstants.NEUTRAL_TREE_HEALTH_RATE * radius;
         }else{
             this.health = .20F * GameConstants.BULLET_TREE_MAX_HEALTH;
+            this.maxHealth = GameConstants.BULLET_TREE_MAX_HEALTH;
         }
 
         this.containedBullets = containedBullets;
@@ -71,6 +74,10 @@ public class InternalTree {
 
     public float getHealth() {
         return health;
+    }
+
+    public float getMaxHealth() {
+        return maxHealth;
     }
 
     public float getContainedBullets() {
@@ -115,8 +122,8 @@ public class InternalTree {
     }
 
     private void keepMaxHealth(){
-        if(health > 100){
-            this.health = 100;
+        if(health > getMaxHealth()){
+            this.health = getMaxHealth();
         }
     }
 
@@ -127,7 +134,7 @@ public class InternalTree {
     }
 
     public void decayTree(){
-        damageTree(1f, Team.NEUTRAL);
+        damageTree(GameConstants.BULLET_TREE_DECAY_RATE, Team.NEUTRAL);
     }
 
     public void growTree(){
@@ -136,7 +143,7 @@ public class InternalTree {
     }
 
     public void waterTree(){
-        this.health += 10;
+        this.health += GameConstants.WATER_HEALTH_REGEN_RATE;
         keepMaxHealth();
     }
 
@@ -149,13 +156,16 @@ public class InternalTree {
     }
 
     public float updateTree(){
-        if(roundsAlive <= 80){
+        if(getTeam() == Team.NEUTRAL){
+            return 0;
+        }
+        if(getRoundsAlive() <= 80){
             growTree();
             return 0;
         }
 
         decayTree();
-        return this.health * .1F;
+        return this.health * GameConstants.BULLET_TREE_BULLET_PRODUCTION_RATE;
     }
 
     // *********************************
