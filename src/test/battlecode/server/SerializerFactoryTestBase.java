@@ -2,7 +2,6 @@ package battlecode.server;
 
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
-import battlecode.common.Signal;
 import battlecode.common.Team;
 import battlecode.serial.notification.*;
 import battlecode.world.signal.InternalSignal;
