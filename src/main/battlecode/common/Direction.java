@@ -31,6 +31,9 @@ public class Direction {
      * @param dy the y component of the vector
      */
     public Direction(float dx, float dy) {
+        if(dx == 0 && dy ==0){
+            dy = 1;
+        }
         this.radians = (float) Math.atan2(dy, dx) % (2 * (float) Math.PI);
     }
 
@@ -44,6 +47,42 @@ public class Direction {
      */
     public Direction(MapLocation start, MapLocation finish) {
         this(finish.x - start.x, finish.y - start.y);
+    }
+
+    /**
+     * Creates a instance of Direction that represents pointing east (right on screen)
+     *
+     * @return Direction instance facing east
+     */
+    public static Direction getEast(){
+        return new Direction(1, 0);
+    }
+
+    /**
+     * Creates a instance of Direction that represents pointing north (up on screen)
+     *
+     * @return Direction instance facing north
+     */
+    public static Direction getNorth(){
+        return new Direction(0, 1);
+    }
+
+    /**
+     * Creates a instance of Direction that represents pointing west (left on screen)
+     *
+     * @return Direction instance facing west
+     */
+    public static Direction getWest(){
+        return new Direction(-1, 0);
+    }
+
+    /**
+     * Creates a instance of Direction that represents pointing south (down on screen)
+     *
+     * @return Direction instance facing south
+     */
+    public static Direction getSouth(){
+        return new Direction(0, -1);
     }
 
     /**
@@ -150,7 +189,7 @@ public class Direction {
     }
 
     public int hashCode() {
-        return Float.floatToIntBits((float)radians) * 13;
+        return Float.floatToIntBits(radians) * 13;
     }
 
     @Override
