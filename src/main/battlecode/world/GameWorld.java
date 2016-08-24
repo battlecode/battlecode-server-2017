@@ -24,9 +24,7 @@ public class GameWorld{
     protected boolean running = true;
 
     protected Team winner = null;
-    protected final IDGenerator idGeneratorRobots;
-    protected final IDGenerator idGeneratorTrees;
-    protected final IDGenerator idGeneratorBullets;
+    protected final IDGenerator idGenerator;
 
     private final GameMap gameMap;
     private final TeamInfo teamInfo;
@@ -45,9 +43,7 @@ public class GameWorld{
                      long[][] oldTeamMemory) {
         
         this.currentRound = -1;
-        this.idGeneratorRobots = new IDGenerator(gm.getSeed());
-        this.idGeneratorTrees = new IDGenerator(gm.getSeed());
-        this.idGeneratorBullets = new IDGenerator(gm.getSeed());
+        this.idGenerator = new IDGenerator(gm.getSeed());
 
         this.gameMap = gm;
         this.objectInfo = new ObjectInfo(gm);
@@ -300,7 +296,7 @@ public class GameWorld{
 
     public int spawnTree(Team team, float radius, MapLocation center,
                          float containedBullets, RobotType containedRobot){
-        int ID = idGeneratorTrees.nextID();
+        int ID = idGenerator.nextID();
 
         InternalTree tree = new InternalTree(
                 this, ID, team, radius, center, containedBullets, containedRobot);
@@ -310,7 +306,7 @@ public class GameWorld{
     }
 
     public int spawnRobot(RobotType type, MapLocation location, Team team){
-        int ID = idGeneratorRobots.nextID();
+        int ID = idGenerator.nextID();
 
         InternalRobot robot = new InternalRobot(this, ID, type, location, team);
         objectInfo.spawnRobot(robot);
@@ -320,7 +316,7 @@ public class GameWorld{
     }
 
     public int spawnBullet(Team team, float speed, float damage, MapLocation location, Direction direction){
-        int ID = idGeneratorBullets.nextID();
+        int ID = idGenerator.nextID();
 
         InternalBullet bullet = new InternalBullet(
                 this, ID, team, speed, damage, location, direction);
