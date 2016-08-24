@@ -2,8 +2,6 @@ package battlecode.common;
 
 import org.apache.commons.lang3.StringUtils;
 
-import battlecode.schema.*;
-
 import java.io.Serializable;
 
 /**
@@ -34,16 +32,6 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
     public MapLocation(float x, float y) {
         this.x = x;
         this.y = y;
-    }
-    
-    /**
-     * Creates a new MapLocation from a Vec (flatbuffer object)
-     * 
-     * @param v Vec object
-     */
-    public MapLocation(Vec v) {
-        this.x = v.x();
-        this.y = v.y();
     }
 
     /**
