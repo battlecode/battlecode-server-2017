@@ -1,6 +1,7 @@
 package battlecode.world;
 
 import battlecode.common.*;
+import battlecode.schema.Action;
 
 /**
  * The representation of a robot used by the server.
@@ -26,6 +27,8 @@ public class InternalRobot {
     private int repairCount;
     private int shakeCount;
     private int waterCount;
+
+    private boolean healthChanged = false;
 
     /**
      * Used to avoid recreating the same RobotInfo object over and over.
@@ -198,11 +201,13 @@ public class InternalRobot {
 
     public void repairRobot(float healAmount){
         this.health += healAmount;
+        this.healthChanged = true;
         keepMaxHealth();
     }
 
     public void damageRobot(float damage){
         this.health -= damage;
+        this.healthChanged = true;
         keepMinHealth();
         killRobotIfDead();
     }
@@ -258,6 +263,7 @@ public class InternalRobot {
 
     // should be called at the beginning of every round
     public void processBeginningOfRound() {
+        this.healthChanged = false;
     }
 
     public void processBeginningOfTurn() {
@@ -277,7 +283,9 @@ public class InternalRobot {
     }
 
     public void processEndOfRound() {
-
+        if(this.healthChanged){
+            gameWorld.getMatchMaker().addHealthChanged(getID(), getHealth());
+        }
     }
 
     // *********************************
@@ -304,6 +312,8 @@ public class InternalRobot {
 
     public void suicide(){
         gameWorld.destroyRobot(getID());
+
+        gameWorld.getMatchMaker().addAction(getID(), Action.DIE_SUICIDE, 0);
     }
 
     // *****************************************

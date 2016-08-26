@@ -3,6 +3,8 @@ package battlecode.world;
 import battlecode.common.*;
 import static battlecode.common.GameActionExceptionType.*;
 import battlecode.instrumenter.RobotDeathException;
+import battlecode.schema.Action;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -538,6 +540,8 @@ public final class RobotControllerImpl implements RobotController {
         this.robot.addCoreDelay(getType().movementDelay);
         this.robot.setWeaponDelayUpTo(getType().cooldownDelay);
         this.robot.setLocation(newLoc);
+
+        gameWorld.getMatchMaker().addMoved(getID(), getLocation());
     }
 
     // ***********************************
@@ -564,23 +568,38 @@ public final class RobotControllerImpl implements RobotController {
      * @param spreadDegrees the spread in degrees at which the bullets should fire.
      */
     private void fireBulletSpread(Direction centerDir, int toFire, float spreadDegrees){
+        byte actionType;
+        switch (toFire){
+            case 5:
+                actionType = Action.FIRE_PENTAD;
+                break;
+            case 3:
+                actionType = Action.FIRE_TRIAD;
+                break;
+            default:
+                actionType = Action.FIRE;
+        }
+
         int bulletsPerSide = (toFire - 1) / 2;
 
         // Fire center bullet
-        gameWorld.spawnBullet(getTeam(), getType().bulletSpeed, getType().attackPower,
+        int bulletID = gameWorld.spawnBullet(getTeam(), getType().bulletSpeed, getType().attackPower,
                 getLocation().add(centerDir, getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET), centerDir);
+        gameWorld.getMatchMaker().addAction(getID(), actionType, bulletID);
 
         // Fire side bullets
         for(int i = 1; i <= bulletsPerSide; i++){
             // Fire left bullet
             Direction dirLeft = centerDir.rotateLeftDegrees(i * spreadDegrees);
-            gameWorld.spawnBullet(getTeam(), getType().bulletSpeed, getType().attackPower,
+            bulletID = gameWorld.spawnBullet(getTeam(), getType().bulletSpeed, getType().attackPower,
                     getLocation().add(dirLeft, getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET), dirLeft);
+            gameWorld.getMatchMaker().addAction(getID(), actionType, bulletID);
 
             // Fire right bullet
             Direction dirRight = centerDir.rotateRightDegrees(i * spreadDegrees);
-            gameWorld.spawnBullet(getTeam(), getType().bulletSpeed, getType().attackPower,
+            bulletID = gameWorld.spawnBullet(getTeam(), getType().bulletSpeed, getType().attackPower,
                     getLocation().add(dirRight, getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET), dirRight);
+            gameWorld.getMatchMaker().addAction(getID(), actionType, bulletID);
         }
     }
 
@@ -754,6 +773,8 @@ public final class RobotControllerImpl implements RobotController {
         }
 
         tree.damageTree(chopDamage, getTeam());
+
+        gameWorld.getMatchMaker().addAction(getID(), Action.CHOP, 0);
     }
 
     @Override
@@ -777,6 +798,8 @@ public final class RobotControllerImpl implements RobotController {
         this.robot.incrementShakeCount();
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), tree.getContainedBullets());
         tree.resetContainedBullets();
+
+        gameWorld.getMatchMaker().addAction(getID(), Action.SHAKE_TREE, tree.getID());
     }
 
     @Override
@@ -799,6 +822,8 @@ public final class RobotControllerImpl implements RobotController {
     private void waterTree(InternalTree tree){
         this.robot.incrementWaterCount();
         tree.waterTree();
+
+        gameWorld.getMatchMaker().addAction(getID(), Action.WATER_TREE, tree.getID());
     }
 
     @Override
@@ -932,7 +957,9 @@ public final class RobotControllerImpl implements RobotController {
                 RobotType.GARDENER.bodyRadius;
         MapLocation spawnLoc = getLocation().add(dir, spawnDist);
 
-        gameWorld.spawnRobot(RobotType.GARDENER, spawnLoc, getTeam());
+        int robotID = gameWorld.spawnRobot(RobotType.GARDENER, spawnLoc, getTeam());
+
+        gameWorld.getMatchMaker().addAction(getID(), Action.SPAWN_UNIT, robotID);
     }
 
     @Override
@@ -950,7 +977,9 @@ public final class RobotControllerImpl implements RobotController {
                 type.bodyRadius;
         MapLocation spawnLoc = getLocation().add(dir, spawnDist);
 
-        gameWorld.spawnRobot(type, spawnLoc, getTeam());
+        int robotID = gameWorld.spawnRobot(type, spawnLoc, getTeam());
+
+        gameWorld.getMatchMaker().addAction(getID(), Action.SPAWN_UNIT, robotID);
     }
 
     @Override
@@ -968,8 +997,10 @@ public final class RobotControllerImpl implements RobotController {
                 GameConstants.BULLET_TREE_RADIUS;
         MapLocation spawnLoc = getLocation().add(dir, spawnDist);
 
-        gameWorld.spawnTree(getTeam(), GameConstants.BULLET_TREE_RADIUS, spawnLoc,
+        int treeID = gameWorld.spawnTree(getTeam(), GameConstants.BULLET_TREE_RADIUS, spawnLoc,
                 0, null);
+
+        gameWorld.getMatchMaker().addAction(getID(), Action.PLANT_TREE, treeID);
     }
 
     // ***********************************

@@ -5,6 +5,7 @@ import battlecode.server.ErrorReporter;
 import battlecode.server.GameState;
 import battlecode.serial.GameStats;
 import battlecode.world.control.RobotControlProvider;
+import com.google.flatbuffers.FlatBufferBuilder;
 
 import java.util.*;
 
@@ -37,10 +38,13 @@ public class GameWorld{
     private final GameStats gameStats = new GameStats();
     private Random rand;
 
+    private final FlatBufferBuilder builder;
+    private final MatchMaker matchMaker;
+
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, RobotControlProvider cp,
                      String teamA, String teamB,
-                     long[][] oldTeamMemory) {
+                     long[][] oldTeamMemory, FlatBufferBuilder builder) {
         
         this.currentRound = -1;
         this.idGenerator = new IDGenerator(gm.getSeed());
@@ -68,6 +72,12 @@ public class GameWorld{
         }
 
         this.rand = new Random(gameMap.getSeed());
+
+        this.builder = builder;
+        this.matchMaker = new MatchMaker(builder);
+
+        // Write match header at beginning of match
+        matchMaker.makeMatchHeader(gameMap);
     }
 
     /**
@@ -77,6 +87,8 @@ public class GameWorld{
      */
     public synchronized GameState runRound() {
         if (!this.isRunning()) {
+            // Write match footer if game is done
+            matchMaker.makeMatchFooter(winner, currentRound);
             return GameState.DONE;
         }
 
@@ -102,6 +114,8 @@ public class GameWorld{
             return GameState.DONE;
         }
 
+        // Write out round data
+        matchMaker.writeAndClearRoundData();
         return GameState.RUNNING;
     }
 
@@ -175,6 +189,10 @@ public class GameWorld{
         return objectInfo;
     }
 
+    public MatchMaker getMatchMaker() {
+        return matchMaker;
+    }
+
     public Team getWinner() {
         return winner;
     }
@@ -202,6 +220,10 @@ public class GameWorld{
         for (InternalRobot robot : objectInfo.getAllRobots()) {
             robot.processBeginningOfRound();
         }
+        // Process beginning of each tree's round
+        for (InternalTree tree : objectInfo.getAllTrees()) {
+            tree.processBeginningOfRound();
+        }
     }
 
     public void setWinner(Team t, DominationFactor d)  {
@@ -225,6 +247,10 @@ public class GameWorld{
         // Process end of each robot's round
         for (InternalRobot robot : objectInfo.getAllRobots()) {
             robot.processEndOfRound();
+        }
+        // Process end of each tree's round
+        for (InternalTree tree : objectInfo.getAllTrees()) {
+            tree.processEndOfRound();
         }
 
         // Add the round bullet income
@@ -302,6 +328,7 @@ public class GameWorld{
                 this, ID, team, radius, center, containedBullets, containedRobot);
         objectInfo.spawnTree(tree);
 
+        matchMaker.addSpawnedTree(tree);
         return ID;
     }
 
@@ -312,6 +339,7 @@ public class GameWorld{
         objectInfo.spawnRobot(robot);
 
         controlProvider.robotSpawned(robot);
+        matchMaker.addSpawnedRobot(robot);
         return ID;
     }
 
@@ -322,6 +350,7 @@ public class GameWorld{
                 this, ID, team, speed, damage, location, direction);
         objectInfo.spawnBullet(bullet);
 
+        matchMaker.addSpawnedBullet(bullet);
         return ID;
     }
 
@@ -337,6 +366,8 @@ public class GameWorld{
         if(toSpawn != null && destroyedBy != Team.NEUTRAL){
             this.spawnRobot(toSpawn, tree.getLocation(), tree.getTeam());
         }
+
+        matchMaker.addDied(id);
     }
 
     public void destroyRobot(int id){
@@ -346,10 +377,14 @@ public class GameWorld{
         objectInfo.destroyRobot(id);
 
         setWinnerIfDestruction();
+
+        matchMaker.addDied(id);
     }
 
     public void destroyBullet(int id){
         objectInfo.destroyBullet(id);
+
+        matchMaker.addDied(id);
     }
 
     // *********************************

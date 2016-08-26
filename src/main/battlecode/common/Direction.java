@@ -86,6 +86,28 @@ public class Direction {
     }
 
     /**
+     * Computes the signed distance traveled on the x-axis when traveling travelDist
+     * units in this Direction.
+     *
+     * @param travelDist the total distance to travel
+     * @return the signed distance traveled on the x-axis
+     */
+    public float getDeltaX(float travelDist){
+        return (float)(travelDist * Math.cos(this.radians));
+    }
+
+    /**
+     * Computes the signed distance traveled on the y-axis when traveling travelDist
+     * units in this Direction.
+     *
+     * @param travelDist the total distance to travel
+     * @return the signed distance traveled on the x-axis
+     */
+    public float getDeltaY(float travelDist){
+        return (float)(travelDist * Math.sin(this.radians));
+    }
+
+    /**
      * Computes the angle in degrees at which this direction faces
      *
      * @return the angle in degrees this direction faces

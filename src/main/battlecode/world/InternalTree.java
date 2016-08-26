@@ -19,6 +19,7 @@ public class InternalTree {
     private RobotType containedRobot;
 
     private int roundsAlive;
+    private boolean healthChanged;
 
     /**
      * Used to avoid recreating the same TreeInfo object over and over.
@@ -129,8 +130,15 @@ public class InternalTree {
 
     public void damageTree(float damage, Team hitBy){
         this.health -= damage;
+        this.healthChanged = true;
         keepMinHealth();
         killTreeIfDead(hitBy);
+    }
+
+    public void healTree(float healAmount){
+        this.health += healAmount;
+        this.healthChanged = true;
+        keepMaxHealth();
     }
 
     public void decayTree(){
@@ -138,13 +146,11 @@ public class InternalTree {
     }
 
     public void growTree(){
-        this.health += 1;
-        keepMaxHealth();
+        healTree(1);
     }
 
     public void waterTree(){
-        this.health += GameConstants.WATER_HEALTH_REGEN_RATE;
-        keepMaxHealth();
+        healTree(GameConstants.WATER_HEALTH_REGEN_RATE);
     }
 
     public boolean killTreeIfDead(Team destroyedBy){
@@ -166,6 +172,16 @@ public class InternalTree {
 
         decayTree();
         return this.health * GameConstants.BULLET_TREE_BULLET_PRODUCTION_RATE;
+    }
+
+    public void processBeginningOfRound(){
+        this.healthChanged = false;
+    }
+
+    public void processEndOfRound(){
+        if(this.healthChanged){
+            gameWorld.getMatchMaker().addHealthChanged(getID(), getHealth());
+        }
     }
 
     // *********************************
