@@ -228,6 +228,22 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
 
     /**
      * Returns a new MapLocation object representing a location
+     * one unit in distance from this one in the given direction
+     * represented in radians.
+     *
+     * @param radians the radians of the direction to add to this location,
+     *                note that 0 radians points right
+     * @return a MapLocation for the location one unit in distance in the given
+     *         direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final MapLocation add(float radians) {
+        return this.add(new Direction(radians));
+    }
+
+    /**
+     * Returns a new MapLocation object representing a location
      * {@code dist} units away from this one in the given direction.
      *
      * @param direction the direction to add to this location
@@ -241,6 +257,23 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
         float dx = (float)(dist * Math.cos(direction.radians));
         float dy = (float)(dist * Math.sin(direction.radians));
         return new MapLocation(x + dx, y + dy);
+    }
+
+    /**
+     * Returns a new MapLocation object representing a location
+     * {@code dist} units away from this one in the given direction
+     * represented in radians.
+     *
+     * @param radians the radians of the direction to add to this location,
+     *                note that 0 radians points right
+     * @param dist  the distance the locations should be apart
+     * @return a MapLocation for the location dist away from this location
+     *         in the given direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final MapLocation add(float radians, float dist) {
+        return this.add(new Direction(radians), dist);
     }
 
     /**
@@ -260,6 +293,22 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
 
     /**
      * Returns a new MapLocation object representing a location
+     * one unit in distance from this one in the opposite direction of the
+     * given direction represented in radians.
+     *
+     * @param radians the radians of the direction to subtract from this location,
+     *                note that 0 radians points right
+     * @return a MapLocation for the location one unit in distance in the given
+     *         direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final MapLocation subtract(float radians) {
+        return this.subtract(new Direction(radians));
+    }
+
+    /**
+     * Returns a new MapLocation object representing a location
      * {@code dist} units in distance from this one in the opposite direction
      * of the given direction.
      *
@@ -272,6 +321,23 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      */
     public final MapLocation subtract(Direction direction, float dist) {
         return this.add(direction.opposite(), dist);
+    }
+
+    /**
+     * Returns a new MapLocation object representing a location
+     * {@code dist} units in distance from this one in the opposite direction of the
+     * given direction represented in radians.
+     *
+     * @param radians the radians of the direction to subtract from this location,
+     *                note that 0 radians points right
+     * @param dist  the distance the locations should be apart
+     * @return a MapLocation for the location one unit in distance in the given
+     *         direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final MapLocation subtract(float radians, float dist) {
+        return this.subtract(new Direction(radians), dist);
     }
 
     /**
