@@ -5,7 +5,7 @@ package battlecode.common;
  * info is ephemeral and there is no guarantee any of it will remain the same
  * between rounds.
  */
-public class TreeInfo {
+public class TreeInfo implements BodyInfo{
 
     /**
      * The unique ID of the tree.
@@ -20,7 +20,7 @@ public class TreeInfo {
     /**
      * The radius of the tree.
      */
-    public final double radius;
+    public final float radius;
 
     /**
      * The current location of the tree.
@@ -30,13 +30,13 @@ public class TreeInfo {
     /**
      * The current health of the tree.
      */
-    public final double health;
+    public final float health;
 
     /**
      * The current amount of bullets contained within the tree.
      * Note: only NEUTRAL trees can contain bullets
      */
-    public final double containedBullets;
+    public final float containedBullets;
 
     /**
      * The robot contained within the tree that is obtained upon
@@ -47,8 +47,8 @@ public class TreeInfo {
     public final RobotType containedRobot;
 
     public TreeInfo(int ID, Team team, MapLocation location,
-                    double radius, double health,
-                    double containedBullets, RobotType containedRobot) {
+                    float radius, float health,
+                    float containedBullets, RobotType containedRobot) {
         this.ID = ID;
         this.team = team;
         this.location = location;
@@ -56,6 +56,31 @@ public class TreeInfo {
         this.health = health;
         this.containedBullets = containedBullets;
         this.containedRobot = containedRobot;
+    }
+
+    @Override
+    public MapLocation getLocation() {
+        return this.location;
+    }
+
+    @Override
+    public float getRadius() {
+        return this.radius;
+    }
+
+    @Override
+    public boolean isRobot() {
+        return false;
+    }
+
+    @Override
+    public boolean isTree() {
+        return true;
+    }
+
+    @Override
+    public boolean isBullet() {
+        return false;
     }
 
     public int hashCode() {

@@ -5,7 +5,7 @@ package battlecode.common;
  * info is ephemeral and there is no guarantee any of it will remain the same
  * between rounds.
  */
-public class RobotInfo {
+public class RobotInfo implements  BodyInfo{
 
     /**
      * The unique ID of the robot.
@@ -41,6 +41,31 @@ public class RobotInfo {
      * The current health of the robot.
      */
     public final double health;
+
+    @Override
+    public MapLocation getLocation() {
+        return this.location;
+    }
+
+    @Override
+    public float getRadius() {
+        return this.type.bodyRadius;
+    }
+
+    @Override
+    public boolean isRobot() {
+        return true;
+    }
+
+    @Override
+    public boolean isTree() {
+        return false;
+    }
+
+    @Override
+    public boolean isBullet() {
+        return false;
+    }
 
     public RobotInfo(int ID, Team team, RobotType type, MapLocation location,
                      double coreDelay, double weaponDelay, double health) {

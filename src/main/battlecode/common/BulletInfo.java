@@ -5,7 +5,7 @@ package battlecode.common;
  * info is ephemeral and there is no guarantee any of it will remain the same
  * between rounds.
  */
-public class BulletInfo {
+public class BulletInfo implements BodyInfo{
 
     /**
      * The unique ID of the bullet.
@@ -39,6 +39,31 @@ public class BulletInfo {
         this.speed = speed;
         this.damage = damage;
         this.location = location;
+    }
+
+    @Override
+    public MapLocation getLocation() {
+        return this.location;
+    }
+
+    @Override
+    public float getRadius() {
+        return 0;
+    }
+
+    @Override
+    public boolean isRobot() {
+        return false;
+    }
+
+    @Override
+    public boolean isTree() {
+        return false;
+    }
+
+    @Override
+    public boolean isBullet() {
+        return true;
     }
 
     public int hashCode() {
