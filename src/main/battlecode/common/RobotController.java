@@ -738,8 +738,8 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Chops the target tree at location loc. This action is considered a
-     * core action.
+     * Chops the target tree at location loc. This action counts as a movement,
+     * adding core and weapon delay.
      *
      * @param loc the location of the tree you wish to chop, does not
      * have to be the center of the tree
@@ -752,8 +752,8 @@ public interface RobotController {
     void chop(MapLocation loc) throws GameActionException;
 
     /**
-     * Chops the target tree at location loc. This action is considered a
-     * core action.
+     * Chops the target tree at location loc. This action counts as a movement,
+     * adding core and weapon delay.
      *
      * @param id the id of the tree you wish to chop.
      * @throws GameActionException if there isn't a tree with the given id,
