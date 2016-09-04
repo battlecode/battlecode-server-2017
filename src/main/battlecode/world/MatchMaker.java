@@ -20,7 +20,8 @@ public class MatchMaker {
     private List<Integer> events; // EventWrappers
 
     private List<Integer> movedIDs; // ints
-    private List<Integer> movedLocs; // Vecs
+    private List<Float> movedLocsXs; // floats (for VecTable)
+    private List<Float> movedLocsYs; // floats (for VecTable)
 
     private List<Integer> spawned; // SpawnedBody
 
