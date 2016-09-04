@@ -4,7 +4,7 @@ package battlecode.common;
  * This class is an immutable representation of a direction
  * in the battlecode world.
  */
-public class Direction {
+public final class Direction {
 
     /**
      * The radians at which this direction is facing based off of
