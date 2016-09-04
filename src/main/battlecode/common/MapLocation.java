@@ -30,8 +30,8 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      * @battlecode.doc.costlymethod
      */
     public MapLocation(float x, float y) {
-        this.x = x;
-        this.y = y;
+        this.x = x == Float.NaN ? 0 : x;
+        this.y = y == Float.NaN ? 0 : y;
     }
 
     /**
