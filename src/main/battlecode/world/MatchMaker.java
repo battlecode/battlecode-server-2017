@@ -20,10 +20,17 @@ public class MatchMaker {
     private List<Integer> events; // EventWrappers
 
     private List<Integer> movedIDs; // ints
-    private List<Float> movedLocsXs; // floats (for VecTable)
-    private List<Float> movedLocsYs; // floats (for VecTable)
+    // VecTable for movedLocs in Round
+    private List<Float> movedLocsXs;
+    private List<Float> movedLocsYs;
 
-    private List<Integer> spawned; // SpawnedBody
+    // SpawnedBodyTable for spawned
+    private List<Integer> spawnedRobotIDs;
+    private List<Byte> spawnedTeamIDs;
+    private List<Byte> spawnedTypes;
+    private List<Float> spawnedRadii;
+    private List<Float> spawnedLocsXs; //For locs
+    private List<Float> spawnedLocsYs; //For locs
 
     private List<Integer> healthChangedIDs; // ints
     private List<Float> healthChangedLevels; // floats
@@ -38,8 +45,14 @@ public class MatchMaker {
         this.builder = builder;
         this.events = new ArrayList<>();
         this.movedIDs = new ArrayList<>();
-        this.movedLocs = new ArrayList<>();
-        this.spawned = new ArrayList<>();
+        this.movedLocsXs = new ArrayList<>();
+        this.movedLocsYs = new ArrayList<>();
+        this.spawnedRobotIDs = new ArrayList<>();
+        this.spawnedTeamIDs = new ArrayList<>();
+        this.spawnedTypes = new ArrayList<>();
+        this.spawnedRadii = new ArrayList<>();
+        this.spawnedLocsXs = new ArrayList<>();
+        this.spawnedLocsYs = new ArrayList<>();
         this.healthChangedIDs = new ArrayList<>();
         this.healthChangedLevels = new ArrayList<>();
         this.diedIDs = new ArrayList<>();
@@ -94,8 +107,26 @@ public class MatchMaker {
     // Called by writeAndClearRoundData
     public void makeRound(){
         int[] movedIDs = ArrayUtils.toPrimitive(this.movedIDs.toArray(new Integer[this.movedIDs.size()]));
-        int[] movedLocs = ArrayUtils.toPrimitive(this.movedLocs.toArray(new Integer[this.movedLocs.size()]));
-        int[] spawned = ArrayUtils.toPrimitive(this.spawned.toArray(new Integer[this.spawned.size()]));
+
+        int movedLocs = VecTable.createVecTable(builder,
+                VecTable.createXsVector(builder, ArrayUtils.toPrimitive(movedLocsXs.toArray(new Float[movedLocsXs.size()]))),
+                VecTable.createYsVector(builder, ArrayUtils.toPrimitive(movedLocsYs.toArray(new Float[movedLocsYs.size()]))));
+
+        SpawnedBodyTable.startSpawnedBodyTable(builder);
+        int robotIDs = SpawnedBodyTable.createRobotIDsVector(builder, ArrayUtils.toPrimitive(spawnedRobotIDs.toArray(new Integer[spawnedRobotIDs.size()])));
+        int teamIDs = SpawnedBodyTable.createTeamIDsVector(builder, ArrayUtils.toPrimitive(spawnedTeamIDs.toArray(new Byte[spawnedTeamIDs.size()])));
+        int types = SpawnedBodyTable.createTypesVector(builder, ArrayUtils.toPrimitive(spawnedTypes.toArray(new Byte[spawnedTypes.size()])));
+        int radii = SpawnedBodyTable.createRadiiVector(builder, ArrayUtils.toPrimitive(spawnedRadii.toArray(new Float[spawnedRadii.size()])));
+        int locs = VecTable.createVecTable(builder,
+                VecTable.createXsVector(builder, ArrayUtils.toPrimitive(spawnedLocsXs.toArray(new Float[spawnedLocsXs.size()]))),
+                VecTable.createYsVector(builder, ArrayUtils.toPrimitive(spawnedLocsYs.toArray(new Float[spawnedLocsYs.size()]))));
+        SpawnedBodyTable.addRobotIDs(builder, robotIDs);
+        SpawnedBodyTable.addTeamIDs(builder, teamIDs);
+        SpawnedBodyTable.addTypes(builder, types);
+        SpawnedBodyTable.addRadii(builder, radii);
+        SpawnedBodyTable.addLocs(builder, locs);
+        int spawned = SpawnedBodyTable.endSpawnedBodyTable(builder);
+
         int[] healthChangedIDs = ArrayUtils.toPrimitive(this.healthChangedIDs.toArray(new Integer[this.healthChangedIDs.size()]));
         float[] healthChangedLevels = ArrayUtils.toPrimitive(this.healthChangedLevels.toArray(new Float[this.healthChangedLevels.size()]));
         int[] diedIDs = ArrayUtils.toPrimitive(this.diedIDs.toArray(new Integer[this.diedIDs.size()]));
@@ -106,8 +137,8 @@ public class MatchMaker {
         // Make the Round
         Round.startRound(builder);
         Round.addMovedIDs(builder, Round.createMovedIDsVector(builder,movedIDs));
-        Round.addMovedLocs(builder, Round.createMovedLocsVector(builder,movedLocs));
-        Round.addSpawned(builder, Round.createSpawnedVector(builder,spawned));
+        Round.addMovedLocs(builder, movedLocs);
+        Round.addSpawned(builder, spawned);
         Round.addHealthChangedIDs(builder, Round.createHealthChangedIDsVector(builder,healthChangedIDs));
         Round.addHealthChangeLevels(builder, Round.createHealthChangeLevelsVector(builder,healthChangedLevels));
         Round.addDiedIDs(builder, Round.createDiedIDsVector(builder,diedIDs));
@@ -128,8 +159,14 @@ public class MatchMaker {
     public void writeAndClearRoundData(){
         makeRound();
         movedIDs.clear();
-        movedLocs.clear();
-        spawned.clear();
+        movedLocsXs.clear();
+        movedLocsYs.clear();
+        spawnedRobotIDs.clear();
+        spawnedTeamIDs.clear();
+        spawnedTypes.clear();
+        spawnedRadii.clear();
+        spawnedLocsXs.clear();
+        spawnedLocsYs.clear();
         healthChangedIDs.clear();
         healthChangedLevels.clear();
         diedIDs.clear();
@@ -144,9 +181,9 @@ public class MatchMaker {
 
     // Called in RobotControllerImpl in move
     public void addMoved(int id, MapLocation newLocaction){
-        int vec = Vec.createVec(builder, newLocaction.x, newLocaction.y);
         movedIDs.add(id);
-        movedLocs.add(vec);
+        movedLocsXs.add(newLocaction.x);
+        movedLocsYs.add(newLocaction.y);
     }
 
     // Called in InternalRobot/InternalTree in processEndOfRound
@@ -169,9 +206,10 @@ public class MatchMaker {
 
     // Called in GameWorld in spawnRobot
     public void addSpawnedRobot(InternalRobot robot){
-        int robotID     = robot.getID();
-        float radius    = robot.getType().bodyRadius;
-        int loc         = Vec.createVec(builder, robot.getLocation().x, robot.getLocation().y);
+        spawnedRobotIDs.add(robot.getID());
+        spawnedRadii.add(robot.getType().bodyRadius);
+        spawnedLocsXs.add(robot.getLocation().x);
+        spawnedLocsYs.add(robot.getLocation().y);
         byte teamID;
         switch (robot.getTeam()){
             case A:
@@ -183,6 +221,7 @@ public class MatchMaker {
             default:
                 teamID = 2;
         }
+        spawnedTeamIDs.add(teamID);
         byte type;
         switch (robot.getType()){
             case ARCHON:
@@ -206,21 +245,15 @@ public class MatchMaker {
             default:
                 type = BodyType.SCOUT;
         }
-
-        SpawnedBody.startSpawnedBody(builder);
-        SpawnedBody.addRobotID(builder, robotID);
-        SpawnedBody.addTeamID(builder, teamID);
-        SpawnedBody.addType(builder, type);
-        SpawnedBody.addRadius(builder, radius);
-        SpawnedBody.addLoc(builder, loc);
-        spawned.add(SpawnedBody.endSpawnedBody(builder));
+        spawnedTeamIDs.add(type);
     }
 
     // Called in GameWorld in spawnTree
     public void addSpawnedTree(InternalTree tree){
-        int robotID     = tree.getID();
-        float radius    = tree.getRadius();
-        int loc         = Vec.createVec(builder, tree.getLocation().x, tree.getLocation().y);
+        spawnedRobotIDs.add(tree.getID());
+        spawnedRadii.add(tree.getRadius());
+        spawnedLocsXs.add(tree.getLocation().x);
+        spawnedLocsYs.add(tree.getLocation().y);
         byte type;
         byte teamID;
         switch (tree.getTeam()){
@@ -236,25 +269,17 @@ public class MatchMaker {
                 type = BodyType.TREE_NEUTRAL;
                 teamID = 2;
         }
-
-        SpawnedBody.startSpawnedBody(builder);
-        SpawnedBody.addRobotID(builder, robotID);
-        SpawnedBody.addTeamID(builder, teamID);
-        SpawnedBody.addType(builder, type);
-        SpawnedBody.addRadius(builder, radius);
-        SpawnedBody.addLoc(builder, loc);
-        spawned.add(SpawnedBody.endSpawnedBody(builder));
+        spawnedTeamIDs.add(teamID);
+        spawnedTypes.add(type);
     }
 
     // Called in GameWorld in spawnBullet
     public void addSpawnedBullet(InternalBullet bullet){
-        int robotID     = bullet.getID();
-        float radius    = 0;
-        int loc         = Vec.createVec(builder, bullet.getLocation().x, bullet.getLocation().y);
-        int vel         = Vec.createVec(builder,
-                bullet.getDirection().getDeltaX(bullet.getSpeed()),
-                bullet.getDirection().getDeltaY(bullet.getSpeed()));
-        byte type       = BodyType.BULLET;
+        spawnedRobotIDs.add(bullet.getID());
+        spawnedRadii.add(0f);
+        spawnedLocsXs.add(bullet.getLocation().x);
+        spawnedLocsYs.add(bullet.getLocation().y);
+        spawnedTypes.add(BodyType.BULLET);
         byte teamID;
         switch (bullet.getTeam()){
             case A:
@@ -266,15 +291,7 @@ public class MatchMaker {
             default:
                 teamID = 2;
         }
-
-        SpawnedBody.startSpawnedBody(builder);
-        SpawnedBody.addRobotID(builder, robotID);
-        SpawnedBody.addTeamID(builder, teamID);
-        SpawnedBody.addType(builder, type);
-        SpawnedBody.addRadius(builder, radius);
-        SpawnedBody.addLoc(builder, loc);
-        SpawnedBody.addVel(builder, vel);
-        spawned.add(SpawnedBody.endSpawnedBody(builder));
+        spawnedTeamIDs.add(teamID);
     }
 
 }

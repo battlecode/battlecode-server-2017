@@ -67,7 +67,7 @@ public enum RobotType {
     /**
      * Maximum health for the robot.
      */
-    public final float maxHealth;
+    public final int maxHealth;
 
     /**
      * Cost for creating the robot.
@@ -77,12 +77,12 @@ public enum RobotType {
     /**
      * Radius for the robot.
      */
-    public final int bodyRadius;
+    public final float bodyRadius;
 
     /**
      * Speed of bullets produced from the robot.
      */
-    public final int bulletSpeed;
+    public final float bulletSpeed;
 
     /**
      * Base damage per attack.
@@ -92,12 +92,12 @@ public enum RobotType {
     /**
      * Range for sensing robots and trees.
      */
-    public final int sensorRadius;
+    public final float sensorRadius;
 
     /**
      * Range for sensing bullets.
      */
-    public final int bulletSightRadius;
+    public final float bulletSightRadius;
 
     /**
      * Movement delay: the amount of contribution to core delay from a movement.
@@ -164,8 +164,8 @@ public enum RobotType {
         return spawnSource == GARDENER;
     }
     
-    RobotType(RobotType spawnSource, int maxHealth, int bulletCost, int bodyRadius, int bulletSpeed, float attackPower,
-              int sensorRadius, int bulletSightRadius, float movementDelay, float attackDelay,
+    RobotType(RobotType spawnSource, int maxHealth, int bulletCost, float bodyRadius, float bulletSpeed, float attackPower,
+              float sensorRadius, float bulletSightRadius, float movementDelay, float attackDelay,
               float cooldownDelay, int bytecodeLimit) {
         this.spawnSource        = spawnSource;
         this.maxHealth          = maxHealth;
