@@ -12,7 +12,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * This class contains the code for reading an XML map file and converting it
+ * This class contains the code for reading a flatbuffer map file and converting it
  * to a proper GameMap.
  */
 public final class GameMapIO {
