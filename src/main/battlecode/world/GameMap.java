@@ -52,7 +52,7 @@ public class GameMap {
      * i.e. in game correct MapLocations that need to have the origin
      * subtracted from them to be used to index into the map arrays.
      */
-    private final ArrayList<BodyInfo> initialBodies;
+    private final BodyInfo[] initialBodies;
 
     /**
      * Creates a deep copy of the input GameMap.
@@ -87,13 +87,15 @@ public class GameMap {
         this.seed = schemaMap.randomSeed();
         this.mapName = schemaMap.name();
         this.rounds = GameConstants.GAME_DEFAULT_ROUNDS;
-        this.initialBodies = new ArrayList<>();
 
+        ArrayList<BodyInfo> initBodies = new ArrayList<>();
         SpawnedBodyTable bodyTable = schemaMap.bodies();
-        initInitialBodiesFromSchemaBodyTable(bodyTable, teamInfo);
+        initInitialBodiesFromSchemaBodyTable(bodyTable, teamInfo, initBodies);
 
         NeutralTreeTable treeTable = schemaMap.trees();
-        initInitialBodiesFromSchemaNeutralTreeTable(treeTable);
+        initInitialBodiesFromSchemaNeutralTreeTable(treeTable, initBodies);
+
+        this.initialBodies = initBodies.toArray(new BodyInfo[initBodies.size()]);
     }
 
     @Override
@@ -164,7 +166,7 @@ public class GameMap {
     /**
      * Determines whether or not the specified location is on the map.
      *
-     * @param location the MapLocation to test
+     * @param loc the MapLocation to test
      * @return true if the given location is on the map,
      *         false if it's not
      */
@@ -193,7 +195,7 @@ public class GameMap {
      * @return the list of starting bodies on the map.
      *         MUST NOT BE MODIFIED.
      */
-    public ArrayList<BodyInfo> getInitialBodies() {
+    public BodyInfo[] getInitialBodies() {
         return initialBodies;
     }
 
@@ -226,9 +228,9 @@ public class GameMap {
     // *** HELPER METHODS *********
     // ****************************
 
-    private void initInitialBodiesFromSchemaBodyTable(SpawnedBodyTable bodyTable, TeamInfo teamInfo){
+    private void initInitialBodiesFromSchemaBodyTable(SpawnedBodyTable bodyTable, TeamInfo teamInfo, ArrayList<BodyInfo> initialBodies){
         // Assumes no neutral trees
-        for(int i = 0; i < bodyTable.robotIDsLength()){
+        for(int i = 0; i < bodyTable.robotIDsLength(); i++){
             RobotType bodyType = getRobotTypeFromSchemaBodyType(bodyTable.types(i));
             int bodyID = bodyTable.robotIDs(i);
             float bodyX = bodyTable.locs().xs(i);
@@ -242,14 +244,14 @@ public class GameMap {
         }
     }
 
-    private void initInitialBodiesFromSchemaNeutralTreeTable(NeutralTreeTable treeTable){
+    private void initInitialBodiesFromSchemaNeutralTreeTable(NeutralTreeTable treeTable, ArrayList<BodyInfo> initialBodies){
         for(int i = 0; i < treeTable.robotIDsLength(); i++){
             int bodyID = treeTable.robotIDs(i);
             float bodyX = treeTable.locs().xs(i);
             float bodyY = treeTable.locs().ys(i);
             float bodyRadius = treeTable.radii(i);
             float containedBullets = treeTable.containedBullets(i);
-            RobotType containedType = getRobotTypeFromSchemaBodyType(treeTable.containedBody(i));
+            RobotType containedType = getRobotTypeFromSchemaBodyType(treeTable.containedBodies(i));
             initialBodies.add(new TreeInfo(bodyID, Team.NEUTRAL, new MapLocation(bodyX, bodyY),
                     bodyRadius, 0, containedBullets, containedType));
         }
