@@ -40,29 +40,19 @@ public final class NeutralTreeTable extends Table {
   public int containedBulletsLength() { int o = __offset(10); return o != 0 ? __vector_len(o) : 0; }
   public ByteBuffer containedBulletsAsByteBuffer() { return __vector_as_bytebuffer(10, 4); }
   /**
-   * The bodies contained within the trees (one table for each tree;
-   * teamIDs and robotIDs will be unset.)
+   * The bodies contained within the trees.
    */
-  public SpawnedBodyTable containedBodies(int j) { return containedBodies(new SpawnedBodyTable(), j); }
-  public SpawnedBodyTable containedBodies(SpawnedBodyTable obj, int j) { int o = __offset(12); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public byte containedBodies(int j) { int o = __offset(12); return o != 0 ? bb.get(__vector(o) + j * 1) : 0; }
   public int containedBodiesLength() { int o = __offset(12); return o != 0 ? __vector_len(o) : 0; }
-  /**
-   * The trees contained within the trees.
-   * IT COULD BE COOL SHUT UP.
-   */
-  public NeutralTreeTable containedTrees(int j) { return containedTrees(new NeutralTreeTable(), j); }
-  public NeutralTreeTable containedTrees(NeutralTreeTable obj, int j) { int o = __offset(14); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int containedTreesLength() { int o = __offset(14); return o != 0 ? __vector_len(o) : 0; }
+  public ByteBuffer containedBodiesAsByteBuffer() { return __vector_as_bytebuffer(12, 1); }
 
   public static int createNeutralTreeTable(FlatBufferBuilder builder,
       int robotIDsOffset,
       int locsOffset,
       int radiiOffset,
       int containedBulletsOffset,
-      int containedBodiesOffset,
-      int containedTreesOffset) {
-    builder.startObject(6);
-    NeutralTreeTable.addContainedTrees(builder, containedTreesOffset);
+      int containedBodiesOffset) {
+    builder.startObject(5);
     NeutralTreeTable.addContainedBodies(builder, containedBodiesOffset);
     NeutralTreeTable.addContainedBullets(builder, containedBulletsOffset);
     NeutralTreeTable.addRadii(builder, radiiOffset);
@@ -71,7 +61,7 @@ public final class NeutralTreeTable extends Table {
     return NeutralTreeTable.endNeutralTreeTable(builder);
   }
 
-  public static void startNeutralTreeTable(FlatBufferBuilder builder) { builder.startObject(6); }
+  public static void startNeutralTreeTable(FlatBufferBuilder builder) { builder.startObject(5); }
   public static void addRobotIDs(FlatBufferBuilder builder, int robotIDsOffset) { builder.addOffset(0, robotIDsOffset, 0); }
   public static int createRobotIDsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt(data[i]); return builder.endVector(); }
   public static void startRobotIDsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
@@ -83,11 +73,8 @@ public final class NeutralTreeTable extends Table {
   public static int createContainedBulletsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt(data[i]); return builder.endVector(); }
   public static void startContainedBulletsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
   public static void addContainedBodies(FlatBufferBuilder builder, int containedBodiesOffset) { builder.addOffset(4, containedBodiesOffset, 0); }
-  public static int createContainedBodiesVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
-  public static void startContainedBodiesVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
-  public static void addContainedTrees(FlatBufferBuilder builder, int containedTreesOffset) { builder.addOffset(5, containedTreesOffset, 0); }
-  public static int createContainedTreesVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
-  public static void startContainedTreesVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
+  public static int createContainedBodiesVector(FlatBufferBuilder builder, byte[] data) { builder.startVector(1, data.length, 1); for (int i = data.length - 1; i >= 0; i--) builder.addByte(data[i]); return builder.endVector(); }
+  public static void startContainedBodiesVector(FlatBufferBuilder builder, int numElems) { builder.startVector(1, numElems, 1); }
   public static int endNeutralTreeTable(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;

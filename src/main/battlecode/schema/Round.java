@@ -85,6 +85,12 @@ public final class Round extends Table {
   public int actionTargets(int j) { int o = __offset(24); return o != 0 ? bb.getInt(__vector(o) + j * 4) : 0; }
   public int actionTargetsLength() { int o = __offset(24); return o != 0 ? __vector_len(o) : 0; }
   public ByteBuffer actionTargetsAsByteBuffer() { return __vector_as_bytebuffer(24, 4); }
+  /**
+   * The first sent Round in a match should have index 1. (The starting state,
+   * created by the MatchHeader, can be thought to have index 0.)
+   * It should increase by one for each following round.
+   */
+  public int roundID() { int o = __offset(26); return o != 0 ? bb.getInt(o + bb_pos) : 0; }
 
   public static int createRound(FlatBufferBuilder builder,
       int movedIDsOffset,
@@ -97,8 +103,10 @@ public final class Round extends Table {
       int diedBulletIDsOffset,
       int actionIDsOffset,
       int actionsOffset,
-      int actionTargetsOffset) {
-    builder.startObject(11);
+      int actionTargetsOffset,
+      int roundID) {
+    builder.startObject(12);
+    Round.addRoundID(builder, roundID);
     Round.addActionTargets(builder, actionTargetsOffset);
     Round.addActions(builder, actionsOffset);
     Round.addActionIDs(builder, actionIDsOffset);
@@ -113,7 +121,7 @@ public final class Round extends Table {
     return Round.endRound(builder);
   }
 
-  public static void startRound(FlatBufferBuilder builder) { builder.startObject(11); }
+  public static void startRound(FlatBufferBuilder builder) { builder.startObject(12); }
   public static void addMovedIDs(FlatBufferBuilder builder, int movedIDsOffset) { builder.addOffset(0, movedIDsOffset, 0); }
   public static int createMovedIDsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt(data[i]); return builder.endVector(); }
   public static void startMovedIDsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
@@ -141,6 +149,7 @@ public final class Round extends Table {
   public static void addActionTargets(FlatBufferBuilder builder, int actionTargetsOffset) { builder.addOffset(10, actionTargetsOffset, 0); }
   public static int createActionTargetsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt(data[i]); return builder.endVector(); }
   public static void startActionTargetsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
+  public static void addRoundID(FlatBufferBuilder builder, int roundID) { builder.addInt(11, roundID, 0); }
   public static int endRound(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
