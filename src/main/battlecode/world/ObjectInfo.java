@@ -12,8 +12,8 @@ import java.util.*;
  * in the game world.
  */
 public class ObjectInfo {
-    private final int mapWidth;
-    private final int mapHeight;
+    private final float mapWidth;
+    private final float mapHeight;
     private final MapLocation mapTopLeft;
 
     private final Map<Integer, InternalRobot> gameRobotsByID;
@@ -38,9 +38,9 @@ public class ObjectInfo {
         this.gameRobotsByID = new LinkedHashMap<>();
         this.gameBulletsByID = new LinkedHashMap<>();
 
-        this.treeLocations = new Set[mapHeight][mapWidth];
-        this.robotLocations = new Set[mapHeight][mapWidth];
-        this.bulletLocations = new Set[mapHeight][mapWidth];
+        this.treeLocations = new Set[(int) mapHeight][(int) mapWidth];
+        this.robotLocations = new Set[(int) mapHeight][(int) mapWidth];
+        this.bulletLocations = new Set[(int) mapHeight][(int) mapWidth];
 
         robotTypeCount.put(Team.A, new EnumMap<>(
                 RobotType.class));

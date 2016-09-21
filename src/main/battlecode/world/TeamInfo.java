@@ -9,8 +9,8 @@ import battlecode.common.Team;
  */
 public class TeamInfo {
 
-    private final String teamAName;
-    private final String teamBName;
+    private final int teamAID;
+    private final int teamBID;
     private final long[][] teamMemory;
     private final long[][] oldTeamMemory;
 
@@ -18,9 +18,9 @@ public class TeamInfo {
     private float[] teamBulletSupplies = new float[3];
     private int[][] teamSharedArrays = new int[3][GameConstants.BROADCAST_MAX_CHANNELS];
 
-    public TeamInfo(String teamA, String teamB, long[][] oldTeamMemory){
-        this.teamAName = teamA;
-        this.teamBName = teamB;
+    public TeamInfo(int teamA, int teamB, long[][] oldTeamMemory){
+        this.teamAID = teamA;
+        this.teamBID = teamB;
         this.teamMemory = new long[2][oldTeamMemory[0].length];
         this.oldTeamMemory = oldTeamMemory;
 
@@ -32,16 +32,13 @@ public class TeamInfo {
     // ***** GETTER METHODS ************
     // *********************************
 
-    public String getTeamName(Team t) {
-        switch (t) {
-            case A:
-                return teamAName;
-            case B:
-                return teamBName;
-            case NEUTRAL:
-                return "neutralplayer";
-            default:
-                return null;
+    public Team getTeamFromID(int id) {
+        if(id == teamAID){
+            return Team.A;
+        }else if(id == teamBID){
+            return Team.B;
+        }else{
+            return Team.NEUTRAL;
         }
     }
 

@@ -17,11 +17,6 @@ import java.util.zip.ZipInputStream;
  */
 public final class GameMapIO {
     /**
-     * The factory we use to create serializers.
-     */
-    private static final XStreamSerializerFactory FACTORY = new XStreamSerializerFactory();
-
-    /**
      * The package we check for maps in if they can't be found in the file system.
      */
     public static final String DEFAULT_MAP_PACKAGE = "battlecode/world/resources/";

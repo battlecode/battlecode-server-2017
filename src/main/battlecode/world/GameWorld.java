@@ -43,7 +43,7 @@ public class GameWorld{
 
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, RobotControlProvider cp,
-                     String teamA, String teamB,
+                     int teamAID, int teamBID,
                      long[][] oldTeamMemory, FlatBufferBuilder builder) {
         
         this.currentRound = -1;
@@ -51,7 +51,7 @@ public class GameWorld{
 
         this.gameMap = gm;
         this.objectInfo = new ObjectInfo(gm);
-        this.teamInfo = new TeamInfo(teamA, teamB, oldTeamMemory);
+        this.teamInfo = new TeamInfo(teamAID, teamBID, oldTeamMemory);
 
         this.previousBroadcasters = new ArrayList<>();
         this.currentBroadcasters = new HashMap<>();

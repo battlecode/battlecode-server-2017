@@ -3,9 +3,11 @@ package battlecode.world;
 import battlecode.common.*;
 
 import battlecode.schema.BodyType;
+import battlecode.schema.NeutralTreeTable;
 import battlecode.schema.SpawnedBodyTable;
 import battlecode.server.Server;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.thoughtworks.xstream.mapper.Mapper;
 
 import java.io.Serializable;
 import java.util.*;
@@ -50,7 +52,7 @@ public class GameMap {
      * i.e. in game correct MapLocations that need to have the origin
      * subtracted from them to be used to index into the map arrays.
      */
-    private final BodyInfo[] initialBodies;
+    private final ArrayList<BodyInfo> initialBodies;
 
     /**
      * Creates a deep copy of the input GameMap.
@@ -78,42 +80,20 @@ public class GameMap {
      *
      * @param schemaMap the GameMap acquired by a flatbuffer.
      */
-    public GameMap(battlecode.schema.GameMap schemaMap) {
+    public GameMap(battlecode.schema.GameMap schemaMap, TeamInfo teamInfo) {
         this.width = schemaMap.maxCorner().x() - schemaMap.minCorner().x();
         this.height = schemaMap.maxCorner().y() - schemaMap.minCorner().y();
         this.origin = new MapLocation(schemaMap.minCorner().x(), schemaMap.minCorner().y());
         this.seed = schemaMap.randomSeed();
         this.mapName = schemaMap.name();
         this.rounds = GameConstants.GAME_DEFAULT_ROUNDS;
+        this.initialBodies = new ArrayList<>();
 
-        this.initialBodies = new BodyInfo[schemaMap.bodies().robotIDsLength()];
         SpawnedBodyTable bodyTable = schemaMap.bodies();
-        for(int i = 0; i < bodyTable.robotIDsLength()){
-            byte bodyType = bodyTable.types(i);
-            switch (bodyType){
-                case BodyType.TREE_BULLET:
-                    this.initialBodies[i] = new TreeInfo()
-                    break;
-                case BodyType.TREE_NEUTRAL:
-                    break;
-                case BodyType.ARCHON:
-                    break;
-                case BodyType.GARDENER:
-                    break;
-                case BodyType.LUMBERJACK:
-                    break;
-                case BodyType.RECRUIT:
-                    break;
-                case BodyType.SCOUT:
-                    break;
-                case BodyType.SOLDIER:
-                    break;
-                case BodyType.TANK:
-                    break;
-                default:
+        initInitialBodiesFromSchemaBodyTable(bodyTable, teamInfo);
 
-            }
-        }
+        NeutralTreeTable treeTable = schemaMap.trees();
+        initInitialBodiesFromSchemaNeutralTreeTable(treeTable);
     }
 
     @Override
@@ -145,7 +125,7 @@ public class GameMap {
      *
      * @return the width of this map.
      */
-    public int getWidth() {
+    public float getWidth() {
         return width;
     }
 
@@ -154,7 +134,7 @@ public class GameMap {
      *
      * @return the height of this map.
      */
-    public int getHeight() {
+    public float getHeight() {
         return height;
     }
 
@@ -188,8 +168,8 @@ public class GameMap {
      * @return true if the given location is on the map,
      *         false if it's not
      */
-    public boolean onTheMap(MapLocation location) {
-        return onTheMap(location.x, location.y);
+    public boolean onTheMap(MapLocation loc) {
+        return onTheMap(loc.x, loc.y);
     }
 
     /**
@@ -213,7 +193,7 @@ public class GameMap {
      * @return the list of starting bodies on the map.
      *         MUST NOT BE MODIFIED.
      */
-    public BodyInfo[] getInitialBodies() {
+    public ArrayList<BodyInfo> getInitialBodies() {
         return initialBodies;
     }
 
@@ -240,5 +220,59 @@ public class GameMap {
      */
     public MapLocation getOrigin() {
         return origin;
+    }
+
+    // ****************************
+    // *** HELPER METHODS *********
+    // ****************************
+
+    private void initInitialBodiesFromSchemaBodyTable(SpawnedBodyTable bodyTable, TeamInfo teamInfo){
+        // Assumes no neutral trees
+        for(int i = 0; i < bodyTable.robotIDsLength()){
+            RobotType bodyType = getRobotTypeFromSchemaBodyType(bodyTable.types(i));
+            int bodyID = bodyTable.robotIDs(i);
+            float bodyX = bodyTable.locs().xs(i);
+            float bodyY = bodyTable.locs().ys(i);
+            Team bodyTeam = teamInfo.getTeamFromID(bodyTable.teamIDs(i));
+            if(bodyType != null){
+                initialBodies.add(new RobotInfo(bodyID, bodyTeam, bodyType, new MapLocation(bodyX, bodyY), 0, 0, 0));
+            }else{
+                initialBodies.add(new TreeInfo(bodyID, bodyTeam, new MapLocation(bodyX, bodyY), 0, 0, 0, null));
+            }
+        }
+    }
+
+    private void initInitialBodiesFromSchemaNeutralTreeTable(NeutralTreeTable treeTable){
+        for(int i = 0; i < treeTable.robotIDsLength(); i++){
+            int bodyID = treeTable.robotIDs(i);
+            float bodyX = treeTable.locs().xs(i);
+            float bodyY = treeTable.locs().ys(i);
+            float bodyRadius = treeTable.radii(i);
+            float containedBullets = treeTable.containedBullets(i);
+            RobotType containedType = getRobotTypeFromSchemaBodyType(treeTable.containedBody(i));
+            initialBodies.add(new TreeInfo(bodyID, Team.NEUTRAL, new MapLocation(bodyX, bodyY),
+                    bodyRadius, 0, containedBullets, containedType));
+        }
+    }
+
+    private RobotType getRobotTypeFromSchemaBodyType(byte bodyType){
+        switch (bodyType){
+            case BodyType.ARCHON:
+                return RobotType.ARCHON;
+            case BodyType.GARDENER:
+                return RobotType.GARDENER;
+            case BodyType.LUMBERJACK:
+                return RobotType.LUMBERJACK;
+            case BodyType.RECRUIT:
+                return RobotType.RECRUIT;
+            case BodyType.SCOUT:
+                return RobotType.SCOUT;
+            case BodyType.SOLDIER:
+                return RobotType.SOLDIER;
+            case BodyType.TANK:
+                return RobotType.TANK;
+            default:
+                return null;
+        }
     }
 }
