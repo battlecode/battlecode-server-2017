@@ -60,15 +60,15 @@ public class GameWorld{
 
         controlProvider.matchStarted(this);
 
-        // Add the robots contained in the GameMap to this world.
-        for(GameMap.InitialRobotInfo robot : gameMap.getInitialRobots()){
-            spawnRobot(robot.type, robot.getLocation(gameMap.getOrigin()), robot.team);
-        }
-
-        // Add the trees contained in the GameMap to this world.
-        for(GameMap.InitialTreeInfo tree : gameMap.getInitialTrees()){
-            spawnTree(tree.team, tree.radius, tree.getLocation(gameMap.getOrigin()),
-                    tree.containedBullets, tree.containedRobot);
+        // Add the robots and trees contained in the GameMap to this world.
+        for(BodyInfo body : gameMap.getInitialBodies()){
+            if(body.isRobot()){
+                RobotInfo robot = (RobotInfo) body;
+                spawnRobot(robot.type, robot.location, robot.team);
+            }else{
+                TreeInfo tree = (TreeInfo) body;
+                spawnTree(tree.team, tree.radius, tree.location, tree.containedBullets, tree.containedRobot);
+            }
         }
 
         this.rand = new Random(gameMap.getSeed());
