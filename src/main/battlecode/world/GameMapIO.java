@@ -7,6 +7,9 @@ import battlecode.serial.serializer.XStreamSerializerFactory;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -26,88 +29,21 @@ public final class GameMapIO {
      */
     private static final ClassLoader BACKUP_LOADER = GameMapIO.class.getClassLoader();
 
-    /**
-     * Returns a GameMap for a specific map.
-     * If the map can't be found in the given directory, the package
-     * "battlecode.world.resources" is checked as a backup.
-     *
-     * @param mapName name of map.
-     * @param mapDir directory to load the extra map from; may be null.
-     * @return GameMap for map
-     * @throws IOException if the map fails to load or can't be found.
-     */
-    public static GameMap loadMap(String mapName, File mapDir)
-            throws IOException {
-        final GameMap result;
-
-        if (mapName.endsWith(".xml")) {
-            mapName = mapName.substring(0, mapName.lastIndexOf('.'));
+    public static GameMap myLoadMap(String mapName, File mapDir) throws IOException {
+        // Checking in given directory
+        String mapStringPath = mapDir.getPath() + mapName;
+        File mapFile = new File(mapStringPath);
+        if(mapFile.exists()){
+            Path mapPath = Paths.get(mapDir.getPath() + mapName);
+            byte[] data  = Files.readAllBytes(mapPath);
         }
 
-        final File mapFile = new File(mapDir, mapName + ".xml");
-        if (mapFile.exists()) {
-            result = loadMap(new FileInputStream(mapFile));
-        } else {
-            final InputStream backupStream = BACKUP_LOADER.getResourceAsStream(DEFAULT_MAP_PACKAGE + mapName + ".xml");
-            if (backupStream == null) {
-                throw new IOException("Can't load map: " + mapName + " from dir " + mapDir + " or default maps.");
-            }
-            result = loadMap(backupStream);
-        }
-
-        if (!result.getMapName().equals(mapName)) {
-            throw new IOException("Invalid map: name (" + result.getMapName()
-                    + ") does not match filename (" + mapName + ".xml)"
-            );
-        }
-
-        return result;
-    }
-
-    /**
-     * Load a map from an input stream.
-     *
-     * @param stream the stream to read from; will be closed after the map is read.
-     * @return a map read from the stream
-     * @throws IOException if the read fails somehow
-     */
-    public static GameMap loadMap(InputStream stream)
-            throws IOException {
-
-        try (final Serializer<GameMap> ser =
-                     FACTORY.createSerializer(null, stream, GameMap.class)) {
-            return ser.deserialize();
-        }
-    }
-
-    /**
-     * Write a map to an output directory.
-     *
-     * @param map the map to output
-     * @param mapDir the directory to write the map to
-     * @throws IOException if the map cannot be written
-     */
-    public static void writeMap(GameMap map, File mapDir)
-            throws IOException {
-        writeMap(
-                map,
-                new FileOutputStream(new File(mapDir, map.getMapName() + ".xml"))
-        );
-    }
-
-    /**
-     * Write a map to an output stream.
-     *
-     * @param map the map to output
-     * @param stream the stream to write to
-     * @throws IOException if the map cannot be written
-     */
-    public static void writeMap(GameMap map, OutputStream stream)
-            throws IOException {
-
-        try (final Serializer<GameMap> ser =
-                     FACTORY.createSerializer(stream, null, GameMap.class)) {
-            ser.serialize(map);
+        // Check in local directory
+        mapStringPath = BACKUP_LOADER.getResource("resources/" + mapName).getPath();
+        mapFile = new File(mapStringPath);
+        if(mapFile.exists()){
+            Path mapPath = Paths.get(mapStringPath);
+            byte[] data = Files.readAllBytes(mapPath);
         }
     }
 
@@ -165,28 +101,6 @@ public final class GameMapIO {
         Collections.sort(result);
 
         return result;
-    }
-
-    /**
-     * Checks a set of maps for legality. It will search in bc.game.map-path
-     * for the maps, and use the maps whose names are passed in as runtime
-     * arguments.
-     *
-     * @param args names of maps to use.
-     */
-    public static void main(String[] args) {
-        System.out.println("Checking maps for tournament legality...");
-        File mapPath = new File(Config.getGlobalConfig().get("bc.game.map-path"));
-        for (String map : args) {
-            try {
-                if (!loadMap(map, mapPath).isTournamentLegal()) {
-                    System.err.println("Illegal map: " + map);
-                }
-            } catch (Exception e) {
-                System.err.println("Couldn't load map: "+map);
-                e.printStackTrace();
-            }
-        }
     }
 
     /**
