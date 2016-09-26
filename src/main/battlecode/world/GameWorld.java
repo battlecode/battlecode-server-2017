@@ -48,7 +48,7 @@ public class GameWorld{
                      TeamMapping teamMapping,
                      long[][] oldTeamMemory, FlatBufferBuilder builder) {
         
-        this.currentRound = -1;
+        this.currentRound = 0;
         this.idGenerator = new IDGenerator(gm.getSeed());
         this.teamMapping = teamMapping;
 
@@ -67,17 +67,17 @@ public class GameWorld{
         for(BodyInfo body : gameMap.getInitialBodies()){
             if(body.isRobot()){
                 RobotInfo robot = (RobotInfo) body;
-                spawnRobot(robot.type, robot.location, robot.team);
+                spawnRobot(robot.ID, robot.type, robot.location, robot.team);
             }else{
                 TreeInfo tree = (TreeInfo) body;
-                spawnTree(tree.team, tree.radius, tree.location, tree.containedBullets, tree.containedRobot);
+                spawnTree(tree.ID, tree.team, tree.radius, tree.location, tree.containedBullets, tree.containedRobot);
             }
         }
 
         this.rand = new Random(gameMap.getSeed());
 
         this.builder = builder;
-        this.matchMaker = new MatchMaker(builder);
+        this.matchMaker = new MatchMaker(this.builder);
 
         // Write match header at beginning of match
         matchMaker.makeMatchHeader(gameMap);
@@ -118,7 +118,7 @@ public class GameWorld{
         }
 
         // Write out round data
-        matchMaker.writeAndClearRoundData();
+        matchMaker.writeAndClearRoundData(currentRound);
         return GameState.RUNNING;
     }
 

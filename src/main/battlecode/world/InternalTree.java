@@ -15,7 +15,7 @@ public class InternalTree {
     private float health;
     private final float maxHealth;
 
-    private float containedBullets;
+    private int containedBullets;
     private RobotType containedRobot;
 
     private int roundsAlive;
@@ -27,7 +27,7 @@ public class InternalTree {
     private TreeInfo cachedTreeInfo;
 
     public InternalTree(GameWorld gw, int id, Team team, float radius, MapLocation center,
-                        float containedBullets, RobotType containedRobot) {
+                        int containedBullets, RobotType containedRobot) {
         this.gameWorld = gw;
 
         this.ID = id;

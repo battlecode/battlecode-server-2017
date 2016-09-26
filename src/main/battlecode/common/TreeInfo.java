@@ -36,7 +36,7 @@ public class TreeInfo implements BodyInfo{
      * The current amount of bullets contained within the tree.
      * Note: only NEUTRAL trees can contain bullets
      */
-    public final float containedBullets;
+    public final int containedBullets;
 
     /**
      * The robot contained within the tree that is obtained upon
@@ -48,7 +48,7 @@ public class TreeInfo implements BodyInfo{
 
     public TreeInfo(int ID, Team team, MapLocation location,
                     float radius, float health,
-                    float containedBullets, RobotType containedRobot) {
+                    int containedBullets, RobotType containedRobot) {
         this.ID = ID;
         this.team = team;
         this.location = location;

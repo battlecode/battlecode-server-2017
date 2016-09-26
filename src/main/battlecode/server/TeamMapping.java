@@ -8,10 +8,10 @@ import battlecode.common.Team;
  */
 public class TeamMapping {
 
-    private final int teamAID;
-    private final int teamBID;
+    private final byte teamAID;
+    private final byte teamBID;
 
-    public TeamMapping(int teamA, int teamB){
+    public TeamMapping(byte teamA, byte teamB){
         this.teamAID = teamA;
         this.teamBID = teamB;
     }
@@ -26,7 +26,7 @@ public class TeamMapping {
         }
     }
 
-    public int getIDFromTeam(Team t){
+    public byte getIDFromTeam(Team t){
         if(t == Team.A){
             return teamAID;
         }else if(t == Team.B){

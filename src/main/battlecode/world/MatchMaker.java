@@ -1,9 +1,9 @@
 package battlecode.world;
 
-import battlecode.common.MapLocation;
-import battlecode.common.Team;
+import battlecode.common.*;
 import battlecode.schema.*;
 import battlecode.schema.GameMap;
+import battlecode.server.TeamMapping;
 import com.google.flatbuffers.FlatBufferBuilder;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -66,25 +66,96 @@ public class MatchMaker {
     // *********************************
 
     // Called at end of GameWorld constructor
-    public void makeMatchHeader(battlecode.world.GameMap gameMap){
+    public void makeMatchHeader(battlecode.world.GameMap gameMap, TeamMapping teamMapping){
         int name = builder.createString(gameMap.getMapName());
         int minCorner = Vec.createVec(builder, gameMap.getOrigin().x, gameMap.getOrigin().y);
         int maxCorner = Vec.createVec(builder, gameMap.getOrigin().x + gameMap.getWidth(),
                 gameMap.getOrigin().y + gameMap.getHeight());
-        int bodies = GameMap.createBodiesVector(builder,
-                ArrayUtils.toPrimitive(this.spawned.toArray(new Integer[this.spawned.size()])));
         int randomSeed = gameMap.getSeed();
 
+        // Make body tables
+        ArrayList<Integer> bodyIDs = new ArrayList<>();
+        ArrayList<Byte> bodyTeamIDs = new ArrayList<>();
+        ArrayList<Byte> bodyTypes = new ArrayList<>();
+        ArrayList<Float> bodyLocsXs = new ArrayList<>();
+        ArrayList<Float> bodyLocsYs = new ArrayList<>();
+
+        ArrayList<Integer> treeIDs = new ArrayList<>();
+        ArrayList<Float> treeRadii = new ArrayList<>();
+        ArrayList<Integer> treeContainedBullets = new ArrayList<>();
+        ArrayList<Byte> treeContainedBodies = new ArrayList<>();
+        ArrayList<Float> treeLocsXs = new ArrayList<>();
+        ArrayList<Float> treeLocsYs = new ArrayList<>();
+        for(BodyInfo initBody : gameMap.getInitialBodies()){
+            if(initBody.isRobot()){
+                RobotInfo robot = (RobotInfo) initBody;
+                bodyIDs.add(robot.ID);
+                bodyTeamIDs.add(teamMapping.getIDFromTeam(robot.team));
+                bodyTypes.add(getByteFromType(robot.type));
+                bodyLocsXs.add(robot.location.x);
+                bodyLocsXs.add(robot.location.y);
+            }else{
+                TreeInfo tree = (TreeInfo) initBody;
+                if(tree.team == Team.NEUTRAL){
+                    treeIDs.add(tree.ID);
+                    treeRadii.add(tree.radius);
+                    treeContainedBullets.add(tree.containedBullets);
+                    treeContainedBodies.add(getByteFromType(tree.containedRobot));
+                    treeLocsXs.add(tree.location.x);
+                    treeLocsXs.add(tree.location.y);
+                }else{
+                    bodyIDs.add(tree.ID);
+                    bodyTeamIDs.add(teamMapping.getIDFromTeam(tree.team));
+                    bodyTypes.add(BodyType.TREE_BULLET);
+                    bodyLocsXs.add(tree.location.x);
+                    bodyLocsXs.add(tree.location.y);
+                }
+            }
+        }
+
+        SpawnedBodyTable.startSpawnedBodyTable(builder);
+        int robotIDs = SpawnedBodyTable.createRobotIDsVector(builder, ArrayUtils.toPrimitive(bodyIDs.toArray(new Integer[bodyIDs.size()])));
+        int teamIDs = SpawnedBodyTable.createTeamIDsVector(builder, ArrayUtils.toPrimitive(bodyTeamIDs.toArray(new Byte[bodyTeamIDs.size()])));
+        int types = SpawnedBodyTable.createTypesVector(builder, ArrayUtils.toPrimitive(bodyTypes.toArray(new Byte[bodyTypes.size()])));
+        int locs = VecTable.createVecTable(builder,
+                VecTable.createXsVector(builder, ArrayUtils.toPrimitive(bodyLocsXs.toArray(new Float[bodyLocsXs.size()]))),
+                VecTable.createYsVector(builder, ArrayUtils.toPrimitive(bodyLocsYs.toArray(new Float[bodyLocsYs.size()]))));
+        SpawnedBodyTable.addRobotIDs(builder, robotIDs);
+        SpawnedBodyTable.addTeamIDs(builder, teamIDs);
+        SpawnedBodyTable.addTypes(builder, types);
+        SpawnedBodyTable.addLocs(builder, locs);
+        int bodies = SpawnedBodyTable.endSpawnedBodyTable(builder);
+
+
+        NeutralTreeTable.startNeutralTreeTable(builder);
+        robotIDs = NeutralTreeTable.createRobotIDsVector(builder, ArrayUtils.toPrimitive(treeIDs.toArray(new Integer[treeIDs.size()])));
+        int radii = NeutralTreeTable.createRadiiVector(builder, ArrayUtils.toPrimitive(treeRadii.toArray(new Float[treeRadii.size()])));
+        int containedBullets = NeutralTreeTable.createContainedBulletsVector(builder, ArrayUtils.toPrimitive(treeContainedBullets.toArray(new Integer[treeContainedBullets.size()])));
+        int containedBodies = NeutralTreeTable.createContainedBodiesVector(builder, ArrayUtils.toPrimitive(treeContainedBodies.toArray(new Byte[treeContainedBodies.size()])));
+        locs = VecTable.createVecTable(builder,
+                VecTable.createXsVector(builder, ArrayUtils.toPrimitive(treeLocsXs.toArray(new Float[treeLocsXs.size()]))),
+                VecTable.createYsVector(builder, ArrayUtils.toPrimitive(treeLocsYs.toArray(new Float[treeLocsYs.size()]))));
+        NeutralTreeTable.addRobotIDs(builder, robotIDs);
+        NeutralTreeTable.addLocs(builder, locs);
+        NeutralTreeTable.addRadii(builder, radii);
+        NeutralTreeTable.addContainedBullets(builder, containedBullets);
+        NeutralTreeTable.addContainedBodies(builder, containedBodies);
+        int trees = NeutralTreeTable.endNeutralTreeTable(builder);
+
+
+        // Build GameMap for flatbuffer
         GameMap.startGameMap(builder);
         GameMap.addName(builder, name);
         GameMap.addMinCorner(builder, minCorner);
         GameMap.addMaxCorner(builder, maxCorner);
         GameMap.addBodies(builder, bodies);
+        GameMap.addTrees(builder, trees);
         GameMap.addRandomSeed(builder, randomSeed);
         int map = GameMap.endGameMap(builder);
 
         events.add(EventWrapper.createEventWrapper(builder, Event.MatchHeader,
                 MatchHeader.createMatchHeader(builder, map, gameMap.getRounds())));
+        clearData();
     }
 
     // Called in GameWorld in runRound
@@ -158,21 +229,7 @@ public class MatchMaker {
     // Called in GameWorld in runRound
     public void writeAndClearRoundData(int roundNum){
         makeRound(roundNum);
-        movedIDs.clear();
-        movedLocsXs.clear();
-        movedLocsYs.clear();
-        spawnedRobotIDs.clear();
-        spawnedTeamIDs.clear();
-        spawnedTypes.clear();
-        spawnedRadii.clear();
-        spawnedLocsXs.clear();
-        spawnedLocsYs.clear();
-        healthChangedIDs.clear();
-        healthChangedLevels.clear();
-        diedIDs.clear();
-        actionIDs.clear();
-        actions.clear();
-        actionTargets.clear();
+        clearData();
     }
 
     // *********************************
@@ -292,6 +349,50 @@ public class MatchMaker {
                 teamID = 2;
         }
         spawnedTeamIDs.add(teamID);
+    }
+
+    // *********************************
+    // ****** PRIVATE INFO *************
+    // *********************************
+
+    private void clearData(){
+        movedIDs.clear();
+        movedLocsXs.clear();
+        movedLocsYs.clear();
+        spawnedRobotIDs.clear();
+        spawnedTeamIDs.clear();
+        spawnedTypes.clear();
+        spawnedRadii.clear();
+        spawnedLocsXs.clear();
+        spawnedLocsYs.clear();
+        healthChangedIDs.clear();
+        healthChangedLevels.clear();
+        diedIDs.clear();
+        actionIDs.clear();
+        actions.clear();
+        actionTargets.clear();
+    }
+    
+    private byte getByteFromType(RobotType type){
+        if(type == null){
+            return -1;
+        }
+        switch (type){
+            case ARCHON:
+                return BodyType.ARCHON;
+            case GARDENER:
+                return BodyType.GARDENER;
+            case LUMBERJACK:
+                return BodyType.LUMBERJACK;
+            case RECRUIT:
+                return BodyType.RECRUIT;
+            case SOLDIER:
+                return BodyType.SOLDIER;
+            case TANK:
+                return BodyType.TANK;
+            default:
+                return BodyType.SCOUT;
+        }
     }
 
 }
