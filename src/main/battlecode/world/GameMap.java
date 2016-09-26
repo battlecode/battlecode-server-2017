@@ -6,6 +6,7 @@ import battlecode.schema.BodyType;
 import battlecode.schema.NeutralTreeTable;
 import battlecode.schema.SpawnedBodyTable;
 import battlecode.server.Server;
+import battlecode.server.TeamMapping;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thoughtworks.xstream.mapper.Mapper;
 
@@ -80,7 +81,7 @@ public class GameMap {
      *
      * @param schemaMap the GameMap acquired by a flatbuffer.
      */
-    public GameMap(battlecode.schema.GameMap schemaMap, TeamInfo teamInfo) {
+    public GameMap(battlecode.schema.GameMap schemaMap, TeamMapping teamMapping) {
         this.width = schemaMap.maxCorner().x() - schemaMap.minCorner().x();
         this.height = schemaMap.maxCorner().y() - schemaMap.minCorner().y();
         this.origin = new MapLocation(schemaMap.minCorner().x(), schemaMap.minCorner().y());
@@ -90,7 +91,7 @@ public class GameMap {
 
         ArrayList<BodyInfo> initBodies = new ArrayList<>();
         SpawnedBodyTable bodyTable = schemaMap.bodies();
-        initInitialBodiesFromSchemaBodyTable(bodyTable, teamInfo, initBodies);
+        initInitialBodiesFromSchemaBodyTable(bodyTable, teamMapping, initBodies);
 
         NeutralTreeTable treeTable = schemaMap.trees();
         initInitialBodiesFromSchemaNeutralTreeTable(treeTable, initBodies);
@@ -228,14 +229,14 @@ public class GameMap {
     // *** HELPER METHODS *********
     // ****************************
 
-    private void initInitialBodiesFromSchemaBodyTable(SpawnedBodyTable bodyTable, TeamInfo teamInfo, ArrayList<BodyInfo> initialBodies){
+    private void initInitialBodiesFromSchemaBodyTable(SpawnedBodyTable bodyTable, TeamMapping teamMapping, ArrayList<BodyInfo> initialBodies){
         // Assumes no neutral trees
         for(int i = 0; i < bodyTable.robotIDsLength(); i++){
             RobotType bodyType = getRobotTypeFromSchemaBodyType(bodyTable.types(i));
             int bodyID = bodyTable.robotIDs(i);
             float bodyX = bodyTable.locs().xs(i);
             float bodyY = bodyTable.locs().ys(i);
-            Team bodyTeam = teamInfo.getTeamFromID(bodyTable.teamIDs(i));
+            Team bodyTeam = teamMapping.getTeamFromID(bodyTable.teamIDs(i));
             if(bodyType != null){
                 initialBodies.add(new RobotInfo(bodyID, bodyTeam, bodyType, new MapLocation(bodyX, bodyY), 0, 0, 0));
             }else{

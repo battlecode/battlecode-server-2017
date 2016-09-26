@@ -105,7 +105,7 @@ public class MatchMaker {
     }
 
     // Called by writeAndClearRoundData
-    public void makeRound(){
+    public void makeRound(int roundNum){
         int[] movedIDs = ArrayUtils.toPrimitive(this.movedIDs.toArray(new Integer[this.movedIDs.size()]));
 
         int movedLocs = VecTable.createVecTable(builder,
@@ -156,8 +156,8 @@ public class MatchMaker {
     // *********************************
 
     // Called in GameWorld in runRound
-    public void writeAndClearRoundData(){
-        makeRound();
+    public void writeAndClearRoundData(int roundNum){
+        makeRound(roundNum);
         movedIDs.clear();
         movedLocsXs.clear();
         movedLocsYs.clear();
