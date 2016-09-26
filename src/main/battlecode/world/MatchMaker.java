@@ -16,6 +16,7 @@ import java.util.List;
 public class MatchMaker {
 
     private FlatBufferBuilder builder;
+    private TeamMapping teamMapping;
 
     private List<Integer> events; // EventWrappers
 
@@ -41,8 +42,9 @@ public class MatchMaker {
     private List<Byte> actions; // Actions
     private List<Integer> actionTargets; // ints (IDs)
 
-    public MatchMaker(FlatBufferBuilder builder){
+    public MatchMaker(FlatBufferBuilder builder, TeamMapping teamMapping){
         this.builder = builder;
+        this.teamMapping = teamMapping;
         this.events = new ArrayList<>();
         this.movedIDs = new ArrayList<>();
         this.movedLocsXs = new ArrayList<>();
@@ -66,7 +68,7 @@ public class MatchMaker {
     // *********************************
 
     // Called at end of GameWorld constructor
-    public void makeMatchHeader(battlecode.world.GameMap gameMap, TeamMapping teamMapping){
+    public void makeMatchHeader(battlecode.world.GameMap gameMap){
         int name = builder.createString(gameMap.getMapName());
         int minCorner = Vec.createVec(builder, gameMap.getOrigin().x, gameMap.getOrigin().y);
         int maxCorner = Vec.createVec(builder, gameMap.getOrigin().x + gameMap.getWidth(),
@@ -160,19 +162,8 @@ public class MatchMaker {
 
     // Called in GameWorld in runRound
     public void makeMatchFooter(Team winTeam, int totalRounds){
-        byte winner;
-        switch (winTeam){
-            case A:
-                winner = 0;
-                break;
-            case B:
-                winner = 1;
-                break;
-            default:
-                winner = 2;
-        }
         events.add(EventWrapper.createEventWrapper(builder, Event.MatchFooter,
-                MatchFooter.createMatchFooter(builder, winner, totalRounds)));
+                MatchFooter.createMatchFooter(builder, teamMapping.getIDFromTeam(winTeam), totalRounds)));
     }
 
     // Called by writeAndClearRoundData
@@ -267,42 +258,8 @@ public class MatchMaker {
         spawnedRadii.add(robot.getType().bodyRadius);
         spawnedLocsXs.add(robot.getLocation().x);
         spawnedLocsYs.add(robot.getLocation().y);
-        byte teamID;
-        switch (robot.getTeam()){
-            case A:
-                teamID = 0;
-                break;
-            case B:
-                teamID = 1;
-                break;
-            default:
-                teamID = 2;
-        }
-        spawnedTeamIDs.add(teamID);
-        byte type;
-        switch (robot.getType()){
-            case ARCHON:
-                type = BodyType.ARCHON;
-                break;
-            case GARDENER:
-                type = BodyType.GARDENER;
-                break;
-            case LUMBERJACK:
-                type = BodyType.LUMBERJACK;
-                break;
-            case RECRUIT:
-                type = BodyType.RECRUIT;
-                break;
-            case SOLDIER:
-                type = BodyType.SOLDIER;
-                break;
-            case TANK:
-                type = BodyType.TANK;
-                break;
-            default:
-                type = BodyType.SCOUT;
-        }
-        spawnedTeamIDs.add(type);
+        spawnedTeamIDs.add(teamMapping.getIDFromTeam(robot.getTeam()));
+        spawnedTeamIDs.add(getByteFromType(robot.getType()));
     }
 
     // Called in GameWorld in spawnTree
@@ -311,23 +268,8 @@ public class MatchMaker {
         spawnedRadii.add(tree.getRadius());
         spawnedLocsXs.add(tree.getLocation().x);
         spawnedLocsYs.add(tree.getLocation().y);
-        byte type;
-        byte teamID;
-        switch (tree.getTeam()){
-            case A:
-                type = BodyType.TREE_BULLET;
-                teamID = 0;
-                break;
-            case B:
-                type = BodyType.TREE_BULLET;
-                teamID = 1;
-                break;
-            default:
-                type = BodyType.TREE_NEUTRAL;
-                teamID = 2;
-        }
-        spawnedTeamIDs.add(teamID);
-        spawnedTypes.add(type);
+        spawnedTeamIDs.add(teamMapping.getIDFromTeam(tree.getTeam()));
+        spawnedTypes.add(tree.getTeam() == Team.NEUTRAL ? BodyType.TREE_NEUTRAL : BodyType.TREE_BULLET);
     }
 
     // Called in GameWorld in spawnBullet
@@ -337,18 +279,7 @@ public class MatchMaker {
         spawnedLocsXs.add(bullet.getLocation().x);
         spawnedLocsYs.add(bullet.getLocation().y);
         spawnedTypes.add(BodyType.BULLET);
-        byte teamID;
-        switch (bullet.getTeam()){
-            case A:
-                teamID = 0;
-                break;
-            case B:
-                teamID = 1;
-                break;
-            default:
-                teamID = 2;
-        }
-        spawnedTeamIDs.add(teamID);
+        spawnedTeamIDs.add(teamMapping.getIDFromTeam(bullet.getTeam()));
     }
 
     // *********************************
