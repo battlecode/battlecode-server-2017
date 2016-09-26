@@ -26,4 +26,14 @@ public class TeamMapping {
         }
     }
 
+    public int getIDFromTeam(Team t){
+        if(t == Team.A){
+            return teamAID;
+        }else if(t == Team.B){
+            return teamBID;
+        }else{
+            return -1;
+        }
+    }
+
 }

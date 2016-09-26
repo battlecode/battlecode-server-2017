@@ -4,6 +4,7 @@ import battlecode.common.*;
 import battlecode.server.ErrorReporter;
 import battlecode.server.GameState;
 import battlecode.serial.GameStats;
+import battlecode.server.TeamMapping;
 import battlecode.world.control.RobotControlProvider;
 import com.google.flatbuffers.FlatBufferBuilder;
 
@@ -26,6 +27,7 @@ public class GameWorld{
 
     protected Team winner = null;
     protected final IDGenerator idGenerator;
+    protected final TeamMapping teamMapping;
 
     private final GameMap gameMap;
     private final TeamInfo teamInfo;
@@ -43,15 +45,16 @@ public class GameWorld{
 
     @SuppressWarnings("unchecked")
     public GameWorld(GameMap gm, RobotControlProvider cp,
-                     int teamAID, int teamBID,
+                     TeamMapping teamMapping,
                      long[][] oldTeamMemory, FlatBufferBuilder builder) {
         
         this.currentRound = -1;
         this.idGenerator = new IDGenerator(gm.getSeed());
+        this.teamMapping = teamMapping;
 
         this.gameMap = gm;
         this.objectInfo = new ObjectInfo(gm);
-        this.teamInfo = new TeamInfo(teamAID, teamBID, oldTeamMemory);
+        this.teamInfo = new TeamInfo(oldTeamMemory);
 
         this.previousBroadcasters = new ArrayList<>();
         this.currentBroadcasters = new HashMap<>();
@@ -320,10 +323,8 @@ public class GameWorld{
     // ****** SPAWNING *****************
     // *********************************
 
-    public int spawnTree(Team team, float radius, MapLocation center,
+    public int spawnTree(int ID, Team team, float radius, MapLocation center,
                          float containedBullets, RobotType containedRobot){
-        int ID = idGenerator.nextID();
-
         InternalTree tree = new InternalTree(
                 this, ID, team, radius, center, containedBullets, containedRobot);
         objectInfo.spawnTree(tree);
@@ -332,9 +333,13 @@ public class GameWorld{
         return ID;
     }
 
-    public int spawnRobot(RobotType type, MapLocation location, Team team){
+    public int spawnTree(Team team, float radius, MapLocation center,
+                         float containedBullets, RobotType containedRobot){
         int ID = idGenerator.nextID();
+        return spawnTree(ID, team, radius, center, containedBullets, containedRobot);
+    }
 
+    public int spawnRobot(int ID, RobotType type, MapLocation location, Team team){
         InternalRobot robot = new InternalRobot(this, ID, type, location, team);
         objectInfo.spawnRobot(robot);
 
@@ -343,15 +348,23 @@ public class GameWorld{
         return ID;
     }
 
-    public int spawnBullet(Team team, float speed, float damage, MapLocation location, Direction direction){
+    public int spawnRobot(RobotType type, MapLocation location, Team team){
         int ID = idGenerator.nextID();
+        return spawnRobot(ID, type, location, team);
+    }
 
+    public int spawnBullet(int ID, Team team, float speed, float damage, MapLocation location, Direction direction){
         InternalBullet bullet = new InternalBullet(
                 this, ID, team, speed, damage, location, direction);
         objectInfo.spawnBullet(bullet);
 
         matchMaker.addSpawnedBullet(bullet);
         return ID;
+    }
+
+    public int spawnBullet(Team team, float speed, float damage, MapLocation location, Direction direction){
+        int ID = idGenerator.nextID();
+        return spawnBullet(ID, team, speed, damage, location, direction);
     }
 
     // *********************************
