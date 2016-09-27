@@ -251,7 +251,7 @@ public class GameMap {
             float bodyX = treeTable.locs().xs(i);
             float bodyY = treeTable.locs().ys(i);
             float bodyRadius = treeTable.radii(i);
-            float containedBullets = treeTable.containedBullets(i);
+            int containedBullets = treeTable.containedBullets(i);
             RobotType containedType = getRobotTypeFromSchemaBodyType(treeTable.containedBodies(i));
             initialBodies.add(new TreeInfo(bodyID, Team.NEUTRAL, new MapLocation(bodyX, bodyY),
                     bodyRadius, 0, containedBullets, containedType));

@@ -115,13 +115,14 @@ public final class RobotControllerImpl implements RobotController {
         if (t == Team.NEUTRAL) {
             return new MapLocation[0];
         } else {
-            GameMap.InitialRobotInfo[] initialRobots = gameWorld.getGameMap()
-                    .getInitialRobots();
+            BodyInfo[] initialRobots = gameWorld.getGameMap().getInitialBodies();
             ArrayList<MapLocation> archonLocs = new ArrayList<>();
-            for (GameMap.InitialRobotInfo initial : initialRobots) {
-                if (initial.type == RobotType.ARCHON && initial.team == t) {
-                    archonLocs.add(initial.getLocation(gameWorld.getGameMap()
-                            .getOrigin()));
+            for (BodyInfo initial : initialRobots) {
+                if(initial.isRobot()){
+                    RobotInfo robot = (RobotInfo) initial;
+                    if (robot.type == RobotType.ARCHON && robot.team == t) {
+                        archonLocs.add(robot.getLocation());
+                    }
                 }
             }
             MapLocation[] array = archonLocs.toArray(new MapLocation[archonLocs.size()]);

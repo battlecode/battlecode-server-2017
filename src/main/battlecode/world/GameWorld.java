@@ -77,7 +77,7 @@ public class GameWorld{
         this.rand = new Random(gameMap.getSeed());
 
         this.builder = builder;
-        this.matchMaker = new MatchMaker(this.builder);
+        this.matchMaker = new MatchMaker(builder, teamMapping);
 
         // Write match header at beginning of match
         matchMaker.makeMatchHeader(gameMap);
@@ -324,7 +324,7 @@ public class GameWorld{
     // *********************************
 
     public int spawnTree(int ID, Team team, float radius, MapLocation center,
-                         float containedBullets, RobotType containedRobot){
+                         int containedBullets, RobotType containedRobot){
         InternalTree tree = new InternalTree(
                 this, ID, team, radius, center, containedBullets, containedRobot);
         objectInfo.spawnTree(tree);
@@ -334,7 +334,7 @@ public class GameWorld{
     }
 
     public int spawnTree(Team team, float radius, MapLocation center,
-                         float containedBullets, RobotType containedRobot){
+                         int containedBullets, RobotType containedRobot){
         int ID = idGenerator.nextID();
         return spawnTree(ID, team, radius, center, containedBullets, containedRobot);
     }
@@ -380,7 +380,7 @@ public class GameWorld{
             this.spawnRobot(toSpawn, tree.getLocation(), tree.getTeam());
         }
 
-        matchMaker.addDied(id);
+        matchMaker.addDied(id, false);
     }
 
     public void destroyRobot(int id){
@@ -391,13 +391,13 @@ public class GameWorld{
 
         setWinnerIfDestruction();
 
-        matchMaker.addDied(id);
+        matchMaker.addDied(id, false);
     }
 
     public void destroyBullet(int id){
         objectInfo.destroyBullet(id);
 
-        matchMaker.addDied(id);
+        matchMaker.addDied(id, true);
     }
 
     // *********************************

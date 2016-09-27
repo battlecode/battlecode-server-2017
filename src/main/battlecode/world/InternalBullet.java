@@ -58,6 +58,10 @@ public class InternalBullet {
         return speed;
     }
 
+    public float getDamage() {
+        return damage;
+    }
+
     public Direction getDirection() {
         return dir;
     }
