@@ -1,7 +1,5 @@
 package battlecode.common;
 
-import java.util.Map;
-
 /**
  * A RobotController allows contestants to make their robot sense and interact
  * with the game world. When a contestant's <code>RobotPlayer</code> is

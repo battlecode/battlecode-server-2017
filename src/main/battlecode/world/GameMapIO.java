@@ -1,20 +1,12 @@
 package battlecode.world;
 
-import battlecode.server.Config;
-import battlecode.serial.serializer.Serializer;
-import battlecode.serial.serializer.XStreamSerializerFactory;
 import battlecode.server.TeamMapping;
 
 import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * This class contains the code for reading a flatbuffer map file and converting it

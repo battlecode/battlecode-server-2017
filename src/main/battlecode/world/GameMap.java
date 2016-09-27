@@ -5,14 +5,9 @@ import battlecode.common.*;
 import battlecode.schema.BodyType;
 import battlecode.schema.NeutralTreeTable;
 import battlecode.schema.SpawnedBodyTable;
-import battlecode.server.Server;
 import battlecode.server.TeamMapping;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.thoughtworks.xstream.mapper.Mapper;
 
-import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * The class represents the map in the game world on which
