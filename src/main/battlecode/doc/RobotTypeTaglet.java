@@ -183,37 +183,23 @@ public class RobotTypeTaglet implements Taglet {
                 appendField(builder, rt, "attackPower");
                 appendField(builder, rt, "attackRadiusSquared");
             }
-            if (rt.buildTurns != 0) {
-                appendField(builder, rt, "buildTurns");
-            }
-            if (rt.bytecodeLimit != 0 && !rt.isZombie) {
+            if (rt.bytecodeLimit != 0) {
                 appendField(builder, rt, "bytecodeLimit");
             }
             if (rt.attackPower != 0) {
                 appendField(builder, rt, "cooldownDelay");
             }
-            if (rt.isZombie) {
-                appendField(builder, rt, "infectTurns");
-            }
 
             appendField(builder, rt, "maxHealth");
 
-            if (rt.canMove()) {
-                appendField(builder, rt, "movementDelay");
-            }
-
-            if (rt.partCost != 0 && !rt.isZombie) {
-                appendField(builder, rt, "partCost");
+            if (rt.bulletCost != 0) {
+                appendField(builder, rt, "bulletCost");
             }
 
             appendField(builder, rt, "sensorRadiusSquared");
 
             if (rt.spawnSource != null) {
                 appendField(builder, rt, "spawnSource");
-            }
-
-            if (rt.turnsInto != null) {
-                appendField(builder, rt, "turnsInto");
             }
         } catch (Exception e) {
             e.printStackTrace();
