@@ -3,7 +3,6 @@ package battlecode.world;
 import battlecode.common.*;
 import battlecode.server.ErrorReporter;
 import battlecode.server.GameState;
-import battlecode.serial.GameStats;
 import battlecode.server.TeamMapping;
 import battlecode.world.control.RobotControlProvider;
 import com.google.flatbuffers.FlatBufferBuilder;
@@ -37,7 +36,6 @@ public class GameWorld{
     private Map<Integer, RobotInfo> currentBroadcasters;
 
     private final RobotControlProvider controlProvider;
-    private final GameStats gameStats = new GameStats();
     private Random rand;
 
     private final FlatBufferBuilder builder;
@@ -176,10 +174,6 @@ public class GameWorld{
         return gameMap.getSeed();
     }
 
-    public GameStats getGameStats() {
-        return gameStats;
-    }
-
     public GameMap getGameMap() {
         return gameMap;
     }
@@ -231,7 +225,6 @@ public class GameWorld{
 
     public void setWinner(Team t, DominationFactor d)  {
         winner = t;
-        gameStats.setDominationFactor(d);
     }
 
     public void setWinnerIfDestruction(){
