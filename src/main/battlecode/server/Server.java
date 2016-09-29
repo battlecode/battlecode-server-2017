@@ -23,6 +23,11 @@ public class Server implements Runnable {
     private static final GameInfo POISON = new GameInfo(null, null, null, null, null, null, false) {};
 
     /**
+     * The current spec version the server compiles with
+     */
+    private static final String SPEC_VERSION = "1.0";
+
+    /**
      * The queue of games to run.
      * When the server encounters the GameInfo POISON, it terminates.
      */
@@ -146,7 +151,7 @@ public class Server implements Runnable {
 
             GameMaker gameMaker = new GameMaker();
             TeamMapping teamMapping = new TeamMapping(currentGame);
-            gameMaker.makeGameHeader(); // TODO: Write Game Header
+            gameMaker.makeGameHeader(SPEC_VERSION, teamMapping); // TODO: Write Game Header
 
             debug("Running: "+currentGame);
 
@@ -191,10 +196,10 @@ public class Server implements Runnable {
                     }
                 }
             }
-
-            gameMaker.makeGameFooter(); // TODO: Write Game Footer
+            byte winner = aWins >= bWins ? teamMapping.getTeamAID() : teamMapping.getTeamBID();
+            gameMaker.makeGameFooter(winner);
             gameMaker.makeGameWrapper();
-            gameMaker.writeGame(); // TODO: Write flatbuffer to file
+            gameMaker.writeGame(currentGame.getSaveFile()); // TODO: Write flatbuffer to file
         }
     }
 
@@ -303,7 +308,8 @@ public class Server implements Runnable {
 
         this.state = State.FINISHED;
 
-        // TODO: Move MatchMaker events of game to GameMaker
+        // Add match info to game info for flatbuffer
+        gameMaker.addMatchInfo(currentWorld.getMatchMaker().getEvents());
 
         return currentWorld.getWinner();
     }
