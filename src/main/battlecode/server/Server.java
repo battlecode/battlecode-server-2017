@@ -151,7 +151,7 @@ public class Server implements Runnable {
 
             GameMaker gameMaker = new GameMaker();
             TeamMapping teamMapping = new TeamMapping(currentGame);
-            gameMaker.makeGameHeader(SPEC_VERSION, teamMapping); // TODO: Write Game Header
+            gameMaker.makeGameHeader(SPEC_VERSION, teamMapping);
 
             debug("Running: "+currentGame);
 
@@ -199,7 +199,7 @@ public class Server implements Runnable {
             byte winner = aWins >= bWins ? teamMapping.getTeamAID() : teamMapping.getTeamBID();
             gameMaker.makeGameFooter(winner);
             gameMaker.makeGameWrapper();
-            gameMaker.writeGame(currentGame.getSaveFile()); // TODO: Write flatbuffer to file
+            gameMaker.writeGame(currentGame.getSaveFile());
         }
     }
 

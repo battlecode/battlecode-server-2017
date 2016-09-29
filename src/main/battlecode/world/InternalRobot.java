@@ -52,11 +52,7 @@ public class InternalRobot {
         this.weaponDelay = 0;
         this.coreDelay = 0;
 
-        if(type == RobotType.ARCHON || type == RobotType.GARDENER){
-            this.health = type.maxHealth;
-        }else{
-            this.health = .20F * type.maxHealth;
-        }
+        this.health = type.getStartingHealth();
 
         this.controlBits = 0;
         this.currentBytecodeLimit = type.bytecodeLimit;

@@ -161,6 +161,15 @@ public enum RobotType {
     public boolean isPlantable() {
         return spawnSource == GARDENER;
     }
+
+    /**
+     * Returns the starting health of this type of robot
+     *
+     * @return the starting health of this type of robot
+     */
+    public float getStartingHealth() {
+        return this == RobotType.ARCHON || this == RobotType.GARDENER ? this.maxHealth : .20F * this.maxHealth;
+    }
     
     RobotType(RobotType spawnSource, int maxHealth, int bulletCost, float bodyRadius, float bulletSpeed, float attackPower,
               float sensorRadius, float bulletSightRadius, float movementDelay, float attackDelay,
