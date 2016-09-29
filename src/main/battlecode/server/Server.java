@@ -2,11 +2,9 @@ package battlecode.server;
 
 import battlecode.common.GameConstants;
 import battlecode.common.Team;
-import battlecode.world.DominationFactor;
-import battlecode.world.GameMap;
-import battlecode.world.GameMapIO;
-import battlecode.world.GameWorld;
+import battlecode.world.*;
 import battlecode.world.control.*;
+import com.google.flatbuffers.FlatBufferBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,6 +84,38 @@ public class Server implements Runnable {
     }
 
     // ******************************
+    // ***** NOTIFICATIONS **********
+    // ******************************
+
+    public void startNotification(){
+        state = State.READY;
+    }
+
+    public void pauseNotification(){
+        state = State.PAUSED;
+    }
+
+    public void resumeNotification(){
+        if (state == State.PAUSED){
+            state = State.RUNNING;
+        }
+    }
+
+    public void runNotification(){
+        if (state != State.PAUSED) {
+            state = State.RUNNING;
+        }
+    }
+
+    public void addGameNotification(GameInfo gameInfo){
+        this.gameQueue.add(gameInfo);
+    }
+
+    public void terminateNotification(){
+        this.gameQueue.add(POISON);
+    }
+
+    // ******************************
     // ***** SIMULATION METHODS *****
     // ******************************
 
@@ -114,6 +144,10 @@ public class Server implements Runnable {
                 return;
             }
 
+            GameMaker gameMaker = new GameMaker();
+            TeamMapping teamMapping = new TeamMapping(currentGame);
+            gameMaker.makeGameHeader(); // TODO: Write Game Header
+
             debug("Running: "+currentGame);
 
             // Set up our control provider
@@ -130,11 +164,11 @@ public class Server implements Runnable {
 
                 Team winner;
                 try {
-                    winner = runMatch(currentGame, matchIndex, prov, teamMemory);
+                    winner = runMatch(currentGame, matchIndex, prov, teamMemory, teamMapping, gameMaker);
                 } catch (Exception e) {
                     ErrorReporter.report(e);
                     this.state = State.ERROR;
-                    return; // TODO
+                    return;
                 }
 
                 switch (winner) {
@@ -157,6 +191,10 @@ public class Server implements Runnable {
                     }
                 }
             }
+
+            gameMaker.makeGameFooter(); // TODO: Write Game Footer
+            gameMaker.makeGameWrapper();
+            gameMaker.writeGame(); // TODO: Write flatbuffer to file
         }
     }
 
@@ -168,23 +206,24 @@ public class Server implements Runnable {
     private Team runMatch(GameInfo currentGame,
                           int matchIndex,
                           RobotControlProvider prov,
-                          long[][] teamMemory) throws Exception {
+                          long[][] teamMemory,
+                          TeamMapping teamMapping,
+                          GameMaker gameMaker) throws Exception {
 
         final String mapName = currentGame.getMaps()[matchIndex];
 
         // Load the map for the match
         final GameMap loadedMap;
         try {
-            loadedMap = GameMapIO.loadMap(mapName, new File(options.get("bc.game.map-path")));
+            loadedMap = GameMapIO.loadMap(mapName, new File(options.get("bc.game.map-path")), teamMapping);
             debug("running map " + loadedMap);
         } catch (IOException e) {
             warn("Couldn't load map " + mapName + ", skipping");
             throw e;
         }
 
-
         // Create the game world!
-        currentWorld = new GameWorld(loadedMap, prov, currentGame.getTeamA(), currentGame.getTeamB(), teamMemory);
+        currentWorld = new GameWorld(loadedMap, prov, teamMapping, teamMemory, gameMaker.getBuilder());
 
 
         // Get started
@@ -207,8 +246,6 @@ public class Server implements Runnable {
         long startTime = System.currentTimeMillis();
         say("-------------------- Match Starting --------------------");
         say(String.format("%s vs. %s on %s", currentGame.getTeamA(), currentGame.getTeamB(), mapName));
-
-        //this.state = State.RUNNING;
 
         // Used to count throttles
         int count = 0;
@@ -266,6 +303,8 @@ public class Server implements Runnable {
 
         this.state = State.FINISHED;
 
+        // TODO: Move MatchMaker events of game to GameMaker
+
         return currentWorld.getWinner();
     }
 
@@ -306,7 +345,7 @@ public class Server implements Runnable {
     // ******************************
 
     /**
-     * @return TODO
+     * @return the state of the game
      */
     public State getState() {
         return this.state;

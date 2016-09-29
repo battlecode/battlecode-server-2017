@@ -8,12 +8,32 @@ import battlecode.common.Team;
  */
 public class TeamMapping {
 
+    private final String teamAName;
+    private final String teamBName;
     private final byte teamAID;
     private final byte teamBID;
 
-    public TeamMapping(byte teamA, byte teamB){
-        this.teamAID = teamA;
-        this.teamBID = teamB;
+    public TeamMapping(GameInfo gameInfo){
+        this.teamAName = gameInfo.getTeamA();
+        this.teamBName = gameInfo.getTeamB();
+        this.teamAID = 1;
+        this.teamBID = 2;
+    }
+
+    public String getTeamAName(){
+        return teamAName;
+    }
+
+    public String getTeamBName(){
+        return teamBName;
+    }
+
+    public byte getTeamAID(){
+        return teamAID;
+    }
+
+    public byte getTeamBID(){
+        return teamBID;
     }
 
     public Team getTeamFromID(int id) {

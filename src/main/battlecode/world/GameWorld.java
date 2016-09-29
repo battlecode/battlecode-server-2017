@@ -24,9 +24,9 @@ public class GameWorld{
      */
     protected boolean running = true;
 
-    protected Team winner = null;
     protected final IDGenerator idGenerator;
     protected final TeamMapping teamMapping;
+    protected final GameStats gameStats;
 
     private final GameMap gameMap;
     private final TeamInfo teamInfo;
@@ -49,6 +49,7 @@ public class GameWorld{
         this.currentRound = 0;
         this.idGenerator = new IDGenerator(gm.getSeed());
         this.teamMapping = teamMapping;
+        this.gameStats = new GameStats();
 
         this.gameMap = gm;
         this.objectInfo = new ObjectInfo(gm);
@@ -89,7 +90,7 @@ public class GameWorld{
     public synchronized GameState runRound() {
         if (!this.isRunning()) {
             // Write match footer if game is done
-            matchMaker.makeMatchFooter(winner, currentRound);
+            matchMaker.makeMatchFooter(gameStats.getWinner(), currentRound);
             return GameState.DONE;
         }
 
@@ -182,6 +183,10 @@ public class GameWorld{
         return teamInfo;
     }
 
+    public GameStats getGameStats() {
+        return gameStats;
+    }
+
     public ObjectInfo getObjectInfo() {
         return objectInfo;
     }
@@ -191,7 +196,7 @@ public class GameWorld{
     }
 
     public Team getWinner() {
-        return winner;
+        return gameStats.getWinner();
     }
 
     public boolean isRunning() {
@@ -224,7 +229,8 @@ public class GameWorld{
     }
 
     public void setWinner(Team t, DominationFactor d)  {
-        winner = t;
+        gameStats.setWinner(t);
+        gameStats.setDominationFactor(d);
     }
 
     public void setWinnerIfDestruction(){
@@ -256,7 +262,7 @@ public class GameWorld{
                 GameConstants.BULLET_INCOME_UNIT_PENALTY * teamInfo.getBulletSupply(Team.B)));
 
         // Check for end of match
-        if (timeLimitReached() && winner == null) {
+        if (timeLimitReached() && gameStats.getWinner() == null) {
             boolean victorDetermined = false;
 
             // tiebreak by number of victory points
@@ -307,7 +313,7 @@ public class GameWorld{
             }
         }
 
-        if (winner != null) {
+        if (gameStats.getWinner() != null) {
             running = false;
         }
     }
