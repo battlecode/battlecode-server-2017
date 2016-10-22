@@ -1,104 +1,223 @@
 package battlecode.common;
 
 /**
- * This enumeration represents a direction from one MapLocation to another.
- * There is a direction for each of the cardinals (north, south, east, west),
- * and each of diagonals (northwest, southwest, northeast, southeast).
- * There is also NONE, representing no direction, and OMNI, representing
- * all directions.
- * <p>
- * Since Direction is a Java 1.5 enum, you can use it in <code>switch</code>
- * statements, it has all the standard enum methods (<code>valueOf</code>,
- * <code>values</code>, etc.), and you can safely use <code>==</code> for
- * equality tests.
+ * This class is an immutable representation of a direction
+ * in the battlecode world.
  */
-public enum Direction {
-    NORTH(0, -1),
-    NORTH_EAST(1, -1),
-    EAST(1, 0),
-    SOUTH_EAST(1, 1),
-    SOUTH(0, 1),
-    SOUTH_WEST(-1, 1),
-    WEST(-1, 0),
-    NORTH_WEST(-1, -1),
-    /**
-     * No direction.
-     */
-    NONE(0, 0),
-    /**
-     * All directions.
-     */
-    OMNI(0, 0);
+public final class Direction {
 
-    public final int dx, dy;
+    /**
+     * The radians at which this direction is facing based off of
+     * the unit circle; i.e. facing right would have 0.0 radians,
+     * up would have PI/2 radians, etc.
+     * Note: radians = [0, 2*Math.PI)
+     */
+    public final float radians;
 
-    Direction(int dx, int dy) {
-        this.dx = dx;
-        this.dy = dy;
+    /**
+     * @param radians the radians at which you wish this direction
+     *                to represent based off of the unit circle
+     */
+    public Direction(float radians){
+        this.radians = radians % (2*(float) Math.PI);
     }
 
     /**
-     * Determines whether or not this direction is a diagonal one.
+     * Creates a new Direction instance to represent the direction
+     * in which the vector created by dx and dy points. Requires
+     * dx or dy to be non-zero
      *
-     * @return true if this Direction is diagonal (northwest, northeast,
-     *         southwest, southeast) or false if it's a cardinal, NONE, or OMNI.
+     * @param dx the x component of the vector
+     * @param dy the y component of the vector
+     */
+    public Direction(float dx, float dy) {
+        if(dx == 0 && dy ==0){
+            dy = 1;
+        }
+        this.radians = (float) Math.atan2(dy, dx) % (2 * (float) Math.PI);
+    }
+
+    /**
+     * Creates a new Direction instance to represent the direction
+     * in which the vector from start to finish points. Requires
+     * start and finish to not be the same location
+     *
+     * @param start the starting point of the vector
+     * @param finish the ending point of the vector
+     */
+    public Direction(MapLocation start, MapLocation finish) {
+        this(finish.x - start.x, finish.y - start.y);
+    }
+
+    /**
+     * Creates a instance of Direction that represents pointing east (right on screen)
+     *
+     * @return Direction instance facing east
+     */
+    public static Direction getEast(){
+        return new Direction(1, 0);
+    }
+
+    /**
+     * Creates a instance of Direction that represents pointing north (up on screen)
+     *
+     * @return Direction instance facing north
+     */
+    public static Direction getNorth(){
+        return new Direction(0, 1);
+    }
+
+    /**
+     * Creates a instance of Direction that represents pointing west (left on screen)
+     *
+     * @return Direction instance facing west
+     */
+    public static Direction getWest(){
+        return new Direction(-1, 0);
+    }
+
+    /**
+     * Creates a instance of Direction that represents pointing south (down on screen)
+     *
+     * @return Direction instance facing south
+     */
+    public static Direction getSouth(){
+        return new Direction(0, -1);
+    }
+
+    /**
+     * Computes the signed distance traveled on the x-axis when traveling travelDist
+     * units in this Direction.
+     *
+     * @param travelDist the total distance to travel
+     * @return the signed distance traveled on the x-axis
+     */
+    public float getDeltaX(float travelDist){
+        return (float)(travelDist * Math.cos(this.radians));
+    }
+
+    /**
+     * Computes the signed distance traveled on the y-axis when traveling travelDist
+     * units in this Direction.
+     *
+     * @param travelDist the total distance to travel
+     * @return the signed distance traveled on the x-axis
+     */
+    public float getDeltaY(float travelDist){
+        return (float)(travelDist * Math.sin(this.radians));
+    }
+
+    /**
+     * Computes the angle in degrees at which this direction faces
+     *
+     * @return the angle in degrees this direction faces
      *
      * @battlecode.doc.costlymethod
      */
-    public boolean isDiagonal() {
-        return (ordinal() < 8 && ordinal() % 2 == 1);
+    public float getAngleDegrees() {
+        return (float) Math.toDegrees(radians);
     }
 
     /**
      * Computes the direction opposite this one.
      *
      * @return the direction pointing in the opposite direction
-     *         to this one, or NONE if it's NONE, or OMNI if it's OMNI
      *
      * @battlecode.doc.costlymethod
      */
     public Direction opposite() {
-        if (ordinal() >= 8) {
-            return this;
-        }
-        return Direction.values()[(ordinal() + 4) % 8];
+        return rotateLeftRads((float) Math.PI);
     }
 
     /**
-     * Computes the direction 45 degrees to the left (counter-clockwise)
+     * Computes the direction angleDegrees to the left (counter-clockwise)
      * of this one.
-     *
-     * @return the direction 45 degrees left of this one, or NONE if it's NONE,
-     *         or OMNI if it's OMNI
-     *
+     * 
+     * @param angleDegrees number of degrees to rotate.
+     * @return the direction angleDegrees degrees left of this one.
+     * 
      * @battlecode.doc.costlymethod
      */
-    public Direction rotateLeft() {
-        if (ordinal() >= 8) {
-            return this;
-        }
-        if (ordinal() == 0) {
-            return Direction.values()[7];
-        }
-        return Direction.values()[(ordinal() - 1)];
+    public Direction rotateLeftDegrees(float angleDegrees) {
+        return rotateLeftRads((float) Math.toRadians(angleDegrees));
     }
 
     /**
-     * Computes the direction 45 degrees to the right (clockwise)
-     * of this one.
-     *
-     * @return the direction 45 degrees right of this one, or NONE if it's NONE,
-     *         or OMNI if it's OMNI
+     * Computes the direction angleDegrees to the right (clockwise) of this
+     * one.
+     * 
+     * @param angleDegrees number of degrees to rotate.
+     * @return the direction angleDegrees right of this one.
      *
      * @battlecode.doc.costlymethod
      */
-    public Direction rotateRight() {
-        if (ordinal() >= 8) {
-            return this;
+    public Direction rotateRightDegrees(float angleDegrees) {
+        return rotateRightRads((float) Math.toRadians(angleDegrees));
+    }
+    
+    /**
+     * Computes the direction angleRads (radians) to the left (counter-clockwise)
+     * of this one.
+     * 
+     * @param angleRads number of radians to rotate.
+     * @return the direction angleRads left of this one.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public Direction rotateLeftRads(float angleRads) {
+        return new Direction(this.radians + angleRads);
+    }
+    
+    /**
+     * Computes the direction angleRads (radians) to the right (clockwise) of
+     * this one.
+     * 
+     * @param angleRads number of radians to rotate.
+     * @return the direction angleRads right of this one.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public Direction rotateRightRads(float angleRads) {
+        return rotateLeftRads(-angleRads);
+    }
+
+    /**
+     * Computes the angle between the given direction and this direction in radians.
+     * Returned value will be in the range [0, Math.PI]
+     *
+     * @param other the direction you wish to find the angle between
+     * @return the angle in radians between this direction and the given direction
+     * in the range of [0, Math.PI]
+     */
+    public float radiansBetween(Direction other){
+        float radiansBetween = this.radians - other.radians;
+        radiansBetween = radiansBetween % (2 * (float) Math.PI);
+        if(radiansBetween > Math.PI){
+            radiansBetween = (2 * (float) Math.PI) - radiansBetween;
         }
-        if (ordinal() == 7) {
-            return Direction.values()[0];
-        }
-        return Direction.values()[(ordinal() + 1)];
+        return radiansBetween;
+    }
+
+    /**
+     * Computes the angle between the given direction and this direction in degrees.
+     * Returned value will be in the range [0, 180]
+     *
+     * @param other the direction you wish to find the angle between
+     * @return the angle in degrees between this direction and the given direction
+     * in the range of [0, 180]
+     */
+    public float degreesBetween(Direction other){
+        return (float) Math.toDegrees(radiansBetween(other));
+    }
+
+    public int hashCode() {
+        return Float.floatToIntBits(radians) * 13;
+    }
+
+    @Override
+    public String toString() {
+        return  "Direction: " +
+                "radians=" + radians +
+                ", degrees=" + Math.toDegrees(radians);
     }
 }

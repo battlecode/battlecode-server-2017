@@ -2,6 +2,7 @@
 /lib
 /javadoc
 /common-javadoc
+/src/battlecode-server.iml
 *.rms
 *.jar
 *.swp

@@ -3,7 +3,6 @@ package battlecode.common;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 /**
  * This class is an immutable representation of two-dimensional coordinates
@@ -15,11 +14,11 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
     /**
      * The x-coordinate.
      */
-    public final int x;
+    public final float x;
     /**
      * The y-coordinate.
      */
-    public final int y;
+    public final float y;
 
     /**
      * Creates a new MapLocation representing the location
@@ -30,13 +29,13 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      *
      * @battlecode.doc.costlymethod
      */
-    public MapLocation(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public MapLocation(float x, float y) {
+        this.x = x == Float.NaN ? 0 : x;
+        this.y = y == Float.NaN ? 0 : y;
     }
 
     /**
-     * A comparison function for MapLocations. Smaller rows go first, with ties broken by smaller columns.
+     * A comparison function for MapLocations. Smaller x values go first, with ties broken by smaller y values.
      *
      * @param other the MapLocation to compare to.
      * @return whether this MapLocation goes before the other one.
@@ -45,9 +44,17 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      */
     public int compareTo(MapLocation other) {
         if (x != other.x) {
-            return x - other.x;
+            if(x < other.x)
+                return -1;
+            else
+                return 1;
         } else {
-            return y - other.y;
+            if(y < other.y)
+                return -1;
+            else if (y > other.y)
+                return 1;
+            else
+                return 0;
         }
     }
 
@@ -66,7 +73,6 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
         }
 
         return (((MapLocation) obj).x == this.x) && (((MapLocation) obj).y == this.y);
-
     }
 
     /**
@@ -76,17 +82,15 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      */
     @Override
     public int hashCode() {
-
-        return this.x * 13 + this.y * 23;
-
+        return Float.floatToIntBits(this.x) * 13 + Float.floatToIntBits(this.y) * 23;
     }
 
     public static MapLocation valueOf(String s) {
         String[] coord = StringUtils.replaceChars(s, "[](){}", null).split(",");
         if (coord.length != 2)
             throw new IllegalArgumentException("Invalid map location string");
-        int x = Integer.valueOf(coord[0].trim());
-        int y = Integer.valueOf(coord[1].trim());
+        float x = Float.valueOf(coord[0].trim());
+        float y = Float.valueOf(coord[1].trim());
 
         return new MapLocation(x, y);
     }
@@ -97,46 +101,99 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      * @battlecode.doc.costlymethod
      */
     public String toString() {
-        return String.format("[%d, %d]", this.x, this.y);
+        return String.format("[%f, %f]", this.x, this.y);
     }
 
     /**
-     * Computes the square of the distance from this location to the specified
+     * Computes the Euclidean distance from this location to the specified
      * location.
      *
-     * @param location the location to compute the distance squared to
-     * @return the distance to the given location squared
+     * @param location the location to compute the distance to
+     * @return the distance to the given location
      *
      * @battlecode.doc.costlymethod
      */
-    public final int distanceSquaredTo(MapLocation location) {
-        int dx = this.x - location.x;
-        int dy = this.y - location.y;
+    public final float distanceTo(MapLocation location) {
+        float dx = this.x - location.x;
+        float dy = this.y - location.y;
+        return (float) Math.sqrt(dx * dx + dy * dy);
+    }
+
+    /**
+     * Computes the squared distance from this location to the specified
+     * location.
+     *
+     * @param location the location to compute the squared distance to
+     * @return the squared distance to the given location
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final float distanceSquaredTo(MapLocation location) {
+        float dx = this.x - location.x;
+        float dy = this.y - location.y;
         return dx * dx + dy * dy;
     }
 
     /**
-     * Determines whether this location is adjacent to the specified
-     * location. Note that squares cannot be adjacent to themselves.
+     * Determines whether this location is within a specified distance
+     * from target location.
      *
      * @param location the location to test
-     * @return true if the given location is adjacent to this one,
+     * @param dist the distance for the location to be within
+     * @return true if the given location is within dist to this one,
      *         or false if it isn't
      *
      * @battlecode.doc.costlymethod
      */
-    public final boolean isAdjacentTo(MapLocation location) {
+    public final boolean isWithinDistance(MapLocation location, float dist) {
+        return this.distanceTo(location) <= dist;
+    }
 
-        int distTo = this.distanceSquaredTo(location);
+    /**
+     * Determines whether this location is within one stride of the given robot
+     *
+     * @param robot the robot to test
+     * @return true if this location is within one stride of the given robot,
+     *          false otherwise
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final boolean isWithinStrideDistance(RobotInfo robot){
+        return isWithinDistance(robot.location, 2*robot.type.bodyRadius);
+    }
 
-        return distTo == 1 || distTo == 2;
+    /**
+     * Determines whether this location is within the sensor radius of the
+     * given robot
+     *
+     * @param robot the robot to test
+     * @return true if this location is within the robot's sensor radius,
+     *         false otherwise
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final boolean isWithinSensorRadius(RobotInfo robot){
+        return isWithinDistance(robot.location, robot.type.sensorRadius);
+    }
 
+    /**
+     * Determines whether this location is within the bullet sight radius of the
+     * given robot
+     *
+     * @param robot the robot to test
+     * @return true if this location is within robot's bullet sight radius,
+     *         false otherwise
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final boolean isWithinBulletSightRadius(RobotInfo robot){
+        return isWithinDistance(robot.location, robot.type.bulletSightRadius);
     }
 
     /**
      * Returns the Direction from this MapLocation to <code>location</code>.
-     * If the locations are equal this method returns Direction.OMNI. If
-     * <code>location</code> is null then the return value is Direction.NONE.
+     * If <code>location</code> is null then the return value is null.
+     * If <code>location</code> equals this location then the return value is null.
      *
      * @param location The location to which the Direction will be calculated
      * @return The Direction to <code>location</code> from this MapLocation.
@@ -147,69 +204,140 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
         if(location == null) {
             return null;
         }
-        
-        double dx = location.x - this.x;
-        double dy = location.y - this.y;
-
-        if (Math.abs(dx) >= 2.414 * Math.abs(dy)) {
-            if (dx > 0) {
-                return Direction.EAST;
-            } else if (dx < 0) {
-                return Direction.WEST;
-            } else {
-                return Direction.OMNI;
-            }
-        } else if (Math.abs(dy) >= 2.414 * Math.abs(dx)) {
-            if (dy > 0) {
-                return Direction.SOUTH;
-            } else {
-                return Direction.NORTH;
-            }
-        } else {
-            if (dy > 0) {
-                if (dx > 0) {
-                    return Direction.SOUTH_EAST;
-                } else {
-                    return Direction.SOUTH_WEST;
-                }
-            } else {
-                if (dx > 0) {
-                    return Direction.NORTH_EAST;
-                } else {
-                    return Direction.NORTH_WEST;
-                }
-            }
+        if(this.equals(location)){
+            return null;
         }
+        return new Direction(this,location);
     }
 
     /**
      * Returns a new MapLocation object representing a location
-     * one square from this one in the given direction.
+     * one unit in distance from this one in the given direction.
      *
      * @param direction the direction to add to this location
-     * @return a MapLocation for the location one square in the given
-     *         direction, or this location if the direction is NONE or OMNI
+     * @return a MapLocation for the location one unit in distance in the given
+     *         direction.
      *
      * @battlecode.doc.costlymethod
      */
     public final MapLocation add(Direction direction) {
-
-        return new MapLocation(x + direction.dx, y + direction.dy);
+        float dx = (float)Math.cos(direction.radians);
+        float dy = (float)Math.sin(direction.radians);
+        return new MapLocation(x + dx, y + dy);
     }
 
     /**
      * Returns a new MapLocation object representing a location
-     * {@code multiple} squares from this one in the given direction.
+     * one unit in distance from this one in the given direction
+     * represented in radians.
      *
-     * @param direction the direction to add to this location
-     * @param multiple  the number of squares to add
-     * @return a MapLocation for the location one square in the given
-     *         direction, or this location if the direction is NONE or OMNI
+     * @param radians the radians of the direction to add to this location,
+     *                note that 0 radians points right
+     * @return a MapLocation for the location one unit in distance in the given
+     *         direction.
      *
      * @battlecode.doc.costlymethod
      */
-    public final MapLocation add(Direction direction, int multiple) {
-        return new MapLocation(x + multiple * direction.dx, y + multiple * direction.dy);
+    public final MapLocation add(float radians) {
+        return this.add(new Direction(radians));
+    }
+
+    /**
+     * Returns a new MapLocation object representing a location
+     * {@code dist} units away from this one in the given direction.
+     *
+     * @param direction the direction to add to this location
+     * @param dist  the distance the locations should be apart
+     * @return a MapLocation for the location dist away from this location
+     *         in the given direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final MapLocation add(Direction direction, float dist) {
+        float dx = (float)(dist * Math.cos(direction.radians));
+        float dy = (float)(dist * Math.sin(direction.radians));
+        return new MapLocation(x + dx, y + dy);
+    }
+
+    /**
+     * Returns a new MapLocation object representing a location
+     * {@code dist} units away from this one in the given direction
+     * represented in radians.
+     *
+     * @param radians the radians of the direction to add to this location,
+     *                note that 0 radians points right
+     * @param dist  the distance the locations should be apart
+     * @return a MapLocation for the location dist away from this location
+     *         in the given direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final MapLocation add(float radians, float dist) {
+        return this.add(new Direction(radians), dist);
+    }
+
+    /**
+     * Returns a new MapLocation object representing a location
+     * one unit in distance from this one in the opposite direction
+     * of the given direction.
+     *
+     * @param direction the direction to subtract from this location
+     * @return a MapLocation for the location one unit in distance in the
+     *         opposite of the given direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final MapLocation subtract(Direction direction) {
+        return this.add(direction.opposite());
+    }
+
+    /**
+     * Returns a new MapLocation object representing a location
+     * one unit in distance from this one in the opposite direction of the
+     * given direction represented in radians.
+     *
+     * @param radians the radians of the direction to subtract from this location,
+     *                note that 0 radians points right
+     * @return a MapLocation for the location one unit in distance in the given
+     *         direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final MapLocation subtract(float radians) {
+        return this.subtract(new Direction(radians));
+    }
+
+    /**
+     * Returns a new MapLocation object representing a location
+     * {@code dist} units in distance from this one in the opposite direction
+     * of the given direction.
+     *
+     * @param direction the direction to subtract from this location
+     * @param dist  the distance the locations should be apart
+     * @return a MapLocation for the location dist away from this location
+     *         in the opposite of the given direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final MapLocation subtract(Direction direction, float dist) {
+        return this.add(direction.opposite(), dist);
+    }
+
+    /**
+     * Returns a new MapLocation object representing a location
+     * {@code dist} units in distance from this one in the opposite direction of the
+     * given direction represented in radians.
+     *
+     * @param radians the radians of the direction to subtract from this location,
+     *                note that 0 radians points right
+     * @param dist  the distance the locations should be apart
+     * @return a MapLocation for the location one unit in distance in the given
+     *         direction.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public final MapLocation subtract(float radians, float dist) {
+        return this.subtract(new Direction(radians), dist);
     }
 
     /**
@@ -222,59 +350,8 @@ public final class MapLocation implements Serializable, Comparable<MapLocation> 
      *
      * @battlecode.doc.costlymethod
      */
-    public final MapLocation add(int dx, int dy) {
+    public final MapLocation translate(float dx, float dy) {
         return new MapLocation(x + dx, y + dy);
-    }
-
-    /**
-     * Returns a new MapLocation object representing a location
-     * one square from this one in the opposite of the given direction.
-     *
-     * @param direction the direction to subtract from this location
-     * @return a MapLocation for the location one square opposite the given
-     *         direction, or this location if the direction is NONE or OMNI
-     *
-     * @battlecode.doc.costlymethod
-     */
-    public final MapLocation subtract(Direction direction) {
-        return this.add(direction.opposite());
-    }
-
-	/**
-	 * Returns an array of all MapLocations within a certain radius squared 
-	 * of a specified location (cannot be called with radiusSquared greater than 100).
-	 *
-	 * @param center the center of the search
-	 * @param radiusSquared the radius of the search, which must be at most 100.
-	 * @return all MapLocations (both on the map and outside the map) within 
-	 * radiusSquared distance of center.
-     * @throws IllegalArgumentException if the radiusSquared is greater than 100 or is negative.
-	 *
-     * @battlecode.doc.costlymethod
-     */
-    public static MapLocation[] getAllMapLocationsWithinRadiusSq(MapLocation center, int radiusSquared) {
-        ArrayList<MapLocation> locations = new ArrayList<>();
-
-        if (radiusSquared > 100 || radiusSquared < 0) {
-            throw new IllegalArgumentException("radiusSquared argument for getAllMapLocationsWithinRadiusSq cannot be greater than 100 or negative. However, since Battlecode is open source, you are free to use the source code of this method to implement it yourself.");
-        }    
-
-        int radius = (int) Math.sqrt(radiusSquared);
-
-        int minXPos = center.x - radius;
-        int maxXPos = center.x + radius;
-        int minYPos = center.y - radius;
-        int maxYPos = center.y + radius;
-
-        for (int x = minXPos; x <= maxXPos; x++) {
-            for (int y = minYPos; y <= maxYPos; y++) {
-                MapLocation loc = new MapLocation(x, y);
-                if (loc.distanceSquaredTo(center) <= radiusSquared)
-                    locations.add(loc);
-            }
-        }
-
-        return locations.toArray(new MapLocation[locations.size()]);
     }
 
     /**

@@ -16,6 +16,11 @@ public class IDGenerator {
     public static final int ID_BLOCK_SIZE = 4096;
 
     /**
+     * The smallest ID possible
+     */
+    public static final int MIN_ID = 10000;
+
+    /**
      * The block of reserved IDs we walk through.
      */
     private final int[] reservedIDs;
@@ -44,7 +49,7 @@ public class IDGenerator {
         this.random = new Random(seed);
         this.reservedIDs = new int[ID_BLOCK_SIZE];
 
-        this.nextIDBlock = 0;
+        this.nextIDBlock = MIN_ID;
 
         allocateNextBlock();
     }

@@ -1,7 +1,5 @@
 package battlecode.server;
 
-import battlecode.server.proxy.Proxy;
-
 import java.io.File;
 import java.io.Serializable;
 import java.net.URL;

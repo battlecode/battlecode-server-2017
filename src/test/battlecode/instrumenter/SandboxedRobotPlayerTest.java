@@ -63,31 +63,9 @@ public class SandboxedRobotPlayerTest {
         // Make sure that the player called the correct methods
 
         verify(rc).addMatchObservation("text");
-        verify(rc).readSignal();
         verify(rc).resign();
         verify(rc).senseNearbyRobots();
         verify(rc).setTeamMemory(0, 0);
-    }
-
-    @Test
-    public void testYield() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerclock", rc, 0, cache);
-        player.setBytecodeLimit(10000);
-
-        player.step();
-
-        assertFalse(player.getTerminated());
-        verify(rc).broadcastSignal(1);
-
-        player.step();
-
-        assertFalse(player.getTerminated());
-        verify(rc).broadcastSignal(2);
-
-        player.step();
-
-        assertTrue(player.getTerminated());
-        verify(rc).broadcastSignal(3);
     }
 
     @Test
@@ -102,18 +80,6 @@ public class SandboxedRobotPlayerTest {
 
         assertFalse(player.getTerminated());
 
-    }
-
-    @Test
-    public void testBytecodeCountsCorrect() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerclock", rc, 0, cache);
-        player.setBytecodeLimit(10000);
-
-        player.step();
-
-        verify(rc).broadcastSignal(1);
-        // broadcast() is 100 bytecodes, +2 extra
-        assertEquals(player.getBytecodesUsed(), 102);
     }
 
     @Test(timeout=300)
