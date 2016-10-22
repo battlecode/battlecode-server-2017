@@ -4,7 +4,6 @@ import battlecode.common.GameConstants;
 import battlecode.common.RobotType;
 import battlecode.schema.*;
 import com.google.flatbuffers.FlatBufferBuilder;
-import com.sun.xml.internal.ws.client.sei.ResponseBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
