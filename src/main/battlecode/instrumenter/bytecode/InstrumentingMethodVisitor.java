@@ -92,8 +92,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         return ClassReferenceUtil.fieldSignatureReference(name, teamPackageName, checkDisallowed);
     }
 
-    private void instrumentationException(String description)
-    {
+    private void instrumentationException(String description) {
         throw new InstrumentationException(String.format("In method %s.%s:%s:\n%s",className,name,desc,description));
     }
 
@@ -143,8 +142,10 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                     bytecodeCtr++;
                     endOfBasicBlock(node);
                     break;
-                case IINC_INSN:
                 case INT_INSN:
+		    visitIntInsnNode((IntInsnNode) node);
+		    break;
+                case IINC_INSN:
                     bytecodeCtr++;
                     break;
             }
@@ -525,8 +526,55 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
     }
 
     private void visitMultiANewArrayInsnNode(MultiANewArrayInsnNode n) {
-        bytecodeCtr++;
         n.desc = classDescReference(n.desc);
+
+	/*
+	 * The following code looks crazy, but all it does is is increment bytecodes by the product
+	 * of the first <n.dims> elements on the stack.
+	 */
+
+	InsnList newInsns = new InsnList();
+	newInsns.add(new LdcInsnNode(n.dims));
+	newInsns.add(new IntInsnNode(NEWARRAY, 10));
+	for (int i = 0; i < n.dims; i++) {
+	    newInsns.add(new InsnNode(DUP_X1));
+	    newInsns.add(new InsnNode(SWAP));
+	    newInsns.add(new LdcInsnNode(i));
+	    newInsns.add(new InsnNode(SWAP));
+	    newInsns.add(new InsnNode(IASTORE));
+	}
+
+	newInsns.add(new InsnNode(ICONST_1));
+	newInsns.add(new InsnNode(SWAP));
+	newInsns.add(new InsnNode(ICONST_0));
+
+	for (int i = 0; i < n.dims; i++) {
+	    newInsns.add(new InsnNode(DUP2_X1));
+	    newInsns.add(new InsnNode(IALOAD));
+	    newInsns.add(new InsnNode(IMUL));
+	    newInsns.add(new InsnNode(DUP_X2));
+	    newInsns.add(new InsnNode(POP));
+	    newInsns.add(new InsnNode(ICONST_1));
+	    newInsns.add(new InsnNode(IADD));
+	}
+
+	newInsns.add(new InsnNode(POP));
+	newInsns.add(new InsnNode(SWAP));
+	newInsns.add(new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "incrementBytecodesWithoutInterrupt", "(I)V"));
+	newInsns.add(new LdcInsnNode(n.dims - 1));
+
+	for (int i = 0; i < n.dims; i++) {
+	    newInsns.add(new InsnNode(DUP2));
+	    newInsns.add(new InsnNode(IALOAD));
+	    newInsns.add(new InsnNode(DUP_X2));
+	    newInsns.add(new InsnNode(POP));
+	    newInsns.add(new InsnNode(ICONST_M1));
+	    newInsns.add(new InsnNode(IADD));
+	}
+
+	newInsns.add(new InsnNode(POP2));
+
+	instructions.insertBefore(n, newInsns);
     }
 
     private void visitLabelNode(LabelNode n) {
@@ -536,14 +584,32 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
     }
 
     private void visitTypeInsnNode(TypeInsnNode n) {
-        bytecodeCtr++;
         n.desc = classReference(n.desc);
+	if (n.getOpcode() == ANEWARRAY) {
+	    InsnList newInsns = new InsnList();
+	    newInsns.add(new InsnNode(DUP));
+	    newInsns.add(new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "incrementBytecodesWithoutInterrupt", "(I)V"));
+	    instructions.insertBefore(n, newInsns);
+	} else {
+	    bytecodeCtr++;
+	}
     }
 
     private void visitVarInsnNode(VarInsnNode n) {
         bytecodeCtr++;
         if (n.getOpcode() == RET)
             endOfBasicBlock(n);
+    }
+
+    private void visitIntInsnNode(IntInsnNode n) {
+	if (n.getOpcode() == NEWARRAY) {
+	    InsnList newInsns = new InsnList();
+	    newInsns.add(new InsnNode(DUP));
+	    newInsns.add(new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "incrementBytecodesWithoutInterrupt", "(I)V"));
+	    instructions.insertBefore(n, newInsns);
+	} else {
+	    bytecodeCtr++;
+	}
     }
 
     private void visitLocalVariableNode(LocalVariableNode n) {

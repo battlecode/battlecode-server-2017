@@ -22,6 +22,7 @@ public final class RobotMonitor {
     private static int randomSeed;
 
     private static int bytecodesLeft;
+    private static int bytecodesToRemove;
     private static boolean shouldDie;
     private static int debugLevel;
 
@@ -119,11 +120,29 @@ public final class RobotMonitor {
 
         if (debugLevel == 0) {
             bytecodesLeft -= numBytecodes;
+	    bytecodesLeft -= bytecodesToRemove;
 
             while (bytecodesLeft <= 0) {
                 pause();
             }
         }
+	
+	bytecodesToRemove = 0;
+    }
+
+    /**
+     * "Increments" the currently active robot's bytecode count by the given amount.
+     * Specifically, this incrementation actually happens when incrementBytecodes is next called.
+     * This method is needed for cases where the nature of bytecode incrementation is dependent on
+     * the state of the player (e.g. array initialization).
+     *
+     * THIS METHOD IS CALLED BY THE INSTRUMENTER.
+     *
+     * @param numBytecodes the number of bytecodes the robot just executed
+     */
+    @SuppressWarnings("unused")
+    public static void incrementBytecodesWithoutInterrupt(int numBytecodes) {
+        bytecodesToRemove += numBytecodes;
     }
 
     /**
