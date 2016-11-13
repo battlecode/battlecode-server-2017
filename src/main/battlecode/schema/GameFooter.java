@@ -34,5 +34,5 @@ public final class GameFooter extends Table {
     int o = builder.endObject();
     return o;
   }
-}
+};
 

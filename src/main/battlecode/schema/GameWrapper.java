@@ -65,5 +65,5 @@ public final class GameWrapper extends Table {
     int o = builder.endObject();
     return o;
   }
-}
+};
 

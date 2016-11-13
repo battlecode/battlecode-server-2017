@@ -69,5 +69,5 @@ public final class SpawnedBulletTable extends Table {
     int o = builder.endObject();
     return o;
   }
-}
+};
 

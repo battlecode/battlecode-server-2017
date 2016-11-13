@@ -58,8 +58,8 @@ public final class BodyType {
    */
   public static final byte TREE_NEUTRAL = 9;
 
-  public static final String[] names = { "ARCHON", "GARDENER", "LUMBERJACK", "RECRUIT", "SOLDIER", "TANK", "SCOUT", "BULLET", "TREE_BULLET", "TREE_NEUTRAL", };
+  private static final String[] names = { "ARCHON", "GARDENER", "LUMBERJACK", "RECRUIT", "SOLDIER", "TANK", "SCOUT", "BULLET", "TREE_BULLET", "TREE_NEUTRAL", };
 
   public static String name(int e) { return names[e]; }
-}
+};
 

@@ -50,5 +50,5 @@ public final class TeamData extends Table {
     int o = builder.endObject();
     return o;
   }
-}
+};
 

@@ -36,8 +36,8 @@ public final class Event {
    */
   public static final byte GameFooter = 5;
 
-  public static final String[] names = { "NONE", "GameHeader", "MatchHeader", "Round", "MatchFooter", "GameFooter", };
+  private static final String[] names = { "NONE", "GameHeader", "MatchHeader", "Round", "MatchFooter", "GameFooter", };
 
   public static String name(int e) { return names[e]; }
-}
+};
 

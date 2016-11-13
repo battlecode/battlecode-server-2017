@@ -57,5 +57,5 @@ public final class GameMap extends Table {
     int o = builder.endObject();
     return o;
   }
-}
+};
 

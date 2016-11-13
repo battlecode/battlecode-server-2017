@@ -63,8 +63,8 @@ public final class Action {
    */
   public static final byte DIE_SUICIDE = 9;
 
-  public static final String[] names = { "FIRE", "FIRE_TRIAD", "FIRE_PENTAD", "CHOP", "SHAKE_TREE", "PLANT_TREE", "WATER_TREE", "SPAWN_UNIT", "DIE_EXCEPTION", "DIE_SUICIDE", };
+  private static final String[] names = { "FIRE", "FIRE_TRIAD", "FIRE_PENTAD", "CHOP", "SHAKE_TREE", "PLANT_TREE", "WATER_TREE", "SPAWN_UNIT", "DIE_EXCEPTION", "DIE_SUICIDE", };
 
   public static String name(int e) { return names[e]; }
-}
+};
 

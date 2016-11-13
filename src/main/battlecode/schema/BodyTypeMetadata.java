@@ -38,27 +38,19 @@ public final class BodyTypeMetadata extends Table {
    */
   public float startHealth() { int o = __offset(12); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
   /**
-   * The delay penalty added to the core counter after movement.
+   * The maximum distance this type can move each turn
    */
-  public float moveDelay() { int o = __offset(14); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  /**
-   * The delay penalty added to the attack counter after movement.
-   */
-  public float attackDelay() { int o = __offset(16); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
-  /**
-   * The delay penalty added to the attack counter after movement, and vice versa.
-   */
-  public float cooldownDelay() { int o = __offset(18); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  public float strideRadius() { int o = __offset(14); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
   /**
    * The speed that bullets from this unit move.
    * Note: you don't need to keep track of this, SpawnedBody.vel will always be set.
    */
-  public float bulletSpeed() { int o = __offset(20); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  public float bulletSpeed() { int o = __offset(16); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
   /**
    * The damage that bullets from this unit inflict.
    * Note: you don't need to keep track of this.
    */
-  public float bulletAttack() { int o = __offset(22); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  public float bulletAttack() { int o = __offset(18); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
 
   public static int createBodyTypeMetadata(FlatBufferBuilder builder,
       byte type,
@@ -66,17 +58,13 @@ public final class BodyTypeMetadata extends Table {
       float cost,
       float maxHealth,
       float startHealth,
-      float moveDelay,
-      float attackDelay,
-      float cooldownDelay,
+      float strideRadius,
       float bulletSpeed,
       float bulletAttack) {
-    builder.startObject(10);
+    builder.startObject(8);
     BodyTypeMetadata.addBulletAttack(builder, bulletAttack);
     BodyTypeMetadata.addBulletSpeed(builder, bulletSpeed);
-    BodyTypeMetadata.addCooldownDelay(builder, cooldownDelay);
-    BodyTypeMetadata.addAttackDelay(builder, attackDelay);
-    BodyTypeMetadata.addMoveDelay(builder, moveDelay);
+    BodyTypeMetadata.addStrideRadius(builder, strideRadius);
     BodyTypeMetadata.addStartHealth(builder, startHealth);
     BodyTypeMetadata.addMaxHealth(builder, maxHealth);
     BodyTypeMetadata.addCost(builder, cost);
@@ -85,20 +73,18 @@ public final class BodyTypeMetadata extends Table {
     return BodyTypeMetadata.endBodyTypeMetadata(builder);
   }
 
-  public static void startBodyTypeMetadata(FlatBufferBuilder builder) { builder.startObject(10); }
+  public static void startBodyTypeMetadata(FlatBufferBuilder builder) { builder.startObject(8); }
   public static void addType(FlatBufferBuilder builder, byte type) { builder.addByte(0, type, 0); }
   public static void addRadius(FlatBufferBuilder builder, float radius) { builder.addFloat(1, radius, 0.0f); }
   public static void addCost(FlatBufferBuilder builder, float cost) { builder.addFloat(2, cost, 0.0f); }
   public static void addMaxHealth(FlatBufferBuilder builder, float maxHealth) { builder.addFloat(3, maxHealth, 0.0f); }
   public static void addStartHealth(FlatBufferBuilder builder, float startHealth) { builder.addFloat(4, startHealth, 0.0f); }
-  public static void addMoveDelay(FlatBufferBuilder builder, float moveDelay) { builder.addFloat(5, moveDelay, 0.0f); }
-  public static void addAttackDelay(FlatBufferBuilder builder, float attackDelay) { builder.addFloat(6, attackDelay, 0.0f); }
-  public static void addCooldownDelay(FlatBufferBuilder builder, float cooldownDelay) { builder.addFloat(7, cooldownDelay, 0.0f); }
-  public static void addBulletSpeed(FlatBufferBuilder builder, float bulletSpeed) { builder.addFloat(8, bulletSpeed, 0.0f); }
-  public static void addBulletAttack(FlatBufferBuilder builder, float bulletAttack) { builder.addFloat(9, bulletAttack, 0.0f); }
+  public static void addStrideRadius(FlatBufferBuilder builder, float strideRadius) { builder.addFloat(5, strideRadius, 0.0f); }
+  public static void addBulletSpeed(FlatBufferBuilder builder, float bulletSpeed) { builder.addFloat(6, bulletSpeed, 0.0f); }
+  public static void addBulletAttack(FlatBufferBuilder builder, float bulletAttack) { builder.addFloat(7, bulletAttack, 0.0f); }
   public static int endBodyTypeMetadata(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
   }
-}
+};
 
