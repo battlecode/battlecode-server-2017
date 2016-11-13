@@ -13,11 +13,15 @@ public class TeamMapping {
     private final byte teamAID;
     private final byte teamBID;
 
-    public TeamMapping(GameInfo gameInfo){
-        this.teamAName = gameInfo.getTeamA();
-        this.teamBName = gameInfo.getTeamB();
+    public TeamMapping(String teamAName, String teamBName){
+        this.teamAName = teamAName;
+        this.teamBName = teamBName;
         this.teamAID = 1;
         this.teamBID = 2;
+    }
+
+    public TeamMapping(GameInfo gameInfo){
+        this(gameInfo.getTeamA(), gameInfo.getTeamB());
     }
 
     public String getTeamAName(){

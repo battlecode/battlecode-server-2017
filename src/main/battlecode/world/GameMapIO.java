@@ -4,6 +4,7 @@ import battlecode.server.TeamMapping;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,6 +43,22 @@ public final class GameMapIO {
             Path mapPath = Paths.get(mapStringPath);
             byte[] data = Files.readAllBytes(mapPath);
             ByteBuffer bb = ByteBuffer.wrap(data);
+            battlecode.schema.GameMap schemaMap = battlecode.schema.GameMap.getRootAsGameMap(bb);
+            return new GameMap(schemaMap, teamMapping);
+        }
+        return null;
+    }
+
+    public static GameMap loadMap(String path, TeamMapping teamMapping) throws IOException {
+        File mapFile = new File(path);
+        if(mapFile.exists()){
+            FileInputStream fIn = new FileInputStream(path);
+            FileChannel fChan = fIn.getChannel();
+            long fSize = fChan.size();
+            ByteBuffer bb = ByteBuffer.allocate((int) fSize);
+            fChan.read(bb);
+            bb.rewind();
+            fChan.close();
             battlecode.schema.GameMap schemaMap = battlecode.schema.GameMap.getRootAsGameMap(bb);
             return new GameMap(schemaMap, teamMapping);
         }
