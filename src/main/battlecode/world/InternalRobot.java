@@ -14,8 +14,6 @@ public class InternalRobot {
     private Team team;
     private RobotType type;
     private MapLocation location;
-    private float weaponDelay;
-    private float coreDelay;
     private float health;
 
     private long controlBits;
@@ -27,6 +25,8 @@ public class InternalRobot {
     private int repairCount;
     private int shakeCount;
     private int waterCount;
+    private int attackCount;
+    private int moveCount;
 
     private boolean healthChanged = false;
 
@@ -49,8 +49,6 @@ public class InternalRobot {
         this.team = team;
         this.type = type;
         this.location = loc;
-        this.weaponDelay = 0;
-        this.coreDelay = 0;
 
         this.health = type.getStartingHealth();
 
@@ -63,6 +61,8 @@ public class InternalRobot {
         this.repairCount = 0;
         this.shakeCount = 0;
         this.waterCount = 0;
+        this.attackCount = 0;
+        this.moveCount = 0;
 
         this.gameWorld = gw;
         this.controller = new RobotControllerImpl(gameWorld, this);
@@ -96,14 +96,6 @@ public class InternalRobot {
         return location;
     }
 
-    public float getWeaponDelay() {
-        return weaponDelay;
-    }
-
-    public float getCoreDelay() {
-        return coreDelay;
-    }
-
     public float getHealth() {
         return health;
     }
@@ -135,6 +127,14 @@ public class InternalRobot {
     public int getWaterCount() {
         return waterCount;
     }
+    
+    public int getAttackCount() {
+        return attackCount;
+    }
+    
+    public int getMoveCount() {
+        return moveCount;
+    }
 
     public RobotInfo getRobotInfo() {
         if (this.cachedRobotInfo != null
@@ -142,13 +142,13 @@ public class InternalRobot {
                 && this.cachedRobotInfo.team == team
                 && this.cachedRobotInfo.type == type
                 && this.cachedRobotInfo.location.equals(location)
-                && this.cachedRobotInfo.coreDelay == coreDelay
-                && this.cachedRobotInfo.weaponDelay == weaponDelay
-                && this.cachedRobotInfo.health == health) {
+                && this.cachedRobotInfo.health == health
+                && this.cachedRobotInfo.attackCount == attackCount
+                && this.cachedRobotInfo.moveCount == moveCount) {
             return this.cachedRobotInfo;
         }
         return this.cachedRobotInfo = new RobotInfo(
-                ID, team, type, location, coreDelay, weaponDelay, health);
+                ID, team, type, location, health, attackCount, moveCount);
     }
 
     // **********************************
@@ -181,6 +181,14 @@ public class InternalRobot {
 
     public void incrementRepairCount() {
         this.repairCount++;
+    }
+    
+    public void incrementAttackCount() {
+        this.shakeCount++;
+    }
+    
+    public void incrementMoveCount() {
+        this.moveCount++;
     }
 
     private void keepMinHealth(){
@@ -217,43 +225,6 @@ public class InternalRobot {
     }
 
     // *********************************
-    // ****** DELAYS METHODS ***********
-    // *********************************
-
-    public void addCoreDelay(float time) {
-        coreDelay += time;
-    }
-
-    public void addWeaponDelay(float time) {
-        weaponDelay += time;
-    }
-
-    public void setCoreDelayUpTo(float delay) {
-        coreDelay = Math.max(coreDelay, delay);
-    }
-
-    public void setWeaponDelayUpTo(float delay) {
-        weaponDelay = Math.max(weaponDelay, delay);
-    }
-
-    public void decrementDelays() {
-        // Formula following the "Explanation of Delays" section of game specs
-        // (Use previous bytecodes because current bytecode = 0)
-        float amountToDecrement = 1.0F - (0.3F * (float) Math.pow(
-                Math.max(0,8000-this.type.bytecodeLimit+this.prevBytecodesUsed)/8000.0,1.5));
-        
-        weaponDelay-=amountToDecrement;
-        coreDelay-=amountToDecrement;
-
-        if (weaponDelay < 0.0) {
-            weaponDelay = 0;
-        }
-        if (coreDelay < 0.0) {
-            coreDelay = 0;
-        }
-    }
-
-    // *********************************
     // ****** GAMEPLAY METHODS *********
     // *********************************
 
@@ -263,7 +234,8 @@ public class InternalRobot {
     }
 
     public void processBeginningOfTurn() {
-        decrementDelays();
+        attackCount = 0;
+        moveCount = 0;
         repairCount = 0;
         waterCount = 0;
         shakeCount = 0;

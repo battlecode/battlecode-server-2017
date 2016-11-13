@@ -28,19 +28,19 @@ public class RobotInfo implements  BodyInfo{
     public final MapLocation location;
 
     /**
-     * The current core delay of the robot.
-     */
-    public final double coreDelay;
-
-    /**
-     * The current weapon delay of the robot.
-     */
-    public final double weaponDelay;
-
-    /**
      * The current health of the robot.
      */
     public final double health;
+    
+    /**
+     * The number of times this robot has attacked in the current turn
+     */
+    public final int attackCount;
+    
+    /**
+     * The number of times this robot has moved in the current turn
+     */
+    public final int moveCount;
 
     @Override
     public MapLocation getLocation() {
@@ -68,15 +68,15 @@ public class RobotInfo implements  BodyInfo{
     }
 
     public RobotInfo(int ID, Team team, RobotType type, MapLocation location,
-                     double coreDelay, double weaponDelay, double health) {
+                     double health, int attackCount, int moveCount) {
         super();
         this.ID = ID;
         this.team = team;
         this.type = type;
         this.location = location;
-        this.coreDelay = coreDelay;
-        this.weaponDelay = weaponDelay;
         this.health = health;
+        this.attackCount = attackCount;
+        this.moveCount = moveCount;
     }
 
     public int hashCode() {
@@ -90,9 +90,9 @@ public class RobotInfo implements  BodyInfo{
                 ", team=" + team +
                 ", type=" + type +
                 ", location=" + location +
-                ", coreDelay=" + coreDelay +
-                ", weaponDelay=" + weaponDelay +
                 ", health=" + health +
+                ", attackCount=" + attackCount +
+                ", moveCount=" + moveCount +
                 '}';
     }
 }
