@@ -3,7 +3,6 @@ package battlecode.world;
 import battlecode.schema.*;
 import battlecode.schema.GameMap;
 import com.google.flatbuffers.FlatBufferBuilder;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
