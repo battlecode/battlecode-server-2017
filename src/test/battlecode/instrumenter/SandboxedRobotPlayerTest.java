@@ -62,7 +62,6 @@ public class SandboxedRobotPlayerTest {
 
         // Make sure that the player called the correct methods
 
-        verify(rc).addMatchObservation("text");
         verify(rc).resign();
         verify(rc).senseNearbyRobots();
         verify(rc).setTeamMemory(0, 0);
