@@ -1139,48 +1139,6 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Sets one of this robot's 'indicator strings' for debugging purposes.
-     * These strings are displayed in the client. This method has no effect on
-     * gameplay (aside from the number of bytecodes executed to call this
-     * method).
-     *
-     * @param stringIndex the index of the indicator string to set. Must be
-     * between 0 and GameConstants.NUMBER_OF_INDICATOR_STRINGS.
-     * @param newString the value to which the indicator string should be set.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void setIndicatorString(int stringIndex, String newString);
-
-    /**
-     * Draws a dot on the game map, for debugging purposes. Press V in the
-     * client to toggle which team's indicator dots are displayed.
-     *
-     * @param loc the location to draw the dot.
-     * @param red the red component of the dot's color.
-     * @param green the green component of the dot's color.
-     * @param blue the blue component of the dot's color.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void setIndicatorDot(MapLocation loc, int red, int green, int blue);
-
-    /**
-     * Draws a line on the game map, for debugging purposes. Press V in the
-     * client to toggle which team's indicator lines are displayed.
-     *
-     * @param from the location to draw the line from.
-     * @param to the location to draw the line to.
-     * @param red the red component of the line's color.
-     * @param green the green component of the line's color.
-     * @param blue the blue component of the line's color.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void setIndicatorLine(MapLocation from, MapLocation to, int red,
-                          int green, int blue);
-
-    /**
      * Gets this robot's 'control bits' for debugging purposes. These bits can
      * be set manually by the user, so a robot can respond to them. To set these
      * bits, you must run the client in lockstep mode and right click the
@@ -1191,16 +1149,5 @@ public interface RobotController {
      * @battlecode.doc.costlymethod
      */
     long getControlBits();
-
-    /**
-     * Adds a custom observation to the match file, such that when it is
-     * analyzed, this observation will appear.
-     *
-     * @param observation the observation you want to inject into the match
-     * file.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void addMatchObservation(String observation);
 
 }

@@ -1124,25 +1124,4 @@ public final class RobotControllerImpl implements RobotController {
     public long getControlBits() {
         return robot.getControlBits();
     }
-
-    // TODO: Implement debug methods
-    @Override
-    public void setIndicatorString(int stringIndex, String newString) {
-        throw new RuntimeException("Implement Me!");
-    }
-
-    @Override
-    public void setIndicatorDot(MapLocation loc, int red, int green, int blue) {
-        throw new RuntimeException("Implement Me!");
-    }
-
-    @Override
-    public void setIndicatorLine(MapLocation from, MapLocation to, int red, int green, int blue) {
-        throw new RuntimeException("Implement Me!");
-    }
-
-    @Override
-    public void addMatchObservation(String observation) {
-        throw new RuntimeException("Implement Me!");
-    }
 }
