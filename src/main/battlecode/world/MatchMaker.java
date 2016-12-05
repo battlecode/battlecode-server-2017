@@ -94,9 +94,6 @@ public class MatchMaker {
     // Called at end of GameWorld constructor
     public void makeMatchHeader(battlecode.world.GameMap gameMap){
         int name = builder.createString(gameMap.getMapName());
-        int minCorner = Vec.createVec(builder, gameMap.getOrigin().x, gameMap.getOrigin().y);
-        int maxCorner = Vec.createVec(builder, gameMap.getOrigin().x + gameMap.getWidth(),
-                gameMap.getOrigin().y + gameMap.getHeight());
         int randomSeed = gameMap.getSeed();
 
         // Make body tables
@@ -139,13 +136,13 @@ public class MatchMaker {
             }
         }
 
-        SpawnedBodyTable.startSpawnedBodyTable(builder);
         int robotIDs = SpawnedBodyTable.createRobotIDsVector(builder, ArrayUtils.toPrimitive(bodyIDs.toArray(new Integer[bodyIDs.size()])));
         int teamIDs = SpawnedBodyTable.createTeamIDsVector(builder, ArrayUtils.toPrimitive(bodyTeamIDs.toArray(new Byte[bodyTeamIDs.size()])));
         int types = SpawnedBodyTable.createTypesVector(builder, ArrayUtils.toPrimitive(bodyTypes.toArray(new Byte[bodyTypes.size()])));
         int locs = VecTable.createVecTable(builder,
                 VecTable.createXsVector(builder, ArrayUtils.toPrimitive(bodyLocsXs.toArray(new Float[bodyLocsXs.size()]))),
                 VecTable.createYsVector(builder, ArrayUtils.toPrimitive(bodyLocsYs.toArray(new Float[bodyLocsYs.size()]))));
+        SpawnedBodyTable.startSpawnedBodyTable(builder);
         SpawnedBodyTable.addRobotIDs(builder, robotIDs);
         SpawnedBodyTable.addTeamIDs(builder, teamIDs);
         SpawnedBodyTable.addTypes(builder, types);
@@ -153,7 +150,6 @@ public class MatchMaker {
         int bodies = SpawnedBodyTable.endSpawnedBodyTable(builder);
 
 
-        NeutralTreeTable.startNeutralTreeTable(builder);
         robotIDs = NeutralTreeTable.createRobotIDsVector(builder, ArrayUtils.toPrimitive(treeIDs.toArray(new Integer[treeIDs.size()])));
         int radii = NeutralTreeTable.createRadiiVector(builder, ArrayUtils.toPrimitive(treeRadii.toArray(new Float[treeRadii.size()])));
         int containedBullets = NeutralTreeTable.createContainedBulletsVector(builder, ArrayUtils.toPrimitive(treeContainedBullets.toArray(new Integer[treeContainedBullets.size()])));
@@ -161,6 +157,7 @@ public class MatchMaker {
         locs = VecTable.createVecTable(builder,
                 VecTable.createXsVector(builder, ArrayUtils.toPrimitive(treeLocsXs.toArray(new Float[treeLocsXs.size()]))),
                 VecTable.createYsVector(builder, ArrayUtils.toPrimitive(treeLocsYs.toArray(new Float[treeLocsYs.size()]))));
+        NeutralTreeTable.startNeutralTreeTable(builder);
         NeutralTreeTable.addRobotIDs(builder, robotIDs);
         NeutralTreeTable.addLocs(builder, locs);
         NeutralTreeTable.addRadii(builder, radii);
@@ -172,8 +169,9 @@ public class MatchMaker {
         // Build GameMap for flatbuffer
         GameMap.startGameMap(builder);
         GameMap.addName(builder, name);
-        GameMap.addMinCorner(builder, minCorner);
-        GameMap.addMaxCorner(builder, maxCorner);
+        GameMap.addMinCorner(builder, Vec.createVec(builder, gameMap.getOrigin().x, gameMap.getOrigin().y));
+        GameMap.addMaxCorner(builder, Vec.createVec(builder, gameMap.getOrigin().x + gameMap.getWidth(),
+                gameMap.getOrigin().y + gameMap.getHeight()));
         GameMap.addBodies(builder, bodies);
         GameMap.addTrees(builder, trees);
         GameMap.addRandomSeed(builder, randomSeed);
@@ -197,20 +195,19 @@ public class MatchMaker {
                 VecTable.createXsVector(builder, ArrayUtils.toPrimitive(movedLocsXs.toArray(new Float[movedLocsXs.size()]))),
                 VecTable.createYsVector(builder, ArrayUtils.toPrimitive(movedLocsYs.toArray(new Float[movedLocsYs.size()]))));
 
-        SpawnedBodyTable.startSpawnedBodyTable(builder);
         int robotIDs = SpawnedBodyTable.createRobotIDsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesRobotIDs.toArray(new Integer[spawnedBodiesRobotIDs.size()])));
         int teamIDs = SpawnedBodyTable.createTeamIDsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesTeamIDs.toArray(new Byte[spawnedBodiesTeamIDs.size()])));
         int types = SpawnedBodyTable.createTypesVector(builder, ArrayUtils.toPrimitive(spawnedBodiesTypes.toArray(new Byte[spawnedBodiesTypes.size()])));
         int locs = VecTable.createVecTable(builder,
                 VecTable.createXsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesLocsXs.toArray(new Float[spawnedBodiesLocsXs.size()]))),
                 VecTable.createYsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesLocsYs.toArray(new Float[spawnedBodiesLocsYs.size()]))));
+        SpawnedBodyTable.startSpawnedBodyTable(builder);
         SpawnedBodyTable.addRobotIDs(builder, robotIDs);
         SpawnedBodyTable.addTeamIDs(builder, teamIDs);
         SpawnedBodyTable.addTypes(builder, types);
         SpawnedBodyTable.addLocs(builder, locs);
         int spawnedBodies = SpawnedBodyTable.endSpawnedBodyTable(builder);
 
-        SpawnedBulletTable.startSpawnedBulletTable(builder);
         robotIDs = SpawnedBulletTable.createRobotIDsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsRobotIDs.toArray(new Integer[spawnedBulletsRobotIDs.size()])));
         int damages = SpawnedBulletTable.createDamagesVector(builder, ArrayUtils.toPrimitive(spawnedBulletsDamages.toArray(new Float[spawnedBulletsDamages.size()])));
         locs = VecTable.createVecTable(builder,
@@ -219,6 +216,7 @@ public class MatchMaker {
         int vels = VecTable.createVecTable(builder,
                 VecTable.createXsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsVelsXs.toArray(new Float[spawnedBulletsVelsXs.size()]))),
                 VecTable.createYsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsVelsYs.toArray(new Float[spawnedBulletsVelsYs.size()]))));
+        SpawnedBulletTable.startSpawnedBulletTable(builder);
         SpawnedBulletTable.addRobotIDs(builder, robotIDs);
         SpawnedBulletTable.addDamages(builder, damages);
         SpawnedBulletTable.addLocs(builder, locs);
@@ -234,18 +232,26 @@ public class MatchMaker {
         int[] actionTargets = ArrayUtils.toPrimitive(this.actionTargets.toArray(new Integer[this.actionTargets.size()]));
 
         // Make the Round
+        int a = Round.createMovedIDsVector(builder,movedIDs);
+        int b = Round.createHealthChangedIDsVector(builder,healthChangedIDs);
+        int c = Round.createHealthChangeLevelsVector(builder,healthChangedLevels);
+        int d = Round.createDiedIDsVector(builder, diedIDs);
+        int e = Round.createDiedBulletIDsVector(builder, diedBulletIDs);
+        int f = Round.createActionIDsVector(builder,actionIDs);
+        int g = Round.createActionsVector(builder,actions);
+        int h = Round.createActionTargetsVector(builder,actionTargets);
         Round.startRound(builder);
-        Round.addMovedIDs(builder, Round.createMovedIDsVector(builder,movedIDs));
+        Round.addMovedIDs(builder, a);
         Round.addMovedLocs(builder, movedLocs);
         Round.addSpawnedBodies(builder, spawnedBodies);
         Round.addSpawnedBullets(builder, spawnedBullets);
-        Round.addHealthChangedIDs(builder, Round.createHealthChangedIDsVector(builder,healthChangedIDs));
-        Round.addHealthChangeLevels(builder, Round.createHealthChangeLevelsVector(builder,healthChangedLevels));
-        Round.addDiedIDs(builder, Round.createDiedIDsVector(builder, diedIDs));
-        Round.addDiedBulletIDs(builder, Round.createDiedBulletIDsVector(builder, diedBulletIDs));
-        Round.addActionIDs(builder, Round.createActionIDsVector(builder,actionIDs));
-        Round.addActions(builder, Round.createActionsVector(builder,actions));
-        Round.addActionTargets(builder, Round.createActionTargetsVector(builder,actionTargets));
+        Round.addHealthChangedIDs(builder, b);
+        Round.addHealthChangeLevels(builder, c);
+        Round.addDiedIDs(builder, d);
+        Round.addDiedBulletIDs(builder, e);
+        Round.addActionIDs(builder, f);
+        Round.addActions(builder, g);
+        Round.addActionTargets(builder, h);
         Round.addRoundID(builder, roundNum);
         int round = Round.endRound(builder);
 

@@ -49,15 +49,19 @@ public class GameMaker {
     public void makeGameHeader(String specVersion, TeamMapping teamMapping){
         int specVersionOffset = builder.createString(specVersion);
 
+        int name = builder.createString(teamMapping.getTeamAName());
+        int packageName = builder.createString(teamMapping.getTeamAName());
         TeamData.startTeamData(builder);
-        TeamData.addName(builder, builder.createString(teamMapping.getTeamAName()));
-        TeamData.addPackageName(builder, builder.createString(teamMapping.getTeamAName()));
+        TeamData.addName(builder, name);
+        TeamData.addPackageName(builder, packageName);
         TeamData.addTeamID(builder, teamMapping.getTeamAID());
         int teamAOffset = TeamData.endTeamData(builder);
 
+        name = builder.createString(teamMapping.getTeamBName());
+        packageName = builder.createString(teamMapping.getTeamBName());
         TeamData.startTeamData(builder);
-        TeamData.addName(builder, builder.createString(teamMapping.getTeamBName()));
-        TeamData.addPackageName(builder, builder.createString(teamMapping.getTeamBName()));
+        TeamData.addName(builder, name);
+        TeamData.addPackageName(builder, packageName);
         TeamData.addTeamID(builder, teamMapping.getTeamBID());
         int teamBOffset = TeamData.endTeamData(builder);
         int[] teamsVec = {teamAOffset, teamBOffset};

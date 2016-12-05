@@ -42,6 +42,14 @@ public class ObjectInfo {
         this.robotLocations = new Set[(int) mapHeight][(int) mapWidth];
         this.bulletLocations = new Set[(int) mapHeight][(int) mapWidth];
 
+        for(int i = 0; i < (int) mapHeight; i++){
+            for(int j = 0; j < (int) mapWidth; j++){
+                this.treeLocations[i][j] = new HashSet<>();
+                this.robotLocations[i][j] = new HashSet<>();
+                this.bulletLocations[i][j] = new HashSet<>();
+            }
+        }
+
         robotTypeCount.put(Team.A, new EnumMap<>(
                 RobotType.class));
         robotTypeCount.put(Team.B, new EnumMap<>(

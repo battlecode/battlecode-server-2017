@@ -60,6 +60,11 @@ public class GameWorld{
 
         this.controlProvider = cp;
 
+        this.rand = new Random(gameMap.getSeed());
+
+        this.builder = builder;
+        this.matchMaker = new MatchMaker(builder, teamMapping);
+
         controlProvider.matchStarted(this);
 
         // Add the robots and trees contained in the GameMap to this world.
@@ -72,11 +77,6 @@ public class GameWorld{
                 spawnTree(tree.ID, tree.team, tree.radius, tree.location, tree.containedBullets, tree.containedRobot);
             }
         }
-
-        this.rand = new Random(gameMap.getSeed());
-
-        this.builder = builder;
-        this.matchMaker = new MatchMaker(builder, teamMapping);
 
         // Write match header at beginning of match
         matchMaker.makeMatchHeader(gameMap);

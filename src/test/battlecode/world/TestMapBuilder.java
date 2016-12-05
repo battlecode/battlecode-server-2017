@@ -37,8 +37,8 @@ public class TestMapBuilder{
     private ArrayList<Integer> nContainedBullets;
     private ArrayList<Byte> nContainedBodyTypes;
 
-    TestMapBuilder(String mapName, float minCornerX, float minCornerY,
-                   float maxCornerX, float maxCornerY, int randomSeed){
+    public TestMapBuilder(String mapName, float minCornerX, float minCornerY,
+                          float maxCornerX, float maxCornerY, int randomSeed){
         this.builder = new FlatBufferBuilder();
 
         this.name = builder.createString(mapName);
