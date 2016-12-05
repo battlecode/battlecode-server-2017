@@ -68,6 +68,27 @@ public class SandboxedRobotPlayerTest {
     }
 
     @Test
+    public void testYield() throws Exception {
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerclock", rc, 0, cache);
+        player.setBytecodeLimit(10000);
+
+        player.step();
+
+        assertFalse(player.getTerminated());
+        verify(rc).broadcast(0, 1);
+
+        player.step();
+
+        assertFalse(player.getTerminated());
+        verify(rc).broadcast(0, 2);
+
+        player.step();
+
+        assertTrue(player.getTerminated());
+        verify(rc).broadcast(0, 3);
+    }
+
+    @Test
     public void testBytecodeCountingWorks() throws Exception {
         SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerloopforever", rc, 0, cache);
         player.setBytecodeLimit(100);
