@@ -27,6 +27,8 @@ public class InternalRobot {
     private int waterCount;
     private int attackCount;
     private int moveCount;
+    
+    private int buildCooldownTurns;
 
     private boolean healthChanged = false;
 
@@ -63,6 +65,8 @@ public class InternalRobot {
         this.waterCount = 0;
         this.attackCount = 0;
         this.moveCount = 0;
+        
+        this.buildCooldownTurns = 0;
 
         this.gameWorld = gw;
         this.controller = new RobotControllerImpl(gameWorld, this);
@@ -135,6 +139,10 @@ public class InternalRobot {
     public int getMoveCount() {
         return moveCount;
     }
+    
+    public int getBuildCooldownTurns() {
+        return buildCooldownTurns;
+    }
 
     public RobotInfo getRobotInfo() {
         if (this.cachedRobotInfo != null
@@ -184,11 +192,15 @@ public class InternalRobot {
     }
     
     public void incrementAttackCount() {
-        this.shakeCount++;
+        this.attackCount++;
     }
     
     public void incrementMoveCount() {
         this.moveCount++;
+    }
+    
+    public void setBuildCooldownTurns(int newTurns) {
+        this.buildCooldownTurns = newTurns;
     }
 
     private void keepMinHealth(){
@@ -239,6 +251,9 @@ public class InternalRobot {
         repairCount = 0;
         waterCount = 0;
         shakeCount = 0;
+        if(buildCooldownTurns > 0) {
+            buildCooldownTurns--;
+        }
         if(getRoundsAlive() < 20){
             this.repairRobot(.04f * getType().maxHealth);
         }
