@@ -4,6 +4,7 @@ import battlecode.schema.*;
 import battlecode.schema.GameMap;
 import com.google.flatbuffers.FlatBufferBuilder;
 import org.apache.commons.lang3.ArrayUtils;
+import org.junit.Ignore;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 
+@Ignore
 public class TestMapBuilder{
 
     private FlatBufferBuilder builder;
@@ -126,7 +128,7 @@ public class TestMapBuilder{
 
     public void saveMap(String path){
         try {
-            File file = new File(path);
+            File file = new File(path).getAbsoluteFile();
             boolean append = false;
             FileChannel wChannel = new FileOutputStream(file, append).getChannel();
             wChannel.write(bb);

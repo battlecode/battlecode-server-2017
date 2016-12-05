@@ -9,6 +9,17 @@ public class Main {
                 options,
                 false
         );
+        final String teamA = options.get("bc.game.team-a");
+        final String teamB = options.get("bc.game.team-b");
+        final String[] maps = options.get("bc.game.maps").split(",");
+        server.addGameNotification(new GameInfo(
+                teamA, null,
+                teamB, null,
+                maps,
+                new File(options.get("bc.server.save-file")),
+                false
+        ));
+        server.terminateNotification();
 
         server.run();
     }

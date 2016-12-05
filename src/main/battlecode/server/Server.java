@@ -134,6 +134,7 @@ public class Server implements Runnable {
         // Running it multiple times may break things.
         while (true) {
             final GameInfo currentGame;
+            debug("Awaiting match");
             try {
                 currentGame = gameQueue.take();
             } catch (InterruptedException e) {
