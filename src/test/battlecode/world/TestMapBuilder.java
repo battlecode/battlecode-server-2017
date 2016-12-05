@@ -19,7 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Ignore
-public class TestMapBuilder{
+/**
+ * Lets maps be built easily, for testing purposes.
+ */
+public class TestMapBuilder {
     private String name;
     private MapLocation origin;
     private float width;
@@ -29,7 +32,11 @@ public class TestMapBuilder{
 
     private List<BodyInfo> bodies;
 
-    public TestMapBuilder(String name, MapLocation origin, float width, float height, int seed, int rounds){
+    public TestMapBuilder(String name, float oX, float oY, float width, float height, int seed, int rounds) {
+        this(name, new MapLocation(oX, oY), width, height, seed, rounds);
+    }
+
+    public TestMapBuilder(String name, MapLocation origin, float width, float height, int seed, int rounds) {
         this.name = name;
         this.origin = origin;
         this.width = width;

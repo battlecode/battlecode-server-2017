@@ -161,7 +161,7 @@ public class GameMaker {
 
     // Called at end of run while loop
     public void writeGame(File saveFile){
-        if(saveFile == null){
+        if(saveFile == null) {
             return;
         }
 
