@@ -246,7 +246,6 @@ public class Server implements Runnable {
             this.runUntil = Integer.MAX_VALUE;
         }
 
-
         // Print an
         long startTime = System.currentTimeMillis();
         say("-------------------- Match Starting --------------------");
@@ -269,7 +268,6 @@ public class Server implements Runnable {
             switch (this.state) {
 
                 case RUNNING:
-
                     if (currentWorld.getCurrentRound() + 1 == runUntil) {
                         Thread.sleep(25);
                         break;
@@ -342,7 +340,6 @@ public class Server implements Runnable {
                 Team.NEUTRAL,
                 new NullControlProvider()
         );
-
         return teamProvider;
     }
 

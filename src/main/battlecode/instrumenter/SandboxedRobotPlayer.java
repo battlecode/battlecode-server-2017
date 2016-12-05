@@ -266,7 +266,6 @@ public class SandboxedRobotPlayer {
         if (terminated) {
             throw new RuntimeException("Step called after robot killed");
         }
-
         // Update the robot's information
         try {
             setSystemOutMethod.invoke(null, getOut());

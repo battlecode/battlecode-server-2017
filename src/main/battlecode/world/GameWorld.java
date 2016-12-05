@@ -115,7 +115,6 @@ public class GameWorld{
             ErrorReporter.report(e);
             return GameState.DONE;
         }
-
         // Write out round data
         matchMaker.writeAndClearRoundData(currentRound);
         return GameState.RUNNING;
@@ -151,6 +150,7 @@ public class GameWorld{
             if(robot.getHealth() > 0) { // Only processEndOfTurn if robot is still alive
                 robot.processEndOfTurn();
             }
+
             // If the robot terminates but the death signal has not yet
             // been visited:
             if (this.controlProvider.getTerminated(robot) && objectInfo.getRobotByID(id) != null) {

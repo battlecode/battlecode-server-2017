@@ -6,6 +6,7 @@ import battlecode.world.TestMapBuilder;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -14,7 +15,7 @@ import static org.junit.Assert.*;
 public class ServerTest {
 
     @Test
-    public void testBasicMap() throws MalformedURLException {
+    public void testBasicMap() throws IOException {
         // Init server
         Config options = new Config(new String[0]);
         Server server = new Server(options, false);
@@ -22,16 +23,16 @@ public class ServerTest {
         // Make game map
         String teamA = "teamA";
         String teamB = "teamB";
-//        TeamMapping teamMapping = new TeamMapping(teamA, teamB);
-//        TestMapBuilder mapBuilder = new TestMapBuilder("neutralBodyMap", 0, 0, 100, 100, 128);
-//        mapBuilder.addBody(1, teamMapping.getIDFromTeam(Team.A), BodyType.ARCHON, 50, 60);
-//        mapBuilder.addBody(2, teamMapping.getIDFromTeam(Team.B), BodyType.ARCHON, 50, 40);
-//        battlecode.schema.GameMap actualMap = mapBuilder.build();
-//        mapBuilder.saveMap("main/battlecode/world/resources/basicMap.txt");
+        TeamMapping teamMapping = new TeamMapping(teamA, teamB);
+        TestMapBuilder mapBuilder = new TestMapBuilder("neutralBodyMap", 0, 0, 100, 100, 128);
+        mapBuilder.addBody(1, teamMapping.getIDFromTeam(Team.A), BodyType.ARCHON, 50, 60);
+        mapBuilder.addBody(2, teamMapping.getIDFromTeam(Team.B), BodyType.ARCHON, 50, 40);
+        battlecode.schema.GameMap actualMap = mapBuilder.build();
+        mapBuilder.saveMap("main/battlecode/world/resources/basicMap.txt");
 
         // Init GameInfo
-        URL teamAClasses = new File("test/battlecode/server/testplayers/moveright/").toURI().toURL();
-        URL teamBClasses = new File("test/battlecode/server/testplayers/moveright/").toURI().toURL();
+        URL teamAClasses = new File("test/battlecode/server/testplayers/moveright").toURI().toURL();
+        URL teamBClasses = new File("test/battlecode/server/testplayers/moveright").toURI().toURL();
         String[] maps = {"basicMap.txt"};
         File saveFile = new File("test/battlecode/server/testgames/basicGame.txt");
         GameInfo gameInfo = new GameInfo(teamA, teamAClasses, teamB, teamBClasses, maps, saveFile, false);
@@ -41,7 +42,10 @@ public class ServerTest {
         server.terminateNotification();
         server.run();
 
-        // Check results in file
+//        // Check results in file
+//        TestGameReader gameReader = new TestGameReader("test/battlecode/server/testgames/basicGame.txt");
+
+
         assertTrue(true);
     }
 
