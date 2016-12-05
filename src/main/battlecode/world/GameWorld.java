@@ -28,7 +28,7 @@ public class GameWorld{
     protected final TeamMapping teamMapping;
     protected final GameStats gameStats;
 
-    private final GameMap gameMap;
+    private final LiveMap gameMap;
     private final TeamInfo teamInfo;
     private final ObjectInfo objectInfo;
 
@@ -42,7 +42,7 @@ public class GameWorld{
     private final MatchMaker matchMaker;
 
     @SuppressWarnings("unchecked")
-    public GameWorld(GameMap gm, RobotControlProvider cp,
+    public GameWorld(LiveMap gm, RobotControlProvider cp,
                      TeamMapping teamMapping,
                      long[][] oldTeamMemory, FlatBufferBuilder builder) {
         
@@ -67,7 +67,7 @@ public class GameWorld{
 
         controlProvider.matchStarted(this);
 
-        // Add the robots and trees contained in the GameMap to this world.
+        // Add the robots and trees contained in the LiveMap to this world.
         for(BodyInfo body : gameMap.getInitialBodies()){
             if(body.isRobot()){
                 RobotInfo robot = (RobotInfo) body;
@@ -175,7 +175,7 @@ public class GameWorld{
         return gameMap.getSeed();
     }
 
-    public GameMap getGameMap() {
+    public LiveMap getGameMap() {
         return gameMap;
     }
 

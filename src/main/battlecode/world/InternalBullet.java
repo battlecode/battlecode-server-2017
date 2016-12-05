@@ -7,7 +7,7 @@ import battlecode.common.*;
  */
 public class InternalBullet {
     private final GameWorld gameWorld;
-    private final GameMap gameMap;
+    private final LiveMap gameMap;
 
     private final int ID;
     private Team team;

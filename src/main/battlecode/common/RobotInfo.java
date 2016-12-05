@@ -43,6 +43,11 @@ public class RobotInfo implements  BodyInfo{
     public final double health;
 
     @Override
+    public int getID() {
+        return this.ID;
+    }
+
+    @Override
     public MapLocation getLocation() {
         return this.location;
     }
@@ -79,8 +84,38 @@ public class RobotInfo implements  BodyInfo{
         this.health = health;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RobotInfo robotInfo = (RobotInfo) o;
+
+        if (ID != robotInfo.ID) return false;
+        if (Double.compare(robotInfo.coreDelay, coreDelay) != 0) return false;
+        if (Double.compare(robotInfo.weaponDelay, weaponDelay) != 0) return false;
+        if (Double.compare(robotInfo.health, health) != 0) return false;
+        if (team != robotInfo.team) return false;
+        if (type != robotInfo.type) return false;
+        return location.equals(robotInfo.location);
+
+    }
+
+    @Override
     public int hashCode() {
-        return ID;
+        int result;
+        long temp;
+        result = ID;
+        result = 31 * result + team.hashCode();
+        result = 31 * result + type.hashCode();
+        result = 31 * result + location.hashCode();
+        temp = Double.doubleToLongBits(coreDelay);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(weaponDelay);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(health);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
     }
 
     @Override

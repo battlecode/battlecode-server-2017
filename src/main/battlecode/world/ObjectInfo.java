@@ -29,7 +29,7 @@ public class ObjectInfo {
     private int[] robotCount = new int[3];
     private int[] treeCount = new int[3];
 
-    public ObjectInfo(GameMap gm){
+    public ObjectInfo(LiveMap gm){
         this.mapWidth = gm.getWidth();
         this.mapHeight = gm.getHeight();
         this.mapTopLeft = gm.getOrigin();

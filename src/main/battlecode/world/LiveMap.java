@@ -15,8 +15,11 @@ import java.util.*;
  *
  * This class is STATIC and immutable. It reflects the initial
  * condition of the map. All changes to the map are reflected in GameWorld.
+ *
+ * It is named LiveMap to distinguish it from a battlecode.schema.GameMap,
+ * which represents a serialized LiveMap.
  */
-public class GameMap {
+public class LiveMap {
 
     /**
      * The width and height of the map.
@@ -50,55 +53,39 @@ public class GameMap {
      */
     private final BodyInfo[] initialBodies;
 
-    /**
-     * Creates a deep copy of the input GameMap.
-     *
-     * @param gm the GameMap to copy.
-     */
-    public GameMap(GameMap gm) {
-        this.width = gm.width;
-        this.height = gm.height;
+    public LiveMap(float width,
+                   float height,
+                   MapLocation origin,
+                   int seed,
+                   int rounds,
+                   String mapName,
+                   BodyInfo[] initialBodies) {
+        this.width = width;
+        this.height = height;
+        this.origin = origin;
+        this.seed = seed;
+        this.rounds = rounds;
+        this.mapName = mapName;
+        this.initialBodies = Arrays.copyOf(initialBodies, initialBodies.length);
 
-        this.origin = gm.origin;
-        this.seed = gm.seed;
-        this.rounds = gm.rounds;
-        this.mapName = gm.mapName;
-        this.initialBodies = gm.getInitialBodies();
+        // invariant: bodies is sorted by id
+        Arrays.sort(this.initialBodies, (a, b) -> Integer.compare(a.getID(), b.getID()));
     }
 
     /**
-     * Creates a GameMap with the given parameters.
+     * Creates a deep copy of the input LiveMap.
      *
-     * The map will be initialized with a pseudorandom origin between (0, 0) and
-     * (500, 500), based on the seed.
-     *
-     * YOU MUST NOT MODIFY ANY OF THESE OBJECTS AFTER CREATING THE MAP.
-     *
-     * @param schemaMap the GameMap acquired by a flatbuffer.
+     * @param gm the LiveMap to copy.
      */
-    public GameMap(battlecode.schema.GameMap schemaMap, TeamMapping teamMapping) {
-        this.width = schemaMap.maxCorner().x() - schemaMap.minCorner().x();
-        this.height = schemaMap.maxCorner().y() - schemaMap.minCorner().y();
-        this.origin = new MapLocation(schemaMap.minCorner().x(), schemaMap.minCorner().y());
-        this.seed = schemaMap.randomSeed();
-        this.mapName = schemaMap.name();
-        this.rounds = GameConstants.GAME_DEFAULT_ROUNDS;
-
-        ArrayList<BodyInfo> initBodies = new ArrayList<>();
-        SpawnedBodyTable bodyTable = schemaMap.bodies();
-        initInitialBodiesFromSchemaBodyTable(bodyTable, teamMapping, initBodies);
-
-        NeutralTreeTable treeTable = schemaMap.trees();
-        initInitialBodiesFromSchemaNeutralTreeTable(treeTable, initBodies);
-
-        this.initialBodies = initBodies.toArray(new BodyInfo[initBodies.size()]);
+    public LiveMap(LiveMap gm) {
+        this(gm.width, gm.height, gm.origin, gm.seed, gm.rounds, gm.mapName, gm.initialBodies);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof GameMap)) return false;
+        if (!(o instanceof LiveMap)) return false;
 
-        return this.equals((GameMap) o);
+        return this.equals((LiveMap) o);
     }
 
     /**
@@ -107,7 +94,7 @@ public class GameMap {
      * @param other the other map to compare to.
      * @return whether the two maps are equivalent.
      */
-    public boolean equals(GameMap other) {
+    public boolean equals(LiveMap other) {
         if (this.rounds != other.rounds) return false;
         if (this.width != other.width) return false;
         if (this.height != other.height) return false;
@@ -116,6 +103,18 @@ public class GameMap {
         if (!this.origin.equals(other.origin)) return false;
 
         return Arrays.equals(this.initialBodies, other.initialBodies);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (width != +0.0f ? Float.floatToIntBits(width) : 0);
+        result = 31 * result + (height != +0.0f ? Float.floatToIntBits(height) : 0);
+        result = 31 * result + origin.hashCode();
+        result = 31 * result + seed;
+        result = 31 * result + rounds;
+        result = 31 * result + mapName.hashCode();
+        result = 31 * result + Arrays.hashCode(initialBodies);
+        return result;
     }
 
     /**
@@ -220,57 +219,16 @@ public class GameMap {
         return origin;
     }
 
-    // ****************************
-    // *** HELPER METHODS *********
-    // ****************************
-
-    private void initInitialBodiesFromSchemaBodyTable(SpawnedBodyTable bodyTable, TeamMapping teamMapping, ArrayList<BodyInfo> initialBodies){
-        // Assumes no neutral trees
-        for(int i = 0; i < bodyTable.robotIDsLength(); i++){
-            RobotType bodyType = getRobotTypeFromSchemaBodyType(bodyTable.types(i));
-            int bodyID = bodyTable.robotIDs(i);
-            float bodyX = bodyTable.locs().xs(i);
-            float bodyY = bodyTable.locs().ys(i);
-            Team bodyTeam = teamMapping.getTeamFromID(bodyTable.teamIDs(i));
-            if(bodyType != null){
-                initialBodies.add(new RobotInfo(bodyID, bodyTeam, bodyType, new MapLocation(bodyX, bodyY), 0, 0, 0));
-            }else{
-                initialBodies.add(new TreeInfo(bodyID, bodyTeam, new MapLocation(bodyX, bodyY), 0, 0, 0, null));
-            }
-        }
-    }
-
-    private void initInitialBodiesFromSchemaNeutralTreeTable(NeutralTreeTable treeTable, ArrayList<BodyInfo> initialBodies){
-        for(int i = 0; i < treeTable.robotIDsLength(); i++){
-            int bodyID = treeTable.robotIDs(i);
-            float bodyX = treeTable.locs().xs(i);
-            float bodyY = treeTable.locs().ys(i);
-            float bodyRadius = treeTable.radii(i);
-            int containedBullets = treeTable.containedBullets(i);
-            RobotType containedType = getRobotTypeFromSchemaBodyType(treeTable.containedBodies(i));
-            initialBodies.add(new TreeInfo(bodyID, Team.NEUTRAL, new MapLocation(bodyX, bodyY),
-                    bodyRadius, 0, containedBullets, containedType));
-        }
-    }
-
-    private RobotType getRobotTypeFromSchemaBodyType(byte bodyType){
-        switch (bodyType){
-            case BodyType.ARCHON:
-                return RobotType.ARCHON;
-            case BodyType.GARDENER:
-                return RobotType.GARDENER;
-            case BodyType.LUMBERJACK:
-                return RobotType.LUMBERJACK;
-            case BodyType.RECRUIT:
-                return RobotType.RECRUIT;
-            case BodyType.SCOUT:
-                return RobotType.SCOUT;
-            case BodyType.SOLDIER:
-                return RobotType.SOLDIER;
-            case BodyType.TANK:
-                return RobotType.TANK;
-            default:
-                return null;
-        }
+    @Override
+    public String toString() {
+        return "LiveMap{" +
+                "width=" + width +
+                ", height=" + height +
+                ", origin=" + origin +
+                ", seed=" + seed +
+                ", rounds=" + rounds +
+                ", mapName='" + mapName + '\'' +
+                ", initialBodies=" + Arrays.toString(initialBodies) +
+                '}';
     }
 }
