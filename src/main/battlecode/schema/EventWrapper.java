@@ -35,5 +35,5 @@ public final class EventWrapper extends Table {
     int o = builder.endObject();
     return o;
   }
-}
+};
 

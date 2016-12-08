@@ -139,11 +139,59 @@ public class SandboxedRobotPlayerTest {
         SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerbytecode", rc, 0, cache);
         player.setBytecodeLimit(200);
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             player.step();
             assertFalse(player.getTerminated());
         }
 
+        player.step();
+        assertTrue(player.getTerminated());
+    }
+
+    @Test
+    public void testArrayBytecode() throws Exception {
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerarraybytecode", rc, 0, cache);
+        player.setBytecodeLimit(10000);
+
+	int[] bytecodesUsed = new int[4];
+	
+        for (int i = 0; i < 4; i++) {
+            player.step();
+	    player.step();
+            assertFalse(player.getTerminated());
+	    bytecodesUsed[i] = player.getBytecodesUsed();
+        }
+
+	int baseBytecodes = 2*bytecodesUsed[0] - bytecodesUsed[1];
+	int[] expectedBytecode = {2, 4, 8, 16};
+
+	for (int i = 0; i < 4; i++)
+	    assertTrue(bytecodesUsed[i] == baseBytecodes + expectedBytecode[i]);
+	    
+        player.step();
+        assertTrue(player.getTerminated());
+    }
+
+    @Test
+    public void testMultiArrayBytecode() throws Exception {
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayermultiarraybytecode", rc, 0, cache);
+        player.setBytecodeLimit(10000);
+
+	int[] bytecodesUsed = new int[4];
+	
+        for (int i = 0; i < 4; i++) {
+            player.step();
+	    player.step();
+            assertFalse(player.getTerminated());
+	    bytecodesUsed[i] = player.getBytecodesUsed();
+        }
+
+	int baseBytecodes = (6*bytecodesUsed[0] - bytecodesUsed[1]) / 5;
+	int[] expectedBytecode = {24, 144, 864, 5184};
+
+	for (int i = 0; i < 4; i++)
+	    assertTrue(bytecodesUsed[i] == baseBytecodes + expectedBytecode[i]);
+	
         player.step();
         assertTrue(player.getTerminated());
     }

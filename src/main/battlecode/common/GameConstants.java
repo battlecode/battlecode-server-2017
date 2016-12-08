@@ -59,6 +59,9 @@ public interface GameConstants {
 
     /** The amount of bullets produced from one unit of health per bullet tree */
     float BULLET_TREE_BULLET_PRODUCTION_RATE = .1f;
+    
+    /** Number of cooldown turns robot must wait between planting trees */
+    int BULLET_TREE_CONSTRUCTION_COOLDOWN = 10;
 
     /** The min radius a neutral tree can have */
     float NEUTRAL_TREE_MIN_RADIUS = .5F;

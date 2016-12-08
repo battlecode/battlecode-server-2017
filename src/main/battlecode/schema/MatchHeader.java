@@ -42,5 +42,5 @@ public final class MatchHeader extends Table {
     int o = builder.endObject();
     return o;
   }
-}
+};
 

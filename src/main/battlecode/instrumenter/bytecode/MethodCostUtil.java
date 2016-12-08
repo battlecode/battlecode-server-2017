@@ -83,7 +83,7 @@ public class MethodCostUtil {
      * Returns the MethodData associated with the given method, or null if no MethodData exists for the given method.
      * Should not be called on player classes.
      *
-     * @param className  the binary name of the class to which the given method belongns
+     * @param className  the binary name of the class to which the given method belongs
      * @param methodName the name of the given class
      * @param loader     the loader used to read the class, if necessary
      */

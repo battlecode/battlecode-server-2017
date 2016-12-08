@@ -143,27 +143,20 @@ public interface RobotController {
      * @battlecode.doc.costlymethod
      */
     float getHealth();
-
+    
     /**
-     * Returns the amount of core delay this robot has accumulated. If the result
-     * is strictly less than 1, then the robot can perform a core action. Core
-     * actions include hiring, planting, chopping, and moving.
-     *
-     * @return the amount of core delay this robot has accumulated.
-     *
-     * @battlecode.doc.costlymethod
+     * Returns the number of times the robot has attacked this turn.
+     * 
+     * @return the number of times the robot has attacked this turn.
      */
-    float getCoreDelay();
-
+    int getAttackCount();
+    
     /**
-     * Returns the amount of weapon delay this robot has accumulated. If the result
-     * is strictly less than 1, then the robot can attack.
-     *
-     * @return the amount of weapon delay this robot has accumulated.
-     *
-     * @battlecode.doc.costlymethod
+     * Returns the number of times the robot has moved this turn.
+     * 
+     * @return the number of times the robot has moved this turn.
      */
-    float getWeaponDelay();
+    int getMoveCount();
 
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
@@ -542,41 +535,36 @@ public interface RobotController {
 
 
     // ***********************************
-    // ****** READINESS METHODS **********
-    // ***********************************
-
-    /**
-     * Returns whether the core delay is strictly less than 1 (whether the robot
-     * can perform a core action in the given turn). If this is true, then you
-     * can perform core actions, such as moving, hiring, chopping, and planting.
-     *
-     * @return whether the robot can perform a core action in this turn.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean isCoreReady();
-
-    /**
-     * Returns whether the weapon delay is less than 1 (whether the robot can
-     * attack in the given turn).
-     *
-     * @return whether the robot is able to attack in the current turn.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean isWeaponReady();
-
-    // ***********************************
     // ****** MOVEMENT METHODS ***********
     // ***********************************
+    
+    /**
+     * Returns true if the robot has moved this turn.
+     * 
+     * @return true if the robot has moved this turn.
+     */
+    boolean hasMoved();
+    
+    /**
+     * Returns true if the robot has attacked this turn.
+     * 
+     * @return true if the robot has attacked this turn.
+     */
+    boolean hasAttacked();
+    
+    /**
+     * Returns true if the robot's build cooldown has expired.
+     * 
+     * @return true if the robot's build cooldown has expired.
+     */
+    boolean isBuildReady();
 
     /**
      * Tells whether this robot can move one stride in the given direction,
-     * without taking any sort of delays into account. Takes into account only
+     * without taking into account if they have already moved. Takes into account only
      * the positions of trees, positions of other robots, and the edge of the
      * game map. Does not take into account whether this robot is currently
-     * active (no core delay).  Note that one stride is equivalent to
-     * 2*getType().bodyRadius in Euclidean distance.
+     * active.  Note that one stride is equivalent to StrideRadius.
      *
      * @param dir the direction to move in.
      * @return true if there is nothing preventing this robot from moving one
@@ -588,12 +576,11 @@ public interface RobotController {
     boolean canMove(Direction dir);
 
     /**
-     * Tells whether this robot can move scale strides in the given
-     * direction, without taking any sort of delays into account. Takes into
+     * Tells whether this robot can move scale strides in the given direction,
+     * without taking into account if they have already moved. Takes into
      * account only the positions of trees, positions of other robots, and the
      * edge of the game map. Does not take into account whether this robot is
-     * currently active (no core delay). Note that one stride is equivalent to
-     * 2*getType().bodyRadius in Euclidean distance.
+     * currently active. Note that one stride is equivalent to StrideRadius.
      *
      *
      * @param dir the direction to move in.
@@ -601,19 +588,33 @@ public interface RobotController {
      * from 0 to 1 (inclusive).
      * @return true if there is nothing preventing this robot from moving scale
      * strides in the given direction; false otherwise (does not account for
-     * core delay).
+     * the robot having already moved that turn).
      *
      * @battlecode.doc.costlymethod
      */
     boolean canMove(Direction dir, float scale);
-
+    
+    /**
+     * Tells whether this robot can move to the target MapLocation. If the location
+     * is outside the robot's StrideRadius, the location is rescaled to be at the
+     * StrideRadius. Takes into account only the positions of rees, positions of
+     * other robots, and the edge of the game map. Does not take into accout whether
+     * this robot is currently active.
+     * 
+     * @param center the MapLocation to move to.
+     * @return true if there is nothing preventing this robot from moving to this
+     * MapLocation (or in the direction of this MapLocation if it is too far);
+     * false otherwise (does not account for the robot having already moved that turn).
+     */
+    boolean canMove(MapLocation center);
+    
     /**
      * Moves one stride in the given direction. Note that one stride is equivalent
      * to 2*getType().bodyRadius in Euclidean distance.
      *
      * @param dir the direction to move in.
      * @throws GameActionException if the robot cannot move one stride in this
-     * direction, such as due to having core delay, the target location being
+     * direction, such as already moved that turn, the target location being
      * off the map, and the target destination being occupied with either
      * another robot or a tree.
      *
@@ -629,13 +630,24 @@ public interface RobotController {
      * @param scale the scale of a stride you wish to move. Must be be
      * from 0 to 1 (inclusive).
      * @throws GameActionException if the robot cannot move scale strides in this
-     * direction, such as due to having core delay, the target location being
+     * direction, such as already moved that turn, the target location being
      * off the map, and the target destination being occupied with either
      * another robot or a tree.
      *
      * @battlecode.doc.costlymethod
      */
     void move(Direction dir, float scale) throws GameActionException;
+    
+    /**
+     * Moves to the target MapLocation. If the target location is outside the robot's
+     * StrideRadius, it is rescaled to be one StrideRadius away.
+     * 
+     * @param center the MapLocation to move to (or toward)
+     * @throws GameActionException if the robot can not move to the target MapLocation,
+     * such as already having moved that turn, the target location being off the map,
+     * or a target destination being occupied with either another robot or a tree.
+     */
+    void move(MapLocation center) throws GameActionException;
 
     // ***********************************
     // ****** ATTACK METHODS *************
@@ -646,7 +658,7 @@ public interface RobotController {
      * this robot. Note that only Lumberjacks can perform this function.
      *
      * @throws GameActionException if the robot is not of type LUMBERJACK or
-     * cannot attack due to having weapon delay.
+     * cannot attack due to having already attacked that turn.
      *
      * @battlecode.doc.costlymethod
      */
@@ -693,7 +705,7 @@ public interface RobotController {
      * @param dir the direction you wish to fire the bullet.
      * @throws GameActionException if this robot is not of a type that can
      * fire single shots (ARCHON, GARDENER, etc.), cannot attack due to having
-     * weapon delay, or for having insufficient bullets in the bullet supply.
+     * already attacked, or for having insufficient bullets in the bullet supply.
      *
      * @battlecode.doc.costlymethod
      */
@@ -709,7 +721,7 @@ public interface RobotController {
      * @param dir the direction you wish to fire the center bullet.
      * @throws GameActionException if this robot is not of a type that can
      * fire triad shots (ARCHON, GARDENER, etc.), cannot attack due to having
-     * weapon delay, or for having insufficient bullets in the bullet supply.
+     * already attacked, or for having insufficient bullets in the bullet supply.
      *
      * @battlecode.doc.costlymethod
      */
@@ -725,7 +737,7 @@ public interface RobotController {
      * @param dir the direction you wish to fire the center bullet.
      * @throws GameActionException if this robot is not of a type that can
      * fire pentad shots (ARCHON, GARDENER, etc.), cannot attack due to having
-     * weapon delay, or for having insufficient bullets in the bullet supply.
+     * already attacked, or for having insufficient bullets in the bullet supply.
      *
      * @battlecode.doc.costlymethod
      */
@@ -736,27 +748,25 @@ public interface RobotController {
     // ***********************************
 
     /**
-     * Chops the target tree at location loc. This action counts as a movement,
-     * adding core and weapon delay.
+     * Chops the target tree at location loc. This action counts as a movement.
      *
      * @param loc the location of the tree you wish to chop, does not
      * have to be the center of the tree
      * @throws GameActionException if the given location does not contain
      * a tree, if the tree (not location) is not within one stride of this
-     * robot, or cannot perform action due to having core delay.
+     * robot, or cannot perform action due to having already moved.
      *
      * @battlecode.doc.costlymethod
      */
     void chop(MapLocation loc) throws GameActionException;
 
     /**
-     * Chops the target tree at location loc. This action counts as a movement,
-     * adding core and weapon delay.
+     * Chops the target tree at location loc. This action counts as a movement.
      *
      * @param id the id of the tree you wish to chop.
      * @throws GameActionException if there isn't a tree with the given id,
      * if the tree (not location) is not within one stride of this robot,
-     * or cannot perform action due to having core delay.
+     * or cannot perform action due to having already moved.
      *
      * @battlecode.doc.costlymethod
      */
@@ -919,7 +929,7 @@ public interface RobotController {
 
     /**
      * Returns whether the robot can build a robot of the given type in the
-     * given direction, without taking delays into account. Checks dependencies,
+     * given direction, without checking build cooldown. Checks dependencies,
      * bullet costs, whether the robot can build, and that the given direction is
      * not blocked. Does not check if a robot has sufficiently low coreDelay or
      * not.

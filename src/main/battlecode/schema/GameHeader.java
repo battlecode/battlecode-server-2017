@@ -57,5 +57,5 @@ public final class GameHeader extends Table {
     int o = builder.endObject();
     return o;
   }
-}
+};
 

@@ -41,5 +41,5 @@ public final class MatchFooter extends Table {
     int o = builder.endObject();
     return o;
   }
-}
+};
 

@@ -5,56 +5,56 @@ package battlecode.common;
  */
 public enum RobotType {
 
-    // spawnSource, maxHealth, bulletCost, bodyRadius, bulletSpeed, attackPower, sensorRadius, bulletSightRadius, movementDelay, attackDelay, cooldownDelay, bytecodeLimit
+    // spawnSource, buildCooldownTurns, maxHealth, bulletCost, bodyRadius, bulletSpeed, attackPower, sensorRadius, bulletSightRadius, strideRadius, bytecodeLimit
     /**
      * An important unit that cannot be constructed; builds other robots.
      *
      * @battlecode.doc.robottype
      */
-    ARCHON          (null,    1000,   -1,   2,  -1,  -1,   7,  15,   2,  -1,   1, 20000),
-    //                          HP    BC   BR   BS   AP   SR  BSR  MVD   AD   CD    BCL
+    ARCHON          (null,    0,    1000,   -1,   2,  -1,  -1,   7,  15, 1,  20000),
+    //                              HP      BC   BR   BS   AP   SR  BSR  STR   BCL
     /**
      * The main producer unit to make other units and trees; can't build Archons or other Gardeners
      *
      * @battlecode.doc.robottype
      */
-    GARDENER        (ARCHON,   100,  100,   1,  -1,  -1,   5,  10,   2,  -1,   1, 10000),
-    //                          HP    BC   BR   BS   AP   SR  BSR  MVD   AD   CD    BCL
+    GARDENER        (ARCHON,  10,   100,  100,   1,  -1,  -1,   5,  10,   1, 10000),
+    //                              HP    BC   BR   BS   AP   SR  BSR  STR   BCL
     /**
      * A melee based unit that specializes at cutting down trees
      *
      * @battlecode.doc.robottype
      */
-    LUMBERJACK      (GARDENER,  70,  100,   1,  -1, 1.5F,   5,  10,   2,   2,   1, 10000),
-    //                          HP    BC   BR   BS   AP    SR  BSR  MVD   AD   CD    BCL
+    LUMBERJACK      (GARDENER,  10, 70,  100,   1,  -1, 1.5F,   5,  10,  1, 10000),
+    //                              HP    BC   BR   BS   AP    SR  BSR  STR   BCL
     /**
      * The basic fighting unit
      *
      * @battlecode.doc.robottype
      */
-    RECRUIT         (GARDENER,  70,  100,   1,   1,   1,   5,  10,   1,   2,   1, 10000),
-    //                          HP    BC   BR   BS   AP   SR  BSR  MVD   AD   CD    BCL
+    RECRUIT         (GARDENER,  10, 70,  100,   1,   1,   1,   5,  10,   2, 10000),
+    //                              HP    BC   BR   BS   AP   SR  BSR  STR   BCL
     /**
      * A slightly better fighting unit
      *
      * @battlecode.doc.robottype
      */
-    SOLDIER         (GARDENER,  80,  130,   1,   1,   1,   5,  10,   1,   2,   1, 10000),
-    //                          HP    BC   BR   BS   AP   SR  BSR  MVD   AD   CD    BCL
+    SOLDIER         (GARDENER,  10, 80,  130,   1,   1,   1,   5,  10,   2, 10000),
+    //                              HP    BC   BR   BS   AP   SR   BSR  STR   BCL
     /**
      * A strong fighting unit
      *
      * @battlecode.doc.robottype
      */
-    TANK            (GARDENER, 125,  200,   1,   1,   1,   5,  10,   1,   2,   1, 10000),
-    //                          HP    BC   BR   BS   AP   SR  BSR  MVD   AD   CD    BCL
+    TANK            (GARDENER, 10,  125,  200,   1,   1,   1,   5,  10,  (float)1.5, 10000),
+    //                              HP    BC   BR   BS   AP   SR  BSR        STR   BCL
     /**
      * An unit that specializes in movement
      *
      * @battlecode.doc.robottype
      */
-    SCOUT           (GARDENER,  80,   80,   1,   1,   1,   5,  10,   1,   2,   1, 20000),
-    //                          HP    BC   BR   BS   AP   SR  BSR  MVD   AD   CD    BCL
+    SCOUT           (GARDENER,  10, 80,   80,   1,   1,   1,   5,  10,  (float)2.5, 20000),
+    //                              HP    BC   BR   BS   AP   SR  BSR         STR   BCL
     ;
     
     /**
@@ -62,6 +62,11 @@ public enum RobotType {
      */
     public final RobotType spawnSource;
 
+    /**
+     * Cooldown turns for structure that spawns it.
+     */
+    public final int buildCooldownTurns;
+    
     /**
      * Maximum health for the robot.
      */
@@ -98,19 +103,9 @@ public enum RobotType {
     public final float bulletSightRadius;
 
     /**
-     * Movement delay: the amount of contribution to core delay from a movement.
+     * Maximum distance the robot can move per turn
      */
-    public final float movementDelay;
-
-    /**
-     * Attack delay: the amount of contribution to weapon delay from an attack.
-     */
-    public final float attackDelay;
-
-    /**
-     * Cooldown delay: the amount of contribution to core delay from an attack.
-     */
-    public final float cooldownDelay;
+    public final float strideRadius;
 
     /**
      * Base bytecode limit of this robot (halved if the robot does not have sufficient supply upkeep).
@@ -171,10 +166,10 @@ public enum RobotType {
         return this == RobotType.ARCHON || this == RobotType.GARDENER ? this.maxHealth : .20F * this.maxHealth;
     }
     
-    RobotType(RobotType spawnSource, int maxHealth, int bulletCost, float bodyRadius, float bulletSpeed, float attackPower,
-              float sensorRadius, float bulletSightRadius, float movementDelay, float attackDelay,
-              float cooldownDelay, int bytecodeLimit) {
+    RobotType(RobotType spawnSource, int buildCooldownTurns, int maxHealth, int bulletCost, float bodyRadius, float bulletSpeed, float attackPower,
+              float sensorRadius, float bulletSightRadius, float strideRadius, int bytecodeLimit) {
         this.spawnSource        = spawnSource;
+        this.buildCooldownTurns = buildCooldownTurns;
         this.maxHealth          = maxHealth;
         this.bulletCost         = bulletCost;
         this.bodyRadius         = bodyRadius;
@@ -182,9 +177,7 @@ public enum RobotType {
         this.attackPower        = attackPower;
         this.sensorRadius       = sensorRadius;
         this.bulletSightRadius  = bulletSightRadius;
-        this.movementDelay      = movementDelay;
-        this.attackDelay        = attackDelay;
-        this.cooldownDelay      = cooldownDelay;
+        this.strideRadius       = strideRadius;
         this.bytecodeLimit      = bytecodeLimit;
     }
 
