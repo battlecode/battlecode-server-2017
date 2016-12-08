@@ -72,5 +72,5 @@ public final class SpawnedBodyTable extends Table {
     int o = builder.endObject();
     return o;
   }
-}
+};
 

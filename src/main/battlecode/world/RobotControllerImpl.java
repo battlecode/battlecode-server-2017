@@ -158,16 +158,17 @@ public final class RobotControllerImpl implements RobotController {
     public float getHealth(){
         return this.robot.getHealth();
     }
-
+    
     @Override
-    public float getCoreDelay(){
-        return this.robot.getCoreDelay();
+    public int getAttackCount(){
+        return this.robot.getAttackCount();
     }
-
+    
     @Override
-    public float getWeaponDelay(){
-        return this.robot.getWeaponDelay();
+    public int getMoveCount(){
+        return this.robot.getMoveCount();
     }
+    
 
     // ***********************************
     // ****** GENERAL SENSOR METHODS *****
@@ -472,28 +473,40 @@ public final class RobotControllerImpl implements RobotController {
     // ****** READINESS METHODS **********
     // ***********************************
 
-    private void assertIsCoreReady() throws GameActionException{
-        if(!isCoreReady()){
+    private void assertMoveReady() throws GameActionException{
+        if(hasMoved()){
             throw new GameActionException(NOT_ACTIVE,
-                    "This robot has core delay.");
+                    "This robot has already moved this turn.");
         }
     }
 
     private void assertIsWeaponReady() throws GameActionException{
-        if(!isWeaponReady()){
+        if(hasAttacked()){
             throw new GameActionException(NOT_ACTIVE,
-                    "This robot has weapon delay.");
+                    "This robot has already attacked this turn.");
+        }
+    }
+    
+    private void assertIsBuildReady() throws GameActionException{
+        if(!isBuildReady()){
+            throw new GameActionException(NOT_ACTIVE,
+                    "This robot's build cooldown has not expired.");
         }
     }
 
     @Override
-    public boolean isCoreReady() {
-        return getCoreDelay() < 1;
+    public boolean hasMoved() {
+        return getMoveCount() > 0;
     }
 
     @Override
-    public boolean isWeaponReady() {
-        return getWeaponDelay() < 1;
+    public boolean hasAttacked() {
+        return getAttackCount() > 0;
+    }
+    
+    @Override
+    public boolean isBuildReady() {
+        return this.robot.getBuildCooldownTurns() == 0;
     }
 
     // ***********************************
@@ -518,7 +531,19 @@ public final class RobotControllerImpl implements RobotController {
         assertNotNull(dir);
         scale = scale < 0 ? 0 : scale;
         scale = scale > 1 ? 1 : scale;
-        MapLocation center = getLocation().add(dir, scale * (2*getType().bodyRadius));
+        MapLocation center = getLocation().add(dir, scale * getType().strideRadius);
+        return gameWorld.getGameMap().onTheMap(center, getType().bodyRadius) &&
+                gameWorld.getObjectInfo().isEmpty(center, getType().bodyRadius);
+    }
+    
+    @Override
+    public boolean canMove(MapLocation center) {
+        assertNotNull(center);
+        float dist = getLocation().distanceTo(center);
+        if(dist > getType().strideRadius) { // Rescale if target location is too far
+            Direction dir = getLocation().directionTo(center);
+            center = getLocation().add(dir, getType().strideRadius);
+        }
         return gameWorld.getGameMap().onTheMap(center, getType().bodyRadius) &&
                 gameWorld.getObjectInfo().isEmpty(center, getType().bodyRadius);
     }
@@ -531,15 +556,31 @@ public final class RobotControllerImpl implements RobotController {
     @Override
     public void move(Direction dir, float scale) throws GameActionException {
         assertNotNull(dir);
-        assertIsCoreReady();
+        assertMoveReady();
         scale = scale < 0 ? 0 : scale;
         scale = scale > 1 ? 1 : scale;
-        MapLocation newLoc = getLocation().add(dir, scale * (2*getType().bodyRadius));
-        assertIsPathable(newLoc);
+        MapLocation center = getLocation().add(dir, scale * (2*getType().bodyRadius));
+        assertIsPathable(center);
 
-        this.robot.addCoreDelay(getType().movementDelay);
-        this.robot.setWeaponDelayUpTo(getType().cooldownDelay);
-        this.robot.setLocation(newLoc);
+        this.robot.incrementMoveCount();
+        this.robot.setLocation(center);
+
+        gameWorld.getMatchMaker().addMoved(getID(), getLocation());
+    }
+    
+    @Override
+    public void move(MapLocation center) throws GameActionException {
+        assertNotNull(center);
+        assertMoveReady();
+        float dist = getLocation().distanceTo(center);
+        if(dist > getType().strideRadius) {
+            Direction dir = getLocation().directionTo(center);
+            center = getLocation().add(dir, getType().strideRadius);
+        }
+        assertIsPathable(center);
+        
+        this.robot.incrementMoveCount();
+        this.robot.setLocation(center);
 
         gameWorld.getMatchMaker().addMoved(getID(), getLocation());
     }
@@ -611,8 +652,7 @@ public final class RobotControllerImpl implements RobotController {
         }
         assertIsWeaponReady();
 
-        this.robot.addWeaponDelay(getType().attackDelay);
-        this.robot.setCoreDelayUpTo(getType().cooldownDelay);
+        this.robot.incrementAttackCount(); // Striking counts as attack.
 
         // Hit adjacent robots
         for(InternalRobot hitRobot :
@@ -661,8 +701,7 @@ public final class RobotControllerImpl implements RobotController {
         }
         assertIsWeaponReady();
 
-        this.robot.addWeaponDelay(getType().attackDelay);
-        this.robot.setCoreDelayUpTo(getType().cooldownDelay);
+        this.robot.incrementAttackCount();
 
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -GameConstants.SINGLE_SHOT_COST);
         fireBulletSpread(dir, 1, 0);
@@ -678,8 +717,7 @@ public final class RobotControllerImpl implements RobotController {
         }
         assertIsWeaponReady();
 
-        this.robot.addWeaponDelay(getType().attackDelay);
-        this.robot.setCoreDelayUpTo(getType().cooldownDelay);
+        this.robot.incrementAttackCount();
 
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -GameConstants.TRIAD_SHOT_COST);
         fireBulletSpread(dir, 3, GameConstants.TRIAD_SPREAD_DEGREES);
@@ -695,8 +733,7 @@ public final class RobotControllerImpl implements RobotController {
         }
         assertIsWeaponReady();
 
-        this.robot.addWeaponDelay(getType().attackDelay);
-        this.robot.setCoreDelayUpTo(getType().cooldownDelay);
+        this.robot.incrementAttackCount();
 
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -GameConstants.PENTAD_SHOT_COST);
         fireBulletSpread(dir, 5, GameConstants.PENTAD_SPREAD_DEGREES);
@@ -749,7 +786,7 @@ public final class RobotControllerImpl implements RobotController {
     @Override
     public void chop(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
-        assertIsCoreReady();
+        assertIsWeaponReady(); // Chop counts as attack
         assertCanInteractWithTree(loc);
         InternalTree tree = gameWorld.getObjectInfo().getTreeAtLocation(loc);
         chopTree(tree);
@@ -757,15 +794,14 @@ public final class RobotControllerImpl implements RobotController {
 
     @Override
     public void chop(int id) throws GameActionException {
-        assertIsCoreReady();
+        assertIsWeaponReady();  // Chop counts as attack
         assertCanInteractWithTree(id);
         InternalTree tree = gameWorld.getObjectInfo().getTreeByID(id);
         chopTree(tree);
     }
 
     private void chopTree(InternalTree tree){
-        this.robot.addCoreDelay(getType().movementDelay);
-        this.robot.setWeaponDelayUpTo(getType().cooldownDelay);
+        this.robot.incrementAttackCount();
 
         float chopDamage = GameConstants.BASE_CHOP_DAMAGE;
         if(getType() == RobotType.LUMBERJACK){
@@ -945,11 +981,11 @@ public final class RobotControllerImpl implements RobotController {
     @Override
     public void hireGardener(Direction dir) throws GameActionException {
         assertNotNull(dir);
-        assertIsCoreReady();
+        assertIsBuildReady();
         assertCanBuildRobot(RobotType.GARDENER, dir);
 
-        this.robot.addCoreDelay(getType().movementDelay);
-        this.robot.setWeaponDelayUpTo(getType().cooldownDelay);
+        this.robot.setBuildCooldownTurns(RobotType.GARDENER.buildCooldownTurns);
+        
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -RobotType.GARDENER.bulletCost);
 
         float spawnDist = getType().bodyRadius +
@@ -965,11 +1001,11 @@ public final class RobotControllerImpl implements RobotController {
     @Override
     public void plantRobot(RobotType type, Direction dir) throws GameActionException {
         assertNotNull(dir);
-        assertIsCoreReady();
+        assertIsBuildReady();
         assertCanBuildRobot(type, dir);
 
-        this.robot.addCoreDelay(getType().movementDelay);
-        this.robot.setWeaponDelayUpTo(getType().cooldownDelay);
+        this.robot.setBuildCooldownTurns(type.buildCooldownTurns);
+        
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -type.bulletCost);
 
         float spawnDist = getType().bodyRadius +
@@ -985,11 +1021,11 @@ public final class RobotControllerImpl implements RobotController {
     @Override
     public void plantBulletTree(Direction dir) throws GameActionException {
         assertNotNull(dir);
-        assertIsCoreReady();
+        assertIsBuildReady();
         assertCanBuildTree(dir);
 
-        this.robot.addCoreDelay(getType().movementDelay);
-        this.robot.setWeaponDelayUpTo(getType().cooldownDelay);
+        this.robot.setBuildCooldownTurns(GameConstants.BULLET_TREE_CONSTRUCTION_COOLDOWN);
+        
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -GameConstants.BULLET_TREE_COST);
 
         float spawnDist = getType().bodyRadius +

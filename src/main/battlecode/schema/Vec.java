@@ -24,5 +24,5 @@ public final class Vec extends Struct {
     builder.putFloat(x);
     return builder.offset();
   }
-}
+};
 

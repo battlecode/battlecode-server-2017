@@ -154,5 +154,5 @@ public final class Round extends Table {
     int o = builder.endObject();
     return o;
   }
-}
+};
 

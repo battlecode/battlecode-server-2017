@@ -43,5 +43,5 @@ public final class VecTable extends Table {
     int o = builder.endObject();
     return o;
   }
-}
+};
 

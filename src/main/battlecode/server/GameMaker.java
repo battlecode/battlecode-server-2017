@@ -84,9 +84,7 @@ public class GameMaker {
             BodyTypeMetadata.addCost(builder, type.bulletCost);
             BodyTypeMetadata.addMaxHealth(builder, type.maxHealth);
             BodyTypeMetadata.addStartHealth(builder, type.getStartingHealth());
-            BodyTypeMetadata.addMoveDelay(builder, type.movementDelay);
-            BodyTypeMetadata.addAttackDelay(builder, type.attackDelay);
-            BodyTypeMetadata.addCooldownDelay(builder, type.cooldownDelay);
+            BodyTypeMetadata.addStrideRadius(builder, type.strideRadius);
             BodyTypeMetadata.addBulletAttack(builder, type.attackPower);
             BodyTypeMetadata.addBulletSpeed(builder, type.bulletSpeed);
             bodyTypeMetadataOffsets.add(BodyTypeMetadata.endBodyTypeMetadata(builder));
