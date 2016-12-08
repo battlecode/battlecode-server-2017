@@ -92,8 +92,8 @@ public class RobotInfo implements  BodyInfo{
         RobotInfo robotInfo = (RobotInfo) o;
 
         if (ID != robotInfo.ID) return false;
-        if (Double.compare(robotInfo.coreDelay, coreDelay) != 0) return false;
-        if (Double.compare(robotInfo.weaponDelay, weaponDelay) != 0) return false;
+        if (Double.compare(robotInfo.attackCount, attackCount) != 0) return false;
+        if (Double.compare(robotInfo.moveCount, moveCount) != 0) return false;
         if (Double.compare(robotInfo.health, health) != 0) return false;
         if (team != robotInfo.team) return false;
         if (type != robotInfo.type) return false;
@@ -109,10 +109,8 @@ public class RobotInfo implements  BodyInfo{
         result = 31 * result + team.hashCode();
         result = 31 * result + type.hashCode();
         result = 31 * result + location.hashCode();
-        temp = Double.doubleToLongBits(coreDelay);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(weaponDelay);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + attackCount;
+        result = 31 * result + moveCount;
         temp = Double.doubleToLongBits(health);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;

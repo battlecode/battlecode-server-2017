@@ -231,7 +231,7 @@ public final class GameMapIO {
          * @param teamMapping
          * @return a new copy of the map as a LiveMap
          */
-        public static LiveMap deserialize(GameMap raw, TeamMapping teamMapping) {
+        public static LiveMap deserialize(battlecode.schema.GameMap raw, TeamMapping teamMapping) {
             final float width = raw.maxCorner().x() - raw.minCorner().x();
             final float height = raw.maxCorner().y() - raw.minCorner().y();
             final MapLocation origin = new MapLocation(raw.minCorner().x(), raw.minCorner().y());
@@ -337,16 +337,16 @@ public final class GameMapIO {
             int trees = NeutralTreeTable.endNeutralTreeTable(builder);
 
             // Build LiveMap for flatbuffer
-            GameMap.startGameMap(builder);
-            GameMap.addName(builder, name);
-            GameMap.addMinCorner(builder, Vec.createVec(builder, gameMap.getOrigin().x, gameMap.getOrigin().y));
-            GameMap.addMaxCorner(builder, Vec.createVec(builder, gameMap.getOrigin().x + gameMap.getWidth(),
+            battlecode.schema.GameMap.startGameMap(builder);
+            battlecode.schema.GameMap.addName(builder, name);
+            battlecode.schema.GameMap.addMinCorner(builder, Vec.createVec(builder, gameMap.getOrigin().x, gameMap.getOrigin().y));
+            battlecode.schema.GameMap.addMaxCorner(builder, Vec.createVec(builder, gameMap.getOrigin().x + gameMap.getWidth(),
                     gameMap.getOrigin().y + gameMap.getHeight()));
-            GameMap.addBodies(builder, bodies);
-            GameMap.addTrees(builder, trees);
-            GameMap.addRandomSeed(builder, randomSeed);
+            battlecode.schema.GameMap.addBodies(builder, bodies);
+            battlecode.schema.GameMap.addTrees(builder, trees);
+            battlecode.schema.GameMap.addRandomSeed(builder, randomSeed);
 
-            return GameMap.endGameMap(builder);
+            return battlecode.schema.GameMap.endGameMap(builder);
 
         }
 
@@ -364,7 +364,7 @@ public final class GameMapIO {
                 float bodyY = locs.ys(i);
                 Team bodyTeam = teamMapping.getTeamFromID(bodyTable.teamIDs(i));
                 if (bodyType != null) {
-                    initialBodies.add(new RobotInfo(bodyID, bodyTeam, bodyType, new MapLocation(bodyX, bodyY), 0, 0, bodyType.getStartingHealth()));
+                    initialBodies.add(new RobotInfo(bodyID, bodyTeam, bodyType, new MapLocation(bodyX, bodyY), bodyType.getStartingHealth(), 0, 0));
                 } else {
                     initialBodies.add(new TreeInfo(bodyID, bodyTeam, new MapLocation(bodyX, bodyY), 0, 0, 0, null));
                 }
