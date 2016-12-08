@@ -296,6 +296,19 @@ public class ObjectInfo {
                 getAllRobotsWithinRadius(loc, radius).length == 0;
     }
 
+    public boolean isEmptyExceptForRobot(MapLocation loc, float radius, InternalRobot robot){
+        if (getAllTreesWithinRadius(loc, radius).length != 0)
+            return false;
+        InternalRobot[] robots = getAllRobotsWithinRadius(loc, radius);
+        if (robots.length == 0) {
+            return true;
+        } else if (robots.length == 1) {
+            return robot.equals(robots[0]);
+        } else {
+            return false;
+        }
+    }
+
     // ****************************
     // *** PRIVATE METHODS ********
     // ****************************

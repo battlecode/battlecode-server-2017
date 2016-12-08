@@ -35,25 +35,25 @@ public class RobotControllerTest {
         // Let's spawn a robot for each team. The integers represent IDs.
         float oX = game.getOriginX();
         float oY = game.getOriginY();
-        final int archonA = game.spawn(oX, oY, RobotType.ARCHON, Team.A);
+        final int archonA = game.spawn(oX + 3, oY + 3, RobotType.ARCHON, Team.A);
         final int soldierB = game.spawn(oX + 1, oY + 1, RobotType.SOLDIER, Team
                 .B);
         InternalRobot archonABot = game.getBot(archonA);
 
-        assertEquals(archonABot.getLocation(), new MapLocation(oX, oY));
+        assertEquals(archonABot.getLocation(), new MapLocation(oX + 3, oY + 3));
 
         // The following specifies the code to be executed in the next round.
         // Bytecodes are not counted, and yields are automatic at the end.
         game.round((id, rc) -> {
             if (id == archonA) {
-                rc.move(Direction.getEast());
+                rc.move(Direction.getEast(), 0.5F);
             } else if (id == soldierB) {
                 // do nothing
             }
         });
 
         // Let's assert that things happened properly.
-        assertEquals(archonABot.getLocation(), new MapLocation(oX + 1, oY));
+        assertEquals(archonABot.getLocation(), new MapLocation(oX + 5, oY + 3));
 
         // Lets wait for 10 rounds go by.
         game.waitRounds(10);
@@ -69,18 +69,18 @@ public class RobotControllerTest {
         LiveMap map= new TestMapBuilder("test", 0, 0, 100, 100, 1337, 1000).build();
         TestGame game = new TestGame(map);
 
-        final int a = game.spawn(0, 0, RobotType.SOLDIER, Team.A);
+        final int a = game.spawn(1, 1, RobotType.SOLDIER, Team.A);
 
         game.round((id, rc) -> {
             if (id != a) return;
 
             final MapLocation start = rc.getLocation();
-            assertEquals(start, new MapLocation(0, 0));
+            assertEquals(start, new MapLocation(1, 1));
 
             rc.move(Direction.getEast());
 
             final MapLocation newLocation = rc.getLocation();
-            assertEquals(newLocation, new MapLocation(1, 0));
+            assertEquals(newLocation, new MapLocation(3, 1));
         });
 
         // Let delays go away

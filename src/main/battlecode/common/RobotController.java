@@ -257,6 +257,17 @@ public interface RobotController {
     boolean isCircleOccupied(MapLocation center, float radius) throws GameActionException;
 
     /**
+     * Returns whether there is any robot or tree within a given circle, ignoring this robot
+     * if it itself occupies the circle
+     *
+     * @param center the center of the circle to check.
+     * @param radius the radius of the circle to check.
+     * @return whether there is a robot or tree in the given circle.
+     * @throws GameActionException if any portion of the given circle is not within sensor range.
+     */
+    boolean isCircleOccupiedExceptByThisRobot(MapLocation center, float radius) throws GameActionException;
+
+    /**
      * Returns the tree at the given location, or null if there is no tree
      * there.
      *
