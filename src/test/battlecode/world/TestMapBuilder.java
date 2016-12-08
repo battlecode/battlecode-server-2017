@@ -52,8 +52,8 @@ public class TestMapBuilder {
                 type,
                 loc,
                 type.getStartingHealth(),
-		0,
-		0
+                0,
+                0
         ));
 
         return this;
