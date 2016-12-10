@@ -43,6 +43,11 @@ public class RobotInfo implements  BodyInfo{
     public final int moveCount;
 
     @Override
+    public int getID() {
+        return this.ID;
+    }
+
+    @Override
     public MapLocation getLocation() {
         return this.location;
     }
@@ -79,8 +84,36 @@ public class RobotInfo implements  BodyInfo{
         this.moveCount = moveCount;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RobotInfo robotInfo = (RobotInfo) o;
+
+        if (ID != robotInfo.ID) return false;
+        if (Double.compare(robotInfo.attackCount, attackCount) != 0) return false;
+        if (Double.compare(robotInfo.moveCount, moveCount) != 0) return false;
+        if (Double.compare(robotInfo.health, health) != 0) return false;
+        if (team != robotInfo.team) return false;
+        if (type != robotInfo.type) return false;
+        return location.equals(robotInfo.location);
+
+    }
+
+    @Override
     public int hashCode() {
-        return ID;
+        int result;
+        long temp;
+        result = ID;
+        result = 31 * result + team.hashCode();
+        result = 31 * result + type.hashCode();
+        result = 31 * result + location.hashCode();
+        result = 31 * result + attackCount;
+        result = 31 * result + moveCount;
+        temp = Double.doubleToLongBits(health);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
     }
 
     @Override

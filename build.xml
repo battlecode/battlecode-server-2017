@@ -143,9 +143,18 @@
         </javac>
     </target>
 
+    <target name="copy-test-resources"
+            description="Copy inline Battlecode testing resources to build folder"
+            depends="init">
+        <copy todir="${test.build.dir}">
+            <fileset dir="${test.src.dir}"
+                     excludes="**/*.java"/>
+        </copy>
+    </target>
+
     <target name="compiletest"
             description="Compile test classes."
-            depends="init,compile">
+            depends="init,compile,copy-test-resources">
         <javac encoding="${build.encoding}"
                 srcdir="${test.src.dir}"
                 includes="**/*.java"

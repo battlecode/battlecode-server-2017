@@ -28,7 +28,7 @@ public class GameWorld{
     protected final TeamMapping teamMapping;
     protected final GameStats gameStats;
 
-    private final GameMap gameMap;
+    private final LiveMap gameMap;
     private final TeamInfo teamInfo;
     private final ObjectInfo objectInfo;
 
@@ -42,7 +42,7 @@ public class GameWorld{
     private final MatchMaker matchMaker;
 
     @SuppressWarnings("unchecked")
-    public GameWorld(GameMap gm, RobotControlProvider cp,
+    public GameWorld(LiveMap gm, RobotControlProvider cp,
                      TeamMapping teamMapping,
                      long[][] oldTeamMemory, FlatBufferBuilder builder) {
         
@@ -60,9 +60,14 @@ public class GameWorld{
 
         this.controlProvider = cp;
 
+        this.rand = new Random(gameMap.getSeed());
+
+        this.builder = builder;
+        this.matchMaker = new MatchMaker(builder, teamMapping);
+
         controlProvider.matchStarted(this);
 
-        // Add the robots and trees contained in the GameMap to this world.
+        // Add the robots and trees contained in the LiveMap to this world.
         for(BodyInfo body : gameMap.getInitialBodies()){
             if(body.isRobot()){
                 RobotInfo robot = (RobotInfo) body;
@@ -72,11 +77,6 @@ public class GameWorld{
                 spawnTree(tree.ID, tree.team, tree.radius, tree.location, tree.containedBullets, tree.containedRobot);
             }
         }
-
-        this.rand = new Random(gameMap.getSeed());
-
-        this.builder = builder;
-        this.matchMaker = new MatchMaker(builder, teamMapping);
 
         // Write match header at beginning of match
         matchMaker.makeMatchHeader(gameMap);
@@ -115,7 +115,6 @@ public class GameWorld{
             ErrorReporter.report(e);
             return GameState.DONE;
         }
-
         // Write out round data
         matchMaker.writeAndClearRoundData(currentRound);
         return GameState.RUNNING;
@@ -151,6 +150,7 @@ public class GameWorld{
             if(robot.getHealth() > 0) { // Only processEndOfTurn if robot is still alive
                 robot.processEndOfTurn();
             }
+
             // If the robot terminates but the death signal has not yet
             // been visited:
             if (this.controlProvider.getTerminated(robot) && objectInfo.getRobotByID(id) != null) {
@@ -175,7 +175,7 @@ public class GameWorld{
         return gameMap.getSeed();
     }
 
-    public GameMap getGameMap() {
+    public LiveMap getGameMap() {
         return gameMap;
     }
 

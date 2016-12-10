@@ -42,6 +42,11 @@ public class BulletInfo implements BodyInfo{
     }
 
     @Override
+    public int getID() {
+        return this.ID;
+    }
+
+    @Override
     public MapLocation getLocation() {
         return this.location;
     }
@@ -66,8 +71,29 @@ public class BulletInfo implements BodyInfo{
         return true;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BulletInfo that = (BulletInfo) o;
+
+        if (ID != that.ID) return false;
+        if (Float.compare(that.speed, speed) != 0) return false;
+        if (Float.compare(that.damage, damage) != 0) return false;
+        if (!dir.equals(that.dir)) return false;
+        return location.equals(that.location);
+
+    }
+
+    @Override
     public int hashCode() {
-        return ID;
+        int result = ID;
+        result = 31 * result + (speed != +0.0f ? Float.floatToIntBits(speed) : 0);
+        result = 31 * result + (damage != +0.0f ? Float.floatToIntBits(damage) : 0);
+        result = 31 * result + dir.hashCode();
+        result = 31 * result + location.hashCode();
+        return result;
     }
 
     @Override

@@ -254,7 +254,14 @@ public final class RobotControllerImpl implements RobotController {
     public boolean isCircleOccupied(MapLocation center, float radius) throws GameActionException{
         assertNotNull(center);
         assertCanSenseAllOfCircle(center, radius);
-        return gameWorld.getObjectInfo().isEmpty(center, radius);
+        return !gameWorld.getObjectInfo().isEmpty(center, radius);
+    }
+
+    @Override
+    public boolean isCircleOccupiedExceptByThisRobot(MapLocation center, float radius) throws GameActionException{
+        assertNotNull(center);
+        assertCanSenseAllOfCircle(center, radius);
+        return !gameWorld.getObjectInfo().isEmptyExceptForRobot(center, radius, robot);
     }
 
     @Override
@@ -515,9 +522,9 @@ public final class RobotControllerImpl implements RobotController {
 
     private void assertIsPathable(MapLocation loc) throws GameActionException{
         if(!onTheMap(loc, getType().bodyRadius) ||
-                isCircleOccupied(loc, getType().bodyRadius)){
+                isCircleOccupiedExceptByThisRobot(loc, getType().bodyRadius)){
             throw new GameActionException(CANT_MOVE_THERE,
-                    "Cannot move to target location.");
+                    "Cannot move to target location " + loc + ".");
         }
     }
 
@@ -533,7 +540,7 @@ public final class RobotControllerImpl implements RobotController {
         scale = scale > 1 ? 1 : scale;
         MapLocation center = getLocation().add(dir, scale * getType().strideRadius);
         return gameWorld.getGameMap().onTheMap(center, getType().bodyRadius) &&
-                gameWorld.getObjectInfo().isEmpty(center, getType().bodyRadius);
+            gameWorld.getObjectInfo().isEmptyExceptForRobot(center, getType().bodyRadius, robot);
     }
     
     @Override
@@ -545,7 +552,7 @@ public final class RobotControllerImpl implements RobotController {
             center = getLocation().add(dir, getType().strideRadius);
         }
         return gameWorld.getGameMap().onTheMap(center, getType().bodyRadius) &&
-                gameWorld.getObjectInfo().isEmpty(center, getType().bodyRadius);
+            gameWorld.getObjectInfo().isEmptyExceptForRobot(center, getType().bodyRadius, robot);
     }
 
     @Override
@@ -1159,26 +1166,5 @@ public final class RobotControllerImpl implements RobotController {
     @Override
     public long getControlBits() {
         return robot.getControlBits();
-    }
-
-    // TODO: Implement debug methods
-    @Override
-    public void setIndicatorString(int stringIndex, String newString) {
-        throw new RuntimeException("Implement Me!");
-    }
-
-    @Override
-    public void setIndicatorDot(MapLocation loc, int red, int green, int blue) {
-        throw new RuntimeException("Implement Me!");
-    }
-
-    @Override
-    public void setIndicatorLine(MapLocation from, MapLocation to, int red, int green, int blue) {
-        throw new RuntimeException("Implement Me!");
-    }
-
-    @Override
-    public void addMatchObservation(String observation) {
-        throw new RuntimeException("Implement Me!");
     }
 }

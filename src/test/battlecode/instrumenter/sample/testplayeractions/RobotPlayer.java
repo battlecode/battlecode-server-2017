@@ -10,7 +10,6 @@ import battlecode.common.*;
 @SuppressWarnings("unused")
 public class RobotPlayer {
     public static void run(RobotController rc) throws GameActionException {
-        rc.addMatchObservation("text");
         rc.resign();
         rc.senseNearbyRobots();
         rc.setTeamMemory(0, 0);

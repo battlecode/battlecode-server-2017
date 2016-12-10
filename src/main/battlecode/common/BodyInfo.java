@@ -6,6 +6,11 @@ package battlecode.common;
 public interface BodyInfo {
 
     /**
+     * @return the id of the body
+     */
+    int getID();
+
+    /**
      * @return the center location of this body
      */
     MapLocation getLocation();

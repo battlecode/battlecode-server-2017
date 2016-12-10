@@ -62,10 +62,30 @@ public class SandboxedRobotPlayerTest {
 
         // Make sure that the player called the correct methods
 
-        verify(rc).addMatchObservation("text");
         verify(rc).resign();
         verify(rc).senseNearbyRobots();
         verify(rc).setTeamMemory(0, 0);
+    }
+
+    @Test
+    public void testYield() throws Exception {
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerclock", rc, 0, cache);
+        player.setBytecodeLimit(10000);
+
+        player.step();
+
+        assertFalse(player.getTerminated());
+        verify(rc).broadcast(0, 1);
+
+        player.step();
+
+        assertFalse(player.getTerminated());
+        verify(rc).broadcast(0, 2);
+
+        player.step();
+
+        assertTrue(player.getTerminated());
+        verify(rc).broadcast(0, 3);
     }
 
     @Test

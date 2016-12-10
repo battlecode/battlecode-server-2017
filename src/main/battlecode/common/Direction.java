@@ -18,8 +18,8 @@ public final class Direction {
      * @param radians the radians at which you wish this direction
      *                to represent based off of the unit circle
      */
-    public Direction(float radians){
-        this.radians = radians % (2*(float) Math.PI);
+    public Direction(float radians) {
+        this.radians = radians % (2 * (float) Math.PI);
     }
 
     /**
@@ -31,7 +31,7 @@ public final class Direction {
      * @param dy the y component of the vector
      */
     public Direction(float dx, float dy) {
-        if(dx == 0 && dy ==0){
+        if (dx == 0 && dy == 0) {
             dy = 1;
         }
         this.radians = (float) Math.atan2(dy, dx) % (2 * (float) Math.PI);
@@ -42,7 +42,7 @@ public final class Direction {
      * in which the vector from start to finish points. Requires
      * start and finish to not be the same location
      *
-     * @param start the starting point of the vector
+     * @param start  the starting point of the vector
      * @param finish the ending point of the vector
      */
     public Direction(MapLocation start, MapLocation finish) {
@@ -54,7 +54,7 @@ public final class Direction {
      *
      * @return Direction instance facing east
      */
-    public static Direction getEast(){
+    public static Direction getEast() {
         return new Direction(1, 0);
     }
 
@@ -63,7 +63,7 @@ public final class Direction {
      *
      * @return Direction instance facing north
      */
-    public static Direction getNorth(){
+    public static Direction getNorth() {
         return new Direction(0, 1);
     }
 
@@ -72,7 +72,7 @@ public final class Direction {
      *
      * @return Direction instance facing west
      */
-    public static Direction getWest(){
+    public static Direction getWest() {
         return new Direction(-1, 0);
     }
 
@@ -81,7 +81,7 @@ public final class Direction {
      *
      * @return Direction instance facing south
      */
-    public static Direction getSouth(){
+    public static Direction getSouth() {
         return new Direction(0, -1);
     }
 
@@ -92,8 +92,8 @@ public final class Direction {
      * @param travelDist the total distance to travel
      * @return the signed distance traveled on the x-axis
      */
-    public float getDeltaX(float travelDist){
-        return (float)(travelDist * Math.cos(this.radians));
+    public float getDeltaX(float travelDist) {
+        return (float) (travelDist * Math.cos(this.radians));
     }
 
     /**
@@ -103,15 +103,14 @@ public final class Direction {
      * @param travelDist the total distance to travel
      * @return the signed distance traveled on the x-axis
      */
-    public float getDeltaY(float travelDist){
-        return (float)(travelDist * Math.sin(this.radians));
+    public float getDeltaY(float travelDist) {
+        return (float) (travelDist * Math.sin(this.radians));
     }
 
     /**
      * Computes the angle in degrees at which this direction faces
      *
      * @return the angle in degrees this direction faces
-     *
      * @battlecode.doc.costlymethod
      */
     public float getAngleDegrees() {
@@ -122,7 +121,6 @@ public final class Direction {
      * Computes the direction opposite this one.
      *
      * @return the direction pointing in the opposite direction
-     *
      * @battlecode.doc.costlymethod
      */
     public Direction opposite() {
@@ -132,10 +130,9 @@ public final class Direction {
     /**
      * Computes the direction angleDegrees to the left (counter-clockwise)
      * of this one.
-     * 
+     *
      * @param angleDegrees number of degrees to rotate.
      * @return the direction angleDegrees degrees left of this one.
-     * 
      * @battlecode.doc.costlymethod
      */
     public Direction rotateLeftDegrees(float angleDegrees) {
@@ -145,36 +142,33 @@ public final class Direction {
     /**
      * Computes the direction angleDegrees to the right (clockwise) of this
      * one.
-     * 
+     *
      * @param angleDegrees number of degrees to rotate.
      * @return the direction angleDegrees right of this one.
-     *
      * @battlecode.doc.costlymethod
      */
     public Direction rotateRightDegrees(float angleDegrees) {
         return rotateRightRads((float) Math.toRadians(angleDegrees));
     }
-    
+
     /**
      * Computes the direction angleRads (radians) to the left (counter-clockwise)
      * of this one.
-     * 
+     *
      * @param angleRads number of radians to rotate.
      * @return the direction angleRads left of this one.
-     *
      * @battlecode.doc.costlymethod
      */
     public Direction rotateLeftRads(float angleRads) {
         return new Direction(this.radians + angleRads);
     }
-    
+
     /**
      * Computes the direction angleRads (radians) to the right (clockwise) of
      * this one.
-     * 
+     *
      * @param angleRads number of radians to rotate.
      * @return the direction angleRads right of this one.
-     *
      * @battlecode.doc.costlymethod
      */
     public Direction rotateRightRads(float angleRads) {
@@ -189,10 +183,10 @@ public final class Direction {
      * @return the angle in radians between this direction and the given direction
      * in the range of [0, Math.PI]
      */
-    public float radiansBetween(Direction other){
+    public float radiansBetween(Direction other) {
         float radiansBetween = this.radians - other.radians;
         radiansBetween = radiansBetween % (2 * (float) Math.PI);
-        if(radiansBetween > Math.PI){
+        if (radiansBetween > Math.PI) {
             radiansBetween = (2 * (float) Math.PI) - radiansBetween;
         }
         return radiansBetween;
@@ -206,7 +200,7 @@ public final class Direction {
      * @return the angle in degrees between this direction and the given direction
      * in the range of [0, 180]
      */
-    public float degreesBetween(Direction other){
+    public float degreesBetween(Direction other) {
         return (float) Math.toDegrees(radiansBetween(other));
     }
 
@@ -216,7 +210,7 @@ public final class Direction {
 
     @Override
     public String toString() {
-        return  "Direction: " +
+        return "Direction: " +
                 "radians=" + radians +
                 ", degrees=" + Math.toDegrees(radians);
     }

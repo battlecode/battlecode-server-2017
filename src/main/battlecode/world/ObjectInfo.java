@@ -29,7 +29,7 @@ public class ObjectInfo {
     private int[] robotCount = new int[3];
     private int[] treeCount = new int[3];
 
-    public ObjectInfo(GameMap gm){
+    public ObjectInfo(LiveMap gm){
         this.mapWidth = gm.getWidth();
         this.mapHeight = gm.getHeight();
         this.mapTopLeft = gm.getOrigin();
@@ -41,6 +41,14 @@ public class ObjectInfo {
         this.treeLocations = new Set[(int) mapHeight][(int) mapWidth];
         this.robotLocations = new Set[(int) mapHeight][(int) mapWidth];
         this.bulletLocations = new Set[(int) mapHeight][(int) mapWidth];
+
+        for(int i = 0; i < (int) mapHeight; i++){
+            for(int j = 0; j < (int) mapWidth; j++){
+                this.treeLocations[i][j] = new HashSet<>();
+                this.robotLocations[i][j] = new HashSet<>();
+                this.bulletLocations[i][j] = new HashSet<>();
+            }
+        }
 
         robotTypeCount.put(Team.A, new EnumMap<>(
                 RobotType.class));
@@ -286,6 +294,19 @@ public class ObjectInfo {
     public boolean isEmpty(MapLocation loc, float radius){
         return getAllTreesWithinRadius(loc, radius).length == 0 &&
                 getAllRobotsWithinRadius(loc, radius).length == 0;
+    }
+
+    public boolean isEmptyExceptForRobot(MapLocation loc, float radius, InternalRobot robot){
+        if (getAllTreesWithinRadius(loc, radius).length != 0)
+            return false;
+        InternalRobot[] robots = getAllRobotsWithinRadius(loc, radius);
+        if (robots.length == 0) {
+            return true;
+        } else if (robots.length == 1) {
+            return robot.equals(robots[0]);
+        } else {
+            return false;
+        }
     }
 
     // ****************************

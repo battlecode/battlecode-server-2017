@@ -59,6 +59,11 @@ public class TreeInfo implements BodyInfo{
     }
 
     @Override
+    public int getID() {
+        return this.ID;
+    }
+
+    @Override
     public MapLocation getLocation() {
         return this.location;
     }
@@ -83,11 +88,35 @@ public class TreeInfo implements BodyInfo{
         return false;
     }
 
-    public int hashCode() {
-        return ID;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TreeInfo treeInfo = (TreeInfo) o;
+
+        if (ID != treeInfo.ID) return false;
+        if (Float.compare(treeInfo.radius, radius) != 0) return false;
+        if (Float.compare(treeInfo.health, health) != 0) return false;
+        if (containedBullets != treeInfo.containedBullets) return false;
+        if (team != treeInfo.team) return false;
+        if (!location.equals(treeInfo.location)) return false;
+        return containedRobot == treeInfo.containedRobot;
+
     }
 
     @Override
+    public int hashCode() {
+        int result = ID;
+        result = 31 * result + team.hashCode();
+        result = 31 * result + (radius != +0.0f ? Float.floatToIntBits(radius) : 0);
+        result = 31 * result + location.hashCode();
+        result = 31 * result + (health != +0.0f ? Float.floatToIntBits(health) : 0);
+        result = 31 * result + containedBullets;
+        result = 31 * result + containedRobot.hashCode();
+        return result;
+    }
+
     public String toString() {
         return "TreeInfo{" +
                 "ID=" + ID +

@@ -4,7 +4,6 @@ import battlecode.common.GameConstants;
 import battlecode.common.Team;
 import battlecode.world.*;
 import battlecode.world.control.*;
-import com.google.flatbuffers.FlatBufferBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -134,6 +133,7 @@ public class Server implements Runnable {
         // Running it multiple times may break things.
         while (true) {
             final GameInfo currentGame;
+            debug("Awaiting match");
             try {
                 currentGame = gameQueue.take();
             } catch (InterruptedException e) {
@@ -218,7 +218,7 @@ public class Server implements Runnable {
         final String mapName = currentGame.getMaps()[matchIndex];
 
         // Load the map for the match
-        final GameMap loadedMap;
+        final LiveMap loadedMap;
         try {
             loadedMap = GameMapIO.loadMap(mapName, new File(options.get("bc.game.map-path")), teamMapping);
             debug("running map " + loadedMap);
@@ -246,7 +246,6 @@ public class Server implements Runnable {
             this.runUntil = Integer.MAX_VALUE;
         }
 
-
         // Print an
         long startTime = System.currentTimeMillis();
         say("-------------------- Match Starting --------------------");
@@ -269,7 +268,6 @@ public class Server implements Runnable {
             switch (this.state) {
 
                 case RUNNING:
-
                     if (currentWorld.getCurrentRound() + 1 == runUntil) {
                         Thread.sleep(25);
                         break;
@@ -342,7 +340,6 @@ public class Server implements Runnable {
                 Team.NEUTRAL,
                 new NullControlProvider()
         );
-
         return teamProvider;
     }
 
