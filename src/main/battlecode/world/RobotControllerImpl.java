@@ -927,16 +927,16 @@ public final class RobotControllerImpl implements RobotController {
             throw new GameActionException(CANT_DO_THAT,
                     "Can't build desired robot in given direction, possibly due to " +
                             "insufficient bullet supply, this robot can't build, " +
-                            "or the spawn location is occupied");
+                            "cooldown not expired, or the spawn location is occupied");
         }
     }
 
     private void assertCanBuildTree(Direction dir) throws GameActionException{
-        if(!canBuildTree(dir)){
+        if(!canPlantBulletTree(dir)){
             throw new GameActionException(CANT_DO_THAT,
                     "Can't build a bullet tree in given direction, possibly due to " +
                             "insufficient bullet supply, this robot can't build, " +
-                            "or the spawn location is occupied");
+                            "cooldown not expired, or the spawn location is occupied");
         }
     }
 
@@ -966,11 +966,12 @@ public final class RobotControllerImpl implements RobotController {
         MapLocation spawnLoc = getLocation().add(dir, spawnDist);
         boolean isClear = gameWorld.getGameMap().onTheMap(spawnLoc, type.bodyRadius) &&
                 gameWorld.getObjectInfo().isEmpty(spawnLoc, type.bodyRadius);
-        return hasBuildRequirements && isClear;
+        boolean cooldownExpired = isBuildReady();
+        return hasBuildRequirements && isClear && cooldownExpired;
     }
 
     @Override
-    public boolean canBuildTree(Direction dir) {
+    public boolean canPlantBulletTree(Direction dir) {
         assertNotNull(dir);
         boolean hasBuildRequirements = hasTreeBuildRequirements();
         float spawnDist = getType().bodyRadius +
@@ -980,13 +981,18 @@ public final class RobotControllerImpl implements RobotController {
         boolean isClear =
                 gameWorld.getGameMap().onTheMap(spawnLoc, GameConstants.BULLET_TREE_RADIUS) &&
                 gameWorld.getObjectInfo().isEmpty(spawnLoc, GameConstants.BULLET_TREE_RADIUS);
-        return hasBuildRequirements && isClear;
+        boolean cooldownExpired = isBuildReady();
+        return hasBuildRequirements && isClear && cooldownExpired;
+    }
+    
+    @Override
+    public boolean canHireGardener(Direction dir) {
+        return canBuildRobot(RobotType.GARDENER,dir);
     }
 
     @Override
     public void hireGardener(Direction dir) throws GameActionException {
         assertNotNull(dir);
-        assertIsBuildReady();
         assertCanBuildRobot(RobotType.GARDENER, dir);
 
         this.robot.setBuildCooldownTurns(RobotType.GARDENER.buildCooldownTurns);
@@ -1004,9 +1010,8 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     @Override
-    public void plantRobot(RobotType type, Direction dir) throws GameActionException {
+    public void buildRobot(RobotType type, Direction dir) throws GameActionException {
         assertNotNull(dir);
-        assertIsBuildReady();
         assertCanBuildRobot(type, dir);
 
         this.robot.setBuildCooldownTurns(type.buildCooldownTurns);

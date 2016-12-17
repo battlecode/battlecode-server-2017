@@ -940,10 +940,9 @@ public interface RobotController {
 
     /**
      * Returns whether the robot can build a robot of the given type in the
-     * given direction, without checking build cooldown. Checks dependencies,
+     * given direction. Checks dependencies, cooldown turns remaining,
      * bullet costs, whether the robot can build, and that the given direction is
-     * not blocked. Does not check if a robot has sufficiently low coreDelay or
-     * not.
+     * not blocked.
      *
      * @param dir the direction to build in.
      * @param type the robot type to build.
@@ -955,11 +954,10 @@ public interface RobotController {
     boolean canBuildRobot(RobotType type, Direction dir);
 
     /**
-     * Returns whether the robot can build a bullet tree in the given direction,
-     * without taking delays into account. Checks dependencies, bullet costs,
+     * Returns whether the robot can build a bullet tree in the given direction.
+     * Checks dependencies, cooldown turns remaining, bullet costs,
      * whether the robot can build, and that the given direction is
-     * not blocked. Does not check if a robot has sufficiently low coreDelay or
-     * not.
+     * not blocked.
      *
      * @param dir the direction to build in.
      * @return whether it is possible to build a bullet tree in the
@@ -967,8 +965,19 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    boolean canBuildTree(Direction dir);
+    boolean canPlantBulletTree(Direction dir);
 
+    /**
+     * Returns whether the robot can hire a gardener in the given direction.
+     * Checks dependencies, cooldown turns remaining, bullet costs,
+     * whether the robot can build, and that the given direction is
+     * not blocked.
+     * 
+     * @param dir the direction to build in.
+     * @return whether it is possible to hire a gardener in the given direction.
+     */
+    boolean canHireGardener(Direction dir);
+    
     /**
      * Hires a Gardener in the given direction. This is a core action.
      *
@@ -983,7 +992,6 @@ public interface RobotController {
 
     /**
      * Plants/Builds a robot of the given type in the given direction.
-     * This is a core action.
      *
      * @param dir the direction to spawn the unit.
      * @param type the type of robot to build
@@ -993,7 +1001,7 @@ public interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    void plantRobot(RobotType type, Direction dir) throws GameActionException;
+    void buildRobot(RobotType type, Direction dir) throws GameActionException;
 
     /**
      * Plants a bullet tree in the given direction. This is a core action.
