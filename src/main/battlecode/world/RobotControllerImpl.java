@@ -927,7 +927,7 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     private void assertCanBuildTree(Direction dir) throws GameActionException{
-        if(!canBuildTree(dir)){
+        if(!canPlantBulletTree(dir)){
             throw new GameActionException(CANT_DO_THAT,
                     "Can't build a bullet tree in given direction, possibly due to " +
                             "insufficient bullet supply, this robot can't build, " +
@@ -966,7 +966,7 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     @Override
-    public boolean canBuildTree(Direction dir) {
+    public boolean canPlantBulletTree(Direction dir) {
         assertNotNull(dir);
         boolean hasBuildRequirements = hasTreeBuildRequirements();
         float spawnDist = getType().bodyRadius +
@@ -978,6 +978,11 @@ public final class RobotControllerImpl implements RobotController {
                 gameWorld.getObjectInfo().isEmpty(spawnLoc, GameConstants.BULLET_TREE_RADIUS);
         boolean cooldownExpired = isBuildReady();
         return hasBuildRequirements && isClear && cooldownExpired;
+    }
+    
+    @Override
+    public boolean canHireGardener(Direction dir) {
+        return canBuildRobot(RobotType.GARDENER,dir);
     }
 
     @Override
@@ -1000,7 +1005,7 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     @Override
-    public void plantRobot(RobotType type, Direction dir) throws GameActionException {
+    public void buildRobot(RobotType type, Direction dir) throws GameActionException {
         assertNotNull(dir);
         assertCanBuildRobot(type, dir);
 
