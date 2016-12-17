@@ -91,11 +91,39 @@ public class InternalBullet {
     // ******************************************
 
     public void setLocation(MapLocation newLoc){
+        this.gameWorld.getObjectInfo().moveBullet(this, newLoc);
         this.location = newLoc;
     }
 
+    public void updateBullet() {
+        MapLocation bulletStart = this.getLocation();
+        MapLocation bulletFinish = bulletStart.add(this.getDirection(), this.getSpeed());
+
+        // THIS DOES NOT FOLLOW THE SPEC
+        // but it works
+
+        InternalRobot hitRobot = gameWorld.getObjectInfo().getRobotAtLocation(bulletFinish);
+        if (hitRobot != null) {
+            gameWorld.destroyBullet(this.ID);
+            hitRobot.damageRobot(this.damage);
+            return;
+        }
+
+        InternalTree hitTree = gameWorld.getObjectInfo().getTreeAtLocation(bulletFinish);
+        if (hitTree != null) {
+            gameWorld.destroyBullet(this.ID);
+            hitTree.damageTree(this.damage, this.team);
+            return;
+        }
+
+        if (gameMap.onTheMap(bulletFinish)) {
+            gameWorld.destroyBullet(this.ID);
+        }
+
+    }
+
     //TODO: Simplify this somehow
-    public void updateBullet(){
+    /*public void updateBullet(){
         MapLocation bulletStart = this.getLocation();
         MapLocation bulletFinish = bulletStart.add(this.getDirection(), this.getSpeed());
         Direction toFinish = bulletStart.directionTo(bulletFinish);
@@ -130,12 +158,17 @@ public class InternalBullet {
         }
 
         //Check if ends off map
-        float mapEdjeDist = calcBoundaryDist(bulletStart, bulletFinish);
+        float mapEdgeDist = calcBoundaryDist(bulletStart, bulletFinish);
 
+        if (hitRobot != null) {
+
+        } else if (hitTree != null) {
+
+        } else if ()
         //Update GameWorld when tree or robot not hit
         if(hitTree == null && hitRobot == null){
-            if(mapEdjeDist >= 0){
-                setLocation(bulletStart.add(toFinish, mapEdjeDist));
+            if(mapEdgeDist >= 0){
+                setLocation(bulletStart.add(toFinish, mapEdgeDist));
                 gameWorld.destroyBullet(this.ID);
             }else{
                 setLocation(bulletStart.add(toFinish, this.speed));
@@ -152,13 +185,13 @@ public class InternalBullet {
                 hitRobot.damageRobot(this.damage);
             }
         }
-    }
+    }*/
 
     // ******************************************
     // ****** CALCULATIONS **********************
     // ******************************************
 
-    private float calcHitDist(MapLocation bulletStart, MapLocation bulletFinish,
+    /*private float calcHitDist(MapLocation bulletStart, MapLocation bulletFinish,
                               MapLocation targetCenter, float targetRadius){
         final float minDist = 0;
         final float maxDist = bulletStart.distanceTo(bulletFinish);
@@ -190,9 +223,9 @@ public class InternalBullet {
             return -1;
         }
         return hitDist;
-    }
+    }*/
 
-    private float calcBoundaryDist(MapLocation bulletStart, MapLocation bulletFinish){
+    /*private float calcBoundaryDist(MapLocation bulletStart, MapLocation bulletFinish){
         float distTotal = bulletStart.distanceTo(bulletFinish);
         float distToLeft  = gameWorld.getGameMap().getOrigin().x - bulletFinish.x;
         float distToRight = bulletFinish.x -
@@ -247,7 +280,7 @@ public class InternalBullet {
             }
         }
         return distCollide;
-    }
+    }*/
 
     // *********************************
     // ****** MISC. METHODS ************

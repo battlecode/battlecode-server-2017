@@ -230,7 +230,6 @@ public class Server implements Runnable {
         // Create the game world!
         currentWorld = new GameWorld(loadedMap, prov, teamMapping, teamMemory, gameMaker.getBuilder());
 
-
         // Get started
         if (interactive) {
             // TODO necessary?
@@ -262,7 +261,7 @@ public class Server implements Runnable {
         // If there are more rounds to be run, run them and
         // and send the round (and optionally stats) bytes to
         // recipients.
-        while (currentWorld.isRunning()) {
+        while (this.state != State.FINISHED) {
 
             // If not paused/stopped:
             switch (this.state) {
@@ -303,8 +302,6 @@ public class Server implements Runnable {
 
         double timeDiff = (System.currentTimeMillis() - startTime) / 1000.0;
         debug(String.format("match completed in %.4g seconds", timeDiff));
-
-        this.state = State.FINISHED;
 
         // Add match info to game info for flatbuffer
         gameMaker.addMatchInfo(currentWorld.getMatchMaker().getEvents());

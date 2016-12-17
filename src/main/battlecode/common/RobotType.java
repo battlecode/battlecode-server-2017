@@ -180,8 +180,4 @@ public enum RobotType {
         this.strideRadius       = strideRadius;
         this.bytecodeLimit      = bytecodeLimit;
     }
-
-    public float getStrideRadius(){
-        return 2*bodyRadius;
-    }
 }

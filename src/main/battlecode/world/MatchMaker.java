@@ -144,7 +144,7 @@ public class MatchMaker {
         int[] healthChangedIDs = ArrayUtils.toPrimitive(this.healthChangedIDs.toArray(new Integer[this.healthChangedIDs.size()]));
         float[] healthChangedLevels = ArrayUtils.toPrimitive(this.healthChangedLevels.toArray(new Float[this.healthChangedLevels.size()]));
         int[] diedIDs = ArrayUtils.toPrimitive(this.diedIDs.toArray(new Integer[this.diedIDs.size()]));
-        int[] diedBulletIDs = ArrayUtils.toPrimitive(this.diedIDs.toArray(new Integer[this.diedBulletIDs.size()]));
+        int[] diedBulletIDs = ArrayUtils.toPrimitive(this.diedBulletIDs.toArray(new Integer[this.diedBulletIDs.size()]));
         int[] actionIDs = ArrayUtils.toPrimitive(this.actionIDs.toArray(new Integer[this.actionIDs.size()]));
         byte[] actions = ArrayUtils.toPrimitive(this.actions.toArray(new Byte[this.actions.size()]));
         int[] actionTargets = ArrayUtils.toPrimitive(this.actionTargets.toArray(new Integer[this.actionTargets.size()]));
