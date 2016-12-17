@@ -7,7 +7,7 @@ package battlecode.common;
  * controls the newly created robot.
  */
 @SuppressWarnings("unused")
-public interface RobotController {
+public strictfp interface RobotController {
 
     // *********************************
     // ****** GLOBAL QUERY METHODS *****

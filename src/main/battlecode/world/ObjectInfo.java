@@ -11,7 +11,7 @@ import java.util.*;
  * This class is used to hold information about the robots, trees, and bullets
  * in the game world.
  */
-public class ObjectInfo {
+public strictfp class ObjectInfo {
     private final float mapWidth;
     private final float mapHeight;
     private final MapLocation mapTopLeft;

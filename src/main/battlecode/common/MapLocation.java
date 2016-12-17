@@ -8,7 +8,7 @@ import java.io.Serializable;
  * This class is an immutable representation of two-dimensional coordinates
  * in the battlecode world.
  */
-public final class MapLocation implements Serializable, Comparable<MapLocation> {
+public final strictfp class MapLocation implements Serializable, Comparable<MapLocation> {
 
     private static final long serialVersionUID = -8945913587066072824L;
     /**
