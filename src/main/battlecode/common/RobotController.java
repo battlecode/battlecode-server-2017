@@ -929,7 +929,7 @@ public interface RobotController {
 
     /**
      * Returns whether the robot can build a robot of the given type in the
-     * given direction, without checking build cooldown. Checks dependencies,
+     * given direction. Checks dependencies, cooldown turns remaining,
      * bullet costs, whether the robot can build, and that the given direction is
      * not blocked. Does not check if a robot has sufficiently low coreDelay or
      * not.
@@ -944,8 +944,8 @@ public interface RobotController {
     boolean canBuildRobot(RobotType type, Direction dir);
 
     /**
-     * Returns whether the robot can build a bullet tree in the given direction,
-     * without taking delays into account. Checks dependencies, bullet costs,
+     * Returns whether the robot can build a bullet tree in the given direction.
+     * Checks dependencies, cooldown turns remaining, bullet costs,
      * whether the robot can build, and that the given direction is
      * not blocked. Does not check if a robot has sufficiently low coreDelay or
      * not.
