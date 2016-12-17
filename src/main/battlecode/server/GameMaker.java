@@ -74,7 +74,7 @@ public class GameMaker {
         GameHeader.addTeams(builder, teamsOffset);
         GameHeader.addBodyTypeMetadata(builder, bodyTypeMetadataOffset);
         int gameHeaderOffset = GameHeader.endGameHeader(builder);
-        events.add(gameHeaderOffset);
+        events.add(EventWrapper.createEventWrapper(builder, Event.GameHeader, gameHeaderOffset));
     }
 
     public int makeBodyTypeMetadata(){
@@ -125,7 +125,7 @@ public class GameMaker {
 
     // Called at end of run while loop
     public void makeGameFooter(byte winner){
-        events.add(GameFooter.createGameFooter(builder, winner));
+        events.add(EventWrapper.createEventWrapper(builder, Event.GameFooter, GameFooter.createGameFooter(builder, winner)));
     }
 
     // **********************************
@@ -165,8 +165,7 @@ public class GameMaker {
 
         assert(isGameFinished);
         builder.finish(finalGameWrapper);
-        ByteBuffer bb = builder.dataBuffer();
-        byte[] byteData = bb.array();
+        byte[] byteData = builder.sizedByteArray();
         try {
             FileUtils.writeByteArrayToFile(saveFile, byteData);
         } catch (IOException e) {

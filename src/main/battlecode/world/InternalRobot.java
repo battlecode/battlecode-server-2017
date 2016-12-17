@@ -176,6 +176,7 @@ public class InternalRobot {
     // ******************************************
 
     public void setLocation(MapLocation loc){
+        this.gameWorld.getObjectInfo().moveRobot(this, loc);
         this.location = loc;
     }
 
@@ -203,28 +204,17 @@ public class InternalRobot {
         this.buildCooldownTurns = newTurns;
     }
 
-    private void keepMinHealth(){
-        if(health < 0){
-            this.health = 0;
-        }
-    }
-
-    private void keepMaxHealth(){
+    public void repairRobot(float healAmount){
+        this.health = Math.min(this.health + healAmount, this.type.maxHealth);
         if(health > this.type.maxHealth){
             this.health = this.type.maxHealth;
         }
-    }
-
-    public void repairRobot(float healAmount){
-        this.health += healAmount;
         this.healthChanged = true;
-        keepMaxHealth();
     }
 
     public void damageRobot(float damage){
-        this.health -= damage;
+        this.health = Math.max(this.health - damage, 0);
         this.healthChanged = true;
-        keepMinHealth();
         killRobotIfDead();
     }
 

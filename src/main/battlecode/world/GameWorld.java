@@ -113,6 +113,7 @@ public class GameWorld{
 
         } catch (Exception e) {
             ErrorReporter.report(e);
+            // TODO throw out file?
             return GameState.DONE;
         }
         // Write out round data

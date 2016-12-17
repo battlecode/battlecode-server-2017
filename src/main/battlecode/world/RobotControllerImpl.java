@@ -530,15 +530,14 @@ public final class RobotControllerImpl implements RobotController {
 
     @Override
     public boolean canMove(Direction dir) {
-        return canMove(dir, 1);
+        return canMove(dir, getType().strideRadius);
     }
 
     @Override
-    public boolean canMove(Direction dir, float scale) {
+    public boolean canMove(Direction dir, float dist) {
         assertNotNull(dir);
-        scale = scale < 0 ? 0 : scale;
-        scale = scale > 1 ? 1 : scale;
-        MapLocation center = getLocation().add(dir, scale * getType().strideRadius);
+        dist = Math.max(0, Math.min(dist, getType().strideRadius));
+        MapLocation center = getLocation().add(dir, dist);
         return gameWorld.getGameMap().onTheMap(center, getType().bodyRadius) &&
             gameWorld.getObjectInfo().isEmptyExceptForRobot(center, getType().bodyRadius, robot);
     }
@@ -547,7 +546,7 @@ public final class RobotControllerImpl implements RobotController {
     public boolean canMove(MapLocation center) {
         assertNotNull(center);
         float dist = getLocation().distanceTo(center);
-        if(dist > getType().strideRadius) { // Rescale if target location is too far
+        if(dist > getType().strideRadius) {
             Direction dir = getLocation().directionTo(center);
             center = getLocation().add(dir, getType().strideRadius);
         }
@@ -557,16 +556,15 @@ public final class RobotControllerImpl implements RobotController {
 
     @Override
     public void move(Direction dir) throws GameActionException {
-        move(dir, 1);
+        move(dir, getType().strideRadius);
     }
 
     @Override
-    public void move(Direction dir, float scale) throws GameActionException {
+    public void move(Direction dir, float dist) throws GameActionException {
         assertNotNull(dir);
         assertMoveReady();
-        scale = scale < 0 ? 0 : scale;
-        scale = scale > 1 ? 1 : scale;
-        MapLocation center = getLocation().add(dir, scale * (2*getType().bodyRadius));
+        dist = Math.max(0, Math.min(dist, getType().strideRadius));
+        MapLocation center = getLocation().add(dir, dist);
         assertIsPathable(center);
 
         this.robot.incrementMoveCount();

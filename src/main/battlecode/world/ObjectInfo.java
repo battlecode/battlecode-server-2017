@@ -118,6 +118,33 @@ public class ObjectInfo {
         return gameBulletsByID.values().toArray(new InternalBullet[gameBulletsByID.size()]);
     }
 
+    public void moveBullet(InternalBullet bullet, MapLocation newLocation) {
+        MapLocation loc = bullet.getLocation();
+        int xIndex = convertToXIndex(loc.x);
+        int yIndex = convertToYIndex(loc.y);
+
+        bulletLocations[yIndex][xIndex].remove(bullet.getID());
+
+        int newXIndex = convertToXIndex(newLocation.x);
+        int newYIndex = convertToYIndex(newLocation.y);
+
+        bulletLocations[newYIndex][newXIndex].add(bullet.getID());
+    }
+
+    public void moveRobot(InternalRobot robot, MapLocation newLocation) {
+        MapLocation loc = robot.getLocation();
+        int xIndex = convertToXIndex(loc.x);
+        int yIndex = convertToYIndex(loc.y);
+
+        robotLocations[yIndex][xIndex].remove(robot.getID());
+
+        int newXIndex = convertToXIndex(newLocation.x);
+        int newYIndex = convertToYIndex(newLocation.y);
+
+        robotLocations[newYIndex][newXIndex].add(robot.getID());
+
+    }
+
     // ****************************
     // *** ADDING OBJECTS *********
     // ****************************
@@ -152,6 +179,7 @@ public class ObjectInfo {
         gameBulletsByID.put(id, bullet);
 
         MapLocation loc = bullet.getLocation();
+
         int xIndex = convertToXIndex(loc.x);
         int yIndex = convertToYIndex(loc.y);
         bulletLocations[yIndex][xIndex].add(id);
@@ -203,10 +231,12 @@ public class ObjectInfo {
     }
 
     public void destroyBullet(int id){
-        MapLocation loc = getBulletByID(id).getLocation();
+        InternalBullet b = getBulletByID(id);
+
+        MapLocation loc = b.getLocation();
+
         int xIndex = convertToXIndex(loc.x);
         int yIndex = convertToYIndex(loc.y);
-
         gameBulletsByID.remove(id);
         bulletLocations[yIndex][xIndex].remove(id);
     }
@@ -216,6 +246,11 @@ public class ObjectInfo {
     // ****************************
 
     public InternalTree[] getAllTreesWithinRadius(MapLocation center, float radius){
+        if (radius <= 0) {
+            return new InternalTree[] { getTreeAtLocation(center) };
+        }
+        radius = (float) Math.ceil(radius);
+
         ArrayList<InternalTree> trees = new ArrayList<>();
         int minXPos = convertToXIndex(center.x - radius - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
         int maxXPos = convertToXIndex(center.x + radius + GameConstants.NEUTRAL_TREE_MAX_RADIUS);
@@ -238,6 +273,11 @@ public class ObjectInfo {
     }
     
     public InternalRobot[] getAllRobotsWithinRadius(MapLocation center, float radius){
+        if (radius <= 0) {
+            return new InternalRobot[] { getRobotAtLocation(center) };
+        }
+        radius = (float) Math.ceil(radius);
+
         ArrayList<InternalRobot> robots = new ArrayList<>();
         int minXPos = convertToXIndex(center.x - radius - GameConstants.MAX_ROBOT_RADIUS);
         int maxXPos = convertToXIndex(center.x + radius + GameConstants.MAX_ROBOT_RADIUS);
@@ -249,6 +289,9 @@ public class ObjectInfo {
                 if(inBounds(x, y)){
                     for(int robotID : robotLocations[y][x]){
                         InternalRobot robot = getRobotByID(robotID);
+                        if (robot == null) {
+                            throw new RuntimeException("NULL ROBOT: "+robotID);
+                        }
                         if(center.isWithinDistance(robot.getLocation(), radius)){
                             robots.add(robot);
                         }
@@ -260,6 +303,11 @@ public class ObjectInfo {
     }
     
     public InternalBullet[] getAllBulletsWithinRadius(MapLocation center, float radius){
+        if (radius <= 0) {
+            return new InternalBullet[0];
+        }
+        radius = (float) Math.ceil(radius);
+
         ArrayList<InternalBullet> bullets = new ArrayList<>();
         int minXPos = convertToXIndex(center.x - radius);
         int maxXPos = convertToXIndex(center.x + radius);
@@ -282,13 +330,34 @@ public class ObjectInfo {
     }
     
     public InternalTree getTreeAtLocation(MapLocation loc){
-        InternalTree[] trees = getAllTreesWithinRadius(loc, 0);
-        return trees.length == 0 ? null : trees[0];
+        int xIndex = convertToXIndex(loc.x);
+        int yIndex = convertToYIndex(loc.y);
+        if (!inBounds(xIndex, yIndex)) return null;
+
+        for (int treeID : treeLocations[yIndex][xIndex]) {
+            InternalTree tree = gameTreesByID.get(treeID);
+            if (tree.getLocation().isWithinDistance(loc, tree.getRadius())) {
+                return tree;
+            }
+        }
+        return null;
     }
 
     public InternalRobot getRobotAtLocation(MapLocation loc){
-        InternalRobot[] robots = getAllRobotsWithinRadius(loc, 0);
-        return robots.length == 0 ? null : robots[0];
+        int xIndex = convertToXIndex(loc.x);
+        int yIndex = convertToYIndex(loc.y);
+        if (!inBounds(xIndex, yIndex)) return null;
+
+        for (int robotID : robotLocations[yIndex][xIndex]) {
+            InternalRobot robot = gameRobotsByID.get(robotID);
+            if (robot == null) {
+                throw new RuntimeException("NULL ROBOT: "+robotID+" in "+robotLocations[yIndex][xIndex]);
+            }
+            if (robot.getLocation().isWithinDistance(loc, robot.getType().bodyRadius)) {
+                return robot;
+            }
+        }
+        return null;
     }
 
     public boolean isEmpty(MapLocation loc, float radius){

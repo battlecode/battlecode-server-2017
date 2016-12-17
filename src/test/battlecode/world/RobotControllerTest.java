@@ -40,20 +40,23 @@ public class RobotControllerTest {
                 .B);
         InternalRobot archonABot = game.getBot(archonA);
 
-        assertEquals(archonABot.getLocation(), new MapLocation(oX + 3, oY + 3));
+        assertEquals(new MapLocation(oX + 3, oY + 3), archonABot.getLocation());
 
         // The following specifies the code to be executed in the next round.
         // Bytecodes are not counted, and yields are automatic at the end.
         game.round((id, rc) -> {
             if (id == archonA) {
-                rc.move(Direction.getEast(), 0.5F);
+                rc.move(Direction.getEast());
             } else if (id == soldierB) {
                 // do nothing
             }
         });
 
         // Let's assert that things happened properly.
-        assertEquals(archonABot.getLocation(), new MapLocation(oX + 5, oY + 3));
+        assertEquals(new MapLocation(
+                oX + 3 + RobotType.ARCHON.strideRadius,
+                oY + 3
+        ), archonABot.getLocation());
 
         // Lets wait for 10 rounds go by.
         game.waitRounds(10);
@@ -75,15 +78,49 @@ public class RobotControllerTest {
             if (id != a) return;
 
             final MapLocation start = rc.getLocation();
-            assertEquals(start, new MapLocation(1, 1));
+            assertEquals(new MapLocation(1, 1), start);
 
             rc.move(Direction.getEast());
 
             final MapLocation newLocation = rc.getLocation();
-            assertEquals(newLocation, new MapLocation(3, 1));
+            assertEquals(new MapLocation(1 + RobotType.SOLDIER.strideRadius, 1), newLocation);
         });
 
         // Let delays go away
         game.waitRounds(10);
+    }
+
+    @Test
+    public void testSpawns() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+            .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        // Let's spawn a robot for each team. The integers represent IDs.
+        final int archonA = game.spawn(3, 3, RobotType.ARCHON, Team.A);
+
+        // The following specifies the code to be executed in the next round.
+        // Bytecodes are not counted, and yields are automatic at the end.
+        game.round((id, rc) -> {
+            assertTrue("Can't build robot", rc.canBuildRobot(RobotType.GARDENER, Direction.getEast()));
+            rc.plantRobot(RobotType.GARDENER, Direction.getEast());
+        });
+
+        int[] ids = game.getWorld().getObjectInfo().getRobotIDs();
+
+        for (int id : ids) {
+            if (id != archonA) {
+                InternalRobot gardener = game.getBot(id);
+                assertEquals(RobotType.GARDENER, gardener.getType());
+            }
+        }
+
+        // Lets wait for 10 rounds go by.
+        game.waitRounds(10);
+
+        // hooray!
+
     }
 }
