@@ -105,7 +105,7 @@ public class RobotControllerTest {
         // Bytecodes are not counted, and yields are automatic at the end.
         game.round((id, rc) -> {
             assertTrue("Can't build robot", rc.canBuildRobot(RobotType.GARDENER, Direction.getEast()));
-            rc.plantRobot(RobotType.GARDENER, Direction.getEast());
+            rc.buildRobot(RobotType.GARDENER, Direction.getEast());
         });
 
         int[] ids = game.getWorld().getObjectInfo().getRobotIDs();
