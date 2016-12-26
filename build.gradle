@@ -62,8 +62,7 @@ dependencies {
 }
 
 javadoc {
-  source = sourceSets.main.java
-  include "**/common/**"
+  includes = ["**/common/**"]
   options.windowTitle = "Battlecode 2017"
   options.classpath = sourceSets.main.compileClasspath as List
   options.doclet = "com.sun.tools.doclets.standard.Standard"
