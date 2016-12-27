@@ -13,7 +13,7 @@ import java.util.*;
  * The primary implementation of the GameWorld interface for containing and
  * modifying the game map and the objects on it.
  */
-public class GameWorld{
+public strictfp class GameWorld{
     /**
      * The current round we're running.
      */

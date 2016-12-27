@@ -5,7 +5,7 @@ import battlecode.common.*;
 /**
  * The representation of a tree used by the server.
  */
-public class InternalTree {
+public strictfp class InternalTree {
     private final GameWorld gameWorld;
 
     private final int ID;

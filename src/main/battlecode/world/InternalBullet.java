@@ -5,7 +5,7 @@ import battlecode.common.*;
 /**
  * The representation of a bullet used by the server.
  */
-public class InternalBullet {
+public strictfp class InternalBullet {
     private final GameWorld gameWorld;
     private final LiveMap gameMap;
 
