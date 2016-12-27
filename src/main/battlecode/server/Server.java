@@ -388,16 +388,16 @@ public class Server implements Runnable {
                 sb.append("The winning team won by destruction.");
                 break;
             case PWNED:
-                sb.append("The winning team won on tiebreakers (more Archons remaining).");
+                sb.append("The winning team won on tiebreakers (more victory points).");
                 break;
             case OWNED:
-                sb.append("The winning team won on tiebreakers (more Archon health).");
+                sb.append("The winning team won on tiebreakers (more bullet trees).");
                 break;
             case BARELY_BEAT:
-                sb.append("The winning team won on tiebreakers (more Parts)");
+                sb.append("The winning team won on tiebreakers (more bullet supply, includings cost of active robots)");
                 break;
             case WON_BY_DUBIOUS_REASONS:
-                sb.append("The winning team won arbitrarily.");
+                sb.append("The winning team won arbitrarily (highest robot ID).");
                 break;
         }
 
