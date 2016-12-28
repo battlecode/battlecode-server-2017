@@ -1,6 +1,7 @@
 package battlecode.world;
 
 import battlecode.common.*;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -11,7 +12,7 @@ import static org.junit.Assert.*;
  * Using TestGame and TestMapBuilder as helpers.
  */
 public class RobotControllerTest {
-    public final double EPSILON = 1.0e-9;
+    public final double EPSILON = 1.0e-6;
 
     /**
      * Tests the most basic methods of RobotController. This test has extra
@@ -122,5 +123,75 @@ public class RobotControllerTest {
 
         // hooray!
 
+    }
+    
+    /**
+     * Checks attacks of bullets in various ways
+     * 
+     * @throws GameActionException
+     */
+    @Test
+    public void testBulletAttack() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+            .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+        
+        // Create some units
+        final int soldierA = game.spawn(5, 5, RobotType.SOLDIER, Team.A);
+        final int soldierA2 = game.spawn(8, 5, RobotType.SOLDIER, Team.A);
+        final int soldierB = game.spawn(2, 5, RobotType.SOLDIER, Team.B);
+        
+        // soldierA fires a shot at soldierA2
+        game.round((id, rc) -> {
+            if (id != soldierA) return;
+            RobotInfo[] nearbyRobots = rc.senseNearbyRobots(-1, Team.A);
+            assertEquals(nearbyRobots.length,1);
+            assertTrue(rc.canSingleShot());
+            rc.fireSingleShot(rc.getLocation().directionTo(nearbyRobots[0].location));
+            assertFalse(rc.canSingleShot());
+            
+            // Ensure bullet exists and spawns at proper location
+            int[] bulletIDs = game.getWorld().getObjectInfo().getBulletIDs();
+            assertEquals(bulletIDs.length,1);
+            InternalBullet bill = game.getBullet(bulletIDs[0]);
+            assertEquals(bill.getLocation().distanceTo(rc.getLocation()),rc.getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET, EPSILON);
+        });
+        
+        // soldierA fires a shot at soldierB
+        game.round((id, rc) -> {
+            if (id != soldierA) return;
+            
+            RobotInfo[] nearbyRobots = rc.senseNearbyRobots(-1, Team.B);
+            assertEquals(nearbyRobots.length,1);
+            assertTrue(rc.canSingleShot());
+            rc.fireSingleShot(rc.getLocation().directionTo(nearbyRobots[0].location));
+            assertFalse(rc.canSingleShot());
+            
+            // Ensure two bullets exist
+            int[] bulletIDs = game.getWorld().getObjectInfo().getBulletIDs();
+            assertEquals(bulletIDs.length,2);
+        });
+        
+        
+        
+    }
+    
+    /**
+     * Ensures tank body attack performs according to spec
+     * 
+     * @throws GameActionException
+     */
+    @Test
+    public void testBodyAttack() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+        .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+        
+        final int tankB = game.spawn(3, 5, RobotType.TANK, Team.B);
+        final int lumberjackA = game.spawn(5, 3, RobotType.LUMBERJACK, Team.A);
     }
 }

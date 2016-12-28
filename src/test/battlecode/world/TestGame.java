@@ -146,6 +146,16 @@ public class TestGame {
     public InternalRobot getBot(int id) {
         return world.getObjectInfo().getRobotByID(id);
     }
+    
+    /**
+     * Returns the InternalBullet associated with a given ID.
+     * 
+     * @param id the ID of the bullet to query
+     * @return the InternalBullet for the given ID
+     */
+    public InternalBullet getBullet(int id) {
+        return world.getObjectInfo().getBulletByID(id);
+    }
 
     /**
      * Returns the GameWorld.

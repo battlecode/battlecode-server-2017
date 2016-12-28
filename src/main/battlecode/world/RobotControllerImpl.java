@@ -679,21 +679,21 @@ public final class RobotControllerImpl implements RobotController {
     public boolean canSingleShot() {
         boolean correctType = getType() != RobotType.ARCHON && getType() != RobotType.GARDENER &&
                 getType() != RobotType.LUMBERJACK;
-        return correctType && haveBulletCosts(GameConstants.SINGLE_SHOT_COST);
+        return correctType && haveBulletCosts(GameConstants.SINGLE_SHOT_COST) && !hasAttacked();
     }
 
     @Override
     public boolean canTriadShot() {
         boolean correctType = getType() != RobotType.ARCHON && getType() != RobotType.GARDENER &&
                 getType() != RobotType.LUMBERJACK && getType() != RobotType.SCOUT;
-        return correctType && haveBulletCosts(GameConstants.TRIAD_SHOT_COST);
+        return correctType && haveBulletCosts(GameConstants.TRIAD_SHOT_COST) && !hasAttacked();
     }
 
     @Override
     public boolean canPentadShot() {
         boolean correctType = getType() != RobotType.ARCHON && getType() != RobotType.GARDENER &&
                 getType() != RobotType.LUMBERJACK && getType() != RobotType.SCOUT;
-        return correctType && haveBulletCosts(GameConstants.PENTAD_SHOT_COST);
+        return correctType && haveBulletCosts(GameConstants.PENTAD_SHOT_COST) && !hasAttacked();
     }
 
     @Override

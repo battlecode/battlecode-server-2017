@@ -677,7 +677,8 @@ public interface RobotController {
 
     /**
      * Tells whether there is enough bullets in your bullet supply to
-     * fire a single shot and if the robot is of an appropriate type.
+     * fire a single shot and if the robot is of an appropriate type and
+     * if the robot has not attacked in the current turn.
      *
      * @return true if there are enough bullets in the bullet supply and
      * this robot is of an appropriate type.
@@ -688,7 +689,8 @@ public interface RobotController {
 
     /**
      * Tells whether there is enough bullets in your bullet supply to
-     * fire a triad shot and if the robot is of an appropriate type.
+     * fire a triad shot and if the robot is of an appropriate type and
+     * if the robot has not attacked in the current turn.
      *
      * @return true if there are enough bullets in the bullet supply and
      * this robot is of an appropriate type.
@@ -699,7 +701,8 @@ public interface RobotController {
 
     /**
      * Tells whether there is enough bullets in your bullet supply to
-     * fire a pentad shot and if the robot is of an appropriate type.
+     * fire a pentad shot and if the robot is of an appropriate type and
+     * if the robot has not attacked in the current turn.
      *
      * @return true if there are enough bullets in the bullet supply and
      * this robot is of an appropriate type.
