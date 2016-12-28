@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
  * Using TestGame and TestMapBuilder as helpers.
  */
 public class RobotControllerTest {
-    public final double EPSILON = 1.0e-5;
+    public final double EPSILON = 1.0e-5; // Smaller epsilon requred, possibly due to strictfp? Used to be 1.0e-9
 
     /**
      * Tests the most basic methods of RobotController. This test has extra
@@ -188,19 +188,83 @@ public class RobotControllerTest {
     }
     
     /**
-     * Ensures tank body attack performs according to spec
+     * Ensures tank body attack (and bullet attack) perform according to spec
      * 
      * @throws GameActionException
      */
     @Test
-    public void testBodyAttack() throws GameActionException {
+    public void testTankAttack() throws GameActionException {
         LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
         .build();
 
         // This creates the actual game.
         TestGame game = new TestGame(map);
         
-        final int tankB = game.spawn(3, 5, RobotType.TANK, Team.B);
-        final int lumberjackA = game.spawn(5, 3, RobotType.LUMBERJACK, Team.A);
+        final int tankB = game.spawn(2, 5, RobotType.TANK, Team.B);
+        final int neutralTree = game.spawnTree(6, 5, 1, Team.NEUTRAL, 0, null);
+        game.waitRounds(20); // Wait for units to mature
+        
+        game.round((id, rc) -> {
+            if (id != tankB) return;
+            
+            TreeInfo[] nearbyTrees = rc.senseNearbyTrees(-1);
+            assertEquals(nearbyTrees.length,1);
+            assertTrue(rc.canSingleShot());
+            rc.fireSingleShot(rc.getLocation().directionTo(nearbyTrees[0].location));
+            assertFalse(rc.canSingleShot());
+        });
+        
+        // Let bullets propagate to targets
+        game.waitRounds(1);
+        
+        // Tree took bullet damage
+        assertEquals(game.getTree(neutralTree).getHealth(),GameConstants.NEUTRAL_TREE_HEALTH_RATE*1 - RobotType.TANK.attackPower,EPSILON);
+        
+        // Move tank toward tree
+        game.round((id, rc) -> {
+            if (id != tankB) return;
+            
+            TreeInfo[] nearbyTrees = rc.senseNearbyTrees(-1);
+            assertEquals(nearbyTrees.length,1);
+            MapLocation originalLoc = rc.getLocation();
+            assertFalse(rc.hasMoved());
+            rc.move(rc.getLocation().directionTo(nearbyTrees[0].location));
+            assertTrue(rc.hasMoved());
+            assertFalse(rc.getLocation().equals(originalLoc)); // Tank should have moved
+        });
+        // Mpve tank into tree
+        game.round((id, rc) -> {
+            if (id != tankB) return;
+            
+            TreeInfo[] nearbyTrees = rc.senseNearbyTrees(-1);
+            assertEquals(nearbyTrees.length,1);
+            MapLocation originalLoc = rc.getLocation();
+            assertFalse(rc.hasMoved());
+            rc.move(rc.getLocation().directionTo(nearbyTrees[0].location));
+            assertTrue(rc.hasMoved());
+            assertTrue(rc.getLocation().equals(originalLoc)); // Tank doesn't move due to tree in the way
+        });
+        // Body Damage
+        assertEquals(game.getTree(neutralTree).getHealth(),GameConstants.NEUTRAL_TREE_HEALTH_RATE*1 - RobotType.TANK.attackPower - GameConstants.TANK_BODY_DAMAGE,EPSILON);
+        
+        // Hit exactly enough times to kill tree
+        for(int i=0; i<(GameConstants.NEUTRAL_TREE_HEALTH_RATE*1-RobotType.TANK.attackPower)/GameConstants.TANK_BODY_DAMAGE - 1; i++) {
+            game.round((id, rc) -> {
+                if (id != tankB) return;
+                
+                TreeInfo[] nearbyTrees = rc.senseNearbyTrees(-1);
+                assertEquals(nearbyTrees.length,1);
+                rc.move(rc.getLocation().directionTo(nearbyTrees[0].location));
+            });
+        }
+        
+        // Should be able to move now
+        game.round((id, rc) -> {
+            if (id != tankB) return;
+            
+            TreeInfo[] nearbyTrees = rc.senseNearbyTrees(-1);
+            assertEquals(nearbyTrees.length,0);
+        });
+
     }
 }

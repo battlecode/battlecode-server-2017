@@ -520,12 +520,17 @@ public final class RobotControllerImpl implements RobotController {
     // ****** MOVEMENT METHODS ***********
     // ***********************************
 
-    private void assertIsPathable(MapLocation loc) throws GameActionException{
+  /*  private void assertIsPathable(MapLocation loc) throws GameActionException{
         if(!onTheMap(loc, getType().bodyRadius) ||
                 isCircleOccupiedExceptByThisRobot(loc, getType().bodyRadius)){
             throw new GameActionException(CANT_MOVE_THERE,
                     "Cannot move to target location " + loc + ".");
         }
+    }*/
+    private void assertCanMove(MapLocation loc) throws GameActionException{
+        if(!canMove(loc))
+            throw new GameActionException(CANT_MOVE_THERE,
+                    "Cannot move to the traget location " + loc +".");
     }
 
     @Override
@@ -538,8 +543,7 @@ public final class RobotControllerImpl implements RobotController {
         assertNotNull(dir);
         dist = Math.max(0, Math.min(dist, getType().strideRadius));
         MapLocation center = getLocation().add(dir, dist);
-        return gameWorld.getGameMap().onTheMap(center, getType().bodyRadius) &&
-            gameWorld.getObjectInfo().isEmptyExceptForRobot(center, getType().bodyRadius, robot);
+        return canMove(center);
     }
     
     @Override
@@ -550,8 +554,14 @@ public final class RobotControllerImpl implements RobotController {
             Direction dir = getLocation().directionTo(center);
             center = getLocation().add(dir, getType().strideRadius);
         }
+        boolean newLocationIsEmpty;
+        if(getType() != RobotType.TANK) {
+            newLocationIsEmpty = gameWorld.getObjectInfo().isEmptyExceptForRobot(center, getType().bodyRadius, robot);
+        } else { // Tanks have special condition due to body attack
+            newLocationIsEmpty = gameWorld.getObjectInfo().noRobotsExceptForRobot(center, RobotType.TANK.bodyRadius, robot);
+        }
         return gameWorld.getGameMap().onTheMap(center, getType().bodyRadius) &&
-            gameWorld.getObjectInfo().isEmptyExceptForRobot(center, getType().bodyRadius, robot);
+                newLocationIsEmpty;
     }
 
     @Override
@@ -565,12 +575,7 @@ public final class RobotControllerImpl implements RobotController {
         assertMoveReady();
         dist = Math.max(0, Math.min(dist, getType().strideRadius));
         MapLocation center = getLocation().add(dir, dist);
-        assertIsPathable(center);
-
-        this.robot.incrementMoveCount();
-        this.robot.setLocation(center);
-
-        gameWorld.getMatchMaker().addMoved(getID(), getLocation());
+        move(center);
     }
     
     @Override
@@ -582,9 +587,33 @@ public final class RobotControllerImpl implements RobotController {
             Direction dir = getLocation().directionTo(center);
             center = getLocation().add(dir, getType().strideRadius);
         }
-        assertIsPathable(center);
+        assertCanMove(center);
         
         this.robot.incrementMoveCount();
+        if(getType() == RobotType.TANK) { // If Tank, see if can actually move, as opposed to just body attack
+            InternalTree[] trees = gameWorld.getObjectInfo().getAllTreesWithinRadius(center, RobotType.TANK.bodyRadius);
+            if(trees.length > 0) { // Body attack will happen
+                
+                // Find closest Tree
+                InternalTree closestTree = null;
+                float closestDist = Float.MAX_VALUE;
+                for(InternalTree tree : trees) {
+                    float treeDist = tree.getLocation().distanceTo(robot.getLocation());
+                    if(treeDist < closestDist) {
+                        closestDist = treeDist;
+                        closestTree = tree;
+                    }
+                }
+                
+                // Damage the closest tree
+                closestTree.damageTree(GameConstants.TANK_BODY_DAMAGE, getTeam());
+            
+                // Now that damage has been done, refresh list of trees to see if it is still there
+                trees = gameWorld.getObjectInfo().getAllTreesWithinRadius(center, RobotType.TANK.bodyRadius);
+                if(trees.length > 0) // If something still obstructs the movement, don't actually move
+                    return;
+            }
+        }
         this.robot.setLocation(center);
 
         gameWorld.getMatchMaker().addMoved(getID(), getLocation());
