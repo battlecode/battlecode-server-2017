@@ -142,8 +142,7 @@ public class RobotControllerTest {
         final int soldierA = game.spawn(5, 5, RobotType.SOLDIER, Team.A);
         final int soldierA2 = game.spawn(9, 5, RobotType.SOLDIER, Team.A);
         final int soldierB = game.spawn(1, 5, RobotType.SOLDIER, Team.B);
-        
-        //game.waitRounds(20);
+        game.waitRounds(20); // Let soldiers mature
         
         // soldierA fires a shot at soldierA2
         game.round((id, rc) -> {
