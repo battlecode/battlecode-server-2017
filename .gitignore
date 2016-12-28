@@ -10,3 +10,4 @@
 /testreport
 *~
 /instrumented
+.gradle
