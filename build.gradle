@@ -1,19 +1,21 @@
 apply plugin: 'java'
 
+sourceCompatibility = 1.8
+
 sourceSets {
   main {
-    java.srcDirs = ["src/main/battlecode"]
-    resources.srcDirs = ["src/main/battlecode"]
+    java.srcDirs = ["src/main"]
+    resources.srcDirs = ["src/main"]
 
     output.classesDir = "$buildDir/classes"
-    output.resourcesDir = "$buildDir/classes/battlecode"
+    output.resourcesDir = "$buildDir/classes"
   }
   test {
-    java.srcDirs = ["src/test/battlecode"]
-    resources.srcDirs = ["src/test/battlecode"]
+    java.srcDirs = ["src/test"]
+    resources.srcDirs = ["src/test"]
 
     output.classesDir = "$buildDir/tests"
-    output.resourcesDir = "$buildDir/tests/battlecode"
+    output.resourcesDir = "$buildDir/tests"
   }
 }
 
