@@ -19,7 +19,7 @@ import java.util.List;
  * All overriden methods should assertNotNull() all of their (Object) arguments,
  * if those objects are not explicitly stated to be nullable.
  */
-public final class RobotControllerImpl implements RobotController {
+public final strictfp class RobotControllerImpl implements RobotController {
 
     /**
      * The world the robot controlled by this controller inhabits.

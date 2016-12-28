@@ -6,7 +6,7 @@ import battlecode.schema.Action;
 /**
  * The representation of a robot used by the server.
  */
-public class InternalRobot {
+public strictfp class InternalRobot {
     private final RobotControllerImpl controller;
     private final GameWorld gameWorld;
 

@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Used to make flatbuffer objects needed to serialize a Match.
  */
-public class MatchMaker {
+public strictfp class MatchMaker {
 
     private FlatBufferBuilder builder;
     private TeamMapping teamMapping;
