@@ -3,7 +3,7 @@ package battlecode.server;
 /**
  * Represents the state of a match in a running server.
  */
-public enum State {
+public enum ServerState {
 
     /**
      * The match is not ready for running yet.
