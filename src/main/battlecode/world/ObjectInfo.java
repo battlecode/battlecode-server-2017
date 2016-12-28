@@ -262,7 +262,7 @@ public class ObjectInfo {
                 if(inBounds(x, y)){
                     for(int treeID : treeLocations[y][x]){
                         InternalTree tree = getTreeByID(treeID);
-                        if(center.isWithinDistance(tree.getLocation(), radius)){
+                        if(center.isWithinDistance(tree.getLocation(), radius+tree.getRadius())){
                             trees.add(tree);
                         }
                     }
@@ -292,7 +292,7 @@ public class ObjectInfo {
                         if (robot == null) {
                             throw new RuntimeException("NULL ROBOT: "+robotID);
                         }
-                        if(center.isWithinDistance(robot.getLocation(), radius)){
+                        if(center.isWithinDistance(robot.getLocation(), radius+robot.getType().bodyRadius)){
                             robots.add(robot);
                         }
                     }

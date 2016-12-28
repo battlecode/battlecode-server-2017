@@ -283,7 +283,55 @@ public class RobotControllerTest {
         // This creates the actual game.
         TestGame game = new TestGame(map);
         
-        final int tankB = game.spawn(2, 5, RobotType.TANK, Team.B);
+        final int lumberjackA = game.spawn(2, 5, RobotType.LUMBERJACK, Team.A);
+        final int soldierA = game.spawn(3, (float)7.1, RobotType.SOLDIER, Team.A);
+        final int soldierB = game.spawn(3, (float)2.9, RobotType.SOLDIER, Team.B);
         final int neutralTree = game.spawnTree(6, 5, 1, Team.NEUTRAL, 0, null);
+        float expectedTreeHealth = GameConstants.NEUTRAL_TREE_HEALTH_RATE*1;
+        game.waitRounds(20); // Let bots mature to full health
+        
+        // Trying to chop a tree
+        game.round((id, rc) -> {
+            if (id != lumberjackA) return;
+            
+            TreeInfo[] nearbyTrees = rc.senseNearbyTrees(-1);
+            assertEquals(nearbyTrees.length,1);
+            
+            boolean exception = false;
+            try {
+                rc.chop(nearbyTrees[0].ID); // Try to chop neutralTree
+            } catch (GameActionException e) {
+                exception = true;
+            }
+            assertTrue(exception); // fails, tree is out of range
+            assertFalse(rc.hasAttacked()); // attack attempt is not counted
+            
+            // Move toward neutralTree
+            rc.move(rc.getLocation().directionTo(nearbyTrees[0].location));
+            
+            exception = false;
+            try {
+                rc.chop(nearbyTrees[0].ID);  // Try to chop again
+            } catch (GameActionException e) {
+                exception = true;
+            }
+            assertFalse(exception); // succeeds, tree now in range
+            assertTrue(rc.hasAttacked());
+        });
+        expectedTreeHealth -= RobotType.LUMBERJACK.attackPower*GameConstants.LUMBERJACK_CHOP_DAMAGE_MULTIPLIER;
+        assertEquals(game.getTree(neutralTree).getHealth(),expectedTreeHealth,EPSILON);
+        
+        // Striking surrounding units
+        game.round((id, rc) -> {
+            if (id != lumberjackA) return;
+            
+            rc.strike();
+            assertTrue(rc.hasAttacked());
+        });
+        
+        expectedTreeHealth -= RobotType.LUMBERJACK.attackPower;
+        assertEquals(game.getTree(neutralTree).getHealth(),expectedTreeHealth,EPSILON);
+        assertEquals(game.getBot(soldierA).getHealth(),RobotType.SOLDIER.maxHealth-RobotType.LUMBERJACK.attackPower,EPSILON);
+        assertEquals(game.getBot(soldierB).getHealth(),RobotType.SOLDIER.maxHealth-RobotType.LUMBERJACK.attackPower,EPSILON);
     }
 }

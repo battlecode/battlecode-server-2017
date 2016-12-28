@@ -690,7 +690,7 @@ public final class RobotControllerImpl implements RobotController {
 
         // Hit adjacent robots
         for(InternalRobot hitRobot :
-                gameWorld.getObjectInfo().getAllRobotsWithinRadius(getLocation(), 2*getType().bodyRadius)){
+                gameWorld.getObjectInfo().getAllRobotsWithinRadius(getLocation(), RobotType.LUMBERJACK.bodyRadius + 1)){
             if(hitRobot.equals(this.robot)){
                 continue;
             }
@@ -698,7 +698,7 @@ public final class RobotControllerImpl implements RobotController {
         }
         // Hit adjacent trees
         for(InternalTree hitTree :
-                gameWorld.getObjectInfo().getAllTreesWithinRadius(getLocation(), 2*getType().bodyRadius)){
+                gameWorld.getObjectInfo().getAllTreesWithinRadius(getLocation(), RobotType.LUMBERJACK.bodyRadius + 1)){
             hitTree.damageTree(getType().attackPower, getTeam());
         }
 
@@ -819,6 +819,10 @@ public final class RobotControllerImpl implements RobotController {
 
     @Override
     public void chop(MapLocation loc) throws GameActionException {
+        if(getType() != RobotType.LUMBERJACK){
+            throw new GameActionException(CANT_DO_THAT,
+                    "Only lumberjacks can chop");
+        }
         assertNotNull(loc);
         assertIsWeaponReady(); // Chop counts as attack
         assertCanInteractWithTree(loc);
@@ -828,6 +832,10 @@ public final class RobotControllerImpl implements RobotController {
 
     @Override
     public void chop(int id) throws GameActionException {
+        if(getType() != RobotType.LUMBERJACK){
+            throw new GameActionException(CANT_DO_THAT,
+                    "Only lumberjacks can chop");
+        }
         assertIsWeaponReady();  // Chop counts as attack
         assertCanInteractWithTree(id);
         InternalTree tree = gameWorld.getObjectInfo().getTreeByID(id);
@@ -835,12 +843,9 @@ public final class RobotControllerImpl implements RobotController {
     }
 
     private void chopTree(InternalTree tree){
-        this.robot.incrementAttackCount();
+        this.robot.incrementAttackCount(); // Chopping counts as attack
 
-        float chopDamage = GameConstants.BASE_CHOP_DAMAGE;
-        if(getType() == RobotType.LUMBERJACK){
-            chopDamage *= GameConstants.LUMBERJACK_CHOP_DAMAGE_MULTIPLIER;
-        }
+        float chopDamage = RobotType.LUMBERJACK.attackPower*GameConstants.LUMBERJACK_CHOP_DAMAGE_MULTIPLIER;
 
         tree.damageTree(chopDamage, getTeam());
 
