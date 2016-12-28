@@ -118,6 +118,7 @@ public class InternalBullet {
 
         if (!gameMap.onTheMap(bulletFinish)) {
             gameWorld.destroyBullet(this.ID);
+            return;
         }
 
         setLocation(bulletFinish); // Actually move the bullet

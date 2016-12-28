@@ -264,7 +264,26 @@ public class RobotControllerTest {
             
             TreeInfo[] nearbyTrees = rc.senseNearbyTrees(-1);
             assertEquals(nearbyTrees.length,0);
+            MapLocation originalLoc = rc.getLocation();
+            rc.move(Direction.getEast());
+            assertFalse(rc.getLocation().equals(originalLoc)); 
         });
+    }
+    
+    /**
+     * Ensures lumberjacks can cut down trees and perform basher-like attacks
+     * 
+     * @throws GameActionException
+     */
+    @Test
+    public void testLumberjacks() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+        .build();
 
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+        
+        final int tankB = game.spawn(2, 5, RobotType.TANK, Team.B);
+        final int neutralTree = game.spawnTree(6, 5, 1, Team.NEUTRAL, 0, null);
     }
 }
