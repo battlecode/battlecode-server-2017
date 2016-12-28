@@ -101,7 +101,6 @@ public class InternalBullet {
 
         // THIS DOES NOT FOLLOW THE SPEC
         // but it works
-
         
         InternalRobot hitRobot = gameWorld.getObjectInfo().getRobotAtLocation(bulletFinish);
         if (hitRobot != null) {
@@ -121,6 +120,7 @@ public class InternalBullet {
             gameWorld.destroyBullet(this.ID);
         }
 
+        setLocation(bulletFinish); // Actually move the bullet
     }
 
     //TODO: Simplify this somehow

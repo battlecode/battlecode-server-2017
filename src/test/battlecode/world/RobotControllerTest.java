@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
  * Using TestGame and TestMapBuilder as helpers.
  */
 public class RobotControllerTest {
-    public final double EPSILON = 1.0e-6;
+    public final double EPSILON = 1.0e-5;
 
     /**
      * Tests the most basic methods of RobotController. This test has extra
@@ -140,8 +140,10 @@ public class RobotControllerTest {
         
         // Create some units
         final int soldierA = game.spawn(5, 5, RobotType.SOLDIER, Team.A);
-        final int soldierA2 = game.spawn(8, 5, RobotType.SOLDIER, Team.A);
-        final int soldierB = game.spawn(2, 5, RobotType.SOLDIER, Team.B);
+        final int soldierA2 = game.spawn(9, 5, RobotType.SOLDIER, Team.A);
+        final int soldierB = game.spawn(1, 5, RobotType.SOLDIER, Team.B);
+        
+        //game.waitRounds(20);
         
         // soldierA fires a shot at soldierA2
         game.round((id, rc) -> {
@@ -174,8 +176,16 @@ public class RobotControllerTest {
             assertEquals(bulletIDs.length,2);
         });
         
+        // Let bullets propagate to targets
+        game.waitRounds(1);
         
+        // No more bullets in flight
+        int[] bulletIDs = game.getWorld().getObjectInfo().getBulletIDs();
+        assertEquals(bulletIDs.length,0);
         
+        // Two targets are damaged
+        assertEquals(game.getBot(soldierA2).getHealth(),RobotType.SOLDIER.maxHealth - RobotType.SOLDIER.attackPower,EPSILON);
+        assertEquals(game.getBot(soldierB).getHealth(),RobotType.SOLDIER.maxHealth - RobotType.SOLDIER.attackPower,EPSILON);
     }
     
     /**

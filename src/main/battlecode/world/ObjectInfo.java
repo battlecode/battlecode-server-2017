@@ -330,31 +330,42 @@ public class ObjectInfo {
     }
     
     public InternalTree getTreeAtLocation(MapLocation loc){
-        int xIndex = convertToXIndex(loc.x);
-        int yIndex = convertToYIndex(loc.y);
-        if (!inBounds(xIndex, yIndex)) return null;
+        int minXPos = convertToXIndex(loc.x - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
+        int maxXPos = convertToXIndex(loc.x + GameConstants.NEUTRAL_TREE_MAX_RADIUS);
+        int minYPos = convertToYIndex(loc.y - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
+        int maxYPos = convertToYIndex(loc.y + GameConstants.NEUTRAL_TREE_MAX_RADIUS);
 
-        for (int treeID : treeLocations[yIndex][xIndex]) {
-            InternalTree tree = gameTreesByID.get(treeID);
-            if (tree.getLocation().isWithinDistance(loc, tree.getRadius())) {
-                return tree;
+        for (int x = minXPos; x <= maxXPos; x++) {
+            for (int y = minYPos; y <= maxYPos; y++) {
+                if(inBounds(x,y)) {
+                    for (int treeID : treeLocations[x][y]) {
+                        InternalTree tree = gameTreesByID.get(treeID);
+                        if (tree.getLocation().isWithinDistance(loc, tree.getRadius())) {
+                            return tree;
+                        }
+                    }
+                }
             }
         }
         return null;
     }
 
     public InternalRobot getRobotAtLocation(MapLocation loc){
-        int xIndex = convertToXIndex(loc.x);
-        int yIndex = convertToYIndex(loc.y);
-        if (!inBounds(xIndex, yIndex)) return null;
+        int minXPos = convertToXIndex(loc.x - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
+        int maxXPos = convertToXIndex(loc.x + GameConstants.NEUTRAL_TREE_MAX_RADIUS);
+        int minYPos = convertToYIndex(loc.y - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
+        int maxYPos = convertToYIndex(loc.y + GameConstants.NEUTRAL_TREE_MAX_RADIUS);
 
-        for (int robotID : robotLocations[yIndex][xIndex]) {
-            InternalRobot robot = gameRobotsByID.get(robotID);
-            if (robot == null) {
-                throw new RuntimeException("NULL ROBOT: "+robotID+" in "+robotLocations[yIndex][xIndex]);
-            }
-            if (robot.getLocation().isWithinDistance(loc, robot.getType().bodyRadius)) {
-                return robot;
+        for (int x = minXPos; x <= maxXPos; x++) {
+            for (int y = minYPos; y <= maxYPos; y++) {
+                if(inBounds(x,y)) {
+                    for (int robotID : robotLocations[x][y]) {
+                        InternalRobot robot = gameRobotsByID.get(robotID);
+                        if (robot.getLocation().isWithinDistance(loc, robot.getType().bodyRadius)) {
+                            return robot;
+                        }
+                    }
+                }
             }
         }
         return null;
