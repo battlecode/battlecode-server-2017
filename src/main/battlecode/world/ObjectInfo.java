@@ -276,7 +276,7 @@ public class ObjectInfo {
         if (radius <= 0) {
             return new InternalRobot[] { getRobotAtLocation(center) };
         }
-        radius = (float) Math.ceil(radius);
+        //radius = (float) Math.ceil(radius); wtf was this doing here, it caused so much pain and debugging
 
         ArrayList<InternalRobot> robots = new ArrayList<>();
         int minXPos = convertToXIndex(center.x - radius - GameConstants.MAX_ROBOT_RADIUS);
