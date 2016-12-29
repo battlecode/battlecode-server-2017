@@ -15,10 +15,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.ToIntFunction;
 
 /**
- * Used to make flatbuffer objects needed to serialize a Game.
+ * Writes a game to a flatbuffer, hooray.
  */
 public strictfp class GameMaker {
 
@@ -44,15 +44,40 @@ public strictfp class GameMaker {
          */
         DONE
     }
-
     private State state;
 
-    private FlatBufferBuilder builder;
+    // this un-separation-of-concerns makes me uncomfortable
+
+    /**
+     * We write the whole match to this builder, then write it to a file.
+     */
+    private final FlatBufferBuilder fileBuilder;
+
+    /**
+     * Null until the end of the match.
+     */
+    private byte[] finishedGame;
+
+    /**
+     * We have a separate byte[] for each packet sent to the client.
+     * This is necessary because flatbuffers shares metadata between structures, so we
+     * can't just cut out chunks of the larger buffer :/
+     */
+    private final List<byte[]> eventPackets;
+    private FlatBufferBuilder packetBuilder;
+
+    /**
+     * Eventually we might extend for more teams.
+     */
     private TeamMapping teamMapping;
 
-    private int finalGameWrapper;
-
-    private List<Integer> events; // EventWrappers
+    /**
+     * Only relevant to the file builder:
+     * We add a table called a GameWrapper to the front of the saved files
+     * that lets you quickly navigate to events by index, and tells you the
+     * indices of headers and footers.
+     */
+    private List<Integer> events;
     private List<Integer> matchHeaders;
     private List<Integer> matchFooters;
 
@@ -61,30 +86,15 @@ public strictfp class GameMaker {
      */
     public GameMaker(final TeamMapping teamMapping){
         this.state = State.GAME_HEADER;
-        this.builder = new FlatBufferBuilder();
+
+        this.fileBuilder = new FlatBufferBuilder();
+        this.packetBuilder = new FlatBufferBuilder();
+        this.eventPackets = new ArrayList<>();
+
         this.events = new ArrayList<>();
         this.matchHeaders = new ArrayList<>();
         this.matchFooters = new ArrayList<>();
         this.teamMapping = teamMapping;
-    }
-
-    /**
-     * Write a match out to a file.
-     *
-     * @param saveFile
-     */
-    public void writeGame(File saveFile) {
-        if(saveFile == null) {
-            return;
-        }
-
-        builder.finish(finalGameWrapper);
-        byte[] byteData = builder.sizedByteArray();
-        try {
-            FileUtils.writeByteArrayToFile(saveFile, byteData);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -107,48 +117,112 @@ public strictfp class GameMaker {
         this.state = end;
     }
 
+
+    /**
+     * Convert entire game to a byte array.
+     *
+     * @return game as a packed flatbuffer byte array.
+     */
+    public byte[] toBytes() {
+        if (finishedGame == null) {
+            assertState(State.DONE);
+
+            int events = GameWrapper.createEventsVector(fileBuilder, ArrayUtils.toPrimitive(this.events.toArray(new Integer[this.events.size()])));
+            int matchHeaders = GameWrapper.createMatchHeadersVector(fileBuilder, ArrayUtils.toPrimitive(this.matchHeaders.toArray(new Integer[this.matchHeaders.size()])));
+            int matchFooters = GameWrapper.createMatchFootersVector(fileBuilder, ArrayUtils.toPrimitive(this.matchFooters.toArray(new Integer[this.matchFooters.size()])));
+
+            GameWrapper.startGameWrapper(fileBuilder);
+            GameWrapper.addEvents(fileBuilder, events);
+            GameWrapper.addMatchHeaders(fileBuilder, matchHeaders);
+            GameWrapper.addMatchFooters(fileBuilder, matchFooters);
+
+            fileBuilder.finish(GameWrapper.endGameWrapper(fileBuilder));
+            finishedGame = fileBuilder.sizedByteArray();
+        }
+        return finishedGame;
+    }
+
+    /**
+     * Write a match out to a file.
+     *
+     * @param saveFile
+     */
+    public void writeGame(File saveFile) {
+        if(saveFile == null) {
+            throw new RuntimeException("Null file provided to writeGame");
+        }
+
+        try {
+            FileUtils.writeByteArrayToFile(saveFile, toBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Run the same logic for both builders.
+     *
+     * @param perBuilder called with each builder; return event id. Should not mutate state.
+     */
+    private void createEvent(ToIntFunction<FlatBufferBuilder> perBuilder) {
+        // make file event and add its offset to the list
+        int eventA = perBuilder.applyAsInt(fileBuilder);
+        events.add(eventA);
+
+        // make packet event and package it up
+        int eventB = perBuilder.applyAsInt(packetBuilder);
+        packetBuilder.finish(eventB);
+        eventPackets.add(packetBuilder.sizedByteArray());
+        // reset packet builder
+        packetBuilder = new FlatBufferBuilder(packetBuilder.dataBuffer());
+    }
+
     /**
      * Make a match maker for a particular match.
+     *
+     * ... you could actually reuse one, but eventually that might change?
      */
     public MatchMaker createMatchMaker() {
         return new MatchMaker();
     }
 
-    public void makeGameHeader(String specVersion, TeamMapping teamMapping){
+    public void makeGameHeader(){
 
         changeState(State.GAME_HEADER, State.IN_GAME);
 
-        int specVersionOffset = builder.createString(specVersion);
+        createEvent((builder) -> {
+            int specVersionOffset = builder.createString(GameConstants.SPEC_VERSION);
 
-        int name = builder.createString(teamMapping.getTeamAName());
-        int packageName = builder.createString(teamMapping.getTeamAName());
-        TeamData.startTeamData(builder);
-        TeamData.addName(builder, name);
-        TeamData.addPackageName(builder, packageName);
-        TeamData.addTeamID(builder, teamMapping.getTeamAID());
-        int teamAOffset = TeamData.endTeamData(builder);
+            int name = builder.createString(teamMapping.getTeamAName());
+            int packageName = builder.createString(teamMapping.getTeamAName());
+            TeamData.startTeamData(builder);
+            TeamData.addName(builder, name);
+            TeamData.addPackageName(builder, packageName);
+            TeamData.addTeamID(builder, teamMapping.getTeamAID());
+            int teamAOffset = TeamData.endTeamData(builder);
 
-        name = builder.createString(teamMapping.getTeamBName());
-        packageName = builder.createString(teamMapping.getTeamBName());
-        TeamData.startTeamData(builder);
-        TeamData.addName(builder, name);
-        TeamData.addPackageName(builder, packageName);
-        TeamData.addTeamID(builder, teamMapping.getTeamBID());
-        int teamBOffset = TeamData.endTeamData(builder);
-        int[] teamsVec = {teamAOffset, teamBOffset};
+            name = builder.createString(teamMapping.getTeamBName());
+            packageName = builder.createString(teamMapping.getTeamBName());
+            TeamData.startTeamData(builder);
+            TeamData.addName(builder, name);
+            TeamData.addPackageName(builder, packageName);
+            TeamData.addTeamID(builder, teamMapping.getTeamBID());
+            int teamBOffset = TeamData.endTeamData(builder);
+            int[] teamsVec = {teamAOffset, teamBOffset};
 
-        int teamsOffset = GameHeader.createTeamsVector(builder, teamsVec);
-        int bodyTypeMetadataOffset = makeBodyTypeMetadata();
+            int teamsOffset = GameHeader.createTeamsVector(builder, teamsVec);
+            int bodyTypeMetadataOffset = makeBodyTypeMetadata(builder);
 
-        GameHeader.startGameHeader(builder);
-        GameHeader.addSpecVersion(builder, specVersionOffset);
-        GameHeader.addTeams(builder, teamsOffset);
-        GameHeader.addBodyTypeMetadata(builder, bodyTypeMetadataOffset);
-        int gameHeaderOffset = GameHeader.endGameHeader(builder);
-        events.add(EventWrapper.createEventWrapper(builder, Event.GameHeader, gameHeaderOffset));
+            GameHeader.startGameHeader(builder);
+            GameHeader.addSpecVersion(builder, specVersionOffset);
+            GameHeader.addTeams(builder, teamsOffset);
+            GameHeader.addBodyTypeMetadata(builder, bodyTypeMetadataOffset);
+            int gameHeaderOffset = GameHeader.endGameHeader(builder);
+            return EventWrapper.createEventWrapper(builder, Event.GameHeader, gameHeaderOffset);
+        });
     }
 
-    public int makeBodyTypeMetadata(){
+    public int makeBodyTypeMetadata(FlatBufferBuilder builder){
         List<Integer> bodyTypeMetadataOffsets = new ArrayList<>();
 
         // Add robot metadata
@@ -190,32 +264,11 @@ public strictfp class GameMaker {
         return Byte.MIN_VALUE;
     }
 
-    public void makeGameFooter(byte winner){
-
+    public void makeGameFooter(Team winner){
         changeState(State.IN_GAME, State.DONE);
 
-        events.add(EventWrapper.createEventWrapper(builder, Event.GameFooter, GameFooter.createGameFooter(builder, winner)));
-    }
-
-    public void makeGameWrapper(){
-
-        assertState(State.DONE);
-
-        int events = GameWrapper.createEventsVector(builder, ArrayUtils.toPrimitive(this.events.toArray(new Integer[this.events.size()])));
-        int matchHeaders = GameWrapper.createMatchHeadersVector(builder, ArrayUtils.toPrimitive(this.matchHeaders.toArray(new Integer[this.matchHeaders.size()])));
-        int matchFooters = GameWrapper.createMatchFootersVector(builder, ArrayUtils.toPrimitive(this.matchFooters.toArray(new Integer[this.matchFooters.size()])));
-
-        GameWrapper.startGameWrapper(builder);
-        GameWrapper.addEvents(builder, events);
-        GameWrapper.addMatchHeaders(builder, matchHeaders);
-        GameWrapper.addMatchFooters(builder, matchFooters);
-        this.finalGameWrapper = GameWrapper.endGameWrapper(builder);
-    }
-
-    public void addMatchInfo(List<Integer> matchEvents) {
-        matchHeaders.add(events.size());
-        events.addAll(matchEvents);
-        matchFooters.add(events.size()-1);
+        createEvent((builder) -> EventWrapper.createEventWrapper(builder, Event.GameFooter,
+                GameFooter.createGameFooter(builder, teamMapping.getIDFromTeam(winner))));
     }
 
     /**
@@ -225,8 +278,6 @@ public strictfp class GameMaker {
      * this basically just provides a restricted interface to GameMaker.
      */
     public class MatchMaker {
-        private List<Integer> events; // EventWrappers
-
         private List<Integer> movedIDs; // ints
         // VecTable for movedLocs in Round
         private List<Float> movedLocsXs;
@@ -259,7 +310,6 @@ public strictfp class GameMaker {
         private List<Integer> actionTargets; // ints (IDs)
 
         public MatchMaker() {
-            this.events = new ArrayList<>();
             this.movedIDs = new ArrayList<>();
             this.movedLocsXs = new ArrayList<>();
             this.movedLocsYs = new ArrayList<>();
@@ -287,96 +337,102 @@ public strictfp class GameMaker {
         public void makeMatchHeader(LiveMap gameMap) {
             changeState(State.IN_GAME, State.IN_MATCH);
 
-            int map = GameMapIO.Serial.serialize(builder, gameMap, teamMapping);
+            createEvent((builder) -> {
+                int map = GameMapIO.Serial.serialize(builder, gameMap, teamMapping);
 
-            events.add(EventWrapper.createEventWrapper(builder, Event.MatchHeader,
-                    MatchHeader.createMatchHeader(builder, map, gameMap.getRounds())));
+                return EventWrapper.createEventWrapper(builder, Event.MatchHeader,
+                        MatchHeader.createMatchHeader(builder, map, gameMap.getRounds()));
+            });
+
+            matchHeaders.add(events.size() - 1);
+
             clearData();
         }
 
         public void makeMatchFooter(Team winTeam, int totalRounds) {
             changeState(State.IN_MATCH, State.IN_GAME);
 
-            events.add(EventWrapper.createEventWrapper(builder, Event.MatchFooter,
+            createEvent((builder) -> EventWrapper.createEventWrapper(builder, Event.MatchFooter,
                     MatchFooter.createMatchFooter(builder, teamMapping.getIDFromTeam(winTeam), totalRounds)));
 
-            addMatchInfo(events);
-
-            events.clear();
+            matchFooters.add(events.size() - 1);
         }
 
         public void makeRound(int roundNum) {
             assertState(State.IN_MATCH);
 
-            int[] movedIDs = ArrayUtils.toPrimitive(this.movedIDs.toArray(new Integer[this.movedIDs.size()]));
-            int movedLocs = VecTable.createVecTable(builder,
-                    VecTable.createXsVector(builder, ArrayUtils.toPrimitive(movedLocsXs.toArray(new Float[movedLocsXs.size()]))),
-                    VecTable.createYsVector(builder, ArrayUtils.toPrimitive(movedLocsYs.toArray(new Float[movedLocsYs.size()]))));
+            createEvent((builder) -> {
+                // we're double-allocating here again
+                // whatever
+                int[] movedIDs = ArrayUtils.toPrimitive(this.movedIDs.toArray(new Integer[this.movedIDs.size()]));
+                int movedLocs = VecTable.createVecTable(builder,
+                        VecTable.createXsVector(builder, ArrayUtils.toPrimitive(movedLocsXs.toArray(new Float[movedLocsXs.size()]))),
+                        VecTable.createYsVector(builder, ArrayUtils.toPrimitive(movedLocsYs.toArray(new Float[movedLocsYs.size()]))));
 
-            int robotIDs = SpawnedBodyTable.createRobotIDsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesRobotIDs.toArray(new Integer[spawnedBodiesRobotIDs.size()])));
-            int teamIDs = SpawnedBodyTable.createTeamIDsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesTeamIDs.toArray(new Byte[spawnedBodiesTeamIDs.size()])));
-            int types = SpawnedBodyTable.createTypesVector(builder, ArrayUtils.toPrimitive(spawnedBodiesTypes.toArray(new Byte[spawnedBodiesTypes.size()])));
-            int locs = VecTable.createVecTable(builder,
-                    VecTable.createXsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesLocsXs.toArray(new Float[spawnedBodiesLocsXs.size()]))),
-                    VecTable.createYsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesLocsYs.toArray(new Float[spawnedBodiesLocsYs.size()]))));
-            SpawnedBodyTable.startSpawnedBodyTable(builder);
-            SpawnedBodyTable.addRobotIDs(builder, robotIDs);
-            SpawnedBodyTable.addTeamIDs(builder, teamIDs);
-            SpawnedBodyTable.addTypes(builder, types);
-            SpawnedBodyTable.addLocs(builder, locs);
-            int spawnedBodies = SpawnedBodyTable.endSpawnedBodyTable(builder);
+                int robotIDs = SpawnedBodyTable.createRobotIDsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesRobotIDs.toArray(new Integer[spawnedBodiesRobotIDs.size()])));
+                int teamIDs = SpawnedBodyTable.createTeamIDsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesTeamIDs.toArray(new Byte[spawnedBodiesTeamIDs.size()])));
+                int types = SpawnedBodyTable.createTypesVector(builder, ArrayUtils.toPrimitive(spawnedBodiesTypes.toArray(new Byte[spawnedBodiesTypes.size()])));
+                int locs = VecTable.createVecTable(builder,
+                        VecTable.createXsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesLocsXs.toArray(new Float[spawnedBodiesLocsXs.size()]))),
+                        VecTable.createYsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesLocsYs.toArray(new Float[spawnedBodiesLocsYs.size()]))));
+                SpawnedBodyTable.startSpawnedBodyTable(builder);
+                SpawnedBodyTable.addRobotIDs(builder, robotIDs);
+                SpawnedBodyTable.addTeamIDs(builder, teamIDs);
+                SpawnedBodyTable.addTypes(builder, types);
+                SpawnedBodyTable.addLocs(builder, locs);
+                int spawnedBodies = SpawnedBodyTable.endSpawnedBodyTable(builder);
 
-            robotIDs = SpawnedBulletTable.createRobotIDsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsRobotIDs.toArray(new Integer[spawnedBulletsRobotIDs.size()])));
-            int damages = SpawnedBulletTable.createDamagesVector(builder, ArrayUtils.toPrimitive(spawnedBulletsDamages.toArray(new Float[spawnedBulletsDamages.size()])));
-            locs = VecTable.createVecTable(builder,
-                    VecTable.createXsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsLocsXs.toArray(new Float[spawnedBulletsLocsXs.size()]))),
-                    VecTable.createYsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsLocsYs.toArray(new Float[spawnedBulletsLocsYs.size()]))));
-            int vels = VecTable.createVecTable(builder,
-                    VecTable.createXsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsVelsXs.toArray(new Float[spawnedBulletsVelsXs.size()]))),
-                    VecTable.createYsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsVelsYs.toArray(new Float[spawnedBulletsVelsYs.size()]))));
-            SpawnedBulletTable.startSpawnedBulletTable(builder);
-            SpawnedBulletTable.addRobotIDs(builder, robotIDs);
-            SpawnedBulletTable.addDamages(builder, damages);
-            SpawnedBulletTable.addLocs(builder, locs);
-            SpawnedBulletTable.addVels(builder, vels);
-            int spawnedBullets = SpawnedBulletTable.endSpawnedBulletTable(builder);
+                robotIDs = SpawnedBulletTable.createRobotIDsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsRobotIDs.toArray(new Integer[spawnedBulletsRobotIDs.size()])));
+                int damages = SpawnedBulletTable.createDamagesVector(builder, ArrayUtils.toPrimitive(spawnedBulletsDamages.toArray(new Float[spawnedBulletsDamages.size()])));
+                locs = VecTable.createVecTable(builder,
+                        VecTable.createXsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsLocsXs.toArray(new Float[spawnedBulletsLocsXs.size()]))),
+                        VecTable.createYsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsLocsYs.toArray(new Float[spawnedBulletsLocsYs.size()]))));
+                int vels = VecTable.createVecTable(builder,
+                        VecTable.createXsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsVelsXs.toArray(new Float[spawnedBulletsVelsXs.size()]))),
+                        VecTable.createYsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsVelsYs.toArray(new Float[spawnedBulletsVelsYs.size()]))));
+                SpawnedBulletTable.startSpawnedBulletTable(builder);
+                SpawnedBulletTable.addRobotIDs(builder, robotIDs);
+                SpawnedBulletTable.addDamages(builder, damages);
+                SpawnedBulletTable.addLocs(builder, locs);
+                SpawnedBulletTable.addVels(builder, vels);
+                int spawnedBullets = SpawnedBulletTable.endSpawnedBulletTable(builder);
 
-            int[] healthChangedIDs = ArrayUtils.toPrimitive(this.healthChangedIDs.toArray(new Integer[this.healthChangedIDs.size()]));
-            float[] healthChangedLevels = ArrayUtils.toPrimitive(this.healthChangedLevels.toArray(new Float[this.healthChangedLevels.size()]));
-            int[] diedIDs = ArrayUtils.toPrimitive(this.diedIDs.toArray(new Integer[this.diedIDs.size()]));
-            int[] diedBulletIDs = ArrayUtils.toPrimitive(this.diedBulletIDs.toArray(new Integer[this.diedBulletIDs.size()]));
-            int[] actionIDs = ArrayUtils.toPrimitive(this.actionIDs.toArray(new Integer[this.actionIDs.size()]));
-            byte[] actions = ArrayUtils.toPrimitive(this.actions.toArray(new Byte[this.actions.size()]));
-            int[] actionTargets = ArrayUtils.toPrimitive(this.actionTargets.toArray(new Integer[this.actionTargets.size()]));
+                int[] healthChangedIDs = ArrayUtils.toPrimitive(this.healthChangedIDs.toArray(new Integer[this.healthChangedIDs.size()]));
+                float[] healthChangedLevels = ArrayUtils.toPrimitive(this.healthChangedLevels.toArray(new Float[this.healthChangedLevels.size()]));
+                int[] diedIDs = ArrayUtils.toPrimitive(this.diedIDs.toArray(new Integer[this.diedIDs.size()]));
+                int[] diedBulletIDs = ArrayUtils.toPrimitive(this.diedBulletIDs.toArray(new Integer[this.diedBulletIDs.size()]));
+                int[] actionIDs = ArrayUtils.toPrimitive(this.actionIDs.toArray(new Integer[this.actionIDs.size()]));
+                byte[] actions = ArrayUtils.toPrimitive(this.actions.toArray(new Byte[this.actions.size()]));
+                int[] actionTargets = ArrayUtils.toPrimitive(this.actionTargets.toArray(new Integer[this.actionTargets.size()]));
 
-            // Make the Round
-            int a = Round.createMovedIDsVector(builder, movedIDs);
-            int b = Round.createHealthChangedIDsVector(builder, healthChangedIDs);
-            int c = Round.createHealthChangeLevelsVector(builder, healthChangedLevels);
-            int d = Round.createDiedIDsVector(builder, diedIDs);
-            int e = Round.createDiedBulletIDsVector(builder, diedBulletIDs);
-            int f = Round.createActionIDsVector(builder, actionIDs);
-            int g = Round.createActionsVector(builder, actions);
-            int h = Round.createActionTargetsVector(builder, actionTargets);
-            Round.startRound(builder);
-            Round.addMovedIDs(builder, a);
-            Round.addMovedLocs(builder, movedLocs);
-            Round.addSpawnedBodies(builder, spawnedBodies);
-            Round.addSpawnedBullets(builder, spawnedBullets);
-            Round.addHealthChangedIDs(builder, b);
-            Round.addHealthChangeLevels(builder, c);
-            Round.addDiedIDs(builder, d);
-            Round.addDiedBulletIDs(builder, e);
-            Round.addActionIDs(builder, f);
-            Round.addActions(builder, g);
-            Round.addActionTargets(builder, h);
-            Round.addRoundID(builder, roundNum);
-            int round = Round.endRound(builder);
+                // Make the Round
+                int a = Round.createMovedIDsVector(builder, movedIDs);
+                int b = Round.createHealthChangedIDsVector(builder, healthChangedIDs);
+                int c = Round.createHealthChangeLevelsVector(builder, healthChangedLevels);
+                int d = Round.createDiedIDsVector(builder, diedIDs);
+                int e = Round.createDiedBulletIDsVector(builder, diedBulletIDs);
+                int f = Round.createActionIDsVector(builder, actionIDs);
+                int g = Round.createActionsVector(builder, actions);
+                int h = Round.createActionTargetsVector(builder, actionTargets);
+                Round.startRound(builder);
+                Round.addMovedIDs(builder, a);
+                Round.addMovedLocs(builder, movedLocs);
+                Round.addSpawnedBodies(builder, spawnedBodies);
+                Round.addSpawnedBullets(builder, spawnedBullets);
+                Round.addHealthChangedIDs(builder, b);
+                Round.addHealthChangeLevels(builder, c);
+                Round.addDiedIDs(builder, d);
+                Round.addDiedBulletIDs(builder, e);
+                Round.addActionIDs(builder, f);
+                Round.addActions(builder, g);
+                Round.addActionTargets(builder, h);
+                Round.addRoundID(builder, roundNum);
+                int round = Round.endRound(builder);
+
+                return EventWrapper.createEventWrapper(builder, Event.Round, round);
+            });
 
             clearData();
-
-            // Make and add the EventWrapper
-            events.add(EventWrapper.createEventWrapper(builder, Event.Round, round));
         }
 
         public void addMoved(int id, MapLocation newLocation) {

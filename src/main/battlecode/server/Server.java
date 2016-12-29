@@ -22,11 +22,6 @@ public strictfp class Server implements Runnable {
     private static final GameInfo POISON = new GameInfo(null, null, null, null, null, null, false) {};
 
     /**
-     * The current spec version the server compiles with
-     */
-    private static final String SPEC_VERSION = "1.0";
-
-    /**
      * The queue of games to run.
      * When the server encounters the GameInfo POISON, it terminates.
      */
@@ -151,7 +146,7 @@ public strictfp class Server implements Runnable {
 
             TeamMapping teamMapping = new TeamMapping(currentGame);
             GameMaker gameMaker = new GameMaker(teamMapping);
-            gameMaker.makeGameHeader(SPEC_VERSION, teamMapping);
+            gameMaker.makeGameHeader();
 
             debug("Running: "+currentGame);
 
@@ -196,9 +191,8 @@ public strictfp class Server implements Runnable {
                     }
                 }
             }
-            byte winner = aWins >= bWins ? teamMapping.getTeamAID() : teamMapping.getTeamBID();
+            Team winner = aWins >= bWins ? Team.A : Team.B;
             gameMaker.makeGameFooter(winner);
-            gameMaker.makeGameWrapper();
             gameMaker.writeGame(currentGame.getSaveFile());
         }
     }
