@@ -139,6 +139,6 @@ public class NetServer extends WebSocketServer {
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-
+        System.err.println("Error from: "+conn.getRemoteSocketAddress()+": "+ex);
     }
 }
