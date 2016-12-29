@@ -170,8 +170,9 @@ public strictfp class InternalTree {
             return 0;
         }
 
+        float bulletIncome = this.health * GameConstants.BULLET_TREE_BULLET_PRODUCTION_RATE;
         decayTree();
-        return this.health * GameConstants.BULLET_TREE_BULLET_PRODUCTION_RATE;
+        return bulletIncome;
     }
 
     public void processBeginningOfRound(){
@@ -182,6 +183,7 @@ public strictfp class InternalTree {
         if(this.healthChanged){
             gameWorld.getMatchMaker().addHealthChanged(getID(), getHealth());
         }
+        roundsAlive++;
     }
 
     // *********************************

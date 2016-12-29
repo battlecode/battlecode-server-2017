@@ -101,7 +101,7 @@ public strictfp class InternalBullet {
 
         // THIS DOES NOT FOLLOW THE SPEC
         // but it works
-
+        
         InternalRobot hitRobot = gameWorld.getObjectInfo().getRobotAtLocation(bulletFinish);
         if (hitRobot != null) {
             gameWorld.destroyBullet(this.ID);
@@ -116,10 +116,12 @@ public strictfp class InternalBullet {
             return;
         }
 
-        if (gameMap.onTheMap(bulletFinish)) {
+        if (!gameMap.onTheMap(bulletFinish)) {
             gameWorld.destroyBullet(this.ID);
+            return;
         }
 
+        setLocation(bulletFinish); // Actually move the bullet
     }
 
     //TODO: Simplify this somehow

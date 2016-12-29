@@ -86,6 +86,16 @@ public interface GameConstants {
      * the chop action on a tree.
      */
     float LUMBERJACK_CHOP_DAMAGE_MULTIPLIER = 5;
+    
+    /**
+     * The damage a tank does to a tree when it attempts to move on top of it.
+     */
+    float TANK_BODY_DAMAGE = 2;
+    
+    /**
+     * Planted units (trees and non-gardener non-archon robots) start at 20% health.
+     */
+    float PLANTED_UNIT_STARTING_HEALTH_FRACTION = 0.2f;
 
     // *********************************
     // ****** BULLETS ******************

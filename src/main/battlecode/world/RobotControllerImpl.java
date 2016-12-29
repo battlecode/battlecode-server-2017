@@ -520,12 +520,17 @@ public final strictfp class RobotControllerImpl implements RobotController {
     // ****** MOVEMENT METHODS ***********
     // ***********************************
 
-    private void assertIsPathable(MapLocation loc) throws GameActionException{
+  /*  private void assertIsPathable(MapLocation loc) throws GameActionException{
         if(!onTheMap(loc, getType().bodyRadius) ||
                 isCircleOccupiedExceptByThisRobot(loc, getType().bodyRadius)){
             throw new GameActionException(CANT_MOVE_THERE,
                     "Cannot move to target location " + loc + ".");
         }
+    }*/
+    private void assertCanMove(MapLocation loc) throws GameActionException{
+        if(!canMove(loc))
+            throw new GameActionException(CANT_MOVE_THERE,
+                    "Cannot move to the traget location " + loc +".");
     }
 
     @Override
@@ -538,8 +543,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         assertNotNull(dir);
         dist = Math.max(0, Math.min(dist, getType().strideRadius));
         MapLocation center = getLocation().add(dir, dist);
-        return gameWorld.getGameMap().onTheMap(center, getType().bodyRadius) &&
-            gameWorld.getObjectInfo().isEmptyExceptForRobot(center, getType().bodyRadius, robot);
+        return canMove(center);
     }
     
     @Override
@@ -550,8 +554,14 @@ public final strictfp class RobotControllerImpl implements RobotController {
             Direction dir = getLocation().directionTo(center);
             center = getLocation().add(dir, getType().strideRadius);
         }
+        boolean newLocationIsEmpty;
+        if(getType() != RobotType.TANK) {
+            newLocationIsEmpty = gameWorld.getObjectInfo().isEmptyExceptForRobot(center, getType().bodyRadius, robot);
+        } else { // Tanks have special condition due to body attack
+            newLocationIsEmpty = gameWorld.getObjectInfo().noRobotsExceptForRobot(center, RobotType.TANK.bodyRadius, robot);
+        }
         return gameWorld.getGameMap().onTheMap(center, getType().bodyRadius) &&
-            gameWorld.getObjectInfo().isEmptyExceptForRobot(center, getType().bodyRadius, robot);
+                newLocationIsEmpty;
     }
 
     @Override
@@ -565,12 +575,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         assertMoveReady();
         dist = Math.max(0, Math.min(dist, getType().strideRadius));
         MapLocation center = getLocation().add(dir, dist);
-        assertIsPathable(center);
-
-        this.robot.incrementMoveCount();
-        this.robot.setLocation(center);
-
-        gameWorld.getMatchMaker().addMoved(getID(), getLocation());
+        move(center);
     }
     
     @Override
@@ -582,9 +587,33 @@ public final strictfp class RobotControllerImpl implements RobotController {
             Direction dir = getLocation().directionTo(center);
             center = getLocation().add(dir, getType().strideRadius);
         }
-        assertIsPathable(center);
+        assertCanMove(center);
         
         this.robot.incrementMoveCount();
+        if(getType() == RobotType.TANK) { // If Tank, see if can actually move, as opposed to just body attack
+            InternalTree[] trees = gameWorld.getObjectInfo().getAllTreesWithinRadius(center, RobotType.TANK.bodyRadius);
+            if(trees.length > 0) { // Body attack will happen
+                
+                // Find closest Tree
+                InternalTree closestTree = null;
+                float closestDist = Float.MAX_VALUE;
+                for(InternalTree tree : trees) {
+                    float treeDist = tree.getLocation().distanceTo(robot.getLocation());
+                    if(treeDist < closestDist) {
+                        closestDist = treeDist;
+                        closestTree = tree;
+                    }
+                }
+                
+                // Damage the closest tree
+                closestTree.damageTree(GameConstants.TANK_BODY_DAMAGE, getTeam());
+            
+                // Now that damage has been done, refresh list of trees to see if it is still there
+                trees = gameWorld.getObjectInfo().getAllTreesWithinRadius(center, RobotType.TANK.bodyRadius);
+                if(trees.length > 0) // If something still obstructs the movement, don't actually move
+                    return;
+            }
+        }
         this.robot.setLocation(center);
 
         gameWorld.getMatchMaker().addMoved(getID(), getLocation());
@@ -661,7 +690,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
 
         // Hit adjacent robots
         for(InternalRobot hitRobot :
-                gameWorld.getObjectInfo().getAllRobotsWithinRadius(getLocation(), 2*getType().bodyRadius)){
+                gameWorld.getObjectInfo().getAllRobotsWithinRadius(getLocation(), RobotType.LUMBERJACK.bodyRadius + 1)){
             if(hitRobot.equals(this.robot)){
                 continue;
             }
@@ -669,7 +698,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         }
         // Hit adjacent trees
         for(InternalTree hitTree :
-                gameWorld.getObjectInfo().getAllTreesWithinRadius(getLocation(), 2*getType().bodyRadius)){
+                gameWorld.getObjectInfo().getAllTreesWithinRadius(getLocation(), RobotType.LUMBERJACK.bodyRadius + 1)){
             hitTree.damageTree(getType().attackPower, getTeam());
         }
 
@@ -679,21 +708,21 @@ public final strictfp class RobotControllerImpl implements RobotController {
     public boolean canSingleShot() {
         boolean correctType = getType() != RobotType.ARCHON && getType() != RobotType.GARDENER &&
                 getType() != RobotType.LUMBERJACK;
-        return correctType && haveBulletCosts(GameConstants.SINGLE_SHOT_COST);
+        return correctType && haveBulletCosts(GameConstants.SINGLE_SHOT_COST) && !hasAttacked();
     }
 
     @Override
     public boolean canTriadShot() {
         boolean correctType = getType() != RobotType.ARCHON && getType() != RobotType.GARDENER &&
                 getType() != RobotType.LUMBERJACK && getType() != RobotType.SCOUT;
-        return correctType && haveBulletCosts(GameConstants.TRIAD_SHOT_COST);
+        return correctType && haveBulletCosts(GameConstants.TRIAD_SHOT_COST) && !hasAttacked();
     }
 
     @Override
     public boolean canPentadShot() {
         boolean correctType = getType() != RobotType.ARCHON && getType() != RobotType.GARDENER &&
                 getType() != RobotType.LUMBERJACK && getType() != RobotType.SCOUT;
-        return correctType && haveBulletCosts(GameConstants.PENTAD_SHOT_COST);
+        return correctType && haveBulletCosts(GameConstants.PENTAD_SHOT_COST) && !hasAttacked();
     }
 
     @Override
@@ -787,9 +816,20 @@ public final strictfp class RobotControllerImpl implements RobotController {
                             " this robot's stride.");
         }
     }
+    
+    private void assertOwnedTree(InternalTree tree) throws GameActionException {
+        if(tree.getTeam().equals(Team.NEUTRAL)) {
+            throw new GameActionException(CANT_DO_THAT,
+                    "Can't water a neutral tree.");
+        }
+    }
 
     @Override
     public void chop(MapLocation loc) throws GameActionException {
+        if(getType() != RobotType.LUMBERJACK){
+            throw new GameActionException(CANT_DO_THAT,
+                    "Only lumberjacks can chop");
+        }
         assertNotNull(loc);
         assertIsWeaponReady(); // Chop counts as attack
         assertCanInteractWithTree(loc);
@@ -799,6 +839,10 @@ public final strictfp class RobotControllerImpl implements RobotController {
 
     @Override
     public void chop(int id) throws GameActionException {
+        if(getType() != RobotType.LUMBERJACK){
+            throw new GameActionException(CANT_DO_THAT,
+                    "Only lumberjacks can chop");
+        }
         assertIsWeaponReady();  // Chop counts as attack
         assertCanInteractWithTree(id);
         InternalTree tree = gameWorld.getObjectInfo().getTreeByID(id);
@@ -806,12 +850,9 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     private void chopTree(InternalTree tree){
-        this.robot.incrementAttackCount();
+        this.robot.incrementAttackCount(); // Chopping counts as attack
 
-        float chopDamage = GameConstants.BASE_CHOP_DAMAGE;
-        if(getType() == RobotType.LUMBERJACK){
-            chopDamage *= GameConstants.LUMBERJACK_CHOP_DAMAGE_MULTIPLIER;
-        }
+        float chopDamage = RobotType.LUMBERJACK.attackPower*GameConstants.LUMBERJACK_CHOP_DAMAGE_MULTIPLIER;
 
         tree.damageTree(chopDamage, getTeam());
 
@@ -849,6 +890,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         assertCanWater();
         assertCanInteractWithTree(loc);
         InternalTree tree = gameWorld.getObjectInfo().getTreeAtLocation(loc);
+        assertOwnedTree(tree);
         waterTree(tree);
     }
 
@@ -857,6 +899,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         assertCanWater();
         assertCanInteractWithTree(id);
         InternalTree tree = gameWorld.getObjectInfo().getTreeByID(id);
+        assertOwnedTree(tree);
         waterTree(tree);
     }
 
