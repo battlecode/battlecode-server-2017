@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Serve a battlecode match over a websocket connection.
@@ -40,11 +41,13 @@ public class NetServer extends WebSocketServer {
         queueThread = new Thread(() -> {
             try {
                 while (!done) {
-                    byte[] event = incomingEvents.take();
-                    processEvent(event);
+                    byte[] event = incomingEvents.poll(300, TimeUnit.MILLISECONDS);
+                    if (event != null) {
+                        processEvent(event);
+                    }
                 }
                 while (incomingEvents.size() > 0) {
-                    byte[] event = incomingEvents.take();
+                    byte[] event = incomingEvents.remove();
                     processEvent(event);
                 }
             } catch(Exception e) {
@@ -94,6 +97,7 @@ public class NetServer extends WebSocketServer {
         done = true;
         try {
             queueThread.join();
+            stop();
         } catch (Exception e) {
             ErrorReporter.report(e, true);
         }
