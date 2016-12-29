@@ -63,8 +63,13 @@ public strictfp class GameMaker {
      * This is necessary because flatbuffers shares metadata between structures, so we
      * can't just cut out chunks of the larger buffer :/
      */
-    private final List<byte[]> eventPackets;
     private FlatBufferBuilder packetBuilder;
+
+    /**
+     * The server we're sending packets on.
+     * May be null.
+     */
+    private final NetServer packetSink;
 
     /**
      * Eventually we might extend for more teams.
@@ -84,17 +89,21 @@ public strictfp class GameMaker {
     /**
      * @param teamMapping
      */
-    public GameMaker(final TeamMapping teamMapping){
+    public GameMaker(final TeamMapping teamMapping, final NetServer packetSink){
         this.state = State.GAME_HEADER;
 
+        this.teamMapping = teamMapping;
+
+        this.packetSink = packetSink;
+        if (packetSink != null) {
+            this.packetBuilder = new FlatBufferBuilder();
+        }
+
         this.fileBuilder = new FlatBufferBuilder();
-        this.packetBuilder = new FlatBufferBuilder();
-        this.eventPackets = new ArrayList<>();
 
         this.events = new ArrayList<>();
         this.matchHeaders = new ArrayList<>();
         this.matchFooters = new ArrayList<>();
-        this.teamMapping = teamMapping;
     }
 
     /**
@@ -169,12 +178,15 @@ public strictfp class GameMaker {
         int eventA = perBuilder.applyAsInt(fileBuilder);
         events.add(eventA);
 
-        // make packet event and package it up
-        int eventB = perBuilder.applyAsInt(packetBuilder);
-        packetBuilder.finish(eventB);
-        eventPackets.add(packetBuilder.sizedByteArray());
-        // reset packet builder
-        packetBuilder = new FlatBufferBuilder(packetBuilder.dataBuffer());
+        if (packetSink != null) {
+            // make packet event and package it up
+            int eventB = perBuilder.applyAsInt(packetBuilder);
+            packetBuilder.finish(eventB);
+            packetSink.addEvent(packetBuilder.sizedByteArray());
+
+            // reset packet builder
+            packetBuilder = new FlatBufferBuilder(packetBuilder.dataBuffer());
+        }
     }
 
     /**

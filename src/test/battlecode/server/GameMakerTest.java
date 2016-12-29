@@ -6,11 +6,17 @@ import battlecode.common.Team;
 import battlecode.schema.Event;
 import battlecode.schema.GameWrapper;
 import battlecode.world.TestMapBuilder;
+
 import org.junit.Test;
+import org.mockito.Mockito;
+
 
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author james
@@ -20,7 +26,7 @@ public class GameMakerTest {
     @Test(expected=RuntimeException.class)
     public void testStateExceptions() {
         TeamMapping tm = new TeamMapping("bananas", "yellow");
-        GameMaker gm = new GameMaker(tm);
+        GameMaker gm = new GameMaker(tm, null);
 
         gm.makeGameFooter(Team.A);
     }
@@ -28,15 +34,17 @@ public class GameMakerTest {
     @Test(expected=RuntimeException.class)
     public void testMatchStateExceptions() {
         TeamMapping tm = new TeamMapping("bananas", "yellow");
-        GameMaker gm = new GameMaker(tm);
+        GameMaker gm = new GameMaker(tm, null);
         gm.makeGameHeader();
         gm.createMatchMaker().makeMatchFooter(Team.A, 23);
     }
 
     @Test
     public void fullReasonableGame() {
+        NetServer mockServer = Mockito.mock(NetServer.class);
         TeamMapping tm = new TeamMapping("bananas", "yellow");
-        GameMaker gm = new GameMaker(tm);
+        GameMaker gm = new GameMaker(tm, mockServer);
+
         gm.makeGameHeader();
         GameMaker.MatchMaker mm = gm.createMatchMaker();
         mm.makeMatchHeader(new TestMapBuilder("honolulu", 2, -3, 50, 50,1337, 50)
@@ -48,10 +56,10 @@ public class GameMakerTest {
         mm.makeMatchFooter(Team.B, 2);
 
         GameMaker.MatchMaker mm2 = gm.createMatchMaker();
-        mm.makeMatchHeader(new TestMapBuilder("argentina", 55.3f, -3, 58.76f, 50, 1337, 50)
+        mm2.makeMatchHeader(new TestMapBuilder("argentina", 55.3f, -3, 58.76f, 50, 1337, 50)
                 .build());
-        mm.makeRound(0);
-        mm.makeMatchFooter(Team.A, 1);
+        mm2.makeRound(0);
+        mm2.makeMatchFooter(Team.A, 1);
         gm.makeGameFooter(Team.A);
 
         byte[] gameBytes = gm.toBytes();
@@ -70,6 +78,7 @@ public class GameMakerTest {
         assertEquals(Event.MatchFooter, output.events(7).eType());
         assertEquals(Event.GameFooter, output.events(8).eType());
 
+        // make sure we sent something to the mock server
+        verify(mockServer, times(9)).addEvent(any());
     }
-
 }

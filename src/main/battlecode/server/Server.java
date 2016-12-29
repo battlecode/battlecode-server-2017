@@ -124,8 +124,13 @@ public strictfp class Server implements Runnable {
      * matches.
      */
     public void run() {
-        // Note that this loop only runs once on the client.
-        // Running it multiple times may break things.
+        final NetServer netServer;
+        if (options.getBoolean("bc.server.websocket")) {
+            netServer = new NetServer(options.getInt("bc.server.port"));
+        } else {
+            netServer = null;
+        }
+
         while (true) {
             final GameInfo currentGame;
             debug("Awaiting match");
@@ -141,11 +146,14 @@ public strictfp class Server implements Runnable {
             // Note: ==, not .equals()
             if (currentGame == POISON) {
                 debug("Shutting down server");
+                if (netServer != null) {
+                    netServer.finish();
+                }
                 return;
             }
 
             TeamMapping teamMapping = new TeamMapping(currentGame);
-            GameMaker gameMaker = new GameMaker(teamMapping);
+            GameMaker gameMaker = new GameMaker(teamMapping, netServer);
             gameMaker.makeGameHeader();
 
             debug("Running: "+currentGame);
