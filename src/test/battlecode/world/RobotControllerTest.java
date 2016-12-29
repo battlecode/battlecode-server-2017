@@ -441,6 +441,17 @@ public class RobotControllerTest {
             if (id != gardenerA) return;
             TreeInfo[] bulletTrees = rc.senseNearbyTrees(-1, rc.getTeam());
             assertEquals(bulletTrees.length,0); // no more tree
+            TreeInfo[] neutralTrees = rc.senseNearbyTrees(-1, Team.NEUTRAL);
+            assertEquals(neutralTrees.length,1);
+            
+            // Atempt to water a neutral tree
+            boolean exception = false;
+            try{
+                rc.water(neutralTrees[0].ID);
+            } catch (GameActionException e) {
+                exception = true;
+            }
+            assertTrue(exception);
         });
     }
     

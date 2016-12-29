@@ -816,6 +816,13 @@ public final class RobotControllerImpl implements RobotController {
                             " this robot's stride.");
         }
     }
+    
+    private void assertOwnedTree(InternalTree tree) throws GameActionException {
+        if(tree.getTeam().equals(Team.NEUTRAL)) {
+            throw new GameActionException(CANT_DO_THAT,
+                    "Can't water a neutral tree.");
+        }
+    }
 
     @Override
     public void chop(MapLocation loc) throws GameActionException {
@@ -883,6 +890,7 @@ public final class RobotControllerImpl implements RobotController {
         assertCanWater();
         assertCanInteractWithTree(loc);
         InternalTree tree = gameWorld.getObjectInfo().getTreeAtLocation(loc);
+        assertOwnedTree(tree);
         waterTree(tree);
     }
 
@@ -891,6 +899,7 @@ public final class RobotControllerImpl implements RobotController {
         assertCanWater();
         assertCanInteractWithTree(id);
         InternalTree tree = gameWorld.getObjectInfo().getTreeByID(id);
+        assertOwnedTree(tree);
         waterTree(tree);
     }
 
