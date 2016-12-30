@@ -5,6 +5,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 
+import com.github.davidmoten.rtree.RTree;
 import net.sf.jsi.SpatialIndex;
 import net.sf.jsi.rtree.RTree;
 import net.sf.jsi.Rectangle;
@@ -20,6 +21,8 @@ public strictfp class ObjectInfo {
     private final float mapWidth;
     private final float mapHeight;
     private final MapLocation mapTopLeft;
+
+    private final SpatialIndex si;
 
     private final Map<Integer, InternalRobot> gameRobotsByID;
     private final Map<Integer, InternalTree> gameTreesByID;
@@ -38,6 +41,8 @@ public strictfp class ObjectInfo {
         this.mapWidth = gm.getWidth();
         this.mapHeight = gm.getHeight();
         this.mapTopLeft = gm.getOrigin();
+
+        si = new RTree();
 
         this.gameTreesByID = new LinkedHashMap<>();
         this.gameRobotsByID = new LinkedHashMap<>();
