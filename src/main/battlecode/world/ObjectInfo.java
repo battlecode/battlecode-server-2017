@@ -221,7 +221,7 @@ public strictfp class ObjectInfo {
 
     public InternalTree[] getAllTreesWithinRadius(MapLocation center, float radius){
 
-        float actualRadius = radius + GameConstants.NEUTRAL_TREE_MAX_RADIUS;
+        float searchRadius = radius + GameConstants.NEUTRAL_TREE_MAX_RADIUS;
 
         ArrayList<InternalTree> returnTrees = new ArrayList<InternalTree>();
 
@@ -229,12 +229,14 @@ public strictfp class ObjectInfo {
                 new Point(center.x,center.y),   // Search from center
                 new TIntProcedure() {          // Add each to a list
                     public boolean execute(int i) {
-                        returnTrees.add(getTreeByID(i));
-                        return true;
+                        InternalTree potentialTree = getTreeByID(i);
+                        if (potentialTree.getLocation().isWithinDistance(center,potentialTree.getRadius()+radius))
+                            returnTrees.add(potentialTree);
+                        return true;    // Keep searching for results
                     }
                 },
                 Integer.MAX_VALUE,
-                actualRadius
+                searchRadius
         );
 
         return returnTrees.toArray(new InternalTree[returnTrees.size()]);
@@ -242,7 +244,7 @@ public strictfp class ObjectInfo {
     
     public InternalRobot[] getAllRobotsWithinRadius(MapLocation center, float radius){
 
-        float actualRadius = radius + GameConstants.MAX_ROBOT_RADIUS;
+        float searchRadius = radius + GameConstants.MAX_ROBOT_RADIUS;
 
         ArrayList<InternalRobot> returnRobots = new ArrayList<InternalRobot>();
 
@@ -250,12 +252,14 @@ public strictfp class ObjectInfo {
                 new Point(center.x,center.y),   // Search from center
                 new TIntProcedure() {           // Add each to a list
                     public boolean execute(int i) {
-                        returnRobots.add(getRobotByID(i));
-                        return true;
+                        InternalRobot potentialRobot = getRobotByID(i);
+                        if (potentialRobot.getLocation().isWithinDistance(center,potentialRobot.getType().bodyRadius+radius))
+                            returnRobots.add(potentialRobot);
+                        return true;   // Keep searching for results
                     }
                 },
                 Integer.MAX_VALUE,
-                actualRadius
+                searchRadius
         );
 
         return returnRobots.toArray(new InternalRobot[returnRobots.size()]);
@@ -265,7 +269,7 @@ public strictfp class ObjectInfo {
 
         ArrayList<InternalBullet> returnBullets = new ArrayList<InternalBullet>();
 
-        treeIndex.nearestNUnsorted(
+        bulletIndex.nearestNUnsorted(
                 new Point(center.x,center.y),   // Search from center
                 new TIntProcedure() {           // Add each to a list
                     public boolean execute(int i) {
@@ -309,7 +313,7 @@ public strictfp class ObjectInfo {
         // even though it only contains one element, arraylist is required to be accessed from inside TIntProcedure
         ArrayList<InternalRobot> returnRobots = new ArrayList<InternalRobot>();
 
-        treeIndex.nearest(
+        robotIndex.nearest(
                 new Point(loc.x,loc.y),
                 new TIntProcedure() {
                     public boolean execute(int i) {
