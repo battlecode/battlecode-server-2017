@@ -119,7 +119,7 @@ public class RobotTypeTaglet implements Taglet {
         if (field.getType() == int.class) {
             value = asCode(Integer.toString(field.getInt(variant)));
         } else if (field.getType() == float.class) {
-            value = asCode(String.format("%1.0f", field.getFloat(variant)));
+            value = asCode(String.format("%1.1f", field.getFloat(variant)));
         } else if (field.getType() == double.class) {
             value = asCode(String.format("%1.0f", field.getDouble(variant)));
         } else if (field.getType() == boolean.class) {
