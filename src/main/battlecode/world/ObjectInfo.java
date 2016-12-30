@@ -5,6 +5,11 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 
+import net.sf.jsi.SpatialIndex;
+import net.sf.jsi.rtree.RTree;
+import net.sf.jsi.Rectangle;
+import net.sf.jsi.Point;
+
 import java.util.*;
 
 /**
