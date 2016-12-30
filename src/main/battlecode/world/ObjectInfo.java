@@ -5,7 +5,8 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 
-import com.github.davidmoten.rtree.RTree;
+import gnu.trove.procedure.TIntProcedure;
+
 import net.sf.jsi.SpatialIndex;
 import net.sf.jsi.rtree.RTree;
 import net.sf.jsi.Rectangle;
@@ -22,15 +23,13 @@ public strictfp class ObjectInfo {
     private final float mapHeight;
     private final MapLocation mapTopLeft;
 
-    private final SpatialIndex si;
-
     private final Map<Integer, InternalRobot> gameRobotsByID;
     private final Map<Integer, InternalTree> gameTreesByID;
     private final Map<Integer, InternalBullet> gameBulletsByID;
 
-    private final Set<Integer>[][] treeLocations;
-    private final Set<Integer>[][] robotLocations;
-    private final Set<Integer>[][] bulletLocations;
+    private final SpatialIndex treeIndex;
+    private final SpatialIndex robotIndex;
+    private final SpatialIndex bulletIndex;
 
     private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<>(
             Team.class);
@@ -42,23 +41,17 @@ public strictfp class ObjectInfo {
         this.mapHeight = gm.getHeight();
         this.mapTopLeft = gm.getOrigin();
 
-        si = new RTree();
-
         this.gameTreesByID = new LinkedHashMap<>();
         this.gameRobotsByID = new LinkedHashMap<>();
         this.gameBulletsByID = new LinkedHashMap<>();
 
-        this.treeLocations = new Set[(int) mapHeight][(int) mapWidth];
-        this.robotLocations = new Set[(int) mapHeight][(int) mapWidth];
-        this.bulletLocations = new Set[(int) mapHeight][(int) mapWidth];
+        treeIndex = new RTree();
+        robotIndex = new RTree();
+        bulletIndex = new RTree();
 
-        for(int i = 0; i < (int) mapHeight; i++){
-            for(int j = 0; j < (int) mapWidth; j++){
-                this.treeLocations[i][j] = new HashSet<>();
-                this.robotLocations[i][j] = new HashSet<>();
-                this.bulletLocations[i][j] = new HashSet<>();
-            }
-        }
+        treeIndex.init(null);
+        robotIndex.init(null);
+        bulletIndex.init(null);
 
         robotTypeCount.put(Team.A, new EnumMap<>(
                 RobotType.class));
@@ -130,29 +123,16 @@ public strictfp class ObjectInfo {
 
     public void moveBullet(InternalBullet bullet, MapLocation newLocation) {
         MapLocation loc = bullet.getLocation();
-        int xIndex = convertToXIndex(loc.x);
-        int yIndex = convertToYIndex(loc.y);
 
-        bulletLocations[yIndex][xIndex].remove(bullet.getID());
-
-        int newXIndex = convertToXIndex(newLocation.x);
-        int newYIndex = convertToYIndex(newLocation.y);
-
-        bulletLocations[newYIndex][newXIndex].add(bullet.getID());
+        bulletIndex.delete(fromPoint(loc),bullet.getID());
+        bulletIndex.add(fromPoint(newLocation),bullet.getID());
     }
 
     public void moveRobot(InternalRobot robot, MapLocation newLocation) {
         MapLocation loc = robot.getLocation();
-        int xIndex = convertToXIndex(loc.x);
-        int yIndex = convertToYIndex(loc.y);
 
-        robotLocations[yIndex][xIndex].remove(robot.getID());
-
-        int newXIndex = convertToXIndex(newLocation.x);
-        int newYIndex = convertToYIndex(newLocation.y);
-
-        robotLocations[newYIndex][newXIndex].add(robot.getID());
-
+        bulletIndex.delete(fromPoint(loc),robot.getID());
+        bulletIndex.add(fromPoint(newLocation),robot.getID());
     }
 
     // ****************************
@@ -166,9 +146,7 @@ public strictfp class ObjectInfo {
         gameTreesByID.put(id, tree);
 
         MapLocation loc = tree.getLocation();
-        int xIndex = convertToXIndex(loc.x);
-        int yIndex = convertToYIndex(loc.y);
-        treeLocations[yIndex][xIndex].add(id);
+        treeIndex.add(fromPoint(loc),tree.getID());
     }
 
     public void spawnRobot(InternalRobot robot){
@@ -179,9 +157,7 @@ public strictfp class ObjectInfo {
         gameRobotsByID.put(id, robot);
 
         MapLocation loc = robot.getLocation();
-        int xIndex = convertToXIndex(loc.x);
-        int yIndex = convertToYIndex(loc.y);
-        robotLocations[yIndex][xIndex].add(id);
+        robotIndex.add(fromPoint(loc),robot.getID());
     }
 
     public void spawnBullet(InternalBullet bullet){
@@ -189,10 +165,7 @@ public strictfp class ObjectInfo {
         gameBulletsByID.put(id, bullet);
 
         MapLocation loc = bullet.getLocation();
-
-        int xIndex = convertToXIndex(loc.x);
-        int yIndex = convertToYIndex(loc.y);
-        bulletLocations[yIndex][xIndex].add(id);
+        bulletIndex.add(fromPoint(loc),bullet.getID());
     }
 
     // ****************************
@@ -220,11 +193,8 @@ public strictfp class ObjectInfo {
         decrementTreeCount(tree.getTeam());
 
         MapLocation loc = tree.getLocation();
-        int xIndex = convertToXIndex(loc.x);
-        int yIndex = convertToYIndex(loc.y);
-
         gameTreesByID.remove(id);
-        treeLocations[yIndex][xIndex].remove(id);
+        treeIndex.delete(fromPoint(loc),id);
     }
 
     public void destroyRobot(int id){
@@ -233,22 +203,16 @@ public strictfp class ObjectInfo {
         decrementRobotTypeCount(robot.getTeam(), robot.getType());
 
         MapLocation loc = robot.getLocation();
-        int xIndex = convertToXIndex(loc.x);
-        int yIndex = convertToYIndex(loc.y);
-
         gameRobotsByID.remove(id);
-        robotLocations[yIndex][xIndex].remove(id);
+        robotIndex.delete(fromPoint(loc),id);
     }
 
     public void destroyBullet(int id){
         InternalBullet b = getBulletByID(id);
 
         MapLocation loc = b.getLocation();
-
-        int xIndex = convertToXIndex(loc.x);
-        int yIndex = convertToYIndex(loc.y);
         gameBulletsByID.remove(id);
-        bulletLocations[yIndex][xIndex].remove(id);
+        bulletIndex.delete(fromPoint(loc),id);
     }
     
     // ****************************
@@ -256,129 +220,112 @@ public strictfp class ObjectInfo {
     // ****************************
 
     public InternalTree[] getAllTreesWithinRadius(MapLocation center, float radius){
-        if (radius <= 0) {
-            return new InternalTree[] { getTreeAtLocation(center) };
-        }
-        radius = (float) Math.ceil(radius);
 
-        ArrayList<InternalTree> trees = new ArrayList<>();
-        int minXPos = convertToXIndex(center.x - radius - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
-        int maxXPos = convertToXIndex(center.x + radius + GameConstants.NEUTRAL_TREE_MAX_RADIUS);
-        int minYPos = convertToYIndex(center.y - radius - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
-        int maxYPos = convertToYIndex(center.y + radius + GameConstants.NEUTRAL_TREE_MAX_RADIUS);
+        float actualRadius = radius + GameConstants.NEUTRAL_TREE_MAX_RADIUS;
 
-        for (int x = minXPos; x <= maxXPos; x++) {
-            for (int y = minYPos; y <= maxYPos; y++) {
-                if(inBounds(x, y)){
-                    for(int treeID : treeLocations[y][x]){
-                        InternalTree tree = getTreeByID(treeID);
-                        if(center.isWithinDistance(tree.getLocation(), radius+tree.getRadius())){
-                            trees.add(tree);
-                        }
+        ArrayList<InternalTree> returnTrees = new ArrayList<InternalTree>();
+
+        treeIndex.nearestNUnsorted(
+                new Point(center.x,center.y),   // Search from center
+                new TIntProcedure() {          // Add each to a list
+                    public boolean execute(int i) {
+                        returnTrees.add(getTreeByID(i));
+                        return true;
                     }
-                }
-            }
-        }
-        return trees.toArray(new InternalTree[trees.size()]);
+                },
+                Integer.MAX_VALUE,
+                actualRadius
+        );
+
+        return returnTrees.toArray(new InternalTree[returnTrees.size()]);
     }
     
     public InternalRobot[] getAllRobotsWithinRadius(MapLocation center, float radius){
-        if (radius <= 0) {
-            return new InternalRobot[] { getRobotAtLocation(center) };
-        }
-        //radius = (float) Math.ceil(radius); wtf was this doing here, it caused so much pain and debugging
 
-        ArrayList<InternalRobot> robots = new ArrayList<>();
-        int minXPos = convertToXIndex(center.x - radius - GameConstants.MAX_ROBOT_RADIUS);
-        int maxXPos = convertToXIndex(center.x + radius + GameConstants.MAX_ROBOT_RADIUS);
-        int minYPos = convertToYIndex(center.y - radius - GameConstants.MAX_ROBOT_RADIUS);
-        int maxYPos = convertToYIndex(center.y + radius + GameConstants.MAX_ROBOT_RADIUS);
+        float actualRadius = radius + GameConstants.MAX_ROBOT_RADIUS;
 
-        for (int x = minXPos; x <= maxXPos; x++) {
-            for (int y = minYPos; y <= maxYPos; y++) {
-                if(inBounds(x, y)){
-                    for(int robotID : robotLocations[y][x]){
-                        InternalRobot robot = getRobotByID(robotID);
-                        if (robot == null) {
-                            throw new RuntimeException("NULL ROBOT: "+robotID);
-                        }
-                        if(center.isWithinDistance(robot.getLocation(), radius+robot.getType().bodyRadius)){
-                            robots.add(robot);
-                        }
+        ArrayList<InternalRobot> returnRobots = new ArrayList<InternalRobot>();
+
+        robotIndex.nearestNUnsorted(
+                new Point(center.x,center.y),   // Search from center
+                new TIntProcedure() {           // Add each to a list
+                    public boolean execute(int i) {
+                        returnRobots.add(getRobotByID(i));
+                        return true;
                     }
-                }
-            }
-        }
-        return robots.toArray(new InternalRobot[robots.size()]);
+                },
+                Integer.MAX_VALUE,
+                actualRadius
+        );
+
+        return returnRobots.toArray(new InternalRobot[returnRobots.size()]);
     }
     
     public InternalBullet[] getAllBulletsWithinRadius(MapLocation center, float radius){
-        if (radius <= 0) {
-            return new InternalBullet[0];
-        }
-        radius = (float) Math.ceil(radius);
 
-        ArrayList<InternalBullet> bullets = new ArrayList<>();
-        int minXPos = convertToXIndex(center.x - radius);
-        int maxXPos = convertToXIndex(center.x + radius);
-        int minYPos = convertToYIndex(center.y - radius);
-        int maxYPos = convertToYIndex(center.y + radius);
+        ArrayList<InternalBullet> returnBullets = new ArrayList<InternalBullet>();
 
-        for (int x = minXPos; x <= maxXPos; x++) {
-            for (int y = minYPos; y <= maxYPos; y++) {
-                if(inBounds(x, y)){
-                    for(int bulletID : bulletLocations[y][x]){
-                        InternalBullet bullet = getBulletByID(bulletID);
-                        if(center.isWithinDistance(bullet.getLocation(), radius)){
-                            bullets.add(bullet);
-                        }
+        treeIndex.nearestNUnsorted(
+                new Point(center.x,center.y),   // Search from center
+                new TIntProcedure() {           // Add each to a list
+                    public boolean execute(int i) {
+                        returnBullets.add(getBulletByID(i));
+                        return true;
                     }
-                }
-            }
-        }
-        return bullets.toArray(new InternalBullet[bullets.size()]);
+                },
+                Integer.MAX_VALUE,
+                radius
+        );
+
+        return returnBullets.toArray(new InternalBullet[returnBullets.size()]);
     }
     
     public InternalTree getTreeAtLocation(MapLocation loc){
-        int minXPos = convertToXIndex(loc.x - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
-        int maxXPos = convertToXIndex(loc.x + GameConstants.NEUTRAL_TREE_MAX_RADIUS);
-        int minYPos = convertToYIndex(loc.y - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
-        int maxYPos = convertToYIndex(loc.y + GameConstants.NEUTRAL_TREE_MAX_RADIUS);
 
-        for (int x = minXPos; x <= maxXPos; x++) {
-            for (int y = minYPos; y <= maxYPos; y++) {
-                if(inBounds(x,y)) {
-                    for (int treeID : treeLocations[x][y]) {
-                        InternalTree tree = gameTreesByID.get(treeID);
-                        if (tree.getLocation().isWithinDistance(loc, tree.getRadius())) {
-                            return tree;
-                        }
+        // even though it only contains one element, arraylist is required to be accessed from inside TIntProcedure
+        ArrayList<InternalTree> returnTrees = new ArrayList<InternalTree>();
+
+        treeIndex.nearest(
+                new Point(loc.x,loc.y),
+                new TIntProcedure() {
+                    public boolean execute(int i) {
+                        InternalTree potentialTree = getTreeByID(i);
+                        if (potentialTree.getLocation().isWithinDistance(loc,potentialTree.getRadius()))
+                            returnTrees.add(potentialTree);
+                        return false;   // Don't need any more results
                     }
-                }
-            }
-        }
-        return null;
+                },
+                GameConstants.NEUTRAL_TREE_MAX_RADIUS  // Furthest distance
+        );
+
+        if(returnTrees.size() > 0)
+            return returnTrees.get(0);
+        else
+            return null;
     }
 
     public InternalRobot getRobotAtLocation(MapLocation loc){
-        int minXPos = convertToXIndex(loc.x - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
-        int maxXPos = convertToXIndex(loc.x + GameConstants.NEUTRAL_TREE_MAX_RADIUS);
-        int minYPos = convertToYIndex(loc.y - GameConstants.NEUTRAL_TREE_MAX_RADIUS);
-        int maxYPos = convertToYIndex(loc.y + GameConstants.NEUTRAL_TREE_MAX_RADIUS);
 
-        for (int x = minXPos; x <= maxXPos; x++) {
-            for (int y = minYPos; y <= maxYPos; y++) {
-                if(inBounds(x,y)) {
-                    for (int robotID : robotLocations[x][y]) {
-                        InternalRobot robot = gameRobotsByID.get(robotID);
-                        if (robot.getLocation().isWithinDistance(loc, robot.getType().bodyRadius)) {
-                            return robot;
-                        }
+        // even though it only contains one element, arraylist is required to be accessed from inside TIntProcedure
+        ArrayList<InternalRobot> returnRobots = new ArrayList<InternalRobot>();
+
+        treeIndex.nearest(
+                new Point(loc.x,loc.y),
+                new TIntProcedure() {
+                    public boolean execute(int i) {
+                        InternalRobot potentialRobot = getRobotByID(i);
+                        if (potentialRobot.getLocation().isWithinDistance(loc,potentialRobot.getType().bodyRadius))
+                            returnRobots.add(potentialRobot);
+                        return false;   // Don't need any more results
                     }
-                }
-            }
-        }
-        return null;
+                },
+                GameConstants.MAX_ROBOT_RADIUS  // Furthest distance
+        );
+
+        if(returnRobots.size() > 0)
+            return returnRobots.get(0);
+        else
+            return null;
     }
 
     public boolean isEmpty(MapLocation loc, float radius){
@@ -410,22 +357,21 @@ public strictfp class ObjectInfo {
         }
     }
 
+    private Rectangle fromPoint(float x, float y) {
+        return new Rectangle(x,y,x,y);
+    }
+
+    private Rectangle fromPoint(Point p) {
+        return new Rectangle(p.x,p.y,p.x,p.y);
+    }
+
+    private Rectangle fromPoint(MapLocation loc) {
+        return new Rectangle(loc.x,loc.y,loc.x,loc.y);
+    }
+
     // ****************************
     // *** PRIVATE METHODS ********
     // ****************************
-
-    private boolean inBounds(float x, float y){
-        return (x >= 0 && x < mapWidth &&
-                y >= 0 && y < mapHeight);
-    }
-
-    private int convertToXIndex(double x){
-        return (int) Math.floor(x - mapTopLeft.x);
-    }
-
-    private int convertToYIndex(double y){
-        return (int) Math.floor(y - mapTopLeft.y);
-    }
 
     private void incrementRobotCount(Team team) {
         robotCount[team.ordinal()]++;
