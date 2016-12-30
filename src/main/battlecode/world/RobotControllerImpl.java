@@ -635,6 +635,13 @@ public final strictfp class RobotControllerImpl implements RobotController {
         }
     }
 
+    private void assertNonNegative(float cost) throws GameActionException{
+        if(cost < 0) {
+            throw new GameActionException(CANT_DO_THAT,
+                    "Can't purchase negative victory points");
+        }
+    }
+
     /**
      * Fires specified bullet spread.  Assumes odd number of bullets to fire.
      *
@@ -1120,9 +1127,10 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     @Override
-    public void donate(int bullets) throws GameActionException{
+    public void donate(float bullets) throws GameActionException{
+        assertNonNegative(bullets);
         assertHaveBulletCosts(bullets);
-        int gainedVictorPoints = bullets / GameConstants.BULLET_EXCHANGE_RATE;
+        int gainedVictorPoints = (int)bullets / GameConstants.BULLET_EXCHANGE_RATE;
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -bullets);
         gameWorld.getTeamInfo().adjustVictoryPoints(getTeam(), gainedVictorPoints);
     }

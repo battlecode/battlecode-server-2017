@@ -454,7 +454,7 @@ public class RobotControllerTest {
             assertTrue(exception);
         });
     }
-    
+
     @Test // Normal robots blocked by trees and other robots, drones fly over but blocked by other drones
     public void obstructionTest() throws GameActionException {
         
@@ -463,6 +463,47 @@ public class RobotControllerTest {
     @Test // Bullet collision works continuously and not at discrete intervals
     public void continuousBulletCollisionTest() throws GameActionException {
         
+    }
+
+    @Test // Buying victory points
+    public void victoryPointTest() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int archonA = game.spawn(5, 5, RobotType.GARDENER, Team.B);
+        final int archonB = game.spawn(5, 5, RobotType.GARDENER, Team.B);
+
+        game.round((id, rc) -> {
+            if (id != archonA) return;
+            rc.donate(100);
+            assertEquals(rc.getTeamBullets(),GameConstants.BULLETS_INITIAL_AMOUNT-100,EPSILON);
+            assertEquals(rc.getTeamVictoryPoints(),100/10);
+            rc.donate(9);
+            rc.donate(9);
+            assertEquals(rc.getTeamBullets(),GameConstants.BULLETS_INITIAL_AMOUNT-118,EPSILON);
+            assertEquals(rc.getTeamVictoryPoints(),100/10);
+
+            // Try to donate negative bullets, should fail.
+            boolean exception = false;
+            try {
+                rc.donate(-1);
+            } catch (GameActionException e) {
+                exception = true;
+            }
+            assertTrue(exception);
+
+            // Try to donate more than you have, should fail.
+            exception = false;
+            try {
+                rc.donate(rc.getTeamBullets()+0.1f);
+            } catch (GameActionException e) {
+                exception = true;
+            }
+            assertTrue(exception);
+        });
     }
     
     // test goodies inside trees

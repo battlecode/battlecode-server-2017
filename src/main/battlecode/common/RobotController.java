@@ -1058,7 +1058,7 @@ public strictfp interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    void donate(int bullets) throws GameActionException;
+    void donate(float bullets) throws GameActionException;
 
     /**
      * Repairs the robot at the given location. The robot must be within one
