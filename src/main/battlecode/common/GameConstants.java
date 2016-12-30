@@ -6,6 +6,11 @@ package battlecode.common;
 @SuppressWarnings("unused")
 public interface GameConstants {
 
+    /**
+     * The current spec version the server compiles with.
+     */
+    String SPEC_VERSION = "1.0";
+
     // *********************************
     // ****** MAP CONSTANTS ************
     // *********************************

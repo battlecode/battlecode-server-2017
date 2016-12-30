@@ -2,10 +2,10 @@ package battlecode.world;
 
 import battlecode.common.*;
 import battlecode.server.ErrorReporter;
+import battlecode.server.GameMaker;
 import battlecode.server.GameState;
 import battlecode.server.TeamMapping;
 import battlecode.world.control.RobotControlProvider;
-import com.google.flatbuffers.FlatBufferBuilder;
 
 import java.util.*;
 
@@ -25,7 +25,6 @@ public strictfp class GameWorld{
     protected boolean running = true;
 
     protected final IDGenerator idGenerator;
-    protected final TeamMapping teamMapping;
     protected final GameStats gameStats;
 
     private final LiveMap gameMap;
@@ -38,17 +37,14 @@ public strictfp class GameWorld{
     private final RobotControlProvider controlProvider;
     private Random rand;
 
-    private final FlatBufferBuilder builder;
-    private final MatchMaker matchMaker;
+    private final GameMaker.MatchMaker matchMaker;
 
     @SuppressWarnings("unchecked")
     public GameWorld(LiveMap gm, RobotControlProvider cp,
-                     TeamMapping teamMapping,
-                     long[][] oldTeamMemory, FlatBufferBuilder builder) {
+                     long[][] oldTeamMemory, GameMaker.MatchMaker matchMaker) {
         
         this.currentRound = 0;
         this.idGenerator = new IDGenerator(gm.getSeed());
-        this.teamMapping = teamMapping;
         this.gameStats = new GameStats();
 
         this.gameMap = gm;
@@ -62,8 +58,7 @@ public strictfp class GameWorld{
 
         this.rand = new Random(gameMap.getSeed());
 
-        this.builder = builder;
-        this.matchMaker = new MatchMaker(builder, teamMapping);
+        this.matchMaker = matchMaker;
 
         controlProvider.matchStarted(this);
 
@@ -117,7 +112,7 @@ public strictfp class GameWorld{
             return GameState.DONE;
         }
         // Write out round data
-        matchMaker.writeAndClearRoundData(currentRound);
+        matchMaker.makeRound(currentRound);
         return GameState.RUNNING;
     }
 
@@ -192,7 +187,7 @@ public strictfp class GameWorld{
         return objectInfo;
     }
 
-    public MatchMaker getMatchMaker() {
+    public GameMaker.MatchMaker getMatchMaker() {
         return matchMaker;
     }
 

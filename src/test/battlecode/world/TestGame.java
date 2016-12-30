@@ -1,11 +1,13 @@
 package battlecode.world;
 
 import battlecode.common.*;
+import battlecode.server.GameMaker;
 import battlecode.server.TeamMapping;
 import battlecode.world.control.NullControlProvider;
 import battlecode.world.control.RobotControlProvider;
 import com.google.flatbuffers.FlatBufferBuilder;
 import org.junit.Ignore;
+import org.mockito.Mockito;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -49,9 +51,10 @@ public class TestGame {
     public TestGame(LiveMap map, long[][] memory) {
         world = new GameWorld(map,
                 new TestControlProvider(),
-                new TeamMapping("testA", "testB"),
                 memory,
-                new FlatBufferBuilder());
+                // this is a hack.
+                // there should be a cleaner way to do this?
+                Mockito.mock(GameMaker.MatchMaker.class));
     }
 
     /**

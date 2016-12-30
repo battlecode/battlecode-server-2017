@@ -22,11 +22,6 @@ public strictfp class Server implements Runnable {
     private static final GameInfo POISON = new GameInfo(null, null, null, null, null, null, false) {};
 
     /**
-     * The current spec version the server compiles with
-     */
-    private static final String SPEC_VERSION = "1.0";
-
-    /**
      * The queue of games to run.
      * When the server encounters the GameInfo POISON, it terminates.
      */
@@ -35,7 +30,7 @@ public strictfp class Server implements Runnable {
     /**
      * The state of the match that the server is running (or about to run).
      */
-    private State state;
+    private ServerState state;
 
     /**
      * The round number to run until.
@@ -84,7 +79,7 @@ public strictfp class Server implements Runnable {
         this.interactive = interactive;
 
         this.options = options;
-        this.state = State.NOT_READY;
+        this.state = ServerState.NOT_READY;
     }
 
     // ******************************
@@ -92,22 +87,22 @@ public strictfp class Server implements Runnable {
     // ******************************
 
     public void startNotification(){
-        state = State.READY;
+        state = ServerState.READY;
     }
 
     public void pauseNotification(){
-        state = State.PAUSED;
+        state = ServerState.PAUSED;
     }
 
     public void resumeNotification(){
-        if (state == State.PAUSED){
-            state = State.RUNNING;
+        if (state == ServerState.PAUSED){
+            state = ServerState.RUNNING;
         }
     }
 
     public void runNotification(){
-        if (state != State.PAUSED) {
-            state = State.RUNNING;
+        if (state != ServerState.PAUSED) {
+            state = ServerState.RUNNING;
         }
     }
 
@@ -129,8 +124,14 @@ public strictfp class Server implements Runnable {
      * matches.
      */
     public void run() {
-        // Note that this loop only runs once on the client.
-        // Running it multiple times may break things.
+        final NetServer netServer;
+        if (options.getBoolean("bc.server.websocket")) {
+            netServer = new NetServer(options.getInt("bc.server.port"));
+            netServer.start();
+        } else {
+            netServer = null;
+        }
+
         while (true) {
             final GameInfo currentGame;
             debug("Awaiting match");
@@ -146,12 +147,15 @@ public strictfp class Server implements Runnable {
             // Note: ==, not .equals()
             if (currentGame == POISON) {
                 debug("Shutting down server");
+                if (netServer != null) {
+                    netServer.finish();
+                }
                 return;
             }
 
-            GameMaker gameMaker = new GameMaker();
             TeamMapping teamMapping = new TeamMapping(currentGame);
-            gameMaker.makeGameHeader(SPEC_VERSION, teamMapping);
+            GameMaker gameMaker = new GameMaker(teamMapping, netServer);
+            gameMaker.makeGameHeader();
 
             debug("Running: "+currentGame);
 
@@ -172,7 +176,7 @@ public strictfp class Server implements Runnable {
                     winner = runMatch(currentGame, matchIndex, prov, teamMemory, teamMapping, gameMaker);
                 } catch (Exception e) {
                     ErrorReporter.report(e);
-                    this.state = State.ERROR;
+                    this.state = ServerState.ERROR;
                     return;
                 }
 
@@ -196,9 +200,8 @@ public strictfp class Server implements Runnable {
                     }
                 }
             }
-            byte winner = aWins >= bWins ? teamMapping.getTeamAID() : teamMapping.getTeamBID();
+            Team winner = aWins >= bWins ? Team.A : Team.B;
             gameMaker.makeGameFooter(winner);
-            gameMaker.makeGameWrapper();
             gameMaker.writeGame(currentGame.getSaveFile());
         }
     }
@@ -228,65 +231,41 @@ public strictfp class Server implements Runnable {
         }
 
         // Create the game world!
-        currentWorld = new GameWorld(loadedMap, prov, teamMapping, teamMemory, gameMaker.getBuilder());
+        currentWorld = new GameWorld(loadedMap, prov, teamMemory, gameMaker.createMatchMaker());
 
         // Get started
         if (interactive) {
             // TODO necessary?
             // Poll for RUNNING, if we're in interactive mode
-            while (!State.RUNNING.equals(state)) {
+            while (!ServerState.RUNNING.equals(state)) {
                 try {
                     Thread.sleep(250);
                 } catch (InterruptedException e) {}
             }
         } else {
             // Start the game immediately if we're not in interactive mode
-            this.state = State.RUNNING;
+            this.state = ServerState.RUNNING;
             this.runUntil = Integer.MAX_VALUE;
         }
 
-        // Print an
         long startTime = System.currentTimeMillis();
         say("-------------------- Match Starting --------------------");
         say(String.format("%s vs. %s on %s", currentGame.getTeamA(), currentGame.getTeamB(), mapName));
 
-        // Used to count throttles
-        int count = 0;
-
-        final String throttle = options.get("bc.server.throttle");
-        final int throttleCount = options.getInt("bc.server.throttle-count");
-        final boolean doYield = "yield".equals(throttle);
-        final boolean doSleep = "sleep".equals(throttle);
-
         // If there are more rounds to be run, run them and
         // and send the round (and optionally stats) bytes to
         // recipients.
-        while (this.state != State.FINISHED) {
+        while (this.state != ServerState.FINISHED) {
 
             // If not paused/stopped:
             switch (this.state) {
 
                 case RUNNING:
-                    if (currentWorld.getCurrentRound() + 1 == runUntil) {
-                        Thread.sleep(25);
-                        break;
-                    }
-
                     GameState state = currentWorld.runRound();
 
-                    if (GameState.BREAKPOINT.equals(state)) {
-                        this.state = State.PAUSED;
-                    } else if (GameState.DONE.equals(state)) {
-                        this.state = State.FINISHED;
+                    if (GameState.DONE.equals(state)) {
+                        this.state = ServerState.FINISHED;
                         break;
-                    }
-
-                    if (count++ == throttleCount) {
-                        if (doYield)
-                            Thread.yield();
-                        else if (doSleep)
-                            Thread.sleep(1);
-                        count = 0;
                     }
 
                     break;
@@ -303,8 +282,6 @@ public strictfp class Server implements Runnable {
         double timeDiff = (System.currentTimeMillis() - startTime) / 1000.0;
         debug(String.format("match completed in %.4g seconds", timeDiff));
 
-        // Add match info to game info for flatbuffer
-        gameMaker.addMatchInfo(currentWorld.getMatchMaker().getEvents());
 
         return currentWorld.getWinner();
     }
@@ -347,7 +324,7 @@ public strictfp class Server implements Runnable {
     /**
      * @return the state of the game
      */
-    public State getState() {
+    public ServerState getState() {
         return this.state;
     }
 
@@ -438,7 +415,6 @@ public strictfp class Server implements Runnable {
         for (String line : msg.split("\n")) {
             System.out.printf("[server] %s\n", line);
         }
-
     }
 
     /**

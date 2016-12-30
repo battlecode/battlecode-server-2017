@@ -41,17 +41,10 @@ dependencies {
 	     
     // Flatbuffers
     [group: 'com.github.davidmoten', name: 'flatbuffers-java', version: '1.3.0.1'],
-	     
-    // JSON serialization
-    [group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.3'],
-    // Uses features from Java 8 to make JSON serialization more convenient
-    [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.6.3'],
 
-    // ivy thinks xstream depends on 6 different xml parsers and 3 optional packages but we only need xpp3, and xmlpull, which specifies xpp3's API.
-    [group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.8', transitive: false],
-    [group: 'xpp3', name: 'xpp3_min', version: '1.1.4c'],
-    [group: 'xmlpull', name: 'xmlpull', version: '1.1.3.1'],
-    
+    // Websockets
+    [group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.3.0'],
+
     // we only use WeakIdentityHashMap which doesn't depend on anything
     [group: 'org.hibernate', name: 'hibernate-search', version: '3.1.0.GA', transitive: false],
 

@@ -30,8 +30,9 @@ public class Config {
         // Default configuration options.
         defaults = new Properties();
 
-        defaults.setProperty("bc.server.port", "6370");
-        defaults.setProperty("bc.server.mode", "local");
+        defaults.setProperty("bc.server.websocket", "true");
+        defaults.setProperty("bc.server.port", "6175");
+
         defaults.setProperty("bc.server.save-file", "match.rms");
         defaults.setProperty("bc.server.transcribe-input", "match.rms");
         defaults.setProperty("bc.server.transcribe-output", "transcribed.txt");
@@ -44,34 +45,14 @@ public class Config {
         defaults.setProperty("bc.engine.silence-b", "false");
         defaults.setProperty("bc.engine.silence-c", "false");
         defaults.setProperty("bc.engine.silence-d", "false");
-        defaults.setProperty("bc.engine.upkeep", "true");
-        defaults.setProperty("bc.engine.breakpoints", "false");
         defaults.setProperty("bc.engine.debug-methods", "false");
-
-        // TODO clean up
-        defaults.setProperty("bc.client.opengl", "false");
-        defaults.setProperty("bc.client.use-models", "true");
-        defaults.setProperty("bc.client.applet", "false");
-        defaults.setProperty("bc.client.applet.path", "http://battlecode.mit.edu/2010/online-client/");
-        defaults.setProperty("bc.client.renderprefs2d", "");
-        defaults.setProperty("bc.client.renderprefs3d", "");
-        defaults.setProperty("bc.client.sound-on", "true");
-        defaults.setProperty("bc.client.check-updates", "true");
-        defaults.setProperty("bc.client.tournament-multiscreen", "true");
-        defaults.setProperty("bc.client.viewer-delay", "50");
-        defaults.setProperty("bc.client.details", "true");
 
         defaults.setProperty("bc.game.team-a", "team000");
         defaults.setProperty("bc.game.team-b", "team000");
         defaults.setProperty("bc.game.maps", "glass");
         defaults.setProperty("bc.game.map-path", "maps");
         defaults.setProperty("bc.game.state", "0,0");
-        defaults.setProperty("bc.game.allow-air-units", "true");
-        defaults.setProperty("bc.game.disable-zombies", "false");
 
-        defaults.setProperty("bc.dialog.skip", "false");
-        
-        
         defaults.setProperty("match.zombie-armageddon", "false");
 
         // Command-line options.
