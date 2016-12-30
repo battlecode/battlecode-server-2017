@@ -8,6 +8,9 @@ import battlecode.schema.*;
 import battlecode.util.FlatHelpers;
 import battlecode.world.*;
 import com.google.flatbuffers.FlatBufferBuilder;
+import gnu.trove.list.array.TByteArrayList;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -84,12 +87,13 @@ public strictfp class GameMaker {
      * that lets you quickly navigate to events by index, and tells you the
      * indices of headers and footers.
      */
-    private List<Integer> events;
-    private List<Integer> matchHeaders;
-    private List<Integer> matchFooters;
+    private TIntArrayList events;
+    private TIntArrayList matchHeaders;
+    private TIntArrayList matchFooters;
 
     /**
-     * @param teamMapping
+     * @param teamMapping the mapping of teams to bytes
+     * @param packetSink the NetServer to send packets to
      */
     public GameMaker(final TeamMapping teamMapping, final NetServer packetSink){
         this.state = State.GAME_HEADER;
@@ -103,9 +107,9 @@ public strictfp class GameMaker {
 
         this.fileBuilder = new FlatBufferBuilder();
 
-        this.events = new ArrayList<>();
-        this.matchHeaders = new ArrayList<>();
-        this.matchFooters = new ArrayList<>();
+        this.events = new TIntArrayList();
+        this.matchHeaders = new TIntArrayList();
+        this.matchFooters = new TIntArrayList();
     }
 
     /**
@@ -138,9 +142,9 @@ public strictfp class GameMaker {
         if (finishedGame == null) {
             assertState(State.DONE);
 
-            int events = GameWrapper.createEventsVector(fileBuilder, ArrayUtils.toPrimitive(this.events.toArray(new Integer[this.events.size()])));
-            int matchHeaders = GameWrapper.createMatchHeadersVector(fileBuilder, ArrayUtils.toPrimitive(this.matchHeaders.toArray(new Integer[this.matchHeaders.size()])));
-            int matchFooters = GameWrapper.createMatchFootersVector(fileBuilder, ArrayUtils.toPrimitive(this.matchFooters.toArray(new Integer[this.matchFooters.size()])));
+            int events = offsetVector(fileBuilder, this.events, GameWrapper::startEventsVector);
+            int matchHeaders = offsetVector(fileBuilder, this.matchHeaders, GameWrapper::startMatchHeadersVector);
+            int matchFooters = offsetVector(fileBuilder, this.matchFooters, GameWrapper::startMatchFootersVector);
 
             GameWrapper.startGameWrapper(fileBuilder);
             GameWrapper.addEvents(fileBuilder, events);
@@ -156,7 +160,7 @@ public strictfp class GameMaker {
     /**
      * Write a match out to a file.
      *
-     * @param saveFile
+     * @param saveFile the file to save to
      */
     public void writeGame(File saveFile) {
         if(saveFile == null) {
@@ -177,13 +181,13 @@ public strictfp class GameMaker {
      */
     private void createEvent(ToIntFunction<FlatBufferBuilder> perBuilder) {
         // make file event and add its offset to the list
-        int eventA = perBuilder.applyAsInt(fileBuilder);
-        events.add(eventA);
+        int eventAP = perBuilder.applyAsInt(fileBuilder);
+        events.add(eventAP);
 
         if (packetSink != null) {
             // make packet event and package it up
-            int eventB = perBuilder.applyAsInt(packetBuilder);
-            packetBuilder.finish(eventB);
+            int eventBP = perBuilder.applyAsInt(packetBuilder);
+            packetBuilder.finish(eventBP);
             packetSink.addEvent(packetBuilder.sizedByteArray());
 
             // reset packet builder
@@ -232,12 +236,13 @@ public strictfp class GameMaker {
             GameHeader.addTeams(builder, teamsOffset);
             GameHeader.addBodyTypeMetadata(builder, bodyTypeMetadataOffset);
             int gameHeaderOffset = GameHeader.endGameHeader(builder);
+
             return EventWrapper.createEventWrapper(builder, Event.GameHeader, gameHeaderOffset);
         });
     }
 
     public int makeBodyTypeMetadata(FlatBufferBuilder builder){
-        List<Integer> bodyTypeMetadataOffsets = new ArrayList<>();
+        TIntArrayList bodyTypeMetadataOffsets = new TIntArrayList();
 
         // Add robot metadata
         for(RobotType type : RobotType.values()){
@@ -263,8 +268,7 @@ public strictfp class GameMaker {
         bodyTypeMetadataOffsets.add(BodyTypeMetadata.endBodyTypeMetadata(builder));
 
         // Make and return BodyTypeMetadata Vector offset
-        return GameHeader.createBodyTypeMetadataVector(builder,
-                ArrayUtils.toPrimitive(bodyTypeMetadataOffsets.toArray(new Integer[bodyTypeMetadataOffsets.size()])));
+        return offsetVector(builder, bodyTypeMetadataOffsets, GameHeader::startBodyTypeMetadataVector);
     }
 
     private byte robotTypeToBodyType(RobotType type){
@@ -292,60 +296,60 @@ public strictfp class GameMaker {
      * this basically just provides a restricted interface to GameMaker.
      */
     public class MatchMaker {
-        private List<Integer> movedIDs; // ints
+        private TIntArrayList movedIDs; // ints
         // VecTable for movedLocs in Round
-        private List<Float> movedLocsXs;
-        private List<Float> movedLocsYs;
+        private TFloatArrayList movedLocsXs;
+        private TFloatArrayList movedLocsYs;
 
         // SpawnedBodyTable for spawnedBodies
-        private List<Integer> spawnedBodiesRobotIDs;
-        private List<Byte> spawnedBodiesTeamIDs;
-        private List<Byte> spawnedBodiesTypes;
-        private List<Float> spawnedBodiesRadii;
-        private List<Float> spawnedBodiesLocsXs; //For locs
-        private List<Float> spawnedBodiesLocsYs; //For locs
+        private TIntArrayList spawnedBodiesRobotIDs;
+        private TByteArrayList spawnedBodiesTeamIDs;
+        private TByteArrayList spawnedBodiesTypes;
+        private TFloatArrayList spawnedBodiesRadii;
+        private TFloatArrayList spawnedBodiesLocsXs; //For locs
+        private TFloatArrayList spawnedBodiesLocsYs; //For locs
 
         // SpawnedBulletTable for spawnedBullets
-        private List<Integer> spawnedBulletsRobotIDs;
-        private List<Float> spawnedBulletsDamages;
-        private List<Float> spawnedBulletsLocsXs; //For locs
-        private List<Float> spawnedBulletsLocsYs; //For locs
-        private List<Float> spawnedBulletsVelsXs; //For vels
-        private List<Float> spawnedBulletsVelsYs; //For vels
+        private TIntArrayList spawnedBulletsRobotIDs;
+        private TFloatArrayList spawnedBulletsDamages;
+        private TFloatArrayList spawnedBulletsLocsXs; //For locs
+        private TFloatArrayList spawnedBulletsLocsYs; //For locs
+        private TFloatArrayList spawnedBulletsVelsXs; //For vels
+        private TFloatArrayList spawnedBulletsVelsYs; //For vels
 
-        private List<Integer> healthChangedIDs; // ints
-        private List<Float> healthChangedLevels; // floats
+        private TIntArrayList healthChangedIDs; // ints
+        private TFloatArrayList healthChangedLevels; // floats
 
-        private List<Integer> diedIDs; // ints
-        private List<Integer> diedBulletIDs; //ints
+        private TIntArrayList diedIDs; // ints
+        private TIntArrayList diedBulletIDs; //ints
 
-        private List<Integer> actionIDs; // ints
-        private List<Byte> actions; // Actions
-        private List<Integer> actionTargets; // ints (IDs)
+        private TIntArrayList actionIDs; // ints
+        private TByteArrayList actions; // Actions
+        private TIntArrayList actionTargets; // ints (IDs)
 
         public MatchMaker() {
-            this.movedIDs = new ArrayList<>();
-            this.movedLocsXs = new ArrayList<>();
-            this.movedLocsYs = new ArrayList<>();
-            this.spawnedBodiesRobotIDs = new ArrayList<>();
-            this.spawnedBodiesTeamIDs = new ArrayList<>();
-            this.spawnedBodiesTypes = new ArrayList<>();
-            this.spawnedBodiesRadii = new ArrayList<>();
-            this.spawnedBodiesLocsXs = new ArrayList<>();
-            this.spawnedBodiesLocsYs = new ArrayList<>();
-            this.spawnedBulletsRobotIDs = new ArrayList<>();
-            this.spawnedBulletsDamages = new ArrayList<>();
-            this.spawnedBulletsLocsXs = new ArrayList<>();
-            this.spawnedBulletsLocsYs = new ArrayList<>();
-            this.spawnedBulletsVelsXs = new ArrayList<>();
-            this.spawnedBulletsVelsYs = new ArrayList<>();
-            this.healthChangedIDs = new ArrayList<>();
-            this.healthChangedLevels = new ArrayList<>();
-            this.diedIDs = new ArrayList<>();
-            this.diedBulletIDs = new ArrayList<>();
-            this.actionIDs = new ArrayList<>();
-            this.actions = new ArrayList<>();
-            this.actionTargets = new ArrayList<>();
+            this.movedIDs = new TIntArrayList();
+            this.movedLocsXs = new TFloatArrayList();
+            this.movedLocsYs = new TFloatArrayList();
+            this.spawnedBodiesRobotIDs = new TIntArrayList();
+            this.spawnedBodiesTeamIDs = new TByteArrayList();
+            this.spawnedBodiesTypes = new TByteArrayList();
+            this.spawnedBodiesRadii = new TFloatArrayList();
+            this.spawnedBodiesLocsXs = new TFloatArrayList();
+            this.spawnedBodiesLocsYs = new TFloatArrayList();
+            this.spawnedBulletsRobotIDs = new TIntArrayList();
+            this.spawnedBulletsDamages = new TFloatArrayList();
+            this.spawnedBulletsLocsXs = new TFloatArrayList();
+            this.spawnedBulletsLocsYs = new TFloatArrayList();
+            this.spawnedBulletsVelsXs = new TFloatArrayList();
+            this.spawnedBulletsVelsYs = new TFloatArrayList();
+            this.healthChangedIDs = new TIntArrayList();
+            this.healthChangedLevels = new TFloatArrayList();
+            this.diedIDs = new TIntArrayList();
+            this.diedBulletIDs = new TIntArrayList();
+            this.actionIDs = new TIntArrayList();
+            this.actions = new TByteArrayList();
+            this.actionTargets = new TIntArrayList();
         }
 
         public void makeMatchHeader(LiveMap gameMap) {

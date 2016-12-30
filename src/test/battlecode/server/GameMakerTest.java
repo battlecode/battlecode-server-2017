@@ -1,9 +1,11 @@
 package battlecode.server;
 
+import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.schema.Event;
+import battlecode.schema.GameHeader;
 import battlecode.schema.GameWrapper;
 import battlecode.world.TestMapBuilder;
 
@@ -66,9 +68,20 @@ public class GameMakerTest {
 
         GameWrapper output = GameWrapper.getRootAsGameWrapper(ByteBuffer.wrap(gameBytes));
 
+        assertEquals(9, output.eventsLength());
         assertEquals(2, output.matchHeadersLength());
         assertEquals(2, output.matchFootersLength());
+
         assertEquals(Event.GameHeader, output.events(0).eType());
+
+        GameHeader h = (GameHeader) output.events(0).e(new GameHeader());
+        assertEquals(GameConstants.SPEC_VERSION, h.specVersion());
+        assertEquals(2, h.teamsLength());
+        assertEquals("bananas", h.teams(0).name());
+        assertEquals("yellow", h.teams(1).name());
+
+        // TODO more sanity checking
+
         assertEquals(Event.MatchHeader, output.events(1).eType());
         assertEquals(Event.Round, output.events(2).eType());
         assertEquals(Event.Round, output.events(3).eType());
@@ -79,6 +92,6 @@ public class GameMakerTest {
         assertEquals(Event.GameFooter, output.events(8).eType());
 
         // make sure we sent something to the mock server
-        verify(mockServer, times(9)).addEvent(any());
+        verify(mockServer, times(9)).addEvent(any(byte[].class));
     }
 }

@@ -4,6 +4,12 @@ import battlecode.common.RobotType;
 import battlecode.schema.BodyType;
 import battlecode.schema.VecTable;
 import com.google.flatbuffers.FlatBufferBuilder;
+import gnu.trove.TByteCollection;
+import gnu.trove.list.TByteList;
+import gnu.trove.list.TFloatList;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TByteArrayList;
+import gnu.trove.list.array.TFloatArrayList;
 
 import java.util.List;
 import java.util.function.ObjIntConsumer;
@@ -57,13 +63,18 @@ public class FlatHelpers {
     }
 
     /**
+     * DO NOT CALL THIS WITH OFFSETS!
+     * Only call it when you're adding an actual int[] to a buffer,
+     * not a Table[].
+     * For that, call offsetVector.
+     *
      * Well that's a weird API.
      *
      * Call like so:
      * int xyzP = intVector(builder, xyz, BufferType::startXyzVector);
      */
     public static int intVector(FlatBufferBuilder builder,
-                                List<Integer> arr,
+                                TIntList arr,
                                 ObjIntConsumer<FlatBufferBuilder> start) {
         final int length = arr.size();
         start.accept(builder, length);
@@ -76,8 +87,27 @@ public class FlatHelpers {
         return builder.endVector();
     }
 
+    /**
+     * This is DIFFERENT from intVector!
+     *
+     * Call this when you're adding a table of offsets, not flat ints.
+     */
+    public static int offsetVector(FlatBufferBuilder builder,
+                                   TIntList arr,
+                                   ObjIntConsumer<FlatBufferBuilder> start) {
+        final int length = arr.size();
+        start.accept(builder, length);
+
+        // arrays go backwards in flatbuffers
+        // for reasons
+        for (int i = length - 1; i >= 0; i--) {
+            builder.addOffset(arr.get(i));
+        }
+        return builder.endVector();
+    }
+
     public static int floatVector(FlatBufferBuilder builder,
-                                  List<Float> arr,
+                                  TFloatList arr,
                                   ObjIntConsumer<FlatBufferBuilder> start) {
         final int length = arr.size();
         start.accept(builder, length);
@@ -89,7 +119,7 @@ public class FlatHelpers {
     }
 
     public static int byteVector(FlatBufferBuilder builder,
-                                 List<Byte> arr,
+                                 TByteList arr,
                                  ObjIntConsumer<FlatBufferBuilder> start) {
         final int length = arr.size();
         start.accept(builder, length);
@@ -100,7 +130,7 @@ public class FlatHelpers {
         return builder.endVector();
     }
 
-    public static int createVecTable(FlatBufferBuilder builder, List<Float> xs, List<Float> ys) {
+    public static int createVecTable(FlatBufferBuilder builder, TFloatList xs, TFloatList ys) {
         if (xs.size() != ys.size()) {
             throw new RuntimeException("Mismatched x/y length: "+xs.size()+" != "+ys.size());
         }
