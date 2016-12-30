@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.ToIntFunction;
 
+import static battlecode.util.FlatHelpers.*;
+
 /**
  * Writes a game to a flatbuffer, hooray.
  */
@@ -374,70 +376,61 @@ public strictfp class GameMaker {
             assertState(State.IN_MATCH);
 
             createEvent((builder) -> {
-                // we're double-allocating here again
-                // whatever
-                int[] movedIDs = ArrayUtils.toPrimitive(this.movedIDs.toArray(new Integer[this.movedIDs.size()]));
-                int movedLocs = VecTable.createVecTable(builder,
-                        VecTable.createXsVector(builder, ArrayUtils.toPrimitive(movedLocsXs.toArray(new Float[movedLocsXs.size()]))),
-                        VecTable.createYsVector(builder, ArrayUtils.toPrimitive(movedLocsYs.toArray(new Float[movedLocsYs.size()]))));
-
-                int robotIDs = SpawnedBodyTable.createRobotIDsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesRobotIDs.toArray(new Integer[spawnedBodiesRobotIDs.size()])));
-                int teamIDs = SpawnedBodyTable.createTeamIDsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesTeamIDs.toArray(new Byte[spawnedBodiesTeamIDs.size()])));
-                int types = SpawnedBodyTable.createTypesVector(builder, ArrayUtils.toPrimitive(spawnedBodiesTypes.toArray(new Byte[spawnedBodiesTypes.size()])));
-                int locs = VecTable.createVecTable(builder,
-                        VecTable.createXsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesLocsXs.toArray(new Float[spawnedBodiesLocsXs.size()]))),
-                        VecTable.createYsVector(builder, ArrayUtils.toPrimitive(spawnedBodiesLocsYs.toArray(new Float[spawnedBodiesLocsYs.size()]))));
+                // The bodies that spawned
+                int spawnedBodiesLocsP = createVecTable(builder, spawnedBodiesLocsXs, spawnedBodiesLocsYs);
+                int spawnedBodiesRobotIDsP = intVector(builder, spawnedBodiesRobotIDs, SpawnedBodyTable::startRobotIDsVector);
+                int spawnedBodiesTeamIDsP = byteVector(builder, spawnedBodiesTeamIDs, SpawnedBodyTable::startTeamIDsVector);
+                int spawnedBodiesTypesP = byteVector(builder, spawnedBodiesTypes, SpawnedBodyTable::startTypesVector);
                 SpawnedBodyTable.startSpawnedBodyTable(builder);
-                SpawnedBodyTable.addRobotIDs(builder, robotIDs);
-                SpawnedBodyTable.addTeamIDs(builder, teamIDs);
-                SpawnedBodyTable.addTypes(builder, types);
-                SpawnedBodyTable.addLocs(builder, locs);
-                int spawnedBodies = SpawnedBodyTable.endSpawnedBodyTable(builder);
+                SpawnedBodyTable.addLocs(builder, spawnedBodiesLocsP);
+                SpawnedBodyTable.addRobotIDs(builder, spawnedBodiesRobotIDsP);
+                SpawnedBodyTable.addTeamIDs(builder, spawnedBodiesTeamIDsP);
+                SpawnedBodyTable.addTypes(builder, spawnedBodiesTypesP);
+                int spawnedBodiesP = SpawnedBodyTable.endSpawnedBodyTable(builder);
 
-                robotIDs = SpawnedBulletTable.createRobotIDsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsRobotIDs.toArray(new Integer[spawnedBulletsRobotIDs.size()])));
-                int damages = SpawnedBulletTable.createDamagesVector(builder, ArrayUtils.toPrimitive(spawnedBulletsDamages.toArray(new Float[spawnedBulletsDamages.size()])));
-                locs = VecTable.createVecTable(builder,
-                        VecTable.createXsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsLocsXs.toArray(new Float[spawnedBulletsLocsXs.size()]))),
-                        VecTable.createYsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsLocsYs.toArray(new Float[spawnedBulletsLocsYs.size()]))));
-                int vels = VecTable.createVecTable(builder,
-                        VecTable.createXsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsVelsXs.toArray(new Float[spawnedBulletsVelsXs.size()]))),
-                        VecTable.createYsVector(builder, ArrayUtils.toPrimitive(spawnedBulletsVelsYs.toArray(new Float[spawnedBulletsVelsYs.size()]))));
+                // The bullets that spawned
+                int spawnedBulletsRobotIDsP = intVector(builder, spawnedBulletsRobotIDs, SpawnedBulletTable::startRobotIDsVector);
+                int spawnedBulletsDamagesP = floatVector(builder, spawnedBulletsDamages, SpawnedBulletTable::startDamagesVector);
+                int spawnedBulletsLocsP = createVecTable(builder, spawnedBulletsLocsXs, spawnedBulletsLocsYs);
+                int spawnedBulletsVelsP = createVecTable(builder, spawnedBulletsVelsXs, spawnedBulletsVelsYs);
                 SpawnedBulletTable.startSpawnedBulletTable(builder);
-                SpawnedBulletTable.addRobotIDs(builder, robotIDs);
-                SpawnedBulletTable.addDamages(builder, damages);
-                SpawnedBulletTable.addLocs(builder, locs);
-                SpawnedBulletTable.addVels(builder, vels);
-                int spawnedBullets = SpawnedBulletTable.endSpawnedBulletTable(builder);
+                SpawnedBulletTable.addRobotIDs(builder, spawnedBulletsRobotIDsP);
+                SpawnedBulletTable.addDamages(builder, spawnedBulletsDamagesP);
+                SpawnedBulletTable.addLocs(builder, spawnedBulletsLocsP);
+                SpawnedBulletTable.addVels(builder, spawnedBulletsVelsP);
+                int spawnedBulletsP = SpawnedBulletTable.endSpawnedBulletTable(builder);
 
-                int[] healthChangedIDs = ArrayUtils.toPrimitive(this.healthChangedIDs.toArray(new Integer[this.healthChangedIDs.size()]));
-                float[] healthChangedLevels = ArrayUtils.toPrimitive(this.healthChangedLevels.toArray(new Float[this.healthChangedLevels.size()]));
-                int[] diedIDs = ArrayUtils.toPrimitive(this.diedIDs.toArray(new Integer[this.diedIDs.size()]));
-                int[] diedBulletIDs = ArrayUtils.toPrimitive(this.diedBulletIDs.toArray(new Integer[this.diedBulletIDs.size()]));
-                int[] actionIDs = ArrayUtils.toPrimitive(this.actionIDs.toArray(new Integer[this.actionIDs.size()]));
-                byte[] actions = ArrayUtils.toPrimitive(this.actions.toArray(new Byte[this.actions.size()]));
-                int[] actionTargets = ArrayUtils.toPrimitive(this.actionTargets.toArray(new Integer[this.actionTargets.size()]));
+                // The bodies that moved
+                int movedIDsP = intVector(builder, movedIDs, Round::startMovedIDsVector);
+                int movedLocsP = createVecTable(builder, movedLocsXs, movedLocsYs);
 
-                // Make the Round
-                int a = Round.createMovedIDsVector(builder, movedIDs);
-                int b = Round.createHealthChangedIDsVector(builder, healthChangedIDs);
-                int c = Round.createHealthChangeLevelsVector(builder, healthChangedLevels);
-                int d = Round.createDiedIDsVector(builder, diedIDs);
-                int e = Round.createDiedBulletIDsVector(builder, diedBulletIDs);
-                int f = Round.createActionIDsVector(builder, actionIDs);
-                int g = Round.createActionsVector(builder, actions);
-                int h = Round.createActionTargetsVector(builder, actionTargets);
+                // The bodies that changed health
+                int healthChangedIDsP = intVector(builder, healthChangedIDs, Round::startHealthChangedIDsVector);
+                int healthChangedLevelsP = floatVector(builder, healthChangedLevels, Round::startHealthChangeLevelsVector);
+
+                // The bodies that died
+                int diedIDsP = intVector(builder, diedIDs, Round::startDiedIDsVector);
+
+                // The bullets that died
+                int diedBulletIDsP = intVector(builder, diedBulletIDs, Round::startDiedBulletIDsVector);
+
+                // The actions that happened
+                int actionIDsP = intVector(builder, actionIDs, Round::startActionIDsVector);
+                int actionsP = byteVector(builder, actions, Round::startActionsVector);
+                int actionTargetsP = intVector(builder, actionTargets, Round::startActionTargetsVector);
+
                 Round.startRound(builder);
-                Round.addMovedIDs(builder, a);
-                Round.addMovedLocs(builder, movedLocs);
-                Round.addSpawnedBodies(builder, spawnedBodies);
-                Round.addSpawnedBullets(builder, spawnedBullets);
-                Round.addHealthChangedIDs(builder, b);
-                Round.addHealthChangeLevels(builder, c);
-                Round.addDiedIDs(builder, d);
-                Round.addDiedBulletIDs(builder, e);
-                Round.addActionIDs(builder, f);
-                Round.addActions(builder, g);
-                Round.addActionTargets(builder, h);
+                Round.addMovedIDs(builder, movedIDsP);
+                Round.addMovedLocs(builder, movedLocsP);
+                Round.addSpawnedBodies(builder, spawnedBodiesP);
+                Round.addSpawnedBullets(builder, spawnedBulletsP);
+                Round.addHealthChangedIDs(builder, healthChangedIDsP);
+                Round.addHealthChangeLevels(builder, healthChangedLevelsP);
+                Round.addDiedIDs(builder, diedIDsP);
+                Round.addDiedBulletIDs(builder, diedBulletIDsP);
+                Round.addActionIDs(builder, actionIDsP);
+                Round.addActions(builder, actionsP);
+                Round.addActionTargets(builder, actionTargetsP);
                 Round.addRoundID(builder, roundNum);
                 int round = Round.endRound(builder);
 
