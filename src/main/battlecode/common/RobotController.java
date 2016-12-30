@@ -148,6 +148,8 @@ public strictfp interface RobotController {
      * Returns the number of times the robot has attacked this turn.
      * 
      * @return the number of times the robot has attacked this turn.
+     *
+     * @battlecode.doc.costlymethod
      */
     int getAttackCount();
     
@@ -155,6 +157,8 @@ public strictfp interface RobotController {
      * Returns the number of times the robot has moved this turn.
      * 
      * @return the number of times the robot has moved this turn.
+     *
+     * @battlecode.doc.costlymethod
      */
     int getMoveCount();
 
@@ -201,6 +205,8 @@ public strictfp interface RobotController {
      * @param center the center of the circle to check.
      * @param radius the radius of the circle to check.
      * @return whether a portion of the circle is within the robot's sensor range.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean canSensePartOfCircle(MapLocation center, float radius);
 
@@ -210,6 +216,8 @@ public strictfp interface RobotController {
      * @param center the center of the circle to check.
      * @param radius the radius of the circle to check.
      * @return whether all of the circle is within the robot's sensor range.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean canSenseAllOfCircle(MapLocation center, float radius);
 
@@ -253,6 +261,8 @@ public strictfp interface RobotController {
      * @param radius the radius of the circle to check.
      * @return whether there is a robot or tree in the given circle.
      * @throws GameActionException if any portion of the given circle is not within sensor range.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean isCircleOccupied(MapLocation center, float radius) throws GameActionException;
 
@@ -264,6 +274,8 @@ public strictfp interface RobotController {
      * @param radius the radius of the circle to check.
      * @return whether there is a robot or tree in the given circle.
      * @throws GameActionException if any portion of the given circle is not within sensor range.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean isCircleOccupiedExceptByThisRobot(MapLocation center, float radius) throws GameActionException;
 
@@ -553,6 +565,8 @@ public strictfp interface RobotController {
      * Returns true if the robot has moved this turn.
      * 
      * @return true if the robot has moved this turn.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean hasMoved();
     
@@ -560,6 +574,8 @@ public strictfp interface RobotController {
      * Returns true if the robot has attacked this turn.
      * 
      * @return true if the robot has attacked this turn.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean hasAttacked();
     
@@ -567,6 +583,8 @@ public strictfp interface RobotController {
      * Returns true if the robot's build cooldown has expired.
      * 
      * @return true if the robot's build cooldown has expired.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean isBuildReady();
 
@@ -616,6 +634,8 @@ public strictfp interface RobotController {
      * @return true if there is nothing preventing this robot from moving to this
      * MapLocation (or in the direction of this MapLocation if it is too far);
      * false otherwise (does not account for the robot having already moved that turn).
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean canMove(MapLocation center);
     
@@ -852,6 +872,8 @@ public strictfp interface RobotController {
      * robot's type
      *
      * @return true if this robot can water a tree, false otherwise.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean canWater();
 
@@ -860,6 +882,8 @@ public strictfp interface RobotController {
      * account how many times this robot has shook this turn.
      *
      * @return true if this robot can shake a tree, false otherwise.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean canShake();
 
@@ -1070,6 +1094,8 @@ public strictfp interface RobotController {
      * robot's type
      *
      * @return true if this robot can repair a robot, false otherwise.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean canRepair();
 
