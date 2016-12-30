@@ -118,6 +118,8 @@ public class RobotTypeTaglet implements Taglet {
 
         if (field.getType() == int.class) {
             value = asCode(Integer.toString(field.getInt(variant)));
+        } else if (field.getType() == float.class) {
+            value = asCode(String.format("%1.0f", field.getFloat(variant)));
         } else if (field.getType() == double.class) {
             value = asCode(String.format("%1.0f", field.getDouble(variant)));
         } else if (field.getType() == boolean.class) {
@@ -175,31 +177,31 @@ public class RobotTypeTaglet implements Taglet {
 
         StringBuilder builder = new StringBuilder();
         try {
-            appendMethod(builder, rt, "canAttack");
+            appendField(builder, rt, "maxHealth");
+            appendField(builder, rt, "bodyRadius");
+            appendField(builder, rt, "strideRadius");
             builder.append("<br />");
 
+            appendMethod(builder, rt, "canAttack");
             if (rt.attackPower > 0) {
-                appendField(builder, rt, "attackDelay");
                 appendField(builder, rt, "attackPower");
-                appendField(builder, rt, "attackRadiusSquared");
+                if (rt.bulletSpeed > 0)
+                    appendField(builder, rt, "bulletSpeed");
             }
-            if (rt.bytecodeLimit != 0) {
-                appendField(builder, rt, "bytecodeLimit");
-            }
-            if (rt.attackPower != 0) {
-                appendField(builder, rt, "cooldownDelay");
-            }
-
-            appendField(builder, rt, "maxHealth");
-
-            if (rt.bulletCost != 0) {
-                appendField(builder, rt, "bulletCost");
-            }
-
-            appendField(builder, rt, "sensorRadiusSquared");
+            builder.append("<br />");
 
             if (rt.spawnSource != null) {
                 appendField(builder, rt, "spawnSource");
+                appendField(builder, rt, "bulletCost");
+                appendField(builder, rt, "buildCooldownTurns");
+                builder.append("<br />");
+            }
+
+            appendField(builder, rt, "sensorRadius");
+            appendField(builder, rt, "bulletSightRadius");
+
+            if (rt.bytecodeLimit != 0) {
+                appendField(builder, rt, "bytecodeLimit");
             }
         } catch (Exception e) {
             e.printStackTrace();
