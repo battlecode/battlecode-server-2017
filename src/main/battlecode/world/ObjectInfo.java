@@ -131,8 +131,8 @@ public strictfp class ObjectInfo {
     public void moveRobot(InternalRobot robot, MapLocation newLocation) {
         MapLocation loc = robot.getLocation();
 
-        bulletIndex.delete(fromPoint(loc),robot.getID());
-        bulletIndex.add(fromPoint(newLocation),robot.getID());
+        robotIndex.delete(fromPoint(loc),robot.getID());
+        robotIndex.add(fromPoint(newLocation),robot.getID());
     }
 
     // ****************************
