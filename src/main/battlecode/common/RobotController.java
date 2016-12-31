@@ -605,7 +605,7 @@ public strictfp interface RobotController {
     boolean canMove(Direction dir);
 
     /**
-     * Tells whether this robot can move scale strides in the given direction,
+     * Tells whether this robot can move distance in the given direction,
      * without taking into account if they have already moved. Takes into
      * account only the positions of trees, positions of other robots, and the
      * edge of the game map. Does not take into account whether this robot is
@@ -613,21 +613,21 @@ public strictfp interface RobotController {
      *
      *
      * @param dir the direction to move in.
-     * @param scale the scale of a stride you wish to check. Must be
-     * from 0 to 1 (inclusive).
-     * @return true if there is nothing preventing this robot from moving scale
-     * strides in the given direction; false otherwise (does not account for
+     * @param distance the distance of a move you wish to check. Must be
+     * from 0 to RobotType.strideRadius (inclusive).
+     * @return true if there is nothing preventing this robot from moving distance
+     * in the given direction; false otherwise (does not account for
      * the robot having already moved that turn).
      *
      * @battlecode.doc.costlymethod
      */
-    boolean canMove(Direction dir, float scale);
+    boolean canMove(Direction dir, float distance);
     
     /**
      * Tells whether this robot can move to the target MapLocation. If the location
      * is outside the robot's StrideRadius, the location is rescaled to be at the
      * StrideRadius. Takes into account only the positions of rees, positions of
-     * other robots, and the edge of the game map. Does not take into accout whether
+     * other robots, and the edge of the game map. Does not take into account whether
      * this robot is currently active.
      * 
      * @param center the MapLocation to move to.
@@ -640,8 +640,8 @@ public strictfp interface RobotController {
     boolean canMove(MapLocation center);
     
     /**
-     * Moves one stride in the given direction. Note that one stride is equivalent
-     * to 2*getType().bodyRadius in Euclidean distance.
+     * Moves one stride in the given direction. One stride is given by the robot's
+     * stride radius (RobotType.strideRadius).
      *
      * @param dir the direction to move in.
      * @throws GameActionException if the robot cannot move one stride in this
@@ -654,20 +654,18 @@ public strictfp interface RobotController {
     void move(Direction dir) throws GameActionException;
 
     /**
-     * Moves scale strides in the given direction. Note that one stride is
-     * equivalent to 2*getType().bodyRadius in Euclidean distance.
+     * Moves distance in the given direction.
      *
      * @param dir the direction to move in.
-     * @param scale the scale of a stride you wish to move. Must be be
-     * from 0 to 1 (inclusive).
-     * @throws GameActionException if the robot cannot move scale strides in this
+     * @param distance the distance to move in that direction.
+     * @throws GameActionException if the robot cannot move distance in this
      * direction, such as already moved that turn, the target location being
      * off the map, and the target destination being occupied with either
      * another robot or a tree.
      *
      * @battlecode.doc.costlymethod
      */
-    void move(Direction dir, float scale) throws GameActionException;
+    void move(Direction dir, float distance) throws GameActionException;
     
     /**
      * Moves to the target MapLocation. If the target location is outside the robot's

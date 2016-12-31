@@ -457,12 +457,75 @@ public class RobotControllerTest {
 
     @Test // Normal robots blocked by trees and other robots, drones fly over but blocked by other drones
     public void obstructionTest() throws GameActionException {
-        
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int archonA = game.spawn(3, 5, RobotType.ARCHON, Team.A);
+        final int scoutA = game.spawn(7.5f, 5, RobotType.SCOUT, Team.A);
+        final int scoutB = game.spawn(7.5f, 2, RobotType.SCOUT, Team.A);
+        final int neutralTree = game.spawnTree(9f,5, 1, Team.NEUTRAL, 0, null);
+        game.waitRounds(20);
+
+        MapLocation originalArchonALoc = game.getWorld().getObjectInfo().getRobotByID(archonA).getLocation();
+        MapLocation scoutBLoc = game.getWorld().getObjectInfo().getRobotByID(scoutB).getLocation();
+        MapLocation neutralTreeLoc = game.getWorld().getObjectInfo().getTreeByID(neutralTree).getLocation();
+
+        // Scout can move over trees, but not other robots
+        game.round((id, rc) -> {
+            if (id != scoutA) return;
+
+            assertFalse(rc.canMove(originalArchonALoc));
+            assertFalse(rc.canMove(scoutBLoc));
+            assertTrue(rc.canMove(neutralTreeLoc)); // Scouts can go over trees
+            rc.move(neutralTreeLoc);
+        });
+
+        // Scout can't go off the map
+        game.round((id, rc) -> {
+            if (id != scoutA) return;
+
+            assertFalse(rc.canMove(Direction.getEast(),0.01f)); // Off the map
+            assertTrue(rc.canMove(Direction.getNorth()));
+            rc.move(Direction.getNorth());  // Move away from tree
+        });
+
+        // Move Archon closer to tree
+        int numMoves = 0;
+        MapLocation currentArchonALoc = null;
+        do {
+            game.round((id, rc) -> {
+                if (id != archonA) return;
+
+                assertTrue(rc.canMove(neutralTreeLoc));
+                rc.move(neutralTreeLoc);    // Move towards the tree
+
+            });
+            numMoves++;
+            currentArchonALoc = game.getWorld().getObjectInfo().getRobotByID(archonA).getLocation();
+            assertEquals(currentArchonALoc.distanceTo(neutralTreeLoc), originalArchonALoc.distanceTo(neutralTreeLoc) - RobotType.ARCHON.strideRadius*numMoves, EPSILON);
+        } while (currentArchonALoc.distanceTo(neutralTreeLoc) > RobotType.ARCHON.bodyRadius+1+RobotType.ARCHON.strideRadius);
+
+        // Move Archon to be just out of tree
+        game.round((id, rc) -> {
+            if (id != archonA) return;
+            assertTrue(rc.canMove(rc.getLocation().directionTo(neutralTreeLoc),rc.getLocation().distanceTo(neutralTreeLoc)-(RobotType.ARCHON.bodyRadius+1+0.0001f)));
+            rc.move(rc.getLocation().directionTo(neutralTreeLoc),rc.getLocation().distanceTo(neutralTreeLoc)-(RobotType.ARCHON.bodyRadius+1+0.0001f));    // Move towards the tree
+            assertEquals(rc.getLocation().distanceTo(neutralTreeLoc),RobotType.ARCHON.bodyRadius+1+0.0001f,EPSILON);
+        });
+
+        // Archon can't go over tree
+        game.round((id, rc) -> {
+            if (id != archonA) return;
+            assertFalse(rc.canMove(rc.getLocation().directionTo(neutralTreeLoc),0.001f));
+        });
     }
-    
+
     @Test // Bullet collision works continuously and not at discrete intervals
     public void continuousBulletCollisionTest() throws GameActionException {
-        
+
     }
 
     @Test // Buying victory points
@@ -473,8 +536,8 @@ public class RobotControllerTest {
         // This creates the actual game.
         TestGame game = new TestGame(map);
 
-        final int archonA = game.spawn(5, 5, RobotType.GARDENER, Team.B);
-        final int archonB = game.spawn(5, 5, RobotType.GARDENER, Team.B);
+        final int archonA = game.spawn(8, 5, RobotType.GARDENER, Team.A);
+        final int archonB = game.spawn(2, 5, RobotType.GARDENER, Team.B);
 
         game.round((id, rc) -> {
             if (id != archonA) return;

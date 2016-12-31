@@ -555,10 +555,10 @@ public final strictfp class RobotControllerImpl implements RobotController {
             center = getLocation().add(dir, getType().strideRadius);
         }
         boolean newLocationIsEmpty;
-        if(getType() != RobotType.TANK) {
+        if(getType() != RobotType.TANK && getType() != RobotType.SCOUT) {
             newLocationIsEmpty = gameWorld.getObjectInfo().isEmptyExceptForRobot(center, getType().bodyRadius, robot);
-        } else { // Tanks have special condition due to body attack
-            newLocationIsEmpty = gameWorld.getObjectInfo().noRobotsExceptForRobot(center, RobotType.TANK.bodyRadius, robot);
+        } else { // Tanks have special condition due to body attack, Scouts can just go over trees
+            newLocationIsEmpty = gameWorld.getObjectInfo().noRobotsExceptForRobot(center, getType().bodyRadius, robot);
         }
         return gameWorld.getGameMap().onTheMap(center, getType().bodyRadius) &&
                 newLocationIsEmpty;
