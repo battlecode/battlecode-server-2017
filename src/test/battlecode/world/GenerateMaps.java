@@ -47,4 +47,34 @@ public class GenerateMaps {
                 new TeamMapping("Banana", "Ocelot"));
 
     }
+
+    @Test
+    public void makeShrine() throws IOException {
+        LiveMap map = new TestMapBuilder("shrine", -15, -15, 30, 30,30,3000)
+                .addRobot(
+                        0,
+                        Team.A,
+                        RobotType.ARCHON,
+                        new MapLocation(
+                                RobotType.ARCHON.bodyRadius-15,
+                                15-RobotType.ARCHON.bodyRadius
+                        )
+                )
+                .addRobot(
+                        1,
+                        Team.B,
+                        RobotType.ARCHON,
+                        new MapLocation(
+                                15-RobotType.ARCHON.bodyRadius,
+                                RobotType.ARCHON.bodyRadius-15
+                        )
+                )
+                .addNeutralTree(3, new MapLocation(0,0), 1, 20, RobotType.TANK)
+                .build();
+
+        GameMapIO.writeMap(map,
+                new File("src/main/battlecode/world/resources"),
+                new TeamMapping("Banana", "Ocelot"));
+
+    }
 }
