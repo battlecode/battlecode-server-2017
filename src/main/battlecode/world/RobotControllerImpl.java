@@ -1177,12 +1177,12 @@ public final strictfp class RobotControllerImpl implements RobotController {
 
     @Override
     public void resign(){
-        int[] robotIDs = gameWorld.getObjectInfo().getRobotIDs();
-        for(int id : robotIDs){
-            if(gameWorld.getObjectInfo().getRobotByID(id).getTeam() == getTeam()){
-                gameWorld.destroyRobot(id);
+        gameWorld.getObjectInfo().eachRobot((robot) -> {
+            if(robot.getTeam() == getTeam()){
+                gameWorld.destroyRobot(robot.getID());
             }
-        }
+            return true;
+        });
     }
 
     // ***********************************

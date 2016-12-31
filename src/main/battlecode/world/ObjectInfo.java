@@ -5,14 +5,20 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
 
+import gnu.trove.procedure.TObjectProcedure;
 import net.sf.jsi.SpatialIndex;
 import net.sf.jsi.rtree.RTree;
 import net.sf.jsi.Rectangle;
 import net.sf.jsi.Point;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.Map;
 
 /**
  * This class is used to hold information about the robots, trees, and bullets
@@ -23,9 +29,9 @@ public strictfp class ObjectInfo {
     private final float mapHeight;
     private final MapLocation mapTopLeft;
 
-    private final Map<Integer, InternalRobot> gameRobotsByID;
-    private final Map<Integer, InternalTree> gameTreesByID;
-    private final Map<Integer, InternalBullet> gameBulletsByID;
+    private final TIntObjectHashMap<InternalRobot> gameRobotsByID;
+    private final TIntObjectHashMap<InternalTree> gameTreesByID;
+    private final TIntObjectHashMap<InternalBullet> gameBulletsByID;
 
     private final SpatialIndex treeIndex;
     private final SpatialIndex robotIndex;
@@ -41,9 +47,9 @@ public strictfp class ObjectInfo {
         this.mapHeight = gm.getHeight();
         this.mapTopLeft = gm.getOrigin();
 
-        this.gameTreesByID = new LinkedHashMap<>();
-        this.gameRobotsByID = new LinkedHashMap<>();
-        this.gameBulletsByID = new LinkedHashMap<>();
+        this.gameTreesByID = new TIntObjectHashMap<>();
+        this.gameRobotsByID = new TIntObjectHashMap<>();
+        this.gameBulletsByID = new TIntObjectHashMap<>();
 
         treeIndex = new RTree();
         robotIndex = new RTree();
@@ -59,34 +65,93 @@ public strictfp class ObjectInfo {
                 RobotType.class));
     }
 
-    // ****************************
-    // *** GETTING OBJECTS ********
-    // ****************************
-
-    public int[] getTreeIDs(){
-        return gameTreesByID.keySet().stream()
-                .mapToInt(i -> i)
-                .toArray();
-    }
-
-    public int[] getRobotIDs(){
-        return gameRobotsByID.keySet().stream()
-                .mapToInt(i -> i)
-                .toArray();
-    }
-
-    public int[] getBulletIDs(){
-        return gameBulletsByID.keySet().stream()
-                .mapToInt(i -> i)
-                .toArray();
-    }
-
     public int getRobotTypeCount(Team team, RobotType type) {
         if (robotTypeCount.get(team).containsKey(type)) {
             return robotTypeCount.get(team).get(type);
         } else {
             return 0;
         }
+    }
+
+    /**
+     * Apply an operation for every bullet.
+     * Return false to stop iterating.
+     * If you call destroyBullet() on a bullet that hasn't been seen yet,
+     * that bullet will be silently skipped.
+     *
+     * @param op a lambda (bullet) -> boolean
+     */
+    public void eachBullet(TObjectProcedure<InternalBullet> op) {
+        // Trove doesn't throw errors when we delete a map entry while iterating
+        // it just silently skips the entry later...
+        // which is exactly the behaviour we want.
+        gameBulletsByID.forEachValue(op);
+    }
+
+    /**
+     * Apply an operation for every tree.
+     * Return false to stop iterating.
+     * If you call destroyTree() on a tree that hasn't been seen yet,
+     * that tree will be silently skipped.
+     *
+     * @param op a lambda (bullet) -> void
+     */
+    public void eachTree(TObjectProcedure<InternalTree> op) {
+        gameTreesByID.forEachValue(op);
+    }
+
+    /**
+     * Apply an operation for every robot.
+     * Return false to stop iterating.
+     * If you call destroyRobot() on a robot that hasn't been seen yet,
+     * that robot will be silently skipped.
+     *
+     * @param op a lambda (bullet) -> void
+     */
+    public void eachRobot(TObjectProcedure<InternalRobot> op) {
+        gameRobotsByID.forEachValue(op);
+    }
+
+    /**
+     * This allocates; prefer eachTree()
+     */
+    public Collection<InternalTree> trees() {
+        return gameTreesByID.valueCollection();
+    }
+
+    /**
+     * This allocates; prefer eachBullet()
+     */
+    public Collection<InternalBullet> bullets() {
+        return gameBulletsByID.valueCollection();
+    }
+
+    /**
+     * This allocates; prefer eachRobot()
+     */
+    public Collection<InternalRobot> robots() {
+        return gameRobotsByID.valueCollection();
+    }
+
+    /**
+     * This allocates; prefer eachTree()
+     */
+    public InternalTree[] treesArray() {
+        return gameTreesByID.values(new InternalTree[gameTreesByID.size()]);
+    }
+
+    /**
+     * This allocates; prefer eachBullet()
+     */
+    public InternalBullet[] bulletsArray() {
+        return gameBulletsByID.values(new InternalBullet[gameBulletsByID.size()]);
+    }
+
+    /**
+     * This allocates; prefer eachRobot()
+     */
+    public InternalRobot[] robotsArray() {
+        return gameRobotsByID.values(new InternalRobot[gameRobotsByID.size()]);
     }
 
     public int getTreeCount(Team team) {
@@ -107,18 +172,6 @@ public strictfp class ObjectInfo {
 
     public InternalBullet getBulletByID(int id){
         return gameBulletsByID.get(id);
-    }
-
-    public InternalTree[] getAllTrees(){
-        return gameTreesByID.values().toArray(new InternalTree[gameTreesByID.size()]);
-    }
-
-    public InternalRobot[] getAllRobots(){
-        return gameRobotsByID.values().toArray(new InternalRobot[gameRobotsByID.size()]);
-    }
-
-    public InternalBullet[] getAllBullets(){
-        return gameBulletsByID.values().toArray(new InternalBullet[gameBulletsByID.size()]);
     }
 
     public void moveBullet(InternalBullet bullet, MapLocation newLocation) {
@@ -269,13 +322,12 @@ public strictfp class ObjectInfo {
 
         ArrayList<InternalBullet> returnBullets = new ArrayList<InternalBullet>();
 
+        // Add each to a list
         bulletIndex.nearestNUnsorted(
                 new Point(center.x,center.y),   // Search from center
-                new TIntProcedure() {           // Add each to a list
-                    public boolean execute(int i) {
-                        returnBullets.add(getBulletByID(i));
-                        return true;
-                    }
+                i -> {
+                    returnBullets.add(getBulletByID(i));
+                    return true;
                 },
                 Integer.MAX_VALUE,
                 radius
@@ -291,13 +343,11 @@ public strictfp class ObjectInfo {
 
         treeIndex.nearest(
                 new Point(loc.x,loc.y),
-                new TIntProcedure() {
-                    public boolean execute(int i) {
-                        InternalTree potentialTree = getTreeByID(i);
-                        if (potentialTree.getLocation().isWithinDistance(loc,potentialTree.getRadius()))
-                            returnTrees.add(potentialTree);
-                        return false;   // Don't need any more results
-                    }
+                i -> {
+                    InternalTree potentialTree = getTreeByID(i);
+                    if (potentialTree.getLocation().isWithinDistance(loc,potentialTree.getRadius()))
+                        returnTrees.add(potentialTree);
+                    return false;   // Don't need any more results
                 },
                 GameConstants.NEUTRAL_TREE_MAX_RADIUS  // Furthest distance
         );

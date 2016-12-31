@@ -4,8 +4,8 @@ import battlecode.common.*;
 import battlecode.server.ErrorReporter;
 import battlecode.server.GameMaker;
 import battlecode.server.GameState;
-import battlecode.server.TeamMapping;
 import battlecode.world.control.RobotControlProvider;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.*;
 
@@ -13,7 +13,7 @@ import java.util.*;
  * The primary implementation of the GameWorld interface for containing and
  * modifying the game map and the objects on it.
  */
-public strictfp class GameWorld{
+public strictfp class GameWorld {
     /**
      * The current round we're running.
      */
@@ -31,8 +31,8 @@ public strictfp class GameWorld{
     private final TeamInfo teamInfo;
     private final ObjectInfo objectInfo;
 
-    private Collection<RobotInfo> previousBroadcasters;
-    private Map<Integer, RobotInfo> currentBroadcasters;
+    private RobotInfo[] previousBroadcasters;
+    private TIntObjectHashMap<RobotInfo> currentBroadcasters;
 
     private final RobotControlProvider controlProvider;
     private Random rand;
@@ -51,8 +51,8 @@ public strictfp class GameWorld{
         this.objectInfo = new ObjectInfo(gm);
         this.teamInfo = new TeamInfo(oldTeamMemory);
 
-        this.previousBroadcasters = new ArrayList<>();
-        this.currentBroadcasters = new HashMap<>();
+        this.previousBroadcasters = new RobotInfo[0];
+        this.currentBroadcasters = new TIntObjectHashMap<>();
 
         this.controlProvider = cp;
 
@@ -117,28 +117,17 @@ public strictfp class GameWorld{
     }
 
     private void updateTrees(){
-        final int[] idsToRun = objectInfo.getTreeIDs();
         float[] totalTreeSupply = new float[3];
-        for(final int id : idsToRun){
-            InternalTree tree = objectInfo.getTreeByID(id);
+        objectInfo.eachTree((tree) -> {
             totalTreeSupply[tree.getTeam().ordinal()] += tree.updateTree();
-        }
+            return true;
+        });
         teamInfo.adjustBulletSupply(Team.A, totalTreeSupply[Team.A.ordinal()]);
         teamInfo.adjustBulletSupply(Team.B, totalTreeSupply[Team.B.ordinal()]);
     }
 
     private void updateRobots(){
-        // We iterate through the IDs so that we avoid ConcurrentModificationExceptions
-        // of an iterator. Kinda gross, but whatever.
-        final int[] idsToRun = objectInfo.getRobotIDs();
-
-        for (final int id : idsToRun) {
-            final InternalRobot robot = objectInfo.getRobotByID(id);
-            if (robot == null) {
-                // Robot might have died earlier in the iteration; skip it
-                continue;
-            }
-
+        objectInfo.eachRobot((robot) -> {
             robot.processBeginningOfTurn();
             this.controlProvider.runRobot(robot);
             robot.setBytecodesUsed(this.controlProvider.getBytecodesUsed(robot));
@@ -149,18 +138,18 @@ public strictfp class GameWorld{
 
             // If the robot terminates but the death signal has not yet
             // been visited:
-            if (this.controlProvider.getTerminated(robot) && objectInfo.getRobotByID(id) != null) {
-                destroyRobot(id);
+            if (this.controlProvider.getTerminated(robot) && objectInfo.getRobotByID(robot.getID()) != null) {
+                destroyRobot(robot.getID());
             }
-        }
+            return true;
+        });
     }
 
     private void updateBullets(){
-        final int[] idsToRun = objectInfo.getBulletIDs();
-        for(final int id : idsToRun){
-            InternalBullet bullet = objectInfo.getBulletByID(id);
+        objectInfo.eachBullet((bullet) -> {
             bullet.updateBullet();
-        }
+            return true;
+        });
     }
 
     // *********************************
@@ -215,13 +204,14 @@ public strictfp class GameWorld{
         updateBroadCastData();
 
         // Process beginning of each robot's round
-        for (InternalRobot robot : objectInfo.getAllRobots()) {
+        objectInfo.eachRobot((robot) -> {
             robot.processBeginningOfRound();
-        }
-        // Process beginning of each tree's round
-        for (InternalTree tree : objectInfo.getAllTrees()) {
+            return true;
+        });
+        objectInfo.eachTree((tree) -> {
             tree.processBeginningOfRound();
-        }
+            return true;
+        });
     }
 
     public void setWinner(Team t, DominationFactor d)  {
@@ -243,13 +233,15 @@ public strictfp class GameWorld{
 
     public void processEndOfRound() {
         // Process end of each robot's round
-        for (InternalRobot robot : objectInfo.getAllRobots()) {
+        objectInfo.eachRobot((robot) -> {
             robot.processEndOfRound();
-        }
+            return true;
+        });
         // Process end of each tree's round
-        for (InternalTree tree : objectInfo.getAllTrees()) {
+        objectInfo.eachTree((tree) -> {
             tree.processEndOfRound();
-        }
+            return true;
+        });
 
         // Add the round bullet income
         teamInfo.adjustBulletSupply(Team.A, Math.max(0, GameConstants.ARCHON_BULLET_INCOME -
@@ -284,11 +276,10 @@ public strictfp class GameWorld{
             if(!victorDetermined){
                 float totalBulletSupplyA = teamInfo.getBulletSupply(Team.A);
                 float totalBulletSupplyB = teamInfo.getBulletSupply(Team.B);
-                for(InternalRobot robot : objectInfo.getAllRobots()){
+                for(InternalRobot robot : objectInfo.robots()){
                     if(robot.getID() > bestRobotID){
                         bestRobotID = robot.getID();
                         bestRobotTeam = robot.getTeam();
-
                     }
                     if(robot.getTeam() == Team.A){
                         totalBulletSupplyA += robot.getType().bulletCost;
@@ -400,7 +391,9 @@ public strictfp class GameWorld{
     // *********************************
 
     private void updateBroadCastData(){
-        this.previousBroadcasters = this.currentBroadcasters.values();
+        this.previousBroadcasters = this.currentBroadcasters.values(
+                new RobotInfo[this.currentBroadcasters.size()]
+        );
         this.currentBroadcasters.clear();
     }
 
@@ -408,9 +401,11 @@ public strictfp class GameWorld{
         this.currentBroadcasters.put(robot.ID, robot);
     }
 
+    /**
+     * Don't mutate this.
+     */
     public RobotInfo[] getPreviousBroadcasters(){
-        return this.previousBroadcasters.toArray(
-                new RobotInfo[this.previousBroadcasters.size()]);
+        return this.previousBroadcasters;
     }
 
 }

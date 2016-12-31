@@ -109,12 +109,9 @@ public class RobotControllerTest {
             rc.buildRobot(RobotType.GARDENER, Direction.getEast());
         });
 
-        int[] ids = game.getWorld().getObjectInfo().getRobotIDs();
-
-        for (int id : ids) {
-            if (id != archonA) {
-                InternalRobot gardener = game.getBot(id);
-                assertEquals(RobotType.GARDENER, gardener.getType());
+        for (InternalRobot robot : game.getWorld().getObjectInfo().robots()) {
+            if (robot.getID() != archonA) {
+                assertEquals(RobotType.GARDENER, robot.getType());
             }
         }
 
@@ -154,10 +151,13 @@ public class RobotControllerTest {
             assertFalse(rc.canSingleShot());
             
             // Ensure bullet exists and spawns at proper location
-            int[] bulletIDs = game.getWorld().getObjectInfo().getBulletIDs();
-            assertEquals(bulletIDs.length,1);
-            InternalBullet bill = game.getBullet(bulletIDs[0]);
-            assertEquals(bill.getLocation().distanceTo(rc.getLocation()),rc.getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET, EPSILON);
+            InternalBullet[] bullets = game.getWorld().getObjectInfo().bulletsArray();
+            assertEquals(bullets.length,1);
+            assertEquals(
+                    bullets[0].getLocation().distanceTo(rc.getLocation()),
+                    rc.getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET,
+                    EPSILON
+            );
         });
         
         // soldierA fires a shot at soldierB
@@ -171,15 +171,15 @@ public class RobotControllerTest {
             assertFalse(rc.canSingleShot());
             
             // Ensure two bullets exist
-            int[] bulletIDs = game.getWorld().getObjectInfo().getBulletIDs();
-            assertEquals(bulletIDs.length,2);
+            InternalBullet[] bullets = game.getWorld().getObjectInfo().bulletsArray();
+            assertEquals(bullets.length,2);
         });
         
         // Let bullets propagate to targets
         game.waitRounds(1);
         
         // No more bullets in flight
-        int[] bulletIDs = game.getWorld().getObjectInfo().getBulletIDs();
+        InternalBullet[] bulletIDs = game.getWorld().getObjectInfo().bulletsArray();
         assertEquals(bulletIDs.length,0);
         
         // Two targets are damaged
