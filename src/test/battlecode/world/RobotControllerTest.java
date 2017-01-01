@@ -462,8 +462,51 @@ public class RobotControllerTest {
     
     @Test // Bullet collision works continuously and not at discrete intervals
     public void continuousBulletCollisionTest() throws GameActionException {
-        
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        // Create some units
+        final int soldierA = game.spawn(3, 5, RobotType.SOLDIER, Team.A);
+        final int soldierB = game.spawn(9, 5, RobotType.SOLDIER, Team.B);
+        game.waitRounds(20);    // Wait for bots to mature to full health
+
+        MapLocation soldierBLocation = game.getBot(soldierB).getLocation();
+        // topOfSoldierB is a location just near the top edge of soldierB.
+        // if discrete bullet position checking is used, the bullet will clip though some of the tests.
+        MapLocation topOfSoldierB = soldierBLocation.add(Direction.getNorth(),RobotType.SOLDIER.bodyRadius - 0.01f);
+
+        final float testInterval = 0.01f;
+        for(float i=0; i<1; i+=testInterval){
+            // soldierA fires a shot at soldierB, and moves a small amount closer.
+            // Move before firing so it doesn't step into it's own bullet
+            game.round((id, rc) -> {
+                if (id != soldierA) return;
+                rc.move(rc.getLocation().directionTo(soldierBLocation),testInterval);
+                rc.fireSingleShot(rc.getLocation().directionTo(topOfSoldierB));
+            });
+            game.waitRounds(5); // Bullet propagation
+
+            assertEquals(game.getBot(soldierB).getHealth(), RobotType.SOLDIER.maxHealth - RobotType.SOLDIER.attackPower, EPSILON);
+            game.getBot(soldierB).repairRobot(10); // Repair back to full health so it doesn't die
+        }
+
+        // Now check cases where it shouldn't hit the other robot
+        game.round((id, rc) -> {
+            if (id != soldierA) return;
+            rc.move(Direction.getNorth(),RobotType.SOLDIER.bodyRadius+0.01f);
+            rc.fireSingleShot(Direction.getEast()); // Shoot a bullet parallel, slightly above soldierB
+        });
+        game.waitRounds(3); // Bullet propagation
+        assertEquals(game.getBot(soldierB).getHealth(), RobotType.SOLDIER.maxHealth, EPSILON);
+        // Bullet should still be in game
+        assertEquals(game.getWorld().getObjectInfo().bullets().size(),1);
+        game.waitRounds(1);
+        // Bullet should hit wall and die
+        assertEquals(game.getWorld().getObjectInfo().bullets().size(),0);
     }
-    
+
     // test goodies inside trees
 }
