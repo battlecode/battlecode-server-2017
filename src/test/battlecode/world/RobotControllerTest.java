@@ -626,6 +626,12 @@ public class RobotControllerTest {
         // Kill the tree
         game.round((id, rc) -> {
             rc.chop(neutralTree2);
+
+            // New robot should exist immediately
+            RobotInfo[] nearbyRobots = rc.senseNearbyRobots();
+            assertEquals(nearbyRobots.length,1);
+            // Can't move into its location
+            assertFalse(rc.canMove(nearbyRobots[0].getLocation()));
         });
         // Two robots should exist after it dies
         assertEquals(game.getWorld().getObjectInfo().getRobotCount(Team.A),2);
