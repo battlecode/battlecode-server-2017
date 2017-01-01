@@ -95,36 +95,6 @@ public strictfp class InternalBullet {
         this.location = newLoc;
     }
 
-/*    public void updateBullet() {
-        MapLocation bulletStart = this.getLocation();
-        MapLocation bulletFinish = bulletStart.add(this.getDirection(), this.getSpeed());
-
-        // THIS DOES NOT FOLLOW THE SPEC
-        // but it works
-        
-        InternalRobot hitRobot = gameWorld.getObjectInfo().getRobotAtLocation(bulletFinish);
-        if (hitRobot != null) {
-            gameWorld.destroyBullet(this.ID);
-            hitRobot.damageRobot(this.damage);
-            return;
-        }
-
-        InternalTree hitTree = gameWorld.getObjectInfo().getTreeAtLocation(bulletFinish);
-        if (hitTree != null) {
-            gameWorld.destroyBullet(this.ID);
-            hitTree.damageTree(this.damage, this.team);
-            return;
-        }
-
-        if (!gameMap.onTheMap(bulletFinish)) {
-            gameWorld.destroyBullet(this.ID);
-            return;
-        }
-
-        setLocation(bulletFinish); // Actually move the bullet
-    }*/
-
-    //TODO: Simplify this somehow
     public void updateBullet(){
         MapLocation bulletStart = this.getLocation();
         MapLocation bulletFinish = bulletStart.add(this.getDirection(), this.getSpeed());
