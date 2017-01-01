@@ -606,7 +606,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
                 }
                 
                 // Damage the closest tree
-                closestTree.damageTree(GameConstants.TANK_BODY_DAMAGE, getTeam());
+                closestTree.damageTree(GameConstants.TANK_BODY_DAMAGE, getTeam(), false);
             
                 // Now that damage has been done, refresh list of trees to see if it is still there
                 trees = gameWorld.getObjectInfo().getAllTreesWithinRadius(center, RobotType.TANK.bodyRadius);
@@ -706,7 +706,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         // Hit adjacent trees
         for(InternalTree hitTree :
                 gameWorld.getObjectInfo().getAllTreesWithinRadius(getLocation(), RobotType.LUMBERJACK.bodyRadius + 1)){
-            hitTree.damageTree(getType().attackPower, getTeam());
+            hitTree.damageTree(getType().attackPower, getTeam(), false);
         }
 
     }
@@ -861,7 +861,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
 
         float chopDamage = RobotType.LUMBERJACK.attackPower*GameConstants.LUMBERJACK_CHOP_DAMAGE_MULTIPLIER;
 
-        tree.damageTree(chopDamage, getTeam());
+        tree.damageTree(chopDamage, getTeam(), true);
 
         gameWorld.getMatchMaker().addAction(getID(), Action.CHOP, 0);
     }

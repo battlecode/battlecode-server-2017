@@ -128,11 +128,11 @@ public strictfp class InternalTree {
         }
     }
 
-    public void damageTree(float damage, Team hitBy){
+    public void damageTree(float damage, Team hitBy, boolean fromChop){
         this.health -= damage;
         this.healthChanged = true;
         keepMinHealth();
-        killTreeIfDead(hitBy);
+        killTreeIfDead(hitBy,fromChop);
     }
 
     public void healTree(float healAmount){
@@ -142,7 +142,7 @@ public strictfp class InternalTree {
     }
 
     public void decayTree(){
-        damageTree(GameConstants.BULLET_TREE_DECAY_RATE, Team.NEUTRAL);
+        damageTree(GameConstants.BULLET_TREE_DECAY_RATE, Team.NEUTRAL, false);
     }
 
     public void growTree(){
@@ -153,9 +153,9 @@ public strictfp class InternalTree {
         healTree(GameConstants.WATER_HEALTH_REGEN_RATE);
     }
 
-    public boolean killTreeIfDead(Team destroyedBy){
+    public boolean killTreeIfDead(Team destroyedBy, boolean fromChop){
         if(health == 0){
-            gameWorld.destroyTree(ID, destroyedBy);
+            gameWorld.destroyTree(ID, destroyedBy, fromChop);
             return true;
         }
         return false;

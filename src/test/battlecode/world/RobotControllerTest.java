@@ -569,5 +569,110 @@ public class RobotControllerTest {
         });
     }
     
-    // test goodies inside trees
+    @Test // Test goodies inside trees
+    public void testTreeGoodies() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int lumberjackA = game.spawn(5,5,RobotType.LUMBERJACK,Team.A);
+        final int neutralTree1 = game.spawnTree(8,5,1,Team.NEUTRAL,123,null);
+        final int neutralTree2 = game.spawnTree(2,5,1,Team.NEUTRAL, 0, RobotType.SOLDIER);
+        final int neutralTree3 = game.spawnTree(5,8,1,Team.NEUTRAL,123,RobotType.SOLDIER);
+        game.waitRounds(20);    // Allow robots to mature
+
+        game.round((id, rc) -> {
+            TreeInfo[] nearbyTrees = rc.senseNearbyTrees(-1,Team.NEUTRAL);
+            assertEquals(nearbyTrees.length,3);
+            int treesWithBullets=0;
+            int treesWithBots=0;
+            for(TreeInfo tree : nearbyTrees) {
+                if(tree.containedBullets > 0)
+                    treesWithBullets++;
+                if(tree.containedRobot != null)
+                    treesWithBots++;
+            }
+            assertEquals(treesWithBots,2);
+            assertEquals(treesWithBullets,2);
+            rc.chop(neutralTree1);
+        });
+        // While tree is not dead, continue hitting it
+        while(game.getTree(neutralTree1).getHealth() > GameConstants.LUMBERJACK_CHOP_DAMAGE_MULTIPLIER*RobotType.LUMBERJACK.attackPower) {
+            game.round((id, rc) -> {
+                rc.chop(neutralTree1);
+            });
+        }
+        // Bullets before final blow
+        assertEquals(game.getWorld().getTeamInfo().getBulletSupply(Team.A),GameConstants.BULLETS_INITIAL_AMOUNT,EPSILON);
+        // Kill the tree
+        game.round((id, rc) -> {
+            rc.chop(neutralTree1);
+        });
+        // Bullets rewarded after it dies
+        assertEquals(game.getWorld().getTeamInfo().getBulletSupply(Team.A),GameConstants.BULLETS_INITIAL_AMOUNT+123,EPSILON);
+
+        // While tree2 is not dead, continue hitting it
+        while(game.getTree(neutralTree2).getHealth() > GameConstants.LUMBERJACK_CHOP_DAMAGE_MULTIPLIER*RobotType.LUMBERJACK.attackPower) {
+            game.round((id, rc) -> {
+                rc.chop(neutralTree2);
+            });
+        }
+        // Only one active robot before killing the robot-containing tree
+        assertEquals(game.getWorld().getObjectInfo().getRobotCount(Team.A),1);
+        assertEquals(game.getWorld().getObjectInfo().getRobotCount(Team.B),0);
+        assertEquals(game.getWorld().getObjectInfo().getRobotCount(Team.NEUTRAL),0);
+        // Kill the tree
+        game.round((id, rc) -> {
+            rc.chop(neutralTree2);
+        });
+        // Two robots should exist after it dies
+        assertEquals(game.getWorld().getObjectInfo().getRobotCount(Team.A),2);
+        assertEquals(game.getWorld().getObjectInfo().getRobotCount(Team.B),0);
+        assertEquals(game.getWorld().getObjectInfo().getRobotCount(Team.NEUTRAL),0);
+
+        // Make sure the new robot runs player code
+        game.round((id, rc) -> {
+            if(id != lumberjackA) {
+                assertTrue(rc.getType().equals(RobotType.SOLDIER));
+                TreeInfo trees[] = rc.senseNearbyTrees(-1,Team.NEUTRAL);
+                assertEquals(trees.length,1);
+                rc.fireSingleShot(rc.getLocation().directionTo(trees[0].getLocation()));
+            }
+        });
+
+        // Last tree should get hit and lose health
+        game.waitRounds(2);
+
+        // Soldier should have damaged last tree
+        assertEquals(game.getTree(neutralTree3).getHealth(),GameConstants.NEUTRAL_TREE_HEALTH_RATE-RobotType.SOLDIER.attackPower,EPSILON);
+
+        // While tree3 is not dead, continue shooting it
+        while(game.getTree(neutralTree3).getHealth() > RobotType.SOLDIER.attackPower) {
+            game.round((id, rc) -> {
+                if(id != lumberjackA) {
+                    TreeInfo trees[] = rc.senseNearbyTrees(-1,Team.NEUTRAL);
+                    assertEquals(trees.length,1);
+                    rc.fireSingleShot(rc.getLocation().directionTo(trees[0].getLocation()));
+                }
+            });
+        }
+        // Tree alive before bullets propagate
+        assertEquals(game.getWorld().getObjectInfo().getTreeCount(Team.NEUTRAL),1);
+        float initialBullets = game.getWorld().getTeamInfo().getBulletSupply(Team.A);
+
+        game.waitRounds(3); // Bullets propagate
+
+        // Tree should be gone
+        assertEquals(game.getWorld().getObjectInfo().getTreeCount(Team.NEUTRAL),0);
+
+        // No additional robots added
+        assertEquals(game.getWorld().getObjectInfo().getRobotCount(Team.A),2);
+        assertEquals(game.getWorld().getObjectInfo().getRobotCount(Team.B),0);
+        assertEquals(game.getWorld().getObjectInfo().getRobotCount(Team.NEUTRAL),0);
+
+        // No additional bullets
+        assertEquals(initialBullets,game.getWorld().getTeamInfo().getBulletSupply(Team.A),EPSILON);
+    }
 }
