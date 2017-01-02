@@ -112,7 +112,7 @@ public strictfp class InternalBullet {
         InternalTree hitTree = gameWorld.getObjectInfo().getTreeAtLocation(bulletFinish);
         if (hitTree != null) {
             gameWorld.destroyBullet(this.ID);
-            hitTree.damageTree(this.damage, this.team);
+            hitTree.damageTree(this.damage, this.team,false);
             return;
         }
 

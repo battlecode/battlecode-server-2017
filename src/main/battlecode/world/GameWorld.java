@@ -357,14 +357,23 @@ public strictfp class GameWorld {
     // ****** DESTROYING ***************
     // *********************************
 
-    public void destroyTree(int id, Team destroyedBy){
+    public void destroyTree(int id, Team destroyedBy, boolean fromChop){
         InternalTree tree = objectInfo.getTreeByID(id);
-        RobotType toSpawn = tree.getContainedRobot();
+
+        // Only chopping can release goodies
+        if(fromChop) {
+            RobotType toSpawn = tree.getContainedRobot();
+            float containedBullets = tree.getContainedBullets();
+
+            if (toSpawn != null && destroyedBy != Team.NEUTRAL && fromChop) {
+                this.spawnRobot(toSpawn, tree.getLocation(), destroyedBy);
+            }
+            if (containedBullets > 0 && fromChop) {
+                this.teamInfo.adjustBulletSupply(destroyedBy,containedBullets);
+            }
+        }
 
         objectInfo.destroyTree(id);
-        if(toSpawn != null && destroyedBy != Team.NEUTRAL){
-            this.spawnRobot(toSpawn, tree.getLocation(), tree.getTeam());
-        }
 
         matchMaker.addDied(id, false);
     }
