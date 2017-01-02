@@ -466,7 +466,11 @@ public strictfp class GameMaker {
                 // The indicator strings that were set
                 int indicatorStringIDsP = intVector(builder, indicatorStringIDs, Round::startIndicatorStringIDsVector);
                 int indicatorStringIndicesP = intVector(builder, indicatorStringIndices, Round::startIndicatorStringIndicesVector);
-                int indicatorStringValuesP = byteVector(); // TODO
+                TIntArrayList indicatorStringValuesInts = new TIntArrayList();
+                for (String indicatorStringValue : indicatorStringValues) {
+                    indicatorStringValuesInts.add(builder.createString(indicatorStringValue));
+                }
+                int indicatorStringValuesP = offsetVector(builder, indicatorStringValuesInts, Round::startIndicatorStringValuesVector);
 
                 // The indicator dots that were set
                 int indicatorDotIDsP = intVector(builder, indicatorDotIDs, Round::startIndicatorDotIDsVector);
