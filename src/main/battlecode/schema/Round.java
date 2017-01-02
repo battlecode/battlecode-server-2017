@@ -104,59 +104,65 @@ public final class Round extends Table {
   public int actionTargetsLength() { int o = __offset(30); return o != 0 ? __vector_len(o) : 0; }
   public ByteBuffer actionTargetsAsByteBuffer() { return __vector_as_bytebuffer(30, 4); }
   /**
+   * The IDs of bodies that set indicator strings.
+   */
+  public int indicatorStringIDs(int j) { int o = __offset(32); return o != 0 ? bb.getInt(__vector(o) + j * 4) : 0; }
+  public int indicatorStringIDsLength() { int o = __offset(32); return o != 0 ? __vector_len(o) : 0; }
+  public ByteBuffer indicatorStringIDsAsByteBuffer() { return __vector_as_bytebuffer(32, 4); }
+  /**
    * The indices of the indicator strings that were set.
    */
-  public int indicatorStringIndices(int j) { int o = __offset(32); return o != 0 ? bb.getInt(__vector(o) + j * 4) : 0; }
-  public int indicatorStringIndicesLength() { int o = __offset(32); return o != 0 ? __vector_len(o) : 0; }
-  public ByteBuffer indicatorStringIndicesAsByteBuffer() { return __vector_as_bytebuffer(32, 4); }
+  public int indicatorStringIndices(int j) { int o = __offset(34); return o != 0 ? bb.getInt(__vector(o) + j * 4) : 0; }
+  public int indicatorStringIndicesLength() { int o = __offset(34); return o != 0 ? __vector_len(o) : 0; }
+  public ByteBuffer indicatorStringIndicesAsByteBuffer() { return __vector_as_bytebuffer(34, 4); }
   /**
    * The values of the indicator strings that were set.
    */
-  public String indicatorStringValues(int j) { int o = __offset(34); return o != 0 ? __string(__vector(o) + j * 4) : null; }
-  public int indicatorStringValuesLength() { int o = __offset(34); return o != 0 ? __vector_len(o) : 0; }
+  public String indicatorStringValues(int j) { int o = __offset(36); return o != 0 ? __string(__vector(o) + j * 4) : null; }
+  public int indicatorStringValuesLength() { int o = __offset(36); return o != 0 ? __vector_len(o) : 0; }
   /**
    * The IDs of bodies that set indicator dots
    */
-  public int indicatorDotIDs(int j) { int o = __offset(36); return o != 0 ? bb.getInt(__vector(o) + j * 4) : 0; }
-  public int indicatorDotIDsLength() { int o = __offset(36); return o != 0 ? __vector_len(o) : 0; }
-  public ByteBuffer indicatorDotIDsAsByteBuffer() { return __vector_as_bytebuffer(36, 4); }
+  public int indicatorDotIDs(int j) { int o = __offset(38); return o != 0 ? bb.getInt(__vector(o) + j * 4) : 0; }
+  public int indicatorDotIDsLength() { int o = __offset(38); return o != 0 ? __vector_len(o) : 0; }
+  public ByteBuffer indicatorDotIDsAsByteBuffer() { return __vector_as_bytebuffer(38, 4); }
   /**
    * The location of the indicator dots
    */
   public VecTable indicatorDotLocs() { return indicatorDotLocs(new VecTable()); }
-  public VecTable indicatorDotLocs(VecTable obj) { int o = __offset(38); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public VecTable indicatorDotLocs(VecTable obj) { int o = __offset(40); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
   /**
    * The RGB values of the indicator dots
    */
   public RGBTable indicatorDotRGBs() { return indicatorDotRGBs(new RGBTable()); }
-  public RGBTable indicatorDotRGBs(RGBTable obj) { int o = __offset(40); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public RGBTable indicatorDotRGBs(RGBTable obj) { int o = __offset(42); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
   /**
    * The IDs of bodies that set indicator lines
    */
-  public int indicatorLineIDs(int j) { int o = __offset(42); return o != 0 ? bb.getInt(__vector(o) + j * 4) : 0; }
-  public int indicatorLineIDsLength() { int o = __offset(42); return o != 0 ? __vector_len(o) : 0; }
-  public ByteBuffer indicatorLineIDsAsByteBuffer() { return __vector_as_bytebuffer(42, 4); }
+  public int indicatorLineIDs(int j) { int o = __offset(44); return o != 0 ? bb.getInt(__vector(o) + j * 4) : 0; }
+  public int indicatorLineIDsLength() { int o = __offset(44); return o != 0 ? __vector_len(o) : 0; }
+  public ByteBuffer indicatorLineIDsAsByteBuffer() { return __vector_as_bytebuffer(44, 4); }
   /**
    * The start location of the indicator lines
    */
   public VecTable indicatorLineStartLocs() { return indicatorLineStartLocs(new VecTable()); }
-  public VecTable indicatorLineStartLocs(VecTable obj) { int o = __offset(44); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public VecTable indicatorLineStartLocs(VecTable obj) { int o = __offset(46); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
   /**
    * The end location of the indicator lines
    */
   public VecTable indicatorLineEndLocs() { return indicatorLineEndLocs(new VecTable()); }
-  public VecTable indicatorLineEndLocs(VecTable obj) { int o = __offset(46); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public VecTable indicatorLineEndLocs(VecTable obj) { int o = __offset(48); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
   /**
    * The RGB values of the indicator lines
    */
   public RGBTable indicatorLineRGBs() { return indicatorLineRGBs(new RGBTable()); }
-  public RGBTable indicatorLineRGBs(RGBTable obj) { int o = __offset(48); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
+  public RGBTable indicatorLineRGBs(RGBTable obj) { int o = __offset(50); return o != 0 ? obj.__init(__indirect(o + bb_pos), bb) : null; }
   /**
    * The first sent Round in a match should have index 1. (The starting state,
    * created by the MatchHeader, can be thought to have index 0.)
    * It should increase by one for each following round.
    */
-  public int roundID() { int o = __offset(50); return o != 0 ? bb.getInt(o + bb_pos) : 0; }
+  public int roundID() { int o = __offset(52); return o != 0 ? bb.getInt(o + bb_pos) : 0; }
 
   public static int createRound(FlatBufferBuilder builder,
       int teamIDsOffset,
@@ -173,6 +179,7 @@ public final class Round extends Table {
       int actionIDsOffset,
       int actionsOffset,
       int actionTargetsOffset,
+      int indicatorStringIDsOffset,
       int indicatorStringIndicesOffset,
       int indicatorStringValuesOffset,
       int indicatorDotIDsOffset,
@@ -183,7 +190,7 @@ public final class Round extends Table {
       int indicatorLineEndLocsOffset,
       int indicatorLineRGBsOffset,
       int roundID) {
-    builder.startObject(24);
+    builder.startObject(25);
     Round.addRoundID(builder, roundID);
     Round.addIndicatorLineRGBs(builder, indicatorLineRGBsOffset);
     Round.addIndicatorLineEndLocs(builder, indicatorLineEndLocsOffset);
@@ -194,6 +201,7 @@ public final class Round extends Table {
     Round.addIndicatorDotIDs(builder, indicatorDotIDsOffset);
     Round.addIndicatorStringValues(builder, indicatorStringValuesOffset);
     Round.addIndicatorStringIndices(builder, indicatorStringIndicesOffset);
+    Round.addIndicatorStringIDs(builder, indicatorStringIDsOffset);
     Round.addActionTargets(builder, actionTargetsOffset);
     Round.addActions(builder, actionsOffset);
     Round.addActionIDs(builder, actionIDsOffset);
@@ -211,7 +219,7 @@ public final class Round extends Table {
     return Round.endRound(builder);
   }
 
-  public static void startRound(FlatBufferBuilder builder) { builder.startObject(24); }
+  public static void startRound(FlatBufferBuilder builder) { builder.startObject(25); }
   public static void addTeamIDs(FlatBufferBuilder builder, int teamIDsOffset) { builder.addOffset(0, teamIDsOffset, 0); }
   public static int createTeamIDsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt(data[i]); return builder.endVector(); }
   public static void startTeamIDsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
@@ -248,24 +256,27 @@ public final class Round extends Table {
   public static void addActionTargets(FlatBufferBuilder builder, int actionTargetsOffset) { builder.addOffset(13, actionTargetsOffset, 0); }
   public static int createActionTargetsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt(data[i]); return builder.endVector(); }
   public static void startActionTargetsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
-  public static void addIndicatorStringIndices(FlatBufferBuilder builder, int indicatorStringIndicesOffset) { builder.addOffset(14, indicatorStringIndicesOffset, 0); }
+  public static void addIndicatorStringIDs(FlatBufferBuilder builder, int indicatorStringIDsOffset) { builder.addOffset(14, indicatorStringIDsOffset, 0); }
+  public static int createIndicatorStringIDsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt(data[i]); return builder.endVector(); }
+  public static void startIndicatorStringIDsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
+  public static void addIndicatorStringIndices(FlatBufferBuilder builder, int indicatorStringIndicesOffset) { builder.addOffset(15, indicatorStringIndicesOffset, 0); }
   public static int createIndicatorStringIndicesVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt(data[i]); return builder.endVector(); }
   public static void startIndicatorStringIndicesVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
-  public static void addIndicatorStringValues(FlatBufferBuilder builder, int indicatorStringValuesOffset) { builder.addOffset(15, indicatorStringValuesOffset, 0); }
+  public static void addIndicatorStringValues(FlatBufferBuilder builder, int indicatorStringValuesOffset) { builder.addOffset(16, indicatorStringValuesOffset, 0); }
   public static int createIndicatorStringValuesVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addOffset(data[i]); return builder.endVector(); }
   public static void startIndicatorStringValuesVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
-  public static void addIndicatorDotIDs(FlatBufferBuilder builder, int indicatorDotIDsOffset) { builder.addOffset(16, indicatorDotIDsOffset, 0); }
+  public static void addIndicatorDotIDs(FlatBufferBuilder builder, int indicatorDotIDsOffset) { builder.addOffset(17, indicatorDotIDsOffset, 0); }
   public static int createIndicatorDotIDsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt(data[i]); return builder.endVector(); }
   public static void startIndicatorDotIDsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
-  public static void addIndicatorDotLocs(FlatBufferBuilder builder, int indicatorDotLocsOffset) { builder.addOffset(17, indicatorDotLocsOffset, 0); }
-  public static void addIndicatorDotRGBs(FlatBufferBuilder builder, int indicatorDotRGBsOffset) { builder.addOffset(18, indicatorDotRGBsOffset, 0); }
-  public static void addIndicatorLineIDs(FlatBufferBuilder builder, int indicatorLineIDsOffset) { builder.addOffset(19, indicatorLineIDsOffset, 0); }
+  public static void addIndicatorDotLocs(FlatBufferBuilder builder, int indicatorDotLocsOffset) { builder.addOffset(18, indicatorDotLocsOffset, 0); }
+  public static void addIndicatorDotRGBs(FlatBufferBuilder builder, int indicatorDotRGBsOffset) { builder.addOffset(19, indicatorDotRGBsOffset, 0); }
+  public static void addIndicatorLineIDs(FlatBufferBuilder builder, int indicatorLineIDsOffset) { builder.addOffset(20, indicatorLineIDsOffset, 0); }
   public static int createIndicatorLineIDsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt(data[i]); return builder.endVector(); }
   public static void startIndicatorLineIDsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
-  public static void addIndicatorLineStartLocs(FlatBufferBuilder builder, int indicatorLineStartLocsOffset) { builder.addOffset(20, indicatorLineStartLocsOffset, 0); }
-  public static void addIndicatorLineEndLocs(FlatBufferBuilder builder, int indicatorLineEndLocsOffset) { builder.addOffset(21, indicatorLineEndLocsOffset, 0); }
-  public static void addIndicatorLineRGBs(FlatBufferBuilder builder, int indicatorLineRGBsOffset) { builder.addOffset(22, indicatorLineRGBsOffset, 0); }
-  public static void addRoundID(FlatBufferBuilder builder, int roundID) { builder.addInt(23, roundID, 0); }
+  public static void addIndicatorLineStartLocs(FlatBufferBuilder builder, int indicatorLineStartLocsOffset) { builder.addOffset(21, indicatorLineStartLocsOffset, 0); }
+  public static void addIndicatorLineEndLocs(FlatBufferBuilder builder, int indicatorLineEndLocsOffset) { builder.addOffset(22, indicatorLineEndLocsOffset, 0); }
+  public static void addIndicatorLineRGBs(FlatBufferBuilder builder, int indicatorLineRGBsOffset) { builder.addOffset(23, indicatorLineRGBsOffset, 0); }
+  public static void addRoundID(FlatBufferBuilder builder, int roundID) { builder.addInt(24, roundID, 0); }
   public static int endRound(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
