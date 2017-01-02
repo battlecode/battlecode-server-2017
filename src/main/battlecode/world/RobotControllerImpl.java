@@ -555,10 +555,10 @@ public final strictfp class RobotControllerImpl implements RobotController {
             center = getLocation().add(dir, getType().strideRadius);
         }
         boolean newLocationIsEmpty;
-        if(getType() != RobotType.TANK) {
+        if(getType() != RobotType.TANK && getType() != RobotType.SCOUT) {
             newLocationIsEmpty = gameWorld.getObjectInfo().isEmptyExceptForRobot(center, getType().bodyRadius, robot);
-        } else { // Tanks have special condition due to body attack
-            newLocationIsEmpty = gameWorld.getObjectInfo().noRobotsExceptForRobot(center, RobotType.TANK.bodyRadius, robot);
+        } else { // Tanks have special condition due to body attack, Scouts can just go over trees
+            newLocationIsEmpty = gameWorld.getObjectInfo().noRobotsExceptForRobot(center, getType().bodyRadius, robot);
         }
         return gameWorld.getGameMap().onTheMap(center, getType().bodyRadius) &&
                 newLocationIsEmpty;
@@ -606,7 +606,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
                 }
                 
                 // Damage the closest tree
-                closestTree.damageTree(GameConstants.TANK_BODY_DAMAGE, getTeam());
+                closestTree.damageTree(GameConstants.TANK_BODY_DAMAGE, getTeam(), false);
             
                 // Now that damage has been done, refresh list of trees to see if it is still there
                 trees = gameWorld.getObjectInfo().getAllTreesWithinRadius(center, RobotType.TANK.bodyRadius);
@@ -632,6 +632,13 @@ public final strictfp class RobotControllerImpl implements RobotController {
         if(!haveBulletCosts(cost)){
             throw new GameActionException(NOT_ENOUGH_RESOURCE,
                     "Not sufficient funds in bullet supply");
+        }
+    }
+
+    private void assertNonNegative(float cost) throws GameActionException{
+        if(cost < 0) {
+            throw new GameActionException(CANT_DO_THAT,
+                    "Can't purchase negative victory points");
         }
     }
 
@@ -699,7 +706,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         // Hit adjacent trees
         for(InternalTree hitTree :
                 gameWorld.getObjectInfo().getAllTreesWithinRadius(getLocation(), RobotType.LUMBERJACK.bodyRadius + 1)){
-            hitTree.damageTree(getType().attackPower, getTeam());
+            hitTree.damageTree(getType().attackPower, getTeam(), false);
         }
 
     }
@@ -854,7 +861,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
 
         float chopDamage = RobotType.LUMBERJACK.attackPower*GameConstants.LUMBERJACK_CHOP_DAMAGE_MULTIPLIER;
 
-        tree.damageTree(chopDamage, getTeam());
+        tree.damageTree(chopDamage, getTeam(), true);
 
         gameWorld.getMatchMaker().addAction(getID(), Action.CHOP, 0);
     }
@@ -1120,9 +1127,10 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     @Override
-    public void donate(int bullets) throws GameActionException{
+    public void donate(float bullets) throws GameActionException{
+        assertNonNegative(bullets);
         assertHaveBulletCosts(bullets);
-        int gainedVictorPoints = bullets / GameConstants.BULLET_EXCHANGE_RATE;
+        int gainedVictorPoints = (int)bullets / GameConstants.BULLET_EXCHANGE_RATE;
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -bullets);
         gameWorld.getTeamInfo().adjustVictoryPoints(getTeam(), gainedVictorPoints);
     }

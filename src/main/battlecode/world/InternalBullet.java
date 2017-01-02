@@ -147,7 +147,7 @@ public strictfp class InternalBullet {
             } else  if (hitTree != null){
                 /// And the closest thing hit was a tree...
                 gameWorld.destroyBullet(this.ID);
-                hitTree.damageTree(this.damage, this.team);
+                hitTree.damageTree(this.damage, this.team, false);
             } else {
                 // This should never happen
                 throw new RuntimeException("Closest hit object was null");

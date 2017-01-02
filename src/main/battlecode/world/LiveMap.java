@@ -155,7 +155,7 @@ public strictfp class LiveMap {
      *         false if they're not
      */
     private boolean onTheMap(float x, float y) {
-        return (x >= origin.x && y >= origin.y && x < origin.x + width && y < origin.y + height);
+        return (x >= origin.x && y >= origin.y && x <= origin.x + width && y <= origin.y + height);
     }
 
     /**
