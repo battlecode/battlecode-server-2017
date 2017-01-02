@@ -625,6 +625,8 @@ public class RobotControllerTest {
         assertEquals(game.getWorld().getObjectInfo().getRobotCount(Team.NEUTRAL),0);
         // Kill the tree
         game.round((id, rc) -> {
+            if(id != lumberjackA) return;
+
             rc.chop(neutralTree2);
 
             // New robot should exist immediately
