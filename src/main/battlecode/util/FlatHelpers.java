@@ -138,4 +138,14 @@ public class FlatHelpers {
         int ysP = floatVector(builder, ys, VecTable::startYsVector);
         return VecTable.createVecTable(builder, xsP, ysP);
     }
+
+    public static int createRGBTable(FlatBufferBuilder builder, TIntList red, TIntList green, TIntList blue) {
+        if (red.size() != green.size() || green.size() != blue.size()) {
+            throw new RuntimeException("Mismatched lengths: "+red.size()+", "+green.size()+", "+blue.size());
+        }
+        int redP = intVector(builder, red, RGBTable::startRedVector);
+        int greenP = intVector(builder, green, RGBTable::startGreenVector);
+        int blueP = intVector(builder, blue, RGBTable::startBlueVector);
+        return RGBTable.createRGBTable(builder, redP, greenP, blueP);
+    }
 }
