@@ -525,7 +525,70 @@ public class RobotControllerTest {
 
     @Test // Bullet collision works continuously and not at discrete intervals
     public void continuousBulletCollisionTest() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 12, 10, 1337, 100)
+                .build();
 
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        // Create some units
+        final int soldierA = game.spawn(3, 5, RobotType.SOLDIER, Team.A);
+        final int soldierB = game.spawn(9, 5, RobotType.SOLDIER, Team.B);
+        final int soldierB2 = game.spawn(10f,6.8f,RobotType.SOLDIER, Team.B);
+        game.waitRounds(20);    // Wait for bots to mature to full health
+
+        MapLocation soldierBLocation = game.getBot(soldierB).getLocation();
+        // topOfSoldierB is a location just near the top edge of soldierB.
+        // if discrete bullet position checking is used, the bullet will clip though some of the tests.
+        MapLocation topOfSoldierB = soldierBLocation.add(Direction.getNorth(),RobotType.SOLDIER.bodyRadius - 0.01f);
+
+        final float testInterval = 0.01f;
+        for(float i=0; i<1; i+=testInterval){
+            // soldierA fires a shot at soldierB, and moves a small amount closer.
+            // Move before firing so it doesn't step into it's own bullet
+            game.round((id, rc) -> {
+                if (id != soldierA) return;
+                rc.move(rc.getLocation().directionTo(soldierBLocation),testInterval);
+                rc.fireSingleShot(rc.getLocation().directionTo(topOfSoldierB));
+            });
+            game.waitRounds(5); // Bullet propagation
+
+            // SoldierB should get hit every time (bullet never clips through)
+            assertEquals(game.getBot(soldierB).getHealth(), RobotType.SOLDIER.maxHealth - RobotType.SOLDIER.attackPower, EPSILON);
+            game.getBot(soldierB).repairRobot(10); // Repair back to full health so it doesn't die
+
+            // SoldierB2 should never get hit
+            assertEquals(game.getBot(soldierB).getHealth(), RobotType.SOLDIER.maxHealth, EPSILON);
+        }
+
+        // Now check cases where it shouldn't hit soldierB
+        game.round((id, rc) -> {
+            if (id != soldierA) return;
+            rc.move(Direction.getNorth(),RobotType.SOLDIER.bodyRadius+0.01f);
+            rc.fireSingleShot(Direction.getEast()); // Shoot a bullet parallel, slightly above soldierB
+        });
+        game.waitRounds(5); // Bullet propagation
+
+        // Bullet goes over soldierB
+        assertEquals(game.getBot(soldierB).getHealth(), RobotType.SOLDIER.maxHealth, EPSILON);
+        // ...and hits soldier B2
+        assertEquals(game.getBot(soldierB2).getHealth(), RobotType.SOLDIER.maxHealth - RobotType.SOLDIER.attackPower, EPSILON);
+
+        // Test shooting off the map
+        game.round((id, rc) -> {
+            if (id == soldierA)
+                rc.fireSingleShot(Direction.getEast()); // Shoot a bullet parallel, slightly above soldierB
+            else if (id == soldierB2)
+                rc.move(Direction.getNorth());  // Move out of way so soldierA can shoot off the map
+        });
+
+        game.waitRounds(5); // Bullet propagation off map
+        assertEquals(game.getBot(soldierB).getHealth(), RobotType.SOLDIER.maxHealth, EPSILON);
+        // Bullet should still be in game
+        assertEquals(game.getWorld().getObjectInfo().bullets().size(),1);
+        game.waitRounds(1);
+        // Bullet should hit wall and die
+        assertEquals(game.getWorld().getObjectInfo().bullets().size(),0);
     }
 
     @Test // Buying victory points
@@ -535,7 +598,6 @@ public class RobotControllerTest {
 
         // This creates the actual game.
         TestGame game = new TestGame(map);
-
         final int archonA = game.spawn(8, 5, RobotType.GARDENER, Team.A);
         final int archonB = game.spawn(2, 5, RobotType.GARDENER, Team.B);
 
@@ -568,7 +630,7 @@ public class RobotControllerTest {
             assertTrue(exception);
         });
     }
-    
+
     @Test // Test goodies inside trees
     public void testTreeGoodies() throws GameActionException {
         LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)

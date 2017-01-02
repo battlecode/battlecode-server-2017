@@ -95,37 +95,7 @@ public strictfp class InternalBullet {
         this.location = newLoc;
     }
 
-    public void updateBullet() {
-        MapLocation bulletStart = this.getLocation();
-        MapLocation bulletFinish = bulletStart.add(this.getDirection(), this.getSpeed());
-
-        // THIS DOES NOT FOLLOW THE SPEC
-        // but it works
-        
-        InternalRobot hitRobot = gameWorld.getObjectInfo().getRobotAtLocation(bulletFinish);
-        if (hitRobot != null) {
-            gameWorld.destroyBullet(this.ID);
-            hitRobot.damageRobot(this.damage);
-            return;
-        }
-
-        InternalTree hitTree = gameWorld.getObjectInfo().getTreeAtLocation(bulletFinish);
-        if (hitTree != null) {
-            gameWorld.destroyBullet(this.ID);
-            hitTree.damageTree(this.damage, this.team,false);
-            return;
-        }
-
-        if (!gameMap.onTheMap(bulletFinish)) {
-            gameWorld.destroyBullet(this.ID);
-            return;
-        }
-
-        setLocation(bulletFinish); // Actually move the bullet
-    }
-
-    //TODO: Simplify this somehow
-    /*public void updateBullet(){
+    public void updateBullet(){
         MapLocation bulletStart = this.getLocation();
         MapLocation bulletFinish = bulletStart.add(this.getDirection(), this.getSpeed());
         Direction toFinish = bulletStart.directionTo(bulletFinish);
@@ -159,41 +129,37 @@ public strictfp class InternalBullet {
             }
         }
 
-        //Check if ends off map
-        float mapEdgeDist = calcBoundaryDist(bulletStart, bulletFinish);
-
-        if (hitRobot != null) {
-
-        } else if (hitTree != null) {
-
-        } else if ()
-        //Update GameWorld when tree or robot not hit
-        if(hitTree == null && hitRobot == null){
-            if(mapEdgeDist >= 0){
-                setLocation(bulletStart.add(toFinish, mapEdgeDist));
+        if(hitRobot == null && hitTree == null) {
+            // If bullet didn't hit anything...
+            if (!gameMap.onTheMap(bulletFinish)) {
+                /// ...and went off the map, destroy it.
                 gameWorld.destroyBullet(this.ID);
-            }else{
-                setLocation(bulletStart.add(toFinish, this.speed));
+            } else {
+                // ... and stayed on the map, keep it going.
+                setLocation(bulletFinish);
             }
-        }//Update GameWorld when tree or robot is hit
-        else{
-            if(hitTreeDist < hitRobotDist){
-                setLocation(bulletStart.add(toFinish, hitTreeDist));
-                gameWorld.destroyBullet(this.ID);
-                hitTree.damageTree(this.damage, this.team);
-            }else{
-                setLocation(bulletStart.add(toFinish, hitRobotDist));
+        } else {
+            // If the bullet hit something...
+            if(hitRobotDist < hitTreeDist && hitRobot != null) {
+                // And the closest thing hit was a robot...
                 gameWorld.destroyBullet(this.ID);
                 hitRobot.damageRobot(this.damage);
+            } else  if (hitTree != null){
+                /// And the closest thing hit was a tree...
+                gameWorld.destroyBullet(this.ID);
+                hitTree.damageTree(this.damage, this.team, false);
+            } else {
+                // This should never happen
+                throw new RuntimeException("Closest hit object was null");
             }
         }
-    }*/
+    }
 
     // ******************************************
     // ****** CALCULATIONS **********************
     // ******************************************
 
-    /*private float calcHitDist(MapLocation bulletStart, MapLocation bulletFinish,
+    private float calcHitDist(MapLocation bulletStart, MapLocation bulletFinish,
                               MapLocation targetCenter, float targetRadius){
         final float minDist = 0;
         final float maxDist = bulletStart.distanceTo(bulletFinish);
@@ -225,64 +191,7 @@ public strictfp class InternalBullet {
             return -1;
         }
         return hitDist;
-    }*/
-
-    /*private float calcBoundaryDist(MapLocation bulletStart, MapLocation bulletFinish){
-        float distTotal = bulletStart.distanceTo(bulletFinish);
-        float distToLeft  = gameWorld.getGameMap().getOrigin().x - bulletFinish.x;
-        float distToRight = bulletFinish.x -
-                (gameWorld.getGameMap().getOrigin().x + gameWorld.getGameMap().getWidth());
-        float distToTop   = gameWorld.getGameMap().getOrigin().y - bulletFinish.y;
-        float distToBottom= bulletFinish.y -
-                (gameWorld.getGameMap().getOrigin().y + gameWorld.getGameMap().getHeight());
-
-        float distCollide = -1;
-        if(distToLeft > 0){
-            Direction toRight = new Direction(0);
-            Direction toStart = bulletFinish.directionTo(bulletStart);
-            float angle = toRight.radiansBetween(toStart);
-            float hyp   = distToLeft / (float) Math.cos(angle);
-            MapLocation testLoc = bulletFinish.add(toStart, hyp);
-            if(testLoc.y >= gameMap.getOrigin().y &&
-                    testLoc.y <= gameMap.getOrigin().y + gameMap.getHeight()){
-                distCollide = distTotal - hyp;
-            }
-        }
-        if(distToRight > 0){
-            Direction toLeft = new Direction((float)Math.PI);
-            Direction toStart = bulletFinish.directionTo(bulletStart);
-            float angle = toLeft.radiansBetween(toStart);
-            float hyp   = distToRight / (float) Math.cos(angle);
-            MapLocation testLoc = bulletFinish.add(toStart, hyp);
-            if(testLoc.y >= gameMap.getOrigin().y &&
-                    testLoc.y <= gameMap.getOrigin().y + gameMap.getHeight()){
-                distCollide = distTotal - hyp;
-            }
-        }
-        if(distToTop > 0){
-            Direction toBottom = new Direction(3 * (float)Math.PI / 2);
-            Direction toStart = bulletFinish.directionTo(bulletStart);
-            float angle = toBottom.radiansBetween(toStart);
-            float hyp   = distToTop * (float) Math.cos(angle);
-            MapLocation testLoc = bulletFinish.add(toStart, hyp);
-            if(testLoc.x >= gameMap.getOrigin().x &&
-                    testLoc.x <= gameMap.getOrigin().x + gameMap.getWidth()){
-                distCollide = distTotal - hyp;
-            }
-        }
-        if(distToBottom > 0){
-            Direction toTop = new Direction((float)Math.PI / 2);
-            Direction toStart = bulletFinish.directionTo(bulletStart);
-            float angle = toTop.radiansBetween(toStart);
-            float hyp   = distToBottom * (float) Math.cos(angle);
-            MapLocation testLoc = bulletFinish.add(toStart, hyp);
-            if(testLoc.x >= gameMap.getOrigin().x &&
-                    testLoc.x <= gameMap.getOrigin().x + gameMap.getWidth()){
-                distCollide = distTotal - hyp;
-            }
-        }
-        return distCollide;
-    }*/
+    }
 
     // *********************************
     // ****** MISC. METHODS ************
