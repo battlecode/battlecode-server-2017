@@ -1138,6 +1138,46 @@ public strictfp interface RobotController {
     void resign();
 
     // ***********************************
+    // **** INDICATOR STRING METHODS *****
+    // ***********************************
+
+    /**
+     * Sets one of this robot's 'indicator strings' for debugging purposes. These
+     * strings are displayed in the client by clicking on the associated robot.
+     * This method has no effect on gameplay.
+     *
+     * @param index the index of the indicator string to set. Must be
+     * between 0 and GameConstants.NUMBER_OF_INDICATOR_STRINGS.
+     * @param value the value to which the indicator string should be set.
+     * @throws GameActionException if the index of the indicator string is not
+     * between 0 and GameConstants.NUMBER_OF_INDICATOR_STRINGS.
+     */
+    void setIndicatorString(int index, String value) throws GameActionException;
+
+    /**
+     * Draw a dot on the game map for debugging purposes.
+     *
+     * @param loc the location to draw the dot.
+     * @param red the red component of the dot's color.
+     * @param green the green component of the dot's color.
+     * @param blue the blue component of the dot's color.
+     * @throws GameActionException if loc is not a valid location on the map
+     */
+    void setIndicatorDot(MapLocation loc, int red, int green, int blue) throws GameActionException;
+
+    /**
+     * Draw a line on the game map for debugging purposes.
+     *
+     * @param startLoc the location to draw the line from.
+     * @param endLoc the location to draw the line to.
+     * @param red the red component of the line's color.
+     * @param green the green component of the line's color.
+     * @param blue the blue component of the line's color.
+     * @throws GameActionException if startLoc or endLoc is not a valid location on the map
+     */
+    void setIndicatorLine(MapLocation startLoc, MapLocation endLoc, int red, int green, int blue) throws GameActionException;
+
+    // ***********************************
     // ******** TEAM MEMORY **************
     // ***********************************
 
