@@ -3,6 +3,7 @@ package battlecode.util;
 import battlecode.common.RobotType;
 import battlecode.schema.BodyType;
 import battlecode.schema.VecTable;
+import battlecode.schema.RGBTable;
 import com.google.flatbuffers.FlatBufferBuilder;
 import gnu.trove.TByteCollection;
 import gnu.trove.list.TByteList;
