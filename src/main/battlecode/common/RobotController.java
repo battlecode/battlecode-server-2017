@@ -510,29 +510,6 @@ public strictfp interface RobotController {
     BulletInfo[] senseNearbyBullets(MapLocation center, float radius);
 
     /**
-     * Returns an array of all the robots that have broadcasted in the
-     * last round (unconstrained by sensor range or distance).
-     *
-     * @return an array of all robots that have broadcasted in the last round.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    RobotInfo[] senseBroadcastingRobots();
-
-    /**
-     * Returns an array of all the robots that have broadcasted in the
-     * last round, filtered by team (unconstrained by sensor range or distance).
-     * Will return an empty list if you query for NEUTRAL.
-     *
-     * @param t - filter robots by the given team.
-     * @return an array of all robots of the given team that have
-     * broadcasted in the last round.
-     *
-     * battlecode.doc.costlymethod
-     */
-    RobotInfo[] senseBroadcastingRobots(Team t);
-
-    /**
      * Returns an array of all the locations of the robots that have
      * broadcasted in the last round (unconstrained by sensor range or distance)
      *
@@ -542,20 +519,6 @@ public strictfp interface RobotController {
      * @battlecode.doc.costlymethod
      */
     MapLocation[] senseBroadcastingRobotLocations();
-
-    /**
-     * Returns an array of all the locations of the robots that have broadcasted
-     * in the last round, filtered by team (unconstrained by sensor range or distance).
-     * Will return an empty list if you query for NEUTRAL.
-     *
-     * @param t - filter robots by the given team.
-     * @return an array of all the locations of the robots of the
-     * given team that have broadcasted in the last round.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    MapLocation[] senseBroadcastingRobotLocations(Team t);
-
 
     // ***********************************
     // ****** MOVEMENT METHODS ***********

@@ -433,45 +433,10 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     @Override
-    public RobotInfo[] senseBroadcastingRobots() {
-        return gameWorld.getPreviousBroadcasters();
-    }
-
-    @Override
-    public RobotInfo[] senseBroadcastingRobots(Team t) {
-        assertNotNull(t);
-        if(t == Team.NEUTRAL){
-            return new RobotInfo[0];
-        }
-        List<RobotInfo> validRobots = new ArrayList<>();
-        for(RobotInfo robot : gameWorld.getPreviousBroadcasters()){
-            if(robot.team == t){
-                validRobots.add(robot);
-            }
-        }
-        return validRobots.toArray(new RobotInfo[validRobots.size()]);
-    }
-
-    @Override
     public MapLocation[] senseBroadcastingRobotLocations() {
         List<MapLocation> validLocs = new ArrayList<>();
         for(RobotInfo robot : gameWorld.getPreviousBroadcasters()){
             validLocs.add(robot.location);
-        }
-        return validLocs.toArray(new MapLocation[validLocs.size()]);
-    }
-
-    @Override
-    public MapLocation[] senseBroadcastingRobotLocations(Team t) {
-        assertNotNull(t);
-        if(t == Team.NEUTRAL){
-            return new MapLocation[0];
-        }
-        List<MapLocation> validLocs = new ArrayList<>();
-        for(RobotInfo robot : gameWorld.getPreviousBroadcasters()){
-            if(robot.team == t){
-                validLocs.add(robot.location);
-            }
         }
         return validLocs.toArray(new MapLocation[validLocs.size()]);
     }
