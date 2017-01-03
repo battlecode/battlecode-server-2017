@@ -63,7 +63,7 @@ public interface GameConstants {
     float BULLET_TREE_DECAY_RATE = 1;
 
     /** The amount of bullets produced from one unit of health per bullet tree */
-    float BULLET_TREE_BULLET_PRODUCTION_RATE = .1f;
+    float BULLET_TREE_BULLET_PRODUCTION_RATE = .01f;
     
     /** Number of cooldown turns robot must wait between planting trees */
     int BULLET_TREE_CONSTRUCTION_COOLDOWN = 10;
