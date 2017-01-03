@@ -54,7 +54,7 @@ public interface GameConstants {
     int BULLET_TREE_MAX_HEALTH = 100;
 
     /** The radius of bullet trees */
-    float BULLET_TREE_RADIUS = .5F;
+    float BULLET_TREE_RADIUS = 1F;
 
     /** The cost in bullets to spawn a bullet tree */
     float BULLET_TREE_COST = 50;
