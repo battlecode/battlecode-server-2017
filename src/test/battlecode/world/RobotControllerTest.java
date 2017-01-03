@@ -201,7 +201,7 @@ public class RobotControllerTest {
         TestGame game = new TestGame(map);
         
         final int tankB = game.spawn(2, 5, RobotType.TANK, Team.B);
-        final int neutralTree = game.spawnTree(6, 5, 1, Team.NEUTRAL, 0, null);
+        final int neutralTree = game.spawnTree(7, 5, 1, Team.NEUTRAL, 0, null);
         game.waitRounds(20); // Wait for units to mature
         
         game.round((id, rc) -> {
@@ -228,6 +228,7 @@ public class RobotControllerTest {
             assertEquals(nearbyTrees.length,1);
             MapLocation originalLoc = rc.getLocation();
             assertFalse(rc.hasMoved());
+            assertTrue(rc.canMove(rc.getLocation().directionTo(nearbyTrees[0].location)));
             rc.move(rc.getLocation().directionTo(nearbyTrees[0].location));
             assertTrue(rc.hasMoved());
             assertFalse(rc.getLocation().equals(originalLoc)); // Tank should have moved
