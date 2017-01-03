@@ -53,15 +53,6 @@ public strictfp interface RobotController {
     int getTeamVictoryPoints();
 
     /**
-     * Gets the opponent's total victory points.
-     *
-     * @return the opponent's total victory points.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    int getOpponentVictoryPoints();
-
-    /**
      * Returns the number of robots on your team, including your archons.
      * If this number ever reaches zero, the opposing team will automatically
      * win by destruction.
