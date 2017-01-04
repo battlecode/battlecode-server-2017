@@ -1,8 +1,6 @@
 package battlecode.world;
 
 import battlecode.common.*;
-import battlecode.schema.BodyType;
-import battlecode.server.TeamMapping;
 import org.junit.Test;
 
 import java.io.File;
@@ -14,19 +12,17 @@ import static org.junit.Assert.*;
 public class GameMapIOTest {
 
     final static ClassLoader loader = GameMapIOTest.class.getClassLoader();
-    final static TeamMapping teamMapping = new TeamMapping("teamA", "org.teamA",
-            "teamB", "org.teamB");
 
     @Test
     public void testFindsDefaultMap() throws IOException {
         // will throw exception if default map can't be loaded
-        GameMapIO.loadMap("basicMap", null, teamMapping);
+        GameMapIO.loadMap("basicMap", null);
     }
 
     @Test
     public void testFindsPackageMap() throws IOException {
         LiveMap readMap = GameMapIO.loadMapAsResource(loader,
-                "battlecode/world/resources", "clearMap", teamMapping);
+                "battlecode/world/resources", "clearMap");
         assertEquals(readMap.getMapName(), "clearMap");
         assertEquals(readMap.getHeight(), 50.0, 0);
         assertEquals(readMap.getWidth(), 50.0, 0);
@@ -45,11 +41,11 @@ public class GameMapIOTest {
                 .addRobot(1, Team.A, RobotType.SCOUT, new MapLocation(30, 40))
                 .build();
 
-        GameMapIO.writeMap(inputMap, tempDir, teamMapping);
+        GameMapIO.writeMap(inputMap, tempDir);
 
         assertTrue("Map not in directory", GameMapIO.getAvailableMaps(tempDir).contains("simple"));
 
-        final LiveMap outputMap = GameMapIO.loadMap("simple", tempDir, teamMapping);
+        final LiveMap outputMap = GameMapIO.loadMap("simple", tempDir);
 
         assertEquals("Maps don't match", inputMap, outputMap);
 
@@ -63,7 +59,7 @@ public class GameMapIOTest {
                 .addRobot(3, Team.NEUTRAL, RobotType.ARCHON, new MapLocation(12, 13))
                 .build();
 
-        LiveMap outputMap = GameMapIO.Serial.deserialize(GameMapIO.Serial.serialize(inputMap, teamMapping), teamMapping);
+        LiveMap outputMap = GameMapIO.Serial.deserialize(GameMapIO.Serial.serialize(inputMap));
 
         assertEquals("Round trip failed", inputMap, outputMap);
     }

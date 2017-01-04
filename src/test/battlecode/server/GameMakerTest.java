@@ -7,6 +7,7 @@ import battlecode.common.Team;
 import battlecode.schema.Event;
 import battlecode.schema.GameHeader;
 import battlecode.schema.GameWrapper;
+import battlecode.util.TeamMapping;
 import battlecode.world.TestMapBuilder;
 
 import org.junit.Test;
@@ -24,19 +25,22 @@ import static org.mockito.Mockito.verify;
  * @author james
  */
 public class GameMakerTest {
-
-    private final TeamMapping tm = new TeamMapping("bananas", "meme","yellow","upside");
+    private final GameInfo info = new GameInfo(
+                    "bananas", "org.bananas", null,
+                    "yellow","org.yellow", null,
+                    new String[] {"honolulu"}, null, false
+    );
 
     @Test(expected=RuntimeException.class)
     public void testStateExceptions() {
-        GameMaker gm = new GameMaker(tm, null);
+        GameMaker gm = new GameMaker(info, null);
 
         gm.makeGameFooter(Team.A);
     }
 
     @Test(expected=RuntimeException.class)
     public void testMatchStateExceptions() {
-        GameMaker gm = new GameMaker(tm, null);
+        GameMaker gm = new GameMaker(info, null);
         gm.makeGameHeader();
         gm.createMatchMaker().makeMatchFooter(Team.A, 23);
     }
@@ -44,7 +48,7 @@ public class GameMakerTest {
     @Test
     public void fullReasonableGame() {
         NetServer mockServer = Mockito.mock(NetServer.class);
-        GameMaker gm = new GameMaker(tm, mockServer);
+        GameMaker gm = new GameMaker(info, mockServer);
 
         gm.makeGameHeader();
         GameMaker.MatchMaker mm = gm.createMatchMaker();
@@ -76,8 +80,14 @@ public class GameMakerTest {
         GameHeader h = (GameHeader) output.events(0).e(new GameHeader());
         assertEquals(GameConstants.SPEC_VERSION, h.specVersion());
         assertEquals(2, h.teamsLength());
+
+        assertEquals(TeamMapping.id(Team.A), h.teams(0).teamID());
         assertEquals("bananas", h.teams(0).name());
+        assertEquals("org.bananas", h.teams(0).packageName());
+
+        assertEquals(TeamMapping.id(Team.B), h.teams(1).teamID());
         assertEquals("yellow", h.teams(1).name());
+        assertEquals("org.yellow", h.teams(1).packageName());
 
         // TODO more sanity checking
 

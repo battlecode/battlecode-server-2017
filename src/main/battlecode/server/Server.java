@@ -145,8 +145,7 @@ public strictfp class Server implements Runnable {
                 return;
             }
 
-            TeamMapping teamMapping = new TeamMapping(currentGame);
-            GameMaker gameMaker = new GameMaker(teamMapping, netServer);
+            GameMaker gameMaker = new GameMaker(currentGame, netServer);
             gameMaker.makeGameHeader();
 
             debug("Running: "+currentGame);
@@ -165,7 +164,7 @@ public strictfp class Server implements Runnable {
 
                 Team winner;
                 try {
-                    winner = runMatch(currentGame, matchIndex, prov, teamMemory, teamMapping, gameMaker);
+                    winner = runMatch(currentGame, matchIndex, prov, teamMemory, gameMaker);
                 } catch (Exception e) {
                     ErrorReporter.report(e);
                     this.state = ServerState.ERROR;
@@ -207,7 +206,6 @@ public strictfp class Server implements Runnable {
                           int matchIndex,
                           RobotControlProvider prov,
                           long[][] teamMemory,
-                          TeamMapping teamMapping,
                           GameMaker gameMaker) throws Exception {
 
         final String mapName = currentGame.getMaps()[matchIndex];
@@ -215,7 +213,7 @@ public strictfp class Server implements Runnable {
         // Load the map for the match
         final LiveMap loadedMap;
         try {
-            loadedMap = GameMapIO.loadMap(mapName, new File(options.get("bc.game.map-path")), teamMapping);
+            loadedMap = GameMapIO.loadMap(mapName, new File(options.get("bc.game.map-path")));
             debug("running map " + loadedMap);
         } catch (IOException e) {
             warn("Couldn't load map " + mapName + ", skipping");

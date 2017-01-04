@@ -3,7 +3,6 @@ package battlecode.world;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import battlecode.server.TeamMapping;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -42,9 +41,7 @@ public class GenerateMaps {
                 )
                 .build();
 
-        GameMapIO.writeMap(map,
-                new File("src/main/battlecode/world/resources"),
-                new TeamMapping("Banana", "org.banana", "Ocelot", "org.ocelot"));
+        GameMapIO.writeMap(map, new File("src/main/battlecode/world/resources"));
 
     }
 
@@ -73,8 +70,8 @@ public class GenerateMaps {
                 .build();
 
         GameMapIO.writeMap(map,
-                new File("src/main/battlecode/world/resources"),
-                new TeamMapping("Banana", "org.banana", "Ocelot", "org.ocelot"));
+                new File("src/main/battlecode/world/resources"));
+
 
     }
 }

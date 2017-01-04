@@ -2,11 +2,6 @@ package battlecode.world;
 
 import battlecode.common.*;
 
-import battlecode.schema.BodyType;
-import battlecode.schema.NeutralTreeTable;
-import battlecode.schema.SpawnedBodyTable;
-import battlecode.server.TeamMapping;
-
 import java.util.*;
 
 /**

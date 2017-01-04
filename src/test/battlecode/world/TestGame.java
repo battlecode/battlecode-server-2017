@@ -2,15 +2,10 @@ package battlecode.world;
 
 import battlecode.common.*;
 import battlecode.server.GameMaker;
-import battlecode.server.TeamMapping;
-import battlecode.world.control.NullControlProvider;
 import battlecode.world.control.RobotControlProvider;
-import com.google.flatbuffers.FlatBufferBuilder;
 import org.junit.Ignore;
 import org.mockito.Mockito;
 
-import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
