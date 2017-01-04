@@ -790,7 +790,6 @@ public final strictfp class RobotControllerImpl implements RobotController {
                     "Can't water a neutral tree.");
         }
     }
-
     @Override
     public void chop(MapLocation loc) throws GameActionException {
         if(getType() != RobotType.LUMBERJACK){

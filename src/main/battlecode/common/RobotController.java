@@ -734,7 +734,7 @@ public strictfp interface RobotController {
     // ***********************************
 
     /**
-     * Chops the target tree at location loc. This action counts as a movement.
+     * Chops the target tree at location loc. This action counts as an attack.
      *
      * @param loc the location of the tree you wish to chop, does not
      * have to be the center of the tree
@@ -747,7 +747,7 @@ public strictfp interface RobotController {
     void chop(MapLocation loc) throws GameActionException;
 
     /**
-     * Chops the target tree at location loc. This action counts as a movement.
+     * Chops the target tree at location loc. This action counts as an attack.
      *
      * @param id the id of the tree you wish to chop.
      * @throws GameActionException if there isn't a tree with the given id,
