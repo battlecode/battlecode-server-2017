@@ -64,6 +64,12 @@ dependencies {
   )
 }
 
+jar {
+  from {
+    configurations.testCompile.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+}
+
 javadoc {
   includes = ["**/common/**"]
   options.windowTitle = "Battlecode 2017"
