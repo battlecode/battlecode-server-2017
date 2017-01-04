@@ -19,7 +19,7 @@ public strictfp class Server implements Runnable {
     /**
      * The GameInfo that signals the server to terminate when it is encountered on the game queue.
      */
-    private static final GameInfo POISON = new GameInfo(null, null, null, null, null, null, false) {};
+    private static final GameInfo POISON = new GameInfo(null, null, null, null, null, null, null, null, false) {};
 
     /**
      * The queue of games to run.
@@ -31,11 +31,6 @@ public strictfp class Server implements Runnable {
      * The state of the match that the server is running (or about to run).
      */
     private ServerState state;
-
-    /**
-     * The round number to run until.
-     */
-    private int runUntil;
 
     /**
      * The options provided to the server via config file and command line.
@@ -61,9 +56,6 @@ public strictfp class Server implements Runnable {
      */
     public enum Mode {
         HEADLESS,
-        LOCAL,
-        SCRIMMAGE,
-        TOURNAMENT
     }
 
     /**
@@ -245,12 +237,11 @@ public strictfp class Server implements Runnable {
         } else {
             // Start the game immediately if we're not in interactive mode
             this.state = ServerState.RUNNING;
-            this.runUntil = Integer.MAX_VALUE;
         }
 
         long startTime = System.currentTimeMillis();
         say("-------------------- Match Starting --------------------");
-        say(String.format("%s vs. %s on %s", currentGame.getTeamA(), currentGame.getTeamB(), mapName));
+        say(String.format("%s vs. %s on %s", currentGame.getTeamAPackage(), currentGame.getTeamBPackage(), mapName));
 
         // If there are more rounds to be run, run them and
         // and send the round (and optionally stats) bytes to
@@ -304,11 +295,11 @@ public strictfp class Server implements Runnable {
 
         teamProvider.registerControlProvider(
                 Team.A,
-                new PlayerControlProvider(game.getTeamA(), game.getTeamAClasses())
+                new PlayerControlProvider(game.getTeamAPackage(), game.getTeamAClasses())
         );
         teamProvider.registerControlProvider(
                 Team.B,
-                new PlayerControlProvider(game.getTeamB(), game.getTeamBClasses())
+                new PlayerControlProvider(game.getTeamBPackage(), game.getTeamBClasses())
         );
         teamProvider.registerControlProvider(
                 Team.NEUTRAL,
@@ -339,11 +330,11 @@ public strictfp class Server implements Runnable {
 
         switch (winner) {
             case A:
-                teamName = game.getTeamA() + " (A)";
+                teamName = game.getTeamAPackage() + " (A)";
                 break;
 
             case B:
-                teamName = game.getTeamB() + " (B)";
+                teamName = game.getTeamBPackage() + " (B)";
                 break;
 
             default:

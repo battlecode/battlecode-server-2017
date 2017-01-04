@@ -1,27 +1,59 @@
 package battlecode.server;
 
 import java.io.File;
+import java.net.URL;
 
 public class Main {
 
     private static void runHeadless(Config options, String saveFile) {
-        final Server server = new Server(
-                options,
-                false
-        );
-        final String teamA = options.get("bc.game.team-a");
-        final String teamB = options.get("bc.game.team-b");
-        final String[] maps = options.get("bc.game.maps").split(",");
-        server.addGameNotification(new GameInfo(
-                teamA, null,
-                teamB, null,
-                maps,
-                new File(options.get("bc.server.save-file")),
-                false
-        ));
-        server.terminateNotification();
+        try {
+            final Server server = new Server(
+                    options,
+                    false
+            );
 
-        server.run();
+            final String teamA = options.get("bc.game.team-a");
+            final URL teamAClasses;
+            if (options.get("bc.game.team-a.classes") != null) {
+                teamAClasses = new URL(options.get("bc.game.team-a.classes"));
+            } else {
+                teamAClasses = null;
+            }
+            final String teamAPackage;
+            if (options.get("bc.game.team-a.package") != null) {
+                teamAPackage = options.get("bc.game.team-a.package");
+            } else {
+                teamAPackage = teamA;
+            }
+
+            final String teamB = options.get("bc.game.team-b");
+            final URL teamBClasses;
+            if (options.get("bc.game.team-b.classes") != null) {
+                teamBClasses = new URL(options.get("bc.game.team-b.classes"));
+            } else {
+                teamBClasses = null;
+            }
+            final String teamBPackage;
+            if (options.get("bc.game.team-b.package") != null) {
+                teamBPackage = options.get("bc.game.team-b.package");
+            } else {
+                teamBPackage = teamB;
+            }
+
+            final String[] maps = options.get("bc.game.maps").split(",");
+            server.addGameNotification(new GameInfo(
+                    teamA, teamAPackage, teamAClasses,
+                    teamB, teamBPackage, teamBClasses,
+                    maps,
+                    new File(options.get("bc.server.save-file")),
+                    false
+            ));
+            server.terminateNotification();
+
+            server.run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static Config setupConfig(String[] args) {

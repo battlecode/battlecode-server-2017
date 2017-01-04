@@ -14,7 +14,8 @@ import static org.junit.Assert.*;
 public class GameMapIOTest {
 
     final static ClassLoader loader = GameMapIOTest.class.getClassLoader();
-    final static TeamMapping teamMapping = new TeamMapping("teamA", "teamB");
+    final static TeamMapping teamMapping = new TeamMapping("teamA", "org.teamA",
+            "teamB", "org.teamB");
 
     @Test
     public void testFindsDefaultMap() throws IOException {
@@ -24,9 +25,7 @@ public class GameMapIOTest {
 
     @Test
     public void testFindsPackageMap() throws IOException {
-        TeamMapping teamMapping = new TeamMapping("teamA", "teamB");
-
-        LiveMap readMap = GameMapIO.loadMapAsResource(GameMapIOTest.class.getClassLoader(),
+        LiveMap readMap = GameMapIO.loadMapAsResource(loader,
                 "battlecode/world/resources", "clearMap", teamMapping);
         assertEquals(readMap.getMapName(), "clearMap");
         assertEquals(readMap.getHeight(), 50.0, 0);

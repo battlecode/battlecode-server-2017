@@ -44,7 +44,7 @@ public class GenerateMaps {
 
         GameMapIO.writeMap(map,
                 new File("src/main/battlecode/world/resources"),
-                new TeamMapping("Banana", "Ocelot"));
+                new TeamMapping("Banana", "org.banana", "Ocelot", "org.ocelot"));
 
     }
 
@@ -74,7 +74,7 @@ public class GenerateMaps {
 
         GameMapIO.writeMap(map,
                 new File("src/main/battlecode/world/resources"),
-                new TeamMapping("Banana", "Ocelot"));
+                new TeamMapping("Banana", "org.banana", "Ocelot", "org.ocelot"));
 
     }
 }

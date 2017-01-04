@@ -212,7 +212,7 @@ public strictfp class GameMaker {
             int specVersionOffset = builder.createString(GameConstants.SPEC_VERSION);
 
             int name = builder.createString(teamMapping.getTeamAName());
-            int packageName = builder.createString(teamMapping.getTeamAName());
+            int packageName = builder.createString(teamMapping.getTeamAPackage());
             TeamData.startTeamData(builder);
             TeamData.addName(builder, name);
             TeamData.addPackageName(builder, packageName);
@@ -220,7 +220,7 @@ public strictfp class GameMaker {
             int teamAOffset = TeamData.endTeamData(builder);
 
             name = builder.createString(teamMapping.getTeamBName());
-            packageName = builder.createString(teamMapping.getTeamBName());
+            packageName = builder.createString(teamMapping.getTeamBPackage());
             TeamData.startTeamData(builder);
             TeamData.addName(builder, name);
             TeamData.addPackageName(builder, packageName);

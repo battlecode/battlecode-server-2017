@@ -25,9 +25,10 @@ import static org.mockito.Mockito.verify;
  */
 public class GameMakerTest {
 
+    private final TeamMapping tm = new TeamMapping("bananas", "meme","yellow","upside");
+
     @Test(expected=RuntimeException.class)
     public void testStateExceptions() {
-        TeamMapping tm = new TeamMapping("bananas", "yellow");
         GameMaker gm = new GameMaker(tm, null);
 
         gm.makeGameFooter(Team.A);
@@ -35,7 +36,6 @@ public class GameMakerTest {
 
     @Test(expected=RuntimeException.class)
     public void testMatchStateExceptions() {
-        TeamMapping tm = new TeamMapping("bananas", "yellow");
         GameMaker gm = new GameMaker(tm, null);
         gm.makeGameHeader();
         gm.createMatchMaker().makeMatchFooter(Team.A, 23);
@@ -44,7 +44,6 @@ public class GameMakerTest {
     @Test
     public void fullReasonableGame() {
         NetServer mockServer = Mockito.mock(NetServer.class);
-        TeamMapping tm = new TeamMapping("bananas", "yellow");
         GameMaker gm = new GameMaker(tm, mockServer);
 
         gm.makeGameHeader();
