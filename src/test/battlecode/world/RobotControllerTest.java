@@ -394,7 +394,7 @@ public class RobotControllerTest {
         
         // Check income from trees
         for(int i=0; i<11; i++){
-            teamAexpected += (GameConstants.BULLET_TREE_MAX_HEALTH-i)*GameConstants.BULLET_TREE_BULLET_PRODUCTION_RATE;
+            teamAexpected += (GameConstants.BULLET_TREE_MAX_HEALTH-i*GameConstants.BULLET_TREE_DECAY_RATE)*GameConstants.BULLET_TREE_BULLET_PRODUCTION_RATE;
         }
         assertEquals(game.getWorld().getTeamInfo().getBulletSupply(Team.A),teamAexpected,EPSILON);
         
@@ -583,7 +583,7 @@ public class RobotControllerTest {
                 rc.move(Direction.getNorth());  // Move out of way so soldierA can shoot off the map
         });
 
-        game.waitRounds(5); // Bullet propagation off map
+        game.waitRounds(3); // Bullet propagation off map
         assertEquals(game.getBot(soldierB).getHealth(), RobotType.SOLDIER.maxHealth, EPSILON);
         // Bullet should still be in game
         assertEquals(game.getWorld().getObjectInfo().bullets().size(),1);
