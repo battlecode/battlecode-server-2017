@@ -201,7 +201,7 @@ public class RobotControllerTest {
         TestGame game = new TestGame(map);
         
         final int tankB = game.spawn(2, 5, RobotType.TANK, Team.B);
-        final int neutralTree = game.spawnTree(6, 5, 1, Team.NEUTRAL, 0, null);
+        final int neutralTree = game.spawnTree(7, 5, 1, Team.NEUTRAL, 0, null);
         game.waitRounds(20); // Wait for units to mature
         
         game.round((id, rc) -> {
@@ -228,6 +228,7 @@ public class RobotControllerTest {
             assertEquals(nearbyTrees.length,1);
             MapLocation originalLoc = rc.getLocation();
             assertFalse(rc.hasMoved());
+            assertTrue(rc.canMove(rc.getLocation().directionTo(nearbyTrees[0].location)));
             rc.move(rc.getLocation().directionTo(nearbyTrees[0].location));
             assertTrue(rc.hasMoved());
             assertFalse(rc.getLocation().equals(originalLoc)); // Tank should have moved
@@ -393,7 +394,7 @@ public class RobotControllerTest {
         
         // Check income from trees
         for(int i=0; i<11; i++){
-            teamAexpected += (GameConstants.BULLET_TREE_MAX_HEALTH-i)*GameConstants.BULLET_TREE_BULLET_PRODUCTION_RATE;
+            teamAexpected += (GameConstants.BULLET_TREE_MAX_HEALTH-i*GameConstants.BULLET_TREE_DECAY_RATE)*GameConstants.BULLET_TREE_BULLET_PRODUCTION_RATE;
         }
         assertEquals(game.getWorld().getTeamInfo().getBulletSupply(Team.A),teamAexpected,EPSILON);
         
@@ -582,7 +583,7 @@ public class RobotControllerTest {
                 rc.move(Direction.getNorth());  // Move out of way so soldierA can shoot off the map
         });
 
-        game.waitRounds(5); // Bullet propagation off map
+        game.waitRounds(3); // Bullet propagation off map
         assertEquals(game.getBot(soldierB).getHealth(), RobotType.SOLDIER.maxHealth, EPSILON);
         // Bullet should still be in game
         assertEquals(game.getWorld().getObjectInfo().bullets().size(),1);

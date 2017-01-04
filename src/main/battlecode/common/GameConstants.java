@@ -51,16 +51,16 @@ public interface GameConstants {
     // *********************************
 
     /** The max health of bullet trees */
-    int BULLET_TREE_MAX_HEALTH = 100;
+    int BULLET_TREE_MAX_HEALTH = 10;
 
     /** The radius of bullet trees */
-    float BULLET_TREE_RADIUS = .5F;
+    float BULLET_TREE_RADIUS = 1F;
 
     /** The cost in bullets to spawn a bullet tree */
     float BULLET_TREE_COST = 50;
 
     /** The amount of health bullet trees lose per turn from decay */
-    float BULLET_TREE_DECAY_RATE = 1;
+    float BULLET_TREE_DECAY_RATE = 0.1f;
 
     /** The amount of bullets produced from one unit of health per bullet tree */
     float BULLET_TREE_BULLET_PRODUCTION_RATE = .1f;
@@ -78,7 +78,7 @@ public interface GameConstants {
      * The rate at which the max health of neutral trees are determined;
      * i.e. maxHealth = NEUTRAL_TREE_HEALTH_RATE * treeRadius
      */
-    float NEUTRAL_TREE_HEALTH_RATE = 100;
+    float NEUTRAL_TREE_HEALTH_RATE = 50;
 
     /**
      * The base damage the chop action deals to trees; note that LUMBERJACK
@@ -158,7 +158,7 @@ public interface GameConstants {
     float GENERAL_SPAWN_OFFSET = .01f;
 
     /** The amount of health a tree gains when watered */
-    float WATER_HEALTH_REGEN_RATE = 10;
+    float WATER_HEALTH_REGEN_RATE = 1;
 
     /** The amount of health a robot gains when repaired by an archon */
     float REPAIR_HEALTH_REGEN_RATE = 1;

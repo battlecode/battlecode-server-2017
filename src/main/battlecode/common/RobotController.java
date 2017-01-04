@@ -53,15 +53,6 @@ public strictfp interface RobotController {
     int getTeamVictoryPoints();
 
     /**
-     * Gets the opponent's total victory points.
-     *
-     * @return the opponent's total victory points.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    int getOpponentVictoryPoints();
-
-    /**
      * Returns the number of robots on your team, including your archons.
      * If this number ever reaches zero, the opposing team will automatically
      * win by destruction.
@@ -510,29 +501,6 @@ public strictfp interface RobotController {
     BulletInfo[] senseNearbyBullets(MapLocation center, float radius);
 
     /**
-     * Returns an array of all the robots that have broadcasted in the
-     * last round (unconstrained by sensor range or distance).
-     *
-     * @return an array of all robots that have broadcasted in the last round.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    RobotInfo[] senseBroadcastingRobots();
-
-    /**
-     * Returns an array of all the robots that have broadcasted in the
-     * last round, filtered by team (unconstrained by sensor range or distance).
-     * Will return an empty list if you query for NEUTRAL.
-     *
-     * @param t - filter robots by the given team.
-     * @return an array of all robots of the given team that have
-     * broadcasted in the last round.
-     *
-     * battlecode.doc.costlymethod
-     */
-    RobotInfo[] senseBroadcastingRobots(Team t);
-
-    /**
      * Returns an array of all the locations of the robots that have
      * broadcasted in the last round (unconstrained by sensor range or distance)
      *
@@ -542,20 +510,6 @@ public strictfp interface RobotController {
      * @battlecode.doc.costlymethod
      */
     MapLocation[] senseBroadcastingRobotLocations();
-
-    /**
-     * Returns an array of all the locations of the robots that have broadcasted
-     * in the last round, filtered by team (unconstrained by sensor range or distance).
-     * Will return an empty list if you query for NEUTRAL.
-     *
-     * @param t - filter robots by the given team.
-     * @return an array of all the locations of the robots of the
-     * given team that have broadcasted in the last round.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    MapLocation[] senseBroadcastingRobotLocations(Team t);
-
 
     // ***********************************
     // ****** MOVEMENT METHODS ***********
@@ -780,7 +734,7 @@ public strictfp interface RobotController {
     // ***********************************
 
     /**
-     * Chops the target tree at location loc. This action counts as a movement.
+     * Chops the target tree at location loc. This action counts as an attack.
      *
      * @param loc the location of the tree you wish to chop, does not
      * have to be the center of the tree
@@ -793,7 +747,7 @@ public strictfp interface RobotController {
     void chop(MapLocation loc) throws GameActionException;
 
     /**
-     * Chops the target tree at location loc. This action counts as a movement.
+     * Chops the target tree at location loc. This action counts as an attack.
      *
      * @param id the id of the tree you wish to chop.
      * @throws GameActionException if there isn't a tree with the given id,
