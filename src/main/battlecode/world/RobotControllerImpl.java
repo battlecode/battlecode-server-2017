@@ -1153,6 +1153,39 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     // ***********************************
+    // **** INDICATOR STRING METHODS *****
+    // ***********************************
+
+    @Override
+    public void setIndicatorString(int index, String value) throws GameActionException {
+        assertNotNull(value);
+        if(index < 0 || index >= GameConstants.NUMBER_OF_INDICATOR_STRINGS){
+            throw new GameActionException(CANT_DO_THAT,
+                    "Indicator string index must be between 0 and GameConstants.NUMBER_OF_INDICATOR_STRINGS");
+        }
+        gameWorld.getMatchMaker().addIndicatorString(getID(), index, value);
+    }
+
+    @Override
+    public void setIndicatorDot(MapLocation loc, int red, int green, int blue) throws GameActionException {
+        assertNotNull(loc);
+        if (!gameWorld.getGameMap().onTheMap(loc)) {
+            throw new GameActionException(OUT_OF_RANGE, "Location is not on the map");
+        }
+        gameWorld.getMatchMaker().addIndicatorDot(getID(), loc, red, green, blue);
+    }
+
+    @Override
+    public void setIndicatorLine(MapLocation startLoc, MapLocation endLoc, int red, int green, int blue) throws GameActionException {
+        assertNotNull(startLoc);
+        assertNotNull(endLoc);
+        if (!gameWorld.getGameMap().onTheMap(startLoc) || !gameWorld.getGameMap().onTheMap(endLoc)) {
+            throw new GameActionException(OUT_OF_RANGE, "Start or end location is not on the map");
+        }
+        gameWorld.getMatchMaker().addIndicatorLine(getID(), startLoc, endLoc, red, green, blue);
+    }
+
+    // ***********************************
     // ******** TEAM MEMORY **************
     // ***********************************
 
