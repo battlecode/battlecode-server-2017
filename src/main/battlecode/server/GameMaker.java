@@ -560,8 +560,8 @@ public strictfp class GameMaker {
             actionTargets.add(targetID);
         }
 
-        public void addTeamStat(int teamID, float bullets, int victoryPoints) {
-            teamIDs.add(teamID);
+        public void addTeamStat(Team team, float bullets, int victoryPoints) {
+            teamIDs.add(TeamMapping.id(team));
             teamBullets.add(bullets);
             teamVictoryPoints.add(victoryPoints);
         }
