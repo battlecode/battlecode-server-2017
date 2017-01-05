@@ -17,6 +17,7 @@ public class ErrorReporter {
         if (ourFault) {
             Server.warn("\n\n");
             printReportString();
+            printStackTrace(new Error("(Stacktrace Error)"));
         }
     }
 
@@ -26,17 +27,16 @@ public class ErrorReporter {
     }
 
     public static void report(Throwable e, boolean ourFault) {
-        e.printStackTrace();
         if (ourFault) {
             Server.warn("\n\n");
             printReportString();
+            printStackTrace(e);
         }
     }
 
-    public static void report(Throwable e, String thingsToTry) {
-        e.printStackTrace();
-        Server.warn("\n\n");
-        printThingsToTry(thingsToTry);
+    private static void printStackTrace(Throwable e) {
+        System.err.println("Stack trace: ");
+        e.printStackTrace(System.err);
     }
 
     private static void printThingsToTry(String thingsToTry) {
