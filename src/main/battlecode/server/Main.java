@@ -46,7 +46,7 @@ public class Main {
                     teamB, teamBPackage, teamBClasses,
                     maps,
                     new File(options.get("bc.server.save-file")),
-                    false
+                    options.getBoolean("bc.game.best-of-three") && maps.length == 3
             ));
             server.terminateNotification();
 
