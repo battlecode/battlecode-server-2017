@@ -101,6 +101,9 @@ battlecode/common/RobotController/senseRobotAtLocation              20    true
 battlecode/common/RobotController/senseRubble                       5     true
 battlecode/common/RobotController/senseTree                         25    true
 battlecode/common/RobotController/senseTreeAtLocation               20    true
+battlecode/common/RobotController/setIndicatorDot                   0     true
+battlecode/common/RobotController/setIndicatorLine                  0     true
+battlecode/common/RobotController/setIndicatorString                0     true
 battlecode/common/RobotController/setTeamMemory                     0     true
 battlecode/common/RobotController/shake                             0     true
 battlecode/common/RobotController/strike                            0     true

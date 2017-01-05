@@ -331,6 +331,29 @@ public strictfp class GameMaker {
         private TByteArrayList actions; // Actions
         private TIntArrayList actionTargets; // ints (IDs)
 
+        // Indicator strings
+        private TIntArrayList indicatorStringIDs; // ints
+        private TIntArrayList indicatorStringIndices; // ints
+        private List<String> indicatorStringValues; // Strings
+
+        // Indicator dots with locations and RGB values
+        private TIntArrayList indicatorDotIDs;
+        private TFloatArrayList indicatorDotLocsX;
+        private TFloatArrayList indicatorDotLocsY;
+        private TIntArrayList indicatorDotRGBsRed;
+        private TIntArrayList indicatorDotRGBsGreen;
+        private TIntArrayList indicatorDotRGBsBlue;
+
+        // Indicator lines with locations and RGB values
+        private TIntArrayList indicatorLineIDs;
+        private TFloatArrayList indicatorLineStartLocsX;
+        private TFloatArrayList indicatorLineStartLocsY;
+        private TFloatArrayList indicatorLineEndLocsX;
+        private TFloatArrayList indicatorLineEndLocsY;
+        private TIntArrayList indicatorLineRGBsRed;
+        private TIntArrayList indicatorLineRGBsGreen;
+        private TIntArrayList indicatorLineRGBsBlue;
+
         public MatchMaker() {
             this.movedIDs = new TIntArrayList();
             this.movedLocsXs = new TFloatArrayList();
@@ -354,6 +377,23 @@ public strictfp class GameMaker {
             this.actionIDs = new TIntArrayList();
             this.actions = new TByteArrayList();
             this.actionTargets = new TIntArrayList();
+            this.indicatorStringIDs = new TIntArrayList();
+            this.indicatorStringIndices = new TIntArrayList();
+            this.indicatorStringValues = new ArrayList<String>();
+            this.indicatorDotIDs = new TIntArrayList();
+            this.indicatorDotLocsX = new TFloatArrayList();
+            this.indicatorDotLocsY = new TFloatArrayList();
+            this.indicatorDotRGBsRed = new TIntArrayList();
+            this.indicatorDotRGBsBlue = new TIntArrayList();
+            this.indicatorDotRGBsGreen = new TIntArrayList();
+            this.indicatorLineIDs = new TIntArrayList();
+            this.indicatorLineStartLocsX = new TFloatArrayList();
+            this.indicatorLineStartLocsY = new TFloatArrayList();
+            this.indicatorLineEndLocsX = new TFloatArrayList();
+            this.indicatorLineEndLocsY = new TFloatArrayList();
+            this.indicatorLineRGBsRed = new TIntArrayList();
+            this.indicatorLineRGBsBlue = new TIntArrayList();
+            this.indicatorLineRGBsGreen = new TIntArrayList();
         }
 
         public void makeMatchHeader(LiveMap gameMap) {
@@ -427,6 +467,26 @@ public strictfp class GameMaker {
                 int actionsP = byteVector(builder, actions, Round::startActionsVector);
                 int actionTargetsP = intVector(builder, actionTargets, Round::startActionTargetsVector);
 
+                // The indicator strings that were set
+                int indicatorStringIDsP = intVector(builder, indicatorStringIDs, Round::startIndicatorStringIDsVector);
+                int indicatorStringIndicesP = intVector(builder, indicatorStringIndices, Round::startIndicatorStringIndicesVector);
+                TIntArrayList indicatorStringValuesInts = new TIntArrayList();
+                for (String indicatorStringValue : indicatorStringValues) {
+                    indicatorStringValuesInts.add(builder.createString(indicatorStringValue));
+                }
+                int indicatorStringValuesP = offsetVector(builder, indicatorStringValuesInts, Round::startIndicatorStringValuesVector);
+
+                // The indicator dots that were set
+                int indicatorDotIDsP = intVector(builder, indicatorDotIDs, Round::startIndicatorDotIDsVector);
+                int indicatorDotLocsP = createVecTable(builder, indicatorDotLocsX, indicatorDotLocsY);
+                int indicatorDotRGBsP = createRGBTable(builder, indicatorDotRGBsRed, indicatorDotRGBsBlue, indicatorDotRGBsGreen);
+
+                // The indicator lines that were set
+                int indicatorLineIDsP = intVector(builder, indicatorLineIDs, Round::startIndicatorLineIDsVector);
+                int indicatorLineStartLocsP = createVecTable(builder, indicatorLineStartLocsX, indicatorLineStartLocsY);
+                int indicatorLineEndLocsP = createVecTable(builder, indicatorLineEndLocsX, indicatorLineEndLocsY);
+                int indicatorLineRGBsP = createRGBTable(builder, indicatorLineRGBsRed, indicatorLineRGBsGreen, indicatorLineRGBsBlue);
+
                 Round.startRound(builder);
                 Round.addMovedIDs(builder, movedIDsP);
                 Round.addMovedLocs(builder, movedLocsP);
@@ -439,7 +499,18 @@ public strictfp class GameMaker {
                 Round.addActionIDs(builder, actionIDsP);
                 Round.addActions(builder, actionsP);
                 Round.addActionTargets(builder, actionTargetsP);
+                Round.addIndicatorStringIDs(builder, indicatorStringIDsP);
+                Round.addIndicatorStringIndices(builder, indicatorStringIndicesP);
+                Round.addIndicatorStringValues(builder, indicatorStringValuesP);
+                Round.addIndicatorDotIDs(builder, indicatorDotIDsP);
+                Round.addIndicatorDotLocs(builder, indicatorDotLocsP);
+                Round.addIndicatorDotRGBs(builder, indicatorDotRGBsP);
+                Round.addIndicatorLineIDs(builder, indicatorLineIDsP);
+                Round.addIndicatorLineStartLocs(builder, indicatorLineStartLocsP);
+                Round.addIndicatorLineEndLocs(builder, indicatorLineEndLocsP);
+                Round.addIndicatorLineRGBs(builder, indicatorLineRGBsP);
                 Round.addRoundID(builder, roundNum);
+
                 int round = Round.endRound(builder);
 
                 return EventWrapper.createEventWrapper(builder, Event.Round, round);
@@ -471,6 +542,32 @@ public strictfp class GameMaker {
             actionIDs.add(userID);
             actions.add(action);
             actionTargets.add(targetID);
+        }
+
+        public void addIndicatorString(int id, int index, String value) {
+            indicatorStringIDs.add(id);
+            indicatorStringIndices.add(index);
+            indicatorStringValues.add(value);
+        }
+
+        public void addIndicatorDot(int id, MapLocation loc, int red, int green, int blue) {
+            indicatorDotIDs.add(id);
+            indicatorDotLocsX.add(loc.x);
+            indicatorDotLocsY.add(loc.y);
+            indicatorDotRGBsRed.add(red);
+            indicatorDotRGBsGreen.add(green);
+            indicatorDotRGBsBlue.add(blue);
+        }
+
+        public void addIndicatorLine(int id, MapLocation startLoc, MapLocation endLoc, int red, int green, int blue) {
+            indicatorLineIDs.add(id);
+            indicatorLineStartLocsX.add(startLoc.x);
+            indicatorLineStartLocsY.add(startLoc.y);
+            indicatorLineEndLocsX.add(endLoc.x);
+            indicatorLineEndLocsY.add(endLoc.y);
+            indicatorLineRGBsRed.add(red);
+            indicatorLineRGBsGreen.add(green);
+            indicatorLineRGBsBlue.add(blue);
         }
 
         public void addSpawnedRobot(InternalRobot robot) {
@@ -523,6 +620,23 @@ public strictfp class GameMaker {
             actionIDs.clear();
             actions.clear();
             actionTargets.clear();
+            indicatorStringIDs.clear();
+            indicatorStringIndices.clear();
+            indicatorStringValues.clear();
+            indicatorDotIDs.clear();
+            indicatorDotLocsX.clear();
+            indicatorDotLocsY.clear();
+            indicatorDotRGBsRed.clear();
+            indicatorDotRGBsBlue.clear();
+            indicatorDotRGBsGreen.clear();
+            indicatorLineIDs.clear();
+            indicatorLineStartLocsX.clear();
+            indicatorLineStartLocsY.clear();
+            indicatorLineEndLocsX.clear();
+            indicatorLineEndLocsY.clear();
+            indicatorLineRGBsRed.clear();
+            indicatorLineRGBsBlue.clear();
+            indicatorLineRGBsGreen.clear();
         }
     }
 }
