@@ -6,18 +6,22 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.schema.*;
 import battlecode.util.FlatHelpers;
+import battlecode.util.TeamMapping;
 import battlecode.world.*;
 import com.google.flatbuffers.FlatBufferBuilder;
 import gnu.trove.list.array.TByteArrayList;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TObjectByteMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.ToIntFunction;
 
 import static battlecode.util.FlatHelpers.*;
@@ -77,9 +81,9 @@ public strictfp class GameMaker {
     private final NetServer packetSink;
 
     /**
-     * Eventually we might extend for more teams.
+     * Information about the active game.
      */
-    private TeamMapping teamMapping;
+    private final GameInfo gameInfo;
 
     /**
      * Only relevant to the file builder:
@@ -92,13 +96,13 @@ public strictfp class GameMaker {
     private TIntArrayList matchFooters;
 
     /**
-     * @param teamMapping the mapping of teams to bytes
+     * @param gameInfo the mapping of teams to bytes
      * @param packetSink the NetServer to send packets to
      */
-    public GameMaker(final TeamMapping teamMapping, final NetServer packetSink){
+    public GameMaker(final GameInfo gameInfo, final NetServer packetSink){
         this.state = State.GAME_HEADER;
 
-        this.teamMapping = teamMapping;
+        this.gameInfo = gameInfo;
 
         this.packetSink = packetSink;
         if (packetSink != null) {
@@ -211,20 +215,20 @@ public strictfp class GameMaker {
         createEvent((builder) -> {
             int specVersionOffset = builder.createString(GameConstants.SPEC_VERSION);
 
-            int name = builder.createString(teamMapping.getTeamAName());
-            int packageName = builder.createString(teamMapping.getTeamAName());
+            int name = builder.createString(gameInfo.getTeamAName());
+            int packageName = builder.createString(gameInfo.getTeamAPackage());
             TeamData.startTeamData(builder);
             TeamData.addName(builder, name);
             TeamData.addPackageName(builder, packageName);
-            TeamData.addTeamID(builder, teamMapping.getTeamAID());
+            TeamData.addTeamID(builder, TeamMapping.id(Team.A));
             int teamAOffset = TeamData.endTeamData(builder);
 
-            name = builder.createString(teamMapping.getTeamBName());
-            packageName = builder.createString(teamMapping.getTeamBName());
+            name = builder.createString(gameInfo.getTeamBName());
+            packageName = builder.createString(gameInfo.getTeamBPackage());
             TeamData.startTeamData(builder);
             TeamData.addName(builder, name);
             TeamData.addPackageName(builder, packageName);
-            TeamData.addTeamID(builder, teamMapping.getTeamBID());
+            TeamData.addTeamID(builder, TeamMapping.id(Team.B));
             int teamBOffset = TeamData.endTeamData(builder);
             int[] teamsVec = {teamAOffset, teamBOffset};
 
@@ -286,7 +290,7 @@ public strictfp class GameMaker {
         changeState(State.IN_GAME, State.DONE);
 
         createEvent((builder) -> EventWrapper.createEventWrapper(builder, Event.GameFooter,
-                GameFooter.createGameFooter(builder, teamMapping.getIDFromTeam(winner))));
+                GameFooter.createGameFooter(builder, TeamMapping.id(winner))));
     }
 
     /**
@@ -396,7 +400,7 @@ public strictfp class GameMaker {
             changeState(State.IN_GAME, State.IN_MATCH);
 
             createEvent((builder) -> {
-                int map = GameMapIO.Serial.serialize(builder, gameMap, teamMapping);
+                int map = GameMapIO.Serial.serialize(builder, gameMap);
 
                 return EventWrapper.createEventWrapper(builder, Event.MatchHeader,
                         MatchHeader.createMatchHeader(builder, map, gameMap.getRounds()));
@@ -411,7 +415,7 @@ public strictfp class GameMaker {
             changeState(State.IN_MATCH, State.IN_GAME);
 
             createEvent((builder) -> EventWrapper.createEventWrapper(builder, Event.MatchFooter,
-                    MatchFooter.createMatchFooter(builder, teamMapping.getIDFromTeam(winTeam), totalRounds)));
+                    MatchFooter.createMatchFooter(builder, TeamMapping.id(winTeam), totalRounds)));
 
             matchFooters.add(events.size() - 1);
         }
@@ -571,7 +575,7 @@ public strictfp class GameMaker {
             spawnedBodiesRadii.add(robot.getType().bodyRadius);
             spawnedBodiesLocsXs.add(robot.getLocation().x);
             spawnedBodiesLocsYs.add(robot.getLocation().y);
-            spawnedBodiesTeamIDs.add(teamMapping.getIDFromTeam(robot.getTeam()));
+            spawnedBodiesTeamIDs.add(TeamMapping.id(robot.getTeam()));
             spawnedBodiesTypes.add(FlatHelpers.getBodyTypeFromRobotType(robot.getType()));
         }
 
@@ -580,7 +584,7 @@ public strictfp class GameMaker {
             spawnedBodiesRadii.add(tree.getRadius());
             spawnedBodiesLocsXs.add(tree.getLocation().x);
             spawnedBodiesLocsYs.add(tree.getLocation().y);
-            spawnedBodiesTeamIDs.add(teamMapping.getIDFromTeam(tree.getTeam()));
+            spawnedBodiesTeamIDs.add(TeamMapping.id(tree.getTeam()));
             spawnedBodiesTypes.add(tree.getTeam() == Team.NEUTRAL ? BodyType.TREE_NEUTRAL : BodyType.TREE_BULLET);
         }
 

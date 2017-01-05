@@ -1,20 +1,8 @@
 package battlecode.world;
 
 import battlecode.common.*;
-import battlecode.schema.*;
-import battlecode.schema.GameMap;
-import battlecode.server.TeamMapping;
-import battlecode.util.FlatHelpers;
-import com.google.flatbuffers.FlatBufferBuilder;
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Ignore;
-import org.junit.Test;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 

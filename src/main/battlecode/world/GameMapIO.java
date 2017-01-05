@@ -2,8 +2,8 @@ package battlecode.world;
 
 import battlecode.common.*;
 import battlecode.schema.*;
-import battlecode.server.TeamMapping;
 import battlecode.util.FlatHelpers;
+import battlecode.util.TeamMapping;
 import com.google.flatbuffers.FlatBufferBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -48,20 +49,20 @@ public final class GameMapIO {
      * @return LiveMap for map
      * @throws IOException if the map fails to load or can't be found.
      */
-    public static LiveMap loadMap(String mapName, File mapDir, TeamMapping teamMapping)
+    public static LiveMap loadMap(String mapName, File mapDir)
             throws IOException {
 
         final LiveMap result;
 
         final File mapFile = new File(mapDir, mapName + MAP_EXTENSION);
         if (mapFile.exists()) {
-            result = loadMap(new FileInputStream(mapFile), teamMapping);
+            result = loadMap(new FileInputStream(mapFile));
         } else {
             final InputStream backupStream = BACKUP_LOADER.getResourceAsStream(DEFAULT_MAP_PACKAGE + mapName + MAP_EXTENSION);
             if (backupStream == null) {
                 throw new IOException("Can't load map: " + mapName + " from dir " + mapDir + " or default maps.");
             }
-            result = loadMap(backupStream, teamMapping);
+            result = loadMap(backupStream);
         }
 
         if (!result.getMapName().equals(mapName)) {
@@ -75,8 +76,7 @@ public final class GameMapIO {
 
     public static LiveMap loadMapAsResource(final ClassLoader loader,
                                             final String mapPackage,
-                                            final String map,
-                                            final TeamMapping teamMapping) throws IOException {
+                                            final String map) throws IOException {
         final InputStream mapStream = loader.getResourceAsStream(
                 mapPackage + (mapPackage.endsWith("/")? "" : "/") +
                 map + MAP_EXTENSION
@@ -86,7 +86,7 @@ public final class GameMapIO {
             throw new IOException("Can't load map: " + map + " from package " + mapPackage);
         }
 
-        final LiveMap result = loadMap(mapStream, teamMapping);
+        final LiveMap result = loadMap(mapStream);
 
         if (!result.getMapName().equals(map)) {
             throw new IOException("Invalid map: name (" + result.getMapName()
@@ -104,10 +104,10 @@ public final class GameMapIO {
      * @return a map read from the stream
      * @throws IOException if the read fails somehow
      */
-    public static LiveMap loadMap(InputStream stream, TeamMapping teamMapping)
+    public static LiveMap loadMap(InputStream stream)
             throws IOException {
 
-        return Serial.deserialize(IOUtils.toByteArray(stream), teamMapping);
+        return Serial.deserialize(IOUtils.toByteArray(stream));
 
     }
 
@@ -116,13 +116,12 @@ public final class GameMapIO {
      *
      * @param mapDir the directory to store the map in
      * @param map the map to write
-     * @param teamMapping the team mapping to use
      * @throws IOException if the write fails somehow
      */
-    public static void writeMap(LiveMap map, File mapDir, TeamMapping teamMapping) throws IOException {
+    public static void writeMap(LiveMap map, File mapDir) throws IOException {
         final File target = new File(mapDir, map.getMapName() + MAP_EXTENSION);
 
-        IOUtils.write(Serial.serialize(map, teamMapping), new FileOutputStream(target));
+        IOUtils.write(Serial.serialize(map), new FileOutputStream(target));
     }
 
     /**
@@ -196,28 +195,26 @@ public final class GameMapIO {
          * Load a flatbuffer map into a LiveMap.
          *
          * @param mapBytes the raw bytes of the map
-         * @param teamMapping the relevant team mapping
          * @return a new copy of the map as a LiveMap
          */
-        public static LiveMap deserialize(byte[] mapBytes, TeamMapping teamMapping) {
+        public static LiveMap deserialize(byte[] mapBytes) {
             battlecode.schema.GameMap rawMap = battlecode.schema.GameMap.getRootAsGameMap(
                     ByteBuffer.wrap(mapBytes)
             );
 
-            return Serial.deserialize(rawMap, teamMapping);
+            return Serial.deserialize(rawMap);
         }
 
         /**
          * Write a map to a byte[].
          *
          * @param gameMap the map to write
-         * @param teamMapping the relevant team mapping
          * @return the map as a byte[]
          */
-        public static byte[] serialize(LiveMap gameMap, TeamMapping teamMapping) {
+        public static byte[] serialize(LiveMap gameMap) {
             FlatBufferBuilder builder = new FlatBufferBuilder();
 
-            int mapRef = Serial.serialize(builder, gameMap, teamMapping);
+            int mapRef = Serial.serialize(builder, gameMap);
 
             builder.finish(mapRef);
 
@@ -228,10 +225,9 @@ public final class GameMapIO {
          * Load a flatbuffer map into a LiveMap.
          *
          * @param raw the flatbuffer map pointer
-         * @param teamMapping
          * @return a new copy of the map as a LiveMap
          */
-        public static LiveMap deserialize(battlecode.schema.GameMap raw, TeamMapping teamMapping) {
+        public static LiveMap deserialize(battlecode.schema.GameMap raw) {
             final float width = raw.maxCorner().x() - raw.minCorner().x();
             final float height = raw.maxCorner().y() - raw.minCorner().y();
             final MapLocation origin = new MapLocation(raw.minCorner().x(), raw.minCorner().y());
@@ -241,7 +237,7 @@ public final class GameMapIO {
 
             ArrayList<BodyInfo> initBodies = new ArrayList<>();
             SpawnedBodyTable bodyTable = raw.bodies();
-            initInitialBodiesFromSchemaBodyTable(bodyTable, teamMapping, initBodies);
+            initInitialBodiesFromSchemaBodyTable(bodyTable, initBodies);
 
             NeutralTreeTable treeTable = raw.trees();
             initInitialBodiesFromSchemaNeutralTreeTable(treeTable, initBodies);
@@ -259,10 +255,9 @@ public final class GameMapIO {
          *
          * @param builder the target builder
          * @param gameMap the map to write
-         * @param teamMapping the relevant team mapping
          * @return the object reference to the map in the builder
          */
-        public static int serialize(FlatBufferBuilder builder, LiveMap gameMap, TeamMapping teamMapping) {
+        public static int serialize(FlatBufferBuilder builder, LiveMap gameMap) {
             int name = builder.createString(gameMap.getMapName());
             int randomSeed = gameMap.getSeed();
 
@@ -283,7 +278,7 @@ public final class GameMapIO {
                 if (initBody.isRobot()) {
                     RobotInfo robot = (RobotInfo) initBody;
                     bodyIDs.add(robot.ID);
-                    bodyTeamIDs.add(teamMapping.getIDFromTeam(robot.team));
+                    bodyTeamIDs.add(TeamMapping.id(robot.team));
                     bodyTypes.add(FlatHelpers.getBodyTypeFromRobotType(robot.type));
                     bodyLocsXs.add(robot.location.x);
                     bodyLocsYs.add(robot.location.y);
@@ -298,7 +293,7 @@ public final class GameMapIO {
                         treeLocsYs.add(tree.location.y);
                     } else {
                         bodyIDs.add(tree.ID);
-                        bodyTeamIDs.add(teamMapping.getIDFromTeam(tree.team));
+                        bodyTeamIDs.add(TeamMapping.id(tree.team));
                         bodyTypes.add(BodyType.TREE_BULLET);
                         bodyLocsXs.add(tree.location.x);
                         bodyLocsYs.add(tree.location.y);
@@ -354,7 +349,7 @@ public final class GameMapIO {
         // *** HELPER METHODS *********
         // ****************************
 
-        private static void initInitialBodiesFromSchemaBodyTable(SpawnedBodyTable bodyTable, TeamMapping teamMapping, ArrayList<BodyInfo> initialBodies) {
+        private static void initInitialBodiesFromSchemaBodyTable(SpawnedBodyTable bodyTable, ArrayList<BodyInfo> initialBodies) {
             // Assumes no neutral trees
             VecTable locs = bodyTable.locs();
             for (int i = 0; i < bodyTable.robotIDsLength(); i++) {
@@ -362,7 +357,7 @@ public final class GameMapIO {
                 int bodyID = bodyTable.robotIDs(i);
                 float bodyX = locs.xs(i);
                 float bodyY = locs.ys(i);
-                Team bodyTeam = teamMapping.getTeamFromID(bodyTable.teamIDs(i));
+                Team bodyTeam = TeamMapping.team(bodyTable.teamIDs(i));
                 if (bodyType != null) {
                     initialBodies.add(new RobotInfo(bodyID, bodyTeam, bodyType, new MapLocation(bodyX, bodyY), bodyType.getStartingHealth(), 0, 0));
                 } else {

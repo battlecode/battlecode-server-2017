@@ -14,9 +14,14 @@ public class GameInfo implements Serializable {
     private static final long serialVersionUID = 638514128835207033L;
 
     /**
+     * The name of team A.
+     */
+    private final String teamAName;
+
+    /**
      * The package name of team A.
      */
-    private final String teamA;
+    private final String teamAPackage;
 
     /**
      * The URL of the classes of team A.
@@ -25,9 +30,14 @@ public class GameInfo implements Serializable {
     private final URL teamAClasses;
 
     /**
+     * The name of team B.
+     */
+    private final String teamBName;
+
+    /**
      * The package name of team B.
      */
-    private final String teamB;
+    private final String teamBPackage;
 
     /**
      * The URL of the classes of team B.
@@ -49,7 +59,6 @@ public class GameInfo implements Serializable {
     /**
      * The file the game should be saved to, or null
      * if it shouldn't be saved.
-     * The match will not be saved
      */
     private final File saveFile;
 
@@ -57,24 +66,26 @@ public class GameInfo implements Serializable {
     /**
      * Create a GameInfo.
      *
-     * @param teamA the package of A team
+     * @param teamAPackage the package of A team
      * @param teamAClasses the location of team A classes - directory or jar,
      *                     or null to use the system classpath
-     * @param teamB the B team
+     * @param teamBPackage the B team
      * @param teamBClasses the location of team B classes
      * @param maps the names maps to play on
      * @param saveFile the file to save to if the server is configured to save
      *                 matches, or null to never save
      * @param bestOfThree whether the game is best of three
      */
-    public GameInfo(String teamA, URL teamAClasses,
-                    String teamB, URL teamBClasses,
+    public GameInfo(String teamAName, String teamAPackage, URL teamAClasses,
+                    String teamBName, String teamBPackage, URL teamBClasses,
                     String[] maps,
                     File saveFile,
                     boolean bestOfThree) {
-        this.teamA = teamA;
+        this.teamAName = teamAName;
+        this.teamAPackage = teamAPackage;
         this.teamAClasses = teamAClasses;
-        this.teamB = teamB;
+        this.teamBName = teamBName;
+        this.teamBPackage = teamBPackage;
         this.teamBClasses = teamBClasses;
         this.maps = maps;
         this.saveFile = saveFile;
@@ -91,8 +102,8 @@ public class GameInfo implements Serializable {
     /**
      * @return the package name of team A
      */
-    public String getTeamA() {
-        return teamA;
+    public String getTeamAPackage() {
+        return teamAPackage;
     }
 
     /**
@@ -105,8 +116,8 @@ public class GameInfo implements Serializable {
     /**
      * @return the package name of team B
      */
-    public String getTeamB() {
-        return teamB;
+    public String getTeamBPackage() {
+        return teamBPackage;
     }
 
     /**
@@ -134,7 +145,7 @@ public class GameInfo implements Serializable {
     public String toString() {
         StringBuilder b = new StringBuilder();
 
-        b.append(teamA);
+        b.append(teamAPackage);
         if (teamAClasses != null) {
             b.append(" (");
             b.append(teamAClasses);
@@ -143,7 +154,7 @@ public class GameInfo implements Serializable {
 
         b.append(" vs ");
 
-        b.append(teamB);
+        b.append(teamBPackage);
         if (teamBClasses != null) {
             b.append(" (");
             b.append(teamBClasses);
@@ -162,10 +173,16 @@ public class GameInfo implements Serializable {
     }
 
     /**
-     * For use by serializers.
+     * The name of team A.
      */
-    @SuppressWarnings("unused")
-    private GameInfo() {
-        this(null, null, null, null, null, null, false);
+    public String getTeamAName() {
+        return teamAName;
+    }
+
+    /**
+     * The name of team B.
+     */
+    public String getTeamBName() {
+        return teamBName;
     }
 }

@@ -3,7 +3,6 @@ package battlecode.world.control;
 import battlecode.instrumenter.IndividualClassLoader;
 import battlecode.instrumenter.InstrumentationException;
 import battlecode.instrumenter.SandboxedRobotPlayer;
-import battlecode.server.Config;
 import battlecode.server.ErrorReporter;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
@@ -45,17 +44,17 @@ public class PlayerControlProvider implements RobotControlProvider {
     /**
      * The name of the team (package) we're processing.
      */
-    private String teamName;
+    private String teamPackage;
 
     /**
      * Create a new PlayerControlProvider.
      *
-     * @param teamName the name / package of the team we're loading
+     * @param teamPackage the name / package of the team we're loading
      * @param teamURL the url of the classes for the team;
      *                null to load from the system classpath
      */
-    public PlayerControlProvider(String teamName, URL teamURL) {
-        this.teamName = teamName;
+    public PlayerControlProvider(String teamPackage, URL teamURL) {
+        this.teamPackage = teamPackage;
         this.sandboxes = new HashMap<>(); // GameWorld maintains order for us
 
         if (teamURL == null) {
@@ -85,14 +84,14 @@ public class PlayerControlProvider implements RobotControlProvider {
     public void robotSpawned(InternalRobot robot) {
         try {
             final SandboxedRobotPlayer player = new SandboxedRobotPlayer(
-                    teamName,
+                    teamPackage,
                     robot.getController(),
                     gameWorld.getMapSeed(),
                     sharedCache
             );
             this.sandboxes.put(robot.getID(), player);
         } catch (InstrumentationException e) {
-            ErrorReporter.report("Error while loading player "+teamName+": "+e.getMessage(), false);
+            ErrorReporter.report("Error while loading player "+ teamPackage +": "+e.getMessage(), false);
             robot.suicide();
         } catch (RuntimeException e) {
             ErrorReporter.report(e, true);

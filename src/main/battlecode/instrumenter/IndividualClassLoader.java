@@ -293,9 +293,7 @@ public class IndividualClassLoader extends ClassLoader {
                     // url classpath, but we only want to load files from
                     // the player classpath.
 
-                    URL result = findResource(name);
-
-                    return result;
+                    return findResource(name);
                 }
             };
 
@@ -307,7 +305,9 @@ public class IndividualClassLoader extends ClassLoader {
          * Create a cache for classes loaded only from the local classpath.
          */
         public Cache() {
-            this.loader = getClass().getClassLoader();
+            // we make a new classloader so that when we get GC'd,
+            // the classes we've loaded will also get GC'd.
+            this.loader = new ClassLoader(getClass().getClassLoader()) {};
             this.instrumentedClasses = new HashMap<>();
             this.teamsWithErrors = new HashSet<>();
         }
