@@ -5,6 +5,7 @@ import battlecode.server.ErrorReporter;
 import battlecode.server.GameMaker;
 import battlecode.server.GameState;
 import battlecode.world.control.RobotControlProvider;
+import battlecode.util.TeamMapping;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.*;
@@ -42,7 +43,7 @@ public strictfp class GameWorld {
     @SuppressWarnings("unchecked")
     public GameWorld(LiveMap gm, RobotControlProvider cp,
                      long[][] oldTeamMemory, GameMaker.MatchMaker matchMaker) {
-        
+
         this.currentRound = 0;
         this.idGenerator = new IDGenerator(gm.getSeed());
         this.gameStats = new GameStats();
@@ -299,6 +300,12 @@ public strictfp class GameWorld {
                 setWinner(bestRobotTeam, DominationFactor.WON_BY_DUBIOUS_REASONS);
             }
         }
+
+        // update the round statistics
+        matchMaker.addTeamStat(TeamMapping.id(Team.A),teamInfo.getBulletSupply(Team.A),
+            teamInfo.getVictoryPoints(Team.A));
+        matchMaker.addTeamStat(TeamMapping.id(Team.B), teamInfo.getBulletSupply(Team.B),
+            teamInfo.getVictoryPoints(Team.B));
 
         if (gameStats.getWinner() != null) {
             running = false;

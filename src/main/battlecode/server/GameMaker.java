@@ -331,6 +331,11 @@ public strictfp class GameMaker {
         private TByteArrayList actions; // Actions
         private TIntArrayList actionTargets; // ints (IDs)
 
+        // Round statistics
+        private TIntArrayList teamIDs;
+        private TFloatArrayList teamBullets;
+        private TIntArrayList teamVictoryPoints;
+
         // Indicator strings
         private TIntArrayList indicatorStringIDs; // ints
         private TIntArrayList indicatorStringIndices; // ints
@@ -377,6 +382,9 @@ public strictfp class GameMaker {
             this.actionIDs = new TIntArrayList();
             this.actions = new TByteArrayList();
             this.actionTargets = new TIntArrayList();
+            this.teamIDs = new TIntArrayList();
+            this.teamBullets = new TFloatArrayList();
+            this.teamVictoryPoints = new TIntArrayList();
             this.indicatorStringIDs = new TIntArrayList();
             this.indicatorStringIndices = new TIntArrayList();
             this.indicatorStringValues = new ArrayList<String>();
@@ -467,6 +475,11 @@ public strictfp class GameMaker {
                 int actionsP = byteVector(builder, actions, Round::startActionsVector);
                 int actionTargetsP = intVector(builder, actionTargets, Round::startActionTargetsVector);
 
+                // Round statistics
+                int teamIDsP = intVector(builder, teamIDs, Round::startTeamIDsVector);
+                int teamBulletsP = floatVector(builder, teamBullets, Round::startTeamBulletsVector);
+                int teamVictoryPointsP = intVector(builder, teamVictoryPoints, Round::startTeamVictoryPointsVector);
+
                 // The indicator strings that were set
                 int indicatorStringIDsP = intVector(builder, indicatorStringIDs, Round::startIndicatorStringIDsVector);
                 int indicatorStringIndicesP = intVector(builder, indicatorStringIndices, Round::startIndicatorStringIndicesVector);
@@ -499,6 +512,9 @@ public strictfp class GameMaker {
                 Round.addActionIDs(builder, actionIDsP);
                 Round.addActions(builder, actionsP);
                 Round.addActionTargets(builder, actionTargetsP);
+                Round.addTeamIDs(builder, teamIDsP);
+                Round.addTeamBullets(builder, teamBulletsP);
+                Round.addTeamVictoryPoints(builder, teamVictoryPointsP);
                 Round.addIndicatorStringIDs(builder, indicatorStringIDsP);
                 Round.addIndicatorStringIndices(builder, indicatorStringIndicesP);
                 Round.addIndicatorStringValues(builder, indicatorStringValuesP);
@@ -542,6 +558,12 @@ public strictfp class GameMaker {
             actionIDs.add(userID);
             actions.add(action);
             actionTargets.add(targetID);
+        }
+
+        public void addTeamStat(int teamID, float bullets, int victoryPoints) {
+            teamIDs.add(teamID);
+            teamBullets.add(bullets);
+            teamVictoryPoints.add(victoryPoints);
         }
 
         public void addIndicatorString(int id, int index, String value) {
@@ -620,6 +642,9 @@ public strictfp class GameMaker {
             actionIDs.clear();
             actions.clear();
             actionTargets.clear();
+            teamIDs.clear();
+            teamBullets.clear();
+            teamVictoryPoints.clear();
             indicatorStringIDs.clear();
             indicatorStringIndices.clear();
             indicatorStringValues.clear();
