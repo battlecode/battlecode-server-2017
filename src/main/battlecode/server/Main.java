@@ -41,20 +41,12 @@ public class Main {
             }
 
             final String[] maps = options.get("bc.game.maps").split(",");
-
-            final boolean bestOfThree;
-            if (options.get("bc.game.best-of-three").equals("true") && maps.length == 3) {
-                bestOfThree = true;
-            } else {
-                bestOfThree = false;
-            }
-
             server.addGameNotification(new GameInfo(
                     teamA, teamAPackage, teamAClasses,
                     teamB, teamBPackage, teamBClasses,
                     maps,
                     new File(options.get("bc.server.save-file")),
-                    bestOfThree
+                    options.getBoolean("bc.game.best-of-three") && maps.length == 3
             ));
             server.terminateNotification();
 
