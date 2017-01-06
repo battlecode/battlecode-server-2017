@@ -47,14 +47,14 @@ public class GenerateMaps {
 
     @Test
     public void makeShrine() throws IOException {
-        LiveMap map = new TestMapBuilder("shrine", -15, -15, 30, 30,30,3000)
+        LiveMap map = new TestMapBuilder("shrine", 0, 0, 30, 30,30,3000)
                 .addRobot(
                         0,
                         Team.A,
                         RobotType.ARCHON,
                         new MapLocation(
-                                RobotType.ARCHON.bodyRadius-15,
-                                15-RobotType.ARCHON.bodyRadius
+                                RobotType.ARCHON.bodyRadius,
+                                30-RobotType.ARCHON.bodyRadius
                         )
                 )
                 .addRobot(
@@ -62,11 +62,11 @@ public class GenerateMaps {
                         Team.B,
                         RobotType.ARCHON,
                         new MapLocation(
-                                15-RobotType.ARCHON.bodyRadius,
-                                RobotType.ARCHON.bodyRadius-15
+                                30-RobotType.ARCHON.bodyRadius,
+                                RobotType.ARCHON.bodyRadius
                         )
                 )
-                .addNeutralTree(3, new MapLocation(0,0), 1, 20, RobotType.TANK)
+                .addNeutralTree(3, new MapLocation(15,15), 1, 20, RobotType.TANK)
                 .build();
 
         GameMapIO.writeMap(map,
