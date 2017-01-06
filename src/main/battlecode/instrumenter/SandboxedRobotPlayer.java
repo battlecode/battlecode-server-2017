@@ -12,6 +12,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import static battlecode.instrumenter.InstrumentationException.Type.ILLEGAL;
+import static battlecode.instrumenter.InstrumentationException.Type.MISSING;
+
 /**
  * Encapsulates an instrumented robot player, its personally-loaded classes,
  * and its main thread. Sort of like a mini-jvm.
@@ -222,7 +225,7 @@ public class SandboxedRobotPlayer {
         try {
             robotPlayer = individualLoader.loadClass(teamName + "." + playerClassName, true);
         } catch (ClassNotFoundException e) {
-            throw new InstrumentationException("Couldn't load player class: "+e.getMessage(), e);
+            throw new InstrumentationException(MISSING, "Couldn't load player class: "+e.getMessage(), e);
         }
 
         // Load RobotPlayer.run()
@@ -230,14 +233,14 @@ public class SandboxedRobotPlayer {
         try {
             runMethod = robotPlayer.getMethod("run", RobotController.class);
         } catch (NoSuchMethodException e) {
-            throw new InstrumentationException(robotPlayer.getSimpleName() + ".run(RobotController) not found",
+            throw new InstrumentationException(ILLEGAL, robotPlayer.getSimpleName() + ".run(RobotController) not found",
                     e);
         } catch (SecurityException e) {
-            throw new InstrumentationException(robotPlayer.getSimpleName() + ".run(RobotController) is not public",
+            throw new InstrumentationException(ILLEGAL, robotPlayer.getSimpleName() + ".run(RobotController) is not public",
                     e);
         }
         if ((runMethod.getModifiers() & Modifier.STATIC) == 0) {
-            throw new InstrumentationException(robotPlayer.getSimpleName() + ".run(RobotController) is not static");
+            throw new InstrumentationException(ILLEGAL, robotPlayer.getSimpleName() + ".run(RobotController) is not static");
         }
 
         // Run!

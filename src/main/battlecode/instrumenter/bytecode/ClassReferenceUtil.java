@@ -11,6 +11,9 @@ import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 
+import static battlecode.instrumenter.InstrumentationException.Type.ILLEGAL;
+import static battlecode.instrumenter.InstrumentationException.Type.MISSING;
+
 /**
  * ClassReferenceUtil provides utility methods for resolving class names during
  * instrumentation.
@@ -53,7 +56,7 @@ public class ClassReferenceUtil {
     static void fileLoadError(String filename) {
         ErrorReporter.report(String.format("Error loading %s",filename),
                 String.format("Check that the '%s' file exists and is not corrupted.",filename));
-        throw new InstrumentationException();
+        throw new InstrumentationException(MISSING, "Error loading "+filename);
     }
 
     // the static constructor basically loads the whitelist files and caches them in allowedPackages and disallowedClasses
@@ -164,7 +167,7 @@ public class ClassReferenceUtil {
 
         if (checkDisallowed) {
             if (disallowedClasses.contains(className) || !isInAllowedPackage(className)) {
-                throw new InstrumentationException("Illegal class: " + className + "\n    this class cannot be referenced by player " + teamPackageName);
+                throw new InstrumentationException(ILLEGAL, "Illegal class: " + className + "\n    this class cannot be referenced by player " + teamPackageName);
             }
         }
         if (className.equals("java/security/SecureRandom")) {

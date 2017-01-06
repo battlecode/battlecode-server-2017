@@ -65,7 +65,7 @@ public class CostlyMethodTaglet implements Taglet {
                 fileName.length() - 5); // remove .java
 
         final MethodCostUtil.MethodData data =
-                MethodCostUtil.getMethodData(className, methodName, LOADER);
+                MethodCostUtil.getMethodData(className, methodName);
 
         final int cost;
 

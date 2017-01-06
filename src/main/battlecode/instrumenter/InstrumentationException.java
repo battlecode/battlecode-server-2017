@@ -9,15 +9,26 @@ package battlecode.instrumenter;
  */
 public class InstrumentationException extends RuntimeException {
 
-    public InstrumentationException() {
-        super();
+    public enum Type {
+        ILLEGAL,
+        MISSING
     }
 
-    public InstrumentationException(String message) {
+    public final Type type;
+
+    public InstrumentationException(Type type, String message) {
         super(message);
+        this.type = type;
     }
 
-    public InstrumentationException(String message, Throwable cause) {
+    public InstrumentationException(Type type, String message, Throwable cause) {
         super(message, cause);
+        this.type = type;
     }
+
+    @Override
+    public String getMessage() {
+        return type + " " + super.getMessage();
+    }
+
 }

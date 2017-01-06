@@ -14,7 +14,8 @@ import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
 
 /**
  * MethodCostUtil is a singleton used for looking up MethodData associated with some methods.
- * <p/>
+ *
+ * It is never used to load player classes.
  *
  * @author adamd
  */
@@ -81,13 +82,10 @@ public class MethodCostUtil {
     /**
      * Returns the MethodData associated with the given method, or null if no MethodData exists for the given method.
      * Should not be called on player classes.
-     *
-     * @param className  the binary name of the class to which the given method belongs
+     *  @param className  the binary name of the class to which the given method belongs
      * @param methodName the name of the given class
-     * @param loader     the loader used to read the class, if necessary
      */
-    public static MethodData getMethodData(String className, String methodName,
-                                           TeamClassLoaderFactory.Loader loader) {
+    public static MethodData getMethodData(String className, String methodName) {
         if (className.charAt(0) == '[')
             return null;
         String key = className + "/" + methodName;
@@ -99,8 +97,8 @@ public class MethodCostUtil {
         if (interfacesMap.containsKey(className))
             interfaces = interfacesMap.get(className);
         else {
-            ClassReader cr = loader.reader(className);
-            InterfaceReader ir = new InterfaceReader(loader);
+            ClassReader cr = TeamClassLoaderFactory.normalReader(className);
+            InterfaceReader ir = new InterfaceReader(null);
             cr.accept(ir, SKIP_DEBUG);
             interfaces = ir.getInterfaces();
             interfacesMap.put(className, interfaces);

@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static battlecode.instrumenter.InstrumentationException.Type.ILLEGAL;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -25,6 +26,11 @@ public class LoaderTest {
     public static void writeCache() throws Exception {
         tempClassFolder = URLUtils.toTempFolder(
             "instrumentertest/CallsIllegalMethods.class",
+            "instrumentertest/CallsIllegalMethods$CallsWait.class",
+            "instrumentertest/CallsIllegalMethods$CallsClassForName.class",
+            "instrumentertest/CallsIllegalMethods$CallsStringIntern.class",
+            "instrumentertest/CallsIllegalMethods$CallsSystemNanoTime.class",
+            "instrumentertest/CallsIllegalMethods$CreatesFilePrintStream.class",
             "instrumentertest/CallsMathRandom.class",
             "instrumentertest/DoesntOverrideHashCode.class",
             "instrumentertest/IllegalMethodReference.class",
@@ -195,6 +201,7 @@ public class LoaderTest {
             try {
                 l1.loadClass(className);
             } catch (InstrumentationException e) {
+                assertEquals(ILLEGAL, e.type);
                 // Reset teamsWithErrors.
                 continue;
             }
@@ -259,7 +266,6 @@ public class LoaderTest {
         assertTrue(jarClassLocation.toString().contains(new File(jar).toURI().toURL().toString()));
     }
 
-    @Test(expected = InstrumentationException.class)
     public void testOverrideLangClass() throws Exception {
         String folder = URLUtils.toTempFolder(
             new String[] {
@@ -275,7 +281,12 @@ public class LoaderTest {
                 new TeamClassLoaderFactory("instrumentertest", folder)
         );
 
-        loader.loadClass("java.lang.Double");
+        try {
+            loader.loadClass("java.lang.Double");
+            fail("No exception thrown?");
+        } catch (InstrumentationException e) {
+            assertEquals(ILLEGAL, e.type);
+        }
     }
 
     @Test

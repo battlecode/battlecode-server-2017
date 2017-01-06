@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static battlecode.instrumenter.InstrumentationException.Type.ILLEGAL;
 import static org.objectweb.asm.tree.AbstractInsnNode.*;
 
 /**
@@ -92,7 +93,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
     }
 
     private void instrumentationException(String description) {
-        throw new InstrumentationException(String.format("In method %s.%s:%s:\n%s",className,name,desc,description));
+        throw new InstrumentationException(ILLEGAL, String.format("In method %s.%s:%s:\n%s",className,name,desc,description));
     }
 
     public void visitMaxs(int maxStack, int maxLocals) {
@@ -329,7 +330,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                                 || isSuperClass(h.getOwner(), "java/lang/Throwable")))
                         || (h.getName().startsWith(DEBUG_PREFIX) && h.getDesc().endsWith("V") &&
                             h.getOwner().startsWith("teamPackageName/"))
-                        || MethodCostUtil.getMethodData(h.getOwner(), h.getName(), loader) != null) {
+                        || MethodCostUtil.getMethodData(h.getOwner(), h.getName()) != null) {
 
                     final String owner = h.getOwner().replace("/",".");
 
@@ -393,7 +394,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 
         boolean endBasicBlock = n.owner.startsWith(teamPackageName) || classReference(n.owner).startsWith("instrumented") || n.owner.startsWith("battlecode");
 
-        MethodCostUtil.MethodData data = MethodCostUtil.getMethodData(n.owner, n.name, loader);
+        MethodCostUtil.MethodData data = MethodCostUtil.getMethodData(n.owner, n.name);
         if (data != null) {
             bytecodeCtr += data.cost;
             endBasicBlock = data.shouldEndRound;
@@ -445,7 +446,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                             break;
                         default:
                             ErrorReporter.report("Illegal type size: not 1 or 2", true);
-                            throw new InstrumentationException();
+                            throw new InstrumentationException(ILLEGAL, "Illegal type size: not 1 or 2");
                     }
                 }
                 // next, pop the class on which the method would be called
@@ -649,8 +650,9 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
      * @throws InstrumentationException if class <code>owner</code> cannot be found
      */
     private boolean isSuperClass(String owner, String superclass) {
-        ClassReader cr = loader.reader(owner);
-        InterfaceReader ir = new InterfaceReader(loader);
+        System.out.println("isSuperClass reader "+name);
+        ClassReader cr = TeamClassLoaderFactory.teamOrSystemReader(loader.getFactory(), owner);
+        InterfaceReader ir = new InterfaceReader(loader.getFactory());
         cr.accept(ir, ClassReader.SKIP_DEBUG);
         return Arrays.asList(ir.getInterfaces()).contains(superclass);
     }

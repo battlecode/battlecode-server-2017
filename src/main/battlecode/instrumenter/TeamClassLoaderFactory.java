@@ -17,6 +17,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
+import static battlecode.instrumenter.InstrumentationException.Type.ILLEGAL;
+import static battlecode.instrumenter.InstrumentationException.Type.MISSING;
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 
 /**
@@ -24,8 +26,20 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
  *
  * ClassLoaders for a team are, mostly, isolated from each other; and nearly
  * completely isolated from the enemy team.
+ *
+ * This is a bit of a god object. A demigod object, anyway.
+ *
+ * We all know what happens to demigods.
  */
 public final class TeamClassLoaderFactory {
+
+    /**
+     * The classloader being used to load the normal parts of -server.
+     *
+     * Not necessarily the *bootstrap* classloader, just the *system* classloader.
+     */
+    private final static ClassLoader NORMAL_CLASS_LOADER =
+            TeamClassLoaderFactory.class.getClassLoader();
 
     /**
      * Packages players are not allowed to use.
@@ -53,9 +67,12 @@ public final class TeamClassLoaderFactory {
     private final String teamPackageName;
 
     /**
-     * The loader used to load classes and resources.
+     * We use this to find resources from the player URL.
+     *
+     * Note that this is never used to *define* classes; we just use it
+     * for convenience in lookups. Loaders do all the actual class defining.
      */
-    private final ClassLoader loader;
+    private final ClassLoader teamResourceLookup;
 
     /**
      * Caches the binary format of classes that have been instrumented.
@@ -89,16 +106,16 @@ public final class TeamClassLoaderFactory {
 
         URL url;
         try {
-            url = getLocalURL(classURL);
+            url = getFilesystemURL(classURL);
         } catch (InstrumentationException e) {
-            this.loader = null;
+            this.teamResourceLookup = null;
             this.hasError = true;
             this.instrumentedClasses = null;
             this.refUtil = null;
             return;
         }
 
-        this.loader = new URLClassLoader(
+        this.teamResourceLookup = new URLClassLoader(
                 new URL[] { url }
         ) {
             @Override
@@ -121,7 +138,7 @@ public final class TeamClassLoaderFactory {
      * For legacy tooling reasons; never during an actual match.
      */
     public TeamClassLoaderFactory() {
-        this.loader = new ClassLoader() {
+        this.teamResourceLookup = new ClassLoader() {
             @Override
             public URL getResource(String name) {
                 return null;
@@ -179,22 +196,123 @@ public final class TeamClassLoaderFactory {
     }
 
     /**
-     * Log that this team has errors.
+     * Get the URL of a resource from the team's container.
+     *
+     * @param resource the resource to find
+     * @return the URL of the resource, loaded from the team's container, or null if it cannot be found.
      */
-    public void setError() {
-        this.hasError = true;
+    private URL getTeamURL(String resource) {
+        return teamResourceLookup.getResource(resource);
     }
 
-    static private URL getLocalURL(String urlOrRelative) throws InstrumentationException {
+    /**
+     * Load a resource using the normal system classloader.
+     *
+     * @param resource the resource to find
+     * @return the URL of the resource, loaded from the normal classpath, or null if it cannot be found.
+     */
+    public static URL getNormalURL(String resource) {
+        return NORMAL_CLASS_LOADER.getResource(resource);
+    }
+
+    /**
+     * Attempt to read a class from the system classloader
+     *
+     * @param className the name of the class
+     * @return a Reader for the class
+     */
+    public static ClassReader normalReader(String className) throws InstrumentationException {
+        URL resURL = getNormalURL(toResourceName(className));
+        if (resURL != null) {
+            try {
+                return new ClassReader(resURL.openStream());
+            } catch (IOException e) {
+                ErrorReporter.report("Can't find the class \"" + className + "\" on the system classpath",
+                        "Make sure the team name is spelled correctly.\n" +
+                                "Make sure the .class files are in the right directory (src/teamname/*.class)");
+                throw new InstrumentationException(MISSING, "Can't load class "+className, e);
+            }
+        }
+        ErrorReporter.report("Can't find the class \"" + className + "\" on the system classpath",
+                "Make sure the team name is spelled correctly.\n" +
+                        "Make sure the .class files are in the right directory (src/teamname/*.class)");
+        throw new InstrumentationException(MISSING, "Can't load class "+className);
+    }
+
+    /**
+     * Attempt to read a class from the team classloader
+     *
+     * @param className the name of the class
+     * @return a Reader for the class
+     * @throws InstrumentationException if the class cannot be read
+     */
+    public ClassReader teamReader(String className) throws InstrumentationException {
+        URL resURL = getTeamURL(toResourceName(className));
+        if (resURL != null) {
+            try {
+                return new ClassReader(resURL.openStream());
+            } catch (IOException e) {
+                ErrorReporter.report("Can't find the class \"" + className + "\" on the system classpath",
+                        "Make sure the team name is spelled correctly.\n" +
+                                "Make sure the .class files are in the right directory (src/teamname/*.class)");
+                throw new InstrumentationException(MISSING, "Can't load class "+className, e);
+            }
+        }
+        ErrorReporter.report("Can't find the class \"" + className + "\" on the system classpath",
+                "Make sure the team name is spelled correctly.\n" +
+                        "Make sure the .class files are in the right directory (src/teamname/*.class)");
+        throw new InstrumentationException(MISSING, "Can't load class "+className);
+    }
+
+    /**
+     * @param maybeFactory a factory to look in, or null to only look at the system.
+     * @param className the class to read.
+     * @return
+     */
+    public static ClassReader teamOrSystemReader(TeamClassLoaderFactory maybeFactory,
+                                                String className) throws InstrumentationException {
+        try {
+            if (maybeFactory != null) {
+                return maybeFactory.teamReader(className);
+            }
+        } catch (InstrumentationException e) {
+            // Do nothing
+        }
+
+        return normalReader(className);
+    }
+
+    /**
+     * @param className class name in the form java/lang/Double or java.lang.Double (no .class)
+     *                  or instrumented/java/lang/Double
+     * @return class name in the form java/lang/Double.class
+     */
+    private static String toResourceName(String className) throws InstrumentationException {
+        if (className.endsWith(".class")) {
+            throw new InstrumentationException(ILLEGAL, "Something has gone wrong: "+className);
+        }
+
+        String uninstrumentedName;
+        if (className.startsWith("instrumented.") ||
+                className.startsWith("instrumented/")) {
+            uninstrumentedName = className.substring(13);
+        } else {
+            uninstrumentedName = className;
+        }
+
+        return uninstrumentedName.replace('.', '/') + ".class";
+    }
+
+    static private URL getFilesystemURL(String urlOrRelative) throws InstrumentationException {
         if (urlOrRelative == null) {
-            throw new InstrumentationException("Can't load player with no URL!");
+            throw new InstrumentationException(MISSING, "Can't load player with no URL!");
         }
 
         // Make sure that we're loading local files, if we're in a jar
         if (urlOrRelative.startsWith("jar:")) {
             String inside = urlOrRelative.substring(4);
             if (!inside.startsWith("file:")) {
-                throw new InstrumentationException("You can only load from local jar files: "+urlOrRelative);
+                throw new InstrumentationException(MISSING, "You can only load from local jar files: "+urlOrRelative);
             }
         }
 
@@ -202,7 +320,7 @@ public final class TeamClassLoaderFactory {
             URL url = new URL(urlOrRelative);
 
             if (!url.getProtocol().equals("jar") && !url.getProtocol().equals("file")) {
-                throw new InstrumentationException("Can't load over protocol: "+url.getProtocol());
+                throw new InstrumentationException(MISSING, "Can't load over protocol: "+url.getProtocol());
             }
 
             return url;
@@ -213,11 +331,11 @@ public final class TeamClassLoaderFactory {
         try {
             File result = new File(urlOrRelative);
             if (!result.exists()) {
-                throw new InstrumentationException("Can't load from nonexistent file: "+result);
+                throw new InstrumentationException(MISSING, "Can't load from nonexistent file: "+result);
             }
             return result.toURI().toURL();
         } catch (MalformedURLException e) {
-            throw new InstrumentationException("Can't load player code from url "+urlOrRelative, e);
+            throw new InstrumentationException(MISSING, "Can't load player code from url "+urlOrRelative, e);
         }
     }
 
@@ -247,16 +365,19 @@ public final class TeamClassLoaderFactory {
             String teamNameSlash = teamPackageName + "/";
             for (String sysName : disallowedPlayerPackages) {
                 if (teamNameSlash.startsWith(sysName)) {
-                    throw new InstrumentationException(
+                    throw new InstrumentationException(ILLEGAL,
                             "Invalid package name: \""
                                     + teamPackageName
                                     + "\"\nPlayer packages cannot be contained "
-                                    + "in system packages (e.g., java., battlecode.)"
-                    );
+                                    + "in system packages (e.g., java., battlecode.)");
                 }
             }
 
             this.loadedCache = new HashMap<>();
+        }
+
+        public TeamClassLoaderFactory getFactory() {
+            return TeamClassLoaderFactory.this;
         }
 
         public ClassReferenceUtil getRefUtil() {
@@ -266,7 +387,7 @@ public final class TeamClassLoaderFactory {
         @Override
         protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
             if (TeamClassLoaderFactory.this.getError()) {
-                throw new InstrumentationException("Team is known to have errors: " +
+                throw new InstrumentationException(ILLEGAL, "Team is known to have errors: " +
                         teamPackageName);
             }
 
@@ -287,7 +408,8 @@ public final class TeamClassLoaderFactory {
                 // so that it isn't possible to send messages by calling
                 // hashCode repeatedly.  But we don't want to instrument it.
                 // So just add its raw bytes to the instrumented classes cache.
-                ClassReader cr = reader(name);
+                System.out.println("alwaysRedefine reader "+name);
+                ClassReader cr = normalReader(name);
 
                 ClassWriter cw = new ClassWriter(cr, COMPUTE_MAXS);
                 cr.accept(cw, 0);
@@ -303,26 +425,29 @@ public final class TeamClassLoaderFactory {
                 final byte[] classBytes;
                 try {
                     classBytes = instrument(
-                            name,
+                            TeamClassLoaderFactory.this.teamReader(name),
                             true,
                             Config.getGlobalConfig().getBoolean("bc.engine.debug-methods")
                     );
                 } catch (InstrumentationException e) {
-                    TeamClassLoaderFactory.this.setError();
+                    TeamClassLoaderFactory.this.hasError = true;
                     throw e;
                 }
 
                 finishedClass = saveAndDefineClass(name, classBytes);
             } else if (name.startsWith("instrumented.")) {
                 // Each robot has its own version of java.util classes.
+                // We don't check them for disallowed or debug methods.
                 // If permgen space becomes a problem, we could make it so
                 // that only one copy of these classes is loaded, but
                 // we would need to modify ObjectHashCode.
                 byte[] classBytes;
                 try {
-                    classBytes = instrument(name, false, false);
+                    classBytes = instrument(
+                            TeamClassLoaderFactory.normalReader(name),
+                            false, false);
                 } catch (InstrumentationException ie) {
-                    TeamClassLoaderFactory.this.setError();
+                    TeamClassLoaderFactory.this.hasError = true;
                     throw ie;
                 }
 
@@ -346,43 +471,16 @@ public final class TeamClassLoaderFactory {
             // in the team package jar if it's a team resource, on the normal classpath
             // otherwise
             if (name.startsWith(teamPackageName)) {
-                return TeamClassLoaderFactory.this.loader.getResource(name);
+                return TeamClassLoaderFactory.this.teamResourceLookup.getResource(name);
             } else {
                 return super.getResource(name);
             }
         }
 
-        /**
-         * Get a ClassReader for a class.
-         *
-         * @param className the name of the class, using .s or /s
-         * @return a reader for the class
-         * @throws InstrumentationException if the class can't be found
-         */
-        public ClassReader reader(String className) throws InstrumentationException {
-            String uninstrumentedName;
-            if (className.startsWith("instrumented.") ||
-                    className.startsWith("instrumented/")) {
-                uninstrumentedName = className.substring(13);
-            } else {
-                uninstrumentedName = className;
-            }
-
-            String finalName = uninstrumentedName.replace('.', '/') + ".class";
-
-            try {
-                return new ClassReader(getResourceAsStream(finalName));
-            } catch (IOException e) {
-                ErrorReporter.report("Can't find the class \"" + className + "\"",
-                        "Make sure the team name is spelled correctly.\n" +
-                        "Make sure the .class files are in the right directory (src/teamname/*.class)");
-                throw new InstrumentationException("Can't load class "+className, e);
-            }
-        }
 
         public Class<?> saveAndDefineClass(String name, byte[] classBytes) {
             if (classBytes == null) {
-                throw new InstrumentationException("Can't save class with null bytes: " + name);
+                throw new InstrumentationException(ILLEGAL, "Can't save class with null bytes: " + name);
             }
 
             Class<?> theClass = defineClass(null, classBytes, 0, classBytes.length);
@@ -392,11 +490,9 @@ public final class TeamClassLoaderFactory {
 
         }
 
-        public byte[] instrument(String className,
+        public byte[] instrument(ClassReader reader,
                                  boolean checkDisallowed,
                                  boolean debugMethodsEnabled) throws InstrumentationException {
-
-            ClassReader cr = reader(className);
 
             ClassWriter cw = new ClassWriter(COMPUTE_MAXS); // passing true sets maxLocals and maxStack, so we don't have to
             ClassVisitor cv = new InstrumentingClassVisitor(
@@ -407,7 +503,7 @@ public final class TeamClassLoaderFactory {
                     checkDisallowed,
                     debugMethodsEnabled
             );
-            cr.accept(cv, 0);        //passing false lets debug info be included in the transformation, so players get line numbers in stack traces
+            reader.accept(cv, 0);        //passing false lets debug info be included in the transformation, so players get line numbers in stack traces
             return cw.toByteArray();
         }
 
