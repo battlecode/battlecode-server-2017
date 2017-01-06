@@ -8,6 +8,8 @@ import battlecode.server.Config;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -22,7 +24,7 @@ public class SandboxedRobotPlayerTest {
     RobotController rc;
 
     @Before
-    public void setupController() {
+    public void setupController() throws Exception {
         // Uses the "mockito" library to create a mock RobotController object,
         // so that we don't have to create a GameWorld and all that
         rc = mock(RobotController.class);
@@ -34,7 +36,22 @@ public class SandboxedRobotPlayerTest {
         when(rc.getLocation()).thenReturn(new MapLocation(0, 0));
         when(rc.getRoundNum()).thenReturn(0);
 
-        cache = new IndividualClassLoader.Cache();
+        cache = new IndividualClassLoader.Cache(URLUtils.toTempFolder(
+                "testplayeractions/RobotPlayer.class",
+                "testplayerarraybytecode/RobotPlayer.class",
+                "testplayerbytecode/RobotPlayer.class",
+                "testplayerclock/RobotPlayer.class",
+                "testplayerdebug/RobotPlayer.class",
+                "testplayerempty/RobotPlayer.class",
+                "testplayerloopforever/RobotPlayer.class",
+                "testplayermultiarraybytecode/RobotPlayer.class",
+                "testplayernodebug/RobotPlayer.class",
+                "testplayerstatic/RobotPlayer.class",
+                "testplayersuicide/RobotPlayer.class",
+                "testplayersystem/RobotPlayer.class",
+                "testplayeruseshared/RobotPlayer.class",
+                "shared/SharedUtility.class"
+        ));
     }
 
     @Test
@@ -227,5 +244,14 @@ public class SandboxedRobotPlayerTest {
 
         player.step();
         assertTrue(player.getTerminated());
+    }
+
+    @Test
+    public void testUseShared() throws Exception {
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerusesshared", rc, 0, cache);
+        player.setBytecodeLimit(200);
+        player.step();
+        assertTrue(player.getTerminated());
+        verify(rc).broadcast(0, 7);
     }
 }

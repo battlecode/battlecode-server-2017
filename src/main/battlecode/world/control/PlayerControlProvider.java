@@ -56,12 +56,7 @@ public class PlayerControlProvider implements RobotControlProvider {
     public PlayerControlProvider(String teamPackage, URL teamURL) {
         this.teamPackage = teamPackage;
         this.sandboxes = new HashMap<>(); // GameWorld maintains order for us
-
-        if (teamURL == null) {
-            this.sharedCache = new IndividualClassLoader.Cache();
-        } else {
-            this.sharedCache = new IndividualClassLoader.Cache(teamURL);
-        }
+        this.sharedCache = new IndividualClassLoader.Cache(teamURL);
     }
 
     @Override

@@ -4,6 +4,7 @@ import battlecode.instrumenter.InstrumentationException;
 import battlecode.server.ErrorReporter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
+import org.objectweb.asm.signature.SignatureWriter;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -244,5 +245,18 @@ public class ClassReferenceUtil {
         return writer.toString();
     }
 
+    private static class BattlecodeSignatureWriter extends SignatureWriter {
+        String teamPackageName;
+        boolean checkDisallowed;
 
+        public BattlecodeSignatureWriter(String teamPackageName, boolean checkDisallowed) {
+            this.teamPackageName = teamPackageName;
+            this.checkDisallowed = checkDisallowed;
+        }
+
+        public void visitClassType(String name) {
+            super.visitClassType(classReference(name, teamPackageName, checkDisallowed));
+        }
+
+    }
 }

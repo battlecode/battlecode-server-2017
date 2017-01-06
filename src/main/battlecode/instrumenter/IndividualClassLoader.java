@@ -48,7 +48,7 @@ public class IndividualClassLoader extends ClassLoader {
     private final Map<String, Class<?>> loadedCache;
 
     /**
-     * A shared cache of instrumented classes, and team error information.
+     * A shared cache of instrumented classes for this robot's team.
      */
     private final Cache sharedCache;
 
@@ -122,7 +122,7 @@ public class IndividualClassLoader extends ClassLoader {
             // classes - we'll only get team loading failures when
             // loading team classes, which keeps the engine consistent
             // in where its failures happen.
-            if (sharedCache.getError(teamPackageName)) {
+            if (sharedCache.getError()) {
                 throw new InstrumentationException("Team is known to have errors: " +
                         teamPackageName);
             }
@@ -135,7 +135,7 @@ public class IndividualClassLoader extends ClassLoader {
                         Config.getGlobalConfig().getBoolean("bc.engine.debug-methods")
                 );
             } catch (InstrumentationException e) {
-                sharedCache.setError(teamPackageName);
+                sharedCache.setError();
                 throw e;
             }
 
@@ -149,7 +149,7 @@ public class IndividualClassLoader extends ClassLoader {
             try {
                 classBytes = instrument(name, false, false);
             } catch (InstrumentationException ie) {
-                sharedCache.setError(teamPackageName);
+                sharedCache.setError();
                 throw ie;
             }
 
@@ -248,9 +248,8 @@ public class IndividualClassLoader extends ClassLoader {
     }
 
     /**
-     * A class that caches data used by an IndividualClassLoader.
-     * Should be shared between IndividualClassLoaders that use the same source
-     * for their code, i.e. both from the same URL, or both from the local classpath.
+     * A class that caches data used by an IndividualClassLoader. Shared between
+     * all IndividualClassLoaders for a particular player.
      */
     public static final class Cache {
 
@@ -268,10 +267,9 @@ public class IndividualClassLoader extends ClassLoader {
         private final Map<String, byte[]> instrumentedClasses;
 
         /**
-         * Caches the names of teams with errors, so that if a class is loaded for
-         * that team, it immediately throws an exception.
+         * If this team has an error, don't bother trying to cache again.
          */
-        private final Set<String> teamsWithErrors;
+        private boolean hasError;
 
         /**
          * Create a cache for classes loaded from a URL, or the local classpath.
@@ -282,7 +280,11 @@ public class IndividualClassLoader extends ClassLoader {
          *
          * @param classURL the URL to load clases from
          */
-        public Cache(final URL classURL) {
+        public Cache(final URL classURL) throws InstrumentationException {
+            if (classURL == null) {
+                throw new InstrumentationException("Can't load player with no URL!");
+            }
+
             this.loader = new URLClassLoader(
                     new URL[] { classURL }
             ) {
@@ -298,18 +300,25 @@ public class IndividualClassLoader extends ClassLoader {
             };
 
             this.instrumentedClasses = new HashMap<>();
-            this.teamsWithErrors = new HashSet<>();
         }
 
         /**
-         * Create a cache for classes loaded only from the local classpath.
+         * Create a cache with no players.
+         * For legacy tooling reasons; never during an actual match.
          */
         public Cache() {
-            // we make a new classloader so that when we get GC'd,
-            // the classes we've loaded will also get GC'd.
-            this.loader = new ClassLoader(getClass().getClassLoader()) {};
+            this.loader = new ClassLoader() {
+                @Override
+                public URL getResource(String name) {
+                    return null;
+                }
+
+                @Override
+                public URL findResource(String name) {
+                    return null;
+                }
+            };
             this.instrumentedClasses = new HashMap<>();
-            this.teamsWithErrors = new HashSet<>();
         }
 
         /**
@@ -345,18 +354,17 @@ public class IndividualClassLoader extends ClassLoader {
         }
 
         /**
-         * @param teamName the team to look up
          * @return whether the team is known to have errors
          */
-        public boolean getError(String teamName) {
-            return this.teamsWithErrors.contains(teamName);
+        public boolean getError() {
+            return this.hasError;
         }
 
         /**
-         * @param teamName the team that we want to remember has errors
+         * Log that this team has errors.
          */
-        public void setError(String teamName) {
-            this.teamsWithErrors.add(teamName);
+        public void setError() {
+            this.hasError = true;
         }
 
     }

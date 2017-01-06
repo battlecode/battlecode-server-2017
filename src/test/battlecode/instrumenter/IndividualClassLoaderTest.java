@@ -1,21 +1,15 @@
 package battlecode.instrumenter;
 
-import battlecode.server.Config;
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * Tests for IndividualClassLoader.
@@ -23,22 +17,42 @@ import java.util.zip.ZipOutputStream;
  * @author james
  */
 public class IndividualClassLoaderTest {
+    private static URL extFolderURL;
     private IndividualClassLoader.Cache sharedCache;
     private IndividualClassLoader l1;
     private IndividualClassLoader l2;
 
-    @Before
-    public void resetIndividualClassLoader() throws Exception {
-        sharedCache = new IndividualClassLoader.Cache();
-        l1 = new IndividualClassLoader("instrumentertest", sharedCache);
-        l2 = new IndividualClassLoader("instrumentertest", sharedCache);
+    @BeforeClass
+    public static void writeCache() throws Exception {
+        extFolderURL = URLUtils.toTempFolder(
+            "instrumentertest/CallsIllegalMethods.class",
+            "instrumentertest/CallsMathRandom.class",
+            "instrumentertest/DoesntOverrideHashCode.class",
+            "instrumentertest/IllegalMethodReference.class",
+            "instrumentertest/LegalMethodReference.class",
+            "instrumentertest/Nothing.class",
+            "instrumentertest/Outer.class",
+            "instrumentertest/Outer$Inner.class",
+            "instrumentertest/OverridesHashCode.class",
+            "instrumentertest/Reflection.class",
+            "instrumentertest/StringFormat.class",
+            "instrumentertest/UsesEnumMap.class",
+            "instrumentertest/UsesLambda.class",
+            "java/lang/Double.class"
+        );
+    }
+
+    public IndividualClassLoader setupLoader(String packageName,
+                                             IndividualClassLoader.Cache cache) throws Exception {
+        IndividualClassLoader result = new IndividualClassLoader(packageName, cache);
 
         // Set up noop RobotMonitors.
+        // Necessary for... reasons.
 
         SandboxedRobotPlayer.Pauser pauser = () -> {};
         SandboxedRobotPlayer.Killer killer = () -> {};
 
-        final Class<?> monitor1 = l1
+        final Class<?> monitor1 = result
                 .loadClass("battlecode.instrumenter.inject.RobotMonitor");
         monitor1.getMethod("init",
                 SandboxedRobotPlayer.Pauser.class,
@@ -48,17 +62,15 @@ public class IndividualClassLoaderTest {
         monitor1.getMethod("setBytecodeLimit", int.class)
                 .invoke(null, Integer.MAX_VALUE);
 
+        return result;
+    }
 
-        final Class<?> monitor2 = l2
-                .loadClass("battlecode.instrumenter.inject.RobotMonitor");
-        monitor2.getMethod("init",
-                SandboxedRobotPlayer.Pauser.class,
-                SandboxedRobotPlayer.Killer.class,
-                int.class)
-                .invoke(null, pauser, killer, 0);
-        monitor2.getMethod("setBytecodeLimit", int.class)
-                .invoke(null, Integer.MAX_VALUE);
 
+    @Before
+    public void setupDefaultCache() throws Exception {
+        sharedCache = new IndividualClassLoader.Cache(extFolderURL);
+        l1 = setupLoader("instrumentertest", sharedCache);
+        l2 = setupLoader("instrumentertest", sharedCache);
     }
 
     // Should always give the same result for loadClass(string)
@@ -234,29 +246,13 @@ public class IndividualClassLoaderTest {
 
     @Test
     public void testLoadFromJar() throws Exception {
-        File jar = Files.createTempFile("battlecode-test", ".jar").toFile();
-
-        jar.deleteOnExit();
-
-        ZipOutputStream z = new ZipOutputStream(new FileOutputStream(jar));
-
-        ZipEntry classEntry = new ZipEntry("instrumentertest/Nothing.class");
-
-        z.putNextEntry(classEntry);
-
-        IOUtils.copy(getClass().getClassLoader().getResourceAsStream("instrumentertest/Nothing.class"),
-                z
-        );
-
-        z.closeEntry();
-        z.close();
-
-        IndividualClassLoader jarLoader = new IndividualClassLoader(
+        URL jar = URLUtils.toTempJar("instrumentertest/Nothing.class");
+        IndividualClassLoader loader = setupLoader(
                 "instrumentertest",
-                new IndividualClassLoader.Cache(jar.toURI().toURL())
+                new IndividualClassLoader.Cache(jar)
         );
 
-        Class<?> jarClass = jarLoader.loadClass("instrumentertest.Nothing");
+        Class<?> jarClass = loader.loadClass("instrumentertest.Nothing");
 
         URL jarClassLocation = jarClass.getResource("Nothing.class");
 
@@ -264,6 +260,69 @@ public class IndividualClassLoaderTest {
 
         assertTrue(jarClassLocation.toString().startsWith("jar:"));
         assertTrue(jarClassLocation.toString().contains(jar.toURI().toURL().toString()));
+    }
 
+    @Test(expected = InstrumentationException.class)
+    public void testOverrideLangClass() throws Exception {
+        URL folder = URLUtils.toTempFolder(
+            new String[] {
+                    // Put it at java/lang/double in the jar
+                    "java/lang/Double.class"
+            },
+            new URL[] {
+                    // load it from there
+                    IndividualClassLoaderTest.class.getResource("resources/java.lang.Double.class")
+            }
+        );
+        IndividualClassLoader loader = setupLoader(
+                "instrumentertest",
+                new IndividualClassLoader.Cache(folder)
+        );
+
+        loader.loadClass("java.lang.Double");
+    }
+
+    @Test
+    public void testNoIncorrectPlayerPackages() {
+        for (String pack : new String[] { "battlecode", "java", "com.sun"}) {
+            try {
+                new IndividualClassLoader(pack, sharedCache);
+                fail("No error on player package: "+pack);
+            } catch (InstrumentationException e) {}
+        }
+    }
+
+    @Test
+    public void testNoCollisions() throws Exception {
+        URL folderA = URLUtils.toTempFolder(
+            new String[] {
+                    "Value.class"
+            },
+            new URL[] {
+                    IndividualClassLoaderTest.class.getResource("resources/ValueA.class")
+            }
+        );
+        URL folderB = URLUtils.toTempFolder(
+            new String[] {
+                    "Value.class"
+            },
+            new URL[] {
+                    IndividualClassLoaderTest.class.getResource("resources/ValueB.class")
+            }
+        );
+        IndividualClassLoader loaderA = setupLoader("instrumentertest",
+                new IndividualClassLoader.Cache(folderA));
+        IndividualClassLoader loaderB = setupLoader("instrumentertest",
+                new IndividualClassLoader.Cache(folderB));
+
+        assertEquals(
+                'A',
+                loaderA.loadClass("Value").getMethod("getValue").invoke(null)
+        );
+
+        assertEquals(
+                'B',
+                loaderB.loadClass("Value").getMethod("getValue").invoke(null)
+        );
     }
 }

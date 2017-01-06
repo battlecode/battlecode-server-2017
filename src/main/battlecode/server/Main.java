@@ -21,7 +21,8 @@ public class Main {
             if (options.get("bc.game.team-a.url") != null) {
                 teamAURL = new URL(options.get("bc.game.team-a.url"));
             } else {
-                teamAURL = null;
+                System.err.println("Can't run match without bc.game.team-a.url set!");
+                return false;
             }
             final String teamAPackage;
             if (options.get("bc.game.team-a.package") != null) {
@@ -35,11 +36,12 @@ public class Main {
                 System.err.println("Can't run match without bc.game.team-b set!");
                 return false;
             }
-            final URL teamBClasses;
-            if (options.get("bc.game.team-b.classes") != null) {
-                teamBClasses = new URL(options.get("bc.game.team-b.classes"));
+            final URL teamBURL;
+            if (options.get("bc.game.team-b.url") != null) {
+                teamBURL = new URL(options.get("bc.game.team-b.url"));
             } else {
-                teamBClasses = null;
+                System.err.println("Can't run match without bc.game.team-b.url set!");
+                return false;
             }
             final String teamBPackage;
             if (options.get("bc.game.team-b.package") != null) {
@@ -65,7 +67,7 @@ public class Main {
 
             server.addGameNotification(new GameInfo(
                     teamA, teamAPackage, teamAURL,
-                    teamB, teamBPackage, teamBClasses,
+                    teamB, teamBPackage, teamBURL,
                     maps,
                     saveFile,
                     options.getBoolean("bc.game.best-of-three") && maps.length == 3
