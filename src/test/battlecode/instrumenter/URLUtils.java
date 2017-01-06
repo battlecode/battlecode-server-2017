@@ -32,7 +32,7 @@ public class URLUtils {
      * @return the URL of the new jar file
      * @throws IOException
      */
-    public static URL toTempJar(String... resources) throws IOException {
+    public static String toTempJar(String... resources) throws IOException {
         return toTempJar(
                 resources,
                 Arrays.stream(resources)
@@ -49,7 +49,7 @@ public class URLUtils {
      * @return the URL of the new folder.
      * @throws IOException
      */
-    public static URL toTempFolder(String... resources) throws IOException {
+    public static String toTempFolder(String... resources) throws IOException {
         return toTempFolder(
                 resources,
                 Arrays.stream(resources)
@@ -66,7 +66,7 @@ public class URLUtils {
      * @return the URL of the new folder.
      * @throws IOException
      */
-    public static URL toTempFolder(String[] paths, URL[] resources) throws IOException {
+    public static String toTempFolder(String[] paths, URL[] resources) throws IOException {
         File folder = Files.createTempDirectory("battlecode-test").toFile();
         folder.deleteOnExit();
 
@@ -83,7 +83,7 @@ public class URLUtils {
             }
         }
 
-        return folder.toURI().toURL();
+        return folder.getPath();
     }
 
     /**
@@ -94,7 +94,7 @@ public class URLUtils {
      * @return the URL of the new jar file
      * @throws IOException
      */
-    public static URL toTempJar(String[] paths, URL[] resources) throws IOException {
+    public static String toTempJar(String[] paths, URL[] resources) throws IOException {
         File jar = Files.createTempFile("battlecode-test", ".jar").toFile();
         jar.deleteOnExit();
 
@@ -112,7 +112,7 @@ public class URLUtils {
         }
         jarOutput.close();
 
-        return jar.toURI().toURL();
+        return jar.getPath();
     }
 
 }

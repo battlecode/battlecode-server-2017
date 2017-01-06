@@ -6,9 +6,11 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -17,7 +19,7 @@ import java.util.List;
  * @author james
  */
 public class IndividualClassLoaderTest {
-    private static URL extFolderURL;
+    private static String extFolderURL;
     private IndividualClassLoader.Cache sharedCache;
     private IndividualClassLoader l1;
     private IndividualClassLoader l2;
@@ -246,7 +248,7 @@ public class IndividualClassLoaderTest {
 
     @Test
     public void testLoadFromJar() throws Exception {
-        URL jar = URLUtils.toTempJar("instrumentertest/Nothing.class");
+        String jar = URLUtils.toTempJar("instrumentertest/Nothing.class");
         IndividualClassLoader loader = setupLoader(
                 "instrumentertest",
                 new IndividualClassLoader.Cache(jar)
@@ -259,12 +261,12 @@ public class IndividualClassLoaderTest {
         // EXTREMELY scientific
 
         assertTrue(jarClassLocation.toString().startsWith("jar:"));
-        assertTrue(jarClassLocation.toString().contains(jar.toURI().toURL().toString()));
+        assertTrue(jarClassLocation.toString().contains(new File(jar).toURI().toURL().toString()));
     }
 
     @Test(expected = InstrumentationException.class)
     public void testOverrideLangClass() throws Exception {
-        URL folder = URLUtils.toTempFolder(
+        String folder = URLUtils.toTempFolder(
             new String[] {
                     // Put it at java/lang/double in the jar
                     "java/lang/Double.class"
@@ -294,7 +296,7 @@ public class IndividualClassLoaderTest {
 
     @Test
     public void testNoCollisions() throws Exception {
-        URL folderA = URLUtils.toTempFolder(
+        String folderA = URLUtils.toTempFolder(
             new String[] {
                     "Value.class"
             },
@@ -302,7 +304,7 @@ public class IndividualClassLoaderTest {
                     IndividualClassLoaderTest.class.getResource("resources/ValueA.class")
             }
         );
-        URL folderB = URLUtils.toTempFolder(
+        String folderB = URLUtils.toTempFolder(
             new String[] {
                     "Value.class"
             },
@@ -324,5 +326,21 @@ public class IndividualClassLoaderTest {
                 'B',
                 loaderB.loadClass("Value").getMethod("getValue").invoke(null)
         );
+    }
+
+    @Test
+    public void testMaliciousURLs() {
+        for (String badURL : new String[] {
+                "afasdfasdf3/this/local/folder/does/not/exist",
+                "afasdfasdf3/this/local/jar/does/not/exist.jar",
+                "jar:jar:file:/binks",
+                "http://bad.site/code.jar",
+                "file:///AJSJEUDKA9FHLJADDHS/THIS/FOLDER/SHOULD/NOT/EXIST"
+        }) {
+
+            IndividualClassLoader.Cache c = new IndividualClassLoader.Cache(badURL);
+
+            assertTrue("Failed to error on url: "+badURL, c.getError());
+        }
     }
 }

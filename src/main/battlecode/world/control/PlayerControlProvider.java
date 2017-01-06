@@ -53,7 +53,7 @@ public class PlayerControlProvider implements RobotControlProvider {
      * @param teamURL the url of the classes for the team;
      *                null to load from the system classpath
      */
-    public PlayerControlProvider(String teamPackage, URL teamURL) {
+    public PlayerControlProvider(String teamPackage, String teamURL) {
         this.teamPackage = teamPackage;
         this.sandboxes = new HashMap<>(); // GameWorld maintains order for us
         this.sharedCache = new IndividualClassLoader.Cache(teamURL);

@@ -17,9 +17,9 @@ public class Main {
                 System.err.println("Can't run match without bc.game.team-a set!");
                 return false;
             }
-            final URL teamAURL;
+            final String teamAURL;
             if (options.get("bc.game.team-a.url") != null) {
-                teamAURL = new URL(options.get("bc.game.team-a.url"));
+                teamAURL = options.get("bc.game.team-a.url");
             } else {
                 System.err.println("Can't run match without bc.game.team-a.url set!");
                 return false;
@@ -36,9 +36,9 @@ public class Main {
                 System.err.println("Can't run match without bc.game.team-b set!");
                 return false;
             }
-            final URL teamBURL;
+            final String teamBURL;
             if (options.get("bc.game.team-b.url") != null) {
-                teamBURL = new URL(options.get("bc.game.team-b.url"));
+                teamBURL = options.get("bc.game.team-b.url");
             } else {
                 System.err.println("Can't run match without bc.game.team-b.url set!");
                 return false;

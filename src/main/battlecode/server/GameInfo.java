@@ -24,10 +24,10 @@ public class GameInfo implements Serializable {
     private final String teamAPackage;
 
     /**
-     * The URL of the classes of team A.
-     * Null if its classes can be found on the system classpath.
+     * The path to the classes of team A. Can be a local file as well
+     * as an actual URL.
      */
-    private final URL teamAURL;
+    private final String teamAURL;
 
     /**
      * The name of team B.
@@ -40,10 +40,10 @@ public class GameInfo implements Serializable {
     private final String teamBPackage;
 
     /**
-     * The URL of the classes of team B.
-     * Null if its classes can be found on the system classpath.
+     * The path to the classes of team A. Can be a local file as well
+     * as an actual URL.
      */
-    private final URL teamBURL;
+    private final String teamBURL;
 
     /**
      * The maps to run matches on.
@@ -76,8 +76,8 @@ public class GameInfo implements Serializable {
      *                 matches, or null to never save
      * @param bestOfThree whether the game is best of three
      */
-    public GameInfo(String teamAName, String teamAPackage, URL teamAURL,
-                    String teamBName, String teamBPackage, URL teamBURL,
+    public GameInfo(String teamAName, String teamAPackage, String teamAURL,
+                    String teamBName, String teamBPackage, String teamBURL,
                     String[] maps,
                     File saveFile,
                     boolean bestOfThree) {
@@ -109,7 +109,7 @@ public class GameInfo implements Serializable {
     /**
      * @return the URL of the classes of team A, or null if they can be found on the system classpath
      */
-    public URL getTeamAURL() {
+    public String getTeamAURL() {
         return teamAURL;
     }
 
@@ -123,7 +123,7 @@ public class GameInfo implements Serializable {
     /**
      * @return the URL of the classes of team B, or null if they can be found on the system classpath
      */
-    public URL getTeamBURL() {
+    public String getTeamBURL() {
         return teamBURL;
     }
 

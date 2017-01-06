@@ -7,7 +7,9 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -272,7 +274,7 @@ public class IndividualClassLoader extends ClassLoader {
         private boolean hasError;
 
         /**
-         * Create a cache for classes loaded from a URL, or the local classpath.
+         * Create a cache for classes loaded from a URL (or local file).
          * The URL can point to a jar file or a directory containing class
          * files, preferably locally - running arbitrary code from the internet
          * is a bad idea, even if we do try to instrument it.
@@ -280,13 +282,19 @@ public class IndividualClassLoader extends ClassLoader {
          *
          * @param classURL the URL to load clases from
          */
-        public Cache(final URL classURL) throws InstrumentationException {
-            if (classURL == null) {
-                throw new InstrumentationException("Can't load player with no URL!");
+        public Cache(final String classURL) {
+            URL url;
+            try {
+                url = getLocalURL(classURL);
+            } catch (InstrumentationException e) {
+                this.loader = null;
+                this.hasError = true;
+                this.instrumentedClasses = null;
+                return;
             }
 
             this.loader = new URLClassLoader(
-                    new URL[] { classURL }
+                    new URL[] { url }
             ) {
                 @Override
                 public URL getResource(String name) {
@@ -298,8 +306,8 @@ public class IndividualClassLoader extends ClassLoader {
                     return findResource(name);
                 }
             };
-
             this.instrumentedClasses = new HashMap<>();
+            this.hasError = false;
         }
 
         /**
@@ -319,6 +327,7 @@ public class IndividualClassLoader extends ClassLoader {
                 }
             };
             this.instrumentedClasses = new HashMap<>();
+            this.hasError = false;
         }
 
         /**
@@ -367,5 +376,40 @@ public class IndividualClassLoader extends ClassLoader {
             this.hasError = true;
         }
 
+        static private URL getLocalURL(String urlOrRelative) throws InstrumentationException {
+            if (urlOrRelative == null) {
+                throw new InstrumentationException("Can't load player with no URL!");
+            }
+
+            // Make sure that we're loading local files, if we're in a jar
+            if (urlOrRelative.startsWith("jar:")) {
+                String inside = urlOrRelative.substring(4);
+                if (!inside.startsWith("file:")) {
+                    throw new InstrumentationException("You can only load from local jar files: "+urlOrRelative);
+                }
+            }
+
+            try {
+                URL url = new URL(urlOrRelative);
+
+                if (url.getProtocol() != "jar" && url.getProtocol() != "file") {
+                    throw new InstrumentationException("Can't load over protocol: "+url.getProtocol());
+                }
+
+                return url;
+            } catch (MalformedURLException e) {
+                // okay, it might be a local file
+            }
+
+            try {
+                File result = new File(urlOrRelative);
+                if (!result.exists()) {
+                    throw new InstrumentationException("Can't load from nonexistent file: "+result);
+                }
+                return result.toURI().toURL();
+            } catch (MalformedURLException e) {
+                throw new InstrumentationException("Can't load player code from url "+urlOrRelative, e);
+            }
+        }
     }
 }
