@@ -77,19 +77,19 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
     }
 
     protected String classReference(String name) {
-        return ClassReferenceUtil.classReference(name, teamPackageName, checkDisallowed);
+        return loader.getRefUtil().classReference(name, teamPackageName, checkDisallowed);
     }
 
     protected String classDescReference(String name) {
-        return ClassReferenceUtil.classDescReference(name, teamPackageName, checkDisallowed);
+        return loader.getRefUtil().classDescReference(name, teamPackageName, checkDisallowed);
     }
 
     protected String methodDescReference(String name) {
-        return ClassReferenceUtil.methodDescReference(name, teamPackageName, checkDisallowed);
+        return loader.getRefUtil().methodDescReference(name, teamPackageName, checkDisallowed);
     }
 
     protected String fieldSignatureReference(String name) {
-        return ClassReferenceUtil.fieldSignatureReference(name, teamPackageName, checkDisallowed);
+        return loader.getRefUtil().fieldSignatureReference(name, teamPackageName, checkDisallowed);
     }
 
     private void instrumentationException(String description) {

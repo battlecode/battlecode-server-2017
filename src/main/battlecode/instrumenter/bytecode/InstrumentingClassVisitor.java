@@ -59,13 +59,13 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
             final String signature,
             final String superName,
             final String[] interfaces) {
-        className = ClassReferenceUtil.classReference(name, teamPackageName, checkDisallowed);
+        className = loader.getRefUtil().classReference(name, teamPackageName, checkDisallowed);
         for (int i = 0; i < interfaces.length; i++) {
-            interfaces[i] = ClassReferenceUtil.classReference(interfaces[i], teamPackageName, checkDisallowed);
+            interfaces[i] = loader.getRefUtil().classReference(interfaces[i], teamPackageName, checkDisallowed);
         }
         String newSuperName;
-        newSuperName = ClassReferenceUtil.classReference(superName, teamPackageName, checkDisallowed);
-        super.visit(version, access, className, ClassReferenceUtil.methodSignatureReference(signature, teamPackageName, checkDisallowed), newSuperName, interfaces);
+        newSuperName = loader.getRefUtil().classReference(superName, teamPackageName, checkDisallowed);
+        super.visit(version, access, className, loader.getRefUtil().methodSignatureReference(signature, teamPackageName, checkDisallowed), newSuperName, interfaces);
     }
 
     /**
@@ -86,13 +86,13 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
 
         if (exceptions != null) {
             for (int i = 0; i < exceptions.length; i++) {
-                exceptions[i] = ClassReferenceUtil.classReference(exceptions[i], teamPackageName, checkDisallowed);
+                exceptions[i] = loader.getRefUtil().classReference(exceptions[i], teamPackageName, checkDisallowed);
             }
         }
         MethodVisitor mv = cv.visitMethod(access,
                 name,
-                ClassReferenceUtil.methodDescReference(desc, teamPackageName, checkDisallowed),
-                ClassReferenceUtil.methodSignatureReference(signature, teamPackageName, checkDisallowed),
+                loader.getRefUtil().methodDescReference(desc, teamPackageName, checkDisallowed),
+                loader.getRefUtil().methodSignatureReference(signature, teamPackageName, checkDisallowed),
                 exceptions);
         // create a new InstrumentingMethodVisitor, and let it loose on this method
         return mv == null ? null : new InstrumentingMethodVisitor(
@@ -122,8 +122,8 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
             access &= ~Opcodes.ACC_VOLATILE;
         return cv.visitField(access,
                 name,
-                ClassReferenceUtil.classDescReference(desc, teamPackageName, checkDisallowed),
-                ClassReferenceUtil.fieldSignatureReference(signature, teamPackageName, checkDisallowed),
+                loader.getRefUtil().classDescReference(desc, teamPackageName, checkDisallowed),
+                loader.getRefUtil().fieldSignatureReference(signature, teamPackageName, checkDisallowed),
                 value);
     }
 
@@ -131,7 +131,7 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
      * @inheritDoc
      */
     public void visitOuterClass(String owner, String name, String desc) {
-        super.visitOuterClass(ClassReferenceUtil.classReference(owner, teamPackageName, checkDisallowed), name, ClassReferenceUtil.methodSignatureReference(desc, teamPackageName, checkDisallowed));
+        super.visitOuterClass(loader.getRefUtil().classReference(owner, teamPackageName, checkDisallowed), name, loader.getRefUtil().methodSignatureReference(desc, teamPackageName, checkDisallowed));
     }
 
     /**
@@ -139,8 +139,8 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
      */
     public void visitInnerClass(String name, String outerName, String innerName, int access) {
         super.visitInnerClass(
-                ClassReferenceUtil.classReference(name, teamPackageName, checkDisallowed),
-                ClassReferenceUtil.classReference(outerName, teamPackageName, checkDisallowed),
+                loader.getRefUtil().classReference(name, teamPackageName, checkDisallowed),
+                loader.getRefUtil().classReference(outerName, teamPackageName, checkDisallowed),
                 innerName, access
         );
     }

@@ -1,5 +1,6 @@
 package battlecode.instrumenter;
 
+import battlecode.instrumenter.bytecode.ClassReferenceUtil;
 import battlecode.instrumenter.bytecode.InstrumentingClassVisitor;
 import battlecode.server.Config;
 import battlecode.server.ErrorReporter;
@@ -90,6 +91,10 @@ public class IndividualClassLoader extends ClassLoader {
 
         this.teamPackageName = teamPackageName.intern();
         this.loadedCache = new HashMap<>();
+    }
+
+    public ClassReferenceUtil getRefUtil() {
+        return this.sharedCache.getRefUtil();
     }
 
     @Override
@@ -274,6 +279,11 @@ public class IndividualClassLoader extends ClassLoader {
         private boolean hasError;
 
         /**
+         * The ClassReferenceUtil used by this cache.
+         */
+        private final ClassReferenceUtil refUtil;
+
+        /**
          * Create a cache for classes loaded from a URL (or local file).
          * The URL can point to a jar file or a directory containing class
          * files, preferably locally - running arbitrary code from the internet
@@ -290,6 +300,7 @@ public class IndividualClassLoader extends ClassLoader {
                 this.loader = null;
                 this.hasError = true;
                 this.instrumentedClasses = null;
+                this.refUtil = null;
                 return;
             }
 
@@ -308,6 +319,7 @@ public class IndividualClassLoader extends ClassLoader {
             };
             this.instrumentedClasses = new HashMap<>();
             this.hasError = false;
+            this.refUtil = new ClassReferenceUtil();
         }
 
         /**
@@ -328,6 +340,7 @@ public class IndividualClassLoader extends ClassLoader {
             };
             this.instrumentedClasses = new HashMap<>();
             this.hasError = false;
+            this.refUtil = new ClassReferenceUtil();
         }
 
         /**
@@ -335,6 +348,13 @@ public class IndividualClassLoader extends ClassLoader {
          */
         public ClassLoader getLoader() {
             return this.loader;
+        }
+
+        /**
+         * @return a classreferenceutil
+         */
+        public ClassReferenceUtil getRefUtil() {
+            return this.refUtil;
         }
 
         /**

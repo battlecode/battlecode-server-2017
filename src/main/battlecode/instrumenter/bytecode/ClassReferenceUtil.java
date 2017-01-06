@@ -46,7 +46,8 @@ public class ClassReferenceUtil {
     // This might have issues so for now I'm just not instrumenting java.io
     // private final static Set<String> uninstrumentedClasses;
 
-    private ClassReferenceUtil() {
+    public ClassReferenceUtil() {
+
     }
 
     static void fileLoadError(String filename) {
@@ -94,7 +95,7 @@ public class ClassReferenceUtil {
         return allowedPackages.contains(className.substring(0, dotIndex));
     }
 
-    private static boolean shouldAddInstrumentedPrefix(String className) {
+    private boolean shouldAddInstrumentedPrefix(String className) {
         if (className.startsWith("battlecode/")) {
             return className.equals("battlecode/instrumenter/inject/InstrumentableFunctions");
         }
@@ -135,7 +136,7 @@ public class ClassReferenceUtil {
      * @return the name of the class that should replace this reference, in fully qualified form
      * @throws InstrumentationException if the class reference is not allowed
      */
-    public static String classReference(String className, String teamPackageName, boolean checkDisallowed) {
+    public String classReference(String className, String teamPackageName, boolean checkDisallowed) {
         if (className == null) return null;
 
         if (className.charAt(0) == '[') {
@@ -186,7 +187,7 @@ public class ClassReferenceUtil {
      * @throws InstrumentationException if the class reference is not allowed.
      */
 
-    public static String classDescReference(String classDesc, String teamPackageName, boolean checkDisallowed) {
+    public String classDescReference(String classDesc, String teamPackageName, boolean checkDisallowed) {
         if (classDesc == null)
             return null;
         if (classDesc.charAt(0) == 'L') {
@@ -207,7 +208,7 @@ public class ClassReferenceUtil {
      * @param teamPackageName the name of the team that referenced the given method
      * @throws InstrumentationException if any of the class references contained the the method descriptor are not allowed.
      */
-    public static String methodDescReference(String methodDesc, String teamPackageName, boolean checkDisallowed) {
+    public String methodDescReference(String methodDesc, String teamPackageName, boolean checkDisallowed) {
         String ret = "(";
 
         Type[] argTypes = Type.getArgumentTypes(methodDesc);
@@ -229,7 +230,7 @@ public class ClassReferenceUtil {
         return ret;
     }
 
-    public static String methodSignatureReference(String signature, String teamPackageName, boolean checkDisallowed) {
+    public String methodSignatureReference(String signature, String teamPackageName, boolean checkDisallowed) {
         if (signature == null) return null;
         BattlecodeSignatureWriter writer = new BattlecodeSignatureWriter(teamPackageName, checkDisallowed);
         SignatureReader reader = new SignatureReader(signature);
@@ -237,7 +238,7 @@ public class ClassReferenceUtil {
         return writer.toString();
     }
 
-    public static String fieldSignatureReference(String signature, String teamPackageName, boolean checkDisallowed) {
+    public String fieldSignatureReference(String signature, String teamPackageName, boolean checkDisallowed) {
         if (signature == null) return null;
         BattlecodeSignatureWriter writer = new BattlecodeSignatureWriter(teamPackageName, checkDisallowed);
         SignatureReader reader = new SignatureReader(signature);
@@ -245,7 +246,7 @@ public class ClassReferenceUtil {
         return writer.toString();
     }
 
-    private static class BattlecodeSignatureWriter extends SignatureWriter {
+    private class BattlecodeSignatureWriter extends SignatureWriter {
         String teamPackageName;
         boolean checkDisallowed;
 
