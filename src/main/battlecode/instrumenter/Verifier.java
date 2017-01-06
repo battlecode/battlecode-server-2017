@@ -12,14 +12,23 @@ package battlecode.instrumenter;
  */
 public class Verifier {
     public static void main(String[] args) {
-        String teamPackageName = args[0];
+        if (args.length != 2) {
+            System.err.println("Usage: battlecode.instrumenter.Verifier ${team} ${team.url}, where team is a package" +
+                    "containing a RobotPlayer and team.url is a folder or jar containing all of the player-defined class files" +
+                    "for that RobotPlayer");
+        }
+        if (!verify(args[0], args[1])) System.exit(1);
+    }
+
+    public static boolean verify(String teamPackageName, String teamURL) {
         try {
-            IndividualClassLoader icl = new IndividualClassLoader(teamPackageName, new IndividualClassLoader.Cache());
+            TeamClassLoaderFactory.Loader icl = new TeamClassLoaderFactory(teamPackageName, teamURL).createLoader();
             icl.loadClass(teamPackageName + ".RobotPlayer");
+            return true;
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace(System.out);
-            System.exit(1);
+            return false;
         }
     }
 }

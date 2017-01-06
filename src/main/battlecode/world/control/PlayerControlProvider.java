@@ -1,13 +1,12 @@
 package battlecode.world.control;
 
-import battlecode.instrumenter.IndividualClassLoader;
 import battlecode.instrumenter.InstrumentationException;
+import battlecode.instrumenter.TeamClassLoaderFactory;
 import battlecode.instrumenter.SandboxedRobotPlayer;
 import battlecode.server.ErrorReporter;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,10 +20,9 @@ import java.util.Map;
 public class PlayerControlProvider implements RobotControlProvider {
 
     /**
-     * The cache shared between the classloaders of all players
-     * loaded by this control provider.
+     * Used to create ClassLoaders for this team.
      */
-    private final IndividualClassLoader.Cache sharedCache;
+    private final TeamClassLoaderFactory factory;
 
     /**
      * The sandboxed robot players we're using to control robots;
@@ -56,7 +54,7 @@ public class PlayerControlProvider implements RobotControlProvider {
     public PlayerControlProvider(String teamPackage, String teamURL) {
         this.teamPackage = teamPackage;
         this.sandboxes = new HashMap<>(); // GameWorld maintains order for us
-        this.sharedCache = new IndividualClassLoader.Cache(teamURL);
+        this.factory = new TeamClassLoaderFactory(teamPackage, teamURL);
     }
 
     @Override
@@ -82,7 +80,7 @@ public class PlayerControlProvider implements RobotControlProvider {
                     teamPackage,
                     robot.getController(),
                     gameWorld.getMapSeed(),
-                    sharedCache
+                    factory.createLoader()
             );
             this.sandboxes.put(robot.getID(), player);
         } catch (InstrumentationException e) {
@@ -126,7 +124,6 @@ public class PlayerControlProvider implements RobotControlProvider {
             player.setBytecodeLimit(robot.getBytecodeLimit());
             player.step();
         }
-
     }
 
     @Override

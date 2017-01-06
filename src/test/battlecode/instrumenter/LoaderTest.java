@@ -10,23 +10,20 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
- * Tests for IndividualClassLoader.
- *
  * @author james
  */
-public class IndividualClassLoaderTest {
-    private static String extFolderURL;
-    private IndividualClassLoader.Cache sharedCache;
-    private IndividualClassLoader l1;
-    private IndividualClassLoader l2;
+public class LoaderTest {
+    private static String tempClassFolder;
+    private TeamClassLoaderFactory sharedCache;
+    private TeamClassLoaderFactory.Loader l1;
+    private TeamClassLoaderFactory.Loader l2;
 
     @BeforeClass
     public static void writeCache() throws Exception {
-        extFolderURL = URLUtils.toTempFolder(
+        tempClassFolder = URLUtils.toTempFolder(
             "instrumentertest/CallsIllegalMethods.class",
             "instrumentertest/CallsMathRandom.class",
             "instrumentertest/DoesntOverrideHashCode.class",
@@ -44,9 +41,8 @@ public class IndividualClassLoaderTest {
         );
     }
 
-    public IndividualClassLoader setupLoader(String packageName,
-                                             IndividualClassLoader.Cache cache) throws Exception {
-        IndividualClassLoader result = new IndividualClassLoader(packageName, cache);
+    public TeamClassLoaderFactory.Loader setupLoader(TeamClassLoaderFactory cache) throws Exception {
+        TeamClassLoaderFactory.Loader result = cache.createLoader();
 
         // Set up noop RobotMonitors.
         // Necessary for... reasons.
@@ -70,9 +66,9 @@ public class IndividualClassLoaderTest {
 
     @Before
     public void setupDefaultCache() throws Exception {
-        sharedCache = new IndividualClassLoader.Cache(extFolderURL);
-        l1 = setupLoader("instrumentertest", sharedCache);
-        l2 = setupLoader("instrumentertest", sharedCache);
+        sharedCache = new TeamClassLoaderFactory("instrumentertest", tempClassFolder);
+        l1 = setupLoader(sharedCache);
+        l2 = setupLoader(sharedCache);
     }
 
     // Should always give the same result for loadClass(string)
@@ -85,7 +81,7 @@ public class IndividualClassLoaderTest {
         classNames.add("instrumentertest.Outer");
         classNames.add("instrumentertest.Outer$Inner");
 
-        classNames.addAll(IndividualClassLoader.alwaysRedefine);
+        classNames.addAll(TeamClassLoaderFactory.alwaysRedefine);
 
         final List<Class<?>> loadedClasses = new ArrayList<>();
 
@@ -117,7 +113,7 @@ public class IndividualClassLoaderTest {
     // Should reload always-reloadable classes between instances.
     @Test
     public void testReloadsAlwaysReloadClasses() throws ClassNotFoundException {
-        for (String alwaysRedefine : IndividualClassLoader.alwaysRedefine) {
+        for (String alwaysRedefine : TeamClassLoaderFactory.alwaysRedefine) {
             assertNotEquals(
                 l1.loadClass(alwaysRedefine),
                 l2.loadClass(alwaysRedefine)
@@ -249,9 +245,8 @@ public class IndividualClassLoaderTest {
     @Test
     public void testLoadFromJar() throws Exception {
         String jar = URLUtils.toTempJar("instrumentertest/Nothing.class");
-        IndividualClassLoader loader = setupLoader(
-                "instrumentertest",
-                new IndividualClassLoader.Cache(jar)
+        TeamClassLoaderFactory.Loader loader = setupLoader(
+                new TeamClassLoaderFactory("instrumentertest", jar)
         );
 
         Class<?> jarClass = loader.loadClass("instrumentertest.Nothing");
@@ -273,12 +268,11 @@ public class IndividualClassLoaderTest {
             },
             new URL[] {
                     // load it from there
-                    IndividualClassLoaderTest.class.getResource("resources/java.lang.Double.class")
+                    LoaderTest.class.getResource("resources/java.lang.Double.class")
             }
         );
-        IndividualClassLoader loader = setupLoader(
-                "instrumentertest",
-                new IndividualClassLoader.Cache(folder)
+        TeamClassLoaderFactory.Loader loader = setupLoader(
+                new TeamClassLoaderFactory("instrumentertest", folder)
         );
 
         loader.loadClass("java.lang.Double");
@@ -288,7 +282,7 @@ public class IndividualClassLoaderTest {
     public void testNoIncorrectPlayerPackages() {
         for (String pack : new String[] { "battlecode", "java", "com.sun"}) {
             try {
-                new IndividualClassLoader(pack, sharedCache);
+                new TeamClassLoaderFactory(pack, tempClassFolder).createLoader();
                 fail("No error on player package: "+pack);
             } catch (InstrumentationException e) {}
         }
@@ -301,7 +295,7 @@ public class IndividualClassLoaderTest {
                     "Value.class"
             },
             new URL[] {
-                    IndividualClassLoaderTest.class.getResource("resources/ValueA.class")
+                    LoaderTest.class.getResource("resources/ValueA.class")
             }
         );
         String folderB = URLUtils.toTempFolder(
@@ -309,13 +303,13 @@ public class IndividualClassLoaderTest {
                     "Value.class"
             },
             new URL[] {
-                    IndividualClassLoaderTest.class.getResource("resources/ValueB.class")
+                    LoaderTest.class.getResource("resources/ValueB.class")
             }
         );
-        IndividualClassLoader loaderA = setupLoader("instrumentertest",
-                new IndividualClassLoader.Cache(folderA));
-        IndividualClassLoader loaderB = setupLoader("instrumentertest",
-                new IndividualClassLoader.Cache(folderB));
+        TeamClassLoaderFactory.Loader loaderA = setupLoader(
+                new TeamClassLoaderFactory("instrumentertest", folderA));
+        TeamClassLoaderFactory.Loader loaderB = setupLoader(
+                new TeamClassLoaderFactory("instrumentertes", folderB));
 
         assertEquals(
                 'A',
@@ -338,7 +332,7 @@ public class IndividualClassLoaderTest {
                 "file:///AJSJEUDKA9FHLJADDHS/THIS/FOLDER/SHOULD/NOT/EXIST"
         }) {
 
-            IndividualClassLoader.Cache c = new IndividualClassLoader.Cache(badURL);
+            TeamClassLoaderFactory c = new TeamClassLoaderFactory("instrumentertest", badURL);
 
             assertTrue("Failed to error on url: "+badURL, c.getError());
         }

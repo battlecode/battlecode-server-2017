@@ -51,7 +51,7 @@ public class SandboxedRobotPlayer {
     /**
      * The classloader used for this player.
      */
-    private final IndividualClassLoader individualLoader;
+    private final TeamClassLoaderFactory.Loader individualLoader;
 
     /**
      * The main thread the player is running on.
@@ -94,14 +94,13 @@ public class SandboxedRobotPlayer {
      * @param teamName          the name of the team to create a player for
      * @param robotController   the robot we're loading a player for
      * @param seed              the seed the robot should use for random operations
-     * @param sharedCache       the cache our classloader should use
      * @throws InstrumentationException if the player doesn't work for some reason
      * @throws RuntimeException if our code fails for some reason
      */
     public SandboxedRobotPlayer(String teamName,
                                 RobotController robotController,
                                 int seed,
-                                IndividualClassLoader.Cache sharedCache)
+                                TeamClassLoaderFactory.Loader loader)
             throws InstrumentationException {
         this.robotController = robotController;
         this.seed = seed;
@@ -109,7 +108,7 @@ public class SandboxedRobotPlayer {
         this.notifier = new Object();
 
         // Create classloader sandbox
-        individualLoader = new IndividualClassLoader(teamName, sharedCache);
+        individualLoader = loader;
 
         // Load monitor / monitor methods
         // Used to initialize the RobotMonitor for the player

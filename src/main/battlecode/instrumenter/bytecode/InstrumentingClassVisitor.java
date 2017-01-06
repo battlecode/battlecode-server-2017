@@ -1,6 +1,6 @@
 package battlecode.instrumenter.bytecode;
 
-import battlecode.instrumenter.IndividualClassLoader;
+import battlecode.instrumenter.TeamClassLoaderFactory;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -19,7 +19,7 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
     private final boolean debugMethodsEnabled;
 
     // Used to find other class files, which is occasionally necessary.
-    private IndividualClassLoader loader;
+    private TeamClassLoaderFactory.Loader loader;
 
     // We check contestants' code for disallowed packages.
     // But some builtin Java libraries use disallowed packages so
@@ -35,7 +35,7 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
      * @param checkDisallowed     whether to check for disallowed classes and methods
      */
     public InstrumentingClassVisitor(final ClassVisitor cv,
-                                     final IndividualClassLoader loader,
+                                     final TeamClassLoaderFactory.Loader loader,
                                      final String teamPackageName,
                                      boolean silenced,
                                      boolean checkDisallowed,

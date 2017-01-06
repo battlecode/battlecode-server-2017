@@ -1,6 +1,6 @@
 package battlecode.doc;
 
-import battlecode.instrumenter.IndividualClassLoader;
+import battlecode.instrumenter.TeamClassLoaderFactory;
 import battlecode.instrumenter.bytecode.MethodCostUtil;
 import com.sun.javadoc.Tag;
 import com.sun.tools.doclets.Taglet;
@@ -11,13 +11,13 @@ import java.util.Map;
  * A taglet for the "battlecode.doc.costlymethod" annotation.
  * Only works on methods of classes in the battlecode package.
  */
+@SuppressWarnings("unused")
 public class CostlyMethodTaglet implements Taglet {
 
     public static final String TAG_NAME = "battlecode.doc.costlymethod";
 
     // Used to look up method costs
-    private final static IndividualClassLoader LOADER =
-        new IndividualClassLoader("", new IndividualClassLoader.Cache());
+    private final static TeamClassLoaderFactory.Loader LOADER = new TeamClassLoaderFactory().createLoader();
 
     @SuppressWarnings("unused")
     public static void register(Map<String, Taglet> map) {

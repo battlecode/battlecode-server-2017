@@ -1,13 +1,12 @@
 package battlecode.instrumenter.bytecode;
 
 import battlecode.common.GameConstants;
-import battlecode.instrumenter.IndividualClassLoader;
+import battlecode.instrumenter.TeamClassLoaderFactory;
 import battlecode.server.ErrorReporter;
 import battlecode.instrumenter.InstrumentationException;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +32,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
     private final boolean debugMethodsEnabled;
 
     // used to load other class files
-    private final IndividualClassLoader loader;
+    private final TeamClassLoaderFactory.Loader loader;
 
     // all the exception handlers we've seen in the code
     private final Set<LabelNode> exceptionHandlers = new HashSet<>();
@@ -55,7 +54,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
     private MethodVisitor methodWriter;
 
     public InstrumentingMethodVisitor(final MethodVisitor mv,
-                                      final IndividualClassLoader loader,
+                                      final TeamClassLoaderFactory.Loader loader,
                                       final String className,
                                       final int access,
                                       final String methodName,

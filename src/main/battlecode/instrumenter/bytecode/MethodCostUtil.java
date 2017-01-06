@@ -1,7 +1,6 @@
 package battlecode.instrumenter.bytecode;
 
-import battlecode.instrumenter.IndividualClassLoader;
-import battlecode.server.ErrorReporter;
+import battlecode.instrumenter.TeamClassLoaderFactory;
 import org.objectweb.asm.ClassReader;
 
 import java.io.BufferedReader;
@@ -88,7 +87,7 @@ public class MethodCostUtil {
      * @param loader     the loader used to read the class, if necessary
      */
     public static MethodData getMethodData(String className, String methodName,
-                                           IndividualClassLoader loader) {
+                                           TeamClassLoaderFactory.Loader loader) {
         if (className.charAt(0) == '[')
             return null;
         String key = className + "/" + methodName;

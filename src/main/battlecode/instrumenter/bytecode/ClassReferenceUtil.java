@@ -51,7 +51,8 @@ public class ClassReferenceUtil {
     }
 
     static void fileLoadError(String filename) {
-        ErrorReporter.report(String.format("Error loading %s",filename),String.format("Check that the '%s' file exists and is not corrupted.",filename));
+        ErrorReporter.report(String.format("Error loading %s",filename),
+                String.format("Check that the '%s' file exists and is not corrupted.",filename));
         throw new InstrumentationException();
     }
 

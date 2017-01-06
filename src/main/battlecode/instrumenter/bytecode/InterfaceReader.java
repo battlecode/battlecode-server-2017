@@ -1,11 +1,8 @@
 package battlecode.instrumenter.bytecode;
 
-import battlecode.instrumenter.IndividualClassLoader;
-import battlecode.instrumenter.InstrumentationException;
-import battlecode.server.ErrorReporter;
+import battlecode.instrumenter.TeamClassLoaderFactory;
 import org.objectweb.asm.*;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 
@@ -23,14 +20,14 @@ class InterfaceReader extends ClassVisitor {
     /**
      * Used to read relevant class files.
      */
-    private IndividualClassLoader loader;
+    private TeamClassLoaderFactory.Loader loader;
 
     /**
      * store the final result of which interfaces are transitively implemented
      */
     private String[] interfaces = null;
 
-    public InterfaceReader(IndividualClassLoader loader) {
+    public InterfaceReader(TeamClassLoaderFactory.Loader loader) {
         super(Opcodes.ASM5);
         this.loader = loader;
     }
