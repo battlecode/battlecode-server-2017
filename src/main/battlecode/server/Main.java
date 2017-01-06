@@ -69,7 +69,13 @@ public class Main {
     }
 
     public static boolean run(Config options) {
-        final Server.Mode mode = Server.Mode.valueOf(options.get("bc.server.mode").toUpperCase());
+        Server.Mode mode;
+        try {
+            mode = Server.Mode.valueOf(options.get("bc.server.mode").toUpperCase());
+        } catch (Exception e) {
+            System.out.println("Failed to get server mode, using headless");
+            mode = Server.Mode.HEADLESS;
+        }
 
         String saveFile = options.get("bc.server.save-file");
 
