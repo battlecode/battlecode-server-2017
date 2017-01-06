@@ -94,6 +94,11 @@ public class IndividualClassLoader extends ClassLoader {
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        if (sharedCache.getError()) {
+            throw new InstrumentationException("Team is known to have errors: " +
+                    teamPackageName);
+        }
+
         // Don't bother to recreate a class if we've done so before -
         // in *this particular* IndividualClassLoader.
         if (loadedCache.containsKey(name)) {
@@ -111,7 +116,6 @@ public class IndividualClassLoader extends ClassLoader {
             // so that it isn't possible to send messages by calling
             // hashCode repeatedly.  But we don't want to instrument it.
             // So just add its raw bytes to the instrumented classes cache.
-
             ClassReader cr = reader(name);
 
             ClassWriter cw = new ClassWriter(cr, COMPUTE_MAXS);
@@ -124,10 +128,6 @@ public class IndividualClassLoader extends ClassLoader {
             // classes - we'll only get team loading failures when
             // loading team classes, which keeps the engine consistent
             // in where its failures happen.
-            if (sharedCache.getError()) {
-                throw new InstrumentationException("Team is known to have errors: " +
-                        teamPackageName);
-            }
 
             final byte[] classBytes;
             try {
