@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -32,22 +33,12 @@ public class URLUtils {
      * @throws IOException
      */
     public static URL toTempJar(String... resources) throws IOException {
-        File jar = Files.createTempFile("battlecode-test", ".jar").toFile();
-        jar.deleteOnExit();
-
-        ZipOutputStream jarOutput = new ZipOutputStream(new FileOutputStream(jar));
-
-        for (String resource : resources) {
-            jarOutput.putNextEntry(new ZipEntry(resource));
-            IOUtils.copy(
-                    URLUtils.class.getClassLoader().getResourceAsStream(resource),
-                    jarOutput
-            );
-            jarOutput.closeEntry();
-        }
-        jarOutput.close();
-
-        return jar.toURI().toURL();
+        return toTempJar(
+                resources,
+                Arrays.stream(resources)
+                      .map(URLUtils.class.getClassLoader()::getResource)
+                      .toArray(URL[]::new)
+        );
     }
 
     /**
@@ -59,21 +50,12 @@ public class URLUtils {
      * @throws IOException
      */
     public static URL toTempFolder(String... resources) throws IOException {
-        File folder = Files.createTempDirectory("battlecode-test").toFile();
-        folder.deleteOnExit();
-
-        for (String resource : resources) {
-            File resFile = new File(folder, resource);
-            resFile.getParentFile().mkdirs();
-            try (FileOutputStream out = new FileOutputStream(resFile)) {
-                IOUtils.copy(
-                        URLUtils.class.getClassLoader().getResourceAsStream(resource),
-                        out
-                );
-            }
-        }
-
-        return folder.toURI().toURL();
+        return toTempFolder(
+                resources,
+                Arrays.stream(resources)
+                      .map(URLUtils.class.getClassLoader()::getResource)
+                      .toArray(URL[]::new)
+        );
     }
 
     /**

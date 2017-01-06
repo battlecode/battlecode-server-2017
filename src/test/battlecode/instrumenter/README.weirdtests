@@ -26,8 +26,8 @@ that our tests are slightly torturous.
 
 - Why are there class files in my source directory??
   We have to load several class files in the tests that are inconvenient to generate at compile time.
-  ValueA.class is compiled from a class called Value and has a static method value that returns 'A';
-  ValueB.class is compiled from a class called Value and has a static method value that returns 'B'.
+  ValueA.class is compiled from a class called Value and has a static method getValue that returns 'A';
+  ValueB.class is compiled from a class called Value and has a static method getValue that returns 'B'.
   java.lang.Double.class is an (incorrect) implementation of Double.
 
 - Why????
