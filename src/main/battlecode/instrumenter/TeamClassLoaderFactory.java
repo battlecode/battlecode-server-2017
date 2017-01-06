@@ -339,6 +339,30 @@ public final class TeamClassLoaderFactory {
         }
     }
 
+    /**
+     * To give you a picture of how this class works:
+     *
+     * Externally, the following actions are invoked:
+     *   First, it loads RobotMonitor.class. RobotMonitor is initialized.
+     *   Then, it loads somepackage/RobotPlayer.class. somepackage.RobotPlayer.run is invoked.
+     *   Whenever somepackage/RobotPlayer.class needs to load a class, we do the following:
+     *     If we have encountered an error, fail.
+     *     If we've already loaded it as a full Class<?>, return it.
+     *     If someone in our team's factory has already loaded it as a byte[],
+     *       redefine that byte[], redefine it as a Class<?>, return it.
+     *     If it is special, load it as a byte[], cache the byte[], load the byte[] as a class.
+     *     If it is in the team's code blob (a .jar or folder),
+     *       load it as a byte[], instrument the byte[], cache the instrumented byte[],
+     *       load the instrumented byte[] as a class.
+     *     If it exists on the system classpath, load it.
+     *
+     *
+     * This algorithm is safe: player code can *load* anything on the system classpath, but
+     * it cannot *reference* it in code, because the instrumentation will purge the references.
+     *
+     * This algorithm is performed lazily and recursively as the player runs.
+     * When this Loader is GC'd, it's defined classes will also be GC'd.
+     */
     public class Loader extends ClassLoader {
 
         /**
@@ -414,8 +438,7 @@ public final class TeamClassLoaderFactory {
                 ClassWriter cw = new ClassWriter(cr, COMPUTE_MAXS);
                 cr.accept(cw, 0);
                 finishedClass = saveAndDefineClass(name, cw.toByteArray());
-            } else if (name.startsWith(teamPackageName)) {
-
+            } else if (TeamClassLoaderFactory.this.getTeamURL(toResourceName(name)) != null) {
                 // Check if the team we're loading already has errors.
                 // Note that we only do this check when loading team
                 // classes - we'll only get team loading failures when
