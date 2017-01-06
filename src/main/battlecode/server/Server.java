@@ -293,11 +293,11 @@ public strictfp class Server implements Runnable {
 
         teamProvider.registerControlProvider(
                 Team.A,
-                new PlayerControlProvider(game.getTeamAPackage(), game.getTeamAClasses())
+                new PlayerControlProvider(game.getTeamAPackage(), game.getTeamAURL())
         );
         teamProvider.registerControlProvider(
                 Team.B,
-                new PlayerControlProvider(game.getTeamBPackage(), game.getTeamBClasses())
+                new PlayerControlProvider(game.getTeamBPackage(), game.getTeamBURL())
         );
         teamProvider.registerControlProvider(
                 Team.NEUTRAL,

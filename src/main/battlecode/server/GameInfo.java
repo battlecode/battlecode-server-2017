@@ -27,7 +27,7 @@ public class GameInfo implements Serializable {
      * The URL of the classes of team A.
      * Null if its classes can be found on the system classpath.
      */
-    private final URL teamAClasses;
+    private final URL teamAURL;
 
     /**
      * The name of team B.
@@ -43,7 +43,7 @@ public class GameInfo implements Serializable {
      * The URL of the classes of team B.
      * Null if its classes can be found on the system classpath.
      */
-    private final URL teamBClasses;
+    private final URL teamBURL;
 
     /**
      * The maps to run matches on.
@@ -67,26 +67,26 @@ public class GameInfo implements Serializable {
      * Create a GameInfo.
      *
      * @param teamAPackage the package of A team
-     * @param teamAClasses the location of team A classes - directory or jar,
+     * @param teamAURL the location of team A classes - directory or jar,
      *                     or null to use the system classpath
      * @param teamBPackage the B team
-     * @param teamBClasses the location of team B classes
+     * @param teamBURL the location of team B classes
      * @param maps the names maps to play on
      * @param saveFile the file to save to if the server is configured to save
      *                 matches, or null to never save
      * @param bestOfThree whether the game is best of three
      */
-    public GameInfo(String teamAName, String teamAPackage, URL teamAClasses,
-                    String teamBName, String teamBPackage, URL teamBClasses,
+    public GameInfo(String teamAName, String teamAPackage, URL teamAURL,
+                    String teamBName, String teamBPackage, URL teamBURL,
                     String[] maps,
                     File saveFile,
                     boolean bestOfThree) {
         this.teamAName = teamAName;
         this.teamAPackage = teamAPackage;
-        this.teamAClasses = teamAClasses;
+        this.teamAURL = teamAURL;
         this.teamBName = teamBName;
         this.teamBPackage = teamBPackage;
-        this.teamBClasses = teamBClasses;
+        this.teamBURL = teamBURL;
         this.maps = maps;
         this.saveFile = saveFile;
         this.bestOfThree = bestOfThree;
@@ -109,8 +109,8 @@ public class GameInfo implements Serializable {
     /**
      * @return the URL of the classes of team A, or null if they can be found on the system classpath
      */
-    public URL getTeamAClasses() {
-        return teamAClasses;
+    public URL getTeamAURL() {
+        return teamAURL;
     }
 
     /**
@@ -123,8 +123,8 @@ public class GameInfo implements Serializable {
     /**
      * @return the URL of the classes of team B, or null if they can be found on the system classpath
      */
-    public URL getTeamBClasses() {
-        return teamBClasses;
+    public URL getTeamBURL() {
+        return teamBURL;
     }
 
     /**
@@ -146,18 +146,18 @@ public class GameInfo implements Serializable {
         StringBuilder b = new StringBuilder();
 
         b.append(teamAPackage);
-        if (teamAClasses != null) {
+        if (teamAURL != null) {
             b.append(" (");
-            b.append(teamAClasses);
+            b.append(teamAURL);
             b.append(") ");
         }
 
         b.append(" vs ");
 
         b.append(teamBPackage);
-        if (teamBClasses != null) {
+        if (teamBURL != null) {
             b.append(" (");
-            b.append(teamBClasses);
+            b.append(teamBURL);
             b.append(") ");
         }
 

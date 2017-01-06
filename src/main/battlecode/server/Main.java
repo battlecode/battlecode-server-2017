@@ -5,7 +5,7 @@ import java.net.URL;
 
 public class Main {
 
-    private static void runHeadless(Config options, String saveFile) {
+    private static boolean runHeadless(Config options) {
         try {
             final Server server = new Server(
                     options,
@@ -13,11 +13,15 @@ public class Main {
             );
 
             final String teamA = options.get("bc.game.team-a");
-            final URL teamAClasses;
-            if (options.get("bc.game.team-a.classes") != null) {
-                teamAClasses = new URL(options.get("bc.game.team-a.classes"));
+            if (teamA == null) {
+                System.err.println("Can't run match without bc.game.team-a set!");
+                return false;
+            }
+            final URL teamAURL;
+            if (options.get("bc.game.team-a.url") != null) {
+                teamAURL = new URL(options.get("bc.game.team-a.url"));
             } else {
-                teamAClasses = null;
+                teamAURL = null;
             }
             final String teamAPackage;
             if (options.get("bc.game.team-a.package") != null) {
@@ -27,6 +31,10 @@ public class Main {
             }
 
             final String teamB = options.get("bc.game.team-b");
+            if (teamB == null) {
+                System.err.println("Can't run match without bc.game.team-b set!");
+                return false;
+            }
             final URL teamBClasses;
             if (options.get("bc.game.team-b.classes") != null) {
                 teamBClasses = new URL(options.get("bc.game.team-b.classes"));
@@ -40,19 +48,36 @@ public class Main {
                 teamBPackage = teamB;
             }
 
-            final String[] maps = options.get("bc.game.maps").split(",");
+            final String mapsCommaSep = options.get("bc.game.maps");
+            if (mapsCommaSep == null) {
+                System.err.println("Can't run match without bc.game.maps set!");
+                return false;
+            }
+            final String[] maps = mapsCommaSep.split(",");
+
+            File saveFile;
+            if (options.get("bc.server.save-file") != null) {
+                saveFile = new File(options.get("bc.server.save-file"));
+            } else {
+                System.err.println("Can't run match without bc.server.save-file set!");
+                return false;
+            }
+
             server.addGameNotification(new GameInfo(
-                    teamA, teamAPackage, teamAClasses,
+                    teamA, teamAPackage, teamAURL,
                     teamB, teamBPackage, teamBClasses,
                     maps,
-                    new File(options.get("bc.server.save-file")),
+                    saveFile,
                     options.getBoolean("bc.game.best-of-three") && maps.length == 3
             ));
             server.terminateNotification();
 
             server.run();
+
+            return server.getState() == ServerState.FINISHED;
         } catch (Exception e) {
-            e.printStackTrace();
+            ErrorReporter.report(e, true);
+            return false;
         }
     }
 
@@ -73,21 +98,16 @@ public class Main {
         try {
             mode = Server.Mode.valueOf(options.get("bc.server.mode").toUpperCase());
         } catch (Exception e) {
-            System.out.println("Failed to get server mode, using headless");
+            System.err.println("Failed to get bc.server.mode mode, using headless");
             mode = Server.Mode.HEADLESS;
         }
 
-        String saveFile = options.get("bc.server.save-file");
-
         switch (mode) {
             case HEADLESS:
-                runHeadless(options, saveFile);
-                break;
+                return runHeadless(options);
             default:
                 return false;
         }
-
-        return true;
     }
 
     public static void main(String[] args) {
