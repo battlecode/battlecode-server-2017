@@ -88,6 +88,17 @@ public class TreeInfo implements BodyInfo{
         return false;
     }
 
+    /**
+     * The maximum health of the tree.
+     */
+    public float getMaxHealth() {
+        if(team == Team.NEUTRAL){
+            return GameConstants.NEUTRAL_TREE_HEALTH_RATE * radius;
+        } else {
+            return GameConstants.BULLET_TREE_MAX_HEALTH;
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

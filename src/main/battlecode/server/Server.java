@@ -411,8 +411,8 @@ public strictfp class Server implements Runnable {
      *
      * @param msg the debug message to display
      */
-    public void debug(String msg) {
-        if (options.getBoolean("bc.server.debug")) {
+    public static void debug(String msg) {
+        if (Config.getGlobalConfig().getBoolean("bc.server.debug")) {
             for (String line : msg.split("\n")) {
                 System.out.printf("[server:debug] %s\n", line);
             }

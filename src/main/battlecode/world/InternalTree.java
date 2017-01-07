@@ -38,7 +38,7 @@ public strictfp class InternalTree {
         if(team == Team.NEUTRAL){
             this.health = GameConstants.NEUTRAL_TREE_HEALTH_RATE * radius;
             this.maxHealth = GameConstants.NEUTRAL_TREE_HEALTH_RATE * radius;
-        }else{
+        } else {
             this.health = .20F * GameConstants.BULLET_TREE_MAX_HEALTH;
             this.maxHealth = GameConstants.BULLET_TREE_MAX_HEALTH;
         }

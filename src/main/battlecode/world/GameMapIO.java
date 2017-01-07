@@ -2,6 +2,7 @@ package battlecode.world;
 
 import battlecode.common.*;
 import battlecode.schema.*;
+import battlecode.server.Server;
 import battlecode.util.FlatHelpers;
 import battlecode.util.TeamMapping;
 import com.google.flatbuffers.FlatBufferBuilder;
@@ -23,7 +24,7 @@ import java.util.zip.ZipInputStream;
  * This class contains the code for reading a flatbuffer map file and converting it
  * to a proper LiveMap.
  */
-public final class GameMapIO {
+public final strictfp class GameMapIO {
     /**
      * The loader we use if we can't find a map in the correct path.
      */
@@ -274,6 +275,8 @@ public final class GameMapIO {
             ArrayList<Byte> treeContainedBodies = new ArrayList<>();
             ArrayList<Float> treeLocsXs = new ArrayList<>();
             ArrayList<Float> treeLocsYs = new ArrayList<>();
+            ArrayList<Float> treeHealths = new ArrayList<>();
+            ArrayList<Float> treeMaxHealths = new ArrayList<>();
             for (BodyInfo initBody : gameMap.getInitialBodies()) {
                 if (initBody.isRobot()) {
                     RobotInfo robot = (RobotInfo) initBody;
@@ -291,6 +294,8 @@ public final class GameMapIO {
                         treeContainedBodies.add(FlatHelpers.getBodyTypeFromRobotType(tree.containedRobot));
                         treeLocsXs.add(tree.location.x);
                         treeLocsYs.add(tree.location.y);
+                        treeHealths.add(tree.health);
+                        treeMaxHealths.add(tree.getMaxHealth());
                     } else {
                         bodyIDs.add(tree.ID);
                         bodyTeamIDs.add(TeamMapping.id(tree.team));
@@ -368,16 +373,34 @@ public final class GameMapIO {
 
         private static void initInitialBodiesFromSchemaNeutralTreeTable(NeutralTreeTable treeTable,
                                                                         ArrayList<BodyInfo> initialBodies) {
+            VecTable locs = treeTable.locs();
+
             for (int i = 0; i < treeTable.robotIDsLength(); i++) {
                 int bodyID = treeTable.robotIDs(i);
-                float bodyX = treeTable.locs().xs(i);
-                float bodyY = treeTable.locs().ys(i);
+                float bodyX = locs.xs(i);
+                float bodyY = locs.ys(i);
                 float bodyRadius = treeTable.radii(i);
                 int containedBullets = treeTable.containedBullets(i);
                 RobotType containedType = FlatHelpers.getRobotTypeFromBodyType(treeTable.containedBodies(i));
-                // TODO: handle tree health
-                initialBodies.add(new TreeInfo(bodyID, Team.NEUTRAL, new MapLocation(bodyX, bodyY),
-                        bodyRadius, 0, containedBullets, containedType));
+                TreeInfo tree = new TreeInfo(
+                        bodyID, Team.NEUTRAL, new MapLocation(bodyX, bodyY),
+                        bodyRadius, bodyRadius * GameConstants.NEUTRAL_TREE_HEALTH_RATE,
+                        containedBullets, containedType
+                );
+                initialBodies.add(tree);
+
+                // we compute these ourselves so that we can enforce our invariants
+                // but we will warn on mismatch
+                float health = treeTable.healths(i);
+                float maxHealth = treeTable.maxHealths(i);
+                if (health != tree.health) {
+                    Server.debug("Mismatched match file tree health ("+health+
+                            ") and actual tree health:"+tree.health);
+                }
+                if (maxHealth != tree.getMaxHealth()) {
+                    Server.debug("Mismatched match file tree max health ("+maxHealth+
+                            ") and actual tree max health:"+tree.getMaxHealth());
+                }
             }
         }
 
