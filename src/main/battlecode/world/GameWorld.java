@@ -95,9 +95,9 @@ public strictfp class GameWorld {
 
             updateRobots();
 
-            updateBullets();
-
             updateTrees();
+
+            updateBullets();
 
             this.controlProvider.roundEnded();
             this.processEndOfRound();
