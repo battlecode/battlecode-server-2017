@@ -146,7 +146,7 @@ public strictfp class InternalTree {
     }
 
     public void growTree(){
-        healTree(1);
+        healTree(GameConstants.BULLET_TREE_MAX_HEALTH*0.01f);
     }
 
     public void waterTree(){
