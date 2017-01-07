@@ -23,21 +23,17 @@ public final class BodyType {
    */
   public static final byte LUMBERJACK = 2;
   /**
-   * Recruits are all-around units with a tricky shot.
+   * Soldiers are all-around units with a tricky shot.
    */
-  public static final byte RECRUIT = 3;
-  /**
-   * Soldiers are all-around units with a tricky shot. But different.
-   */
-  public static final byte SOLDIER = 4;
+  public static final byte SOLDIER = 3;
   /**
    * Tanks are large, slow units with powerful bullets.
    */
-  public static final byte TANK = 5;
+  public static final byte TANK = 4;
   /**
    * Scouts are fast units that move around without obstruction.
    */
-  public static final byte SCOUT = 6;
+  public static final byte SCOUT = 5;
   /**
    * A bullet that moves in a perfectly straight line.
    * Note: bullet location updates are not sent; a bullet is defined to be
@@ -46,19 +42,19 @@ public final class BodyType {
    * of bullets, and we don't need to send position updates.
    * The event stream will say if a bullet has been destroyed.
    */
-  public static final byte BULLET = 7;
+  public static final byte BULLET = 6;
   /**
    * A tree that belongs to a team and produces bullets.
    */
-  public static final byte TREE_BULLET = 8;
+  public static final byte TREE_BULLET = 7;
   /**
    * A neutral tree.
    * This is included for convenience; note this value SHALL NOT appear in
    * a SpawnedBodyTable.
    */
-  public static final byte TREE_NEUTRAL = 9;
+  public static final byte TREE_NEUTRAL = 8;
 
-  private static final String[] names = { "ARCHON", "GARDENER", "LUMBERJACK", "RECRUIT", "SOLDIER", "TANK", "SCOUT", "BULLET", "TREE_BULLET", "TREE_NEUTRAL", };
+  private static final String[] names = { "ARCHON", "GARDENER", "LUMBERJACK", "SOLDIER", "TANK", "SCOUT", "BULLET", "TREE_BULLET", "TREE_NEUTRAL", };
 
   public static String name(int e) { return names[e]; }
 };

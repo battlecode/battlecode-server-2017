@@ -51,5 +51,5 @@ public final class RGBTable extends Table {
     int o = builder.endObject();
     return o;
   }
-}
+};
 
