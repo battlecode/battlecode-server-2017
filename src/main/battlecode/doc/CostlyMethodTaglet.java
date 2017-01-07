@@ -16,9 +16,6 @@ public class CostlyMethodTaglet implements Taglet {
 
     public static final String TAG_NAME = "battlecode.doc.costlymethod";
 
-    // Used to look up method costs
-    private final static TeamClassLoaderFactory.Loader LOADER = new TeamClassLoaderFactory().createLoader();
-
     @SuppressWarnings("unused")
     public static void register(Map<String, Taglet> map) {
         map.put(TAG_NAME, new CostlyMethodTaglet());
