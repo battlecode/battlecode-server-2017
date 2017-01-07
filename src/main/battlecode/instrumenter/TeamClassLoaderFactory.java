@@ -134,27 +134,6 @@ public final class TeamClassLoaderFactory {
     }
 
     /**
-     * Create a cache with no players.
-     * For legacy tooling reasons; never during an actual match.
-     */
-    public TeamClassLoaderFactory() {
-        this.teamResourceLookup = new ClassLoader() {
-            @Override
-            public URL getResource(String name) {
-                return null;
-            }
-
-            @Override
-            public URL findResource(String name) {
-                return null;
-            }
-        };
-        this.instrumentedClasses = new HashMap<>();
-        this.hasError = false;
-        this.refUtil = new ClassReferenceUtil(this);
-    }
-
-    /**
      * Create a loader for a new robot.
      * @return
      */
