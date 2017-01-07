@@ -39,7 +39,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    TANK            (GARDENER, 10,  100,  300,   2,   3f,   5,   7,  10,  1f, 10000),
+    TANK            (GARDENER, 10,  100,  300,   2,   3f,   4,   7,  10,  1f, 10000),
     //                              HP    BC     BR   BS    AP   SR  BSR    STR   BCL
     /**
      * An unit that specializes in movement
