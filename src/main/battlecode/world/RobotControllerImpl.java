@@ -669,6 +669,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
             hitTree.damageTree(getType().attackPower, getTeam(), false);
         }
 
+        gameWorld.getMatchMaker().addAction(getID(), Action.LUMBERJACK_STRIKE, -1);
     }
 
     @Override
@@ -822,7 +823,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
 
         tree.damageTree(chopDamage, getTeam(), true);
 
-        gameWorld.getMatchMaker().addAction(getID(), Action.CHOP, 0);
+        gameWorld.getMatchMaker().addAction(getID(), Action.CHOP, -1);
     }
 
     @Override

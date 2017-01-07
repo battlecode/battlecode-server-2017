@@ -288,7 +288,7 @@ public strictfp class InternalRobot {
     public void suicide(){
         gameWorld.destroyRobot(getID());
 
-        gameWorld.getMatchMaker().addAction(getID(), Action.DIE_SUICIDE, 0);
+        gameWorld.getMatchMaker().addAction(getID(), Action.DIE_SUICIDE, -1);
     }
 
     // *****************************************
