@@ -142,7 +142,10 @@ public final class RobotMonitor {
      */
     @SuppressWarnings("unused")
     public static void incrementBytecodesWithoutInterrupt(int numBytecodes) {
-        bytecodesToRemove += numBytecodes;
+        // Several potential exploits mean this argument may be passed a negative value.
+        // It's easier to deal with this here than in the instrumenter.
+        if (numBytecodes > 0)
+            bytecodesToRemove += numBytecodes;
     }
 
     /**
