@@ -35,6 +35,16 @@ public final class BodyType {
    */
   public static final byte SCOUT = 5;
   /**
+   * A tree that belongs to a team and produces bullets.
+   */
+  public static final byte TREE_BULLET = 6;
+  /**
+   * A neutral tree.
+   * This is included for convenience; note this value SHALL NOT appear in
+   * a SpawnedBodyTable.
+   */
+  public static final byte TREE_NEUTRAL = 7;
+  /**
    * A bullet that moves in a perfectly straight line.
    * Note: bullet location updates are not sent; a bullet is defined to be
    * in position loc + dt * vel after dt seconds.
@@ -42,19 +52,9 @@ public final class BodyType {
    * of bullets, and we don't need to send position updates.
    * The event stream will say if a bullet has been destroyed.
    */
-  public static final byte BULLET = 6;
-  /**
-   * A tree that belongs to a team and produces bullets.
-   */
-  public static final byte TREE_BULLET = 7;
-  /**
-   * A neutral tree.
-   * This is included for convenience; note this value SHALL NOT appear in
-   * a SpawnedBodyTable.
-   */
-  public static final byte TREE_NEUTRAL = 8;
+  public static final byte BULLET = 8;
 
-  private static final String[] names = { "ARCHON", "GARDENER", "LUMBERJACK", "SOLDIER", "TANK", "SCOUT", "BULLET", "TREE_BULLET", "TREE_NEUTRAL", };
+  private static final String[] names = { "ARCHON", "GARDENER", "LUMBERJACK", "SOLDIER", "TANK", "SCOUT", "TREE_BULLET", "TREE_NEUTRAL", "BULLET", };
 
   public static String name(int e) { return names[e]; }
 };
