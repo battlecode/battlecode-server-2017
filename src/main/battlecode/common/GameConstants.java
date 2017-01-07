@@ -19,13 +19,13 @@ public interface GameConstants {
     int MAP_MIN_HEIGHT = 30;
 
     /** The maximum possible map height. */
-    int MAP_MAX_HEIGHT = 80;
+    int MAP_MAX_HEIGHT = 100;
 
     /** The minumum possible map width. */
     int MAP_MIN_WIDTH = 30;
 
     /** The maxiumum possible map width. */
-    int MAP_MAX_WIDTH = 80;
+    int MAP_MAX_WIDTH = 100;
 
     // *********************************
     // ****** GAME PARAMETERS **********
@@ -51,7 +51,7 @@ public interface GameConstants {
     // *********************************
 
     /** The max health of bullet trees */
-    int BULLET_TREE_MAX_HEALTH = 10;
+    float BULLET_TREE_MAX_HEALTH = 50;
 
     /** The radius of bullet trees */
     float BULLET_TREE_RADIUS = 1F;
@@ -60,10 +60,10 @@ public interface GameConstants {
     float BULLET_TREE_COST = 50;
 
     /** The amount of health bullet trees lose per turn from decay */
-    float BULLET_TREE_DECAY_RATE = 0.1f;
+    float BULLET_TREE_DECAY_RATE = BULLET_TREE_MAX_HEALTH / 100f;
 
     /** The amount of bullets produced from one unit of health per bullet tree */
-    float BULLET_TREE_BULLET_PRODUCTION_RATE = .1f;
+    float BULLET_TREE_BULLET_PRODUCTION_RATE = 1f / BULLET_TREE_MAX_HEALTH;
     
     /** Number of cooldown turns robot must wait between planting trees */
     int BULLET_TREE_CONSTRUCTION_COOLDOWN = 10;
@@ -78,19 +78,12 @@ public interface GameConstants {
      * The rate at which the max health of neutral trees are determined;
      * i.e. maxHealth = NEUTRAL_TREE_HEALTH_RATE * treeRadius
      */
-    float NEUTRAL_TREE_HEALTH_RATE = 50;
+    float NEUTRAL_TREE_HEALTH_RATE = 200;
 
     /**
-     * The base damage the chop action deals to trees; note that LUMBERJACK
-     * units deal multiple of this damage.
+     * The chop damage when lumberjacks perform the chop action on a tree.
      */
-    float BASE_CHOP_DAMAGE = 10;
-
-    /**
-     * The multiplier applied to the base chop damage when lumberjacks perform
-     * the chop action on a tree.
-     */
-    float LUMBERJACK_CHOP_DAMAGE_MULTIPLIER = 5;
+    float LUMBERJACK_CHOP_DAMAGE = 5;
     
     /**
      * The damage a tank does to a tree when it attempts to move on top of it.
@@ -136,6 +129,9 @@ public interface GameConstants {
 
     /** The distance from the outer edge of a robot bullets are spawned */
     float BULLET_SPAWN_OFFSET = .05f;
+
+    /** The radius around a lumberjack affected by a strike() */
+    float LUMBERJACK_STRIKE_RADIUS = 1;
     
     // *********************************
     // ****** MESSAGING ****************
@@ -158,7 +154,7 @@ public interface GameConstants {
     float GENERAL_SPAWN_OFFSET = .01f;
 
     /** The amount of health a tree gains when watered */
-    float WATER_HEALTH_REGEN_RATE = 1;
+    float WATER_HEALTH_REGEN_RATE = BULLET_TREE_MAX_HEALTH/10f;
 
     /** The amount of health a robot gains when repaired by an archon */
     float REPAIR_HEALTH_REGEN_RATE = 1;

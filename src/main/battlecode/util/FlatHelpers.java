@@ -29,8 +29,6 @@ public class FlatHelpers {
                 return RobotType.GARDENER;
             case BodyType.LUMBERJACK:
                 return RobotType.LUMBERJACK;
-            case BodyType.RECRUIT:
-                return RobotType.RECRUIT;
             case BodyType.SCOUT:
                 return RobotType.SCOUT;
             case BodyType.SOLDIER:
@@ -50,8 +48,6 @@ public class FlatHelpers {
                 return BodyType.GARDENER;
             case LUMBERJACK:
                 return BodyType.LUMBERJACK;
-            case RECRUIT:
-                return BodyType.RECRUIT;
             case SCOUT:
                 return BodyType.SCOUT;
             case SOLDIER:

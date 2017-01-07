@@ -279,7 +279,6 @@ public strictfp class GameMaker {
         if (type == RobotType.ARCHON) return BodyType.ARCHON;
         if (type == RobotType.GARDENER) return BodyType.GARDENER;
         if (type == RobotType.SCOUT) return BodyType.SCOUT;
-        if (type == RobotType.RECRUIT) return BodyType.RECRUIT;
         if (type == RobotType.SOLDIER) return BodyType.SOLDIER;
         if (type == RobotType.LUMBERJACK) return BodyType.LUMBERJACK;
         if (type == RobotType.TANK) return BodyType.TANK;
