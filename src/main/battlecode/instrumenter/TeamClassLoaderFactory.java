@@ -310,7 +310,10 @@ public final class TeamClassLoaderFactory {
         return uninstrumentedName.replace('.', '/') + ".class";
     }
 
-    static private URL getFilesystemURL(String urlOrRelative) throws InstrumentationException {
+    /**
+     * Convert a URL or file path into a definitely-URL.
+     */
+    static URL getFilesystemURL(String urlOrRelative) throws InstrumentationException {
         if (urlOrRelative == null) {
             throw new InstrumentationException(MISSING, "Can't load player with no URL!");
         }
@@ -511,7 +514,6 @@ public final class TeamClassLoaderFactory {
                 return super.getResource(name);
             }*/
         }
-
 
         public Class<?> saveAndDefineClass(String name, byte[] classBytes) {
             if (classBytes == null) {

@@ -1,5 +1,13 @@
 package battlecode.instrumenter;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import static battlecode.instrumenter.InstrumentationException.Type.MISSING;
+
 /**
  * Used to verify that a team's submission will pass the instrumenter when it's run.
  * <p/>
@@ -22,13 +30,52 @@ public class Verifier {
 
     public static boolean verify(String teamPackageName, String teamURL) {
         try {
-            TeamClassLoaderFactory.Loader icl = new TeamClassLoaderFactory(teamURL).createLoader();
-            icl.loadClass(teamPackageName + ".RobotPlayer");
+            TeamClassLoaderFactory.Loader loader = new TeamClassLoaderFactory(teamURL).createLoader();
+
+            // Has teamPackageName/RobotPlayer.java
+            loader.loadClass(teamPackageName + ".RobotPlayer");
+
+            // Everything else is valid
+            if (teamURL.endsWith(".jar")) checkJar(teamPackageName + ".RobotPlayer", teamURL, loader);
+            else checkFolder(teamPackageName + ".RobotPlayer", teamURL, loader);
+
             return true;
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace(System.out);
             return false;
         }
+    }
+
+    public static void checkJar(String rpName, String url, TeamClassLoaderFactory.Loader loader) throws Exception {
+        ZipInputStream z = new ZipInputStream(TeamClassLoaderFactory.getFilesystemURL(url).openStream());
+
+        while (true) {
+            ZipEntry entry = z.getNextEntry();
+            if (entry == null) break;
+            String name = entry.getName();
+
+            if (name.endsWith(".class")) {
+                String className = name.substring(0, name.length()-6).replace("/",".");
+                if (className.equals(rpName)) continue;
+                loader.loadClass(className);
+            }
+        }
+    }
+
+    public static void checkFolder(String rpName, String folder, TeamClassLoaderFactory.Loader loader) throws Exception {
+        Path root = Paths.get(folder);
+        Files.walk(root).forEach((path) -> {
+            String innerPath = root.relativize(path).toString();
+            if (innerPath.endsWith(".class")) {
+                String className = innerPath.substring(0, innerPath.length() - 6).replace("/", ".");
+                if (className.equals(rpName)) return;
+                try {
+                    loader.loadClass(className);
+                } catch (ClassNotFoundException e) {
+                    throw new InstrumentationException(MISSING, "Couldn't load file, what?", e);
+                }
+            }
+        });
     }
 }
