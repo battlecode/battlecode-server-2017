@@ -657,7 +657,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
 
         // Hit adjacent robots
         for(InternalRobot hitRobot :
-                gameWorld.getObjectInfo().getAllRobotsWithinRadius(getLocation(), RobotType.LUMBERJACK.bodyRadius + 1)){
+                gameWorld.getObjectInfo().getAllRobotsWithinRadius(getLocation(), RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS)){
             if(hitRobot.equals(this.robot)){
                 continue;
             }
@@ -665,7 +665,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         }
         // Hit adjacent trees
         for(InternalTree hitTree :
-                gameWorld.getObjectInfo().getAllTreesWithinRadius(getLocation(), RobotType.LUMBERJACK.bodyRadius + 1)){
+                gameWorld.getObjectInfo().getAllTreesWithinRadius(getLocation(), RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS)){
             hitTree.damageTree(getType().attackPower, getTeam(), false);
         }
 
@@ -818,7 +818,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
     private void chopTree(InternalTree tree){
         this.robot.incrementAttackCount(); // Chopping counts as attack
 
-        float chopDamage = RobotType.LUMBERJACK.attackPower*GameConstants.LUMBERJACK_CHOP_DAMAGE_MULTIPLIER;
+        float chopDamage = GameConstants.LUMBERJACK_CHOP_DAMAGE;
 
         tree.damageTree(chopDamage, getTeam(), true);
 

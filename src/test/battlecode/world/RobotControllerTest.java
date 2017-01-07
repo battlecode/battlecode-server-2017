@@ -323,7 +323,7 @@ public class RobotControllerTest {
             assertFalse(exception); // succeeds, tree now in range
             assertTrue(rc.hasAttacked());
         });
-        expectedTreeHealth -= RobotType.LUMBERJACK.attackPower*GameConstants.LUMBERJACK_CHOP_DAMAGE_MULTIPLIER;
+        expectedTreeHealth -= GameConstants.LUMBERJACK_CHOP_DAMAGE;
         assertEquals(game.getTree(neutralTree).getHealth(),expectedTreeHealth,EPSILON);
         
         // Striking surrounding units
@@ -668,7 +668,7 @@ public class RobotControllerTest {
             rc.chop(neutralTree1);
         });
         // While tree is not dead, continue hitting it
-        while(game.getTree(neutralTree1).getHealth() > GameConstants.LUMBERJACK_CHOP_DAMAGE_MULTIPLIER*RobotType.LUMBERJACK.attackPower) {
+        while(game.getTree(neutralTree1).getHealth() > GameConstants.LUMBERJACK_CHOP_DAMAGE) {
             game.round((id, rc) -> {
                 rc.chop(neutralTree1);
             });
@@ -683,7 +683,7 @@ public class RobotControllerTest {
         assertEquals(game.getWorld().getTeamInfo().getBulletSupply(Team.A),GameConstants.BULLETS_INITIAL_AMOUNT+123,EPSILON);
 
         // While tree2 is not dead, continue hitting it
-        while(game.getTree(neutralTree2).getHealth() > GameConstants.LUMBERJACK_CHOP_DAMAGE_MULTIPLIER*RobotType.LUMBERJACK.attackPower) {
+        while(game.getTree(neutralTree2).getHealth() > GameConstants.LUMBERJACK_CHOP_DAMAGE) {
             game.round((id, rc) -> {
                 rc.chop(neutralTree2);
             });
