@@ -1,10 +1,14 @@
 package battlecode.instrumenter.bytecode;
 
+import battlecode.instrumenter.InstrumentationException;
 import battlecode.instrumenter.TeamClassLoaderFactory;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Instruments a class. Overrides class references and runs an
@@ -13,6 +17,7 @@ import org.objectweb.asm.Opcodes;
  * @author adamd
  */
 public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
+
     private String className;
     private final boolean silenced;
     private final boolean debugMethodsEnabled;
@@ -35,7 +40,7 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
                                      final TeamClassLoaderFactory.Loader loader,
                                      boolean silenced,
                                      boolean checkDisallowed,
-                                     boolean debugMethodsEnabled) {
+                                     boolean debugMethodsEnabled) throws InstrumentationException {
         super(Opcodes.ASM5, cv);
         this.loader = loader;
         this.silenced = silenced;

@@ -34,7 +34,7 @@ public class SandboxedRobotPlayerTest {
                 "testplayerstatic/RobotPlayer.class",
                 "testplayersuicide/RobotPlayer.class",
                 "testplayersystem/RobotPlayer.class",
-                "testplayeruseshared/RobotPlayer.class",
+                "testplayerusesshared/RobotPlayer.class",
                 "shared/SharedUtility.class"
         );
     }

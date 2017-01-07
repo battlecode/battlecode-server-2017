@@ -252,13 +252,8 @@ public class LoaderTest {
     @Test
     public void testLoadFromJar() throws Exception {
         String jar = URLUtils.toTempJar("instrumentertest/Nothing.class");
-        TeamClassLoaderFactory.Loader loader = setupLoader(
-                new TeamClassLoaderFactory(jar)
-        );
-
-        Class<?> jarClass = loader.loadClass("instrumentertest.Nothing");
-
-        URL jarClassLocation = jarClass.getResource("Nothing.class");
+        TeamClassLoaderFactory factory = new TeamClassLoaderFactory(jar);
+        URL jarClassLocation = factory.getTeamURL("instrumentertest/Nothing.class");
 
         // EXTREMELY scientific
 
@@ -266,6 +261,7 @@ public class LoaderTest {
         assertTrue(jarClassLocation.toString().contains(new File(jar).toURI().toURL().toString()));
     }
 
+    @Test
     public void testOverrideLangClass() throws Exception {
         String folder = URLUtils.toTempFolder(
             new String[] {
@@ -290,11 +286,22 @@ public class LoaderTest {
     }
 
     @Test
-    public void testNoIncorrectPlayerPackages() {
-        for (String pack : new String[] { "battlecode", "java", "com.sun"}) {
+    public void testNoIncorrectPlayerPackages() throws Exception {
+        String folder = URLUtils.toTempFolder(
+                "battlecode/server/Server.class",
+                "java/lang/Double.class",
+                "org/apache/commons/io/IOUtils.class"
+        );
+        for (String className : new String[] {
+            "battlecode.server.Server",
+            "java.lang.Double",
+            "org.apache.commons.io.IOUtils"
+        }) {
             try {
-                new TeamClassLoaderFactory(tempClassFolder).createLoader();
-                fail("No error on player package: "+pack);
+                TeamClassLoaderFactory.Loader loader
+                    = setupLoader(new TeamClassLoaderFactory(folder));
+                loader.loadClass(className);
+                fail("No error on player package: "+className);
             } catch (InstrumentationException e) {}
         }
     }
@@ -338,6 +345,8 @@ public class LoaderTest {
         for (String badURL : new String[] {
                 "afasdfasdf3/this/local/folder/does/not/exist",
                 "afasdfasdf3/this/local/jar/does/not/exist.jar",
+                "/asdfasf/this/system/folder/does/not/exist",
+                "/asdfasf/this/system/jar/does/not/exist.jar",
                 "jar:jar:file:/binks",
                 "http://bad.site/code.jar",
                 "file:///AJSJEUDKA9FHLJADDHS/THIS/FOLDER/SHOULD/NOT/EXIST"

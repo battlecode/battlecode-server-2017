@@ -1,4 +1,4 @@
-package testplayeruseshared;
+package testplayerusesshared;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;

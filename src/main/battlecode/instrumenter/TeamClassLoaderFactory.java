@@ -11,6 +11,7 @@ import org.objectweb.asm.ClassWriter;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -34,20 +35,26 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 public final class TeamClassLoaderFactory {
 
     /**
+     * Players have no business writing bots that live in some packages.
+     *
+     * Class name should be in binary form, i.e. with .s and not /s
+     */
+    private static boolean allowedPackage(String packageName) {
+        return !(packageName.startsWith("battlecode")
+            || packageName.startsWith("java")
+            || packageName.startsWith("com.sun")
+            || packageName.startsWith("sun")
+            || packageName.startsWith("org.apache")
+            || packageName.startsWith("org.objectweb"));
+    }
+
+    /**
      * The classloader being used to load the normal parts of -server.
      *
      * Not necessarily the *bootstrap* classloader, just the *system* classloader.
      */
     private final static ClassLoader NORMAL_CLASS_LOADER =
             TeamClassLoaderFactory.class.getClassLoader();
-
-    /**
-     * Packages players are not allowed to use.
-     * Some elements of these packages *are* permitted to be used,
-     * e.g. java.util.*, but those classes are prefixed with "instrumented"
-     * during instrumentation.
-     */
-    protected final static String[] disallowedPlayerPackages = {"java.", "battlecode.", "sun.", "com.sun."};
 
     /**
      * Classes that don't need to be instrumented but do need to be reloaded
@@ -201,7 +208,7 @@ public final class TeamClassLoaderFactory {
      * @param resource the resource to find
      * @return the URL of the resource, loaded from the team's container, or null if it cannot be found.
      */
-    private URL getTeamURL(String resource) {
+    public URL getTeamURL(String resource) {
         return teamResourceLookup.getResource(resource);
     }
 
@@ -308,22 +315,21 @@ public final class TeamClassLoaderFactory {
             throw new InstrumentationException(MISSING, "Can't load player with no URL!");
         }
 
-        // Make sure that we're loading local files, if we're in a jar
-        if (urlOrRelative.startsWith("jar:")) {
-            String inside = urlOrRelative.substring(4);
-            if (!inside.startsWith("file:")) {
-                throw new InstrumentationException(MISSING, "You can only load from local jar files: "+urlOrRelative);
-            }
-        }
-
         try {
             URL url = new URL(urlOrRelative);
 
-            if (!url.getProtocol().equals("jar") && !url.getProtocol().equals("file")) {
+            if (url.getProtocol().equals("file")) {
+                try {
+                    if (!Paths.get(url.toURI()).toFile().exists()) {
+                        throw new InstrumentationException(MISSING, "Missing file: "+url);
+                    }
+                    return url;
+                } catch (URISyntaxException e) {
+                    throw new InstrumentationException(MISSING, "Can't parse file: url", e);
+                }
+            } else {
                 throw new InstrumentationException(MISSING, "Can't load over protocol: "+url.getProtocol());
             }
-
-            return url;
         } catch (MalformedURLException e) {
             // okay, it might be a local file
         }
@@ -355,7 +361,6 @@ public final class TeamClassLoaderFactory {
      *       load it as a byte[], instrument the byte[], cache the instrumented byte[],
      *       load the instrumented byte[] as a class.
      *     If it exists on the system classpath, load it.
-     *
      *
      * This algorithm is safe: player code can *load* anything on the system classpath, but
      * it cannot *reference* it in code, because the instrumentation will purge the references.
@@ -430,7 +435,6 @@ public final class TeamClassLoaderFactory {
                 // so that it isn't possible to send messages by calling
                 // hashCode repeatedly.  But we don't want to instrument it.
                 // So just add its raw bytes to the instrumented classes cache.
-                System.out.println("alwaysRedefine reader "+name);
                 ClassReader cr = normalReader(name);
 
                 ClassWriter cw = new ClassWriter(cr, COMPUTE_MAXS);
@@ -442,6 +446,14 @@ public final class TeamClassLoaderFactory {
                 // classes - we'll only get team loading failures when
                 // loading team classes, which keeps the engine consistent
                 // in where its failures happen.
+
+                if (!allowedPackage(name)) {
+                    TeamClassLoaderFactory.this.hasError = true;
+                    throw new InstrumentationException(
+                            ILLEGAL,
+                            "You can't write package code in packages like "+name
+                    );
+                }
 
                 final byte[] classBytes;
                 try {
