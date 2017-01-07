@@ -12,6 +12,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import static battlecode.instrumenter.InstrumentationException.Type.ILLEGAL;
+import static battlecode.instrumenter.InstrumentationException.Type.MISSING;
+
 /**
  * Encapsulates an instrumented robot player, its personally-loaded classes,
  * and its main thread. Sort of like a mini-jvm.
@@ -51,7 +54,7 @@ public class SandboxedRobotPlayer {
     /**
      * The classloader used for this player.
      */
-    private final IndividualClassLoader individualLoader;
+    private final TeamClassLoaderFactory.Loader individualLoader;
 
     /**
      * The main thread the player is running on.
@@ -94,14 +97,13 @@ public class SandboxedRobotPlayer {
      * @param teamName          the name of the team to create a player for
      * @param robotController   the robot we're loading a player for
      * @param seed              the seed the robot should use for random operations
-     * @param sharedCache       the cache our classloader should use
      * @throws InstrumentationException if the player doesn't work for some reason
      * @throws RuntimeException if our code fails for some reason
      */
     public SandboxedRobotPlayer(String teamName,
                                 RobotController robotController,
                                 int seed,
-                                IndividualClassLoader.Cache sharedCache)
+                                TeamClassLoaderFactory.Loader loader)
             throws InstrumentationException {
         this.robotController = robotController;
         this.seed = seed;
@@ -109,7 +111,7 @@ public class SandboxedRobotPlayer {
         this.notifier = new Object();
 
         // Create classloader sandbox
-        individualLoader = new IndividualClassLoader(teamName, sharedCache);
+        individualLoader = loader;
 
         // Load monitor / monitor methods
         // Used to initialize the RobotMonitor for the player
@@ -223,7 +225,7 @@ public class SandboxedRobotPlayer {
         try {
             robotPlayer = individualLoader.loadClass(teamName + "." + playerClassName, true);
         } catch (ClassNotFoundException e) {
-            throw new InstrumentationException("Couldn't load player class: "+e.getMessage(), e);
+            throw new InstrumentationException(MISSING, "Couldn't load player class: "+e.getMessage(), e);
         }
 
         // Load RobotPlayer.run()
@@ -231,14 +233,14 @@ public class SandboxedRobotPlayer {
         try {
             runMethod = robotPlayer.getMethod("run", RobotController.class);
         } catch (NoSuchMethodException e) {
-            throw new InstrumentationException(robotPlayer.getSimpleName() + ".run(RobotController) not found",
+            throw new InstrumentationException(ILLEGAL, robotPlayer.getSimpleName() + ".run(RobotController) not found",
                     e);
         } catch (SecurityException e) {
-            throw new InstrumentationException(robotPlayer.getSimpleName() + ".run(RobotController) is not public",
+            throw new InstrumentationException(ILLEGAL, robotPlayer.getSimpleName() + ".run(RobotController) is not public",
                     e);
         }
         if ((runMethod.getModifiers() & Modifier.STATIC) == 0) {
-            throw new InstrumentationException(robotPlayer.getSimpleName() + ".run(RobotController) is not static");
+            throw new InstrumentationException(ILLEGAL, robotPlayer.getSimpleName() + ".run(RobotController) is not static");
         }
 
         // Run!

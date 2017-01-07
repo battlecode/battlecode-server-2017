@@ -1,18 +1,18 @@
 package battlecode.instrumenter.bytecode;
 
 import battlecode.common.GameConstants;
-import battlecode.instrumenter.IndividualClassLoader;
+import battlecode.instrumenter.TeamClassLoaderFactory;
 import battlecode.server.ErrorReporter;
 import battlecode.instrumenter.InstrumentationException;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static battlecode.instrumenter.InstrumentationException.Type.ILLEGAL;
 import static org.objectweb.asm.tree.AbstractInsnNode.*;
 
 /**
@@ -27,13 +27,12 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 
     private final static String DEBUG_PREFIX = "debug_";
 
-    private final String teamPackageName;
     private final String className;    // the class to which this method belongs
     private final boolean checkDisallowed;
     private final boolean debugMethodsEnabled;
 
     // used to load other class files
-    private final IndividualClassLoader loader;
+    private final TeamClassLoaderFactory.Loader loader;
 
     // all the exception handlers we've seen in the code
     private final Set<LabelNode> exceptionHandlers = new HashSet<>();
@@ -55,14 +54,13 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
     private MethodVisitor methodWriter;
 
     public InstrumentingMethodVisitor(final MethodVisitor mv,
-                                      final IndividualClassLoader loader,
+                                      final TeamClassLoaderFactory.Loader loader,
                                       final String className,
                                       final int access,
                                       final String methodName,
                                       final String methodDesc,
                                       final String signature,
                                       final String[] exceptions,
-                                      final String teamPackageName,
                                       boolean silenced,
                                       boolean checkDisallowed,
                                       boolean debugMethodsEnabled) {
@@ -70,30 +68,29 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         this.methodWriter = mv;
 
         this.loader = loader;
-        this.teamPackageName = teamPackageName;
         this.className = className;
         this.checkDisallowed = checkDisallowed;
         this.debugMethodsEnabled = debugMethodsEnabled;
     }
 
     protected String classReference(String name) {
-        return ClassReferenceUtil.classReference(name, teamPackageName, checkDisallowed);
+        return loader.getRefUtil().classReference(name, checkDisallowed);
     }
 
     protected String classDescReference(String name) {
-        return ClassReferenceUtil.classDescReference(name, teamPackageName, checkDisallowed);
+        return loader.getRefUtil().classDescReference(name, checkDisallowed);
     }
 
     protected String methodDescReference(String name) {
-        return ClassReferenceUtil.methodDescReference(name, teamPackageName, checkDisallowed);
+        return loader.getRefUtil().methodDescReference(name, checkDisallowed);
     }
 
     protected String fieldSignatureReference(String name) {
-        return ClassReferenceUtil.fieldSignatureReference(name, teamPackageName, checkDisallowed);
+        return loader.getRefUtil().fieldSignatureReference(name, checkDisallowed);
     }
 
     private void instrumentationException(String description) {
-        throw new InstrumentationException(String.format("In method %s.%s:%s:\n%s",className,name,desc,description));
+        throw new InstrumentationException(ILLEGAL, String.format("In method %s.%s:%s:\n%s",className,name,desc,description));
     }
 
     public void visitMaxs(int maxStack, int maxLocals) {
@@ -329,8 +326,8 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                             (h.getOwner() == null || h.getOwner().equals("java/lang/Throwable")
                                 || isSuperClass(h.getOwner(), "java/lang/Throwable")))
                         || (h.getName().startsWith(DEBUG_PREFIX) && h.getDesc().endsWith("V") &&
-                            h.getOwner().startsWith("teamPackageName/"))
-                        || MethodCostUtil.getMethodData(h.getOwner(), h.getName(), loader) != null) {
+                            loader.getFactory().hasTeamClass(h.getOwner()))
+                        || MethodCostUtil.getMethodData(h.getOwner(), h.getName()) != null) {
 
                     final String owner = h.getOwner().replace("/",".");
 
@@ -392,9 +389,9 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             checkDisallowedMethod(n.owner, n.name, n.desc);
         }
 
-        boolean endBasicBlock = n.owner.startsWith(teamPackageName) || classReference(n.owner).startsWith("instrumented") || n.owner.startsWith("battlecode");
+        boolean endBasicBlock = loader.getFactory().hasTeamClass(n.owner) || classReference(n.owner).startsWith("instrumented") || n.owner.startsWith("battlecode");
 
-        MethodCostUtil.MethodData data = MethodCostUtil.getMethodData(n.owner, n.name, loader);
+        MethodCostUtil.MethodData data = MethodCostUtil.getMethodData(n.owner, n.name);
         if (data != null) {
             bytecodeCtr += data.cost;
             endBasicBlock = data.shouldEndRound;
@@ -428,7 +425,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 
             // are we calling a disabled debug method?
             if (!debugMethodsEnabled && n.name.startsWith("debug_")
-                    && n.desc.endsWith("V") && n.owner.startsWith(teamPackageName)) {
+                    && n.desc.endsWith("V") && loader.getFactory().hasTeamClass(n.owner)) {
 
                 // if debug methods aren't enabled, we remove the call to the debug method
                 // first, pop the arguments from the stack
@@ -446,7 +443,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                             break;
                         default:
                             ErrorReporter.report("Illegal type size: not 1 or 2", true);
-                            throw new InstrumentationException();
+                            throw new InstrumentationException(ILLEGAL, "Illegal type size: not 1 or 2");
                     }
                 }
                 // next, pop the class on which the method would be called
@@ -650,8 +647,9 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
      * @throws InstrumentationException if class <code>owner</code> cannot be found
      */
     private boolean isSuperClass(String owner, String superclass) {
-        ClassReader cr = loader.reader(owner);
-        InterfaceReader ir = new InterfaceReader(loader);
+        System.out.println("isSuperClass reader "+name);
+        ClassReader cr = TeamClassLoaderFactory.teamOrSystemReader(loader.getFactory(), owner);
+        InterfaceReader ir = new InterfaceReader(loader.getFactory());
         cr.accept(ir, ClassReader.SKIP_DEBUG);
         return Arrays.asList(ir.getInterfaces()).contains(superclass);
     }

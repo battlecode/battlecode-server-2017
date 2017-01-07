@@ -1,44 +1,62 @@
 package battlecode.instrumenter;
 
-import battlecode.server.Config;
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static battlecode.instrumenter.InstrumentationException.Type.ILLEGAL;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
- * Tests for IndividualClassLoader.
- *
  * @author james
  */
-public class IndividualClassLoaderTest {
-    private IndividualClassLoader.Cache sharedCache;
-    private IndividualClassLoader l1;
-    private IndividualClassLoader l2;
+public class LoaderTest {
+    private static String tempClassFolder;
+    private TeamClassLoaderFactory sharedCache;
+    private TeamClassLoaderFactory.Loader l1;
+    private TeamClassLoaderFactory.Loader l2;
 
-    @Before
-    public void resetIndividualClassLoader() throws Exception {
-        sharedCache = new IndividualClassLoader.Cache();
-        l1 = new IndividualClassLoader("instrumentertest", sharedCache);
-        l2 = new IndividualClassLoader("instrumentertest", sharedCache);
+    @BeforeClass
+    public static void writeCache() throws Exception {
+        tempClassFolder = URLUtils.toTempFolder(
+            "instrumentertest/CallsIllegalMethods.class",
+            "instrumentertest/CallsIllegalMethods$CallsWait.class",
+            "instrumentertest/CallsIllegalMethods$CallsClassForName.class",
+            "instrumentertest/CallsIllegalMethods$CallsStringIntern.class",
+            "instrumentertest/CallsIllegalMethods$CallsSystemNanoTime.class",
+            "instrumentertest/CallsIllegalMethods$CreatesFilePrintStream.class",
+            "instrumentertest/CallsMathRandom.class",
+            "instrumentertest/DoesntOverrideHashCode.class",
+            "instrumentertest/IllegalMethodReference.class",
+            "instrumentertest/LegalMethodReference.class",
+            "instrumentertest/Nothing.class",
+            "instrumentertest/Outer.class",
+            "instrumentertest/Outer$Inner.class",
+            "instrumentertest/OverridesHashCode.class",
+            "instrumentertest/Reflection.class",
+            "instrumentertest/StringFormat.class",
+            "instrumentertest/UsesEnumMap.class",
+            "instrumentertest/UsesLambda.class",
+            "java/lang/Double.class"
+        );
+    }
+
+    public TeamClassLoaderFactory.Loader setupLoader(TeamClassLoaderFactory cache) throws Exception {
+        TeamClassLoaderFactory.Loader result = cache.createLoader();
 
         // Set up noop RobotMonitors.
+        // Necessary for... reasons.
 
         SandboxedRobotPlayer.Pauser pauser = () -> {};
         SandboxedRobotPlayer.Killer killer = () -> {};
 
-        final Class<?> monitor1 = l1
+        final Class<?> monitor1 = result
                 .loadClass("battlecode.instrumenter.inject.RobotMonitor");
         monitor1.getMethod("init",
                 SandboxedRobotPlayer.Pauser.class,
@@ -48,17 +66,15 @@ public class IndividualClassLoaderTest {
         monitor1.getMethod("setBytecodeLimit", int.class)
                 .invoke(null, Integer.MAX_VALUE);
 
+        return result;
+    }
 
-        final Class<?> monitor2 = l2
-                .loadClass("battlecode.instrumenter.inject.RobotMonitor");
-        monitor2.getMethod("init",
-                SandboxedRobotPlayer.Pauser.class,
-                SandboxedRobotPlayer.Killer.class,
-                int.class)
-                .invoke(null, pauser, killer, 0);
-        monitor2.getMethod("setBytecodeLimit", int.class)
-                .invoke(null, Integer.MAX_VALUE);
 
+    @Before
+    public void setupDefaultCache() throws Exception {
+        sharedCache = new TeamClassLoaderFactory(tempClassFolder);
+        l1 = setupLoader(sharedCache);
+        l2 = setupLoader(sharedCache);
     }
 
     // Should always give the same result for loadClass(string)
@@ -71,7 +87,7 @@ public class IndividualClassLoaderTest {
         classNames.add("instrumentertest.Outer");
         classNames.add("instrumentertest.Outer$Inner");
 
-        classNames.addAll(IndividualClassLoader.alwaysRedefine);
+        classNames.addAll(TeamClassLoaderFactory.alwaysRedefine);
 
         final List<Class<?>> loadedClasses = new ArrayList<>();
 
@@ -103,7 +119,7 @@ public class IndividualClassLoaderTest {
     // Should reload always-reloadable classes between instances.
     @Test
     public void testReloadsAlwaysReloadClasses() throws ClassNotFoundException {
-        for (String alwaysRedefine : IndividualClassLoader.alwaysRedefine) {
+        for (String alwaysRedefine : TeamClassLoaderFactory.alwaysRedefine) {
             assertNotEquals(
                 l1.loadClass(alwaysRedefine),
                 l2.loadClass(alwaysRedefine)
@@ -185,6 +201,7 @@ public class IndividualClassLoaderTest {
             try {
                 l1.loadClass(className);
             } catch (InstrumentationException e) {
+                assertEquals(ILLEGAL, e.type);
                 // Reset teamsWithErrors.
                 continue;
             }
@@ -234,36 +251,110 @@ public class IndividualClassLoaderTest {
 
     @Test
     public void testLoadFromJar() throws Exception {
-        File jar = Files.createTempFile("battlecode-test", ".jar").toFile();
-
-        jar.deleteOnExit();
-
-        ZipOutputStream z = new ZipOutputStream(new FileOutputStream(jar));
-
-        ZipEntry classEntry = new ZipEntry("instrumentertest/Nothing.class");
-
-        z.putNextEntry(classEntry);
-
-        IOUtils.copy(getClass().getClassLoader().getResourceAsStream("instrumentertest/Nothing.class"),
-                z
-        );
-
-        z.closeEntry();
-        z.close();
-
-        IndividualClassLoader jarLoader = new IndividualClassLoader(
-                "instrumentertest",
-                new IndividualClassLoader.Cache(jar.toURI().toURL())
-        );
-
-        Class<?> jarClass = jarLoader.loadClass("instrumentertest.Nothing");
-
-        URL jarClassLocation = jarClass.getResource("Nothing.class");
+        String jar = URLUtils.toTempJar("instrumentertest/Nothing.class");
+        TeamClassLoaderFactory factory = new TeamClassLoaderFactory(jar);
+        URL jarClassLocation = factory.getTeamURL("instrumentertest/Nothing.class");
 
         // EXTREMELY scientific
 
         assertTrue(jarClassLocation.toString().startsWith("jar:"));
-        assertTrue(jarClassLocation.toString().contains(jar.toURI().toURL().toString()));
+        assertTrue(jarClassLocation.toString().contains(new File(jar).toURI().toURL().toString()));
+    }
 
+    @Test
+    public void testOverrideLangClass() throws Exception {
+        String folder = URLUtils.toTempFolder(
+            new String[] {
+                    // Put it at java/lang/double in the jar
+                    "java/lang/Double.class"
+            },
+            new URL[] {
+                    // load it from there
+                    LoaderTest.class.getResource("resources/java.lang.Double.class")
+            }
+        );
+        TeamClassLoaderFactory.Loader loader = setupLoader(
+                new TeamClassLoaderFactory(folder)
+        );
+
+        try {
+            loader.loadClass("java.lang.Double");
+            fail("No exception thrown?");
+        } catch (InstrumentationException e) {
+            assertEquals(ILLEGAL, e.type);
+        }
+    }
+
+    @Test
+    public void testNoIncorrectPlayerPackages() throws Exception {
+        String folder = URLUtils.toTempFolder(
+                "battlecode/server/Server.class",
+                "java/lang/Double.class",
+                "org/apache/commons/io/IOUtils.class"
+        );
+        for (String className : new String[] {
+            "battlecode.server.Server",
+            "java.lang.Double",
+            "org.apache.commons.io.IOUtils"
+        }) {
+            try {
+                TeamClassLoaderFactory.Loader loader
+                    = setupLoader(new TeamClassLoaderFactory(folder));
+                loader.loadClass(className);
+                fail("No error on player package: "+className);
+            } catch (InstrumentationException e) {}
+        }
+    }
+
+    @Test
+    public void testNoCollisions() throws Exception {
+        String folderA = URLUtils.toTempFolder(
+            new String[] {
+                    "Value.class"
+            },
+            new URL[] {
+                    LoaderTest.class.getResource("resources/ValueA.class")
+            }
+        );
+        String folderB = URLUtils.toTempFolder(
+            new String[] {
+                    "Value.class"
+            },
+            new URL[] {
+                    LoaderTest.class.getResource("resources/ValueB.class")
+            }
+        );
+        TeamClassLoaderFactory.Loader loaderA = setupLoader(
+                new TeamClassLoaderFactory(folderA));
+        TeamClassLoaderFactory.Loader loaderB = setupLoader(
+                new TeamClassLoaderFactory(folderB));
+
+        assertEquals(
+                'A',
+                loaderA.loadClass("Value").getMethod("getValue").invoke(null)
+        );
+
+        assertEquals(
+                'B',
+                loaderB.loadClass("Value").getMethod("getValue").invoke(null)
+        );
+    }
+
+    @Test
+    public void testMaliciousURLs() {
+        for (String badURL : new String[] {
+                "afasdfasdf3/this/local/folder/does/not/exist",
+                "afasdfasdf3/this/local/jar/does/not/exist.jar",
+                "/asdfasf/this/system/folder/does/not/exist",
+                "/asdfasf/this/system/jar/does/not/exist.jar",
+                "jar:jar:file:/binks",
+                "http://bad.site/code.jar",
+                "file:///AJSJEUDKA9FHLJADDHS/THIS/FOLDER/SHOULD/NOT/EXIST"
+        }) {
+
+            TeamClassLoaderFactory c = new TeamClassLoaderFactory(badURL);
+
+            assertTrue("Failed to error on url: "+badURL, c.getError());
+        }
     }
 }

@@ -5,7 +5,7 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.server.Config;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -18,11 +18,32 @@ import static org.mockito.Mockito.*;
  */
 public class SandboxedRobotPlayerTest {
 
-    IndividualClassLoader.Cache cache;
+    static String tempClassFolder;
+    @BeforeClass
+    public static void setupFolder() throws Exception {
+        tempClassFolder = URLUtils.toTempFolder(
+                "testplayeractions/RobotPlayer.class",
+                "testplayerarraybytecode/RobotPlayer.class",
+                "testplayerbytecode/RobotPlayer.class",
+                "testplayerclock/RobotPlayer.class",
+                "testplayerdebug/RobotPlayer.class",
+                "testplayerempty/RobotPlayer.class",
+                "testplayerloopforever/RobotPlayer.class",
+                "testplayermultiarraybytecode/RobotPlayer.class",
+                "testplayernodebug/RobotPlayer.class",
+                "testplayerstatic/RobotPlayer.class",
+                "testplayersuicide/RobotPlayer.class",
+                "testplayersystem/RobotPlayer.class",
+                "testplayerusesshared/RobotPlayer.class",
+                "shared/SharedUtility.class"
+        );
+    }
+
+    TeamClassLoaderFactory factory;
+    TeamClassLoaderFactory.Loader loader;
     RobotController rc;
 
-    @Before
-    public void setupController() {
+    public void setupController(String teamPackageName) throws Exception {
         // Uses the "mockito" library to create a mock RobotController object,
         // so that we don't have to create a GameWorld and all that
         rc = mock(RobotController.class);
@@ -34,12 +55,14 @@ public class SandboxedRobotPlayerTest {
         when(rc.getLocation()).thenReturn(new MapLocation(0, 0));
         when(rc.getRoundNum()).thenReturn(0);
 
-        cache = new IndividualClassLoader.Cache();
+        factory = new TeamClassLoaderFactory(tempClassFolder);
+        loader = factory.createLoader();
     }
 
     @Test
     public void testLifecycleEmptyPlayer() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerempty", rc, 0, cache);
+        setupController("testplayerempty");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerempty", rc, 0, loader);
 
         player.setBytecodeLimit(10000);
 
@@ -52,7 +75,8 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testRobotControllerMethodsCalled() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayeractions", rc, 0, cache);
+        setupController("testplayeractions");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayeractions", rc, 0, loader);
 
         player.setBytecodeLimit(10000);
 
@@ -69,7 +93,8 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testYield() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerclock", rc, 0, cache);
+        setupController("testplayerclock");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerclock", rc, 0, loader);
         player.setBytecodeLimit(10000);
 
         player.step();
@@ -90,7 +115,8 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testBytecodeCountingWorks() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerloopforever", rc, 0, cache);
+        setupController("testplayerloopforever");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerloopforever", rc, 0, loader);
         player.setBytecodeLimit(100);
 
         player.step();
@@ -104,7 +130,8 @@ public class SandboxedRobotPlayerTest {
 
     @Test(timeout=300)
     public void testAvoidDeadlocks() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersuicide", rc, 0, cache);
+        setupController("testplayersuicide");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersuicide", rc, 0, loader);
         player.setBytecodeLimit(10);
 
         // Attempt to kill the player when it calls "disintegrate"
@@ -122,7 +149,8 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testStaticInitialization() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerstatic", rc, 0, cache);
+        setupController("testplayerstatic");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerstatic", rc, 0, loader);
         player.setBytecodeLimit(10000);
 
         // Player calls "yield" in static initializer
@@ -136,7 +164,8 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testBytecodeOveruse() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerbytecode", rc, 0, cache);
+        setupController("testplayerbytecode");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerbytecode", rc, 0, loader);
         player.setBytecodeLimit(200);
 
         for (int i = 0; i < 10; i++) {
@@ -150,7 +179,8 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testArrayBytecode() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerarraybytecode", rc, 0, cache);
+        setupController("testplayerarraybytecode");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerarraybytecode", rc, 0, loader);
         player.setBytecodeLimit(10000);
 
 	int[] bytecodesUsed = new int[4];
@@ -174,7 +204,8 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testMultiArrayBytecode() throws Exception {
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayermultiarraybytecode", rc, 0, cache);
+        setupController("testplayermultiarraybytecode");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayermultiarraybytecode", rc, 0, loader);
         player.setBytecodeLimit(10000);
 
 	int[] bytecodesUsed = new int[4];
@@ -200,7 +231,8 @@ public class SandboxedRobotPlayerTest {
     public void testBcTesting() throws Exception {
         Config.getGlobalConfig().set("bc.testing.should.terminate", "true");
 
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersystem", rc, 0, cache);
+        setupController("testplayersystem");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersystem", rc, 0, loader);
         player.setBytecodeLimit(200);
 
         player.step();
@@ -211,7 +243,8 @@ public class SandboxedRobotPlayerTest {
     public void testDebugMethodsEnabled() throws Exception {
         Config.getGlobalConfig().set("bc.engine.debug-methods", "true");
 
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerdebug", rc, 0, cache);
+        setupController("testplayerdebug");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerdebug", rc, 0, loader);
         player.setBytecodeLimit(100);
 
         player.step();
@@ -222,10 +255,21 @@ public class SandboxedRobotPlayerTest {
     public void testDebugMethodsDisabled() throws Exception {
         Config.getGlobalConfig().set("bc.engine.debug-methods", "false");
 
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayernodebug", rc, 0, cache);
+        setupController("testplayernodebug");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayernodebug", rc, 0, loader);
         player.setBytecodeLimit(200);
 
         player.step();
         assertTrue(player.getTerminated());
+    }
+
+    @Test
+    public void testUseShared() throws Exception {
+        setupController("testplayerusesshared");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerusesshared", rc, 0, loader);
+        player.setBytecodeLimit(200);
+        player.step();
+        assertTrue(player.getTerminated());
+        verify(rc).broadcast(0, 7);
     }
 }

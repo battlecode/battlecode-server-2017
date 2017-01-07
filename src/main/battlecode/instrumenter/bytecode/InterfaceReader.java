@@ -1,11 +1,8 @@
 package battlecode.instrumenter.bytecode;
 
-import battlecode.instrumenter.IndividualClassLoader;
-import battlecode.instrumenter.InstrumentationException;
-import battlecode.server.ErrorReporter;
+import battlecode.instrumenter.TeamClassLoaderFactory;
 import org.objectweb.asm.*;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 
@@ -22,43 +19,46 @@ class InterfaceReader extends ClassVisitor {
 
     /**
      * Used to read relevant class files.
+     *
+     * May be null.
      */
-    private IndividualClassLoader loader;
+    private TeamClassLoaderFactory factory;
 
     /**
      * store the final result of which interfaces are transitively implemented
      */
     private String[] interfaces = null;
 
-    public InterfaceReader(IndividualClassLoader loader) {
+    public InterfaceReader(TeamClassLoaderFactory factory) {
         super(Opcodes.ASM5);
-        this.loader = loader;
+        this.factory = factory;
     }
 
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         // first, put all interfaces/classes directly implemented/extended by the given class into result
-        HashSet<String> result = new HashSet<>();
+        HashSet<String> directIfaces = new HashSet<>();
 
-        Collections.addAll(result, interfaces);
+        Collections.addAll(directIfaces, interfaces);
 
         if (superName != null)
-            result.add(superName);
+            directIfaces.add(superName);
 
-        // now, for each element of result, use an InterfaceReader on it, so we recursively get all interfaces/classes transitively implemented/extended
+        // now, for each element of result, use an InterfaceReader on it,
+        // so we recursively get all interfaces/classes transitively implemented/extended
         // by the given class.  The results will be stored in result2.
-        HashSet<String> result2 = new HashSet<>();
-        for (String i : result) {
-            ClassReader cr;
-            cr = loader.reader(i);
-            InterfaceReader ir = new InterfaceReader(loader);
+        HashSet<String> allIfaces = new HashSet<>();
+        allIfaces.addAll(directIfaces);
+
+        for (String iface : directIfaces) {
+            ClassReader cr = TeamClassLoaderFactory.teamOrSystemReader(factory, iface);
+            InterfaceReader ir = new InterfaceReader(factory);
             cr.accept(ir, SKIP_DEBUG);
             String[] ret = ir.getInterfaces();
 
-            Collections.addAll(result2, ret);
+            Collections.addAll(allIfaces, ret);
         }
-        result2.addAll(result);
 
-        this.interfaces = result2.toArray(new String[result2.size()]);
+        this.interfaces = allIfaces.toArray(new String[allIfaces.size()]);
     }
 
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {

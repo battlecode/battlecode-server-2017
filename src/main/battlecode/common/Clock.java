@@ -14,7 +14,7 @@ public final class Clock {
     /**
      * IMPORTANT NOTE!
      * This class is reloaded for every individual robot.
-     * See IndividualClassLoader for more information.
+     * See Loader for more information.
      */
 
     /**
