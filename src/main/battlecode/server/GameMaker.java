@@ -335,11 +335,6 @@ public strictfp class GameMaker {
         private TFloatArrayList teamBullets;
         private TIntArrayList teamVictoryPoints;
 
-        // Indicator strings
-        private TIntArrayList indicatorStringIDs; // ints
-        private TIntArrayList indicatorStringIndices; // ints
-        private List<String> indicatorStringValues; // Strings
-
         // Indicator dots with locations and RGB values
         private TIntArrayList indicatorDotIDs;
         private TFloatArrayList indicatorDotLocsX;
@@ -384,9 +379,6 @@ public strictfp class GameMaker {
             this.teamIDs = new TIntArrayList();
             this.teamBullets = new TFloatArrayList();
             this.teamVictoryPoints = new TIntArrayList();
-            this.indicatorStringIDs = new TIntArrayList();
-            this.indicatorStringIndices = new TIntArrayList();
-            this.indicatorStringValues = new ArrayList<String>();
             this.indicatorDotIDs = new TIntArrayList();
             this.indicatorDotLocsX = new TFloatArrayList();
             this.indicatorDotLocsY = new TFloatArrayList();
@@ -479,15 +471,6 @@ public strictfp class GameMaker {
                 int teamBulletsP = floatVector(builder, teamBullets, Round::startTeamBulletsVector);
                 int teamVictoryPointsP = intVector(builder, teamVictoryPoints, Round::startTeamVictoryPointsVector);
 
-                // The indicator strings that were set
-                int indicatorStringIDsP = intVector(builder, indicatorStringIDs, Round::startIndicatorStringIDsVector);
-                int indicatorStringIndicesP = intVector(builder, indicatorStringIndices, Round::startIndicatorStringIndicesVector);
-                TIntArrayList indicatorStringValuesInts = new TIntArrayList();
-                for (String indicatorStringValue : indicatorStringValues) {
-                    indicatorStringValuesInts.add(builder.createString(indicatorStringValue));
-                }
-                int indicatorStringValuesP = offsetVector(builder, indicatorStringValuesInts, Round::startIndicatorStringValuesVector);
-
                 // The indicator dots that were set
                 int indicatorDotIDsP = intVector(builder, indicatorDotIDs, Round::startIndicatorDotIDsVector);
                 int indicatorDotLocsP = createVecTable(builder, indicatorDotLocsX, indicatorDotLocsY);
@@ -514,9 +497,6 @@ public strictfp class GameMaker {
                 Round.addTeamIDs(builder, teamIDsP);
                 Round.addTeamBullets(builder, teamBulletsP);
                 Round.addTeamVictoryPoints(builder, teamVictoryPointsP);
-                Round.addIndicatorStringIDs(builder, indicatorStringIDsP);
-                Round.addIndicatorStringIndices(builder, indicatorStringIndicesP);
-                Round.addIndicatorStringValues(builder, indicatorStringValuesP);
                 Round.addIndicatorDotIDs(builder, indicatorDotIDsP);
                 Round.addIndicatorDotLocs(builder, indicatorDotLocsP);
                 Round.addIndicatorDotRGBs(builder, indicatorDotRGBsP);
@@ -563,12 +543,6 @@ public strictfp class GameMaker {
             teamIDs.add(TeamMapping.id(team));
             teamBullets.add(bullets);
             teamVictoryPoints.add(victoryPoints);
-        }
-
-        public void addIndicatorString(int id, int index, String value) {
-            indicatorStringIDs.add(id);
-            indicatorStringIndices.add(index);
-            indicatorStringValues.add(value);
         }
 
         public void addIndicatorDot(int id, MapLocation loc, int red, int green, int blue) {
@@ -644,9 +618,6 @@ public strictfp class GameMaker {
             teamIDs.clear();
             teamBullets.clear();
             teamVictoryPoints.clear();
-            indicatorStringIDs.clear();
-            indicatorStringIndices.clear();
-            indicatorStringValues.clear();
             indicatorDotIDs.clear();
             indicatorDotLocsX.clear();
             indicatorDotLocsY.clear();

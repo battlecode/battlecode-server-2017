@@ -4,7 +4,7 @@ package battlecode.schema;
 
 /**
  * The possible types of things that can exist.
- * Note that neutral trees are not treated as bodies.
+ * Note that neutral trees and bullets are not treated as bodies.
  */
 public final class BodyType {
   private BodyType() { }
@@ -51,11 +51,18 @@ public final class BodyType {
    * This allows us some significant space savings, since there are lots
    * of bullets, and we don't need to send position updates.
    * The event stream will say if a bullet has been destroyed.
+   * This is included for convenience; note this value SHALL NOT appear in
+   * a SpawnedBodyTable.
    */
   public static final byte BULLET = 8;
+  /**
+   * Indicates that there is no body.
+   * May only appear in the containedBodies field of NeutralTreeTable.
+   */
+  public static final byte NONE = 9;
 
-  private static final String[] names = { "ARCHON", "GARDENER", "LUMBERJACK", "SOLDIER", "TANK", "SCOUT", "TREE_BULLET", "TREE_NEUTRAL", "BULLET", };
+  public static final String[] names = { "ARCHON", "GARDENER", "LUMBERJACK", "SOLDIER", "TANK", "SCOUT", "TREE_BULLET", "TREE_NEUTRAL", "BULLET", "NONE", };
 
   public static String name(int e) { return names[e]; }
-};
+}
 

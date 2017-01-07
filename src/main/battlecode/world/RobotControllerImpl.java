@@ -1157,16 +1157,6 @@ public final strictfp class RobotControllerImpl implements RobotController {
     // ***********************************
 
     @Override
-    public void setIndicatorString(int index, String value) throws GameActionException {
-        assertNotNull(value);
-        if(index < 0 || index >= GameConstants.NUMBER_OF_INDICATOR_STRINGS){
-            throw new GameActionException(CANT_DO_THAT,
-                    "Indicator string index must be between 0 and GameConstants.NUMBER_OF_INDICATOR_STRINGS");
-        }
-        gameWorld.getMatchMaker().addIndicatorString(getID(), index, value);
-    }
-
-    @Override
     public void setIndicatorDot(MapLocation loc, int red, int green, int blue) throws GameActionException {
         assertNotNull(loc);
         if (!gameWorld.getGameMap().onTheMap(loc)) {
