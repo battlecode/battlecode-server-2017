@@ -163,6 +163,10 @@ public class RobotControllerTest {
         // soldierA fires a shot at soldierB
         game.round((id, rc) -> {
             if (id != soldierA) return;
+
+            // Original bullet should be gone
+            InternalBullet[] bullets = game.getWorld().getObjectInfo().bulletsArray();
+            assertEquals(bullets.length,0);
             
             RobotInfo[] nearbyRobots = rc.senseNearbyRobots(-1, Team.B);
             assertEquals(nearbyRobots.length,1);
@@ -170,9 +174,9 @@ public class RobotControllerTest {
             rc.fireSingleShot(rc.getLocation().directionTo(nearbyRobots[0].location));
             assertFalse(rc.canSingleShot());
             
-            // Ensure two bullets exist
-            InternalBullet[] bullets = game.getWorld().getObjectInfo().bulletsArray();
-            assertEquals(bullets.length,2);
+            // Ensure new bullet exists
+            bullets = game.getWorld().getObjectInfo().bulletsArray();
+            assertEquals(bullets.length,1);
         });
         
         // Let bullets propagate to targets
@@ -583,7 +587,9 @@ public class RobotControllerTest {
                 rc.move(Direction.getNorth());  // Move out of way so soldierA can shoot off the map
         });
 
-        game.waitRounds(3); // Bullet propagation off map
+        float bulletDistanceToWall = 12-game.getWorld().getObjectInfo().bulletsArray()[0].getLocation().x;
+        int turnsToApproachWall = (int)Math.floor(bulletDistanceToWall/RobotType.SOLDIER.bulletSpeed);
+        game.waitRounds(turnsToApproachWall); // Bullet close to wall
         assertEquals(game.getBot(soldierB).getHealth(), RobotType.SOLDIER.maxHealth, EPSILON);
         // Bullet should still be in game
         assertEquals(game.getWorld().getObjectInfo().bullets().size(),1);
