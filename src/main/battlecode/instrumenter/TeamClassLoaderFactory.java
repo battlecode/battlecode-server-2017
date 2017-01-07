@@ -62,11 +62,6 @@ public final class TeamClassLoaderFactory {
     )));
 
     /**
-     * The name of the team this InstrumentingClassLoader is loading.
-     */
-    private final String teamPackageName;
-
-    /**
      * We use this to find resources from the player URL.
      *
      * Note that this is never used to *define* classes; we just use it
@@ -101,9 +96,7 @@ public final class TeamClassLoaderFactory {
      *
      * @param classURL the URL to load clases from
      */
-    public TeamClassLoaderFactory(final String teamPackageName, final String classURL) {
-        this.teamPackageName = teamPackageName.intern();
-
+    public TeamClassLoaderFactory(final String classURL) {
         URL url;
         try {
             url = getFilesystemURL(classURL);
@@ -130,7 +123,7 @@ public final class TeamClassLoaderFactory {
         };
         this.instrumentedClasses = new HashMap<>();
         this.hasError = false;
-        this.refUtil = new ClassReferenceUtil();
+        this.refUtil = new ClassReferenceUtil(this);
     }
 
     /**
@@ -151,8 +144,7 @@ public final class TeamClassLoaderFactory {
         };
         this.instrumentedClasses = new HashMap<>();
         this.hasError = false;
-        this.refUtil = new ClassReferenceUtil();
-        this.teamPackageName = "".intern();
+        this.refUtil = new ClassReferenceUtil(this);
     }
 
     /**
@@ -193,6 +185,14 @@ public final class TeamClassLoaderFactory {
      */
     public boolean getError() {
         return this.hasError;
+    }
+
+    /**
+     * @param className the name of the class
+     * @return whether or not the team has the class
+     */
+    public boolean hasTeamClass(String className) {
+        return getTeamURL(toResourceName(className)) != null;
     }
 
     /**
@@ -385,8 +385,7 @@ public final class TeamClassLoaderFactory {
             this.clearAssertionStatus();
             this.setDefaultAssertionStatus(true);
 
-            // check that the package we're trying to load isn't contained in a disallowed package
-            String teamNameSlash = teamPackageName + "/";
+            /*
             for (String sysName : disallowedPlayerPackages) {
                 if (teamNameSlash.startsWith(sysName)) {
                     throw new InstrumentationException(ILLEGAL,
@@ -395,7 +394,7 @@ public final class TeamClassLoaderFactory {
                                     + "\"\nPlayer packages cannot be contained "
                                     + "in system packages (e.g., java., battlecode.)");
                 }
-            }
+            }*/
 
             this.loadedCache = new HashMap<>();
         }
@@ -411,8 +410,7 @@ public final class TeamClassLoaderFactory {
         @Override
         protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
             if (TeamClassLoaderFactory.this.getError()) {
-                throw new InstrumentationException(ILLEGAL, "Team is known to have errors: " +
-                        teamPackageName);
+                throw new InstrumentationException(ILLEGAL, "Team is known to have errors");
             }
 
             // Don't bother to recreate a class if we've done so before -
@@ -438,7 +436,7 @@ public final class TeamClassLoaderFactory {
                 ClassWriter cw = new ClassWriter(cr, COMPUTE_MAXS);
                 cr.accept(cw, 0);
                 finishedClass = saveAndDefineClass(name, cw.toByteArray());
-            } else if (TeamClassLoaderFactory.this.getTeamURL(toResourceName(name)) != null) {
+            } else if (TeamClassLoaderFactory.this.hasTeamClass(name)) {
                 // Check if the team we're loading already has errors.
                 // Note that we only do this check when loading team
                 // classes - we'll only get team loading failures when
@@ -490,14 +488,16 @@ public final class TeamClassLoaderFactory {
 
         @Override
         public URL getResource(String name) {
+            throw new RuntimeException("You can't use getResource() from a player class!");
+
             // We override getResource to have it look in the correct places for things;
             // in the team package jar if it's a team resource, on the normal classpath
             // otherwise
-            if (name.startsWith(teamPackageName)) {
+            /*if (TeamClassLoaderFactory.this.getTeamURL(name) != null) {
                 return TeamClassLoaderFactory.this.teamResourceLookup.getResource(name);
             } else {
                 return super.getResource(name);
-            }
+            }*/
         }
 
 
@@ -521,7 +521,6 @@ public final class TeamClassLoaderFactory {
             ClassVisitor cv = new InstrumentingClassVisitor(
                     cw,
                     this,
-                    teamPackageName,
                     false,
                     checkDisallowed,
                     debugMethodsEnabled

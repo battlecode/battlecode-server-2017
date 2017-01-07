@@ -55,7 +55,7 @@ public class SandboxedRobotPlayerTest {
         when(rc.getLocation()).thenReturn(new MapLocation(0, 0));
         when(rc.getRoundNum()).thenReturn(0);
 
-        factory = new TeamClassLoaderFactory(teamPackageName, tempClassFolder);
+        factory = new TeamClassLoaderFactory(tempClassFolder);
         loader = factory.createLoader();
     }
 

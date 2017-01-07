@@ -22,7 +22,7 @@ public class Verifier {
 
     public static boolean verify(String teamPackageName, String teamURL) {
         try {
-            TeamClassLoaderFactory.Loader icl = new TeamClassLoaderFactory(teamPackageName, teamURL).createLoader();
+            TeamClassLoaderFactory.Loader icl = new TeamClassLoaderFactory(teamURL).createLoader();
             icl.loadClass(teamPackageName + ".RobotPlayer");
             return true;
         } catch (Exception e) {

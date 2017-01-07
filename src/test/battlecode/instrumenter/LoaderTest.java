@@ -72,7 +72,7 @@ public class LoaderTest {
 
     @Before
     public void setupDefaultCache() throws Exception {
-        sharedCache = new TeamClassLoaderFactory("instrumentertest", tempClassFolder);
+        sharedCache = new TeamClassLoaderFactory(tempClassFolder);
         l1 = setupLoader(sharedCache);
         l2 = setupLoader(sharedCache);
     }
@@ -253,7 +253,7 @@ public class LoaderTest {
     public void testLoadFromJar() throws Exception {
         String jar = URLUtils.toTempJar("instrumentertest/Nothing.class");
         TeamClassLoaderFactory.Loader loader = setupLoader(
-                new TeamClassLoaderFactory("instrumentertest", jar)
+                new TeamClassLoaderFactory(jar)
         );
 
         Class<?> jarClass = loader.loadClass("instrumentertest.Nothing");
@@ -278,7 +278,7 @@ public class LoaderTest {
             }
         );
         TeamClassLoaderFactory.Loader loader = setupLoader(
-                new TeamClassLoaderFactory("instrumentertest", folder)
+                new TeamClassLoaderFactory(folder)
         );
 
         try {
@@ -293,7 +293,7 @@ public class LoaderTest {
     public void testNoIncorrectPlayerPackages() {
         for (String pack : new String[] { "battlecode", "java", "com.sun"}) {
             try {
-                new TeamClassLoaderFactory(pack, tempClassFolder).createLoader();
+                new TeamClassLoaderFactory(tempClassFolder).createLoader();
                 fail("No error on player package: "+pack);
             } catch (InstrumentationException e) {}
         }
@@ -318,9 +318,9 @@ public class LoaderTest {
             }
         );
         TeamClassLoaderFactory.Loader loaderA = setupLoader(
-                new TeamClassLoaderFactory("instrumentertest", folderA));
+                new TeamClassLoaderFactory(folderA));
         TeamClassLoaderFactory.Loader loaderB = setupLoader(
-                new TeamClassLoaderFactory("instrumentertes", folderB));
+                new TeamClassLoaderFactory(folderB));
 
         assertEquals(
                 'A',
@@ -343,7 +343,7 @@ public class LoaderTest {
                 "file:///AJSJEUDKA9FHLJADDHS/THIS/FOLDER/SHOULD/NOT/EXIST"
         }) {
 
-            TeamClassLoaderFactory c = new TeamClassLoaderFactory("instrumentertest", badURL);
+            TeamClassLoaderFactory c = new TeamClassLoaderFactory(badURL);
 
             assertTrue("Failed to error on url: "+badURL, c.getError());
         }

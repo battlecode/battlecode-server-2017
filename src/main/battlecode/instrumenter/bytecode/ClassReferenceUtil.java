@@ -1,6 +1,7 @@
 package battlecode.instrumenter.bytecode;
 
 import battlecode.instrumenter.InstrumentationException;
+import battlecode.instrumenter.TeamClassLoaderFactory;
 import battlecode.server.ErrorReporter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
@@ -49,8 +50,10 @@ public class ClassReferenceUtil {
     // This might have issues so for now I'm just not instrumenting java.io
     // private final static Set<String> uninstrumentedClasses;
 
-    public ClassReferenceUtil() {
+    private final TeamClassLoaderFactory factory;
 
+    public ClassReferenceUtil(TeamClassLoaderFactory factory) {
+        this.factory = factory;
     }
 
     static void fileLoadError(String filename) {
@@ -90,7 +93,6 @@ public class ClassReferenceUtil {
         } catch (Exception e) {
             fileLoadError(DISALLOWED_RESOURCE_FILE);
         }
-
     }
 
     protected static boolean isInAllowedPackage(String className) {
@@ -136,21 +138,20 @@ public class ClassReferenceUtil {
      * also always be the case that cR == classReference(cR.substring(13),tPN,s,cD).
      *
      * @param className       the name of the class that was referenced, in fully qualified form (e.g., "team666/navigation/Navigator")
-     * @param teamPackageName the name of the team thaht referenced the given class
      * @return the name of the class that should replace this reference, in fully qualified form
      * @throws InstrumentationException if the class reference is not allowed
      */
-    public String classReference(String className, String teamPackageName, boolean checkDisallowed) {
+    public String classReference(String className, boolean checkDisallowed) {
         if (className == null) return null;
 
         if (className.charAt(0) == '[') {
             int arrayIndex = className.lastIndexOf('[');
             if (className.charAt(arrayIndex + 1) == 'L') {
-                return className.substring(0, arrayIndex + 2) + classReference(className.substring(arrayIndex + 2), teamPackageName, checkDisallowed);
+                return className.substring(0, arrayIndex + 2) + classReference(className.substring(arrayIndex + 2), checkDisallowed);
             } else {
                 return className;
             }
-        } else if (className.startsWith(teamPackageName + "/"))
+        } else if (factory.hasTeamClass(className))
             return className;
         else if (className.equals("java/lang/System"))
             return "battlecode/instrumenter/inject/System";
@@ -167,7 +168,7 @@ public class ClassReferenceUtil {
 
         if (checkDisallowed) {
             if (disallowedClasses.contains(className) || !isInAllowedPackage(className)) {
-                throw new InstrumentationException(ILLEGAL, "Illegal class: " + className + "\n    this class cannot be referenced by player " + teamPackageName);
+                throw new InstrumentationException(ILLEGAL, "Illegal class: " + className + "\n    this class cannot be referenced by player code.");
             }
         }
         if (className.equals("java/security/SecureRandom")) {
@@ -187,18 +188,17 @@ public class ClassReferenceUtil {
      * of binary form).
      *
      * @param classDesc       descriptor of the class that was referenced (e.g., "Lteam666/navigation/Navigator;")
-     * @param teamPackageName the name of the team that referenced the given class
      * @throws InstrumentationException if the class reference is not allowed.
      */
 
-    public String classDescReference(String classDesc, String teamPackageName, boolean checkDisallowed) {
+    public String classDescReference(String classDesc, boolean checkDisallowed) {
         if (classDesc == null)
             return null;
         if (classDesc.charAt(0) == 'L') {
-            return "L" + classReference(classDesc.substring(1, classDesc.length() - 1), teamPackageName, checkDisallowed) + ";";
+            return "L" + classReference(classDesc.substring(1, classDesc.length() - 1), checkDisallowed) + ";";
         } else if (classDesc.charAt(0) == '[') {
             int arrayIndex = classDesc.lastIndexOf('[');
-            return classDesc.substring(0, arrayIndex + 1) + classDescReference(classDesc.substring(arrayIndex + 1, classDesc.length()), teamPackageName, checkDisallowed);
+            return classDesc.substring(0, arrayIndex + 1) + classDescReference(classDesc.substring(arrayIndex + 1, classDesc.length()), checkDisallowed);
         } else {
             return classDesc;
         }
@@ -209,16 +209,15 @@ public class ClassReferenceUtil {
      * reference.
      *
      * @param methodDesc      descriptor for the method that was referenced (e.g., "(Ljava/util/Map;Z)Ljava/util/Set;")
-     * @param teamPackageName the name of the team that referenced the given method
      * @throws InstrumentationException if any of the class references contained the the method descriptor are not allowed.
      */
-    public String methodDescReference(String methodDesc, String teamPackageName, boolean checkDisallowed) {
+    public String methodDescReference(String methodDesc, boolean checkDisallowed) {
         String ret = "(";
 
         Type[] argTypes = Type.getArgumentTypes(methodDesc);
         for (Type argType : argTypes) {
             if (argType.getSort() == Type.ARRAY || argType.getSort() == Type.OBJECT)
-                ret = ret + classDescReference(argType.toString(), teamPackageName, checkDisallowed);
+                ret = ret + classDescReference(argType.toString(), checkDisallowed);
             else
                 ret = ret + argType.toString();
         }
@@ -227,40 +226,38 @@ public class ClassReferenceUtil {
 
         Type returnType = Type.getReturnType(methodDesc);
         if (returnType.getSort() == Type.ARRAY || returnType.getSort() == Type.OBJECT)
-            ret = ret + classDescReference(returnType.toString(), teamPackageName, checkDisallowed);
+            ret = ret + classDescReference(returnType.toString(), checkDisallowed);
         else
             ret = ret + returnType.toString();
 
         return ret;
     }
 
-    public String methodSignatureReference(String signature, String teamPackageName, boolean checkDisallowed) {
+    public String methodSignatureReference(String signature, boolean checkDisallowed) {
         if (signature == null) return null;
-        BattlecodeSignatureWriter writer = new BattlecodeSignatureWriter(teamPackageName, checkDisallowed);
+        BattlecodeSignatureWriter writer = new BattlecodeSignatureWriter(checkDisallowed);
         SignatureReader reader = new SignatureReader(signature);
         reader.accept(writer);
         return writer.toString();
     }
 
-    public String fieldSignatureReference(String signature, String teamPackageName, boolean checkDisallowed) {
+    public String fieldSignatureReference(String signature, boolean checkDisallowed) {
         if (signature == null) return null;
-        BattlecodeSignatureWriter writer = new BattlecodeSignatureWriter(teamPackageName, checkDisallowed);
+        BattlecodeSignatureWriter writer = new BattlecodeSignatureWriter(checkDisallowed);
         SignatureReader reader = new SignatureReader(signature);
         reader.acceptType(writer);
         return writer.toString();
     }
 
     private class BattlecodeSignatureWriter extends SignatureWriter {
-        String teamPackageName;
         boolean checkDisallowed;
 
-        public BattlecodeSignatureWriter(String teamPackageName, boolean checkDisallowed) {
-            this.teamPackageName = teamPackageName;
+        public BattlecodeSignatureWriter(boolean checkDisallowed) {
             this.checkDisallowed = checkDisallowed;
         }
 
         public void visitClassType(String name) {
-            super.visitClassType(classReference(name, teamPackageName, checkDisallowed));
+            super.visitClassType(classReference(name, checkDisallowed));
         }
 
     }

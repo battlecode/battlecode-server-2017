@@ -27,7 +27,6 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 
     private final static String DEBUG_PREFIX = "debug_";
 
-    private final String teamPackageName;
     private final String className;    // the class to which this method belongs
     private final boolean checkDisallowed;
     private final boolean debugMethodsEnabled;
@@ -62,7 +61,6 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                                       final String methodDesc,
                                       final String signature,
                                       final String[] exceptions,
-                                      final String teamPackageName,
                                       boolean silenced,
                                       boolean checkDisallowed,
                                       boolean debugMethodsEnabled) {
@@ -70,26 +68,25 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         this.methodWriter = mv;
 
         this.loader = loader;
-        this.teamPackageName = teamPackageName;
         this.className = className;
         this.checkDisallowed = checkDisallowed;
         this.debugMethodsEnabled = debugMethodsEnabled;
     }
 
     protected String classReference(String name) {
-        return loader.getRefUtil().classReference(name, teamPackageName, checkDisallowed);
+        return loader.getRefUtil().classReference(name, checkDisallowed);
     }
 
     protected String classDescReference(String name) {
-        return loader.getRefUtil().classDescReference(name, teamPackageName, checkDisallowed);
+        return loader.getRefUtil().classDescReference(name, checkDisallowed);
     }
 
     protected String methodDescReference(String name) {
-        return loader.getRefUtil().methodDescReference(name, teamPackageName, checkDisallowed);
+        return loader.getRefUtil().methodDescReference(name, checkDisallowed);
     }
 
     protected String fieldSignatureReference(String name) {
-        return loader.getRefUtil().fieldSignatureReference(name, teamPackageName, checkDisallowed);
+        return loader.getRefUtil().fieldSignatureReference(name, checkDisallowed);
     }
 
     private void instrumentationException(String description) {
@@ -329,7 +326,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                             (h.getOwner() == null || h.getOwner().equals("java/lang/Throwable")
                                 || isSuperClass(h.getOwner(), "java/lang/Throwable")))
                         || (h.getName().startsWith(DEBUG_PREFIX) && h.getDesc().endsWith("V") &&
-                            h.getOwner().startsWith("teamPackageName/"))
+                            loader.getFactory().hasTeamClass(h.getOwner()))
                         || MethodCostUtil.getMethodData(h.getOwner(), h.getName()) != null) {
 
                     final String owner = h.getOwner().replace("/",".");
@@ -392,7 +389,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             checkDisallowedMethod(n.owner, n.name, n.desc);
         }
 
-        boolean endBasicBlock = n.owner.startsWith(teamPackageName) || classReference(n.owner).startsWith("instrumented") || n.owner.startsWith("battlecode");
+        boolean endBasicBlock = loader.getFactory().hasTeamClass(n.owner) || classReference(n.owner).startsWith("instrumented") || n.owner.startsWith("battlecode");
 
         MethodCostUtil.MethodData data = MethodCostUtil.getMethodData(n.owner, n.name);
         if (data != null) {
@@ -428,7 +425,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 
             // are we calling a disabled debug method?
             if (!debugMethodsEnabled && n.name.startsWith("debug_")
-                    && n.desc.endsWith("V") && n.owner.startsWith(teamPackageName)) {
+                    && n.desc.endsWith("V") && loader.getFactory().hasTeamClass(n.owner)) {
 
                 // if debug methods aren't enabled, we remove the call to the debug method
                 // first, pop the arguments from the stack

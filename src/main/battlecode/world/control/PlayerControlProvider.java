@@ -54,7 +54,7 @@ public class PlayerControlProvider implements RobotControlProvider {
     public PlayerControlProvider(String teamPackage, String teamURL) {
         this.teamPackage = teamPackage;
         this.sandboxes = new HashMap<>(); // GameWorld maintains order for us
-        this.factory = new TeamClassLoaderFactory(teamPackage, teamURL);
+        this.factory = new TeamClassLoaderFactory(teamURL);
     }
 
     @Override

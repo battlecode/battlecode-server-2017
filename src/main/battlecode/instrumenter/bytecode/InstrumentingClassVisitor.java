@@ -14,7 +14,6 @@ import org.objectweb.asm.Opcodes;
  */
 public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
     private String className;
-    private final String teamPackageName;
     private final boolean silenced;
     private final boolean debugMethodsEnabled;
 
@@ -28,21 +27,17 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
 
     /**
      * Creates a InstrumentingClassVisitor to instrument a given class.
-     *
-     * @param cv                  the ClassVisitor that should be used to read the class
-     * @param teamPackageName     the package name of the team for which this class is being instrumented
+     *  @param cv                  the ClassVisitor that should be used to read the class
      * @param silenced            whether System.out should be silenced for this class
      * @param checkDisallowed     whether to check for disallowed classes and methods
      */
     public InstrumentingClassVisitor(final ClassVisitor cv,
                                      final TeamClassLoaderFactory.Loader loader,
-                                     final String teamPackageName,
                                      boolean silenced,
                                      boolean checkDisallowed,
                                      boolean debugMethodsEnabled) {
         super(Opcodes.ASM5, cv);
         this.loader = loader;
-        this.teamPackageName = teamPackageName;
         this.silenced = silenced;
         this.checkDisallowed = checkDisallowed;
         this.debugMethodsEnabled = debugMethodsEnabled;
@@ -59,13 +54,13 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
             final String signature,
             final String superName,
             final String[] interfaces) {
-        className = loader.getRefUtil().classReference(name, teamPackageName, checkDisallowed);
+        className = loader.getRefUtil().classReference(name, checkDisallowed);
         for (int i = 0; i < interfaces.length; i++) {
-            interfaces[i] = loader.getRefUtil().classReference(interfaces[i], teamPackageName, checkDisallowed);
+            interfaces[i] = loader.getRefUtil().classReference(interfaces[i], checkDisallowed);
         }
         String newSuperName;
-        newSuperName = loader.getRefUtil().classReference(superName, teamPackageName, checkDisallowed);
-        super.visit(version, access, className, loader.getRefUtil().methodSignatureReference(signature, teamPackageName, checkDisallowed), newSuperName, interfaces);
+        newSuperName = loader.getRefUtil().classReference(superName, checkDisallowed);
+        super.visit(version, access, className, loader.getRefUtil().methodSignatureReference(signature, checkDisallowed), newSuperName, interfaces);
     }
 
     /**
@@ -86,13 +81,13 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
 
         if (exceptions != null) {
             for (int i = 0; i < exceptions.length; i++) {
-                exceptions[i] = loader.getRefUtil().classReference(exceptions[i], teamPackageName, checkDisallowed);
+                exceptions[i] = loader.getRefUtil().classReference(exceptions[i], checkDisallowed);
             }
         }
         MethodVisitor mv = cv.visitMethod(access,
                 name,
-                loader.getRefUtil().methodDescReference(desc, teamPackageName, checkDisallowed),
-                loader.getRefUtil().methodSignatureReference(signature, teamPackageName, checkDisallowed),
+                loader.getRefUtil().methodDescReference(desc, checkDisallowed),
+                loader.getRefUtil().methodSignatureReference(signature, checkDisallowed),
                 exceptions);
         // create a new InstrumentingMethodVisitor, and let it loose on this method
         return mv == null ? null : new InstrumentingMethodVisitor(
@@ -104,7 +99,6 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
                 desc,
                 signature,
                 exceptions,
-                teamPackageName,
                 silenced,
                 checkDisallowed,
                 debugMethodsEnabled
@@ -122,8 +116,8 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
             access &= ~Opcodes.ACC_VOLATILE;
         return cv.visitField(access,
                 name,
-                loader.getRefUtil().classDescReference(desc, teamPackageName, checkDisallowed),
-                loader.getRefUtil().fieldSignatureReference(signature, teamPackageName, checkDisallowed),
+                loader.getRefUtil().classDescReference(desc, checkDisallowed),
+                loader.getRefUtil().fieldSignatureReference(signature, checkDisallowed),
                 value);
     }
 
@@ -131,7 +125,7 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
      * @inheritDoc
      */
     public void visitOuterClass(String owner, String name, String desc) {
-        super.visitOuterClass(loader.getRefUtil().classReference(owner, teamPackageName, checkDisallowed), name, loader.getRefUtil().methodSignatureReference(desc, teamPackageName, checkDisallowed));
+        super.visitOuterClass(loader.getRefUtil().classReference(owner, checkDisallowed), name, loader.getRefUtil().methodSignatureReference(desc, checkDisallowed));
     }
 
     /**
@@ -139,8 +133,8 @@ public class InstrumentingClassVisitor extends ClassVisitor implements Opcodes {
      */
     public void visitInnerClass(String name, String outerName, String innerName, int access) {
         super.visitInnerClass(
-                loader.getRefUtil().classReference(name, teamPackageName, checkDisallowed),
-                loader.getRefUtil().classReference(outerName, teamPackageName, checkDisallowed),
+                loader.getRefUtil().classReference(name, checkDisallowed),
+                loader.getRefUtil().classReference(outerName, checkDisallowed),
                 innerName, access
         );
     }
