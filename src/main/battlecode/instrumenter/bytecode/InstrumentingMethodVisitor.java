@@ -647,7 +647,6 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
      * @throws InstrumentationException if class <code>owner</code> cannot be found
      */
     private boolean isSuperClass(String owner, String superclass) {
-        System.out.println("isSuperClass reader "+name);
         ClassReader cr = TeamClassLoaderFactory.teamOrSystemReader(loader.getFactory(), owner);
         InterfaceReader ir = new InterfaceReader(loader.getFactory());
         cr.accept(ir, ClassReader.SKIP_DEBUG);

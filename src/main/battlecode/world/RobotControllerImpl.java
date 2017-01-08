@@ -490,7 +490,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
     private void assertCanMove(MapLocation loc) throws GameActionException{
         if(!canMove(loc))
             throw new GameActionException(CANT_MOVE_THERE,
-                    "Cannot move to the traget location " + loc +".");
+                    "Cannot move to the target location " + loc +".");
     }
 
     @Override
