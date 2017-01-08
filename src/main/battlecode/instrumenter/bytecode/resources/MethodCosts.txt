@@ -37,7 +37,7 @@ battlecode/common/RobotController/canInteractWithRobot              5     true
 battlecode/common/RobotController/canInteractWithTree               5     true
 battlecode/common/RobotController/canMove                           10    true
 battlecode/common/RobotController/canPentadShot                     5     true
-battlecode/common/RobotController/canPlantBulletTree                10    true
+battlecode/common/RobotController/canPlantTree                      10    true
 battlecode/common/RobotController/canRepair                         5     true
 battlecode/common/RobotController/canSenseAllOfCircle               5     true
 battlecode/common/RobotController/canSenseBullet                    5     true
@@ -86,7 +86,7 @@ battlecode/common/RobotController/isLocationOccupiedByRobot         20    true
 battlecode/common/RobotController/isLocationOccupiedByTree          20    true
 battlecode/common/RobotController/move                              0     true
 battlecode/common/RobotController/onTheMap                          5     true
-battlecode/common/RobotController/plantBulletTree                   0     true
+battlecode/common/RobotController/plantTree                         0     true
 battlecode/common/RobotController/readBroadcast                     5     true
 battlecode/common/RobotController/repair                            0     true
 battlecode/common/RobotController/resign                            0     true
