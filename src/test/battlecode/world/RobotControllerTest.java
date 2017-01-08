@@ -369,12 +369,12 @@ public class RobotControllerTest {
         
         game.round((id, rc) -> {
             if (id != gardenerA) return;
-            assertFalse(rc.canPlantBulletTree(Direction.getWest())); // tree in way
-            assertTrue(rc.canPlantBulletTree(Direction.getNorth())); // unobstructed
-            assertTrue(rc.canPlantBulletTree(Direction.getEast())); // unobstructed
-            rc.plantBulletTree(Direction.getEast());
+            assertFalse(rc.canPlantTree(Direction.getWest())); // tree in way
+            assertTrue(rc.canPlantTree(Direction.getNorth())); // unobstructed
+            assertTrue(rc.canPlantTree(Direction.getEast())); // unobstructed
+            rc.plantTree(Direction.getEast());
             assertFalse(rc.canMove(Direction.getEast())); // tree now in the way
-            assertFalse(rc.canPlantBulletTree(Direction.getNorth())); // has already planted this turn
+            assertFalse(rc.canPlantTree(Direction.getNorth())); // has already planted this turn
             TreeInfo[] trees = rc.senseNearbyTrees();
             assertEquals(trees.length,2);
             TreeInfo[] bulletTrees = rc.senseNearbyTrees(-1, rc.getTeam());

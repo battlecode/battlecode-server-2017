@@ -942,7 +942,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     private void assertCanBuildTree(Direction dir) throws GameActionException{
-        if(!canPlantBulletTree(dir)){
+        if(!canPlantTree(dir)){
             throw new GameActionException(CANT_DO_THAT,
                     "Can't build a bullet tree in given direction, possibly due to " +
                             "insufficient bullet supply, this robot can't build, " +
@@ -981,7 +981,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     @Override
-    public boolean canPlantBulletTree(Direction dir) {
+    public boolean canPlantTree(Direction dir) {
         assertNotNull(dir);
         boolean hasBuildRequirements = hasTreeBuildRequirements();
         float spawnDist = getType().bodyRadius +
@@ -1039,7 +1039,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     @Override
-    public void plantBulletTree(Direction dir) throws GameActionException {
+    public void plantTree(Direction dir) throws GameActionException {
         assertNotNull(dir);
         assertIsBuildReady();
         assertCanBuildTree(dir);

@@ -944,7 +944,7 @@ public strictfp interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    boolean canPlantBulletTree(Direction dir);
+    boolean canPlantTree(Direction dir);
 
     /**
      * Returns whether the robot can hire a gardener in the given direction.
@@ -992,7 +992,7 @@ public strictfp interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    void plantBulletTree(Direction dir) throws  GameActionException;
+    void plantTree(Direction dir) throws  GameActionException;
 
     // ***********************************
     // ****** OTHER ACTION METHODS *******
