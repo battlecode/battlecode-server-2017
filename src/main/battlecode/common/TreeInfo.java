@@ -33,6 +33,11 @@ public class TreeInfo implements BodyInfo{
     public final float health;
 
     /**
+     * The current maximum health of the tree.
+     */
+    public final float maxHealth;
+
+    /**
      * The current amount of bullets contained within the tree.
      * Note: only NEUTRAL trees can contain bullets
      */
@@ -56,6 +61,12 @@ public class TreeInfo implements BodyInfo{
         this.health = health;
         this.containedBullets = containedBullets;
         this.containedRobot = containedRobot;
+
+        if(team == Team.NEUTRAL){
+            this.maxHealth = GameConstants.NEUTRAL_TREE_HEALTH_RATE * radius;
+        } else {
+            this.maxHealth = GameConstants.BULLET_TREE_MAX_HEALTH;
+        }
     }
 
     @Override

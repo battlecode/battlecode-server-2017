@@ -10,11 +10,16 @@ import battlecode.schema.GameWrapper;
 import battlecode.util.TeamMapping;
 import battlecode.world.TestMapBuilder;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -42,16 +47,16 @@ public class GameMakerTest {
     public void testMatchStateExceptions() {
         GameMaker gm = new GameMaker(info, null);
         gm.makeGameHeader();
-        gm.createMatchMaker().makeMatchFooter(Team.A, 23);
+        gm.getMatchMaker().makeMatchFooter(Team.A, 23);
     }
 
     @Test
-    public void fullReasonableGame() {
+    public void fullReasonableGame() throws Exception {
         NetServer mockServer = Mockito.mock(NetServer.class);
         GameMaker gm = new GameMaker(info, mockServer);
 
         gm.makeGameHeader();
-        GameMaker.MatchMaker mm = gm.createMatchMaker();
+        GameMaker.MatchMaker mm = gm.getMatchMaker();
         mm.makeMatchHeader(new TestMapBuilder("honolulu", 2, -3, 50, 50,1337, 50)
                 .addRobot(0, Team.A, RobotType.ARCHON, new MapLocation(0, 0)).build());
         mm.addMoved(0, new MapLocation(1, 1));
@@ -60,14 +65,14 @@ public class GameMakerTest {
         mm.makeRound(1);
         mm.makeMatchFooter(Team.B, 2);
 
-        GameMaker.MatchMaker mm2 = gm.createMatchMaker();
+        GameMaker.MatchMaker mm2 = gm.getMatchMaker();
         mm2.makeMatchHeader(new TestMapBuilder("argentina", 55.3f, -3, 58.76f, 50, 1337, 50)
                 .build());
         mm2.makeRound(0);
         mm2.makeMatchFooter(Team.A, 1);
         gm.makeGameFooter(Team.A);
 
-        byte[] gameBytes = gm.toBytes();
+        byte[] gameBytes = ungzip(gm.toBytes());
 
         GameWrapper output = GameWrapper.getRootAsGameWrapper(ByteBuffer.wrap(gameBytes));
 
@@ -102,5 +107,12 @@ public class GameMakerTest {
 
         // make sure we sent something to the mock server
         verify(mockServer, times(9)).addEvent(any(byte[].class));
+    }
+
+    public byte[] ungzip(byte[] in) throws IOException {
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        IOUtils.copy(new GZIPInputStream(new ByteArrayInputStream(in)), result);
+        result.flush();
+        return result.toByteArray();
     }
 }

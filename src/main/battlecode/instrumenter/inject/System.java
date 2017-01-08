@@ -1,5 +1,6 @@
 package battlecode.instrumenter.inject;
 
+import battlecode.instrumenter.InstrumentationException;
 import battlecode.instrumenter.RobotDeathException;
 import battlecode.instrumenter.stream.EOFInputStream;
 import battlecode.instrumenter.stream.PrintStreamWrapper;
@@ -9,6 +10,8 @@ import java.io.*;
 import java.nio.channels.Channel;
 import java.util.Map;
 import java.util.Properties;
+
+import static battlecode.instrumenter.InstrumentationException.Type.ILLEGAL;
 
 /**
  * A wrapper for java.lang.System that prevents user code from getting access to
@@ -97,15 +100,15 @@ public final class System {
     // No reason not to let users modify these.
 
     public static void setIn(InputStream newIn) {
-        in = newIn;
+        throw new InstrumentationException(ILLEGAL, "You can't change System.in, sorry.");
     }
 
     public static void setOut(PrintStream newOut) {
-        out = newOut;
+        throw new InstrumentationException(ILLEGAL, "You can't change System.out, sorry.");
     }
 
     public static void setErr(PrintStream newErr) {
-        err = newErr;
+        throw new InstrumentationException(ILLEGAL, "You can't change System.err, sorry.");
     }
 
     public static Console console() {

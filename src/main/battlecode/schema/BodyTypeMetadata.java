@@ -86,5 +86,5 @@ public final class BodyTypeMetadata extends Table {
     int o = builder.endObject();
     return o;
   }
-};
+}
 

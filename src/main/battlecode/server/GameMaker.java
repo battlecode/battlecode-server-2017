@@ -14,15 +14,17 @@ import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TObjectByteMap;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.ToIntFunction;
+import java.util.zip.GZIPOutputStream;
 
 import static battlecode.util.FlatHelpers.*;
 
@@ -96,6 +98,11 @@ public strictfp class GameMaker {
     private TIntArrayList matchFooters;
 
     /**
+     * The MatchMaker associated with this GameMaker.
+     */
+    private final MatchMaker matchMaker;
+
+    /**
      * @param gameInfo the mapping of teams to bytes
      * @param packetSink the NetServer to send packets to
      */
@@ -114,6 +121,8 @@ public strictfp class GameMaker {
         this.events = new TIntArrayList();
         this.matchHeaders = new TIntArrayList();
         this.matchFooters = new TIntArrayList();
+
+        this.matchMaker = new MatchMaker();
     }
 
     /**
@@ -156,7 +165,20 @@ public strictfp class GameMaker {
             GameWrapper.addMatchFooters(fileBuilder, matchFooters);
 
             fileBuilder.finish(GameWrapper.endGameWrapper(fileBuilder));
-            finishedGame = fileBuilder.sizedByteArray();
+
+            byte[] rawBytes = fileBuilder.sizedByteArray();
+
+            try {
+                ByteArrayOutputStream result = new ByteArrayOutputStream();
+                GZIPOutputStream zipper = new GZIPOutputStream(result);
+                IOUtils.copy(new ByteArrayInputStream(rawBytes), zipper);
+                zipper.close();
+                zipper.flush();
+                result.flush();
+                finishedGame = result.toByteArray();
+            } catch (IOException e) {
+                throw new RuntimeException("Gzipping failed?", e);
+            }
         }
         return finishedGame;
     }
@@ -200,12 +222,10 @@ public strictfp class GameMaker {
     }
 
     /**
-     * Make a match maker for a particular match.
-     *
-     * ... you could actually reuse one, but eventually that might change?
+     * Get the MatchMaker associated with this GameMaker.
      */
-    public MatchMaker createMatchMaker() {
-        return new MatchMaker();
+    public MatchMaker getMatchMaker() {
+        return this.matchMaker;
     }
 
     public void makeGameHeader(){
@@ -297,6 +317,8 @@ public strictfp class GameMaker {
      *
      * One of the rare cases where we want a non-static inner class in Java:
      * this basically just provides a restricted interface to GameMaker.
+     *
+     * There is only one of these per GameMaker.
      */
     public class MatchMaker {
         private TIntArrayList movedIDs; // ints
@@ -335,11 +357,6 @@ public strictfp class GameMaker {
         private TFloatArrayList teamBullets;
         private TIntArrayList teamVictoryPoints;
 
-        // Indicator strings
-        private TIntArrayList indicatorStringIDs; // ints
-        private TIntArrayList indicatorStringIndices; // ints
-        private List<String> indicatorStringValues; // Strings
-
         // Indicator dots with locations and RGB values
         private TIntArrayList indicatorDotIDs;
         private TFloatArrayList indicatorDotLocsX;
@@ -357,6 +374,9 @@ public strictfp class GameMaker {
         private TIntArrayList indicatorLineRGBsRed;
         private TIntArrayList indicatorLineRGBsGreen;
         private TIntArrayList indicatorLineRGBsBlue;
+
+        // Used to write logs.
+        private final ByteArrayOutputStream logger;
 
         public MatchMaker() {
             this.movedIDs = new TIntArrayList();
@@ -384,9 +404,6 @@ public strictfp class GameMaker {
             this.teamIDs = new TIntArrayList();
             this.teamBullets = new TFloatArrayList();
             this.teamVictoryPoints = new TIntArrayList();
-            this.indicatorStringIDs = new TIntArrayList();
-            this.indicatorStringIndices = new TIntArrayList();
-            this.indicatorStringValues = new ArrayList<String>();
             this.indicatorDotIDs = new TIntArrayList();
             this.indicatorDotLocsX = new TFloatArrayList();
             this.indicatorDotLocsY = new TFloatArrayList();
@@ -401,6 +418,7 @@ public strictfp class GameMaker {
             this.indicatorLineRGBsRed = new TIntArrayList();
             this.indicatorLineRGBsBlue = new TIntArrayList();
             this.indicatorLineRGBsGreen = new TIntArrayList();
+            this.logger = new ByteArrayOutputStream();
         }
 
         public void makeMatchHeader(LiveMap gameMap) {
@@ -429,6 +447,15 @@ public strictfp class GameMaker {
 
         public void makeRound(int roundNum) {
             assertState(State.IN_MATCH);
+
+            try {
+                this.logger.flush();
+            } catch (IOException e) {
+                throw new RuntimeException("Can't flush byte[]outputstream?", e);
+            }
+            byte[] logs = this.logger.toByteArray();
+            ByteBuffer logsBuffer = ByteBuffer.wrap(logs);
+            this.logger.reset();
 
             createEvent((builder) -> {
                 // The bodies that spawned
@@ -479,15 +506,6 @@ public strictfp class GameMaker {
                 int teamBulletsP = floatVector(builder, teamBullets, Round::startTeamBulletsVector);
                 int teamVictoryPointsP = intVector(builder, teamVictoryPoints, Round::startTeamVictoryPointsVector);
 
-                // The indicator strings that were set
-                int indicatorStringIDsP = intVector(builder, indicatorStringIDs, Round::startIndicatorStringIDsVector);
-                int indicatorStringIndicesP = intVector(builder, indicatorStringIndices, Round::startIndicatorStringIndicesVector);
-                TIntArrayList indicatorStringValuesInts = new TIntArrayList();
-                for (String indicatorStringValue : indicatorStringValues) {
-                    indicatorStringValuesInts.add(builder.createString(indicatorStringValue));
-                }
-                int indicatorStringValuesP = offsetVector(builder, indicatorStringValuesInts, Round::startIndicatorStringValuesVector);
-
                 // The indicator dots that were set
                 int indicatorDotIDsP = intVector(builder, indicatorDotIDs, Round::startIndicatorDotIDsVector);
                 int indicatorDotLocsP = createVecTable(builder, indicatorDotLocsX, indicatorDotLocsY);
@@ -498,6 +516,8 @@ public strictfp class GameMaker {
                 int indicatorLineStartLocsP = createVecTable(builder, indicatorLineStartLocsX, indicatorLineStartLocsY);
                 int indicatorLineEndLocsP = createVecTable(builder, indicatorLineEndLocsX, indicatorLineEndLocsY);
                 int indicatorLineRGBsP = createRGBTable(builder, indicatorLineRGBsRed, indicatorLineRGBsGreen, indicatorLineRGBsBlue);
+
+                int logsP = builder.createString(logsBuffer);
 
                 Round.startRound(builder);
                 Round.addMovedIDs(builder, movedIDsP);
@@ -514,9 +534,6 @@ public strictfp class GameMaker {
                 Round.addTeamIDs(builder, teamIDsP);
                 Round.addTeamBullets(builder, teamBulletsP);
                 Round.addTeamVictoryPoints(builder, teamVictoryPointsP);
-                Round.addIndicatorStringIDs(builder, indicatorStringIDsP);
-                Round.addIndicatorStringIndices(builder, indicatorStringIndicesP);
-                Round.addIndicatorStringValues(builder, indicatorStringValuesP);
                 Round.addIndicatorDotIDs(builder, indicatorDotIDsP);
                 Round.addIndicatorDotLocs(builder, indicatorDotLocsP);
                 Round.addIndicatorDotRGBs(builder, indicatorDotRGBsP);
@@ -525,6 +542,7 @@ public strictfp class GameMaker {
                 Round.addIndicatorLineEndLocs(builder, indicatorLineEndLocsP);
                 Round.addIndicatorLineRGBs(builder, indicatorLineRGBsP);
                 Round.addRoundID(builder, roundNum);
+                Round.addLogs(builder, logsP);
 
                 int round = Round.endRound(builder);
 
@@ -532,6 +550,13 @@ public strictfp class GameMaker {
             });
 
             clearData();
+        }
+
+        /**
+         * @return an outputstream that will be baked into the output file
+         */
+        public OutputStream getOut() {
+            return logger;
         }
 
         public void addMoved(int id, MapLocation newLocation) {
@@ -563,12 +588,6 @@ public strictfp class GameMaker {
             teamIDs.add(TeamMapping.id(team));
             teamBullets.add(bullets);
             teamVictoryPoints.add(victoryPoints);
-        }
-
-        public void addIndicatorString(int id, int index, String value) {
-            indicatorStringIDs.add(id);
-            indicatorStringIndices.add(index);
-            indicatorStringValues.add(value);
         }
 
         public void addIndicatorDot(int id, MapLocation loc, int red, int green, int blue) {
@@ -644,9 +663,6 @@ public strictfp class GameMaker {
             teamIDs.clear();
             teamBullets.clear();
             teamVictoryPoints.clear();
-            indicatorStringIDs.clear();
-            indicatorStringIndices.clear();
-            indicatorStringValues.clear();
             indicatorDotIDs.clear();
             indicatorDotLocsX.clear();
             indicatorDotLocsY.clear();

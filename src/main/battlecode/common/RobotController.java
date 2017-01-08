@@ -1094,19 +1094,6 @@ public strictfp interface RobotController {
     // ***********************************
 
     /**
-     * Sets one of this robot's 'indicator strings' for debugging purposes. These
-     * strings are displayed in the client by clicking on the associated robot.
-     * This method has no effect on gameplay.
-     *
-     * @param index the index of the indicator string to set. Must be
-     * between 0 and GameConstants.NUMBER_OF_INDICATOR_STRINGS.
-     * @param value the value to which the indicator string should be set.
-     * @throws GameActionException if the index of the indicator string is not
-     * between 0 and GameConstants.NUMBER_OF_INDICATOR_STRINGS.
-     */
-    void setIndicatorString(int index, String value) throws GameActionException;
-
-    /**
      * Draw a dot on the game map for debugging purposes.
      *
      * @param loc the location to draw the dot.

@@ -49,7 +49,8 @@ public class TestMapBuilder {
 
     public TestMapBuilder addNeutralTree(int id, MapLocation loc, float radius, int containedBullets, RobotType containedBody){
         bodies.add(new TreeInfo(
-                id, Team.NEUTRAL, loc, radius, 0, containedBullets, containedBody
+                id, Team.NEUTRAL, loc, radius, radius * GameConstants.NEUTRAL_TREE_HEALTH_RATE,
+                containedBullets, containedBody
         ));
 
         return this;

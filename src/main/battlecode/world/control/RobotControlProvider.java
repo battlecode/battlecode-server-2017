@@ -84,5 +84,4 @@ public interface RobotControlProvider {
      * @return whether the robot is terminated or not
      */
     boolean getTerminated(InternalRobot robot);
-
 }

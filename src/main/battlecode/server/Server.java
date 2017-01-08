@@ -151,7 +151,7 @@ public strictfp class Server implements Runnable {
             debug("Running: "+currentGame);
 
             // Set up our control provider
-            final RobotControlProvider prov = createControlProvider(currentGame);
+            final RobotControlProvider prov = createControlProvider(currentGame, gameMaker);
 
             // We start with zeroed team memories.
             long[][] teamMemory = new long[2][GameConstants.TEAM_MEMORY_LENGTH];
@@ -221,7 +221,7 @@ public strictfp class Server implements Runnable {
         }
 
         // Create the game world!
-        currentWorld = new GameWorld(loadedMap, prov, teamMemory, gameMaker.createMatchMaker());
+        currentWorld = new GameWorld(loadedMap, prov, teamMemory, gameMaker.getMatchMaker());
 
         // Get started
         if (interactive) {
@@ -285,7 +285,7 @@ public strictfp class Server implements Runnable {
      * @param game the game to provide control for
      * @return a fresh control provider for the game
      */
-    private RobotControlProvider createControlProvider(GameInfo game) {
+    private RobotControlProvider createControlProvider(GameInfo game, GameMaker gameMaker) {
         // Strictly speaking, this should probably be somewhere in battlecode.world
         // Whatever
 
@@ -293,11 +293,11 @@ public strictfp class Server implements Runnable {
 
         teamProvider.registerControlProvider(
                 Team.A,
-                new PlayerControlProvider(game.getTeamAPackage(), game.getTeamAURL())
+                new PlayerControlProvider(game.getTeamAPackage(), game.getTeamAURL(), gameMaker.getMatchMaker().getOut())
         );
         teamProvider.registerControlProvider(
                 Team.B,
-                new PlayerControlProvider(game.getTeamBPackage(), game.getTeamBURL())
+                new PlayerControlProvider(game.getTeamBPackage(), game.getTeamBURL(), gameMaker.getMatchMaker().getOut())
         );
         teamProvider.registerControlProvider(
                 Team.NEUTRAL,
@@ -411,8 +411,8 @@ public strictfp class Server implements Runnable {
      *
      * @param msg the debug message to display
      */
-    public void debug(String msg) {
-        if (options.getBoolean("bc.server.debug")) {
+    public static void debug(String msg) {
+        if (Config.getGlobalConfig().getBoolean("bc.server.debug")) {
             for (String line : msg.split("\n")) {
                 System.out.printf("[server:debug] %s\n", line);
             }

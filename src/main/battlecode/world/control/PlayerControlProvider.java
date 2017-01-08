@@ -7,6 +7,8 @@ import battlecode.server.ErrorReporter;
 import battlecode.world.GameWorld;
 import battlecode.world.InternalRobot;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,19 +44,24 @@ public class PlayerControlProvider implements RobotControlProvider {
     /**
      * The name of the team (package) we're processing.
      */
-    private String teamPackage;
+    private final String teamPackage;
+
+    /**
+     * The printstream robots should write to (besides System.out).
+     */
+    private final OutputStream robotOut;
 
     /**
      * Create a new PlayerControlProvider.
-     *
-     * @param teamPackage the name / package of the team we're loading
+     *  @param teamPackage the name / package of the team we're loading
      * @param teamURL the url of the classes for the team;
-     *                null to load from the system classpath
+     * @param robotOut the output that robots should write to
      */
-    public PlayerControlProvider(String teamPackage, String teamURL) {
+    public PlayerControlProvider(String teamPackage, String teamURL, OutputStream robotOut) {
         this.teamPackage = teamPackage;
         this.sandboxes = new HashMap<>(); // GameWorld maintains order for us
         this.factory = new TeamClassLoaderFactory(teamURL);
+        this.robotOut = robotOut;
     }
 
     @Override
@@ -80,7 +87,8 @@ public class PlayerControlProvider implements RobotControlProvider {
                     teamPackage,
                     robot.getController(),
                     gameWorld.getMapSeed(),
-                    factory.createLoader()
+                    factory.createLoader(),
+                    robotOut
             );
             this.sandboxes.put(robot.getID(), player);
         } catch (InstrumentationException e) {
