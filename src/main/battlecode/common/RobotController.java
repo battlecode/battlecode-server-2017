@@ -1093,45 +1093,6 @@ public strictfp interface RobotController {
     void donate(float bullets) throws GameActionException;
 
     /**
-     * Repairs the robot at the given location. The robot must be within one
-     * stride. You can only repair once a turn. Note this action can only be
-     * performed by ARCHONS and only works on robots, not trees.
-     *
-     * @param loc the location of the robot to repair.
-     * @throws GameActionException if this robot is not an archon, the robot
-     * is out of range, if there is no robot there, or if you already repaired
-     * this turn.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void repair(MapLocation loc) throws GameActionException;
-
-    /**
-     * Repairs the robot with the given id. The robot must be within one
-     * stride. You can only repair once a turn. Note this action can only be
-     * performed by ARCHONS and only works on robots, not trees.
-     *
-     * @param id the id of the robot to repair.
-     * @throws GameActionException if this robot is not an archon, the robot
-     * is out of range, if there is no robot with the given id, or if you
-     * already repaired this turn.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    void repair(int id) throws GameActionException;
-
-    /**
-     * Determines whether or not this robot can repair a robot, taking into
-     * account how many times this robot has repaired this turn and this
-     * robot's type
-     *
-     * @return true if this robot can repair a robot, false otherwise.
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean canRepair();
-
-    /**
      * Determines whether or not there is a robot at location loc and, if so,
      * if the robot is within one stride of this robot.
      *

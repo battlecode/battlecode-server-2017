@@ -801,7 +801,6 @@ public final strictfp class RobotControllerImpl implements RobotController {
 
     @Override
     public boolean canChop(MapLocation loc) {
-        assertNotNull(loc);
         boolean correctType = (getType() == RobotType.LUMBERJACK);
         boolean canInteract = canInteractWithTree(loc);
 
@@ -1108,13 +1107,6 @@ public final strictfp class RobotControllerImpl implements RobotController {
     // ****** OTHER ACTION METHODS *******
     // ***********************************
 
-    private void assertCanRepair() throws GameActionException{
-        if(!canRepair()){
-            throw new GameActionException(CANT_DO_THAT,
-                    "Archons can only repair once per turn");
-        }
-    }
-
     private void assertCanInteractWithRobot(MapLocation robotLoc) throws GameActionException{
         if(!canInteractWithRobot(robotLoc)){
             throw new GameActionException(CANT_DO_THAT,
@@ -1138,34 +1130,6 @@ public final strictfp class RobotControllerImpl implements RobotController {
         int gainedVictorPoints = (int)bullets / GameConstants.BULLET_EXCHANGE_RATE;
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -bullets);
         gameWorld.getTeamInfo().adjustVictoryPoints(getTeam(), gainedVictorPoints);
-    }
-
-    @Override
-    public void repair(MapLocation loc) throws GameActionException {
-        assertNotNull(loc);
-        assertCanRepair();
-        assertCanInteractWithRobot(loc);
-        InternalRobot robot = gameWorld.getObjectInfo().getRobotAtLocation(loc);
-        repairRobot(robot);
-    }
-
-    @Override
-    public void repair(int id) throws GameActionException {
-        assertCanRepair();
-        assertCanInteractWithRobot(id);
-        InternalRobot robot = gameWorld.getObjectInfo().getRobotByID(id);
-        repairRobot(robot);
-    }
-
-    private void repairRobot(InternalRobot robot){
-        robot.incrementRepairCount();
-        robot.repairRobot(GameConstants.REPAIR_HEALTH_REGEN_RATE);
-    }
-
-    @Override
-    public boolean canRepair(){
-        boolean correctType = getType() == RobotType.ARCHON;
-        return correctType && this.robot.getRepairCount() < 1;
     }
 
     @Override
