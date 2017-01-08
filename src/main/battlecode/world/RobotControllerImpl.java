@@ -646,6 +646,13 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     @Override
+    public boolean canStrike() {
+        boolean correctType = getType() == RobotType.LUMBERJACK;
+
+        return correctType && !hasAttacked();
+    }
+
+    @Override
     public void strike() throws GameActionException {
         if(getType() != RobotType.LUMBERJACK){
             throw new GameActionException(CANT_DO_THAT,
@@ -673,21 +680,21 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     @Override
-    public boolean canSingleShot() {
+    public boolean canFireSingleShot() {
         boolean correctType = getType() != RobotType.ARCHON && getType() != RobotType.GARDENER &&
                 getType() != RobotType.LUMBERJACK;
         return correctType && haveBulletCosts(GameConstants.SINGLE_SHOT_COST) && !hasAttacked();
     }
 
     @Override
-    public boolean canTriadShot() {
+    public boolean canFireTriadShot() {
         boolean correctType = getType() != RobotType.ARCHON && getType() != RobotType.GARDENER &&
                 getType() != RobotType.LUMBERJACK && getType() != RobotType.SCOUT;
         return correctType && haveBulletCosts(GameConstants.TRIAD_SHOT_COST) && !hasAttacked();
     }
 
     @Override
-    public boolean canPentadShot() {
+    public boolean canFirePentadShot() {
         boolean correctType = getType() != RobotType.ARCHON && getType() != RobotType.GARDENER &&
                 getType() != RobotType.LUMBERJACK && getType() != RobotType.SCOUT;
         return correctType && haveBulletCosts(GameConstants.PENTAD_SHOT_COST) && !hasAttacked();
@@ -696,12 +703,12 @@ public final strictfp class RobotControllerImpl implements RobotController {
     @Override
     public void fireSingleShot(Direction dir) throws GameActionException {
         assertNotNull(dir);
-        if(!canSingleShot()){
+        assertIsWeaponReady();
+        if(!canFireSingleShot()){
             throw new GameActionException(CANT_DO_THAT,
                     "This robot cannot fire a single shot possibly due to wrong type or " +
                             "insufficient funds");
         }
-        assertIsWeaponReady();
 
         this.robot.incrementAttackCount();
 
@@ -712,12 +719,12 @@ public final strictfp class RobotControllerImpl implements RobotController {
     @Override
     public void fireTriadShot(Direction dir) throws GameActionException {
         assertNotNull(dir);
-        if(!canTriadShot()){
+        assertIsWeaponReady();
+        if(!canFireTriadShot()){
             throw new GameActionException(CANT_DO_THAT,
                     "This robot cannot fire a triad shot possibly due to wrong type or " +
                             "insufficient funds");
         }
-        assertIsWeaponReady();
 
         this.robot.incrementAttackCount();
 
@@ -728,12 +735,12 @@ public final strictfp class RobotControllerImpl implements RobotController {
     @Override
     public void firePentadShot(Direction dir) throws GameActionException {
         assertNotNull(dir);
-        if(!canPentadShot()){
+        assertIsWeaponReady();
+        if(!canFirePentadShot()){
             throw new GameActionException(CANT_DO_THAT,
                     "This robot cannot fire a pentad shot possibly due to wrong type or " +
                             "insufficient funds");
         }
-        assertIsWeaponReady();
 
         this.robot.incrementAttackCount();
 
@@ -791,6 +798,24 @@ public final strictfp class RobotControllerImpl implements RobotController {
                     "Can't water a neutral tree.");
         }
     }
+
+    @Override
+    public boolean canChop(MapLocation loc) {
+        assertNotNull(loc);
+        boolean correctType = (getType() == RobotType.LUMBERJACK);
+        boolean canInteract = canInteractWithTree(loc);
+
+        return correctType && canInteract;
+    }
+
+    @Override
+    public boolean canChop(int id) {
+        boolean correctType = (getType() == RobotType.LUMBERJACK);
+        boolean canInteract = canInteractWithTree(id);
+
+        return correctType && canInteract;
+    }
+
     @Override
     public void chop(MapLocation loc) throws GameActionException {
         if(getType() != RobotType.LUMBERJACK){
@@ -827,6 +852,16 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     @Override
+    public boolean canShake(MapLocation loc) {
+        return canInteractWithTree(loc) && canShake();
+    }
+
+    @Override
+    public boolean canShake(int id) {
+        return canInteractWithTree(id) && canShake();
+    }
+
+    @Override
     public void shake(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
         assertCanShake();
@@ -849,6 +884,16 @@ public final strictfp class RobotControllerImpl implements RobotController {
         tree.resetContainedBullets();
 
         gameWorld.getMatchMaker().addAction(getID(), Action.SHAKE_TREE, tree.getID());
+    }
+
+    @Override
+    public boolean canWater(MapLocation loc) {
+        return canWater() && canInteractWithTree(loc);
+    }
+
+    @Override
+    public boolean canWater(int id) {
+        return canWater() && canInteractWithTree(id);
     }
 
     @Override
