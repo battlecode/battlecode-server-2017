@@ -14,6 +14,7 @@ import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TObjectByteMap;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.*;
@@ -23,6 +24,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.ToIntFunction;
+import java.util.zip.GZIPOutputStream;
 
 import static battlecode.util.FlatHelpers.*;
 
@@ -163,7 +165,20 @@ public strictfp class GameMaker {
             GameWrapper.addMatchFooters(fileBuilder, matchFooters);
 
             fileBuilder.finish(GameWrapper.endGameWrapper(fileBuilder));
-            finishedGame = fileBuilder.sizedByteArray();
+
+            byte[] rawBytes = fileBuilder.sizedByteArray();
+
+            try {
+                ByteArrayOutputStream result = new ByteArrayOutputStream();
+                GZIPOutputStream zipper = new GZIPOutputStream(result);
+                IOUtils.copy(new ByteArrayInputStream(rawBytes), zipper);
+                zipper.close();
+                zipper.flush();
+                result.flush();
+                finishedGame = result.toByteArray();
+            } catch (IOException e) {
+                throw new RuntimeException("Gzipping failed?", e);
+            }
         }
         return finishedGame;
     }

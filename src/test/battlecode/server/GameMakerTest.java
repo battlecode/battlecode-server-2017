@@ -10,11 +10,16 @@ import battlecode.schema.GameWrapper;
 import battlecode.util.TeamMapping;
 import battlecode.world.TestMapBuilder;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -46,7 +51,7 @@ public class GameMakerTest {
     }
 
     @Test
-    public void fullReasonableGame() {
+    public void fullReasonableGame() throws Exception {
         NetServer mockServer = Mockito.mock(NetServer.class);
         GameMaker gm = new GameMaker(info, mockServer);
 
@@ -67,7 +72,7 @@ public class GameMakerTest {
         mm2.makeMatchFooter(Team.A, 1);
         gm.makeGameFooter(Team.A);
 
-        byte[] gameBytes = gm.toBytes();
+        byte[] gameBytes = ungzip(gm.toBytes());
 
         GameWrapper output = GameWrapper.getRootAsGameWrapper(ByteBuffer.wrap(gameBytes));
 
@@ -102,5 +107,12 @@ public class GameMakerTest {
 
         // make sure we sent something to the mock server
         verify(mockServer, times(9)).addEvent(any(byte[].class));
+    }
+
+    public byte[] ungzip(byte[] in) throws IOException {
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        IOUtils.copy(new GZIPInputStream(new ByteArrayInputStream(in)), result);
+        result.flush();
+        return result.toByteArray();
     }
 }
