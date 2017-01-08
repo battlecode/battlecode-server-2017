@@ -117,38 +117,36 @@ public enum RobotType {
     /**
      * Returns whether the robot can hire Gardeners
      *
-     * @return whether the robot can build.
+     * @return whether the robot can hire Gardeners.
      */
     public boolean canHire() {
         return this == ARCHON;
     }
 
     /**
-     * Returns whether the robot can plant trees and all units except Gardeners and Archons
+     * Returns whether the robot can build trees and all units except Gardeners and Archons
      *
      * @return whether the robot can build.
      */
-    public boolean canPlant() {
+    public boolean canBuild() {
         return this == GARDENER;
     }
 
     /**
      * Returns whether the robot is hireable.
      *
-     * @return whether the robot is buildable.
+     * @return whether the robot is hireable.
      */
     public boolean isHireable() {
         return spawnSource == ARCHON;
     }
 
     /**
-     * Returns whether the robot is plantable.
+     * Returns whether the robot is buildable.
      *
      * @return whether the robot is buildable.
      */
-    public boolean isPlantable() {
-        return spawnSource == GARDENER;
-    }
+    public boolean isBuildable() { return spawnSource == GARDENER; }
 
     /**
      * Returns the starting health of this type of robot

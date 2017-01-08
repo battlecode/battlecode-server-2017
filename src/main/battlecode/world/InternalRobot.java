@@ -268,7 +268,7 @@ public strictfp class InternalRobot {
     public boolean canExecuteCode() {
         if (getHealth() <= 0.0)
             return false;
-        if(type.isPlantable())
+        if(type.isBuildable())
             return roundsAlive >= 20;
         return true;
     }
