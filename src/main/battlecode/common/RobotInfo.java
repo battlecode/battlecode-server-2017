@@ -84,6 +84,26 @@ public class RobotInfo implements  BodyInfo{
         this.moveCount = moveCount;
     }
 
+    public Team getTeam() {
+        return team;
+    }
+
+    public RobotType getType() {
+        return type;
+    }
+
+    public double getHealth() {
+        return health;
+    }
+
+    public int getAttackCount() {
+        return attackCount;
+    }
+
+    public int getMoveCount() {
+        return moveCount;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

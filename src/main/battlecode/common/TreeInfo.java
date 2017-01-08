@@ -69,6 +69,26 @@ public class TreeInfo implements BodyInfo{
         }
     }
 
+    public Team getTeam() {
+        return team;
+    }
+
+    public float getHealth() {
+        return health;
+    }
+
+    public float getMaxHealth() {
+        return maxHealth;
+    }
+
+    public int getContainedBullets() {
+        return containedBullets;
+    }
+
+    public RobotType getContainedRobot() {
+        return containedRobot;
+    }
+
     @Override
     public int getID() {
         return this.ID;

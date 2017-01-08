@@ -41,6 +41,18 @@ public class BulletInfo implements BodyInfo{
         this.location = location;
     }
 
+    public float getSpeed() {
+        return speed;
+    }
+
+    public float getDamage() {
+        return damage;
+    }
+
+    public Direction getDir() {
+        return dir;
+    }
+
     @Override
     public int getID() {
         return this.ID;
