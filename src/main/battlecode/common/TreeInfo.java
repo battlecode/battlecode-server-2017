@@ -69,22 +69,39 @@ public class TreeInfo implements BodyInfo{
         }
     }
 
+    /**
+     * The Team that the tree is on.
+     */
     public Team getTeam() {
         return team;
     }
 
+    /**
+     * The current health of the tree.
+     */
     public float getHealth() {
         return health;
     }
 
+    /**
+     * The current maximum health of the tree.
+     */
     public float getMaxHealth() {
         return maxHealth;
     }
 
+    /**
+     * The current amount of bullets contained within the tree.
+     * Note: only NEUTRAL trees can contain bullets
+     */
     public int getContainedBullets() {
         return containedBullets;
     }
 
+    /**
+     * The current amount of bullets contained within the tree.
+     * Note: only NEUTRAL trees can contain bullets
+     */
     public RobotType getContainedRobot() {
         return containedRobot;
     }
