@@ -146,9 +146,9 @@ public class RobotControllerTest {
             if (id != soldierA) return;
             RobotInfo[] nearbyRobots = rc.senseNearbyRobots(-1, Team.A);
             assertEquals(nearbyRobots.length,1);
-            assertTrue(rc.canSingleShot());
+            assertTrue(rc.canFireSingleShot());
             rc.fireSingleShot(rc.getLocation().directionTo(nearbyRobots[0].location));
-            assertFalse(rc.canSingleShot());
+            assertFalse(rc.canFireSingleShot());
             
             // Ensure bullet exists and spawns at proper location
             InternalBullet[] bullets = game.getWorld().getObjectInfo().bulletsArray();
@@ -170,9 +170,9 @@ public class RobotControllerTest {
             
             RobotInfo[] nearbyRobots = rc.senseNearbyRobots(-1, Team.B);
             assertEquals(nearbyRobots.length,1);
-            assertTrue(rc.canSingleShot());
+            assertTrue(rc.canFireSingleShot());
             rc.fireSingleShot(rc.getLocation().directionTo(nearbyRobots[0].location));
-            assertFalse(rc.canSingleShot());
+            assertFalse(rc.canFireSingleShot());
             
             // Ensure new bullet exists
             bullets = game.getWorld().getObjectInfo().bulletsArray();
@@ -213,9 +213,9 @@ public class RobotControllerTest {
             
             TreeInfo[] nearbyTrees = rc.senseNearbyTrees(-1);
             assertEquals(nearbyTrees.length,1);
-            assertTrue(rc.canSingleShot());
+            assertTrue(rc.canFireSingleShot());
             rc.fireSingleShot(rc.getLocation().directionTo(nearbyTrees[0].location));
-            assertFalse(rc.canSingleShot());
+            assertFalse(rc.canFireSingleShot());
         });
         
         // Let bullets propagate to targets
