@@ -16,7 +16,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -295,7 +294,7 @@ public final strictfp class GameMapIO {
                         treeLocsXs.add(tree.location.x);
                         treeLocsYs.add(tree.location.y);
                         treeHealths.add(tree.health);
-                        treeMaxHealths.add(tree.getMaxHealth());
+                        treeMaxHealths.add(tree.maxHealth);
                     } else {
                         bodyIDs.add(tree.ID);
                         bodyTeamIDs.add(TeamMapping.id(tree.team));
@@ -397,9 +396,9 @@ public final strictfp class GameMapIO {
                     Server.debug("Mismatched match file tree health ("+health+
                             ") and actual tree health:"+tree.health);
                 }
-                if (maxHealth != tree.getMaxHealth()) {
+                if (maxHealth != tree.maxHealth) {
                     Server.debug("Mismatched match file tree max health ("+maxHealth+
-                            ") and actual tree max health:"+tree.getMaxHealth());
+                            ") and actual tree max health:"+ tree.maxHealth);
                 }
             }
         }
