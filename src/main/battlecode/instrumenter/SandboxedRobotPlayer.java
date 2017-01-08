@@ -7,7 +7,9 @@ import battlecode.instrumenter.stream.SilencedPrintStream;
 import battlecode.server.ErrorReporter;
 import battlecode.server.Config;
 
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -77,11 +79,6 @@ public class SandboxedRobotPlayer {
     private final Method getBytecodeNumMethod;
 
     /**
-     * The cached 'setSystemOut' method of the monitor.
-     */
-    private final Method setSystemOutMethod;
-
-    /**
      * The object used to trade of control between threads.
      */
     private final Object notifier;
@@ -92,18 +89,27 @@ public class SandboxedRobotPlayer {
     private boolean running;
 
     /**
+     * Used so we don't create a new PrintStream for every robot
+     * every round.
+     */
+    private OutputStream systemOut;
+
+    /**
      * Create a new sandboxed robot player.
      *
      * @param teamName          the name of the team to create a player for
      * @param robotController   the robot we're loading a player for
      * @param seed              the seed the robot should use for random operations
+     * @param loader            the classloader to load classes with
+     * @param robotOut          the output to write robot output to (with headers)
      * @throws InstrumentationException if the player doesn't work for some reason
      * @throws RuntimeException if our code fails for some reason
      */
     public SandboxedRobotPlayer(String teamName,
                                 RobotController robotController,
                                 int seed,
-                                TeamClassLoaderFactory.Loader loader)
+                                TeamClassLoaderFactory.Loader loader,
+                                OutputStream robotOut)
             throws InstrumentationException {
         this.robotController = robotController;
         this.seed = seed;
@@ -133,7 +139,9 @@ public class SandboxedRobotPlayer {
             // from inflicting its bytecode cost on the player.
             Class<?> system = individualLoader
                     .loadClass("battlecode.instrumenter.inject.System");
-            setSystemOutMethod = system.getMethod("setSystemOut", PrintStream.class);
+
+            this.systemOut = getOut(robotOut);
+            system.getMethod("setSystemOut", PrintStream.class).invoke(null, this.systemOut);
 
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException("Couldn't load RobotMonitor", e);
@@ -269,12 +277,7 @@ public class SandboxedRobotPlayer {
             throw new RuntimeException("Step called after robot killed");
         }
         // Update the robot's information
-        try {
-            setSystemOutMethod.invoke(null, getOut());
-        } catch (ReflectiveOperationException e) {
-            ErrorReporter.report(e, true);
-        }
-
+        updateOut();
 
         try {
             synchronized (notifier) {
@@ -376,43 +379,37 @@ public class SandboxedRobotPlayer {
         void kill();
     }
 
-    /**
-     * Used so we don't create a new PrintStream for every robot
-     * every round.
-     */
-    private PrintStream cachedOut;
-
-    /**
-     * Create a new System.out for this robot and round.
-     * @return a stream to use for System.out in the sandboxed player
-     */
-    private PrintStream getOut() {
-        //TODO move this logic?
-
+    public PrintStream getOut(OutputStream wrapped) {
         Config options = Config.getGlobalConfig();
 
         if (robotController.getTeam() == Team.A
                 && options.getBoolean("bc.engine.silence-a")
                 || robotController.getTeam() == Team.B
                 && options.getBoolean("bc.engine.silence-b")) {
-            if (!(cachedOut instanceof SilencedPrintStream)) {
-                cachedOut = SilencedPrintStream.theInstance();
-            }
+            return SilencedPrintStream.theInstance();
             // Modifying Systems specific to this robot.
         } else {
-            if (!(cachedOut instanceof RoboPrintStream)) {
-                cachedOut = new RoboPrintStream();
+            try {
+                return new RoboPrintStream(wrapped);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException("UTF-8 isn't supported on this system??", e);
             }
+        }
+    }
 
-            ((RoboPrintStream) cachedOut).updateHeader(
+    /**
+     * Create a new System.out for this robot and round.
+     * @return a stream to use for System.out in the sandboxed player
+     */
+    private void updateOut() {
+        //TODO this is ugly
+        if (systemOut instanceof RoboPrintStream) {
+            ((RoboPrintStream) systemOut).updateHeader(
                         robotController.getTeam(),
                         robotController.getType(),
                         robotController.getID(),
                         robotController.getRoundNum()
             );
-
         }
-
-        return cachedOut;
     }
 }

@@ -3,7 +3,9 @@ package battlecode.instrumenter.stream;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * RoboPrintStream is a wrapper for System.out that prepends a string identifying the current robot to
@@ -14,15 +16,18 @@ import java.io.PrintStream;
 @SuppressWarnings("unused")
 public class RoboPrintStream extends PrintStream {
 
-    private boolean alreadyInLine = false;
+    private final PrintStream real;
 
+    private boolean headerThisRound;
     private Team team;
     private RobotType type;
     private int id;
     private int round;
 
-    public RoboPrintStream() {
-        super(java.lang.System.out);
+    public RoboPrintStream(OutputStream robotOut) throws UnsupportedEncodingException {
+        super(SilencedPrintStream.theInstance());
+        real = new PrintStream(robotOut, true, "UTF-8");
+        headerThisRound = false;
     }
 
     //************************
@@ -30,57 +35,57 @@ public class RoboPrintStream extends PrintStream {
     //************************
 
     public void print(boolean b) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.print(b);
         java.lang.System.out.print(b);
-        alreadyInLine = true;
     }
 
     public void print(char c) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.print(c);
         java.lang.System.out.print(c);
-        alreadyInLine = true;
     }
 
     public void print(char[] s) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.print(s);
         java.lang.System.out.print(s);
-        alreadyInLine = true;
     }
 
     public void print(double d) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.print(d);
         java.lang.System.out.print(d);
-        alreadyInLine = true;
     }
 
     public void print(float f) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.print(f);
         java.lang.System.out.print(f);
-        alreadyInLine = true;
     }
 
     public void print(int i) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.print(i);
         java.lang.System.out.print(i);
-        alreadyInLine = true;
     }
 
     public void print(long l) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.print(l);
         java.lang.System.out.print(l);
-        alreadyInLine = true;
     }
 
     public void print(Object obj) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.print(String.valueOf(obj));
         java.lang.System.out.print(String.valueOf(obj));
-        alreadyInLine = true;
     }
 
     public void print(String s) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.print(s);
         java.lang.System.out.print(s);
-        alreadyInLine = true;
     }
 
     //***************************
@@ -88,63 +93,63 @@ public class RoboPrintStream extends PrintStream {
     //***************************
 
     public void println(boolean b) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.println(b);
         java.lang.System.out.println(b);
-        alreadyInLine = false;
     }
 
     public void println(char c) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.println(c);
         java.lang.System.out.println(c);
-        alreadyInLine = false;
     }
 
     public void println(char[] s) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.println(s);
         java.lang.System.out.println(s);
-        alreadyInLine = false;
     }
 
     public void println(double d) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.println(d);
         java.lang.System.out.println(d);
-        alreadyInLine = false;
     }
 
     public void println(float f) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.println(f);
         java.lang.System.out.println(f);
-        alreadyInLine = false;
     }
 
     public void println(int i) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.println(i);
         java.lang.System.out.println(i);
-        alreadyInLine = false;
     }
 
     public void println(long l) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.println(l);
         java.lang.System.out.println(l);
-        alreadyInLine = false;
     }
 
     public void println(Object obj) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.println(obj);
         java.lang.System.out.println(obj);
-        alreadyInLine = false;
     }
 
     public void println(String s) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.println(s);
         java.lang.System.out.println(s);
-        alreadyInLine = false;
     }
 
     public void println() {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.println();
         java.lang.System.out.println();
-        alreadyInLine = false;
     }
 
     //*************************
@@ -152,23 +157,23 @@ public class RoboPrintStream extends PrintStream {
     //*************************
 
     public PrintStream append(char c) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.print(c);
         java.lang.System.out.print(c);
-        alreadyInLine = true;
         return this;
     }
 
     public PrintStream append(CharSequence csq) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.print(String.valueOf(csq));
         java.lang.System.out.print(String.valueOf(csq));
-        alreadyInLine = true;
         return this;
     }
 
     public PrintStream append(CharSequence csq, int start, int end) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.print(csq.subSequence(start, end).toString());
         java.lang.System.out.print(csq.subSequence(start, end).toString());
-        alreadyInLine = true;
         return this;
     }
 
@@ -176,37 +181,36 @@ public class RoboPrintStream extends PrintStream {
         return false;
     }
 
-    public void setError() {
-    }
+    public void setError() {}
 
     public void close() {
         flush();
     }
 
     public PrintStream format(String format, Object... args) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.print(String.format(format, args));
         java.lang.System.out.print(String.format(format, args));
-        alreadyInLine = true;
         return this;
     }
 
     public PrintStream printf(String format, Object... args) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.printf(format, args);
         java.lang.System.out.printf(format, args);
-        alreadyInLine = true;
         return this;
     }
 
     public void write(byte[] buf, int off, int len) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.write(buf, off, len);
         java.lang.System.out.write(buf, off, len);
-        alreadyInLine = true;
     }
 
     public void write(int b) {
-        if (!alreadyInLine) printHeader();
+        maybePrintHeader();
+        real.write(b);
         java.lang.System.out.write(b);
-        alreadyInLine = true;
     }
 
     //**************************
@@ -226,17 +230,30 @@ public class RoboPrintStream extends PrintStream {
         this.type = type;
         this.id = id;
         this.round = round;
+        this.headerThisRound = false;
     }
 
-    private void printHeader() {
-        java.lang.System.out.print('[');
-        java.lang.System.out.print(team);
-        java.lang.System.out.print(':');
-        java.lang.System.out.print(type);
-        java.lang.System.out.print('#');
-        java.lang.System.out.print(id);
-        java.lang.System.out.print('@');
-        java.lang.System.out.print(round);
-        java.lang.System.out.print("] ");
+    private void maybePrintHeader() {
+        if (!this.headerThisRound) {
+            this.headerThisRound = true;
+            real.print('[');
+            java.lang.System.out.print('[');
+            real.print(team);
+            java.lang.System.out.print(team);
+            real.print(':');
+            java.lang.System.out.print(':');
+            real.print(type);
+            java.lang.System.out.print(type);
+            real.print('#');
+            java.lang.System.out.print('#');
+            real.print(id);
+            java.lang.System.out.print(id);
+            real.print('@');
+            java.lang.System.out.print('@');
+            real.print(round);
+            java.lang.System.out.print(round);
+            real.print("] ");
+            java.lang.System.out.print("] ");
+        }
     }
 }

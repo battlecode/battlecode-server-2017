@@ -42,7 +42,7 @@ public class GameMakerTest {
     public void testMatchStateExceptions() {
         GameMaker gm = new GameMaker(info, null);
         gm.makeGameHeader();
-        gm.createMatchMaker().makeMatchFooter(Team.A, 23);
+        gm.getMatchMaker().makeMatchFooter(Team.A, 23);
     }
 
     @Test
@@ -51,7 +51,7 @@ public class GameMakerTest {
         GameMaker gm = new GameMaker(info, mockServer);
 
         gm.makeGameHeader();
-        GameMaker.MatchMaker mm = gm.createMatchMaker();
+        GameMaker.MatchMaker mm = gm.getMatchMaker();
         mm.makeMatchHeader(new TestMapBuilder("honolulu", 2, -3, 50, 50,1337, 50)
                 .addRobot(0, Team.A, RobotType.ARCHON, new MapLocation(0, 0)).build());
         mm.addMoved(0, new MapLocation(1, 1));
@@ -60,7 +60,7 @@ public class GameMakerTest {
         mm.makeRound(1);
         mm.makeMatchFooter(Team.B, 2);
 
-        GameMaker.MatchMaker mm2 = gm.createMatchMaker();
+        GameMaker.MatchMaker mm2 = gm.getMatchMaker();
         mm2.makeMatchHeader(new TestMapBuilder("argentina", 55.3f, -3, 58.76f, 50, 1337, 50)
                 .build());
         mm2.makeRound(0);

@@ -16,8 +16,8 @@ import gnu.trove.map.TObjectByteMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -96,6 +96,11 @@ public strictfp class GameMaker {
     private TIntArrayList matchFooters;
 
     /**
+     * The MatchMaker associated with this GameMaker.
+     */
+    private final MatchMaker matchMaker;
+
+    /**
      * @param gameInfo the mapping of teams to bytes
      * @param packetSink the NetServer to send packets to
      */
@@ -114,6 +119,8 @@ public strictfp class GameMaker {
         this.events = new TIntArrayList();
         this.matchHeaders = new TIntArrayList();
         this.matchFooters = new TIntArrayList();
+
+        this.matchMaker = new MatchMaker();
     }
 
     /**
@@ -200,12 +207,10 @@ public strictfp class GameMaker {
     }
 
     /**
-     * Make a match maker for a particular match.
-     *
-     * ... you could actually reuse one, but eventually that might change?
+     * Get the MatchMaker associated with this GameMaker.
      */
-    public MatchMaker createMatchMaker() {
-        return new MatchMaker();
+    public MatchMaker getMatchMaker() {
+        return this.matchMaker;
     }
 
     public void makeGameHeader(){
@@ -297,6 +302,8 @@ public strictfp class GameMaker {
      *
      * One of the rare cases where we want a non-static inner class in Java:
      * this basically just provides a restricted interface to GameMaker.
+     *
+     * There is only one of these per GameMaker.
      */
     public class MatchMaker {
         private TIntArrayList movedIDs; // ints
@@ -353,6 +360,9 @@ public strictfp class GameMaker {
         private TIntArrayList indicatorLineRGBsGreen;
         private TIntArrayList indicatorLineRGBsBlue;
 
+        // Used to write logs.
+        private final ByteArrayOutputStream logger;
+
         public MatchMaker() {
             this.movedIDs = new TIntArrayList();
             this.movedLocsXs = new TFloatArrayList();
@@ -393,6 +403,7 @@ public strictfp class GameMaker {
             this.indicatorLineRGBsRed = new TIntArrayList();
             this.indicatorLineRGBsBlue = new TIntArrayList();
             this.indicatorLineRGBsGreen = new TIntArrayList();
+            this.logger = new ByteArrayOutputStream();
         }
 
         public void makeMatchHeader(LiveMap gameMap) {
@@ -421,6 +432,15 @@ public strictfp class GameMaker {
 
         public void makeRound(int roundNum) {
             assertState(State.IN_MATCH);
+
+            try {
+                this.logger.flush();
+            } catch (IOException e) {
+                throw new RuntimeException("Can't flush byte[]outputstream?", e);
+            }
+            byte[] logs = this.logger.toByteArray();
+            ByteBuffer logsBuffer = ByteBuffer.wrap(logs);
+            this.logger.reset();
 
             createEvent((builder) -> {
                 // The bodies that spawned
@@ -482,6 +502,8 @@ public strictfp class GameMaker {
                 int indicatorLineEndLocsP = createVecTable(builder, indicatorLineEndLocsX, indicatorLineEndLocsY);
                 int indicatorLineRGBsP = createRGBTable(builder, indicatorLineRGBsRed, indicatorLineRGBsGreen, indicatorLineRGBsBlue);
 
+                int logsP = builder.createString(logsBuffer);
+
                 Round.startRound(builder);
                 Round.addMovedIDs(builder, movedIDsP);
                 Round.addMovedLocs(builder, movedLocsP);
@@ -505,6 +527,7 @@ public strictfp class GameMaker {
                 Round.addIndicatorLineEndLocs(builder, indicatorLineEndLocsP);
                 Round.addIndicatorLineRGBs(builder, indicatorLineRGBsP);
                 Round.addRoundID(builder, roundNum);
+                Round.addLogs(builder, logsP);
 
                 int round = Round.endRound(builder);
 
@@ -512,6 +535,13 @@ public strictfp class GameMaker {
             });
 
             clearData();
+        }
+
+        /**
+         * @return an outputstream that will be baked into the output file
+         */
+        public OutputStream getOut() {
+            return logger;
         }
 
         public void addMoved(int id, MapLocation newLocation) {

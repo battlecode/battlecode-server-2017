@@ -10,5 +10,5 @@ import battlecode.common.RobotController;
  */
 @SuppressWarnings("unused")
 public class RobotPlayer {
-    public static void run(RobotController r) {}
+    public static void run(RobotController r) throws Exception {}
 }

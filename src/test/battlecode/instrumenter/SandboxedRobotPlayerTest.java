@@ -4,15 +4,24 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import battlecode.instrumenter.stream.SilencedPrintStream;
 import battlecode.server.Config;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Tests for SandboxedRobotPlayer; i.e.
+ * Tests for SandboxedRobotPlayer.
+ *
+ * IF YOU NEED TO LOAD A NEW TEST PLAYER ADD IT TO setupFolder(),
+ * OTHERWISE IT WON'T BE INSTRUMENTED.
  *
  * @author james
  */
@@ -34,16 +43,20 @@ public class SandboxedRobotPlayerTest {
                 "testplayerstatic/RobotPlayer.class",
                 "testplayersuicide/RobotPlayer.class",
                 "testplayersystem/RobotPlayer.class",
+                "testplayersystemout/RobotPlayer.class",
                 "testplayerusesshared/RobotPlayer.class",
                 "shared/SharedUtility.class"
         );
     }
 
+    static PrintStream out = SilencedPrintStream.theInstance();
+
     TeamClassLoaderFactory factory;
     TeamClassLoaderFactory.Loader loader;
     RobotController rc;
 
-    public void setupController(String teamPackageName) throws Exception {
+    @Before
+    public void setupController() throws Exception {
         // Uses the "mockito" library to create a mock RobotController object,
         // so that we don't have to create a GameWorld and all that
         rc = mock(RobotController.class);
@@ -61,8 +74,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testLifecycleEmptyPlayer() throws Exception {
-        setupController("testplayerempty");
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerempty", rc, 0, loader);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerempty", rc, 0, loader, out);
 
         player.setBytecodeLimit(10000);
 
@@ -75,8 +87,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testRobotControllerMethodsCalled() throws Exception {
-        setupController("testplayeractions");
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayeractions", rc, 0, loader);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayeractions", rc, 0, loader, out);
 
         player.setBytecodeLimit(10000);
 
@@ -93,8 +104,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testYield() throws Exception {
-        setupController("testplayerclock");
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerclock", rc, 0, loader);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerclock", rc, 0, loader, out);
         player.setBytecodeLimit(10000);
 
         player.step();
@@ -115,8 +125,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testBytecodeCountingWorks() throws Exception {
-        setupController("testplayerloopforever");
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerloopforever", rc, 0, loader);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerloopforever", rc, 0, loader, out);
         player.setBytecodeLimit(100);
 
         player.step();
@@ -130,8 +139,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test(timeout=300)
     public void testAvoidDeadlocks() throws Exception {
-        setupController("testplayersuicide");
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersuicide", rc, 0, loader);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersuicide", rc, 0, loader, out);
         player.setBytecodeLimit(10);
 
         // Attempt to kill the player when it calls "disintegrate"
@@ -149,8 +157,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testStaticInitialization() throws Exception {
-        setupController("testplayerstatic");
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerstatic", rc, 0, loader);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerstatic", rc, 0, loader, out);
         player.setBytecodeLimit(10000);
 
         // Player calls "yield" in static initializer
@@ -164,8 +171,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testBytecodeOveruse() throws Exception {
-        setupController("testplayerbytecode");
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerbytecode", rc, 0, loader);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerbytecode", rc, 0, loader, out);
         player.setBytecodeLimit(200);
 
         for (int i = 0; i < 10; i++) {
@@ -179,8 +185,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testArrayBytecode() throws Exception {
-        setupController("testplayerarraybytecode");
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerarraybytecode", rc, 0, loader);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerarraybytecode", rc, 0, loader, out);
         player.setBytecodeLimit(10000);
 
 	int[] bytecodesUsed = new int[4];
@@ -204,8 +209,7 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testMultiArrayBytecode() throws Exception {
-        setupController("testplayermultiarraybytecode");
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayermultiarraybytecode", rc, 0, loader);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayermultiarraybytecode", rc, 0, loader, out);
         player.setBytecodeLimit(10000);
 
 	int[] bytecodesUsed = new int[4];
@@ -231,8 +235,7 @@ public class SandboxedRobotPlayerTest {
     public void testBcTesting() throws Exception {
         Config.getGlobalConfig().set("bc.testing.should.terminate", "true");
 
-        setupController("testplayersystem");
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersystem", rc, 0, loader);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersystem", rc, 0, loader, out);
         player.setBytecodeLimit(200);
 
         player.step();
@@ -243,8 +246,7 @@ public class SandboxedRobotPlayerTest {
     public void testDebugMethodsEnabled() throws Exception {
         Config.getGlobalConfig().set("bc.engine.debug-methods", "true");
 
-        setupController("testplayerdebug");
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerdebug", rc, 0, loader);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerdebug", rc, 0, loader, out);
         player.setBytecodeLimit(100);
 
         player.step();
@@ -255,8 +257,7 @@ public class SandboxedRobotPlayerTest {
     public void testDebugMethodsDisabled() throws Exception {
         Config.getGlobalConfig().set("bc.engine.debug-methods", "false");
 
-        setupController("testplayernodebug");
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayernodebug", rc, 0, loader);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayernodebug", rc, 0, loader, out);
         player.setBytecodeLimit(200);
 
         player.step();
@@ -265,11 +266,27 @@ public class SandboxedRobotPlayerTest {
 
     @Test
     public void testUseShared() throws Exception {
-        setupController("testplayerusesshared");
-        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerusesshared", rc, 0, loader);
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerusesshared", rc, 0, loader, out);
         player.setBytecodeLimit(200);
         player.step();
         assertTrue(player.getTerminated());
         verify(rc).broadcast(0, 7);
+    }
+
+    @Test
+    public void testPlayerSystemOut() throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PrintStream outPrinter = new PrintStream(out, false, "UTF-8");
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayersystemout", rc, 0, loader,
+                outPrinter);
+        player.setBytecodeLimit(200);
+        player.step();
+        assertTrue(player.getTerminated());
+
+        //outPrinter.flush();
+        //out.flush();
+
+        assertEquals("[A:ARCHON#0@0] I LOVE MEMES\nthis shouldn't have a header\n",
+                out.toString("UTF-8"));
     }
 }
