@@ -85,35 +85,35 @@ public class RobotInfo implements  BodyInfo{
     }
 
     /**
-     * The Team that the robot is on.
+     * @return the team that this robot is on
      */
     public Team getTeam() {
         return team;
     }
 
     /**
-     * The type of the robot.
+     * @return the type of this robot
      */
     public RobotType getType() {
         return type;
     }
 
     /**
-     * The current health of the robot.
+     * @return the current health of this robot
      */
     public double getHealth() {
         return health;
     }
 
     /**
-     * The number of times this robot has attacked in the current turn
+     * @return the number of times this robot has attacked in the current turn
      */
     public int getAttackCount() {
         return attackCount;
     }
 
     /**
-     * The number of times this robot has moved in the current turn
+     * @return the number of times this robot has moved in the current turn
      */
     public int getMoveCount() {
         return moveCount;

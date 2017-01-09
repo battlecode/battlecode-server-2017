@@ -844,22 +844,24 @@ public strictfp interface RobotController {
     void shake(int id) throws GameActionException;
 
     /**
-     * Returns true if the robot can water a tree. Takes into accout the
+     * Determines whether the robot can water a tree. Takes into accout the
      * robot's type, if it's already watered this turn, and if a valid
-     * tree exists at this location within range.
+     * tree at this location exists within range.
      *
      * @param loc The location of a tree to check.
+     * @return true if this robot can water a tree, false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canWater(MapLocation loc);
 
     /**
-     * Returns true if the robot can water a tree. Takes into accout the
+     * Determines whether the robot can water a tree. Takes into accout the
      * robot's type, if it's already watered this turn, and if a valid
-     * tree exists with this id within range
+     * tree with this id exists within range.
      *
      * @param id The id of a tree to check.
+     * @return true if this robot can water a tree, false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
