@@ -7,6 +7,7 @@ import battlecode.instrumenter.InstrumentationException;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -327,7 +328,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                                 || isSuperClass(h.getOwner(), "java/lang/Throwable")))
                         || (h.getName().startsWith(DEBUG_PREFIX) && h.getDesc().endsWith("V") &&
                             loader.getFactory().hasTeamClass(h.getOwner()))
-                        || MethodCostUtil.getMethodData(h.getOwner(), h.getName()) != null) {
+                        || getMethodData(h.getOwner(), h.getName()) != null) {
 
                     final String owner = h.getOwner().replace("/",".");
 
@@ -391,7 +392,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 
         boolean endBasicBlock = loader.getFactory().hasTeamClass(n.owner) || classReference(n.owner).startsWith("instrumented") || n.owner.startsWith("battlecode");
 
-        MethodCostUtil.MethodData data = MethodCostUtil.getMethodData(n.owner, n.name);
+        MethodCostUtil.MethodData data = getMethodData(n.owner, n.name);
         if (data != null) {
             bytecodeCtr += data.cost;
             endBasicBlock = data.shouldEndRound;
@@ -483,7 +484,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             // There are some methods called automatically by Java
             // that we need to enable
             if (!methodName.equals("desiredAssertionStatus")) {
-                instrumentationException("Illegal method in " + className + ": Class." + methodName + " may not be called by a player.");
+                instrumentationException("Illegal method in " + className + ": "+owner + "." + methodName + " may not be called by a player.");
             }
         }
 
@@ -651,6 +652,22 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         InterfaceReader ir = new InterfaceReader(loader.getFactory());
         cr.accept(ir, ClassReader.SKIP_DEBUG);
         return Arrays.asList(ir.getInterfaces()).contains(superclass);
+    }
+
+    /**
+     * Perform a check to see if we can get method data for this method
+     *
+     * @param owner the class
+     * @param name the method name
+     * @return method data or null
+     */
+    private MethodCostUtil.MethodData getMethodData(String owner, String name) {
+        if (loader.getFactory().hasTeamClass(owner)) {
+            // player code should be instrumented directly
+            return null;
+        } else {
+            return MethodCostUtil.getMethodData(owner, name);
+        }
     }
 
 }
