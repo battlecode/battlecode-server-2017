@@ -366,7 +366,7 @@ public strictfp interface RobotController {
     BulletInfo senseBullet(int id) throws GameActionException;
 
     /**
-     * Returns all robots that can be sensed on the map.
+     * Returns all robots within sense radius.
      *
      * @return array of RobotInfo objects, which contain information about all
      * the robots you sensed.
@@ -380,7 +380,7 @@ public strictfp interface RobotController {
      * robot.
      *
      * @param radius return robots this distance away from the center of
-     * this robot. If -1 is passed, robots from the whole map are returned.
+     * this robot. If -1 is passed, all robots within sense radius are returned.
      * @return array of RobotInfo objects of all the robots you sensed.
      *
      * @battlecode.doc.costlymethod
@@ -392,7 +392,7 @@ public strictfp interface RobotController {
      * radius of this robot.
      *
      * @param radius return robots this distance away from the center of
-     * this robot. If -1 is passed, robots from the whole map are returned.
+     * this robot. If -1 is passed, all robots within sense radius are returned.
      * @param team filter game objects by the given team. If null is passed,
      * robots from any team are returned.
      * @return array of RobotInfo objects of all the robots you sensed.
@@ -407,7 +407,7 @@ public strictfp interface RobotController {
      *
      * @param center center of the given search radius.
      * @param radius return robots this distance away from the given center
-     * location. If -1 is passed, robots from the whole map are returned.
+     * location. If -1 is passed, all robots within sense radius are returned.
      * @param team filter game objects by the given team. If null is passed,
      * objects from all teams are returned.
      * @return array of RobotInfo objects of the robots you sensed.
@@ -417,7 +417,7 @@ public strictfp interface RobotController {
     RobotInfo[] senseNearbyRobots(MapLocation center, float radius, Team team);
 
     /**
-     * Returns all trees that can be sensed on the map.
+     * Returns all trees within sense radius.
      *
      * @return array of TreeInfo objects, which contain information about all
      * the trees you sensed.
@@ -431,7 +431,7 @@ public strictfp interface RobotController {
      * robot.
      *
      * @param radius return trees this distance away from the center of
-     * this robot. If -1 is passed, trees from the whole map are returned.
+     * this robot. If -1 is passed, all trees within sense radius are returned.
      * @return array of TreeInfo objects of all the trees you sensed.
      *
      * @battlecode.doc.costlymethod
@@ -443,7 +443,7 @@ public strictfp interface RobotController {
      * radius of this robot.
      *
      * @param radius return trees this distance away from the center of
-     * this robot. If -1 is passed, trees from the whole map are returned.
+     * this robot. If -1 is passed, all trees within sense radius are returned.
      * @param team filter game objects by the given team. If null is passed,
      * robots from any team are returned.
      * @return array of TreeInfo objects of all the trees you sensed.
@@ -458,7 +458,7 @@ public strictfp interface RobotController {
      *
      * @param center center of the given search radius.
      * @param radius return trees this distance away from given center
-     * location. If -1 is passed, trees from the whole map are returned.
+     * location. If -1 is passed, all trees within sense radius are returned.
      * @param team filter game objects by the given team. If null is passed,
      * objects from all teams are returned.
      * @return array of TreeInfo objects of the trees you sensed.
@@ -468,7 +468,7 @@ public strictfp interface RobotController {
     TreeInfo[] senseNearbyTrees(MapLocation center, float radius, Team team);
 
     /**
-     * Returns all bullets that can be sensed on the map.
+     * Returns all bullets within bullet sense radius.
      *
      * @return array of BulletInfo objects, which contain information about all
      * the bullets you sensed.
@@ -495,7 +495,7 @@ public strictfp interface RobotController {
      *
      * @param center center of the given search radius.
      * @param radius return bullets this distance away from the given center
-     * location. If -1 is passed, bullets from the whole map are returned.
+     * location. If -1 is passed, all bullets within bullet sense radius are returned..
      * @return array of TreeInfo objects of the bullets you sensed.
      *
      * @battlecode.doc.costlymethod
