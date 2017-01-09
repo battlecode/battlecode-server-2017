@@ -33,10 +33,14 @@ battlecode/common/MapLocation/valueOf                              25    false
 battlecode/common/RobotController/broadcast                         10    true
 battlecode/common/RobotController/buildRobot                        0     true
 battlecode/common/RobotController/canBuildRobot                     10    true
+battlecode/common/RobotController/canChop                           5     true
+battlecode/common/RobotController/canFirePentadShot                 5     true
+battlecode/common/RobotController/canFireSingleShot                 5     true
+battlecode/common/RobotController/canFireTriadShot                  5     true
+battlecode/common/RobotController/canHireGardener                   10    true
 battlecode/common/RobotController/canInteractWithRobot              5     true
 battlecode/common/RobotController/canInteractWithTree               5     true
 battlecode/common/RobotController/canMove                           10    true
-battlecode/common/RobotController/canPentadShot                     5     true
 battlecode/common/RobotController/canPlantTree                      10    true
 battlecode/common/RobotController/canRepair                         5     true
 battlecode/common/RobotController/canSenseAllOfCircle               5     true
@@ -45,9 +49,8 @@ battlecode/common/RobotController/canSenseLocation                  5     true
 battlecode/common/RobotController/canSensePartOfCircle              5     true
 battlecode/common/RobotController/canSenseRobot                     5     true
 battlecode/common/RobotController/canSenseTree                      5     true
-battlecode/common/RobotController/canSingleShot                     5     true
 battlecode/common/RobotController/canShake                          5     true
-battlecode/common/RobotController/canTriadShot                      5     true
+battlecode/common/RobotController/canStrike                         5     true
 battlecode/common/RobotController/canWater                          5     true
 battlecode/common/RobotController/chop                              0     true
 battlecode/common/RobotController/disintegrate                      0     true
