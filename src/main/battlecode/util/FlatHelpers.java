@@ -35,6 +35,8 @@ public class FlatHelpers {
                 return RobotType.SOLDIER;
             case BodyType.TANK:
                 return RobotType.TANK;
+            case BodyType.NONE:
+                return null;
             default:
                 throw new RuntimeException("No robot type for: "+bodyType);
         }
