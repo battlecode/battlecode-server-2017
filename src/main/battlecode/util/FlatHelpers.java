@@ -43,6 +43,10 @@ public class FlatHelpers {
     }
 
     public static byte getBodyTypeFromRobotType(RobotType type) {
+        if (type == null) {
+            return BodyType.NONE;
+        }
+
         switch (type) {
             case ARCHON:
                 return BodyType.ARCHON;
