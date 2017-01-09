@@ -192,7 +192,10 @@ public class SandboxedRobotPlayer {
                 }
                 ErrorReporter.report(e.getCause(), false);
             } catch (final InstrumentationException e) {
-                ErrorReporter.report("Error instrumenting " + teamName + ": " + e.getMessage(), false);
+                ErrorReporter.report(e,"Error instrumenting " + teamName +
+                        "Make sure the team name is spelled correctly.\n" +
+                        "Make sure the .class files are in the right directory (src/teamname/*.class)" , false);
+
             } catch (final RobotDeathException e) {
                 return;
             } finally {
