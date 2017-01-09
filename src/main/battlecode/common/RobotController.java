@@ -177,6 +177,8 @@ public strictfp interface RobotController {
      * @param radius the radius of the circle to check.
      * @return true if the circle is completely on the map, false otherwise.
      * @throws GameActionException if any portion of the given circle is not within sensor range.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean onTheMap(MapLocation center, float radius) throws GameActionException;
 
@@ -364,7 +366,7 @@ public strictfp interface RobotController {
     BulletInfo senseBullet(int id) throws GameActionException;
 
     /**
-     * Returns all robots that can be sensed on the map.
+     * Returns all robots within sense radius.
      *
      * @return array of RobotInfo objects, which contain information about all
      * the robots you sensed.
@@ -378,7 +380,7 @@ public strictfp interface RobotController {
      * robot.
      *
      * @param radius return robots this distance away from the center of
-     * this robot. If -1 is passed, robots from the whole map are returned.
+     * this robot. If -1 is passed, all robots within sense radius are returned.
      * @return array of RobotInfo objects of all the robots you sensed.
      *
      * @battlecode.doc.costlymethod
@@ -390,7 +392,7 @@ public strictfp interface RobotController {
      * radius of this robot.
      *
      * @param radius return robots this distance away from the center of
-     * this robot. If -1 is passed, robots from the whole map are returned.
+     * this robot. If -1 is passed, all robots within sense radius are returned.
      * @param team filter game objects by the given team. If null is passed,
      * robots from any team are returned.
      * @return array of RobotInfo objects of all the robots you sensed.
@@ -405,7 +407,7 @@ public strictfp interface RobotController {
      *
      * @param center center of the given search radius.
      * @param radius return robots this distance away from the given center
-     * location. If -1 is passed, robots from the whole map are returned.
+     * location. If -1 is passed, all robots within sense radius are returned.
      * @param team filter game objects by the given team. If null is passed,
      * objects from all teams are returned.
      * @return array of RobotInfo objects of the robots you sensed.
@@ -415,7 +417,7 @@ public strictfp interface RobotController {
     RobotInfo[] senseNearbyRobots(MapLocation center, float radius, Team team);
 
     /**
-     * Returns all trees that can be sensed on the map.
+     * Returns all trees within sense radius.
      *
      * @return array of TreeInfo objects, which contain information about all
      * the trees you sensed.
@@ -429,7 +431,7 @@ public strictfp interface RobotController {
      * robot.
      *
      * @param radius return trees this distance away from the center of
-     * this robot. If -1 is passed, trees from the whole map are returned.
+     * this robot. If -1 is passed, all trees within sense radius are returned.
      * @return array of TreeInfo objects of all the trees you sensed.
      *
      * @battlecode.doc.costlymethod
@@ -441,7 +443,7 @@ public strictfp interface RobotController {
      * radius of this robot.
      *
      * @param radius return trees this distance away from the center of
-     * this robot. If -1 is passed, trees from the whole map are returned.
+     * this robot. If -1 is passed, all trees within sense radius are returned.
      * @param team filter game objects by the given team. If null is passed,
      * robots from any team are returned.
      * @return array of TreeInfo objects of all the trees you sensed.
@@ -456,7 +458,7 @@ public strictfp interface RobotController {
      *
      * @param center center of the given search radius.
      * @param radius return trees this distance away from given center
-     * location. If -1 is passed, trees from the whole map are returned.
+     * location. If -1 is passed, all trees within sense radius are returned.
      * @param team filter game objects by the given team. If null is passed,
      * objects from all teams are returned.
      * @return array of TreeInfo objects of the trees you sensed.
@@ -466,7 +468,7 @@ public strictfp interface RobotController {
     TreeInfo[] senseNearbyTrees(MapLocation center, float radius, Team team);
 
     /**
-     * Returns all bullets that can be sensed on the map.
+     * Returns all bullets within bullet sense radius.
      *
      * @return array of BulletInfo objects, which contain information about all
      * the bullets you sensed.
@@ -493,7 +495,7 @@ public strictfp interface RobotController {
      *
      * @param center center of the given search radius.
      * @param radius return bullets this distance away from the given center
-     * location. If -1 is passed, bullets from the whole map are returned.
+     * location. If -1 is passed, all bullets within bullet sense radius are returned..
      * @return array of TreeInfo objects of the bullets you sensed.
      *
      * @battlecode.doc.costlymethod
@@ -844,22 +846,24 @@ public strictfp interface RobotController {
     void shake(int id) throws GameActionException;
 
     /**
-     * Returns true if the robot can water a tree. Takes into accout the
+     * Determines whether the robot can water a tree. Takes into accout the
      * robot's type, if it's already watered this turn, and if a valid
-     * tree exists at this location within range.
+     * tree at this location exists within range.
      *
      * @param loc The location of a tree to check.
+     * @return true if this robot can water a tree, false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canWater(MapLocation loc);
 
     /**
-     * Returns true if the robot can water a tree. Takes into accout the
+     * Determines whether the robot can water a tree. Takes into accout the
      * robot's type, if it's already watered this turn, and if a valid
-     * tree exists with this id within range
+     * tree with this id exists within range.
      *
      * @param id The id of a tree to check.
+     * @return true if this robot can water a tree, false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
@@ -1142,6 +1146,8 @@ public strictfp interface RobotController {
      * @param green the green component of the dot's color.
      * @param blue the blue component of the dot's color.
      * @throws GameActionException if loc is not a valid location on the map
+     *
+     * @battlecode.doc.costlymethod
      */
     void setIndicatorDot(MapLocation loc, int red, int green, int blue) throws GameActionException;
 
@@ -1154,6 +1160,8 @@ public strictfp interface RobotController {
      * @param green the green component of the line's color.
      * @param blue the blue component of the line's color.
      * @throws GameActionException if startLoc or endLoc is not a valid location on the map
+     *
+     * @battlecode.doc.costlymethod
      */
     void setIndicatorLine(MapLocation startLoc, MapLocation endLoc, int red, int green, int blue) throws GameActionException;
 
