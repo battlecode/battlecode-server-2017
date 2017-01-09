@@ -177,6 +177,8 @@ public strictfp interface RobotController {
      * @param radius the radius of the circle to check.
      * @return true if the circle is completely on the map, false otherwise.
      * @throws GameActionException if any portion of the given circle is not within sensor range.
+     *
+     * @battlecode.doc.costlymethod
      */
     boolean onTheMap(MapLocation center, float radius) throws GameActionException;
 
@@ -1144,6 +1146,8 @@ public strictfp interface RobotController {
      * @param green the green component of the dot's color.
      * @param blue the blue component of the dot's color.
      * @throws GameActionException if loc is not a valid location on the map
+     *
+     * @battlecode.doc.costlymethod
      */
     void setIndicatorDot(MapLocation loc, int red, int green, int blue) throws GameActionException;
 
@@ -1156,6 +1160,8 @@ public strictfp interface RobotController {
      * @param green the green component of the line's color.
      * @param blue the blue component of the line's color.
      * @throws GameActionException if startLoc or endLoc is not a valid location on the map
+     *
+     * @battlecode.doc.costlymethod
      */
     void setIndicatorLine(MapLocation startLoc, MapLocation endLoc, int red, int green, int blue) throws GameActionException;
 
