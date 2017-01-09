@@ -13,11 +13,11 @@ public class ErrorReporter {
     }
 
     public static void report(Throwable e, String message, boolean ourFault) {
+        Server.warn(e.getMessage());
         Server.warn(message);
+        printStackTrace(e);
         if (ourFault) {
-            Server.warn("\n\n");
             printReportString();
-            printStackTrace(e);
         }
     }
 
