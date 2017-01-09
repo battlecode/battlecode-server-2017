@@ -213,16 +213,10 @@ public final class TeamClassLoaderFactory {
             try {
                 return new ClassReader(resURL.openStream());
             } catch (IOException e) {
-                ErrorReporter.report("Can't find the class \"" + className + "\" on the system classpath",
-                        "Make sure the team name is spelled correctly.\n" +
-                                "Make sure the .class files are in the right directory (src/teamname/*.class)");
-                throw new InstrumentationException(MISSING, "Can't load class "+className, e);
+                throw new InstrumentationException(MISSING, "Can't load class "+className+" on the system classpath", e);
             }
         }
-        ErrorReporter.report("Can't find the class \"" + className + "\" on the system classpath",
-                "Make sure the team name is spelled correctly.\n" +
-                        "Make sure the .class files are in the right directory (src/teamname/*.class)");
-        throw new InstrumentationException(MISSING, "Can't load class "+className);
+        throw new InstrumentationException(MISSING, "Can't load class "+className+" on the system classpath");
     }
 
     /**
@@ -238,16 +232,10 @@ public final class TeamClassLoaderFactory {
             try {
                 return new ClassReader(resURL.openStream());
             } catch (IOException e) {
-                ErrorReporter.report("Can't find the class \"" + className + "\" on the system classpath",
-                        "Make sure the team name is spelled correctly.\n" +
-                                "Make sure the .class files are in the right directory (src/teamname/*.class)");
-                throw new InstrumentationException(MISSING, "Can't load class "+className, e);
+                throw new InstrumentationException(MISSING, "Can't load class "+className+" from player classpath", e);
             }
         }
-        ErrorReporter.report("Can't find the class \"" + className + "\" on the system classpath",
-                "Make sure the team name is spelled correctly.\n" +
-                        "Make sure the .class files are in the right directory (src/teamname/*.class)");
-        throw new InstrumentationException(MISSING, "Can't load class "+className);
+        throw new InstrumentationException(MISSING, "Can't load class "+className+" from player classpath");
     }
 
     /**

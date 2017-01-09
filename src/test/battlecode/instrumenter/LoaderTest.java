@@ -8,6 +8,7 @@ import static battlecode.instrumenter.InstrumentationException.Type.ILLEGAL;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class LoaderTest {
             "instrumentertest/StringFormat.class",
             "instrumentertest/UsesEnumMap.class",
             "instrumentertest/UsesLambda.class",
-            "java/lang/Double.class"
+            "instrumentertest/UsesThrowable.class"
         );
     }
 
@@ -65,6 +66,9 @@ public class LoaderTest {
                 .invoke(null, pauser, killer, 0);
         monitor1.getMethod("setBytecodeLimit", int.class)
                 .invoke(null, Integer.MAX_VALUE);
+
+        result.loadClass("battlecode.instrumenter.inject.System")
+                .getMethod("setSystemOut", PrintStream.class).invoke(null, System.out);
 
         return result;
     }
@@ -247,6 +251,12 @@ public class LoaderTest {
     @Test
     public void testCanUseEnumMap() throws Exception {
         l1.loadClass("instrumentertest.UsesEnumMap");
+    }
+
+    @Test
+    public void testCanUseThrowable() throws Exception {
+        Class<?> c = l1.loadClass("instrumentertest.UsesThrowable");
+        c.getMethod("run").invoke(null);
     }
 
     @Test

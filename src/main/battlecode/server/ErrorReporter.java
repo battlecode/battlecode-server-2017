@@ -12,13 +12,17 @@ public class ErrorReporter {
         report(message, true);
     }
 
-    public static void report(String message, boolean ourFault) {
+    public static void report(Throwable e, String message, boolean ourFault) {
+        Server.warn(e.getMessage());
         Server.warn(message);
+        printStackTrace(e);
         if (ourFault) {
-            Server.warn("\n\n");
             printReportString();
-            printStackTrace(new Error("(Stacktrace Error)"));
         }
+    }
+
+    public static void report(String message, boolean ourFault) {
+        report(new Error("(Stacktrace Error)"), message, ourFault);
     }
 
     public static void report(String message, String thingsToTry) {

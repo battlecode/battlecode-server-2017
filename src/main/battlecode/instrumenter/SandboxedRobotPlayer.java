@@ -192,7 +192,11 @@ public class SandboxedRobotPlayer {
                 }
                 ErrorReporter.report(e.getCause(), false);
             } catch (final InstrumentationException e) {
-                ErrorReporter.report("Error instrumenting " + teamName + ": " + e.getMessage(), false);
+                ErrorReporter.report(e,"Error instrumenting " + teamName + ".RobotPlayer:\n" +
+                        "Make sure you're not trying to escape the sandbox.\n" +
+                        "Make sure the team name is spelled correctly.\n" +
+                        "Make sure the bc.game.team-a.url and bc.game.team-b.url are configured correctly." , false);
+
             } catch (final RobotDeathException e) {
                 return;
             } finally {

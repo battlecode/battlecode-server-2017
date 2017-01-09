@@ -75,10 +75,6 @@ public class MethodCostUtil {
         interfacesMap = new HashMap<>();
     }
 
-    public static MethodData getMethodDataRaw(String fullName) {
-        return methodCosts.get(fullName);
-    }
-
     /**
      * Returns the MethodData associated with the given method, or null if no MethodData exists for the given method.
      * Should not be called on player classes.

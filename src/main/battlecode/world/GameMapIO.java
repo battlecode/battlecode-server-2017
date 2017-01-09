@@ -324,6 +324,8 @@ public final strictfp class GameMapIO {
             int radii = NeutralTreeTable.createRadiiVector(builder, ArrayUtils.toPrimitive(treeRadii.toArray(new Float[treeRadii.size()])));
             int containedBullets = NeutralTreeTable.createContainedBulletsVector(builder, ArrayUtils.toPrimitive(treeContainedBullets.toArray(new Integer[treeContainedBullets.size()])));
             int containedBodies = NeutralTreeTable.createContainedBodiesVector(builder, ArrayUtils.toPrimitive(treeContainedBodies.toArray(new Byte[treeContainedBodies.size()])));
+            int healths = NeutralTreeTable.createHealthsVector(builder, ArrayUtils.toPrimitive(treeHealths.toArray(new Float[treeHealths.size()])));
+            int maxHealths = NeutralTreeTable.createMaxHealthsVector(builder, ArrayUtils.toPrimitive(treeMaxHealths.toArray(new Float[treeMaxHealths.size()])));
             locs = VecTable.createVecTable(builder,
                     VecTable.createXsVector(builder, ArrayUtils.toPrimitive(treeLocsXs.toArray(new Float[treeLocsXs.size()]))),
                     VecTable.createYsVector(builder, ArrayUtils.toPrimitive(treeLocsYs.toArray(new Float[treeLocsYs.size()]))));
@@ -332,6 +334,9 @@ public final strictfp class GameMapIO {
             NeutralTreeTable.addLocs(builder, locs);
             NeutralTreeTable.addRadii(builder, radii);
             NeutralTreeTable.addContainedBullets(builder, containedBullets);
+            NeutralTreeTable.addContainedBodies(builder, containedBodies);
+            NeutralTreeTable.addHealths(builder, healths);
+            NeutralTreeTable.addMaxHealths(builder, maxHealths);
             NeutralTreeTable.addContainedBodies(builder, containedBodies);
             int trees = NeutralTreeTable.endNeutralTreeTable(builder);
 
