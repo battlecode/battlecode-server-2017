@@ -29,7 +29,7 @@ public class BulletInfo implements BodyInfo{
     public final Direction dir;
 
     /**
-     * The current location of the tree.
+     * The current location of the bullet.
      */
     public final MapLocation location;
 

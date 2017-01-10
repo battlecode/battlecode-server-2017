@@ -553,8 +553,7 @@ public strictfp interface RobotController {
      *
      * @param dir the direction to move in.
      * @return true if there is nothing preventing this robot from moving one
-     * stride in the given direction; false otherwise (does not account for
-     * core delay).
+     * stride in the given direction; false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
@@ -1020,7 +1019,7 @@ public strictfp interface RobotController {
      * @param dir the direction to spawn the unit.
      * @param type the type of robot to build
      * @throws GameActionException if the build is bad: if you don't have enough
-     * bullets, if you have coreDelay, if the direction is not a good build
+     * bullets, there is still cooldown, if the direction is not a good build
      * direction, or if you are not of type GARDENER.
      *
      * @battlecode.doc.costlymethod
@@ -1046,7 +1045,7 @@ public strictfp interface RobotController {
      *
      * @param dir the direction to plant the bullet tree.
      * @throws GameActionException if the build is bad: if you don't have enough
-     * bullets, if you have coreDelay, if the direction is not a good build
+     * bullets, if you have cooldown remaining, if the direction is not a good build
      * direction, or if you are not of type GARDENER.
      *
      * @battlecode.doc.costlymethod
@@ -1071,7 +1070,7 @@ public strictfp interface RobotController {
      *
      * @param dir the direction to spawn the GARDENER unit.
      * @throws GameActionException if the build is bad: if you don't have enough
-     * bullets, if you have coreDelay, if the direction is not a good build
+     * bullets, if you have cooldown remaining, if the direction is not a good build
      * direction, or if you are not of type ARCHON.
      *
      * @battlecode.doc.costlymethod
