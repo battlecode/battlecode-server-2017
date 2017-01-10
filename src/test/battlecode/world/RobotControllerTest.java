@@ -843,7 +843,7 @@ public class RobotControllerTest {
             MapLocation loc1 = new MapLocation(5, 5);
             MapLocation loc2 = loc1.add(null, 5);
             assertEquals(loc1, loc2);
-        }
+        });
     }
 
 }
