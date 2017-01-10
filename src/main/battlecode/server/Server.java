@@ -350,6 +350,9 @@ public strictfp class Server implements Runnable {
         DominationFactor dom = stats.getDominationFactor();
 
         switch (dom) {
+            case PHILANTROPIED:
+                sb.append("The winning team won by reaching "+GameConstants.VICTORY_POINTS_TO_WIN+" victory points");
+                break;
             case DESTROYED:
                 sb.append("The winning team won by destruction.");
                 break;
