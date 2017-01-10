@@ -783,24 +783,25 @@ public class RobotControllerTest {
         // This creates the actual game.
         TestGame game = new TestGame(map);
 
-        final int soldierA = game.spawn(3, 5, RobotType.SOLDIER, Team.A);
+        final int soldierA = game.spawn(3, 5, RobotType.SCOUT, Team.A);
+        final int neutralTree = game.spawnTree(5,5,1,Team.NEUTRAL,0,null);
 
         game.round((id, rc) -> {
-            if(id != soldierA) return;
+            if (id != soldierA) return;
 
             // Silly Direction sanity checks
-            for(int i=0; i < 3; i++) {
-                assertEquals(new Direction(0.1f).radians,new Direction(0.1f).rotateLeftRads((float)(2*Math.PI*i)).radians,EPSILON);
-                assertEquals(new Direction(-0.1f).radians,new Direction(-0.1f).rotateLeftRads((float)(2*Math.PI*i)).radians,EPSILON);
-                assertEquals(new Direction(0.1f).radians,new Direction(0.1f).rotateRightRads((float)(2*Math.PI*i)).radians,EPSILON);
-                assertEquals(new Direction(-0.1f).radians,new Direction(-0.1f).rotateRightRads((float)(2*Math.PI*i)).radians,EPSILON);
+            for (int i = 0; i < 3; i++) {
+                assertEquals(new Direction(0.1f).radians, new Direction(0.1f).rotateLeftRads((float) (2 * Math.PI * i)).radians, EPSILON);
+                assertEquals(new Direction(-0.1f).radians, new Direction(-0.1f).rotateLeftRads((float) (2 * Math.PI * i)).radians, EPSILON);
+                assertEquals(new Direction(0.1f).radians, new Direction(0.1f).rotateRightRads((float) (2 * Math.PI * i)).radians, EPSILON);
+                assertEquals(new Direction(-0.1f).radians, new Direction(-0.1f).rotateRightRads((float) (2 * Math.PI * i)).radians, EPSILON);
             }
 
             // Ensure range (-Math.PI,Math.PI]
             Direction testDir = Direction.getSouth();
             float testRads = testDir.radians;
             Direction fromRads = new Direction(testRads);
-            for(int i=0; i < 200; i++) {
+            for (int i = 0; i < 200; i++) {
                 testDir = testDir.rotateLeftDegrees(i);
                 // Stays within range
                 assertTrue(Math.abs(testDir.radians) <= Math.PI);
@@ -808,8 +809,41 @@ public class RobotControllerTest {
                 // Direction.reduce() functionality works
                 testRads += Math.toRadians(i);
                 fromRads = new Direction(testRads);
-                assertEquals(testDir.radians,fromRads.radians,0.0001); // silly rounding errors can accumulate, so larger epsilon
+                assertEquals(testDir.radians, fromRads.radians, 0.0001); // silly rounding errors can accumulate, so larger epsilon
             }
         });
     }
+
+    @Test
+    public void overlappingScoutTest() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int scoutA = game.spawn(3, 5, RobotType.SCOUT, Team.A);
+        final int neutralTree = game.spawnTree(5,5,1,Team.NEUTRAL,0,null);
+
+        game.round((id, rc) -> {
+            if (id != scoutA) return;
+
+            TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
+            rc.move(nearbyTrees[0].getLocation());
+
+            boolean exception = false;
+            try {
+                nearbyTrees = rc.senseNearbyTrees();
+            } catch (Exception e) {
+                System.out.println("Scout threw an error when trying to sense tree at its location, this shouldn't happen");
+                exception = true;
+            }
+            assertFalse(exception);
+
+            MapLocation loc1 = new MapLocation(5, 5);
+            MapLocation loc2 = loc1.add(null, 5);
+            assertEquals(loc1, loc2);
+        });
+    }
+
 }
