@@ -52,7 +52,7 @@ public final strictfp class Direction {
     /**
      * Creates a instance of Direction that represents pointing east (right on screen).
      *
-     * @return Direction instance facing east
+     * @return Direction instance facing east.
      * @battlecode.doc.costlymethod
      */
     public static Direction getEast() {
@@ -62,7 +62,7 @@ public final strictfp class Direction {
     /**
      * Creates a instance of Direction that represents pointing north (up on screen).
      *
-     * @return Direction instance facing north
+     * @return Direction instance facing north.
      * @battlecode.doc.costlymethod
      */
     public static Direction getNorth() {
@@ -72,7 +72,7 @@ public final strictfp class Direction {
     /**
      * Creates a instance of Direction that represents pointing west (left on screen).
      *
-     * @return Direction instance facing west
+     * @return Direction instance facing west.
      * @battlecode.doc.costlymethod
      */
     public static Direction getWest() {
@@ -82,7 +82,7 @@ public final strictfp class Direction {
     /**
      * Creates a instance of Direction that represents pointing south (down on screen).
      *
-     * @return Direction instance facing south
+     * @return Direction instance facing south.
      * @battlecode.doc.costlymethod
      */
     public static Direction getSouth() {
@@ -94,7 +94,7 @@ public final strictfp class Direction {
      * units in this Direction.
      *
      * @param travelDist the total distance to travel
-     * @return the signed distance traveled on the x-axis
+     * @return the signed distance traveled on the x-axis.
      * @battlecode.doc.costlymethod
      */
     public float getDeltaX(float travelDist) {
@@ -106,7 +106,7 @@ public final strictfp class Direction {
      * units in this Direction.
      *
      * @param travelDist the total distance to travel
-     * @return the signed distance traveled on the x-axis
+     * @return the signed distance traveled on the x-axis.
      * @battlecode.doc.costlymethod
      */
     public float getDeltaY(float travelDist) {
@@ -116,7 +116,7 @@ public final strictfp class Direction {
     /**
      * Computes the angle in degrees at which this direction faces.
      *
-     * @return the angle in degrees this direction faces
+     * @return the angle in degrees this direction faces.
      * @battlecode.doc.costlymethod
      */
     public float getAngleDegrees() {
@@ -126,7 +126,7 @@ public final strictfp class Direction {
     /**
      * Computes the direction opposite this one.
      *
-     * @return the direction pointing in the opposite direction
+     * @return the direction pointing in the opposite direction.
      * @battlecode.doc.costlymethod
      */
     public Direction opposite() {
@@ -137,7 +137,7 @@ public final strictfp class Direction {
      * Computes the direction angleDegrees to the left (counter-clockwise)
      * of this one.
      *
-     * @param angleDegrees number of degrees to rotate.
+     * @param angleDegrees number of degrees to rotate
      * @return the direction angleDegrees degrees left of this one.
      * @battlecode.doc.costlymethod
      */
@@ -149,7 +149,7 @@ public final strictfp class Direction {
      * Computes the direction angleDegrees to the right (clockwise) of this
      * one.
      *
-     * @param angleDegrees number of degrees to rotate.
+     * @param angleDegrees number of degrees to rotate
      * @return the direction angleDegrees right of this one.
      * @battlecode.doc.costlymethod
      */
@@ -161,7 +161,7 @@ public final strictfp class Direction {
      * Computes the direction angleRads (radians) to the left (counter-clockwise)
      * of this one.
      *
-     * @param angleRads number of radians to rotate.
+     * @param angleRads number of radians to rotate
      * @return the direction angleRads left of this one.
      * @battlecode.doc.costlymethod
      */
@@ -173,7 +173,7 @@ public final strictfp class Direction {
      * Computes the direction angleRads (radians) to the right (clockwise) of
      * this one.
      *
-     * @param angleRads number of radians to rotate.
+     * @param angleRads number of radians to rotate
      * @return the direction angleRads right of this one.
      * @battlecode.doc.costlymethod
      */
@@ -187,7 +187,7 @@ public final strictfp class Direction {
      *
      * @param other the direction you wish to find the angle between
      * @return the angle in radians between this direction and the given direction
-     * in the range of [0, Math.PI]
+     * in the range of [0, Math.PI].
      * @battlecode.doc.costlymethod
      */
     public float radiansBetween(Direction other) {
@@ -205,7 +205,7 @@ public final strictfp class Direction {
      *
      * @param other the direction you wish to find the angle between
      * @return the angle in degrees between this direction and the given direction
-     * in the range of [0, 180]
+     * in the range of [0, 180].
      * @battlecode.doc.costlymethod
      */
     public float degreesBetween(Direction other) {
