@@ -1142,6 +1142,8 @@ public strictfp interface RobotController {
      * @param red the red component of the dot's color.
      * @param green the green component of the dot's color.
      * @param blue the blue component of the dot's color.
+     *
+     * @battlecode.doc.costlymethod
      */
     void setIndicatorDot(MapLocation loc, int red, int green, int blue);
 
@@ -1154,6 +1156,8 @@ public strictfp interface RobotController {
      * @param red the red component of the line's color.
      * @param green the green component of the line's color.
      * @param blue the blue component of the line's color.
+     *
+     * @battlecode.doc.costlymethod
      */
     void setIndicatorLine(MapLocation startLoc, MapLocation endLoc, int red, int green, int blue);
 
