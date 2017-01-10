@@ -183,7 +183,9 @@ public final strictfp class Direction {
 
     /**
      * Computes the angle between the given direction and this direction in radians.
-     * Returned value will be in the range (-Math.PI, Math.PI]
+     * Returned value will be in the range (-Math.PI, Math.PI].
+     * Positive values mean 'other' is to the left, negative values mean 'other' is to
+     * the right.
      *
      * @param other the direction you wish to find the angle between
      * @return the angle in radians between this direction and the given direction
@@ -191,7 +193,7 @@ public final strictfp class Direction {
      * @battlecode.doc.costlymethod
      */
     public float radiansBetween(Direction other) {
-        return reduce(this.radians - other.radians);
+        return reduce(other.radians - this.radians);
     }
 
     /**
