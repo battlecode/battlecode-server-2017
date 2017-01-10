@@ -636,6 +636,24 @@ public class RobotControllerTest {
             }
             assertTrue(exception);
         });
+
+        // No winner yet
+        assertEquals(game.getWorld().getWinner(),null);
+
+        // Give TeamA lots of bullets
+        game.getWorld().getTeamInfo().adjustBulletSupply(Team.A,GameConstants.VICTORY_POINTS_TO_WIN*GameConstants.BULLET_EXCHANGE_RATE);
+
+        game.round((id, rc) -> {
+            if(id != archonA) return;
+
+            rc.donate(rc.getTeamBullets());
+        });
+
+        // Team A should win
+        assertEquals(game.getWorld().getWinner(),Team.A);
+        // ...by victory point threshold
+        assertEquals(game.getWorld().getGameStats().getDominationFactor(), DominationFactor.PHILANTROPIED);
+
     }
 
     @Test // Test goodies inside trees
