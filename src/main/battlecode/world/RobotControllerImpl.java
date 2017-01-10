@@ -484,6 +484,11 @@ public final strictfp class RobotControllerImpl implements RobotController {
         return this.robot.getBuildCooldownTurns() == 0;
     }
 
+    @Override
+    public int getBuildCooldownTurns() {
+        return this.robot.getBuildCooldownTurns();
+    }
+
     // ***********************************
     // ****** MOVEMENT METHODS ***********
     // ***********************************
