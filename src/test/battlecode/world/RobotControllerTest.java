@@ -797,7 +797,7 @@ public class RobotControllerTest {
             }
 
             // Ensure range (-Math.PI,Math.PI]
-            Direction testDir = Direction.getNorth();
+            Direction testDir = Direction.getSouth();
             float testRads = testDir.radians;
             Direction fromRads = new Direction(testRads);
             for(int i=0; i < 200; i++) {
