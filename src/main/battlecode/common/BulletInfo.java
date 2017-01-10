@@ -14,17 +14,17 @@ public class BulletInfo implements BodyInfo{
 
     /**
      * The speed at which the bullet is traveling in
-     * terms of units per turn
+     * terms of units per turn.
      */
     public final float speed;
 
     /**
-     * The damage this bullet deals on impact
+     * The damage this bullet deals on impact.
      */
     public final float damage;
 
     /**
-     * The direction in which the bullet is moving
+     * The direction in which the bullet is moving.
      */
     public final Direction dir;
 
@@ -42,21 +42,21 @@ public class BulletInfo implements BodyInfo{
     }
 
     /**
-     * @return the speed at which the bullet is traveling in units per turn
+     * @return the speed at which the bullet is traveling in units per turn.
      */
     public float getSpeed() {
         return speed;
     }
 
     /**
-     * @return the damage this bullet deals on impact
+     * @return the damage this bullet deals on impact.
      */
     public float getDamage() {
         return damage;
     }
 
     /**
-     * @return the direction in which the bullet is moving
+     * @return the direction in which the bullet is moving.
      */
     public Direction getDir() {
         return dir;

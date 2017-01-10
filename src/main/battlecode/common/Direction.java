@@ -25,7 +25,7 @@ public final strictfp class Direction {
     /**
      * Creates a new Direction instance to represent the direction
      * in which the vector created by dx and dy points. Requires
-     * dx or dy to be non-zero
+     * dx or dy to be non-zero.
      *
      * @param dx the x component of the vector
      * @param dy the y component of the vector
@@ -40,7 +40,7 @@ public final strictfp class Direction {
     /**
      * Creates a new Direction instance to represent the direction
      * in which the vector from start to finish points. Requires
-     * start and finish to not be the same location
+     * start and finish to not be the same location.
      *
      * @param start  the starting point of the vector
      * @param finish the ending point of the vector
@@ -50,7 +50,7 @@ public final strictfp class Direction {
     }
 
     /**
-     * Creates a instance of Direction that represents pointing east (right on screen)
+     * Creates a instance of Direction that represents pointing east (right on screen).
      *
      * @return Direction instance facing east
      * @battlecode.doc.costlymethod
@@ -60,7 +60,7 @@ public final strictfp class Direction {
     }
 
     /**
-     * Creates a instance of Direction that represents pointing north (up on screen)
+     * Creates a instance of Direction that represents pointing north (up on screen).
      *
      * @return Direction instance facing north
      * @battlecode.doc.costlymethod
@@ -70,7 +70,7 @@ public final strictfp class Direction {
     }
 
     /**
-     * Creates a instance of Direction that represents pointing west (left on screen)
+     * Creates a instance of Direction that represents pointing west (left on screen).
      *
      * @return Direction instance facing west
      * @battlecode.doc.costlymethod
@@ -80,7 +80,7 @@ public final strictfp class Direction {
     }
 
     /**
-     * Creates a instance of Direction that represents pointing south (down on screen)
+     * Creates a instance of Direction that represents pointing south (down on screen).
      *
      * @return Direction instance facing south
      * @battlecode.doc.costlymethod
@@ -114,7 +114,7 @@ public final strictfp class Direction {
     }
 
     /**
-     * Computes the angle in degrees at which this direction faces
+     * Computes the angle in degrees at which this direction faces.
      *
      * @return the angle in degrees this direction faces
      * @battlecode.doc.costlymethod
@@ -183,7 +183,7 @@ public final strictfp class Direction {
 
     /**
      * Computes the angle between the given direction and this direction in radians.
-     * Returned value will be in the range [0, Math.PI]
+     * Returned value will be in the range [0, Math.PI].
      *
      * @param other the direction you wish to find the angle between
      * @return the angle in radians between this direction and the given direction
@@ -201,7 +201,7 @@ public final strictfp class Direction {
 
     /**
      * Computes the angle between the given direction and this direction in degrees.
-     * Returned value will be in the range [0, 180]
+     * Returned value will be in the range [0, 180].
      *
      * @param other the direction you wish to find the angle between
      * @return the angle in degrees between this direction and the given direction

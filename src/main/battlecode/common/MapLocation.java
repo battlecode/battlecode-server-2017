@@ -140,8 +140,7 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
      *
      * @param location the location to test
      * @param dist the distance for the location to be within
-     * @return true if the given location is within dist to this one,
-     *         or false if it isn't
+     * @return true if the given location is within dist to this one; false otherwise
      *
      * @battlecode.doc.costlymethod
      */
@@ -150,11 +149,10 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
     }
 
     /**
-     * Determines whether this location is within one stride of the given robot
+     * Determines whether this location is within one stride of the given robot.
      *
      * @param robot the robot to test
-     * @return true if this location is within one stride of the given robot,
-     *          false otherwise
+     * @return true if this location is within one stride of the given robot; false otherwise
      *
      * @battlecode.doc.costlymethod
      */
@@ -164,7 +162,7 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
 
     /**
      * Determines whether this location is within the sensor radius of the
-     * given robot
+     * given robot.
      *
      * @param robot the robot to test
      * @return true if this location is within the robot's sensor radius,
@@ -178,7 +176,7 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
 
     /**
      * Determines whether this location is within the bullet sight radius of the
-     * given robot
+     * given robot.
      *
      * @param robot the robot to test
      * @return true if this location is within robot's bullet sight radius,
@@ -342,7 +340,7 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
 
     /**
      * Returns a new MapLocation object translated from this location
-     * by a fixed amount
+     * by a fixed amount.
      *
      * @param dx the amount to translate in the x direction
      * @param dy the amount to translate in the y direction
