@@ -774,4 +774,32 @@ public class RobotControllerTest {
             assertEquals(nullBot,null);
         });
     }
+
+    @Test
+    public void overlappingScoutTest() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int scoutA = game.spawn(3, 5, RobotType.SCOUT, Team.A);
+        final int neutralTree = game.spawnTree(5,5,1,Team.NEUTRAL,0,null);
+
+        game.round((id, rc) -> {
+            if(id != scoutA) return;
+
+            TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
+            rc.move(nearbyTrees[0].getLocation());
+
+            boolean exception = false;
+            try {
+                nearbyTrees = rc.senseNearbyTrees();
+            } catch (Exception e) {
+                System.out.println("Scout threw an error when trying to sense tree at its location, this shouldn't happen");
+                exception = true;
+            }
+            assertFalse(exception);
+        });
+    }
 }
