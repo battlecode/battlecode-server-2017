@@ -751,200 +751,202 @@ public strictfp interface RobotController {
     // ***********************************
 
     /**
-     * Tests whether the robot can chop, has not already attacked this turn,
-     * and will hit an in-range tree at the given location.
+     * Tests whether the robot can chop a tree at the given location. Checks robot
+     * stride radius, the robot's type, if a tree exists, and if the robot hasn't
+     * attacked this turn.
      *
-     * @param loc The location of the tree to test
-     * @return true if the tree can be chopped this turn; false otherwise.
+     * @param loc The location of the tree to chop
+     * @return true if this robot can chop the tree; false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canChop(MapLocation loc);
 
     /**
-     * Tests whether the robot can chop, has not already attacked this turn,
-     * and {@code id} corresponds to an in-range tree.
+     * Tests whether the robot can chop a tree with the given ID. Checks robot
+     * stride radius, the robot's type, if a tree exists, and if the robot hasn't
+     * attacked this turn.
      *
-     * @param id The id of the tree to chop
-     * @return true of the tree can be chopped by this robot; false otherwise.
+     * @param id The ID of the tree to chop
+     * @return true if this robot can chop the tree; false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canChop(int id);
 
     /**
-     * Chops the target tree at location {@code loc}. This action counts as an attack.
+     * Chops the tree at the given location. This action counts as an attack.
      *
-     * @param loc the location of the tree you wish to chop, does not
-     * have to be the center of the tree
+     * @param loc the location of the tree to chop
      * @throws GameActionException if the given location does not contain
-     * a tree, the specified tree is not within one stride of this
-     * robot, or this robot cannot perform an action due to having already moved.
+     * a tree, the specified tree is not within one stride of this robot,
+     * this robot is not of type LUMBERJACK, or this robot has already attacked
+     * this turn.
      *
      * @battlecode.doc.costlymethod
      */
     void chop(MapLocation loc) throws GameActionException;
 
     /**
-     * Chops the target tree at location {@code loc}. This action counts as an attack.
+     * Chops the tree with the given ID. This action counts as an attack.
      *
-     * @param id the id of the tree you wish to chop
+     * @param id the ID of the tree you wish to chop
      * @throws GameActionException if there isn't a tree with the given id,
-     * the specified tree is not within one stride of this robot,
-     * or this robot cannot perform an action due to having already moved.
+     * the specified tree is not within one stride of this robot, this robot
+     * is not of type LUMBERJACK, or this robot has already attacked this turn.
      *
      * @battlecode.doc.costlymethod
      */
     void chop(int id) throws GameActionException;
 
     /**
-     * Tells if this robot can shake the tree at the given location. Checks robot
+     * Tests whether this robot can shake a tree at the given location. Checks robot
      * stride radius, if a tree exists, and if the robot hasn't shaken this turn.
      *
-     * @param loc The location of a tree to shake.
-     * @return true if this tree can be shaken by this robot this turn.
+     * @param loc The location of the tree to shake
+     * @return true if this robot can shake the tree; false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canShake(MapLocation loc);
 
     /**
-     * Tells if a robot can shake a tree with this id. Checks robot stride radius,
-     * if a tree exists, and if the robot hasn't shaken this turn.
+     * Tests whether this robot can shake a tree with the given ID. Checks robot
+     * stride radius, if a tree exists, and if the robot hasn't shaken this turn.
      *
-     * @param id The ID of a tree to shake.
-     * @return true if this tree can be shaken by this robot this turn.
+     * @param id The ID of the tree to shake
+     * @return true if this robot can shake the tree; false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canShake(int id);
 
     /**
-     * Shakes the target tree at location loc for all the bullets held within
+     * Shakes the tree at the given location for all the bullets held within
      * the tree; these bullets will be added to your team's bullet supply.
      * Robots can only shake once per turn.
      *
-     * @param loc the location of the tree you wish to shake, does not
-     * have to be the center of the tree
+     * @param loc the location of the tree to shake
      * @throws GameActionException if the given location does not contain
      * a tree, if the tree (not location) is not within one stride of this
-     * robot, or if this robot has already shook a tree this turn
+     * robot, or if this robot has already shaken a tree this turn.
      *
      * @battlecode.doc.costlymethod
      */
     void shake(MapLocation loc) throws GameActionException;
 
     /**
-     * Shakes the target tree at location loc for all the bullets held within
+     * Shakes the tree with the given ID for all the bullets held within
      * the tree; these bullets will be added to your team's bullet supply.
      * Robots can only shake once per turn.
      *
-     * @param id the id of the tree you wish to shake.
+     * @param id the ID of the tree to shake
      * @throws GameActionException if there isn't a tree with the given id,
      * if the tree (not location) is not within one stride of this robot,
-     * or if this robot has already shook a tree this turn
+     * or if this robot has already shaken a tree this turn
      *
      * @battlecode.doc.costlymethod
      */
     void shake(int id) throws GameActionException;
 
     /**
-     * Determines whether the robot can water a tree. Takes into accout the
-     * robot's type, if it's already watered this turn, and if a valid
-     * tree at this location exists within range.
+     * Tests whether this robot can water a tree at the given location. Checks robot
+     * stride radius, the robot's type, if a tree exists, and if the robot hasn't
+     * watered this turn.
      *
-     * @param loc The location of a tree to check.
-     * @return true if this robot can water a tree, false otherwise.
+     * @param loc The location of the tree to water
+     * @return true if this robot can water the tree; false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canWater(MapLocation loc);
 
     /**
-     * Determines whether the robot can water a tree. Takes into accout the
-     * robot's type, if it's already watered this turn, and if a valid
-     * tree with this id exists within range.
+     * Tests whether this robot can water a tree with the given ID. Checks robot
+     * stride radius, the robot's type, if a tree exists, and if the robot hasn't
+     * watered this turn.
      *
-     * @param id The id of a tree to check.
-     * @return true if this robot can water a tree, false otherwise.
+     * @param id The ID of a tree to check.
+     * @return true if this robot can water a tree; false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canWater(int id);
 
     /**
-     * Waters the target tree at location loc, healing
-     * GameConstants.WATER_HEALTH_REGEN_RATE health to the tree.
+     * Waters the target tree at the given location, restoring
+     * {@code WATER_HEALTH_REGEN_RATE} health to the tree.
      * Robots can only water once per turn and only with robots
      * of type GARDENER.
      *
-     * @param loc the location of the tree you wish to water, does not
-     * have to be the center of the tree
+     * @param loc the location of the tree you wish to water
      * @throws GameActionException if the given location does not contain
-     * a tree, if the tree (not location) is not within one stride of this
-     * robot, or this robot is not of type GARDENER
+     * a tree, the tree is not within one stride of this robot,
+     * this robot is not of type GARDENER, or this robot has already
+     * watered a tree.
      *
      * @battlecode.doc.costlymethod
      */
     void water(MapLocation loc) throws GameActionException;
 
     /**
-     * Waters the target tree at location loc, healing
-     * GameConstants.WATER_HEALTH_REGEN_RATE health to the tree.
+     * Waters the target tree with the given ID, restoring
+     * {@code WATER_HEALTH_REGEN_RATE} health to the tree.
      * Robots can only water once per turn and only with robots
      * of type GARDENER.
      *
-     * @param id the id of the tree you wish to water.
+     * @param id the ID of the tree you wish to water.
      * @throws GameActionException if there isn't a tree with the given id,
-     * if the tree (not location) is not within one stride of this robot,
-     * or this robot is not of type GARDENER
+     * the tree is not within one stride of this robot,
+     * this robot is not of type GARDENER, or this robot has already
+     * watered a tree.
      *
      * @battlecode.doc.costlymethod
      */
     void water(int id) throws GameActionException;
 
     /**
-     * Determines whether or not this robot can water a tree, taking into
+     * Tests whether this robot can water a tree, taking into
      * account how many times this robot has watered this turn and this
-     * robot's type
+     * robot's type.
      *
-     * @return true if this robot can water a tree, false otherwise.
+     * @return true if this robot can water a tree; false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canWater();
 
     /**
-     * Determines whether or not this robot can shake a tree, taking into
-     * account how many times this robot has shook this turn.
+     * Tests whether this robot can shake a tree, taking into
+     * account how many times this robot has shaken this turn.
      *
-     * @return true if this robot can shake a tree, false otherwise.
+     * @return true if this robot can shake a tree; false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canShake();
 
     /**
-     * Determines whether or not there is a tree at location loc and, if so,
+     * Tests whether there is a tree at the given location and, if so,
      * if the tree is within one stride of this robot and can therefore be
      * interacted with through chop(), shake(), or water().
      *
      * @param loc the location you wish to test
      * @return true if there is a tree located at loc and if said tree is
-     * within one stride of this robot
+     * within one stride of this robot.
      *
      * @battlecode.doc.costlymethod
      */
     boolean canInteractWithTree(MapLocation loc);
 
     /**
-     * Determines whether or not there is a tree with the given id and, if so,
+     * Tests whether there is a tree with the given ID and, if so,
      * if the tree is within one stride of this robot and can therefore be
      * interacted with through chop(), shake(), or water().
      *
-     * @param id the id of the tree you wish to test
-     * @return true if there is a tree with the given id and if siad tree is
-     * within a stride of this robot
+     * @param id the ID of the tree you wish to test
+     * @return true if there is a tree with id and if said tree is
+     * within one stride of this robot.
      *
      * @battlecode.doc.costlymethod
      */
@@ -958,8 +960,8 @@ public strictfp interface RobotController {
      * Broadcasts a message to the team-shared array at index channel.
      * The data is not written until the end of the robot's turn.
      *
-     * @param channel - the index to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
-     * @param data - one int's worth of data to write
+     * @param channel the index to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
+     * @param data one int of data to write
      * @throws GameActionException if the channel is invalid
      *
      * @battlecode.doc.costlymethod
@@ -970,7 +972,7 @@ public strictfp interface RobotController {
      * Retrieves the message stored in the team-shared array at index channel.
      *
      * @param channel the index to query, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
-     * @return data currently stored on the channel
+     * @return the data currently stored on the channel.
      * @throws GameActionException  if the channel is invalid
      *
      * @battlecode.doc.costlymethod
@@ -982,34 +984,34 @@ public strictfp interface RobotController {
     // ***********************************
 
     /**
-     * Returns whether you have the bullets and dependencies to build the given
+     * Tests whether you have the bullets and dependencies to build the given
      * robot, and this robot is a valid builder for the target robot.
      *
-     * @param type the type to build.
-     * @return whether the requirements to build are met.
+     * @param type the type of robot to build
+     * @return true if the requirements to build the given robot are met; false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
     boolean hasRobotBuildRequirements(RobotType type);
 
     /**
-     * Returns whether you have the bullets and dependencies to build a
+     * Tests whether you have the bullets and dependencies to build a
      * bullet tree, and this robot is a valid builder for a bullet tree.
      *
-     * @return whether the requirements to build are met.
+     * @return true if the requirements to plant a tree are met; false otherwise.
      *
      * @battlecode.doc.costlymethod
      */
     boolean hasTreeBuildRequirements();
 
     /**
-     * Returns whether the robot can build a robot of the given type in the
-     * given direction. Checks dependencies, cooldown turns remaining,
-     * bullet costs, whether the robot can build, and that the given direction is
+     * Tests whether the robot can build a robot of the given type in the
+     * given direction. Checks cooldown turns remaining, bullet costs,
+     * whether the robot can build, and that the given direction is
      * not blocked.
      *
-     * @param dir the direction to build in.
-     * @param type the robot type to build.
+     * @param dir the direction to build in
+     * @param type the type of robot to build
      * @return whether it is possible to build a robot of the given type in the
      * given direction.
      *
@@ -1018,25 +1020,24 @@ public strictfp interface RobotController {
     boolean canBuildRobot(RobotType type, Direction dir);
 
     /**
-     * Plants/Builds a robot of the given type in the given direction.
+     * Builds a robot of the given type in the given direction.
      *
-     * @param dir the direction to spawn the unit.
+     * @param dir the direction to spawn the unit
      * @param type the type of robot to build
-     * @throws GameActionException if the build is bad: if you don't have enough
-     * bullets, if you have coreDelay, if the direction is not a good build
-     * direction, or if you are not of type GARDENER.
+     * @throws GameActionException if you don't have enough bullets, if
+     * the robot is still in build cooldown, if the direction is not a
+     * good build direction, or if this robot is not of an appropriate type.
      *
      * @battlecode.doc.costlymethod
      */
     void buildRobot(RobotType type, Direction dir) throws GameActionException;
 
     /**
-     * Returns whether the robot can build a bullet tree in the given direction.
-     * Checks dependencies, cooldown turns remaining, bullet costs,
-     * whether the robot can build, and that the given direction is
-     * not blocked.
+     * Tests whether the robot can build a bullet tree in the given direction.
+     * Checks cooldown turns remaining, bullet costs, whether the robot can
+     * plant, and that the given direction is not blocked
      *
-     * @param dir the direction to build in.
+     * @param dir the direction to build in
      * @return whether it is possible to build a bullet tree in the
      * given direction.
      *
@@ -1045,24 +1046,23 @@ public strictfp interface RobotController {
     boolean canPlantTree(Direction dir);
 
     /**
-     * Plants a bullet tree in the given direction. This is a core action.
+     * Plants a bullet tree in the given direction.
      *
-     * @param dir the direction to plant the bullet tree.
-     * @throws GameActionException if the build is bad: if you don't have enough
-     * bullets, if you have coreDelay, if the direction is not a good build
-     * direction, or if you are not of type GARDENER.
+     * @param dir the direction to plant the bullet tree
+     * @throws GameActionException if you don't have enough bullets, if
+     * the robot is still in build cooldown, if the direction is not a good build
+     * direction, or if this robot is not of an appropriate type.
      *
      * @battlecode.doc.costlymethod
      */
     void plantTree(Direction dir) throws  GameActionException;
 
     /**
-     * Returns whether the robot can hire a gardener in the given direction.
-     * Checks dependencies, cooldown turns remaining, bullet costs,
-     * whether the robot can build, and that the given direction is
-     * not blocked.
+     * Tests whether the robot can hire a Gardener in the given direction.
+     * Checks cooldown turns remaining, bullet costs, whether the robot can
+     * hire, and that the given direction is not blocked.
      * 
-     * @param dir the direction to build in.
+     * @param dir the direction to build in
      * @return whether it is possible to hire a gardener in the given direction.
      *
      * @battlecode.doc.costlymethod
@@ -1070,12 +1070,12 @@ public strictfp interface RobotController {
     boolean canHireGardener(Direction dir);
     
     /**
-     * Hires a Gardener in the given direction. This is a core action.
+     * Hires a Gardener in the given direction.
      *
-     * @param dir the direction to spawn the GARDENER unit.
-     * @throws GameActionException if the build is bad: if you don't have enough
-     * bullets, if you have coreDelay, if the direction is not a good build
-     * direction, or if you are not of type ARCHON.
+     * @param dir the direction to spawn the Gardener
+     * @throws GameActionException if you don't have enough bullets, if
+     * the robot is still in build cooldown, if the direction is not a good build
+     * direction, or if this robot is not of an appropriate type.
      *
      * @battlecode.doc.costlymethod
      */
@@ -1144,11 +1144,11 @@ public strictfp interface RobotController {
     /**
      * Draw a dot on the game map for debugging purposes.
      *
-     * @param loc the location to draw the dot.
-     * @param red the red component of the dot's color.
-     * @param green the green component of the dot's color.
-     * @param blue the blue component of the dot's color.
-     * @throws GameActionException if loc is not a valid location on the map
+     * @param loc the location to draw the dot
+     * @param red the red component of the dot's color
+     * @param green the green component of the dot's color
+     * @param blue the blue component of the dot's color
+     * @throws GameActionException if loc is not a valid location on the map.
      *
      * @battlecode.doc.costlymethod
      */
@@ -1157,12 +1157,12 @@ public strictfp interface RobotController {
     /**
      * Draw a line on the game map for debugging purposes.
      *
-     * @param startLoc the location to draw the line from.
-     * @param endLoc the location to draw the line to.
-     * @param red the red component of the line's color.
-     * @param green the green component of the line's color.
-     * @param blue the blue component of the line's color.
-     * @throws GameActionException if startLoc or endLoc is not a valid location on the map
+     * @param startLoc the location to draw the line from
+     * @param endLoc the location to draw the line to
+     * @param red the red component of the line's color
+     * @param green the green component of the line's color
+     * @param blue the blue component of the line's color
+     * @throws GameActionException if startLoc or endLoc is not a valid location on the map.
      *
      * @battlecode.doc.costlymethod
      */
@@ -1178,8 +1178,8 @@ public strictfp interface RobotController {
      * If this method is called more than once with the same index in the same
      * game, the last call is what is saved for the next game.
      *
-     * @param index the index of the array to set.
-     * @param value the data that the team should remember for the next game.
+     * @param index the index of the array to set
+     * @param value the data that the team should remember for the next game
      * @throws java.lang.ArrayIndexOutOfBoundsException if {@code index} is less
      * than zero or greater than or equal to
      * {@link GameConstants#TEAM_MEMORY_LENGTH}.
@@ -1196,9 +1196,9 @@ public strictfp interface RobotController {
      * {@code mask == 0xFF} then only the eight least significant bits of the
      * memory will be set.
      *
-     * @param index the index of the array to set.
-     * @param value the data that the team should remember for the next game.
-     * @param mask indicates which bits should be set.
+     * @param index the index of the array to set
+     * @param value the data that the team should remember for the next game
+     * @param mask indicates which bits should be set
      * @throws java.lang.ArrayIndexOutOfBoundsException if {@code index} is less
      * than zero or greater than or equal to
      * {@link GameConstants#TEAM_MEMORY_LENGTH}.
@@ -1233,7 +1233,7 @@ public strictfp interface RobotController {
      * bits, you must run the client in lockstep mode and right click the
      * units.
      *
-     * @return this robot's control bits
+     * @return this robot's control bits.
      *
      * @battlecode.doc.costlymethod
      */
