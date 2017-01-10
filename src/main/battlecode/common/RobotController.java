@@ -545,7 +545,15 @@ public strictfp interface RobotController {
     boolean isBuildReady();
 
     /**
-     * Tests whether this robot can move one stride in the given direction,
+     * Returns the number of cooldown turns remaining before this unit can build() again.
+     * When this number is 0, isBuildReady() is true.
+     *
+     * @return the number of cooldown turns remaining before this unit can build() again.
+     */
+    int getBuildCooldownTurns();
+
+    /**
+     * Tells whether this robot can move one stride in the given direction,
      * without taking into account if they have already moved. Takes into account only
      * the positions of trees, positions of other robots, and the edge of the
      * game map. Does not take into account whether this robot is currently
@@ -1098,30 +1106,6 @@ public strictfp interface RobotController {
      * @battlecode.doc.costlymethod
      */
     void donate(float bullets) throws GameActionException;
-
-    /**
-     * Determines whether or not there is a robot at location loc and, if so,
-     * if the robot is within one stride of this robot.
-     *
-     * @param loc the location you wish to test
-     * @return true if there is a robot located at loc and if said robot is
-     * within one stride of this robot
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean canInteractWithRobot(MapLocation loc);
-
-    /**
-     * Determines whether or not there is a robot with the given id and, if so,
-     * if the robot is within one stride of this robot.
-     *
-     * @param id the id of the robot you wish to test
-     * @return true if there is a robot with the given id and if siad robot is
-     * within a stride of this robot
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean canInteractWithRobot(int id);
 
     /**
      * Kills your robot and ends the current round. Never fails.

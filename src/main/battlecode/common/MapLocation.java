@@ -219,6 +219,9 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
      * @battlecode.doc.costlymethod
      */
     public final MapLocation add(Direction direction) {
+        if(direction == null) {
+            return new MapLocation(x ,y);
+        }
         float dx = (float)Math.cos(direction.radians);
         float dy = (float)Math.sin(direction.radians);
         return new MapLocation(x + dx, y + dy);
@@ -252,6 +255,9 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
      * @battlecode.doc.costlymethod
      */
     public final MapLocation add(Direction direction, float dist) {
+        if(direction == null) {
+            return new MapLocation(x ,y);
+        }
         float dx = (float)(dist * Math.cos(direction.radians));
         float dy = (float)(dist * Math.sin(direction.radians));
         return new MapLocation(x + dx, y + dy);
@@ -286,6 +292,9 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
      * @battlecode.doc.costlymethod
      */
     public final MapLocation subtract(Direction direction) {
+        if(direction == null) {
+            return new MapLocation(x,y);
+        }
         return this.add(direction.opposite());
     }
 
@@ -318,6 +327,9 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
      * @battlecode.doc.costlymethod
      */
     public final MapLocation subtract(Direction direction, float dist) {
+        if(direction == null) {
+            return new MapLocation(x,y);
+        }
         return this.add(direction.opposite(), dist);
     }
 

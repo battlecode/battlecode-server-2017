@@ -370,11 +370,11 @@ public class RobotControllerTest {
         game.round((id, rc) -> {
             if (id != gardenerA) return;
             assertFalse(rc.canPlantTree(Direction.getWest())); // tree in way
-            assertTrue(rc.canPlantTree(Direction.getNorth())); // unobstructed
+            assertTrue(rc.canPlantTree(Direction.getSouth())); // unobstructed
             assertTrue(rc.canPlantTree(Direction.getEast())); // unobstructed
             rc.plantTree(Direction.getEast());
             assertFalse(rc.canMove(Direction.getEast())); // tree now in the way
-            assertFalse(rc.canPlantTree(Direction.getNorth())); // has already planted this turn
+            assertFalse(rc.canPlantTree(Direction.getSouth())); // has already planted this turn
             TreeInfo[] trees = rc.senseNearbyTrees();
             assertEquals(trees.length,2);
             TreeInfo[] bulletTrees = rc.senseNearbyTrees(-1, rc.getTeam());
@@ -493,8 +493,8 @@ public class RobotControllerTest {
             if (id != scoutA) return;
 
             assertFalse(rc.canMove(Direction.getEast(),0.01f)); // Off the map
-            assertTrue(rc.canMove(Direction.getNorth()));
-            rc.move(Direction.getNorth());  // Move away from tree
+            assertTrue(rc.canMove(Direction.getSouth()));
+            rc.move(Direction.getSouth());  // Move away from tree
         });
 
         // Move Archon closer to tree
@@ -545,7 +545,7 @@ public class RobotControllerTest {
         MapLocation soldierBLocation = game.getBot(soldierB).getLocation();
         // topOfSoldierB is a location just near the top edge of soldierB.
         // if discrete bullet position checking is used, the bullet will clip though some of the tests.
-        MapLocation topOfSoldierB = soldierBLocation.add(Direction.getNorth(),RobotType.SOLDIER.bodyRadius - 0.01f);
+        MapLocation topOfSoldierB = soldierBLocation.add(Direction.getSouth(),RobotType.SOLDIER.bodyRadius - 0.01f);
 
         final float testInterval = 0.01f;
         for(float i=0; i<1; i+=testInterval){
@@ -569,7 +569,7 @@ public class RobotControllerTest {
         // Now check cases where it shouldn't hit soldierB
         game.round((id, rc) -> {
             if (id != soldierA) return;
-            rc.move(Direction.getNorth(),RobotType.SOLDIER.bodyRadius+0.01f);
+            rc.move(Direction.getSouth(),RobotType.SOLDIER.bodyRadius+0.01f);
             rc.fireSingleShot(Direction.getEast()); // Shoot a bullet parallel, slightly above soldierB
         });
         game.waitRounds(5); // Bullet propagation
@@ -584,7 +584,7 @@ public class RobotControllerTest {
             if (id == soldierA)
                 rc.fireSingleShot(Direction.getEast()); // Shoot a bullet parallel, slightly above soldierB
             else if (id == soldierB2)
-                rc.move(Direction.getNorth());  // Move out of way so soldierA can shoot off the map
+                rc.move(Direction.getSouth());  // Move out of way so soldierA can shoot off the map
         });
 
         float bulletDistanceToWall = 12-game.getWorld().getObjectInfo().bulletsArray()[0].getLocation().x;
@@ -636,6 +636,24 @@ public class RobotControllerTest {
             }
             assertTrue(exception);
         });
+
+        // No winner yet
+        assertEquals(game.getWorld().getWinner(),null);
+
+        // Give TeamA lots of bullets
+        game.getWorld().getTeamInfo().adjustBulletSupply(Team.A,GameConstants.VICTORY_POINTS_TO_WIN*GameConstants.BULLET_EXCHANGE_RATE);
+
+        game.round((id, rc) -> {
+            if(id != archonA) return;
+
+            rc.donate(rc.getTeamBullets());
+        });
+
+        // Team A should win
+        assertEquals(game.getWorld().getWinner(),Team.A);
+        // ...by victory point threshold
+        assertEquals(game.getWorld().getGameStats().getDominationFactor(), DominationFactor.PHILANTROPIED);
+
     }
 
     @Test // Test goodies inside trees
@@ -752,4 +770,98 @@ public class RobotControllerTest {
         // No additional bullets
         assertEquals(initialBullets,game.getWorld().getTeamInfo().getBulletSupply(Team.A),EPSILON);
     }
+
+    @Test
+    public void testNullSense() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int soldierA = game.spawn(3, 5, RobotType.SOLDIER, Team.A);
+        final int soldierB = game.spawn(7, 5, RobotType.SOLDIER, Team.B);
+
+        game.round((id, rc) -> {
+            if(id != soldierA) return;
+
+            RobotInfo actualBot = rc.senseRobotAtLocation(new MapLocation(3,5));
+            RobotInfo nullBot = rc.senseRobotAtLocation(new MapLocation(5,7));
+
+            assertNotEquals(actualBot,null);
+            assertEquals(nullBot,null);
+        });
+    }
+
+    @Test
+    public void testDirections() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int soldierA = game.spawn(3, 5, RobotType.SCOUT, Team.A);
+        final int neutralTree = game.spawnTree(5,5,1,Team.NEUTRAL,0,null);
+
+        game.round((id, rc) -> {
+            if (id != soldierA) return;
+
+            // Silly Direction sanity checks
+            for (int i = 0; i < 3; i++) {
+                assertEquals(new Direction(0.1f).radians, new Direction(0.1f).rotateLeftRads((float) (2 * Math.PI * i)).radians, EPSILON);
+                assertEquals(new Direction(-0.1f).radians, new Direction(-0.1f).rotateLeftRads((float) (2 * Math.PI * i)).radians, EPSILON);
+                assertEquals(new Direction(0.1f).radians, new Direction(0.1f).rotateRightRads((float) (2 * Math.PI * i)).radians, EPSILON);
+                assertEquals(new Direction(-0.1f).radians, new Direction(-0.1f).rotateRightRads((float) (2 * Math.PI * i)).radians, EPSILON);
+            }
+
+            // Ensure range (-Math.PI,Math.PI]
+            Direction testDir = Direction.getSouth();
+            float testRads = testDir.radians;
+            Direction fromRads = new Direction(testRads);
+            for (int i = 0; i < 200; i++) {
+                testDir = testDir.rotateLeftDegrees(i);
+                // Stays within range
+                assertTrue(Math.abs(testDir.radians) <= Math.PI);
+
+                // Direction.reduce() functionality works
+                testRads += Math.toRadians(i);
+                fromRads = new Direction(testRads);
+                assertEquals(testDir.radians, fromRads.radians, 0.0001); // silly rounding errors can accumulate, so larger epsilon
+            }
+        });
+    }
+
+    @Test
+    public void overlappingScoutTest() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int scoutA = game.spawn(3, 5, RobotType.SCOUT, Team.A);
+        final int neutralTree = game.spawnTree(5,5,1,Team.NEUTRAL,0,null);
+
+        game.round((id, rc) -> {
+            if (id != scoutA) return;
+
+            TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
+            rc.move(nearbyTrees[0].getLocation());
+
+            boolean exception = false;
+            try {
+                nearbyTrees = rc.senseNearbyTrees();
+            } catch (Exception e) {
+                System.out.println("Scout threw an error when trying to sense tree at its location, this shouldn't happen");
+                exception = true;
+            }
+            assertFalse(exception);
+
+            MapLocation loc1 = new MapLocation(5, 5);
+            MapLocation loc2 = loc1.add(null, 5);
+            assertEquals(loc1, loc2);
+        });
+    }
+
 }

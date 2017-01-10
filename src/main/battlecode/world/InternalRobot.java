@@ -251,6 +251,7 @@ public strictfp class InternalRobot {
     }
 
     public void processEndOfTurn() {
+        gameWorld.getMatchMaker().addBytecodes(ID, this.bytecodesUsed);
         this.prevBytecodesUsed = this.bytecodesUsed;
         roundsAlive++;
     }

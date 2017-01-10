@@ -263,14 +263,22 @@ public final strictfp class RobotControllerImpl implements RobotController {
     public TreeInfo senseTreeAtLocation(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
         assertCanSenseLocation(loc);
-        return gameWorld.getObjectInfo().getTreeAtLocation(loc).getTreeInfo();
+        InternalTree tree = gameWorld.getObjectInfo().getTreeAtLocation(loc);
+        if(tree != null) {
+            return tree.getTreeInfo();
+        }
+        return null;
     }
 
     @Override
     public RobotInfo senseRobotAtLocation(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
         assertCanSenseLocation(loc);
-        return gameWorld.getObjectInfo().getRobotAtLocation(loc).getRobotInfo();
+        InternalRobot bot = gameWorld.getObjectInfo().getRobotAtLocation(loc);
+        if(bot != null) {
+            return bot.getRobotInfo();
+        }
+        return null;
     }
 
     @Override
@@ -474,6 +482,11 @@ public final strictfp class RobotControllerImpl implements RobotController {
     @Override
     public boolean isBuildReady() {
         return this.robot.getBuildCooldownTurns() == 0;
+    }
+
+    @Override
+    public int getBuildCooldownTurns() {
+        return this.robot.getBuildCooldownTurns();
     }
 
     // ***********************************
@@ -804,7 +817,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         boolean correctType = (getType() == RobotType.LUMBERJACK);
         boolean canInteract = canInteractWithTree(loc);
 
-        return correctType && canInteract;
+        return correctType && canInteract && !hasAttacked();
     }
 
     @Override
@@ -812,7 +825,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         boolean correctType = (getType() == RobotType.LUMBERJACK);
         boolean canInteract = canInteractWithTree(id);
 
-        return correctType && canInteract;
+        return correctType && canInteract && !hasAttacked();
     }
 
     @Override
@@ -1107,22 +1120,6 @@ public final strictfp class RobotControllerImpl implements RobotController {
     // ****** OTHER ACTION METHODS *******
     // ***********************************
 
-    private void assertCanInteractWithRobot(MapLocation robotLoc) throws GameActionException{
-        if(!canInteractWithRobot(robotLoc)){
-            throw new GameActionException(CANT_DO_THAT,
-                    "Can't interact with a robot that doesn't exist or is outside" +
-                            " this robot's stride.");
-        }
-    }
-
-    private void assertCanInteractWithRobot(int robotID) throws GameActionException{
-        if(!canInteractWithRobot(robotID)){
-            throw new GameActionException(CANT_DO_THAT,
-                    "Can't interact with a robot that doesn't exist or is outside" +
-                            " this robot's stride.");
-        }
-    }
-
     @Override
     public void donate(float bullets) throws GameActionException{
         assertNonNegative(bullets);
@@ -1130,21 +1127,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         int gainedVictorPoints = (int)bullets / GameConstants.BULLET_EXCHANGE_RATE;
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -bullets);
         gameWorld.getTeamInfo().adjustVictoryPoints(getTeam(), gainedVictorPoints);
-    }
-
-    @Override
-    public boolean canInteractWithRobot(MapLocation loc){
-        assertNotNull(loc);
-        InternalRobot robot = gameWorld.getObjectInfo().getRobotAtLocation(loc);
-        return robot != null &&
-                canInteractWithCircle(robot.getLocation(), robot.getType().bodyRadius);
-    }
-
-    @Override
-    public boolean canInteractWithRobot(int id){
-        InternalRobot robot = gameWorld.getObjectInfo().getRobotByID(id);
-        return robot != null &&
-                canInteractWithCircle(robot.getLocation(), robot.getType().bodyRadius);
+        gameWorld.setWinnerIfVictoryPoints();
     }
 
     @Override
