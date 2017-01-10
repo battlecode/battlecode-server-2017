@@ -545,6 +545,14 @@ public strictfp interface RobotController {
     boolean isBuildReady();
 
     /**
+     * Returns the number of cooldown turns remaining before this unit can build() again.
+     * When this number is 0, isBuildReady() is true.
+     *
+     * @return the number of cooldown turns remaining before this unit can build() again.
+     */
+    int getBuildCooldownTurns();
+
+    /**
      * Tells whether this robot can move one stride in the given direction,
      * without taking into account if they have already moved. Takes into account only
      * the positions of trees, positions of other robots, and the edge of the
