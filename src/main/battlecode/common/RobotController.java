@@ -1135,27 +1135,27 @@ public strictfp interface RobotController {
     // ***********************************
 
     /**
-     * Draw a dot on the game map for debugging purposes.
+     * Draw a dot on the game map for debugging purposes. If you cannot see the
+     * dot in the client, the location might be off the map.
      *
      * @param loc the location to draw the dot.
      * @param red the red component of the dot's color.
      * @param green the green component of the dot's color.
      * @param blue the blue component of the dot's color.
-     * @throws GameActionException if loc is not a valid location on the map
      */
-    void setIndicatorDot(MapLocation loc, int red, int green, int blue) throws GameActionException;
+    void setIndicatorDot(MapLocation loc, int red, int green, int blue);
 
     /**
-     * Draw a line on the game map for debugging purposes.
+     * Draw a line on the game map for debugging purposes. If you cannot see the
+     * line in the client, the locations might be off the map.
      *
      * @param startLoc the location to draw the line from.
      * @param endLoc the location to draw the line to.
      * @param red the red component of the line's color.
      * @param green the green component of the line's color.
      * @param blue the blue component of the line's color.
-     * @throws GameActionException if startLoc or endLoc is not a valid location on the map
      */
-    void setIndicatorLine(MapLocation startLoc, MapLocation endLoc, int red, int green, int blue) throws GameActionException;
+    void setIndicatorLine(MapLocation startLoc, MapLocation endLoc, int red, int green, int blue);
 
     // ***********************************
     // ******** TEAM MEMORY **************
