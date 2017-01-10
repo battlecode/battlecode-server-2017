@@ -10,7 +10,7 @@ public final strictfp class Direction {
      * The radians at which this direction is facing based off of
      * the unit circle; i.e. facing right would have 0.0 radians,
      * up would have PI/2 radians, etc.
-     * Note: radians = [0, 2*Math.PI)
+     * Note: radians = (-Math.PI, Math.PI]
      */
     public final float radians;
 
@@ -19,7 +19,7 @@ public final strictfp class Direction {
      *                to represent based off of the unit circle
      */
     public Direction(float radians) {
-        this.radians = radians % (2 * (float) Math.PI);
+        this.radians = reduce(radians);
     }
 
     /**
@@ -34,7 +34,7 @@ public final strictfp class Direction {
         if (dx == 0 && dy == 0) {
             dy = 1;
         }
-        this.radians = (float) Math.atan2(dy, dx) % (2 * (float) Math.PI);
+        this.radians = reduce((float)Math.atan2(dy, dx));
     }
 
     /**
@@ -183,29 +183,26 @@ public final strictfp class Direction {
 
     /**
      * Computes the angle between the given direction and this direction in radians.
-     * Returned value will be in the range [0, Math.PI]
+     * Returned value will be in the range (-Math.PI, Math.PI].
+     * Positive values mean 'other' is to the left, negative values mean 'other' is to
+     * the right.
      *
      * @param other the direction you wish to find the angle between
      * @return the angle in radians between this direction and the given direction
-     * in the range of [0, Math.PI]
+     * in the range of (-Math.PI, Math.PI]
      * @battlecode.doc.costlymethod
      */
     public float radiansBetween(Direction other) {
-        float radiansBetween = this.radians - other.radians;
-        radiansBetween = radiansBetween % (2 * (float) Math.PI);
-        if (radiansBetween > Math.PI) {
-            radiansBetween = (2 * (float) Math.PI) - radiansBetween;
-        }
-        return radiansBetween;
+        return reduce(other.radians - this.radians);
     }
 
     /**
      * Computes the angle between the given direction and this direction in degrees.
-     * Returned value will be in the range [0, 180]
+     * Returned value will be in the range (-180,180]
      *
      * @param other the direction you wish to find the angle between
      * @return the angle in degrees between this direction and the given direction
-     * in the range of [0, 180]
+     * in the range of (-180,180]
      * @battlecode.doc.costlymethod
      */
     public float degreesBetween(Direction other) {
@@ -221,5 +218,17 @@ public final strictfp class Direction {
         return "Direction: " +
                 "radians=" + radians +
                 ", degrees=" + Math.toDegrees(radians);
+    }
+
+    // Internally used to keep angles in the range (-Math.PI,Math.PI]
+    private float reduce(float rads) {
+        if(rads <= -Math.PI) {
+            int circles = (int)Math.ceil(-(rads+Math.PI)/(2*Math.PI));
+            return rads + (float)(Math.PI*2*circles);
+        } else if (rads > Math.PI) {
+            int circles = (int)Math.ceil((rads-Math.PI)/(2*Math.PI));
+            return rads - (float)(Math.PI*2*circles);
+        }
+        return rads;
     }
 }

@@ -774,4 +774,42 @@ public class RobotControllerTest {
             assertEquals(nullBot,null);
         });
     }
+
+    @Test
+    public void testDirections() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int soldierA = game.spawn(3, 5, RobotType.SOLDIER, Team.A);
+
+        game.round((id, rc) -> {
+            if(id != soldierA) return;
+
+            // Silly Direction sanity checks
+            for(int i=0; i < 3; i++) {
+                assertEquals(new Direction(0.1f).radians,new Direction(0.1f).rotateLeftRads((float)(2*Math.PI*i)).radians,EPSILON);
+                assertEquals(new Direction(-0.1f).radians,new Direction(-0.1f).rotateLeftRads((float)(2*Math.PI*i)).radians,EPSILON);
+                assertEquals(new Direction(0.1f).radians,new Direction(0.1f).rotateRightRads((float)(2*Math.PI*i)).radians,EPSILON);
+                assertEquals(new Direction(-0.1f).radians,new Direction(-0.1f).rotateRightRads((float)(2*Math.PI*i)).radians,EPSILON);
+            }
+
+            // Ensure range (-Math.PI,Math.PI]
+            Direction testDir = Direction.getNorth();
+            float testRads = testDir.radians;
+            Direction fromRads = new Direction(testRads);
+            for(int i=0; i < 200; i++) {
+                testDir = testDir.rotateLeftDegrees(i);
+                // Stays within range
+                assertTrue(Math.abs(testDir.radians) <= Math.PI);
+
+                // Direction.reduce() functionality works
+                testRads += Math.toRadians(i);
+                fromRads = new Direction(testRads);
+                assertEquals(testDir.radians,fromRads.radians,0.0001); // silly rounding errors can accumulate, so larger epsilon
+            }
+        });
+    }
 }
