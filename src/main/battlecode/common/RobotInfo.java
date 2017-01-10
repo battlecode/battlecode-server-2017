@@ -86,7 +86,7 @@ public class RobotInfo implements  BodyInfo{
 
     /**
      * Returns the team that this robot is on.
-     * 
+     *
      * @return the team that this robot is on.
      */
     public Team getTeam() {
