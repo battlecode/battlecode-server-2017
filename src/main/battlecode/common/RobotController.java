@@ -1097,30 +1097,6 @@ public strictfp interface RobotController {
     void donate(float bullets) throws GameActionException;
 
     /**
-     * Determines whether or not there is a robot at location loc and, if so,
-     * if the robot is within one stride of this robot.
-     *
-     * @param loc the location you wish to test
-     * @return true if there is a robot located at loc and if said robot is
-     * within one stride of this robot
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean canInteractWithRobot(MapLocation loc);
-
-    /**
-     * Determines whether or not there is a robot with the given id and, if so,
-     * if the robot is within one stride of this robot.
-     *
-     * @param id the id of the robot you wish to test
-     * @return true if there is a robot with the given id and if siad robot is
-     * within a stride of this robot
-     *
-     * @battlecode.doc.costlymethod
-     */
-    boolean canInteractWithRobot(int id);
-
-    /**
      * Kills your robot and ends the current round. Never fails.
      *
      * @battlecode.doc.costlymethod
