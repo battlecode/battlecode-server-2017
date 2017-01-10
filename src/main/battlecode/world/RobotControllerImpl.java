@@ -270,7 +270,11 @@ public final strictfp class RobotControllerImpl implements RobotController {
     public RobotInfo senseRobotAtLocation(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
         assertCanSenseLocation(loc);
-        return gameWorld.getObjectInfo().getRobotAtLocation(loc).getRobotInfo();
+        InternalRobot bot = gameWorld.getObjectInfo().getRobotAtLocation(loc);
+        if(bot != null) {
+            return bot.getRobotInfo();
+        }
+        return null;
     }
 
     @Override
