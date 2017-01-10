@@ -578,7 +578,7 @@ public strictfp interface RobotController {
     boolean canMove(Direction dir, float distance);
     
     /**
-     * Tests whether this robot can move to the target {@code MapLocation}. If
+     * Tests whether this robot can move to the target MapLocation. If
      * the location is outside the robot's {@code strideRadius}, the location
      * is rescaled to be at the {@code strideRadius}. Takes into account only
      * the positions of trees, other robots, and the edge of the game map. Does
@@ -651,7 +651,7 @@ public strictfp interface RobotController {
 
     /**
      * Strikes and deals damage to all other robots and trees within
-     * @{code LUMBERJACK_STRIKE_RADIUS} of this robot. Note that only Lumberjacks
+     * {@link GameConstants#LUMBERJACK_STRIKE_RADIUS} of this robot. Note that only Lumberjacks
      * can perform this function.
      *
      * @throws GameActionException if the robot is not of type LUMBERJACK or
@@ -702,7 +702,7 @@ public strictfp interface RobotController {
 
     /**
      * Fires a single bullet in the direction dir at the cost of
-     * {@code SINGLE_SHOT_COST} from your team's bullet supply. The speed
+     * {@link GameConstants#SINGLE_SHOT_COST} from your team's bullet supply. The speed
      * and damage of the bullet is determined from the type of this robot.
      *
      * @param dir the direction you wish to fire the bullet
@@ -716,8 +716,8 @@ public strictfp interface RobotController {
 
     /**
      * Fires a three bullets with the center bullet in the direction dir and
-     * with a spread of {@code TRIAD_SPREAD_DEGREES} degrees for the other
-     * bullets.  This function costs {@code TRIAD_SHOT_COST} bullets from
+     * with a spread of {@link GameConstants#TRIAD_SPREAD_DEGREES} degrees for the other
+     * bullets.  This function costs {@link GameConstants#TRIAD_SHOT_COST} bullets from
      * your team's supply. The speed and damage of the bullets is determined
      * from the type of this robot.
      *
@@ -732,8 +732,8 @@ public strictfp interface RobotController {
 
     /**
      * Fires a five bullets with the center bullet in the direction dir and
-     * with a spread of {@code PENTAD_SPREAD_DEGREES} degrees for the other
-     * bullets.  This function costs {@code PENTAD_SHOT_COST} bullets from
+     * with a spread of {@link GameConstants#PENTAD_SPREAD_DEGREES} degrees for the other
+     * bullets.  This function costs {@link GameConstants#PENTAD_SHOT_COST} bullets from
      * your team's supply. The speed and damage of the bullets is determined
      * from the type of this robot.
      *
@@ -891,7 +891,7 @@ public strictfp interface RobotController {
 
     /**
      * Waters the target tree with the given ID, restoring
-     * {@code WATER_HEALTH_REGEN_RATE} health to the tree.
+     * {@link GameConstants#WATER_HEALTH_REGEN_RATE} health to the tree.
      * Robots can only water once per turn and only with robots
      * of type GARDENER.
      *

@@ -35,7 +35,7 @@ public class GameActionException extends Exception {
      * Gives the type of gameworld interaction that caused this GameActionException, which
      * was specified when this instance was constructed.
      *
-     * @return this GameActionException's type
+     * @return this GameActionException's type.
      */
     public GameActionExceptionType getType() {
         return type;
