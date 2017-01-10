@@ -42,7 +42,7 @@ public enum RobotType {
     TANK            (GARDENER, 10,  100,  300,   2,   3f,   4,   7,  10,  1f, 10000),
     //                              HP    BC     BR   BS    AP   SR  BSR    STR   BCL
     /**
-     * An unit that specializes in movement and reconnaissance.
+     * A unit that specializes in movement and reconnaissance.
      *
      * @battlecode.doc.robottype
      */
@@ -101,7 +101,7 @@ public enum RobotType {
     public final float strideRadius;
 
     /**
-     * Base bytecode limit of this robot (halved if the robot does not have sufficient supply upkeep).
+     * Base bytecode limit of this robot.
      */
     public final int bytecodeLimit;
 
