@@ -14,7 +14,7 @@ public enum GameActionExceptionType {
      */
     NOT_ENOUGH_RESOURCE,
     /**
-     * Indicates when a robot tries to move into non-empty location.
+     * Indicates when a robot tries to move into a non-empty location.
      */
     CANT_MOVE_THERE,
     /**
@@ -22,13 +22,13 @@ public enum GameActionExceptionType {
      */
     NOT_ACTIVE,
     /**
-     * Indicates when a robot tries to sense a Robot that is no longer existant or no longer
+     * Indicates when a robot tries to sense a robot, bullet, or tree that no longer exists or is no longer
      * in this robot's sensor range.
      */
     CANT_SENSE_THAT,
     /**
      * Indicates when a robot tries to perform an action on a location that is outside
-     * its range..
+     * its range.
      */
     OUT_OF_RANGE,
     /**
@@ -41,7 +41,7 @@ public enum GameActionExceptionType {
      */
     NO_ROBOT_THERE,
     /**
-     * Indicates when a robot tries to perform an action on tree, but there is
+     * Indicates when a robot tries to perform an action on a tree, but there is
      * no suitable tree there.
      */
     NO_TREE_THERE,

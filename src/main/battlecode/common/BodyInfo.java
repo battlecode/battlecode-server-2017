@@ -6,32 +6,44 @@ package battlecode.common;
 public interface BodyInfo {
 
     /**
-     * @return the id of the body
+     * Returns the ID of this body.
+     *
+     * @return the ID of this body.
      */
     int getID();
 
     /**
-     * @return the center location of this body
+     * Returns the center location of this body.
+     *
+     * @return the center location of this body.
      */
     MapLocation getLocation();
 
     /**
-     * @return the radius of this body
+     * Returns the radius of this body.
+     *
+     * @return the radius of this body.
      */
     float getRadius();
 
     /**
-     * @return true if this body is a robot, false otherwise
+     * Returns whether this body is a robot.
+     *
+     * @return true if this body is a robot; false otherwise.
      */
     boolean isRobot();
 
     /**
-     * @return true if this body is a tree, false otherwise
+     * Returns whether this body is a tree.
+     *
+     * @return true if this body is a tree; false otherwise.
      */
     boolean isTree();
 
     /**
-     * @return true if this body is a bullet, false otherwise
+     * Returns whether this body is a bullet.
+     *
+     * @return true if this body is a bullet; false otherwise.
      */
     boolean isBullet();
 
