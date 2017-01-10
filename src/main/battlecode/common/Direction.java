@@ -187,7 +187,7 @@ public final strictfp class Direction {
      *
      * @param other the direction you wish to find the angle between
      * @return the angle in radians between this direction and the given direction
-     * in the range of [0, Math.PI]
+     * in the range of (-Math.PI, Math.PI]
      * @battlecode.doc.costlymethod
      */
     public float radiansBetween(Direction other) {
@@ -221,10 +221,10 @@ public final strictfp class Direction {
     // Internally used to keep angles in the range (-Math.PI,Math.PI]
     private float reduce(float rads) {
         if(rads <= -Math.PI) {
-            int circles = (int)Math.ceil(-rads/(2*Math.PI));
+            int circles = (int)Math.ceil(-(rads+Math.PI)/(2*Math.PI));
             return rads + (float)(Math.PI*2*circles);
         } else if (rads > Math.PI) {
-            int circles = (int)Math.ceil(rads/(2*Math.PI));
+            int circles = (int)Math.ceil((rads-Math.PI)/(2*Math.PI));
             return rads - (float)(Math.PI*2*circles);
         }
         return rads;
