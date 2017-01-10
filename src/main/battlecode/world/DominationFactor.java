@@ -23,5 +23,9 @@ public enum DominationFactor {
     /**
      * Win by destroying all enemy robots (trees are not considered robots).
      */
-    DESTROYED
+    DESTROYED,
+    /**
+     * Won by donating enough bullets to reach VICTORY_POINTS_TO_WIN.
+     */
+    PHILANTROPIED
 }

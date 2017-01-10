@@ -1130,6 +1130,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         int gainedVictorPoints = (int)bullets / GameConstants.BULLET_EXCHANGE_RATE;
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -bullets);
         gameWorld.getTeamInfo().adjustVictoryPoints(getTeam(), gainedVictorPoints);
+        gameWorld.setWinnerIfVictoryPoints();
     }
 
     @Override

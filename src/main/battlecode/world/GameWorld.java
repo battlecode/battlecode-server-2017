@@ -227,6 +227,14 @@ public strictfp class GameWorld {
         }
     }
 
+    public void setWinnerIfVictoryPoints() {
+        if(teamInfo.getVictoryPoints(Team.A) >= GameConstants.VICTORY_POINTS_TO_WIN) {
+            setWinner(Team.A, DominationFactor.PHILANTROPIED);
+        } else if(teamInfo.getVictoryPoints(Team.B) >= GameConstants.VICTORY_POINTS_TO_WIN) {
+            setWinner(Team.B, DominationFactor.PHILANTROPIED);
+        }
+    }
+
     public boolean timeLimitReached() {
         return currentRound >= gameMap.getRounds() - 1;
     }
