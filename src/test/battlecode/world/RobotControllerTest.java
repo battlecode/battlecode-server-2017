@@ -752,4 +752,26 @@ public class RobotControllerTest {
         // No additional bullets
         assertEquals(initialBullets,game.getWorld().getTeamInfo().getBulletSupply(Team.A),EPSILON);
     }
+
+    @Test
+    public void testNullSense() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int soldierA = game.spawn(3, 5, RobotType.SOLDIER, Team.A);
+        final int soldierB = game.spawn(7, 5, RobotType.SOLDIER, Team.B);
+
+        game.round((id, rc) -> {
+            if(id != soldierA) return;
+
+            RobotInfo actualBot = rc.senseRobotAtLocation(new MapLocation(3,5));
+            RobotInfo nullBot = rc.senseRobotAtLocation(new MapLocation(5,7));
+
+            assertNotEquals(actualBot,null);
+            assertEquals(nullBot,null);
+        });
+    }
 }

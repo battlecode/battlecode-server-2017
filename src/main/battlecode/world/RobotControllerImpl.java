@@ -263,14 +263,22 @@ public final strictfp class RobotControllerImpl implements RobotController {
     public TreeInfo senseTreeAtLocation(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
         assertCanSenseLocation(loc);
-        return gameWorld.getObjectInfo().getTreeAtLocation(loc).getTreeInfo();
+        InternalTree tree = gameWorld.getObjectInfo().getTreeAtLocation(loc);
+        if(tree != null) {
+            return tree.getTreeInfo();
+        }
+        return null;
     }
 
     @Override
     public RobotInfo senseRobotAtLocation(MapLocation loc) throws GameActionException {
         assertNotNull(loc);
         assertCanSenseLocation(loc);
-        return gameWorld.getObjectInfo().getRobotAtLocation(loc).getRobotInfo();
+        InternalRobot bot = gameWorld.getObjectInfo().getRobotAtLocation(loc);
+        if(bot != null) {
+            return bot.getRobotInfo();
+        }
+        return null;
     }
 
     @Override
