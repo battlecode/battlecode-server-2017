@@ -370,11 +370,11 @@ public class RobotControllerTest {
         game.round((id, rc) -> {
             if (id != gardenerA) return;
             assertFalse(rc.canPlantTree(Direction.getWest())); // tree in way
-            assertTrue(rc.canPlantTree(Direction.getNorth())); // unobstructed
+            assertTrue(rc.canPlantTree(Direction.getSouth())); // unobstructed
             assertTrue(rc.canPlantTree(Direction.getEast())); // unobstructed
             rc.plantTree(Direction.getEast());
             assertFalse(rc.canMove(Direction.getEast())); // tree now in the way
-            assertFalse(rc.canPlantTree(Direction.getNorth())); // has already planted this turn
+            assertFalse(rc.canPlantTree(Direction.getSouth())); // has already planted this turn
             TreeInfo[] trees = rc.senseNearbyTrees();
             assertEquals(trees.length,2);
             TreeInfo[] bulletTrees = rc.senseNearbyTrees(-1, rc.getTeam());
@@ -493,8 +493,8 @@ public class RobotControllerTest {
             if (id != scoutA) return;
 
             assertFalse(rc.canMove(Direction.getEast(),0.01f)); // Off the map
-            assertTrue(rc.canMove(Direction.getNorth()));
-            rc.move(Direction.getNorth());  // Move away from tree
+            assertTrue(rc.canMove(Direction.getSouth()));
+            rc.move(Direction.getSouth());  // Move away from tree
         });
 
         // Move Archon closer to tree
@@ -545,7 +545,7 @@ public class RobotControllerTest {
         MapLocation soldierBLocation = game.getBot(soldierB).getLocation();
         // topOfSoldierB is a location just near the top edge of soldierB.
         // if discrete bullet position checking is used, the bullet will clip though some of the tests.
-        MapLocation topOfSoldierB = soldierBLocation.add(Direction.getNorth(),RobotType.SOLDIER.bodyRadius - 0.01f);
+        MapLocation topOfSoldierB = soldierBLocation.add(Direction.getSouth(),RobotType.SOLDIER.bodyRadius - 0.01f);
 
         final float testInterval = 0.01f;
         for(float i=0; i<1; i+=testInterval){
@@ -569,7 +569,7 @@ public class RobotControllerTest {
         // Now check cases where it shouldn't hit soldierB
         game.round((id, rc) -> {
             if (id != soldierA) return;
-            rc.move(Direction.getNorth(),RobotType.SOLDIER.bodyRadius+0.01f);
+            rc.move(Direction.getSouth(),RobotType.SOLDIER.bodyRadius+0.01f);
             rc.fireSingleShot(Direction.getEast()); // Shoot a bullet parallel, slightly above soldierB
         });
         game.waitRounds(5); // Bullet propagation
@@ -584,7 +584,7 @@ public class RobotControllerTest {
             if (id == soldierA)
                 rc.fireSingleShot(Direction.getEast()); // Shoot a bullet parallel, slightly above soldierB
             else if (id == soldierB2)
-                rc.move(Direction.getNorth());  // Move out of way so soldierA can shoot off the map
+                rc.move(Direction.getSouth());  // Move out of way so soldierA can shoot off the map
         });
 
         float bulletDistanceToWall = 12-game.getWorld().getObjectInfo().bulletsArray()[0].getLocation().x;
