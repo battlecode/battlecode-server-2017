@@ -812,7 +812,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         boolean correctType = (getType() == RobotType.LUMBERJACK);
         boolean canInteract = canInteractWithTree(loc);
 
-        return correctType && canInteract;
+        return correctType && canInteract && !hasAttacked();
     }
 
     @Override
@@ -820,7 +820,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         boolean correctType = (getType() == RobotType.LUMBERJACK);
         boolean canInteract = canInteractWithTree(id);
 
-        return correctType && canInteract;
+        return correctType && canInteract && !hasAttacked();
     }
 
     @Override
