@@ -39,13 +39,27 @@ public final class TeamClassLoaderFactory {
      *
      * Class name should be in binary form, i.e. with .s and not /s
      */
-    private static boolean allowedPackage(String packageName) {
-        return !(packageName.startsWith("battlecode")
-            || packageName.startsWith("java")
-            || packageName.startsWith("com.sun")
-            || packageName.startsWith("sun")
-            || packageName.startsWith("org.apache")
-            || packageName.startsWith("org.objectweb"));
+    private static void assertAllowedPackage(String packageName) throws InstrumentationException {
+        if (packageName.startsWith("battlecode.")) {
+            throw new InstrumentationException(
+                    ILLEGAL,
+                    "Sorry, you can't use the package 'battlecode.' or any of its subpackages, " +
+                    "because you might be trying to hack the server, which isn't allowed. Move your code."
+            );
+        } else if (packageName.startsWith("java.") || packageName.startsWith("com.sun.")
+            || packageName.startsWith("sun.")) {
+            throw new InstrumentationException(
+                    ILLEGAL,
+                    "Sorry, you can't use system packages ('java.', 'sun.', 'org.sun.') " +
+                    "because you might be trying to hack the server, which isn't allowed. Move your code."
+            );
+        } else if (packageName.startsWith("org.apache.") || packageName.startsWith("org.objectweb.")) {
+            throw new InstrumentationException(
+                    ILLEGAL,
+                    "Sorry, you can't use certain library packages ('org.apache.', 'org.objectweb.') " +
+                    "because you might be trying to hack the server, which isn't allowed. Move your code."
+            );
+        }
     }
 
     /**
@@ -417,12 +431,11 @@ public final class TeamClassLoaderFactory {
                 // loading team classes, which keeps the engine consistent
                 // in where its failures happen.
 
-                if (!allowedPackage(name)) {
+                try {
+                    assertAllowedPackage(name);
+                } catch (InstrumentationException e) {
                     TeamClassLoaderFactory.this.hasError = true;
-                    throw new InstrumentationException(
-                            ILLEGAL,
-                            "You can't write package code in packages like "+name
-                    );
+                    throw e;
                 }
 
                 final byte[] classBytes;
