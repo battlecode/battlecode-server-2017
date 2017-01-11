@@ -1,6 +1,8 @@
 package battlecode.world;
 
 import battlecode.common.*;
+import battlecode.server.MetricsReporter;
+import com.sun.javafx.font.Metrics;
 
 /**
  * The representation of a tree used by the server.
@@ -155,6 +157,7 @@ public strictfp class InternalTree {
 
     public boolean killTreeIfDead(Team destroyedBy, boolean fromChop){
         if(health == 0){
+            MetricsReporter.addActionObservation(MetricsReporter.TREE_DESTROYED, destroyedBy);
             gameWorld.destroyTree(ID, destroyedBy, fromChop);
             return true;
         }
