@@ -145,7 +145,7 @@ public class ClassReferenceUtil {
         if (className == null) return null;
 
         // Classes of the form "[[[Lorg.dogs.Bone;" (e.g. object arrays)
-        // should be replaced with classes of the form "[[[" + classReference(org.dogs.Bone) + ";"
+        // should be replaced with classes of the form "[[[L" + classReference(org.dogs.Bone) + ";"
         if (className.charAt(0) == '[') {
             int arrayIndex = className.lastIndexOf('[');
             if (className.charAt(arrayIndex + 1) == 'L') {
