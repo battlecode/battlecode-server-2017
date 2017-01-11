@@ -864,4 +864,36 @@ public class RobotControllerTest {
         });
     }
 
+    @Test
+    public void testShakeInsideTree() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int scoutA = game.spawn(1, 5, RobotType.SCOUT, Team.A);
+        final int neutralTree = game.spawnTree(5,5,5,Team.NEUTRAL,0,null);
+
+        for(int i=0; i<8; i++) {
+            game.round((id, rc) -> {
+                if (id != scoutA) return;
+
+                // I can shake the tree I am on
+                assertTrue(rc.canShake(neutralTree));
+
+                // I can see the tree I am on
+                TreeInfo[] sensedTrees = rc.senseNearbyTrees(0.1f);
+                assertEquals(sensedTrees.length, 1);
+
+                // I can shake the tree I am on based on location
+                assertTrue(rc.canShake(rc.getLocation()));
+
+                // I can shake this tree in the same ways from another location
+                assertTrue(rc.canMove(Direction.getEast(), 1));
+                rc.move(Direction.getEast(), 1);
+            });
+        }
+    }
+
 }
