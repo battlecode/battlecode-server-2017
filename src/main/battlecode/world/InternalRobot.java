@@ -171,6 +171,10 @@ public strictfp class InternalRobot {
         return this.location.distanceTo(toInteract) <= (this.type.strideRadius+this.type.bodyRadius);
     }
 
+    public boolean canInteractWithCircle(MapLocation center, float radius) {
+        return this.location.distanceTo(center) <= (this.type.strideRadius+this.type.bodyRadius+radius);
+    }
+
     // ******************************************
     // ****** UPDATE METHODS ********************
     // ******************************************

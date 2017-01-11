@@ -772,7 +772,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
 
     private boolean canInteractWithCircle(MapLocation center, float radius){
         assertNotNull(center);
-        return canInteractWithLocation(center.add(center.directionTo(getLocation()), radius));
+        return this.robot.canInteractWithCircle(center,radius);
     }
 
     private void assertCanWater() throws GameActionException{
