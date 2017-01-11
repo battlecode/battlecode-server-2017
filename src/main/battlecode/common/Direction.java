@@ -66,7 +66,7 @@ public final strictfp class Direction {
      * @battlecode.doc.costlymethod
      */
     public static Direction getNorth() {
-        return new Direction(0, -1);
+        return new Direction(0, 1);
     }
 
     /**
@@ -86,7 +86,7 @@ public final strictfp class Direction {
      * @battlecode.doc.costlymethod
      */
     public static Direction getSouth() {
-        return new Direction(0,  1);
+        return new Direction(0,  -1);
     }
 
     /**
