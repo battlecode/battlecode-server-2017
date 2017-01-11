@@ -5,7 +5,6 @@ import static battlecode.common.GameActionExceptionType.*;
 import battlecode.instrumenter.RobotDeathException;
 import battlecode.schema.Action;
 import battlecode.server.MetricsReporter;
-import com.sun.javafx.font.Metrics;
 
 import java.util.ArrayList;
 import java.util.Arrays;

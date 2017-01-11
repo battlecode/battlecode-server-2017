@@ -2,7 +2,6 @@ package battlecode.world;
 
 import battlecode.common.*;
 import battlecode.server.MetricsReporter;
-import com.sun.javafx.font.Metrics;
 
 /**
  * The representation of a tree used by the server.
