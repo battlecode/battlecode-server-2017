@@ -144,10 +144,14 @@ public class ClassReferenceUtil {
     public String classReference(String className, boolean checkDisallowed) {
         if (className == null) return null;
 
+        // Classes of the form "[[[Lorg.dogs.Bone;" (e.g. object arrays)
+        // should be replaced with classes of the form "[[[" + classReference(org.dogs.Bone) + ";"
         if (className.charAt(0) == '[') {
             int arrayIndex = className.lastIndexOf('[');
             if (className.charAt(arrayIndex + 1) == 'L') {
-                return className.substring(0, arrayIndex + 2) + classReference(className.substring(arrayIndex + 2), checkDisallowed);
+                return className.substring(0, arrayIndex + 2)
+                        + classReference(className.substring(arrayIndex + 2, className.length() - 1), checkDisallowed)
+                        + ';';
             } else {
                 return className;
             }
