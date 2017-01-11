@@ -31,10 +31,10 @@ public class ErrorReporter {
     }
 
     public static void report(Throwable e, boolean ourFault) {
+        printStackTrace(e);
         if (ourFault) {
             Server.warn("\n\n");
             printReportString();
-            printStackTrace(e);
         }
     }
 
