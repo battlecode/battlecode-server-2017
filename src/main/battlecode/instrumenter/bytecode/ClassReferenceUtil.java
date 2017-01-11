@@ -147,7 +147,8 @@ public class ClassReferenceUtil {
         if (className.charAt(0) == '[') {
             int arrayIndex = className.lastIndexOf('[');
             if (className.charAt(arrayIndex + 1) == 'L') {
-                return className.substring(0, arrayIndex + 2) + classReference(className.substring(arrayIndex + 2), checkDisallowed);
+                String extractedClassName = className.substring(arrayIndex + 2, className.length() - 1);
+                return className.substring(0, arrayIndex + 2) + classReference(extractedClassName, checkDisallowed) + ";";
             } else {
                 return className;
             }
