@@ -211,17 +211,20 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     @Override
+    public boolean canSenseRadius(float radius) {
+        return this.robot.canSenseRadius(radius);
+    }
+
+    @Override
     public boolean canSensePartOfCircle(MapLocation center, float radius){
         assertNotNull(center);
-        MapLocation closestPointOnCircle = center.add(center.directionTo(getLocation()), radius);
-        return canSenseLocation(closestPointOnCircle);
+        return canSenseRadius(getLocation().distanceTo(center)-radius);
     }
 
     @Override
     public boolean canSenseAllOfCircle(MapLocation center, float radius){
         assertNotNull(center);
-        MapLocation furthestPointOnCircle = center.add(center.directionTo(getLocation()).opposite(), radius);
-        return canSenseLocation(furthestPointOnCircle);
+        return canSenseRadius(getLocation().distanceTo(center)+radius);
     }
 
     @Override

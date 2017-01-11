@@ -896,4 +896,27 @@ public class RobotControllerTest {
         }
     }
 
+    @Test
+    public void testNullIsCircleOccupied() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int gardener = game.spawnTree(5,5,5,Team.A,0,null);
+
+
+        game.round((id, rc) -> {
+            if(id != gardener) return;
+
+            boolean exception = false;
+            try {
+                assertFalse(rc.isCircleOccupiedExceptByThisRobot(rc.getLocation(), 3));
+            } catch(Exception e) {
+                exception = true;
+            }
+            assertFalse(exception);
+        });
+    }
 }
