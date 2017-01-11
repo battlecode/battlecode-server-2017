@@ -460,7 +460,6 @@ public strictfp class GameMaker {
                 throw new RuntimeException("Can't flush byte[]outputstream?", e);
             }
             byte[] logs = this.logger.toByteArray();
-            ByteBuffer logsBuffer = ByteBuffer.wrap(logs);
             this.logger.reset();
 
             createEvent((builder) -> {
@@ -527,7 +526,7 @@ public strictfp class GameMaker {
                 int bytecodeIDsP = intVector(builder, bytecodeIDs, Round::startBytecodeIDsVector);
                 int bytecodesUsedP = intVector(builder, bytecodesUsed, Round::startBytecodesUsedVector);
 
-                int logsP = builder.createString(logsBuffer);
+                int logsP = builder.createString(ByteBuffer.wrap(logs));
 
                 Round.startRound(builder);
                 Round.addMovedIDs(builder, movedIDsP);
