@@ -30,7 +30,7 @@ public class RobotInfo implements  BodyInfo{
     /**
      * The current health of the robot.
      */
-    public final double health;
+    public final float health;
     
     /**
      * The number of times this robot has attacked in the current turn.
@@ -73,7 +73,7 @@ public class RobotInfo implements  BodyInfo{
     }
 
     public RobotInfo(int ID, Team team, RobotType type, MapLocation location,
-                     double health, int attackCount, int moveCount) {
+                     float health, int attackCount, int moveCount) {
         super();
         this.ID = ID;
         this.team = team;
@@ -107,7 +107,7 @@ public class RobotInfo implements  BodyInfo{
      *
      * @return the current health of this robot.
      */
-    public double getHealth() {
+    public float getHealth() {
         return health;
     }
 
@@ -137,9 +137,9 @@ public class RobotInfo implements  BodyInfo{
         RobotInfo robotInfo = (RobotInfo) o;
 
         if (ID != robotInfo.ID) return false;
-        if (Double.compare(robotInfo.attackCount, attackCount) != 0) return false;
-        if (Double.compare(robotInfo.moveCount, moveCount) != 0) return false;
-        if (Double.compare(robotInfo.health, health) != 0) return false;
+        if (Float.compare(robotInfo.attackCount, attackCount) != 0) return false;
+        if (Float.compare(robotInfo.moveCount, moveCount) != 0) return false;
+        if (Float.compare(robotInfo.health, health) != 0) return false;
         if (team != robotInfo.team) return false;
         if (type != robotInfo.type) return false;
         return location.equals(robotInfo.location);
