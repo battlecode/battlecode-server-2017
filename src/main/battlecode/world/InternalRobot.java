@@ -168,7 +168,7 @@ public strictfp class InternalRobot {
     }
 
     public boolean canInteractWithLocation(MapLocation toInteract){
-        return this.location.distanceTo(toInteract) <= 2*this.type.bodyRadius;
+        return this.location.distanceTo(toInteract) <= (this.type.strideRadius+this.type.bodyRadius);
     }
 
     // ******************************************
