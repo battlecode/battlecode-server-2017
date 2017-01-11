@@ -140,14 +140,14 @@ public strictfp class InternalBullet {
             }
         } else {
             // If the bullet hit something...
-            if(hitRobotDist < hitTreeDist && hitRobot != null) {
-                // And the closest thing hit was a robot...
-                gameWorld.destroyBullet(this.ID);
-                hitRobot.damageRobot(this.damage);
-            } else  if (hitTree != null){
-                /// And the closest thing hit was a tree...
+            if(hitTreeDist<hitRobotDist && hitTree != null) {
+                // And the closest thing hit was a tree...
                 gameWorld.destroyBullet(this.ID);
                 hitTree.damageTree(this.damage, this.team, false);
+            } else  if (hitRobot != null){
+                /// And the closest thing hit was a robot...
+                gameWorld.destroyBullet(this.ID);
+                hitRobot.damageRobot(this.damage);
             } else {
                 // This should never happen
                 throw new RuntimeException("Closest hit object was null");

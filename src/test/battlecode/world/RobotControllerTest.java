@@ -896,4 +896,29 @@ public class RobotControllerTest {
         }
     }
 
+    @Test
+    public void hitScoutsBeforeTrees() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        // In case scouts are on top of trees with radius 1, hit scout first
+        final int soldierA = game.spawn(5,5,RobotType.SOLDIER,Team.A);
+        final int scoutB = game.spawn(8,5,RobotType.SCOUT,Team.B);
+        final int neutralTree1 = game.spawnTree(8,5,1,Team.NEUTRAL,123,null);
+        game.waitRounds(20); // Let them mature
+
+        // Fire shot at tree/soldier combo
+        game.round((id, rc) -> {
+            if (id != soldierA) return;
+            rc.fireSingleShot(rc.getLocation().directionTo(new MapLocation(8,5)));
+        });
+        game.waitRounds(1);
+        // Scout gets hit, tree does not
+        assertEquals(game.getBot(scoutB).getHealth(),RobotType.SCOUT.maxHealth-RobotType.SOLDIER.attackPower, EPSILON);
+        assertEquals(game.getTree(neutralTree1).getHealth(),GameConstants.NEUTRAL_TREE_HEALTH_RATE, EPSILON);
+    }
+
 }
