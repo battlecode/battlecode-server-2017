@@ -96,6 +96,21 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
     }
 
     /**
+     * Checks where two given circles collide at any point.
+     *
+     * @param center1 the center of the first circle
+     * @param radius1 the radius of the first circle
+     * @param center2 the center of the second circle
+     * @param radius2 the radius of the second circle
+     * @return true if the given circles collide at any point, false otherwise.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public static boolean doCirclesCollide(MapLocation center1, float radius1, MapLocation center2, float radius2){
+        return center1.distanceTo(center2) <= radius1 + radius2;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @battlecode.doc.costlymethod
