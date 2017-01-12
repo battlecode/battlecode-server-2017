@@ -2,6 +2,7 @@ package battlecode.world;
 
 import battlecode.common.*;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -948,5 +949,55 @@ public class RobotControllerTest {
         // Scout gets hit, tree does not
         assertEquals(game.getBot(scoutB).getHealth(),RobotType.SCOUT.maxHealth-RobotType.SOLDIER.attackPower, EPSILON);
         assertEquals(game.getTree(neutralTree1).getHealth(),GameConstants.NEUTRAL_TREE_HEALTH_RATE, EPSILON);
+    }
+
+    // Check to ensure execution order is equal to spawn order
+    @Test
+    public void executionOrderTest() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 50, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int TEST_UNITS = 10;
+
+        int[] testIDs = new int[TEST_UNITS];
+
+        for(int i=0; i<TEST_UNITS; i++) {
+            testIDs[i] = game.spawn(2+i*3,5,RobotType.SOLDIER,Team.A);
+        }
+        final int archonA = game.spawn(40,5,RobotType.ARCHON,Team.A);
+        final int gardenerA = game.spawn(46,5,RobotType.GARDENER,Team.A);
+
+        TIntArrayList executionOrder = new TIntArrayList();
+
+        game.round((id, rc) -> {
+            if(rc.getType() == RobotType.SOLDIER) {
+                executionOrder.add(id);
+            } else if (id == archonA) {
+                assertTrue(rc.canHireGardener(Direction.getEast()));
+                rc.hireGardener(Direction.getEast());
+            } else if (id == gardenerA) {
+                assertTrue(rc.canBuildRobot(RobotType.LUMBERJACK,Direction.getEast()));
+            } else {
+                // If either the spawned gardener or the lumberjack run code in the first round, this will fail.
+                assertTrue(false);
+            }
+        });
+
+        // Assert IDs aren't in order (random change, but very unlikely unless something is wrong)
+        boolean sorted = true;
+        for(int i=0; i<TEST_UNITS-1; i++) {
+            if (testIDs[i] < testIDs[i+1])
+                sorted = false;
+        }
+        assertFalse(sorted);
+
+
+        // Assert execution IS in order
+        for(int i=0; i<TEST_UNITS; i++) {
+            assertEquals(testIDs[i],executionOrder.get(i));
+        }
     }
 }

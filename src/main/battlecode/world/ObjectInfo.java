@@ -5,6 +5,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
+
 
 /**
  * This class is used to hold information about the robots, trees, and bullets
@@ -37,6 +39,12 @@ public strictfp class ObjectInfo {
     private final SpatialIndex robotIndex;
     private final SpatialIndex bulletIndex;
 
+    private final TIntArrayList robotSpawnOrder;
+    // Tree spawn order does not matter because trees cannot affect each other.
+    // Bullet spawn order may matter if two separate bullets in different directions
+    // are about to hit a robot with 1 health left.
+    private final TIntArrayList bulletSpawnOrder;
+
     private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<>(
             Team.class);
     private int[] robotCount = new int[3];
@@ -54,6 +62,9 @@ public strictfp class ObjectInfo {
         treeIndex = new RTree();
         robotIndex = new RTree();
         bulletIndex = new RTree();
+
+        robotSpawnOrder = new TIntArrayList();
+        bulletSpawnOrder = new TIntArrayList();
 
         treeIndex.init(null);
         robotIndex.init(null);
@@ -89,6 +100,29 @@ public strictfp class ObjectInfo {
     }
 
     /**
+     * Apply an operation for every bullet, in the order the bullets were spawned.
+     * Return false to stop iterating.
+     * If you call destroyBullet() on a bullet that hasn't been seen yet,
+     * that bullet will be silently skipped.
+     *
+     * @param op a lambda (bullet) -> boolean
+     */
+    public void eachBulletBySpawnOrder(TObjectProcedure<InternalBullet> op) {
+        // We can't modify the arraylist we are looping over
+        int [] spawnOrderArray = bulletSpawnOrder.toArray();
+
+        for(int id : spawnOrderArray) {
+            // Shouldn't be necessary with Bullets but safety safety safety
+            if(existsBullet(id)) {
+                boolean returnedTrue = op.execute(gameBulletsByID.get(id));
+                if(!returnedTrue) {
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
      * Apply an operation for every tree.
      * Return false to stop iterating.
      * If you call destroyTree() on a tree that hasn't been seen yet,
@@ -101,7 +135,7 @@ public strictfp class ObjectInfo {
     }
 
     /**
-     * Apply an operation for every robot.
+     * Apply an operation for every robot, ordered based on robot ID hash (effectively random).
      * Return false to stop iterating.
      * If you call destroyRobot() on a robot that hasn't been seen yet,
      * that robot will be silently skipped.
@@ -110,6 +144,31 @@ public strictfp class ObjectInfo {
      */
     public void eachRobot(TObjectProcedure<InternalRobot> op) {
         gameRobotsByID.forEachValue(op);
+        //eachRobotBySpawnOrder(op);
+    }
+
+    /**
+     * Apply an operation for every robot, in the order the Robots were spawned.
+     * Return false to stop iterating.
+     * If you call destroyRobot() on a robot that hasn't been seen yet,
+     * that robot will be silently skipped.
+     *
+     * @param op a lambda (bullet) -> void
+     */
+    public void eachRobotBySpawnOrder(TObjectProcedure<InternalRobot> op) {
+        // Robots may be removed during iteration, and we can't modify
+        // the ArrayList we are looping over.
+        int[] spawnOrderArray = robotSpawnOrder.toArray();
+
+        for(int id : spawnOrderArray) {
+            // Robot may have been killed by a previous one, so check if still exists.
+            if(existsRobot(id)) {
+                boolean returnedTrue = op.execute(gameRobotsByID.get(id));
+                if(!returnedTrue) {
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -208,6 +267,8 @@ public strictfp class ObjectInfo {
 
         int id = robot.getID();
         gameRobotsByID.put(id, robot);
+        //System.out.println("Spawning robot "+id);
+        robotSpawnOrder.add(id); // Remember order in which IDs were spawned
 
         MapLocation loc = robot.getLocation();
         robotIndex.add(fromPoint(loc),robot.getID());
@@ -216,6 +277,8 @@ public strictfp class ObjectInfo {
     public void spawnBullet(InternalBullet bullet){
         int id = bullet.getID();
         gameBulletsByID.put(id, bullet);
+
+        bulletSpawnOrder.add(id); // Remember order in which IDs were spawned
 
         MapLocation loc = bullet.getLocation();
         bulletIndex.add(fromPoint(loc),bullet.getID());
@@ -257,6 +320,7 @@ public strictfp class ObjectInfo {
 
         MapLocation loc = robot.getLocation();
         gameRobotsByID.remove(id);
+        robotSpawnOrder.remove(id);
         robotIndex.delete(fromPoint(loc),id);
     }
 
@@ -265,6 +329,7 @@ public strictfp class ObjectInfo {
 
         MapLocation loc = b.getLocation();
         gameBulletsByID.remove(id);
+        bulletSpawnOrder.remove(id);
         bulletIndex.delete(fromPoint(loc),id);
     }
     

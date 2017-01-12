@@ -127,7 +127,7 @@ public strictfp class GameWorld {
     }
 
     private void updateRobots(){
-        objectInfo.eachRobot((robot) -> {
+        objectInfo.eachRobotBySpawnOrder((robot) -> {
             robot.processBeginningOfTurn();
             this.controlProvider.runRobot(robot);
             robot.setBytecodesUsed(this.controlProvider.getBytecodesUsed(robot));
@@ -146,7 +146,7 @@ public strictfp class GameWorld {
     }
 
     private void updateBullets(){
-        objectInfo.eachBullet((bullet) -> {
+        objectInfo.eachBulletBySpawnOrder((bullet) -> {
             bullet.updateBullet();
             return true;
         });
