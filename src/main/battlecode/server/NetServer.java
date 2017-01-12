@@ -24,7 +24,10 @@ public class NetServer extends WebSocketServer {
     private final List<byte[]> previousEvents;
     private final BlockingQueue<byte[]> incomingEvents;
 
+    private boolean waitForClient;
+
     private boolean done = false;
+    private boolean connected = false;
 
     private Thread queueThread;
 
@@ -32,8 +35,10 @@ public class NetServer extends WebSocketServer {
      * Create a new server.
      * @param port
      */
-    public NetServer(int port) {
+    public NetServer(int port, boolean waitForClient) {
         super(new InetSocketAddress(port));
+
+        this.waitForClient = waitForClient;
 
         previousEvents = new ArrayList<>();
         incomingEvents = new ArrayBlockingQueue<>(64);
@@ -67,6 +72,18 @@ public class NetServer extends WebSocketServer {
 
         queueThread.start();
         super.start();
+
+        if (waitForClient) {
+            System.out.println("Waiting for connection from client...");
+            try {
+                while (!connected) {
+                    Thread.sleep(300);
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Bad things happened");
+            }
+            System.out.println("Connection received!");
+        }
     }
 
     /**
@@ -124,6 +141,8 @@ public class NetServer extends WebSocketServer {
     @Override
     public void onOpen(WebSocket client, ClientHandshake handshake) {
         synchronized (connections()) {
+            connected = true;
+
             for (byte[] event : previousEvents) {
                 client.send(event);
             }
