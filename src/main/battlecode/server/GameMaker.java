@@ -279,6 +279,8 @@ public strictfp class GameMaker {
             BodyTypeMetadata.addStrideRadius(builder, type.strideRadius);
             BodyTypeMetadata.addBulletAttack(builder, type.attackPower);
             BodyTypeMetadata.addBulletSpeed(builder, type.bulletSpeed);
+            BodyTypeMetadata.addSightRadius(builder, type.sensorRadius);
+            BodyTypeMetadata.addBulletSightRadius(builder, type.bulletSightRadius);
             bodyTypeMetadataOffsets.add(BodyTypeMetadata.endBodyTypeMetadata(builder));
         }
 
