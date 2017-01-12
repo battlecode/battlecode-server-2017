@@ -172,9 +172,9 @@ public strictfp class InternalBullet {
             return 0;
         }
 
-        // If toFinish is null, then the bullets final location will be on top of a unit
         if(toFinish == null) {
-            return Math.max(maxDist - targetRadius, minDist);
+            // This should never happen
+            throw new RuntimeException("bulletStart and bulletFinish are the same.");
         }
 
         float radiansBetween = toFinish.radiansBetween(toTarget);
