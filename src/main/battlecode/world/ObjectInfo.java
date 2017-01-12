@@ -320,7 +320,7 @@ public strictfp class ObjectInfo {
 
         MapLocation loc = robot.getLocation();
         gameRobotsByID.remove(id);
-        robotSpawnOrder.remove(Integer.valueOf(id));
+        robotSpawnOrder.remove(id);
         robotIndex.delete(fromPoint(loc),id);
     }
 
@@ -329,7 +329,7 @@ public strictfp class ObjectInfo {
 
         MapLocation loc = b.getLocation();
         gameBulletsByID.remove(id);
-        bulletSpawnOrder.remove(Integer.valueOf(id));
+        bulletSpawnOrder.remove(id);
         bulletIndex.delete(fromPoint(loc),id);
     }
     
