@@ -830,6 +830,10 @@ public class RobotControllerTest {
                 assertEquals(testDir.radians, fromRads.radians, 0.0001); // silly rounding errors can accumulate, so larger epsilon
             }
         });
+
+        // Test from ndefilippis
+        Direction d = new Direction((float) Math.PI);
+        assertEquals(d.radians, Math.PI, 1E-7);
     }
 
     @Test
