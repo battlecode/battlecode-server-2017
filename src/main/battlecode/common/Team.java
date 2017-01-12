@@ -45,7 +45,7 @@ public enum Team {
      * Returns whether a robot of this team is a player-controlled entity
      * (team A or team B).
      *
-     * @return whether a robot of this team is player-controlled.
+     * @return true a robot of this team is player-controlled; false otherwise.
      *
      * @battlecode.doc.costlymethod
      */

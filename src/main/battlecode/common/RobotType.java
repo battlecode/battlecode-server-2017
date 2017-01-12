@@ -14,35 +14,35 @@ public enum RobotType {
     ARCHON          (null,    0,    400,   -1,   2,  -1,  -1,   10,  15, 1,  20000),
     //                              HP      BC   BR   BS   AP   SR  BSR  STR   BCL
     /**
-     * The main producer unit to make other units and trees; can't build Archons or other Gardeners
+     * The main producer unit to make other units and trees; can't build Archons or other Gardeners.
      *
      * @battlecode.doc.robottype
      */
     GARDENER        (ARCHON,  10,   40,  100,   1,  -1,  -1,   7,  10,   1, 10000),
     //                              HP    BC   BR   BS   AP   SR  BSR  STR   BCL
     /**
-     * A melee based unit that specializes at cutting down trees
+     * A melee based unit that specializes at cutting down trees.
      *
      * @battlecode.doc.robottype
      */
     LUMBERJACK      (GARDENER,  10, 50,  100,   1,  -1,   2,   7,  10,  1.5f, 10000),
     //                              HP    BC   BR   BS   AP    SR  BSR  STR   BCL
     /**
-     * The basic fighting unit
+     * The basic fighting unit.
      *
      * @battlecode.doc.robottype
      */
     SOLDIER         (GARDENER,  10, 50,  100,   1,   2f,   2,   7,  10,   2, 10000),
     //                              HP    BC   BR     BS    AP   SR   BSR  STR   BCL
     /**
-     * A strong fighting unit
+     * A strong fighting unit.
      *
      * @battlecode.doc.robottype
      */
     TANK            (GARDENER, 10,  100,  300,   2,   3f,   4,   7,  10,  1f, 10000),
     //                              HP    BC     BR   BS    AP   SR  BSR    STR   BCL
     /**
-     * An unit that specializes in movement
+     * A unit that specializes in movement and reconnaissance.
      *
      * @battlecode.doc.robottype
      */
@@ -96,12 +96,12 @@ public enum RobotType {
     public final float bulletSightRadius;
 
     /**
-     * Maximum distance the robot can move per turn
+     * Maximum distance the robot can move per turn.
      */
     public final float strideRadius;
 
     /**
-     * Base bytecode limit of this robot (halved if the robot does not have sufficient supply upkeep).
+     * Base bytecode limit of this robot.
      */
     public final int bytecodeLimit;
 
@@ -115,7 +115,7 @@ public enum RobotType {
     }
 
     /**
-     * Returns whether the robot can hire Gardeners
+     * Returns whether the robot can hire Gardeners.
      *
      * @return whether the robot can hire Gardeners.
      */
@@ -124,7 +124,7 @@ public enum RobotType {
     }
 
     /**
-     * Returns whether the robot can build trees and all units except Gardeners and Archons
+     * Returns whether the robot can build trees and all units except Gardeners and Archons.
      *
      * @return whether the robot can build.
      */
@@ -149,9 +149,9 @@ public enum RobotType {
     public boolean isBuildable() { return spawnSource == GARDENER; }
 
     /**
-     * Returns the starting health of this type of robot
+     * Returns the starting health of this type of robot.
      *
-     * @return the starting health of this type of robot
+     * @return the starting health of this type of robot.
      */
     public float getStartingHealth() {
         return this == RobotType.ARCHON || this == RobotType.GARDENER ? this.maxHealth : .20F * this.maxHealth;

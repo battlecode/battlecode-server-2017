@@ -96,6 +96,21 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
     }
 
     /**
+     * Checks where two given circles collide at any point.
+     *
+     * @param center1 the center of the first circle
+     * @param radius1 the radius of the first circle
+     * @param center2 the center of the second circle
+     * @param radius2 the radius of the second circle
+     * @return true if the given circles collide at any point, false otherwise.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    public static boolean doCirclesCollide(MapLocation center1, float radius1, MapLocation center2, float radius2){
+        return center1.distanceTo(center2) <= radius1 + radius2;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @battlecode.doc.costlymethod
@@ -140,8 +155,7 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
      *
      * @param location the location to test
      * @param dist the distance for the location to be within
-     * @return true if the given location is within dist to this one,
-     *         or false if it isn't
+     * @return true if the given location is within dist to this one; false otherwise
      *
      * @battlecode.doc.costlymethod
      */
@@ -150,11 +164,10 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
     }
 
     /**
-     * Determines whether this location is within one stride of the given robot
+     * Determines whether this location is within one stride of the given robot.
      *
      * @param robot the robot to test
-     * @return true if this location is within one stride of the given robot,
-     *          false otherwise
+     * @return true if this location is within one stride of the given robot; false otherwise
      *
      * @battlecode.doc.costlymethod
      */
@@ -164,7 +177,7 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
 
     /**
      * Determines whether this location is within the sensor radius of the
-     * given robot
+     * given robot.
      *
      * @param robot the robot to test
      * @return true if this location is within the robot's sensor radius,
@@ -178,7 +191,7 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
 
     /**
      * Determines whether this location is within the bullet sight radius of the
-     * given robot
+     * given robot.
      *
      * @param robot the robot to test
      * @return true if this location is within robot's bullet sight radius,
@@ -221,6 +234,9 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
      * @battlecode.doc.costlymethod
      */
     public final MapLocation add(Direction direction) {
+        if(direction == null) {
+            return new MapLocation(x ,y);
+        }
         float dx = (float)Math.cos(direction.radians);
         float dy = (float)Math.sin(direction.radians);
         return new MapLocation(x + dx, y + dy);
@@ -254,6 +270,9 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
      * @battlecode.doc.costlymethod
      */
     public final MapLocation add(Direction direction, float dist) {
+        if(direction == null) {
+            return new MapLocation(x ,y);
+        }
         float dx = (float)(dist * Math.cos(direction.radians));
         float dy = (float)(dist * Math.sin(direction.radians));
         return new MapLocation(x + dx, y + dy);
@@ -288,6 +307,9 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
      * @battlecode.doc.costlymethod
      */
     public final MapLocation subtract(Direction direction) {
+        if(direction == null) {
+            return new MapLocation(x,y);
+        }
         return this.add(direction.opposite());
     }
 
@@ -320,6 +342,9 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
      * @battlecode.doc.costlymethod
      */
     public final MapLocation subtract(Direction direction, float dist) {
+        if(direction == null) {
+            return new MapLocation(x,y);
+        }
         return this.add(direction.opposite(), dist);
     }
 
@@ -342,7 +367,7 @@ public final strictfp class MapLocation implements Serializable, Comparable<MapL
 
     /**
      * Returns a new MapLocation object translated from this location
-     * by a fixed amount
+     * by a fixed amount.
      *
      * @param dx the amount to translate in the x direction
      * @param dy the amount to translate in the y direction

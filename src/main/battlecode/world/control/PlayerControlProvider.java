@@ -86,7 +86,7 @@ public class PlayerControlProvider implements RobotControlProvider {
             final SandboxedRobotPlayer player = new SandboxedRobotPlayer(
                     teamPackage,
                     robot.getController(),
-                    gameWorld.getMapSeed(),
+                    robot.getID(),
                     factory.createLoader(),
                     robotOut
             );

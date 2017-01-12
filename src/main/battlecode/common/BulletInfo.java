@@ -13,23 +13,22 @@ public class BulletInfo implements BodyInfo{
     public final int ID;
 
     /**
-     * The speed at which the bullet is traveling in
-     * terms of units per turn
+     * The speed of this bullet, in units per turn.
      */
     public final float speed;
 
     /**
-     * The damage this bullet deals on impact
+     * The damage this bullet deals on impact.
      */
     public final float damage;
 
     /**
-     * The direction in which the bullet is moving
+     * The direction in which this bullet is moving.
      */
     public final Direction dir;
 
     /**
-     * The current location of the tree.
+     * The current location of this bullet.
      */
     public final MapLocation location;
 
@@ -42,22 +41,27 @@ public class BulletInfo implements BodyInfo{
     }
 
     /**
-     * The speed at which the bullet is traveling in
-     * terms of units per turn
+     * Returns the speed of this bullet, in units per turn
+     *
+     * @return the speed of this bullet.
      */
     public float getSpeed() {
         return speed;
     }
 
     /**
-     * The damage this bullet deals on impact
+     * Returns the damage this bullet deals on impact.
+     *
+     * @return the damage this bullet deals on impact.
      */
     public float getDamage() {
         return damage;
     }
 
     /**
-     * The direction in which the bullet is moving
+     * Returns the direction in which this bullet is moving.
+     *
+     * @return the direction in which this bullet is moving.
      */
     public Direction getDir() {
         return dir;

@@ -167,8 +167,16 @@ public strictfp class InternalRobot {
         return this.location.distanceTo(toSense) <= this.type.sensorRadius;
     }
 
+    public boolean canSenseRadius(float radius) {
+        return radius <= this.type.sensorRadius;
+    }
+
     public boolean canInteractWithLocation(MapLocation toInteract){
-        return this.location.distanceTo(toInteract) <= 2*this.type.bodyRadius;
+        return this.location.distanceTo(toInteract) <= (this.type.strideRadius+this.type.bodyRadius);
+    }
+
+    public boolean canInteractWithCircle(MapLocation center, float radius) {
+        return this.location.distanceTo(center) <= (this.type.strideRadius+this.type.bodyRadius+radius);
     }
 
     // ******************************************
@@ -251,6 +259,7 @@ public strictfp class InternalRobot {
     }
 
     public void processEndOfTurn() {
+        gameWorld.getMatchMaker().addBytecodes(ID, this.bytecodesUsed);
         this.prevBytecodesUsed = this.bytecodesUsed;
         roundsAlive++;
     }

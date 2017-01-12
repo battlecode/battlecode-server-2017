@@ -375,6 +375,10 @@ public strictfp class GameMaker {
         private TIntArrayList indicatorLineRGBsGreen;
         private TIntArrayList indicatorLineRGBsBlue;
 
+        // Robot IDs and their bytecode usage
+        private TIntArrayList bytecodeIDs;
+        private TIntArrayList bytecodesUsed;
+
         // Used to write logs.
         private final ByteArrayOutputStream logger;
 
@@ -418,6 +422,8 @@ public strictfp class GameMaker {
             this.indicatorLineRGBsRed = new TIntArrayList();
             this.indicatorLineRGBsBlue = new TIntArrayList();
             this.indicatorLineRGBsGreen = new TIntArrayList();
+            this.bytecodeIDs = new TIntArrayList();
+            this.bytecodesUsed = new TIntArrayList();
             this.logger = new ByteArrayOutputStream();
         }
 
@@ -454,7 +460,6 @@ public strictfp class GameMaker {
                 throw new RuntimeException("Can't flush byte[]outputstream?", e);
             }
             byte[] logs = this.logger.toByteArray();
-            ByteBuffer logsBuffer = ByteBuffer.wrap(logs);
             this.logger.reset();
 
             createEvent((builder) -> {
@@ -517,7 +522,11 @@ public strictfp class GameMaker {
                 int indicatorLineEndLocsP = createVecTable(builder, indicatorLineEndLocsX, indicatorLineEndLocsY);
                 int indicatorLineRGBsP = createRGBTable(builder, indicatorLineRGBsRed, indicatorLineRGBsGreen, indicatorLineRGBsBlue);
 
-                int logsP = builder.createString(logsBuffer);
+                // The bytecode usage
+                int bytecodeIDsP = intVector(builder, bytecodeIDs, Round::startBytecodeIDsVector);
+                int bytecodesUsedP = intVector(builder, bytecodesUsed, Round::startBytecodesUsedVector);
+
+                int logsP = builder.createString(ByteBuffer.wrap(logs));
 
                 Round.startRound(builder);
                 Round.addMovedIDs(builder, movedIDsP);
@@ -542,6 +551,8 @@ public strictfp class GameMaker {
                 Round.addIndicatorLineEndLocs(builder, indicatorLineEndLocsP);
                 Round.addIndicatorLineRGBs(builder, indicatorLineRGBsP);
                 Round.addRoundID(builder, roundNum);
+                Round.addBytecodeIDs(builder, bytecodeIDsP);
+                Round.addBytecodesUsed(builder, bytecodesUsedP);
                 Round.addLogs(builder, logsP);
 
                 int round = Round.endRound(builder);
@@ -608,6 +619,11 @@ public strictfp class GameMaker {
             indicatorLineRGBsRed.add(red);
             indicatorLineRGBsGreen.add(green);
             indicatorLineRGBsBlue.add(blue);
+        }
+
+        public void addBytecodes(int id, int bytecodes) {
+            bytecodeIDs.add(id);
+            bytecodesUsed.add(bytecodes);
         }
 
         public void addSpawnedRobot(InternalRobot robot) {
@@ -677,6 +693,8 @@ public strictfp class GameMaker {
             indicatorLineRGBsRed.clear();
             indicatorLineRGBsBlue.clear();
             indicatorLineRGBsGreen.clear();
+            bytecodeIDs.clear();
+            bytecodesUsed.clear();
         }
     }
 }

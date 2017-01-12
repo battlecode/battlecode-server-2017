@@ -30,15 +30,15 @@ public class RobotInfo implements  BodyInfo{
     /**
      * The current health of the robot.
      */
-    public final double health;
+    public final float health;
     
     /**
-     * The number of times this robot has attacked in the current turn
+     * The number of times this robot has attacked in the current turn.
      */
     public final int attackCount;
     
     /**
-     * The number of times this robot has moved in the current turn
+     * The number of times this robot has moved in the current turn.
      */
     public final int moveCount;
 
@@ -73,7 +73,7 @@ public class RobotInfo implements  BodyInfo{
     }
 
     public RobotInfo(int ID, Team team, RobotType type, MapLocation location,
-                     double health, int attackCount, int moveCount) {
+                     float health, int attackCount, int moveCount) {
         super();
         this.ID = ID;
         this.team = team;
@@ -85,35 +85,45 @@ public class RobotInfo implements  BodyInfo{
     }
 
     /**
-     * The Team that the robot is on.
+     * Returns the team that this robot is on.
+     *
+     * @return the team that this robot is on.
      */
     public Team getTeam() {
         return team;
     }
 
     /**
-     * The type of the robot.
+     * Returns the type of this robot.
+     *
+     * @return the type of this robot.
      */
     public RobotType getType() {
         return type;
     }
 
     /**
-     * The current health of the robot.
+     * Returns the current health of this robot.
+     *
+     * @return the current health of this robot.
      */
-    public double getHealth() {
+    public float getHealth() {
         return health;
     }
 
     /**
-     * The number of times this robot has attacked in the current turn
+     * Returns the number of times this robot has attacked this turn.
+     *
+     * @return the number of times this robot has attacked this turn.
      */
     public int getAttackCount() {
         return attackCount;
     }
 
     /**
-     * The number of times this robot has moved in the current turn
+     * Returns the number of times this robot has moved this turn.
+     *
+     * @return the number of times this robot has moved this turn.
      */
     public int getMoveCount() {
         return moveCount;
@@ -127,9 +137,9 @@ public class RobotInfo implements  BodyInfo{
         RobotInfo robotInfo = (RobotInfo) o;
 
         if (ID != robotInfo.ID) return false;
-        if (Double.compare(robotInfo.attackCount, attackCount) != 0) return false;
-        if (Double.compare(robotInfo.moveCount, moveCount) != 0) return false;
-        if (Double.compare(robotInfo.health, health) != 0) return false;
+        if (Float.compare(robotInfo.attackCount, attackCount) != 0) return false;
+        if (Float.compare(robotInfo.moveCount, moveCount) != 0) return false;
+        if (Float.compare(robotInfo.health, health) != 0) return false;
         if (team != robotInfo.team) return false;
         if (type != robotInfo.type) return false;
         return location.equals(robotInfo.location);

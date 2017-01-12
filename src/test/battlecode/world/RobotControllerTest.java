@@ -636,6 +636,24 @@ public class RobotControllerTest {
             }
             assertTrue(exception);
         });
+
+        // No winner yet
+        assertEquals(game.getWorld().getWinner(),null);
+
+        // Give TeamA lots of bullets
+        game.getWorld().getTeamInfo().adjustBulletSupply(Team.A,GameConstants.VICTORY_POINTS_TO_WIN*GameConstants.BULLET_EXCHANGE_RATE);
+
+        game.round((id, rc) -> {
+            if(id != archonA) return;
+
+            rc.donate(rc.getTeamBullets());
+        });
+
+        // Team A should win
+        assertEquals(game.getWorld().getWinner(),Team.A);
+        // ...by victory point threshold
+        assertEquals(game.getWorld().getGameStats().getDominationFactor(), DominationFactor.PHILANTROPIED);
+
     }
 
     @Test // Test goodies inside trees
@@ -751,5 +769,180 @@ public class RobotControllerTest {
 
         // No additional bullets
         assertEquals(initialBullets,game.getWorld().getTeamInfo().getBulletSupply(Team.A),EPSILON);
+    }
+
+    @Test
+    public void testNullSense() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int soldierA = game.spawn(3, 5, RobotType.SOLDIER, Team.A);
+        final int soldierB = game.spawn(7, 5, RobotType.SOLDIER, Team.B);
+
+        game.round((id, rc) -> {
+            if(id != soldierA) return;
+
+            RobotInfo actualBot = rc.senseRobotAtLocation(new MapLocation(3,5));
+            RobotInfo nullBot = rc.senseRobotAtLocation(new MapLocation(5,7));
+
+            assertNotEquals(actualBot,null);
+            assertEquals(nullBot,null);
+        });
+    }
+
+    @Test
+    public void testDirections() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int soldierA = game.spawn(3, 5, RobotType.SCOUT, Team.A);
+        final int neutralTree = game.spawnTree(5,5,1,Team.NEUTRAL,0,null);
+
+        game.round((id, rc) -> {
+            if (id != soldierA) return;
+
+            // Silly Direction sanity checks
+            for (int i = 0; i < 3; i++) {
+                assertEquals(new Direction(0.1f).radians, new Direction(0.1f).rotateLeftRads((float) (2 * Math.PI * i)).radians, EPSILON);
+                assertEquals(new Direction(-0.1f).radians, new Direction(-0.1f).rotateLeftRads((float) (2 * Math.PI * i)).radians, EPSILON);
+                assertEquals(new Direction(0.1f).radians, new Direction(0.1f).rotateRightRads((float) (2 * Math.PI * i)).radians, EPSILON);
+                assertEquals(new Direction(-0.1f).radians, new Direction(-0.1f).rotateRightRads((float) (2 * Math.PI * i)).radians, EPSILON);
+            }
+
+            // Ensure range (-Math.PI,Math.PI]
+            Direction testDir = Direction.getNorth();
+            float testRads = testDir.radians;
+            Direction fromRads = new Direction(testRads);
+            for (int i = 0; i < 200; i++) {
+                testDir = testDir.rotateLeftDegrees(i);
+                // Stays within range
+                assertTrue(Math.abs(testDir.radians) <= Math.PI);
+
+                // Direction.reduce() functionality works
+                testRads += Math.toRadians(i);
+                fromRads = new Direction(testRads);
+                assertEquals(testDir.radians, fromRads.radians, 0.0001); // silly rounding errors can accumulate, so larger epsilon
+            }
+        });
+    }
+
+    @Test
+    public void overlappingScoutTest() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int scoutA = game.spawn(3, 5, RobotType.SCOUT, Team.A);
+        final int neutralTree = game.spawnTree(5,5,1,Team.NEUTRAL,0,null);
+
+        game.round((id, rc) -> {
+            if (id != scoutA) return;
+
+            TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
+            rc.move(nearbyTrees[0].getLocation());
+
+            boolean exception = false;
+            try {
+                nearbyTrees = rc.senseNearbyTrees();
+            } catch (Exception e) {
+                System.out.println("Scout threw an error when trying to sense tree at its location, this shouldn't happen");
+                exception = true;
+            }
+            assertFalse(exception);
+
+            MapLocation loc1 = new MapLocation(5, 5);
+            MapLocation loc2 = loc1.add(null, 5);
+            assertEquals(loc1, loc2);
+        });
+    }
+
+    @Test
+    public void testShakeInsideTree() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int scoutA = game.spawn(1, 5, RobotType.SCOUT, Team.A);
+        final int neutralTree = game.spawnTree(5,5,5,Team.NEUTRAL,0,null);
+
+        for(int i=0; i<8; i++) {
+            game.round((id, rc) -> {
+                if (id != scoutA) return;
+
+                // I can shake the tree I am on
+                assertTrue(rc.canShake(neutralTree));
+
+                // I can see the tree I am on
+                TreeInfo[] sensedTrees = rc.senseNearbyTrees(0.1f);
+                assertEquals(sensedTrees.length, 1);
+
+                // I can shake the tree I am on based on location
+                assertTrue(rc.canShake(rc.getLocation()));
+
+                // I can shake this tree in the same ways from another location
+                assertTrue(rc.canMove(Direction.getEast(), 1));
+                rc.move(Direction.getEast(), 1);
+            });
+        }
+    }
+
+    @Test
+    public void testNullIsCircleOccupied() throws GameActionException {
+
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int gardener = game.spawnTree(5,5,5,Team.A,0,null);
+
+
+        game.round((id, rc) -> {
+            if(id != gardener) return;
+
+            boolean exception = false;
+            try {
+                assertFalse(rc.isCircleOccupiedExceptByThisRobot(rc.getLocation(), 3));
+            } catch(Exception e) {
+                exception = true;
+            }
+            assertFalse(exception);
+        });
+    }
+
+    @Test
+    public void hitScoutsBeforeTrees() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        // In case scouts are on top of trees with radius 1, hit scout first
+        final int soldierA = game.spawn(5,5,RobotType.SOLDIER,Team.A);
+        final int scoutB = game.spawn(8,5,RobotType.SCOUT,Team.B);
+        final int neutralTree1 = game.spawnTree(8,5,1,Team.NEUTRAL,123,null);
+        game.waitRounds(20); // Let them mature
+
+        // Fire shot at tree/soldier combo
+        game.round((id, rc) -> {
+            if (id != soldierA) return;
+            rc.fireSingleShot(rc.getLocation().directionTo(new MapLocation(8,5)));
+        });
+        game.waitRounds(1);
+        // Scout gets hit, tree does not
+        assertEquals(game.getBot(scoutB).getHealth(),RobotType.SCOUT.maxHealth-RobotType.SOLDIER.attackPower, EPSILON);
+        assertEquals(game.getTree(neutralTree1).getHealth(),GameConstants.NEUTRAL_TREE_HEALTH_RATE, EPSILON);
     }
 }

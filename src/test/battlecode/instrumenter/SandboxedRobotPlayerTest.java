@@ -32,6 +32,7 @@ public class SandboxedRobotPlayerTest {
     public static void setupFolder() throws Exception {
         tempClassFolder = URLUtils.toTempFolder(
                 "testplayeractions/RobotPlayer.class",
+                "testplayerarray/RobotPlayer.class",
                 "testplayerarraybytecode/RobotPlayer.class",
                 "testplayerbytecode/RobotPlayer.class",
                 "testplayerclock/RobotPlayer.class",
@@ -181,6 +182,15 @@ public class SandboxedRobotPlayerTest {
 
         player.step();
         assertTrue(player.getTerminated());
+    }
+
+    @Test
+    public void testArrayLooping() throws Exception {
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerarray", rc, 0, loader, out);
+        player.setBytecodeLimit(10000);
+
+        player.step();
+        player.step();
     }
 
     @Test
