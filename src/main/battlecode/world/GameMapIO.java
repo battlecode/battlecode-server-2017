@@ -397,14 +397,6 @@ public final strictfp class GameMapIO {
                 // but we will warn on mismatch
                 float health = treeTable.healths(i);
                 float maxHealth = treeTable.maxHealths(i);
-                if (health != tree.health) {
-                    Server.debug("Mismatched match file tree health ("+health+
-                            ") and actual tree health:"+tree.health);
-                }
-                if (maxHealth != tree.maxHealth) {
-                    Server.debug("Mismatched match file tree max health ("+maxHealth+
-                            ") and actual tree max health:"+ tree.maxHealth);
-                }
             }
         }
 
