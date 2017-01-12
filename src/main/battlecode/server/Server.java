@@ -118,7 +118,8 @@ public strictfp class Server implements Runnable {
     public void run() {
         final NetServer netServer;
         if (options.getBoolean("bc.server.websocket")) {
-            netServer = new NetServer(options.getInt("bc.server.port"));
+            netServer = new NetServer(options.getInt("bc.server.port"),
+                                      options.getBoolean("bc.server.wait.for.client"));
             netServer.start();
         } else {
             netServer = null;

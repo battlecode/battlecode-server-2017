@@ -32,6 +32,7 @@ public class Config {
 
         defaults.setProperty("bc.server.websocket", "true");
         defaults.setProperty("bc.server.port", "6175");
+        defaults.setProperty("bc.server.wait-for-client", "false");
 
         defaults.setProperty("bc.server.save-file", "match.rms");
         defaults.setProperty("bc.server.transcribe-input", "match.rms");
