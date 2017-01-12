@@ -680,7 +680,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
 
         // Hit adjacent robots
         for(InternalRobot hitRobot :
-                gameWorld.getObjectInfo().getAllRobotsWithinRadius(getLocation(), RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS)){
+                gameWorld.getObjectInfo().getAllRobotsWithinRadius(getLocation(), GameConstants.LUMBERJACK_STRIKE_RADIUS)){
             if(hitRobot.equals(this.robot)){
                 continue;
             }
@@ -688,7 +688,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         }
         // Hit adjacent trees
         for(InternalTree hitTree :
-                gameWorld.getObjectInfo().getAllTreesWithinRadius(getLocation(), RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS)){
+                gameWorld.getObjectInfo().getAllTreesWithinRadius(getLocation(), GameConstants.LUMBERJACK_STRIKE_RADIUS)){
             hitTree.damageTree(getType().attackPower, getTeam(), false);
         }
 

@@ -131,7 +131,7 @@ public interface GameConstants {
     float BULLET_SPAWN_OFFSET = .05f;
 
     /** The radius around a lumberjack affected by a strike(). */
-    float LUMBERJACK_STRIKE_RADIUS = 1;
+    float LUMBERJACK_STRIKE_RADIUS = 2;
     
     // *********************************
     // ****** MESSAGING ****************
