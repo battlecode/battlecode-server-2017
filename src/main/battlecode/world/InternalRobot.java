@@ -167,6 +167,10 @@ public strictfp class InternalRobot {
         return this.location.distanceTo(toSense) <= this.type.sensorRadius;
     }
 
+    public boolean canSenseRadius(float radius) {
+        return radius <= this.type.sensorRadius;
+    }
+
     public boolean canInteractWithLocation(MapLocation toInteract){
         return this.location.distanceTo(toInteract) <= (this.type.strideRadius+this.type.bodyRadius);
     }
