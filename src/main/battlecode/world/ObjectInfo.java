@@ -5,6 +5,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
@@ -19,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.ArrayList;
 
 
 /**
@@ -39,11 +39,11 @@ public strictfp class ObjectInfo {
     private final SpatialIndex robotIndex;
     private final SpatialIndex bulletIndex;
 
-    private final ArrayList<Integer> robotSpawnOrder;
+    private final TIntArrayList robotSpawnOrder;
     // Tree spawn order does not matter because trees cannot affect each other.
     // Bullet spawn order may matter if two separate bullets in different directions
     // are about to hit a robot with 1 health left.
-    private final ArrayList<Integer> bulletSpawnOrder;
+    private final TIntArrayList bulletSpawnOrder;
 
     private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<>(
             Team.class);
@@ -63,8 +63,8 @@ public strictfp class ObjectInfo {
         robotIndex = new RTree();
         bulletIndex = new RTree();
 
-        robotSpawnOrder = new ArrayList<Integer>();
-        bulletSpawnOrder = new ArrayList<Integer>();
+        robotSpawnOrder = new TIntArrayList();
+        bulletSpawnOrder = new TIntArrayList();
 
         treeIndex.init(null);
         robotIndex.init(null);
@@ -109,8 +109,7 @@ public strictfp class ObjectInfo {
      */
     public void eachBulletBySpawnOrder(TObjectProcedure<InternalBullet> op) {
         // We can't modify the arraylist we are looping over
-        Integer[] spawnOrderArray = new Integer[bulletSpawnOrder.size()];
-        spawnOrderArray = bulletSpawnOrder.toArray(spawnOrderArray);
+        int [] spawnOrderArray = bulletSpawnOrder.toArray();
 
         for(int id : spawnOrderArray) {
             // Shouldn't be necessary with Bullets but safety safety safety
@@ -159,8 +158,7 @@ public strictfp class ObjectInfo {
     public void eachRobotBySpawnOrder(TObjectProcedure<InternalRobot> op) {
         // Robots may be removed during iteration, and we can't modify
         // the ArrayList we are looping over.
-        Integer[] spawnOrderArray = new Integer[robotSpawnOrder.size()];
-        spawnOrderArray = robotSpawnOrder.toArray(spawnOrderArray);
+        int[] spawnOrderArray = robotSpawnOrder.toArray();
 
         for(int id : spawnOrderArray) {
             // Robot may have been killed by a previous one, so check if still exists.
