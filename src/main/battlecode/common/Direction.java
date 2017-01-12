@@ -222,10 +222,10 @@ public final strictfp class Direction {
 
     // Internally used to keep angles in the range (-Math.PI,Math.PI]
     private float reduce(float rads) {
-        if(rads <= -Math.PI) {
+        if(rads <= -(float)Math.PI) {
             int circles = (int)Math.ceil(-(rads+Math.PI)/(2*Math.PI));
             return rads + (float)(Math.PI*2*circles);
-        } else if (rads > Math.PI) {
+        } else if (rads > (float)Math.PI) {
             int circles = (int)Math.ceil((rads-Math.PI)/(2*Math.PI));
             return rads - (float)(Math.PI*2*circles);
         }
