@@ -30,6 +30,7 @@ battlecode/common/MapLocation/subtract                             5     false
 battlecode/common/MapLocation/toString                             5     false
 battlecode/common/MapLocation/translate                            10    false
 battlecode/common/MapLocation/valueOf                              25    false
+battlecode/common/MapLocation/doCirclesCollide                     10    false
 battlecode/common/RobotController/broadcast                         10    true
 battlecode/common/RobotController/buildRobot                        0     true
 battlecode/common/RobotController/canBuildRobot                     10    true
