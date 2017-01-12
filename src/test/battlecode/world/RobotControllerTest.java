@@ -967,11 +967,23 @@ public class RobotControllerTest {
         for(int i=0; i<TEST_UNITS; i++) {
             testIDs[i] = game.spawn(2+i*3,5,RobotType.SOLDIER,Team.A);
         }
+        final int archonA = game.spawn(40,5,RobotType.ARCHON,Team.A);
+        final int gardenerA = game.spawn(46,5,RobotType.GARDENER,Team.A);
 
         TIntArrayList executionOrder = new TIntArrayList();
 
         game.round((id, rc) -> {
-            executionOrder.add(id);
+            if(rc.getType() == RobotType.SOLDIER) {
+                executionOrder.add(id);
+            } else if (id == archonA) {
+                assertTrue(rc.canHireGardener(Direction.getEast()));
+                rc.hireGardener(Direction.getEast());
+            } else if (id == gardenerA) {
+                assertTrue(rc.canBuildRobot(RobotType.LUMBERJACK,Direction.getEast()));
+            } else {
+                // If either the spawned gardener or the lumberjack run code in the first round, this will fail.
+                assertTrue(false);
+            }
         });
 
         // Assert IDs aren't in order (random change, but very unlikely unless something is wrong)
