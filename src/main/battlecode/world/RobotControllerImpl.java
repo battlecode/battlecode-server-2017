@@ -896,7 +896,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
     private void shakeTree(InternalTree tree){
         this.robot.incrementShakeCount();
         if (tree.getContainedBullets() > 0) {
-            gameWorld.getGameMaker().addShaken(tree.getID());
+            gameWorld.getMatchMaker().addShaken(tree.getID());
         }
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), tree.getContainedBullets());
         tree.resetContainedBullets();
