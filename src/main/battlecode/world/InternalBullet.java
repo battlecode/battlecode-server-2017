@@ -167,7 +167,17 @@ public strictfp class InternalBullet {
         final Direction toFinish = bulletStart.directionTo(bulletFinish);
         final Direction toTarget = bulletStart.directionTo(targetCenter);
 
-        float radiansBetween = toFinish.radiansBetween(bulletStart.directionTo(targetCenter));
+        // If toTarget is null, then bullet is on top of center of unit, distance is zero
+        if(toTarget == null) {
+            return 0;
+        }
+
+        if(toFinish == null) {
+            // This should never happen
+            throw new RuntimeException("bulletStart and bulletFinish are the same.");
+        }
+
+        float radiansBetween = toFinish.radiansBetween(toTarget);
 
         //Check if the target intersects with the line made between the bullet points
         float perpDist = (float)Math.abs(distToTarget * Math.sin(radiansBetween));
