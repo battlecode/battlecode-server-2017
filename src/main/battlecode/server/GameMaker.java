@@ -514,7 +514,7 @@ public strictfp class GameMaker {
                 // The indicator dots that were set
                 int indicatorDotIDsP = intVector(builder, indicatorDotIDs, Round::startIndicatorDotIDsVector);
                 int indicatorDotLocsP = createVecTable(builder, indicatorDotLocsX, indicatorDotLocsY);
-                int indicatorDotRGBsP = createRGBTable(builder, indicatorDotRGBsRed, indicatorDotRGBsBlue, indicatorDotRGBsGreen);
+                int indicatorDotRGBsP = createRGBTable(builder, indicatorDotRGBsRed, indicatorDotRGBsGreen, indicatorDotRGBsBlue);
 
                 // The indicator lines that were set
                 int indicatorLineIDsP = intVector(builder, indicatorLineIDs, Round::startIndicatorLineIDsVector);
