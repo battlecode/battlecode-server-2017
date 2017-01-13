@@ -6,10 +6,24 @@ package battlecode.common;
  */
 public final strictfp class Direction {
 
-    // Direction constants, for consistency with last year.
+    /**
+     * Direction that represents pointing north (up on screen).
+     */
     public static final Direction NORTH =  Direction.getNorth();
+
+    /**
+     * Direction that represents pointing east (right on screen).
+     */
     public static final Direction EAST = Direction.getEast();
+
+    /**
+     * Direction that represents pointing south (down on screen).
+     */
     public static final Direction SOUTH = Direction.getSouth();
+
+    /**
+     * Direction that represents pointing west (left on screen).
+     */
     public static final Direction WEST = Direction.getWest();
 
     /**
