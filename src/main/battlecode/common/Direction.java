@@ -23,6 +23,32 @@ public final strictfp class Direction {
     }
 
     /**
+     * If another Direction equals this one. Realistically, you should never
+     * want to use this due to floating point rounding errors.
+     * @param other Another Direction
+     * @return If the two Directions are equal
+     */
+    @Override
+    public boolean equals(Object other) {
+        if(other == null) return false;
+        if(other == this) return true;
+        if(!(other instanceof Direction)) return false;
+        return this.radians == ((Direction) other).radians;
+    }
+
+    /**
+     * If two Directions are equal to each other, with an error range epsilon radians.
+     *
+     * @param other Another Direction.
+     * @param epsilon Amount of error (in radians) to allow in the comparison
+     * @return If the two Directions are equal within error
+     */
+    public boolean equals(Direction other, float epsilon) {
+        float difference = this.radiansBetween(other);
+        return (Math.abs(difference) <= epsilon);
+    }
+
+    /**
      * Creates a new Direction instance to represent the direction
      * in which the vector created by dx and dy points. Requires
      * dx or dy to be non-zero.
