@@ -6,6 +6,12 @@ package battlecode.common;
  */
 public final strictfp class Direction {
 
+    // Direction constants, for consistency with last year.
+    public static final Direction NORTH =  Direction.getNorth();
+    public static final Direction EAST = Direction.getEast();
+    public static final Direction SOUTH = Direction.getSouth();
+    public static final Direction WEST = Direction.getWest();
+
     /**
      * The radians at which this direction is facing based off of
      * the unit circle; i.e. facing right would have 0.0 radians,

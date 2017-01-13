@@ -841,6 +841,7 @@ public class RobotControllerTest {
         assertFalse(Direction.getNorth().equals(Direction.getEast()));
         assertFalse(Direction.getNorth().equals(Direction.getEast(),0.01f));
         assertTrue(Direction.getNorth().equals(Direction.getEast(),(float)Math.PI/2+0.01f));
+        assertTrue(Direction.NORTH.equals(Direction.getNorth()));
     }
 
     @Test
