@@ -34,6 +34,9 @@ public class Config {
         defaults.setProperty("bc.server.port", "6175");
         defaults.setProperty("bc.server.wait-for-client", "false");
 
+        // Whether to write robot player output to System.out as well as match files.
+        defaults.setProperty("bc.server.robot-player-to-system-out", "true");
+
         defaults.setProperty("bc.server.save-file", "match.rms");
         defaults.setProperty("bc.server.transcribe-input", "match.rms");
         defaults.setProperty("bc.server.transcribe-output", "transcribed.txt");
@@ -42,6 +45,9 @@ public class Config {
         defaults.setProperty("bc.server.throttle-count", "15");
         defaults.setProperty("bc.server.output-xml", "true");
 
+        // Whether to write robot player output to match files / system out
+        // if bc.server.robot-player-to-system-out is false then it will only write
+        // to match files
         defaults.setProperty("bc.engine.silence-a", "false");
         defaults.setProperty("bc.engine.silence-b", "false");
         defaults.setProperty("bc.engine.silence-c", "false");
