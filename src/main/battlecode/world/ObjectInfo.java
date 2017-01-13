@@ -343,7 +343,7 @@ public strictfp class ObjectInfo {
 
         ArrayList<InternalTree> returnTrees = new ArrayList<InternalTree>();
 
-        treeIndex.nearestNUnsorted(
+        treeIndex.nearestN(
                 new Point(center.x,center.y),   // Search from center
                 new TIntProcedure() {          // Add each to a list
                     public boolean execute(int i) {
@@ -366,7 +366,7 @@ public strictfp class ObjectInfo {
 
         ArrayList<InternalRobot> returnRobots = new ArrayList<InternalRobot>();
 
-        robotIndex.nearestNUnsorted(
+        robotIndex.nearestN(
                 new Point(center.x,center.y),   // Search from center
                 new TIntProcedure() {           // Add each to a list
                     public boolean execute(int i) {
@@ -388,7 +388,7 @@ public strictfp class ObjectInfo {
         ArrayList<InternalBullet> returnBullets = new ArrayList<InternalBullet>();
 
         // Add each to a list
-        bulletIndex.nearestNUnsorted(
+        bulletIndex.nearestN(
                 new Point(center.x,center.y),   // Search from center
                 i -> {
                     returnBullets.add(getBulletByID(i));
