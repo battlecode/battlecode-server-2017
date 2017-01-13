@@ -909,12 +909,17 @@ public final strictfp class RobotControllerImpl implements RobotController {
 
     @Override
     public boolean canWater(MapLocation loc) {
-        return canWater() && canInteractWithTree(loc);
+        assertNotNull(loc);
+        InternalTree tree = gameWorld.getObjectInfo().getTreeAtLocation(loc);
+        boolean notNeutralTree = (tree != null && tree.getTeam() != Team.NEUTRAL);
+        return canWater() && canInteractWithTree(loc) && notNeutralTree;
     }
 
     @Override
     public boolean canWater(int id) {
-        return canWater() && canInteractWithTree(id);
+        InternalTree tree = gameWorld.getObjectInfo().getTreeByID(id);
+        boolean notNeutralTree = (tree != null && tree.getTeam() != Team.NEUTRAL);
+        return canWater() && canInteractWithTree(id) && notNeutralTree;
     }
 
     @Override
