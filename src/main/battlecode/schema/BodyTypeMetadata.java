@@ -51,6 +51,14 @@ public final class BodyTypeMetadata extends Table {
    * Note: you don't need to keep track of this.
    */
   public float bulletAttack() { int o = __offset(18); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  /**
+   * The maximum distance this type can sense other trees and robots
+   */
+  public float sightRadius() { int o = __offset(20); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
+  /**
+   * The maximum distance this type can sense bullets
+   */
+  public float bulletSightRadius() { int o = __offset(22); return o != 0 ? bb.getFloat(o + bb_pos) : 0.0f; }
 
   public static int createBodyTypeMetadata(FlatBufferBuilder builder,
       byte type,
@@ -60,8 +68,12 @@ public final class BodyTypeMetadata extends Table {
       float startHealth,
       float strideRadius,
       float bulletSpeed,
-      float bulletAttack) {
-    builder.startObject(8);
+      float bulletAttack,
+      float sightRadius,
+      float bulletSightRadius) {
+    builder.startObject(10);
+    BodyTypeMetadata.addBulletSightRadius(builder, bulletSightRadius);
+    BodyTypeMetadata.addSightRadius(builder, sightRadius);
     BodyTypeMetadata.addBulletAttack(builder, bulletAttack);
     BodyTypeMetadata.addBulletSpeed(builder, bulletSpeed);
     BodyTypeMetadata.addStrideRadius(builder, strideRadius);
@@ -73,7 +85,7 @@ public final class BodyTypeMetadata extends Table {
     return BodyTypeMetadata.endBodyTypeMetadata(builder);
   }
 
-  public static void startBodyTypeMetadata(FlatBufferBuilder builder) { builder.startObject(8); }
+  public static void startBodyTypeMetadata(FlatBufferBuilder builder) { builder.startObject(10); }
   public static void addType(FlatBufferBuilder builder, byte type) { builder.addByte(0, type, 0); }
   public static void addRadius(FlatBufferBuilder builder, float radius) { builder.addFloat(1, radius, 0.0f); }
   public static void addCost(FlatBufferBuilder builder, float cost) { builder.addFloat(2, cost, 0.0f); }
@@ -82,6 +94,8 @@ public final class BodyTypeMetadata extends Table {
   public static void addStrideRadius(FlatBufferBuilder builder, float strideRadius) { builder.addFloat(5, strideRadius, 0.0f); }
   public static void addBulletSpeed(FlatBufferBuilder builder, float bulletSpeed) { builder.addFloat(6, bulletSpeed, 0.0f); }
   public static void addBulletAttack(FlatBufferBuilder builder, float bulletAttack) { builder.addFloat(7, bulletAttack, 0.0f); }
+  public static void addSightRadius(FlatBufferBuilder builder, float sightRadius) { builder.addFloat(8, sightRadius, 0.0f); }
+  public static void addBulletSightRadius(FlatBufferBuilder builder, float bulletSightRadius) { builder.addFloat(9, bulletSightRadius, 0.0f); }
   public static int endBodyTypeMetadata(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
