@@ -394,7 +394,9 @@ public class SandboxedRobotPlayer {
             // Modifying Systems specific to this robot.
         } else {
             try {
-                return new RoboPrintStream(wrapped);
+                return new RoboPrintStream(wrapped, options.getBoolean(
+                        "bc.server.robot-player-to-system-out"
+                ));
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException("UTF-8 isn't supported on this system??", e);
             }

@@ -24,10 +24,13 @@ public class RoboPrintStream extends PrintStream {
     private int id;
     private int round;
 
-    public RoboPrintStream(OutputStream robotOut) throws UnsupportedEncodingException {
+    private boolean writeToSystemOut;
+
+    public RoboPrintStream(OutputStream robotOut, boolean writeToSystemOut) throws UnsupportedEncodingException {
         super(SilencedPrintStream.theInstance());
-        real = new PrintStream(robotOut, true, "UTF-8");
-        headerThisRound = false;
+        this.real = new PrintStream(robotOut, true, "UTF-8");
+        this.headerThisRound = false;
+        this.writeToSystemOut = writeToSystemOut;
     }
 
     //************************
@@ -37,55 +40,55 @@ public class RoboPrintStream extends PrintStream {
     public void print(boolean b) {
         maybePrintHeader();
         real.print(b);
-        java.lang.System.out.print(b);
+        if (this.writeToSystemOut) java.lang.System.out.print(b);
     }
 
     public void print(char c) {
         maybePrintHeader();
         real.print(c);
-        java.lang.System.out.print(c);
+        if (this.writeToSystemOut) java.lang.System.out.print(c);
     }
 
     public void print(char[] s) {
         maybePrintHeader();
         real.print(s);
-        java.lang.System.out.print(s);
+        if (this.writeToSystemOut) java.lang.System.out.print(s);
     }
 
     public void print(double d) {
         maybePrintHeader();
         real.print(d);
-        java.lang.System.out.print(d);
+        if (this.writeToSystemOut) java.lang.System.out.print(d);
     }
 
     public void print(float f) {
         maybePrintHeader();
         real.print(f);
-        java.lang.System.out.print(f);
+        if (this.writeToSystemOut) java.lang.System.out.print(f);
     }
 
     public void print(int i) {
         maybePrintHeader();
         real.print(i);
-        java.lang.System.out.print(i);
+        if (this.writeToSystemOut) java.lang.System.out.print(i);
     }
 
     public void print(long l) {
         maybePrintHeader();
         real.print(l);
-        java.lang.System.out.print(l);
+        if (this.writeToSystemOut) java.lang.System.out.print(l);
     }
 
     public void print(Object obj) {
         maybePrintHeader();
         real.print(String.valueOf(obj));
-        java.lang.System.out.print(String.valueOf(obj));
+        if (this.writeToSystemOut) java.lang.System.out.print(String.valueOf(obj));
     }
 
     public void print(String s) {
         maybePrintHeader();
         real.print(s);
-        java.lang.System.out.print(s);
+        if (this.writeToSystemOut) java.lang.System.out.print(s);
     }
 
     //***************************
@@ -95,61 +98,61 @@ public class RoboPrintStream extends PrintStream {
     public void println(boolean b) {
         maybePrintHeader();
         real.println(b);
-        java.lang.System.out.println(b);
+        if (this.writeToSystemOut) java.lang.System.out.println(b);
     }
 
     public void println(char c) {
         maybePrintHeader();
         real.println(c);
-        java.lang.System.out.println(c);
+        if (this.writeToSystemOut) java.lang.System.out.println(c);
     }
 
     public void println(char[] s) {
         maybePrintHeader();
         real.println(s);
-        java.lang.System.out.println(s);
+        if (this.writeToSystemOut) java.lang.System.out.println(s);
     }
 
     public void println(double d) {
         maybePrintHeader();
         real.println(d);
-        java.lang.System.out.println(d);
+        if (this.writeToSystemOut) java.lang.System.out.println(d);
     }
 
     public void println(float f) {
         maybePrintHeader();
         real.println(f);
-        java.lang.System.out.println(f);
+        if (this.writeToSystemOut) java.lang.System.out.println(f);
     }
 
     public void println(int i) {
         maybePrintHeader();
         real.println(i);
-        java.lang.System.out.println(i);
+        if (this.writeToSystemOut) java.lang.System.out.println(i);
     }
 
     public void println(long l) {
         maybePrintHeader();
         real.println(l);
-        java.lang.System.out.println(l);
+        if (this.writeToSystemOut) java.lang.System.out.println(l);
     }
 
     public void println(Object obj) {
         maybePrintHeader();
         real.println(obj);
-        java.lang.System.out.println(obj);
+        if (this.writeToSystemOut) java.lang.System.out.println(obj);
     }
 
     public void println(String s) {
         maybePrintHeader();
         real.println(s);
-        java.lang.System.out.println(s);
+        if (this.writeToSystemOut) java.lang.System.out.println(s);
     }
 
     public void println() {
         maybePrintHeader();
         real.println();
-        java.lang.System.out.println();
+        if (this.writeToSystemOut) java.lang.System.out.println();
     }
 
     //*************************
@@ -159,21 +162,21 @@ public class RoboPrintStream extends PrintStream {
     public PrintStream append(char c) {
         maybePrintHeader();
         real.print(c);
-        java.lang.System.out.print(c);
+        if (this.writeToSystemOut) java.lang.System.out.print(c);
         return this;
     }
 
     public PrintStream append(CharSequence csq) {
         maybePrintHeader();
         real.print(String.valueOf(csq));
-        java.lang.System.out.print(String.valueOf(csq));
+        if (this.writeToSystemOut) java.lang.System.out.print(String.valueOf(csq));
         return this;
     }
 
     public PrintStream append(CharSequence csq, int start, int end) {
         maybePrintHeader();
         real.print(csq.subSequence(start, end).toString());
-        java.lang.System.out.print(csq.subSequence(start, end).toString());
+        if (this.writeToSystemOut) java.lang.System.out.print(csq.subSequence(start, end).toString());
         return this;
     }
 
@@ -190,27 +193,27 @@ public class RoboPrintStream extends PrintStream {
     public PrintStream format(String format, Object... args) {
         maybePrintHeader();
         real.print(String.format(format, args));
-        java.lang.System.out.print(String.format(format, args));
+        if (this.writeToSystemOut) java.lang.System.out.print(String.format(format, args));
         return this;
     }
 
     public PrintStream printf(String format, Object... args) {
         maybePrintHeader();
         real.printf(format, args);
-        java.lang.System.out.printf(format, args);
+        if (this.writeToSystemOut) java.lang.System.out.printf(format, args);
         return this;
     }
 
     public void write(byte[] buf, int off, int len) {
         maybePrintHeader();
         real.write(buf, off, len);
-        java.lang.System.out.write(buf, off, len);
+        if (this.writeToSystemOut) java.lang.System.out.write(buf, off, len);
     }
 
     public void write(int b) {
         maybePrintHeader();
         real.write(b);
-        java.lang.System.out.write(b);
+        if (this.writeToSystemOut) java.lang.System.out.write(b);
     }
 
     //**************************
@@ -237,23 +240,25 @@ public class RoboPrintStream extends PrintStream {
         if (!this.headerThisRound) {
             this.headerThisRound = true;
             real.print('[');
-            java.lang.System.out.print('[');
             real.print(team);
-            java.lang.System.out.print(team);
             real.print(':');
-            java.lang.System.out.print(':');
             real.print(type);
-            java.lang.System.out.print(type);
             real.print('#');
-            java.lang.System.out.print('#');
             real.print(id);
-            java.lang.System.out.print(id);
             real.print('@');
-            java.lang.System.out.print('@');
             real.print(round);
-            java.lang.System.out.print(round);
             real.print("] ");
-            java.lang.System.out.print("] ");
+            if (this.writeToSystemOut) {
+                java.lang.System.out.print('[');
+                java.lang.System.out.print(team);
+                java.lang.System.out.print(':');
+                java.lang.System.out.print(type);
+                java.lang.System.out.print('#');
+                java.lang.System.out.print(id);
+                java.lang.System.out.print('@');
+                java.lang.System.out.print(round);
+                java.lang.System.out.print("] ");
+            }
         }
     }
 }
