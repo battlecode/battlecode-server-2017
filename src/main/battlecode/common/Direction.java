@@ -7,6 +7,26 @@ package battlecode.common;
 public final strictfp class Direction {
 
     /**
+     * Direction that represents pointing north (up on screen).
+     */
+    public static final Direction NORTH =  Direction.getNorth();
+
+    /**
+     * Direction that represents pointing east (right on screen).
+     */
+    public static final Direction EAST = Direction.getEast();
+
+    /**
+     * Direction that represents pointing south (down on screen).
+     */
+    public static final Direction SOUTH = Direction.getSouth();
+
+    /**
+     * Direction that represents pointing west (left on screen).
+     */
+    public static final Direction WEST = Direction.getWest();
+
+    /**
      * The radians at which this direction is facing based off of
      * the unit circle; i.e. facing right would have 0.0 radians,
      * up would have PI/2 radians, etc.
@@ -20,6 +40,32 @@ public final strictfp class Direction {
      */
     public Direction(float radians) {
         this.radians = reduce(radians);
+    }
+
+    /**
+     * If another Direction equals this one. Realistically, you should never
+     * want to use this due to floating point rounding errors.
+     * @param other Another Direction
+     * @return If the two Directions are equal
+     */
+    @Override
+    public boolean equals(Object other) {
+        if(other == null) return false;
+        if(other == this) return true;
+        if(!(other instanceof Direction)) return false;
+        return this.radians == ((Direction) other).radians;
+    }
+
+    /**
+     * If two Directions are equal to each other, with an error range epsilon radians.
+     *
+     * @param other Another Direction.
+     * @param epsilon Amount of error (in radians) to allow in the comparison
+     * @return If the two Directions are equal within error
+     */
+    public boolean equals(Direction other, float epsilon) {
+        float difference = this.radiansBetween(other);
+        return (Math.abs(difference) <= epsilon);
     }
 
     /**

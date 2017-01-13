@@ -828,13 +828,20 @@ public class RobotControllerTest {
                 // Direction.reduce() functionality works
                 testRads += Math.toRadians(i);
                 fromRads = new Direction(testRads);
-                assertEquals(testDir.radians, fromRads.radians, 0.0001); // silly rounding errors can accumulate, so larger epsilon
+                assertTrue(testDir.equals(fromRads,0.0001f)); // silly rounding errors can accumulate, so larger epsilon
             }
         });
 
         // Test from ndefilippis
         Direction d = new Direction((float) Math.PI);
         assertEquals(d.radians, Math.PI, 1E-7);
+
+        // Equals override test
+        assertTrue(Direction.getNorth().equals(Direction.getNorth()));
+        assertFalse(Direction.getNorth().equals(Direction.getEast()));
+        assertFalse(Direction.getNorth().equals(Direction.getEast(),0.01f));
+        assertTrue(Direction.getNorth().equals(Direction.getEast(),(float)Math.PI/2+0.01f));
+        assertTrue(Direction.NORTH.equals(Direction.getNorth()));
     }
 
     @Test
