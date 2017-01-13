@@ -183,6 +183,16 @@ public strictfp interface RobotController {
     boolean onTheMap(MapLocation center, float radius) throws GameActionException;
 
     /**
+     * Senses whether the given location is within the robot's bullet sense range.
+     *
+     * @param loc the location to check
+     * @return true if the given location is within the robot's bullet sense range, false otherwise.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    boolean canSenseBulletLocation(MapLocation loc);
+
+    /**
      * Senses whether the given location is within the robot's sensor range.
      *
      * @param loc the location to check

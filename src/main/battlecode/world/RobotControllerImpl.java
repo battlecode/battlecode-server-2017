@@ -211,6 +211,12 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     @Override
+    public boolean canSenseBulletLocation(MapLocation loc) {
+        assertNotNull(loc);
+        return this.robot.canSenseBulletLocation(loc);
+    }
+
+    @Override
     public boolean canSenseRadius(float radius) {
         return this.robot.canSenseRadius(radius);
     }
@@ -305,7 +311,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
     @Override
     public boolean canSenseBullet(int id) {
         return gameWorld.getObjectInfo().existsBullet(id) &&
-                canSenseLocation(gameWorld.getObjectInfo().getBulletByID(id).getLocation());
+                canSenseBulletLocation(gameWorld.getObjectInfo().getBulletByID(id).getLocation());
     }
 
     @Override
@@ -425,11 +431,11 @@ public final strictfp class RobotControllerImpl implements RobotController {
     public BulletInfo[] senseNearbyBullets(MapLocation center, float radius) {
         assertNotNull(center);
         InternalBullet[] allSensedBullets = gameWorld.getObjectInfo().getAllBulletsWithinRadius(center,
-                radius == -1 ? getType().sensorRadius : radius);
+                radius == -1 ? getType().bulletSightRadius : radius);
         List<BulletInfo> validSensedBullets = new ArrayList<>();
         for(InternalBullet sensedBullet : allSensedBullets){
             // check if can sense
-            if(!canSenseLocation(sensedBullet.getLocation())){
+            if(!canSenseBulletLocation(sensedBullet.getLocation())){
                 continue;
             }
 

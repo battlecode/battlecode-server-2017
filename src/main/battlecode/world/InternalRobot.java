@@ -163,6 +163,10 @@ public strictfp class InternalRobot {
     // ****** CHECK METHODS *************
     // **********************************
 
+    public boolean canSenseBulletLocation(MapLocation toSense) {
+        return this.location.distanceTo(toSense) <= this.type.bulletSightRadius;
+    }
+
     public boolean canSenseLocation(MapLocation toSense){
         return this.location.distanceTo(toSense) <= this.type.sensorRadius;
     }
@@ -252,7 +256,7 @@ public strictfp class InternalRobot {
         if(buildCooldownTurns > 0) {
             buildCooldownTurns--;
         }
-        if(getRoundsAlive() < 20){
+        if(getRoundsAlive() < 20 && this.type.isBuildable()){
             this.repairRobot(.04f * getType().maxHealth);
         }
         this.currentBytecodeLimit = getType().bytecodeLimit;
