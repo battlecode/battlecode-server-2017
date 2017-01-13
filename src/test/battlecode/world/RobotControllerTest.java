@@ -449,7 +449,11 @@ public class RobotControllerTest {
             assertEquals(bulletTrees.length,0); // no more tree
             TreeInfo[] neutralTrees = rc.senseNearbyTrees(-1, Team.NEUTRAL);
             assertEquals(neutralTrees.length,1);
-            
+
+            // No watering neutral trees
+            assertFalse(rc.canWater(neutralTrees[0].getID()));
+            assertFalse(rc.canWater(neutralTrees[0].getLocation()));
+
             // Atempt to water a neutral tree
             boolean exception = false;
             try{
@@ -917,7 +921,7 @@ public class RobotControllerTest {
         // This creates the actual game.
         TestGame game = new TestGame(map);
 
-        final int gardener = game.spawnTree(5,5,5,Team.A,0,null);
+        final int gardener = game.spawn(5, 5, RobotType.GARDENER, Team.A);
 
 
         game.round((id, rc) -> {
@@ -1006,5 +1010,68 @@ public class RobotControllerTest {
         for(int i=0; i<TEST_UNITS; i++) {
             assertEquals(testIDs[i],executionOrder.get(i));
         }
+    }
+
+    @Test
+    public void noHealing() throws GameActionException {
+
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int gardener = game.spawn(5,5,RobotType.GARDENER,Team.A);
+        final int archon = game.spawn(5,2,RobotType.ARCHON,Team.A);
+        final int soldier = game.spawn(5,8,RobotType.SOLDIER,Team.A);
+
+        assertEquals(game.getBot(gardener).getHealth(),RobotType.GARDENER.maxHealth,EPSILON);
+        assertEquals(game.getBot(archon).getHealth(),RobotType.ARCHON.maxHealth,EPSILON);
+        assertEquals(game.getBot(soldier).getHealth(),RobotType.SOLDIER.getStartingHealth(),EPSILON);
+
+        game.getBot(gardener).damageRobot(10);
+        game.getBot(archon).damageRobot(10);
+
+        game.waitRounds(20);
+
+        // Gardener and Archon should not heal in first 20 turns
+        assertEquals(game.getBot(gardener).getHealth(),RobotType.GARDENER.maxHealth-10,EPSILON);
+        assertEquals(game.getBot(archon).getHealth(),RobotType.ARCHON.maxHealth-10,EPSILON);
+        assertEquals(game.getBot(soldier).getHealth(),RobotType.SOLDIER.maxHealth,EPSILON);
+    }
+
+    @Test
+    public void sensingEachOtherTest() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 50, 50, 1337, 100)
+                .build();
+
+        TestGame game = new TestGame(map);
+
+        final int tankA = game.spawn(10, 10, RobotType.TANK, Team.A);
+        final int soldierB = game.spawn(10, (float) 18.4534432, RobotType.SOLDIER, Team.B);
+
+        game.waitRounds(50);
+
+
+        // Soldier can see tank
+        game.round((id, rc) -> {
+            if (id == soldierB) {
+                RobotInfo[] robots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+                assertEquals(robots.length, 1);
+                rc.fireSingleShot(rc.getLocation().directionTo(robots[0].getLocation()));
+                assertEquals(rc.senseNearbyBullets(-1).length,1);
+            }
+        });
+
+        // Tank can't see soldier, but can see its bullet
+        game.round((id, rc) -> {
+            if (id == tankA) {
+                RobotInfo[] robots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+                assertEquals(robots.length, 0);
+                assertEquals(rc.senseNearbyBullets(-1).length,1);
+                rc.fireSingleShot(rc.getLocation().directionTo(robots[0].getLocation()));
+                assertEquals(rc.senseNearbyBullets(-1).length,2);
+            }
+        });
     }
 }
