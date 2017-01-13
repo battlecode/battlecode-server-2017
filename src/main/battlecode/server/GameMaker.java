@@ -381,9 +381,6 @@ public strictfp class GameMaker {
         private TIntArrayList bytecodeIDs;
         private TIntArrayList bytecodesUsed;
 
-        // Tree IDs that were shaken
-        private TIntArrayList shakenIDs;
-
         // Used to write logs.
         private final ByteArrayOutputStream logger;
 
@@ -429,7 +426,6 @@ public strictfp class GameMaker {
             this.indicatorLineRGBsGreen = new TIntArrayList();
             this.bytecodeIDs = new TIntArrayList();
             this.bytecodesUsed = new TIntArrayList();
-            this.shakenIDs = new TIntArrayList();
             this.logger = new ByteArrayOutputStream();
         }
 
@@ -532,9 +528,6 @@ public strictfp class GameMaker {
                 int bytecodeIDsP = intVector(builder, bytecodeIDs, Round::startBytecodeIDsVector);
                 int bytecodesUsedP = intVector(builder, bytecodesUsed, Round::startBytecodesUsedVector);
 
-                // The trees that were shaken
-                int shakenIDsP = intVector(builder, shakenIDs, Round::startShakenIDsVector);
-
                 int logsP = builder.createString(ByteBuffer.wrap(logs));
 
                 Round.startRound(builder);
@@ -635,10 +628,6 @@ public strictfp class GameMaker {
             bytecodesUsed.add(bytecodes);
         }
 
-        public void addShaken(int id) {
-            shakenIDs.add(id);
-        }
-
         public void addSpawnedRobot(InternalRobot robot) {
             spawnedBodiesRobotIDs.add(robot.getID());
             spawnedBodiesRadii.add(robot.getType().bodyRadius);
@@ -708,7 +697,6 @@ public strictfp class GameMaker {
             indicatorLineRGBsGreen.clear();
             bytecodeIDs.clear();
             bytecodesUsed.clear();
-            shakenIDs.clear();
         }
     }
 }

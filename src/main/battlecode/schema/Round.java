@@ -146,7 +146,7 @@ public final class Round extends Table {
    * have a header:
    * '[' $TEAM ':' $ROBOTTYPE '#' $ID '@' $ROUND '] '
    * $TEAM = 'A' | 'B'
-   * $ROBOTTYPE = 'ARCHON' | 'GARDENER' | 'LUMBERJACK'
+   * $ROBOTTYPE = 'ARCHON' | 'GARDENER' | 'LUMBERJACK' 
    *            | 'SOLDIER' | 'TANK' | 'SCOUT' | other names...
    * $ID = a number
    * $ROUND = a number
@@ -181,12 +181,6 @@ public final class Round extends Table {
   public int bytecodesUsed(int j) { int o = __offset(52); return o != 0 ? bb.getInt(__vector(o) + j * 4) : 0; }
   public int bytecodesUsedLength() { int o = __offset(52); return o != 0 ? __vector_len(o) : 0; }
   public ByteBuffer bytecodesUsedAsByteBuffer() { return __vector_as_bytebuffer(52, 4); }
-  /**
-   * The IDs of trees that were shaken.
-   */
-  public int shakenIDs(int j) { int o = __offset(54); return o != 0 ? bb.getInt(__vector(o) + j * 4) : 0; }
-  public int shakenIDsLength() { int o = __offset(54); return o != 0 ? __vector_len(o) : 0; }
-  public ByteBuffer shakenIDsAsByteBuffer() { return __vector_as_bytebuffer(54, 4); }
 
   public static int createRound(FlatBufferBuilder builder,
       int teamIDsOffset,
@@ -213,10 +207,8 @@ public final class Round extends Table {
       int logsOffset,
       int roundID,
       int bytecodeIDsOffset,
-      int bytecodesUsedOffset,
-      int shakenIDsOffset) {
-    builder.startObject(26);
-    Round.addShakenIDs(builder, shakenIDsOffset);
+      int bytecodesUsedOffset) {
+    builder.startObject(25);
     Round.addBytecodesUsed(builder, bytecodesUsedOffset);
     Round.addBytecodeIDs(builder, bytecodeIDsOffset);
     Round.addRoundID(builder, roundID);
@@ -245,7 +237,7 @@ public final class Round extends Table {
     return Round.endRound(builder);
   }
 
-  public static void startRound(FlatBufferBuilder builder) { builder.startObject(26); }
+  public static void startRound(FlatBufferBuilder builder) { builder.startObject(25); }
   public static void addTeamIDs(FlatBufferBuilder builder, int teamIDsOffset) { builder.addOffset(0, teamIDsOffset, 0); }
   public static int createTeamIDsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt(data[i]); return builder.endVector(); }
   public static void startTeamIDsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
@@ -301,9 +293,6 @@ public final class Round extends Table {
   public static void addBytecodesUsed(FlatBufferBuilder builder, int bytecodesUsedOffset) { builder.addOffset(24, bytecodesUsedOffset, 0); }
   public static int createBytecodesUsedVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt(data[i]); return builder.endVector(); }
   public static void startBytecodesUsedVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
-  public static void addShakenIDs(FlatBufferBuilder builder, int shakenIDsOffset) { builder.addOffset(25, shakenIDsOffset, 0); }
-  public static int createShakenIDsVector(FlatBufferBuilder builder, int[] data) { builder.startVector(4, data.length, 4); for (int i = data.length - 1; i >= 0; i--) builder.addInt(data[i]); return builder.endVector(); }
-  public static void startShakenIDsVector(FlatBufferBuilder builder, int numElems) { builder.startVector(4, numElems, 4); }
   public static int endRound(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
