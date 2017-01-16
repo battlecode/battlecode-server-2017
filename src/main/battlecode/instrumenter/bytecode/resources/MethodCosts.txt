@@ -1,6 +1,7 @@
 battlecode/common/Clock/yield                                0      true
 battlecode/common/Clock/getBytecodesLeft                     0      true
 battlecode/common/Clock/getBytecodeNum                       0      true
+battlecode/common/Direction/equals                           1      false
 battlecode/common/Direction/degreesBetween                   1      false
 battlecode/common/Direction/getAngleDegrees                  1      false
 battlecode/common/Direction/getDeltaX                        5      false
@@ -45,8 +46,10 @@ battlecode/common/RobotController/canMove                           10    true
 battlecode/common/RobotController/canPlantTree                      10    true
 battlecode/common/RobotController/canSenseAllOfCircle               5     true
 battlecode/common/RobotController/canSenseBullet                    5     true
+battlecode/common/RobotController/canSenseBulletLocation            5     true
 battlecode/common/RobotController/canSenseLocation                  5     true
 battlecode/common/RobotController/canSensePartOfCircle              5     true
+battlecode/common/RobotController/canSenseRadius                    5     true
 battlecode/common/RobotController/canSenseRobot                     5     true
 battlecode/common/RobotController/canSenseTree                      5     true
 battlecode/common/RobotController/canShake                          5     true
@@ -59,6 +62,7 @@ battlecode/common/RobotController/firePentadShot                    0     true
 battlecode/common/RobotController/fireSingleShot                    0     true
 battlecode/common/RobotController/fireTriadShot                     0     true
 battlecode/common/RobotController/getAttackCount                    1     true
+battlecode/common/RobotController/getBuildCooldownTurns             1     true
 battlecode/common/RobotController/getControlBits                    0     true
 battlecode/common/RobotController/getHealth                         1     true
 battlecode/common/RobotController/getID                             1     true
