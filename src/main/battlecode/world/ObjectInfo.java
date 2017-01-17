@@ -34,6 +34,7 @@ public strictfp class ObjectInfo {
     private final TIntObjectHashMap<InternalRobot> gameRobotsByID;
     private final TIntObjectHashMap<InternalTree> gameTreesByID;
     private final TIntObjectHashMap<InternalBullet> gameBulletsByID;
+    private final TIntObjectHashMap<InternalBody> gameDynamicBodiesByID;
 
     private final SpatialIndex treeIndex;
     private final SpatialIndex robotIndex;
@@ -44,6 +45,7 @@ public strictfp class ObjectInfo {
     // Bullet spawn order may matter if two separate bullets in different directions
     // are about to hit a robot with 1 health left.
     private final TIntArrayList bulletSpawnOrder;
+    private final TIntArrayList dynamicBodyExecOrder;
 
     private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<>(
             Team.class);
@@ -58,6 +60,7 @@ public strictfp class ObjectInfo {
         this.gameTreesByID = new TIntObjectHashMap<>();
         this.gameRobotsByID = new TIntObjectHashMap<>();
         this.gameBulletsByID = new TIntObjectHashMap<>();
+        this.gameDynamicBodiesByID = new TIntObjectHashMap<>();
 
         treeIndex = new RTree();
         robotIndex = new RTree();
@@ -65,6 +68,7 @@ public strictfp class ObjectInfo {
 
         robotSpawnOrder = new TIntArrayList();
         bulletSpawnOrder = new TIntArrayList();
+        dynamicBodyExecOrder = new TIntArrayList();
 
         treeIndex.init(null);
         robotIndex.init(null);
@@ -171,6 +175,22 @@ public strictfp class ObjectInfo {
         }
     }
 
+    public void eachDynamicBodyByExecOrder(TObjectProcedure<InternalBody> op) {
+        // We can't modify the ArrayList we are looping over
+        int[] spawnOrderArray = dynamicBodyExecOrder.toArray();
+
+        for (int id : spawnOrderArray) {
+            // Check if body still exists.
+            // This can produce bugs if a bullet and a robot can have the same ID.
+            if (existsBullet(id) || existsRobot(id)) {
+                boolean returnedTrue = op.execute(gameDynamicBodiesByID.get(id));
+                if (!returnedTrue) {
+                    break;
+                }
+            }
+        }
+    }
+
     /**
      * This allocates; prefer eachTree()
      */
@@ -267,18 +287,28 @@ public strictfp class ObjectInfo {
 
         int id = robot.getID();
         gameRobotsByID.put(id, robot);
-        //System.out.println("Spawning robot "+id);
+        gameDynamicBodiesByID.put(id, robot);
+
         robotSpawnOrder.add(id); // Remember order in which IDs were spawned
+        dynamicBodyExecOrder.add(id);
 
         MapLocation loc = robot.getLocation();
         robotIndex.add(fromPoint(loc),robot.getID());
     }
 
-    public void spawnBullet(InternalBullet bullet){
+    public void spawnBullet(InternalBullet bullet, InternalRobot parent){
         int id = bullet.getID();
         gameBulletsByID.put(id, bullet);
+        gameDynamicBodiesByID.put(id, bullet);
 
         bulletSpawnOrder.add(id); // Remember order in which IDs were spawned
+
+        // We insert the bullet immediately before its parent (i.e. the robot
+        // which fired it). This means that the bullet will first update immediately
+        // before its parent next updates, and after any bullets previously fired
+        // by this robot have updated again.
+        int parentIndex = dynamicBodyExecOrder.indexOf(parent.getID());
+        dynamicBodyExecOrder.insert(id, parentIndex);
 
         MapLocation loc = bullet.getLocation();
         bulletIndex.add(fromPoint(loc),bullet.getID());
@@ -320,7 +350,9 @@ public strictfp class ObjectInfo {
 
         MapLocation loc = robot.getLocation();
         gameRobotsByID.remove(id);
+        gameDynamicBodiesByID.remove(id);
         robotSpawnOrder.remove(id);
+        dynamicBodyExecOrder.remove(id);
         robotIndex.delete(fromPoint(loc),id);
     }
 
@@ -329,7 +361,9 @@ public strictfp class ObjectInfo {
 
         MapLocation loc = b.getLocation();
         gameBulletsByID.remove(id);
+        gameDynamicBodiesByID.remove(id);
         bulletSpawnOrder.remove(id);
+        dynamicBodyExecOrder.remove(id);
         bulletIndex.delete(fromPoint(loc),id);
     }
     

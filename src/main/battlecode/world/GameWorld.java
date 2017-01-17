@@ -93,11 +93,9 @@ public strictfp class GameWorld {
             this.processBeginningOfRound();
             this.controlProvider.roundStarted();
 
-            updateRobots();
+            updateDynamicBodies();
 
             updateTrees();
-
-            updateBullets();
 
             this.controlProvider.roundEnded();
             this.processEndOfRound();
@@ -126,30 +124,38 @@ public strictfp class GameWorld {
         teamInfo.adjustBulletSupply(Team.B, totalTreeSupply[Team.B.ordinal()]);
     }
 
-    private void updateRobots(){
-        objectInfo.eachRobotBySpawnOrder((robot) -> {
-            robot.processBeginningOfTurn();
-            this.controlProvider.runRobot(robot);
-            robot.setBytecodesUsed(this.controlProvider.getBytecodesUsed(robot));
-
-            if(robot.getHealth() > 0) { // Only processEndOfTurn if robot is still alive
-                robot.processEndOfTurn();
+    private void updateDynamicBodies(){
+        objectInfo.eachDynamicBodyByExecOrder((body) -> {
+            if (body instanceof InternalRobot) {
+                return updateRobot((InternalRobot) body);
+            } else if (body instanceof InternalBullet) {
+                return updateBullet((InternalBullet) body);
+            } else {
+                throw new RuntimeException("non-robot non-bullet body registered as dynamic");
             }
-
-            // If the robot terminates but the death signal has not yet
-            // been visited:
-            if (this.controlProvider.getTerminated(robot) && objectInfo.getRobotByID(robot.getID()) != null) {
-                destroyRobot(robot.getID());
-            }
-            return true;
         });
     }
 
-    private void updateBullets(){
-        objectInfo.eachBulletBySpawnOrder((bullet) -> {
-            bullet.updateBullet();
-            return true;
-        });
+    private boolean updateRobot(InternalRobot robot) {
+        robot.processBeginningOfTurn();
+        this.controlProvider.runRobot(robot);
+        robot.setBytecodesUsed(this.controlProvider.getBytecodesUsed(robot));
+
+        if(robot.getHealth() > 0) { // Only processEndOfTurn if robot is still alive
+            robot.processEndOfTurn();
+        }
+
+        // If the robot terminates but the death signal has not yet
+        // been visited:
+        if (this.controlProvider.getTerminated(robot) && objectInfo.getRobotByID(robot.getID()) != null) {
+            destroyRobot(robot.getID());
+        }
+        return true;
+    }
+
+    private boolean updateBullet(InternalBullet bullet) {
+        bullet.updateBullet();
+        return true;
     }
 
     // *********************************
@@ -351,18 +357,18 @@ public strictfp class GameWorld {
         return spawnRobot(ID, type, location, team);
     }
 
-    public int spawnBullet(int ID, Team team, float speed, float damage, MapLocation location, Direction direction){
+    public int spawnBullet(int ID, Team team, float speed, float damage, MapLocation location, Direction direction, InternalRobot parent){
         InternalBullet bullet = new InternalBullet(
                 this, ID, team, speed, damage, location, direction);
-        objectInfo.spawnBullet(bullet);
+        objectInfo.spawnBullet(bullet, parent);
 
         matchMaker.addSpawnedBullet(bullet);
         return ID;
     }
 
-    public int spawnBullet(Team team, float speed, float damage, MapLocation location, Direction direction){
+    public int spawnBullet(Team team, float speed, float damage, MapLocation location, Direction direction, InternalRobot parent){
         int ID = idGenerator.nextID();
-        return spawnBullet(ID, team, speed, damage, location, direction);
+        return spawnBullet(ID, team, speed, damage, location, direction, parent);
     }
 
     // *********************************
