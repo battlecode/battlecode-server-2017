@@ -308,7 +308,7 @@ public strictfp class ObjectInfo {
         // before its parent next updates, and after any bullets previously fired
         // by this robot have updated again.
         int parentIndex = dynamicBodyExecOrder.indexOf(parent.getID());
-        dynamicBodyExecOrder.insert(id, parentIndex);
+        dynamicBodyExecOrder.insert(parentIndex, id);
 
         MapLocation loc = bullet.getLocation();
         bulletIndex.add(fromPoint(loc),bullet.getID());
