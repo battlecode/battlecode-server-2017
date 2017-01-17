@@ -28,7 +28,10 @@ repositories {
 }
 
 dependencies {
-  compile (    
+  compile (
+    [group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'],
+    [group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.21'],
+
     // normal dependencies
     [group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'],
     [group: 'commons-cli', name: 'commons-cli', version: '1.3.1'],
