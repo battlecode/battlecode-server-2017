@@ -1,8 +1,8 @@
 battlecode/common/Clock/yield                                0      true
 battlecode/common/Clock/getBytecodesLeft                     0      true
 battlecode/common/Clock/getBytecodeNum                       0      true
-battlecode/common/Direction/equals                           1      false
 battlecode/common/Direction/degreesBetween                   1      false
+battlecode/common/Direction/equals                           1      false
 battlecode/common/Direction/getAngleDegrees                  1      false
 battlecode/common/Direction/getDeltaX                        5      false
 battlecode/common/Direction/getDeltaY                        5      false
@@ -21,6 +21,7 @@ battlecode/common/MapLocation/compareTo                            1     false
 battlecode/common/MapLocation/directionTo                          10    false
 battlecode/common/MapLocation/distanceSquaredTo                    10    false
 battlecode/common/MapLocation/distanceTo                           10    false
+battlecode/common/MapLocation/doCirclesCollide                     10    false
 battlecode/common/MapLocation/equals                               1     false
 battlecode/common/MapLocation/hashCode                             10    false
 battlecode/common/MapLocation/isWithinBulletSightRadius            10    false
@@ -31,7 +32,6 @@ battlecode/common/MapLocation/subtract                             5     false
 battlecode/common/MapLocation/toString                             5     false
 battlecode/common/MapLocation/translate                            10    false
 battlecode/common/MapLocation/valueOf                              25    false
-battlecode/common/MapLocation/doCirclesCollide                     10    false
 battlecode/common/RobotController/broadcast                         10    true
 battlecode/common/RobotController/buildRobot                        0     true
 battlecode/common/RobotController/canBuildRobot                     10    true
@@ -40,7 +40,6 @@ battlecode/common/RobotController/canFirePentadShot                 5     true
 battlecode/common/RobotController/canFireSingleShot                 5     true
 battlecode/common/RobotController/canFireTriadShot                  5     true
 battlecode/common/RobotController/canHireGardener                   10    true
-battlecode/common/RobotController/canInteractWithRobot              5     true
 battlecode/common/RobotController/canInteractWithTree               5     true
 battlecode/common/RobotController/canMove                           10    true
 battlecode/common/RobotController/canPlantTree                      10    true
@@ -93,7 +92,6 @@ battlecode/common/RobotController/move                              0     true
 battlecode/common/RobotController/onTheMap                          5     true
 battlecode/common/RobotController/plantTree                         0     true
 battlecode/common/RobotController/readBroadcast                     5     true
-battlecode/common/RobotController/repair                            0     true
 battlecode/common/RobotController/resign                            0     true
 battlecode/common/RobotController/senseBroadcastingRobotLocations   100   true
 battlecode/common/RobotController/senseBullet                       25    true
