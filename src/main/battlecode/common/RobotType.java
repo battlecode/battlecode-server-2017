@@ -46,7 +46,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    SCOUT           (GARDENER,  10, 20,   80,   1, 1.5f,   1,   10,  20,  (float)2.5, 10000),
+    SCOUT           (GARDENER,  10, 20,   80,   1,   -1,  -1,   10,  20,  (float)2.5, 10000),
     //                              HP    BC   BR    BS   AP   SR  BSR         STR   BCL
     ;
     
