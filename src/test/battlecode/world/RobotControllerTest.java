@@ -615,13 +615,13 @@ public class RobotControllerTest {
 
         game.round((id, rc) -> {
             if (id != archonA) return;
-            rc.donate(100);
-            assertEquals(rc.getTeamBullets(),GameConstants.BULLETS_INITIAL_AMOUNT-100,EPSILON);
-            assertEquals(rc.getTeamVictoryPoints(),100/10);
-            rc.donate(9);
-            rc.donate(9);
-            assertEquals(rc.getTeamBullets(),GameConstants.BULLETS_INITIAL_AMOUNT-118,EPSILON);
-            assertEquals(rc.getTeamVictoryPoints(),100/10);
+            rc.donate(rc.getVictoryPointCost()*10);
+            assertEquals(rc.getTeamBullets(),GameConstants.BULLETS_INITIAL_AMOUNT-rc.getVictoryPointCost()*10,EPSILON);
+            assertEquals(rc.getTeamVictoryPoints(),10);
+            rc.donate(rc.getVictoryPointCost()-0.1f);
+            rc.donate(rc.getVictoryPointCost()-0.1f);
+            assertEquals(rc.getTeamBullets(),GameConstants.BULLETS_INITIAL_AMOUNT-rc.getVictoryPointCost()*12+0.2f,EPSILON);
+            assertEquals(rc.getTeamVictoryPoints(),10);
 
             // Try to donate negative bullets, should fail.
             boolean exception = false;
@@ -645,11 +645,11 @@ public class RobotControllerTest {
         // No winner yet
         assertEquals(game.getWorld().getWinner(),null);
 
-        // Give TeamA lots of bullets
-        game.getWorld().getTeamInfo().adjustBulletSupply(Team.A,GameConstants.VICTORY_POINTS_TO_WIN*GameConstants.BULLET_EXCHANGE_RATE);
-
         game.round((id, rc) -> {
             if(id != archonA) return;
+
+            // Give TeamA lots of bullets
+            game.getWorld().getTeamInfo().adjustBulletSupply(Team.A,GameConstants.VICTORY_POINTS_TO_WIN*rc.getVictoryPointCost());
 
             rc.donate(rc.getTeamBullets());
         });
@@ -1069,7 +1069,7 @@ public class RobotControllerTest {
                 RobotInfo[] robots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
                 assertEquals(robots.length, 0);
                 assertEquals(rc.senseNearbyBullets(-1).length,1);
-                rc.fireSingleShot(rc.getLocation().directionTo(robots[0].getLocation()));
+                rc.fireSingleShot(Direction.EAST);
                 assertEquals(rc.senseNearbyBullets(-1).length,2);
             }
         });

@@ -144,8 +144,11 @@ public interface GameConstants {
     // ****** MISCELLANEOUS ************
     // *********************************
 
-    /** The price, in bullets, of 1 victory point. */
-    int BULLET_EXCHANGE_RATE = 10;
+    /** The price, in bullets, of 1 victory point at the start of the game */
+    int VP_BASE_COST = 5;
+
+    /** The price, in bullets, the victory point cost increases each turn */
+    float VP_INCREASE_PER_ROUND = 15f / 3000f;
 
     /**
      * The distance, as measured at its minimum value, between the bodies
