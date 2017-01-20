@@ -131,6 +131,15 @@ public final class RobotMonitor {
     }
 
     /**
+     * todo: add
+     * @param numBytecodes
+     */
+    public static void increaseBytecodeLimit(int numBytecodes) {
+        bytecodesLeft += numBytecodes;
+        bytecodeLimit += numBytecodes;
+    }
+
+    /**
      * "Increments" the currently active robot's bytecode count by the given amount.
      * Specifically, this incrementation actually happens when incrementBytecodes is next called.
      * This method is needed for cases where the nature of bytecode incrementation is dependent on

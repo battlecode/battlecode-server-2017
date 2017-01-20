@@ -1149,11 +1149,24 @@ public strictfp interface RobotController {
      *
      * @param bullets the amount of bullets you wish to donate
      * @throws GameActionException if you have less bullets in your bullet
-     * supply than the amount of bullet you wish to donate.
+     * supply than the amount of bullets you wish to donate.
      *
      * @battlecode.doc.costlymethod
      */
     void donate(float bullets) throws GameActionException;
+
+    /**
+     * Purchases additional bytecode for this robot to run this round. Cost is
+     * determined by GameConstants.BYTECODES_PER_BULLET_COST. There is no limit
+     * to the number of bytecodes that can be purchased in one round, other than
+     * your bullet supply. If Clock.yield() is called, all purchased bytecodes are
+     * wasted and do not carry over to the next round.
+     *
+     * @param bullets the number of bullets to spend on bytecodes
+     * @throws GameActionException if you have less bullets in your bullet
+     * supply than the amount of bullets you wish to spend.
+     */
+    void purchaseBytecodes(float bullets) throws GameActionException;
 
     /**
      * Kills your robot and ends the current round. Never fails.

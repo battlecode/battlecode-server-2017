@@ -286,6 +286,8 @@ public strictfp class InternalRobot {
         return true;
     }
 
+    public void increaseBytecodeLimit(int numBytecodes) {this.currentBytecodeLimit += numBytecodes; }
+
     public void setBytecodesUsed(int numBytecodes) {
         bytecodesUsed = numBytecodes;
     }

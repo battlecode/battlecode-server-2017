@@ -35,6 +35,7 @@ public class SandboxedRobotPlayerTest {
                 "testplayerarray/RobotPlayer.class",
                 "testplayerarraybytecode/RobotPlayer.class",
                 "testplayerbytecode/RobotPlayer.class",
+                //"testplayerbytecodepurchase/RobotPlayer.class",
                 "testplayerclock/RobotPlayer.class",
                 "testplayerdebug/RobotPlayer.class",
                 "testplayerempty/RobotPlayer.class",
@@ -298,5 +299,12 @@ public class SandboxedRobotPlayerTest {
 
         assertEquals("[A:ARCHON#0@0] I LOVE MEMES\nthis shouldn't have a header\n",
                 out.toString("UTF-8"));
+    }
+
+    @Test
+    public void testBytecodeBuying() throws Exception {
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerbytecodepurchase", rc, 0, loader, out);
+        player.setBytecodeLimit(10000);
+        player.step();
     }
 }

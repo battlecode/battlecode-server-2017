@@ -3,6 +3,7 @@ package battlecode.world;
 import battlecode.common.*;
 import static battlecode.common.GameActionExceptionType.*;
 import battlecode.instrumenter.RobotDeathException;
+import battlecode.instrumenter.inject.RobotMonitor;
 import battlecode.schema.Action;
 
 import java.util.ArrayList;
@@ -1152,6 +1153,15 @@ public final strictfp class RobotControllerImpl implements RobotController {
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -bullets);
         gameWorld.getTeamInfo().adjustVictoryPoints(getTeam(), gainedVictorPoints);
         gameWorld.setWinnerIfVictoryPoints();
+    }
+
+    @Override
+    public void purchaseBytecodes(float bullets) throws GameActionException {
+        assertNonNegative(bullets);
+        assertHaveBulletCosts(bullets);
+        int gainedBytecodes = (int)Math.floor(bullets * GameConstants.BYTECODES_PER_BULLET_COST);
+        this.robot.increaseBytecodeLimit(gainedBytecodes);
+        RobotMonitor.increaseBytecodeLimit(gainedBytecodes);
     }
 
     @Override

@@ -150,6 +150,9 @@ public interface GameConstants {
     /** The price, in bullets, the victory point cost increases each turn */
     float VP_INCREASE_PER_ROUND = 15f / 3000f;
 
+    /** The number of bytecodes that can be purchased using a single bullet */
+    float BYTECODES_PER_BULLET_COST = 10000f;
+
     /**
      * The distance, as measured at its minimum value, between the bodies
      * of a creator robot and the robot/tree it spawns.
