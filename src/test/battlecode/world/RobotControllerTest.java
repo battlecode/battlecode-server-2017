@@ -626,7 +626,7 @@ public class RobotControllerTest {
             assertEquals(rc.getTeamVictoryPoints(),10);
             rc.donate(rc.getVictoryPointCost()-0.1f);
             rc.donate(rc.getVictoryPointCost()-0.1f);
-            assertEquals(rc.getTeamBullets(),GameConstants.BULLETS_INITIAL_AMOUNT-rc.getVictoryPointCost()*12+0.2f,EPSILON);
+            assertEquals(rc.getTeamBullets(),GameConstants.BULLETS_INITIAL_AMOUNT-rc.getVictoryPointCost()*12+0.2f,1E-4);
             assertEquals(rc.getTeamVictoryPoints(),10);
 
             // Try to donate negative bullets, should fail.
