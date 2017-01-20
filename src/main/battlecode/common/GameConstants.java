@@ -156,6 +156,9 @@ public interface GameConstants {
      */
     float GENERAL_SPAWN_OFFSET = .01f;
 
+    /** The distance around a robot's edge it can interact with robots/trees (water, shake, chope, etc) */
+    float INTERACTION_DIST_FROM_EDGE = 1f;
+
     /** The amount of health a tree gains when watered. */
     float WATER_HEALTH_REGEN_RATE = BULLET_TREE_MAX_HEALTH/10f;
 
