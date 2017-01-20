@@ -25,28 +25,28 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    LUMBERJACK      (GARDENER,  10, 50,  100,   1,  -1,   2,   7,  10,  1.5f, 10000),
+    LUMBERJACK      (GARDENER,  10, 50,  100,   1,  -1,   2,   7,  10,  1.25f, 10000),
     //                              HP    BC   BR   BS   AP    SR  BSR  STR   BCL
     /**
      * The basic fighting unit.
      *
      * @battlecode.doc.robottype
      */
-    SOLDIER         (GARDENER,  10, 50,  100,   1,   2f,   2,   7,  10,   2, 10000),
+    SOLDIER         (GARDENER,  10, 50,  100,   1,   2f,   2,   7,  10,   1.75f, 10000),
     //                              HP    BC   BR     BS    AP   SR   BSR  STR   BCL
     /**
      * A strong fighting unit.
      *
      * @battlecode.doc.robottype
      */
-    TANK            (GARDENER, 10,  200,  300,   2,   3f,   4,   7,  10,  1f, 10000),
+    TANK            (GARDENER, 10,  200,  300,   2,   4,   5,   7,  10,  1f, 10000),
     //                              HP    BC     BR   BS    AP   SR  BSR    STR   BCL
     /**
      * A unit that specializes in movement and reconnaissance.
      *
      * @battlecode.doc.robottype
      */
-    SCOUT           (GARDENER,  10, 20,   80,   1, 1.5f,   1,   10,  20,  (float)2.5, 10000),
+    SCOUT           (GARDENER,  10, 10,   80,   1, 1.5f,   0.5f,   12,  20,  (float)2, 10000),
     //                              HP    BC   BR    BS   AP   SR  BSR         STR   BCL
     ;
     

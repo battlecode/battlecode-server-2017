@@ -88,7 +88,7 @@ public interface GameConstants {
     /**
      * The damage a tank does to a tree when it attempts to move on top of it.
      */
-    float TANK_BODY_DAMAGE = 2;
+    float TANK_BODY_DAMAGE = 4;
     
     /**
      * The fraction of max health which trees and gardener-produced robots start at.
@@ -138,7 +138,7 @@ public interface GameConstants {
     // *********************************
 
     /** The size of the team-shared array for signaling. */
-    int BROADCAST_MAX_CHANNELS = 1000;
+    int BROADCAST_MAX_CHANNELS = 10000;
 
     // *********************************
     // ****** MISCELLANEOUS ************
