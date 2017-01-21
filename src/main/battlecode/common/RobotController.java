@@ -580,6 +580,8 @@ public strictfp interface RobotController {
      * When this number is 0, isBuildReady() is true.
      *
      * @return the number of cooldown turns remaining before this unit can build() again.
+     *
+     * @battlecode.doc.costlymethod
      */
     int getBuildCooldownTurns();
 
