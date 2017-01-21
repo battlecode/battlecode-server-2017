@@ -1217,6 +1217,8 @@ public strictfp interface RobotController {
      * on the round number, and is equal to {@link GameConstants#VP_BASE_COST} +
      * NumRounds * {@link GameConstants#VP_INCREASE_PER_ROUND}.
      *
+     * @return the current cost of a victory point in bullets
+     *
      * @battlecode.doc.costlymethod
      */
     float getVictoryPointCost();
