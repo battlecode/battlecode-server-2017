@@ -3,7 +3,6 @@ package battlecode.instrumenter;
 import battlecode.instrumenter.bytecode.ClassReferenceUtil;
 import battlecode.instrumenter.bytecode.InstrumentingClassVisitor;
 import battlecode.server.Config;
-import battlecode.server.ErrorReporter;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -57,6 +56,12 @@ public final class TeamClassLoaderFactory {
             throw new InstrumentationException(
                     ILLEGAL,
                     "Sorry, you can't use certain library packages ('org.apache.', 'org.objectweb.') " +
+                    "because you might be trying to hack the server, which isn't allowed. Move your code."
+            );
+        } else if (packageName.startsWith("kotlin.")) {
+            throw new InstrumentationException(
+                    ILLEGAL,
+                    "Sorry, you can't use certain library packages ('kotlin.') " +
                     "because you might be trying to hack the server, which isn't allowed. Move your code."
             );
         }

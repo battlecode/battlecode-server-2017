@@ -44,8 +44,32 @@ public class LoaderTest {
             "instrumentertest/StringFormat.class",
             "instrumentertest/UsesEnumMap.class",
             "instrumentertest/UsesLambda.class",
-            "instrumentertest/UsesThrowable.class"
-        );
+            "instrumentertest/UsesThrowable.class",
+
+            // Kotlin classes
+            "instrumentertest/CallsIllegalMethodsKotlin.class",
+            "instrumentertest/CallsIllegalMethodsKotlin$CallsWait.class",
+            "instrumentertest/CallsIllegalMethodsKotlin$CallsClassForName.class",
+            "instrumentertest/CallsIllegalMethodsKotlin$CallsStringIntern.class",
+            "instrumentertest/CallsIllegalMethodsKotlin$CallsSystemNanoTime.class",
+            "instrumentertest/CallsIllegalMethodsKotlin$CreatesFilePrintStream.class",
+
+            "instrumentertest/ReflectionKotlin.class",
+            "instrumentertest/UsesEnumMapKotlin.class",
+
+            // Kotlin generates static classes for lambdas in order to support Java 1.6
+            "instrumentertest/UsesLambdaKotlin.class",
+            "instrumentertest/UsesLambdaKotlin$run$lambda$1.class",
+            "instrumentertest/UsesLambdaKotlin$run$1.class",
+
+            "instrumentertest/BasicKotlinKt.class",
+            "instrumentertest/LegalMethodReferenceKotlin.class",
+            "instrumentertest/LegalMethodReferenceKotlin$run$randomSupplier$1.class",
+
+            "instrumentertest/KtClass.class",
+            "instrumentertest/KtObject.class"
+
+            );
     }
 
     public TeamClassLoaderFactory.Loader setupLoader(TeamClassLoaderFactory cache) throws Exception {
@@ -215,8 +239,52 @@ public class LoaderTest {
     }
 
     @Test
+    public void testKotlinIllegalMethodsFail() throws Exception {
+        final String[] classNames = new String[] {
+                "instrumentertest.CallsIllegalMethodsKotlin$CallsWait",
+                "instrumentertest.CallsIllegalMethodsKotlin$CallsClassForName",
+                "instrumentertest.CallsIllegalMethodsKotlin$CallsStringIntern",
+                "instrumentertest.CallsIllegalMethodsKotlin$CallsSystemNanoTime",
+                "instrumentertest.CallsIllegalMethodsKotlin$CreatesFilePrintStream",
+        };
+
+        for (String className : classNames) {
+            try {
+                l1.loadClass(className);
+            } catch (InstrumentationException e) {
+                assertEquals(ILLEGAL, e.type);
+                // Reset teamsWithErrors.
+                continue;
+            }
+
+            fail("Didn't outlaw illegal class: "+className);
+        }
+    }
+
+    @Test
+    public void testBasicKotlin() throws Exception {
+        final Class<?> c = l1.loadClass("instrumentertest.BasicKotlinKt");
+
+        c.getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void testKotlinMethodReference() throws Exception {
+        final Class<?> c = l1.loadClass("instrumentertest.LegalMethodReferenceKotlin");
+
+        c.getMethod("run").invoke(null);
+    }
+
+    @Test
     public void testLambdas() throws Exception {
         final Class<?> c = l1.loadClass("instrumentertest.UsesLambda");
+
+        c.getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void testKotlinLambdas() throws Exception {
+        final Class<?> c = l1.loadClass("instrumentertest.UsesLambdaKotlin");
 
         c.getMethod("run").invoke(null);
     }
@@ -231,6 +299,11 @@ public class LoaderTest {
     @Test(expected=InstrumentationException.class)
     public void testCantReflect() throws Exception {
         l1.loadClass("instrumentertest.Reflection");
+    }
+
+    @Test(expected=InstrumentationException.class)
+    public void testKotlinCantReflect() throws Exception {
+        l1.loadClass("instrumentertest.ReflectionKotlin");
     }
 
     @Test(expected=InstrumentationException.class)
@@ -251,6 +324,11 @@ public class LoaderTest {
     @Test
     public void testCanUseEnumMap() throws Exception {
         l1.loadClass("instrumentertest.UsesEnumMap");
+    }
+
+    @Test
+    public void testKotlinCanUseEnumMap() throws Exception {
+        l1.loadClass("instrumentertest.UsesEnumMapKotlin");
     }
 
     @Test

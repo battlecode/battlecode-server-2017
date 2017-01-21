@@ -120,6 +120,10 @@ public class ClassReferenceUtil {
                 className.startsWith("java/math/"))
             return true;
 
+        if (className.startsWith("kotlin/")) { // Kotlin standard library is counted is player code
+            return !className.equals("kotlin/jvm/internal/Intrinsics"); // except Intrinsics which is free
+        }
+
         if (className.startsWith("sun/") ||
                 className.startsWith("com/") ||
                 className.startsWith("java/"))

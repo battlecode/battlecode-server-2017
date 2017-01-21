@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
@@ -35,6 +34,8 @@ public class SandboxedRobotPlayerTest {
                 "testplayerarray/RobotPlayer.class",
                 "testplayerarraybytecode/RobotPlayer.class",
                 "testplayerbytecode/RobotPlayer.class",
+                "testplayerbytecodekotlin/RobotPlayer.class",
+                "testplayerbytecodekotlinintrinsics/RobotPlayer.class",
                 "testplayerclock/RobotPlayer.class",
                 "testplayerdebug/RobotPlayer.class",
                 "testplayerempty/RobotPlayer.class",
@@ -179,6 +180,36 @@ public class SandboxedRobotPlayerTest {
             player.step();
             assertFalse(player.getTerminated());
         }
+
+        player.step();
+        assertTrue(player.getTerminated());
+    }
+
+    @Test
+    public void testKotlinStdBytecodeUsage() throws Exception {
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerbytecodekotlin", rc, 0, loader, out);
+        player.setBytecodeLimit(200);
+
+        // assert that this operation costs a significant amount of bytecodes
+        for (int i = 0; i < 50; i++) {
+            player.step();
+            assertFalse(player.getTerminated());
+        }
+
+    }
+
+    @Test
+    public void testKotlinIntrinsicsBytecodeUsage() throws Exception {
+        // This bytecode limit here and the number of Intrinsics.checkNotNull() calls in RobotPlayer are important.
+        // The execution of Intrinsics.checkNotNull() costs ~1 bytecode. This test is to ensure that the calls do use
+        // only ~1 bytecode and don't count the internals of the Intrinsics class toward the bytecode counter.
+
+        SandboxedRobotPlayer player = new SandboxedRobotPlayer("testplayerbytecodekotlinintrinsics", rc, 0, loader, out);
+        player.setBytecodeLimit(54);
+
+
+        player.step();
+        assertFalse(player.getTerminated());
 
         player.step();
         assertTrue(player.getTerminated());

@@ -1,4 +1,18 @@
+buildscript {
+  ext.kotlin_version = '1.0.6'
+
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+  }
+}
+
+
 apply plugin: 'java'
+apply plugin: 'kotlin'
 
 sourceCompatibility = 1.8
 
@@ -12,6 +26,7 @@ sourceSets {
   }
   test {
     java.srcDirs = ["src/test"]
+    kotlin.srcDirs = ["src/test"]
     resources.srcDirs = ["src/test"]
 
     output.classesDir = "$buildDir/tests"
@@ -50,7 +65,10 @@ dependencies {
 
     // Java Spatial Index, RTree indexing
     [group: 'net.sf.jsi', name: 'jsi', version: '1.1.0-SNAPSHOT'],
-    [group: 'net.sf.trove4j', name: 'trove4j',version:'3.0.3']
+    [group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'],
+
+    // Kotlin (required for instrumented classes)
+    [group: 'org.jetbrains.kotlin', 'name': 'kotlin-stdlib', version: kotlin_version]
   )
 
   // Javadoc manipulation libraries
