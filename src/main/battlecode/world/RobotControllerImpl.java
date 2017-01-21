@@ -998,6 +998,35 @@ public final strictfp class RobotControllerImpl implements RobotController {
         return gameWorld.getTeamInfo().readBroadcast(getTeam(), channel);
     }
 
+    @Override
+    public void broadcastBoolean(int channel, boolean data) throws GameActionException {
+        broadcast(channel, data ? 1 : 0);
+    }
+
+    @Override
+    public boolean readBroadcastBoolean(int channel) throws GameActionException {
+        return readBroadcast(channel) != 0;
+    }
+
+    @Override
+    public void broadcastInt(int channel, int data) throws GameActionException {
+        broadcast(channel, data);
+    }
+
+    @Override
+    public int readBroadcastInt(int channel) throws GameActionException {
+        return readBroadcast(channel);
+    }
+
+    @Override
+    public void broadcastFloat(int channel, float data) throws GameActionException {
+        broadcast(channel, Float.floatToRawIntBits(data));
+    }
+
+    @Override
+    public float readBroadcastFloat(int channel) throws GameActionException {
+        return Float.intBitsToFloat(readBroadcast(channel));
+    }
 
     // ***********************************
     // ****** BUILDING/SPAWNING **********

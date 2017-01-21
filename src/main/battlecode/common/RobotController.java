@@ -996,7 +996,34 @@ public strictfp interface RobotController {
     // ***********************************
 
     /**
-     * Broadcasts a message to the team-shared array at index channel.
+     * Broadcasts an integer to the team-shared array at index channel.
+     * The data is not written until the end of the robot's turn.
+     *
+     * @param channel the index to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
+     * @param data one int of data to write
+     * @throws GameActionException if the channel is invalid
+     *
+     * @see #broadcastInt(int channel, int data)
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void broadcast(int channel, int data) throws GameActionException;
+
+    /**
+     * Retrieves the integer stored in the team-shared array at index channel.
+     *
+     * @param channel the index to query, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
+     * @return the data currently stored on the channel, interpreted as an int.
+     * @throws GameActionException  if the channel is invalid
+     *
+     * @see #readBroadcastInt(int channel)
+     *
+     * @battlecode.doc.costlymethod
+     */
+    int readBroadcast(int channel) throws GameActionException;
+
+    /**
+     * Broadcasts a boolean to the team-shared array at index channel.
      * The data is not written until the end of the robot's turn.
      *
      * @param channel the index to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
@@ -1005,18 +1032,68 @@ public strictfp interface RobotController {
      *
      * @battlecode.doc.costlymethod
      */
-    void broadcast(int channel, int data) throws GameActionException;
+    void broadcastBoolean(int channel, boolean data) throws GameActionException;
 
     /**
-     * Retrieves the message stored in the team-shared array at index channel.
+     * Retrieves the boolean stored in the team-shared array at index channel.
      *
      * @param channel the index to query, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
-     * @return the data currently stored on the channel.
+     * @return the data currently stored on the channel, interpreted as a boolean.
      * @throws GameActionException  if the channel is invalid
      *
      * @battlecode.doc.costlymethod
      */
-    int readBroadcast(int channel) throws GameActionException;
+    boolean readBroadcastBoolean(int channel) throws GameActionException;
+
+    /**
+     * Broadcasts an int to the team-shared array at index channel.
+     * The data is not written until the end of the robot's turn.
+     *
+     * @param channel the index to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
+     * @param data one int of data to write
+     * @throws GameActionException if the channel is invalid
+     *
+     * @see #broadcast(int channel, int data)
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void broadcastInt(int channel, int data) throws GameActionException;
+
+    /**
+     * Retrieves the int stored in the team-shared array at index channel.
+     *
+     * @param channel the index to query, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
+     * @return the data currently stored on the channel, interpreted as an int.
+     * @throws GameActionException  if the channel is invalid
+     *
+     * @see #readBroadcast(int channel)
+     *
+     * @battlecode.doc.costlymethod
+     */
+    int readBroadcastInt(int channel) throws GameActionException;
+
+    /**
+     * Broadcasts a float to the team-shared array at index channel.
+     * The data is not written until the end of the robot's turn.
+     *
+     * @param channel the index to write to, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
+     * @param data one float of data to write
+     * @throws GameActionException if the channel is invalid
+     *
+     * @battlecode.doc.costlymethod
+     */
+    void broadcastFloat(int channel, float data) throws GameActionException;
+
+    /**
+     * Retrieves the float stored in the team-shared array at index channel.
+     *
+     * @param channel the index to query, from 0 to <code>BROADCAST_MAX_CHANNELS</code>
+     * @return the data currently stored on the channel, interpreted as a float.
+     * @throws GameActionException  if the channel is invalid
+     *
+     * @battlecode.doc.costlymethod
+     */
+    float readBroadcastFloat(int channel) throws GameActionException;
 
     // ***********************************
     // ****** BUILDING/SPAWNING **********

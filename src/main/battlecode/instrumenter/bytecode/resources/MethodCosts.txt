@@ -32,6 +32,9 @@ battlecode/common/MapLocation/translate                            2    false
 battlecode/common/MapLocation/valueOf                              25   false
 battlecode/common/MapLocation/doCirclesCollide                     4    false
 battlecode/common/RobotController/broadcast                         10    true
+battlecode/common/RobotController/broadcastBoolean                  10    true
+battlecode/common/RobotController/broadcastFloat                    10    true
+battlecode/common/RobotController/broadcastInt                      10    true
 battlecode/common/RobotController/buildRobot                        0     true
 battlecode/common/RobotController/canBuildRobot                     10    true
 battlecode/common/RobotController/canChop                           5     true
@@ -89,6 +92,9 @@ battlecode/common/RobotController/move                              0     true
 battlecode/common/RobotController/onTheMap                          5     true
 battlecode/common/RobotController/plantTree                         0     true
 battlecode/common/RobotController/readBroadcast                     5     true
+battlecode/common/RobotController/readBroadcastBoolean              5     true
+battlecode/common/RobotController/readBroadcastFloat                5     true
+battlecode/common/RobotController/readBroadcastInt                  5     true
 battlecode/common/RobotController/repair                            0     true
 battlecode/common/RobotController/resign                            0     true
 battlecode/common/RobotController/senseBroadcastingRobotLocations   100   true
