@@ -4,6 +4,7 @@ import battlecode.common.*;
 import battlecode.server.ErrorReporter;
 import battlecode.server.GameMaker;
 import battlecode.server.GameState;
+import battlecode.server.MetricsReporter;
 import battlecode.world.control.RobotControlProvider;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -378,6 +379,7 @@ public strictfp class GameWorld {
             float containedBullets = tree.getContainedBullets();
 
             if (toSpawn != null && destroyedBy != Team.NEUTRAL && fromChop) {
+                MetricsReporter.addRobotActivatedObservation(toSpawn, destroyedBy);
                 this.spawnRobot(toSpawn, tree.getLocation(), destroyedBy);
             }
             if (containedBullets > 0 && fromChop) {

@@ -4,6 +4,7 @@ import battlecode.common.*;
 import static battlecode.common.GameActionExceptionType.*;
 import battlecode.instrumenter.RobotDeathException;
 import battlecode.schema.Action;
+import battlecode.server.MetricsReporter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -633,14 +634,18 @@ public final strictfp class RobotControllerImpl implements RobotController {
      */
     private void fireBulletSpread(Direction centerDir, int toFire, float spreadDegrees){
         byte actionType;
+        MetricsReporter.addBulletFiredObservation(toFire, getTeam());
         switch (toFire){
             case 5:
+                MetricsReporter.addActionObservation(MetricsReporter.PENTAD_SHOT, getTeam());
                 actionType = Action.FIRE_PENTAD;
                 break;
             case 3:
+                MetricsReporter.addActionObservation(MetricsReporter.TRIAD_SHOT, getTeam());
                 actionType = Action.FIRE_TRIAD;
                 break;
             default:
+                MetricsReporter.addActionObservation(MetricsReporter.SINGLE_SHOT, getTeam());
                 actionType = Action.FIRE;
         }
 
@@ -683,6 +688,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         assertIsWeaponReady();
 
         this.robot.incrementAttackCount(); // Striking counts as attack.
+        MetricsReporter.addActionObservation(MetricsReporter.STRIKE, getTeam());
 
         // Hit adjacent robots
         for(InternalRobot hitRobot :
@@ -867,6 +873,8 @@ public final strictfp class RobotControllerImpl implements RobotController {
 
         float chopDamage = GameConstants.LUMBERJACK_CHOP_DAMAGE;
 
+        MetricsReporter.addActionObservation(MetricsReporter.TREE_CHOP, getTeam());
+
         tree.damageTree(chopDamage, getTeam(), true);
 
         gameWorld.getMatchMaker().addAction(getID(), Action.CHOP, -1);
@@ -904,6 +912,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), tree.getContainedBullets());
         tree.resetContainedBullets();
 
+        MetricsReporter.addActionObservation(MetricsReporter.TREE_SHAKE, getTeam());
         gameWorld.getMatchMaker().addAction(getID(), Action.SHAKE_TREE, tree.getID());
     }
 
@@ -945,6 +954,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         this.robot.incrementWaterCount();
         tree.waterTree();
 
+        MetricsReporter.addActionObservation(MetricsReporter.TREE_WATER, getTeam());
         gameWorld.getMatchMaker().addAction(getID(), Action.WATER_TREE, tree.getID());
     }
 
@@ -1077,6 +1087,8 @@ public final strictfp class RobotControllerImpl implements RobotController {
         assertCanBuildRobot(RobotType.GARDENER, dir);
 
         this.robot.setBuildCooldownTurns(RobotType.GARDENER.buildCooldownTurns);
+
+        MetricsReporter.addRobotBuiltObservation(RobotType.GARDENER, getTeam());
         
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -RobotType.GARDENER.bulletCost);
 
@@ -1096,7 +1108,8 @@ public final strictfp class RobotControllerImpl implements RobotController {
         assertCanBuildRobot(type, dir);
 
         this.robot.setBuildCooldownTurns(type.buildCooldownTurns);
-        
+
+        MetricsReporter.addRobotBuiltObservation(type, getTeam());
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -type.bulletCost);
 
         float spawnDist = getType().bodyRadius +
@@ -1115,6 +1128,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         assertIsBuildReady();
         assertCanBuildTree(dir);
 
+        MetricsReporter.addActionObservation(MetricsReporter.TREE_PLANT, getTeam());
         this.robot.setBuildCooldownTurns(GameConstants.BULLET_TREE_CONSTRUCTION_COOLDOWN);
         
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -GameConstants.BULLET_TREE_COST);
@@ -1139,6 +1153,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         assertNonNegative(bullets);
         assertHaveBulletCosts(bullets);
         int gainedVictorPoints = (int)bullets / GameConstants.BULLET_EXCHANGE_RATE;
+        MetricsReporter.addVP(gainedVictorPoints, getTeam());
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -bullets);
         gameWorld.getTeamInfo().adjustVictoryPoints(getTeam(), gainedVictorPoints);
         gameWorld.setWinnerIfVictoryPoints();

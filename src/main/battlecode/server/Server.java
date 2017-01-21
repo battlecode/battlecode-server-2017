@@ -271,6 +271,7 @@ public strictfp class Server implements Runnable {
 
         double timeDiff = (System.currentTimeMillis() - startTime) / 1000.0;
         debug(String.format("match completed in %.4g seconds", timeDiff));
+        MetricsReporter.printAndReset();
 
 
         return currentWorld.getWinner();
