@@ -53,6 +53,15 @@ public strictfp interface RobotController {
     int getTeamVictoryPoints();
 
     /**
+     * Returns your opponent's total victory points.
+     *
+     * @return your opponent's total victory points.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    int getOpponentVictoryPoints();
+
+    /**
      * Returns the number of robots on your team, including your archons.
      * If this number ever reaches zero, the opposing team will automatically
      * win by destruction.
@@ -1202,6 +1211,15 @@ public strictfp interface RobotController {
     // ***********************************
     // ****** OTHER ACTION METHODS *******
     // ***********************************
+
+    /**
+     * Returns the current cost of a victory point in bullets. This varies based
+     * on the round number, and is equal to {@link GameConstants#VP_BASE_COST} +
+     * NumRounds * {@link GameConstants#VP_INCREASE_PER_ROUND}.
+     *
+     * @battlecode.doc.costlymethod
+     */
+    float getVictoryPointCost();
 
     /**
      * Donates the given amount of bullets to the reforestation fund in

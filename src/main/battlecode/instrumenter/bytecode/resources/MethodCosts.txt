@@ -71,6 +71,7 @@ battlecode/common/RobotController/getID                             1     true
 battlecode/common/RobotController/getInitialArchonLocations         100   true
 battlecode/common/RobotController/getLocation                       1     true
 battlecode/common/RobotController/getMoveCount                      1     true
+battlecode/common/RobotController/getOpponentVictoryPoints          1     true
 battlecode/common/RobotController/getRobotCount                     20    true
 battlecode/common/RobotController/getRoundLimit                     1     true
 battlecode/common/RobotController/getRoundNum                       1     true
@@ -80,6 +81,7 @@ battlecode/common/RobotController/getTeamMemory                     0     true
 battlecode/common/RobotController/getTeamVictoryPoints              1     true
 battlecode/common/RobotController/getTreeCount                      20    true
 battlecode/common/RobotController/getType                           1     true
+battlecode/common/RobotController/getVictoryPointCost               0     true
 battlecode/common/RobotController/hasAttacked                       1     true
 battlecode/common/RobotController/hasMoved                          1     true
 battlecode/common/RobotController/hasRobotBuildRequirements         5     true

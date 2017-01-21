@@ -88,7 +88,7 @@ public interface GameConstants {
     /**
      * The damage a tank does to a tree when it attempts to move on top of it.
      */
-    float TANK_BODY_DAMAGE = 2;
+    float TANK_BODY_DAMAGE = 4;
     
     /**
      * The fraction of max health which trees and gardener-produced robots start at.
@@ -138,20 +138,26 @@ public interface GameConstants {
     // *********************************
 
     /** The size of the team-shared array for signaling. */
-    int BROADCAST_MAX_CHANNELS = 1000;
+    int BROADCAST_MAX_CHANNELS = 10000;
 
     // *********************************
     // ****** MISCELLANEOUS ************
     // *********************************
 
-    /** The price, in bullets, of 1 victory point. */
-    int BULLET_EXCHANGE_RATE = 10;
+    /** The price, in bullets, of 1 victory point at the start of the game */
+    float VP_BASE_COST = 7.5f;
+
+    /** The price, in bullets, the victory point cost increases each turn */
+    float VP_INCREASE_PER_ROUND = 12.5f / 3000f;
 
     /**
      * The distance, as measured at its minimum value, between the bodies
      * of a creator robot and the robot/tree it spawns.
      */
     float GENERAL_SPAWN_OFFSET = .01f;
+
+    /** The distance around a robot's edge it can interact with robots/trees (water, shake, chop, etc) */
+    float INTERACTION_DIST_FROM_EDGE = 1f;
 
     /** The amount of health a tree gains when watered. */
     float WATER_HEALTH_REGEN_RATE = BULLET_TREE_MAX_HEALTH/10f;

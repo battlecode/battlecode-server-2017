@@ -94,6 +94,11 @@ public final strictfp class RobotControllerImpl implements RobotController {
     }
 
     @Override
+    public int getOpponentVictoryPoints() {
+        return gameWorld.getTeamInfo().getVictoryPoints(getTeam().opponent());
+    }
+
+    @Override
     public int getRobotCount(){
         return gameWorld.getObjectInfo().getRobotCount(getTeam());
     }
@@ -1164,10 +1169,15 @@ public final strictfp class RobotControllerImpl implements RobotController {
     // ***********************************
 
     @Override
+    public float getVictoryPointCost() {
+        return GameConstants.VP_BASE_COST + GameConstants.VP_INCREASE_PER_ROUND * getRoundNum();
+    }
+
+    @Override
     public void donate(float bullets) throws GameActionException{
         assertNonNegative(bullets);
         assertHaveBulletCosts(bullets);
-        int gainedVictorPoints = (int)bullets / GameConstants.BULLET_EXCHANGE_RATE;
+        int gainedVictorPoints = (int)Math.floor(bullets / getVictoryPointCost());
         gameWorld.getTeamInfo().adjustBulletSupply(getTeam(), -bullets);
         gameWorld.getTeamInfo().adjustVictoryPoints(getTeam(), gainedVictorPoints);
         gameWorld.setWinnerIfVictoryPoints();

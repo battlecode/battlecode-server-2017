@@ -176,11 +176,11 @@ public strictfp class InternalRobot implements InternalBody {
     }
 
     public boolean canInteractWithLocation(MapLocation toInteract){
-        return this.location.distanceTo(toInteract) <= (this.type.strideRadius+this.type.bodyRadius);
+        return this.location.distanceTo(toInteract) <= (this.type.bodyRadius + GameConstants.INTERACTION_DIST_FROM_EDGE);
     }
 
     public boolean canInteractWithCircle(MapLocation center, float radius) {
-        return this.location.distanceTo(center) <= (this.type.strideRadius+this.type.bodyRadius+radius);
+        return this.location.distanceTo(center) <= (this.type.bodyRadius + radius + GameConstants.INTERACTION_DIST_FROM_EDGE);
     }
 
     // ******************************************

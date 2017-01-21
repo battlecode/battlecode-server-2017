@@ -205,7 +205,7 @@ public class RobotControllerTest {
         // This creates the actual game.
         TestGame game = new TestGame(map);
         
-        final int tankB = game.spawn(2, 5, RobotType.TANK, Team.B);
+        final int tankB = game.spawn(3.25f, 5, RobotType.TANK, Team.B);
         final int neutralTree = game.spawnTree(7, 5, 1, Team.NEUTRAL, 0, null);
         game.waitRounds(20); // Wait for units to mature
         
@@ -238,7 +238,7 @@ public class RobotControllerTest {
             assertTrue(rc.hasMoved());
             assertFalse(rc.getLocation().equals(originalLoc)); // Tank should have moved
         });
-        // Mpve tank into tree
+        // Move tank into tree
         game.round((id, rc) -> {
             if (id != tankB) return;
             
@@ -289,7 +289,7 @@ public class RobotControllerTest {
         // This creates the actual game.
         TestGame game = new TestGame(map);
         
-        final int lumberjackA = game.spawn(2, 5, RobotType.LUMBERJACK, Team.A);
+        final int lumberjackA = game.spawn(2.5f, 5, RobotType.LUMBERJACK, Team.A);
         final int soldierA = game.spawn(3, (float)7.1, RobotType.SOLDIER, Team.A);
         final int soldierB = game.spawn(3, (float)2.9, RobotType.SOLDIER, Team.B);
         final int neutralTree = game.spawnTree(6, 5, 1, Team.NEUTRAL, 0, null);
@@ -473,7 +473,7 @@ public class RobotControllerTest {
         // This creates the actual game.
         TestGame game = new TestGame(map);
 
-        final int archonA = game.spawn(3, 5, RobotType.ARCHON, Team.A);
+        final int archonA = game.spawn(4, 5, RobotType.ARCHON, Team.A);
         final int scoutA = game.spawn(7.5f, 5, RobotType.SCOUT, Team.A);
         final int scoutB = game.spawn(7.5f, 2, RobotType.SCOUT, Team.A);
         final int neutralTree = game.spawnTree(9f,5, 1, Team.NEUTRAL, 0, null);
@@ -489,6 +489,12 @@ public class RobotControllerTest {
 
             assertFalse(rc.canMove(originalArchonALoc));
             assertFalse(rc.canMove(scoutBLoc));
+            assertTrue(rc.canMove(neutralTreeLoc)); // Scouts can go over trees
+            rc.move(neutralTreeLoc);
+        });
+
+        game.round((id, rc) -> {
+            if (id != scoutA) return;
             assertTrue(rc.canMove(neutralTreeLoc)); // Scouts can go over trees
             rc.move(neutralTreeLoc);
         });
@@ -542,7 +548,7 @@ public class RobotControllerTest {
         TestGame game = new TestGame(map);
 
         // Create some units
-        final int soldierA = game.spawn(3, 5, RobotType.SOLDIER, Team.A);
+        final int soldierA = game.spawn(3, 5.01f, RobotType.SOLDIER, Team.A);
         final int soldierB = game.spawn(9, 5, RobotType.SOLDIER, Team.B);
         final int soldierB2 = game.spawn(10f,6.8f,RobotType.SOLDIER, Team.B);
         game.waitRounds(20);    // Wait for bots to mature to full health
@@ -574,7 +580,7 @@ public class RobotControllerTest {
         // Now check cases where it shouldn't hit soldierB
         game.round((id, rc) -> {
             if (id != soldierA) return;
-            rc.move(Direction.getNorth(),RobotType.SOLDIER.bodyRadius+0.01f);
+            rc.move(Direction.getNorth(),RobotType.SOLDIER.bodyRadius);
             rc.fireSingleShot(Direction.getEast()); // Shoot a bullet parallel, slightly above soldierB
         });
         game.waitRounds(5); // Bullet propagation
@@ -615,13 +621,13 @@ public class RobotControllerTest {
 
         game.round((id, rc) -> {
             if (id != archonA) return;
-            rc.donate(100);
-            assertEquals(rc.getTeamBullets(),GameConstants.BULLETS_INITIAL_AMOUNT-100,EPSILON);
-            assertEquals(rc.getTeamVictoryPoints(),100/10);
-            rc.donate(9);
-            rc.donate(9);
-            assertEquals(rc.getTeamBullets(),GameConstants.BULLETS_INITIAL_AMOUNT-118,EPSILON);
-            assertEquals(rc.getTeamVictoryPoints(),100/10);
+            rc.donate(rc.getVictoryPointCost()*10);
+            assertEquals(rc.getTeamBullets(),GameConstants.BULLETS_INITIAL_AMOUNT-rc.getVictoryPointCost()*10,EPSILON);
+            assertEquals(rc.getTeamVictoryPoints(),10);
+            rc.donate(rc.getVictoryPointCost()-0.1f);
+            rc.donate(rc.getVictoryPointCost()-0.1f);
+            assertEquals(rc.getTeamBullets(),GameConstants.BULLETS_INITIAL_AMOUNT-rc.getVictoryPointCost()*12+0.2f,1E-4);
+            assertEquals(rc.getTeamVictoryPoints(),10);
 
             // Try to donate negative bullets, should fail.
             boolean exception = false;
@@ -645,11 +651,11 @@ public class RobotControllerTest {
         // No winner yet
         assertEquals(game.getWorld().getWinner(),null);
 
-        // Give TeamA lots of bullets
-        game.getWorld().getTeamInfo().adjustBulletSupply(Team.A,GameConstants.VICTORY_POINTS_TO_WIN*GameConstants.BULLET_EXCHANGE_RATE);
-
         game.round((id, rc) -> {
             if(id != archonA) return;
+
+            // Give TeamA lots of bullets
+            game.getWorld().getTeamInfo().adjustBulletSupply(Team.A,GameConstants.VICTORY_POINTS_TO_WIN*rc.getVictoryPointCost());
 
             rc.donate(rc.getTeamBullets());
         });
@@ -724,8 +730,6 @@ public class RobotControllerTest {
             // New robot should exist immediately
             RobotInfo[] nearbyRobots = rc.senseNearbyRobots();
             assertEquals(nearbyRobots.length,1);
-            // Can't move into its location
-            assertFalse(rc.canMove(nearbyRobots[0].getLocation()));
         });
         // Two robots should exist after it dies
         assertEquals(game.getWorld().getObjectInfo().getRobotCount(Team.A),2);
@@ -1069,7 +1073,7 @@ public class RobotControllerTest {
                 RobotInfo[] robots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
                 assertEquals(robots.length, 0);
                 assertEquals(rc.senseNearbyBullets(-1).length,1);
-                rc.fireSingleShot(rc.getLocation().directionTo(robots[0].getLocation()));
+                rc.fireSingleShot(Direction.EAST);
                 assertEquals(rc.senseNearbyBullets(-1).length,2);
             }
         });
