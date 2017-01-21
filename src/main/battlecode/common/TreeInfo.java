@@ -1,5 +1,7 @@
 package battlecode.common;
 
+import java.util.Objects;
+
 /**
  * Struct that stores basic information that was 'sensed' of a Tree. This
  * info is ephemeral and there is no guarantee any of it will remain the same
@@ -159,7 +161,7 @@ public class TreeInfo implements BodyInfo{
         result = 31 * result + location.hashCode();
         result = 31 * result + (health != +0.0f ? Float.floatToIntBits(health) : 0);
         result = 31 * result + containedBullets;
-        result = 31 * result + containedRobot.hashCode();
+        result = 31 * result + Objects.hashCode(containedRobot);
         return result;
     }
 

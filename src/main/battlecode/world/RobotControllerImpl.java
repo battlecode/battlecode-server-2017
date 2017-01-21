@@ -648,7 +648,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
 
         // Fire center bullet
         int bulletID = gameWorld.spawnBullet(getTeam(), getType().bulletSpeed, getType().attackPower,
-                getLocation().add(centerDir, getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET), centerDir);
+                getLocation().add(centerDir, getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET), centerDir, this.robot);
         gameWorld.getMatchMaker().addAction(getID(), actionType, bulletID);
 
         // Fire side bullets
@@ -656,13 +656,13 @@ public final strictfp class RobotControllerImpl implements RobotController {
             // Fire left bullet
             Direction dirLeft = centerDir.rotateLeftDegrees(i * spreadDegrees);
             bulletID = gameWorld.spawnBullet(getTeam(), getType().bulletSpeed, getType().attackPower,
-                    getLocation().add(dirLeft, getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET), dirLeft);
+                    getLocation().add(dirLeft, getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET), dirLeft, this.robot);
             gameWorld.getMatchMaker().addAction(getID(), actionType, bulletID);
 
             // Fire right bullet
             Direction dirRight = centerDir.rotateRightDegrees(i * spreadDegrees);
             bulletID = gameWorld.spawnBullet(getTeam(), getType().bulletSpeed, getType().attackPower,
-                    getLocation().add(dirRight, getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET), dirRight);
+                    getLocation().add(dirRight, getType().bodyRadius + GameConstants.BULLET_SPAWN_OFFSET), dirRight, this.robot);
             gameWorld.getMatchMaker().addAction(getID(), actionType, bulletID);
         }
     }
@@ -998,6 +998,35 @@ public final strictfp class RobotControllerImpl implements RobotController {
         return gameWorld.getTeamInfo().readBroadcast(getTeam(), channel);
     }
 
+    @Override
+    public void broadcastBoolean(int channel, boolean data) throws GameActionException {
+        broadcast(channel, data ? 1 : 0);
+    }
+
+    @Override
+    public boolean readBroadcastBoolean(int channel) throws GameActionException {
+        return readBroadcast(channel) != 0;
+    }
+
+    @Override
+    public void broadcastInt(int channel, int data) throws GameActionException {
+        broadcast(channel, data);
+    }
+
+    @Override
+    public int readBroadcastInt(int channel) throws GameActionException {
+        return readBroadcast(channel);
+    }
+
+    @Override
+    public void broadcastFloat(int channel, float data) throws GameActionException {
+        broadcast(channel, Float.floatToRawIntBits(data));
+    }
+
+    @Override
+    public float readBroadcastFloat(int channel) throws GameActionException {
+        return Float.intBitsToFloat(readBroadcast(channel));
+    }
 
     // ***********************************
     // ****** BUILDING/SPAWNING **********

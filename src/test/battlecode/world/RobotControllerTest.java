@@ -1074,4 +1074,48 @@ public class RobotControllerTest {
             }
         });
     }
+
+    @Test
+    public void turnOrderTest() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 50, 50, 1337, 100)
+                .build();
+
+        TestGame game = new TestGame(map);
+
+        // Spawn two tanks close enough such that a bullet fired from one
+        // at the other will hit after updating once.
+        final int tankA = game.spawn(10, 10, RobotType.TANK, Team.A);
+        final int tankB = game.spawn(15, 10, RobotType.TANK, Team.B);
+
+        game.waitRounds(50);
+
+        game.round((id, rc) -> {
+            if (id == tankA) {
+                // Fire a bullet.
+                assertEquals(rc.senseNearbyBullets(-1).length,0);
+                rc.fireSingleShot(Direction.EAST);
+                assertEquals(rc.senseNearbyBullets(-1).length,1);
+            } else if (id == tankB) {
+                // The other bullet should have fired, but not yet moved.
+                assertEquals(rc.senseNearbyBullets(-1).length,1);
+                rc.fireSingleShot(Direction.WEST);
+                assertEquals(rc.senseNearbyBullets(-1).length,2);
+            }
+        });
+
+        game.round((id, rc) -> {
+            if (id == tankA) {
+                // The bullet fired by this tank last round should
+                // now have hit the other tank.
+                assertEquals(rc.senseNearbyBullets(-1).length,1);
+                assertEquals(rc.senseRobot(tankB).health,
+                             RobotType.TANK.maxHealth - RobotType.TANK.attackPower, 0.00001);
+            } else if (id == tankB) {
+                // Both bullets should now have updated.
+                assertEquals(rc.senseNearbyBullets(-1).length,0);
+                assertEquals(rc.senseRobot(tankA).health,
+                             RobotType.TANK.maxHealth - RobotType.TANK.attackPower, 0.00001);
+            }
+        });
+    }
 }

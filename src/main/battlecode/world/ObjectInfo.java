@@ -39,11 +39,7 @@ public strictfp class ObjectInfo {
     private final SpatialIndex robotIndex;
     private final SpatialIndex bulletIndex;
 
-    private final TIntArrayList robotSpawnOrder;
-    // Tree spawn order does not matter because trees cannot affect each other.
-    // Bullet spawn order may matter if two separate bullets in different directions
-    // are about to hit a robot with 1 health left.
-    private final TIntArrayList bulletSpawnOrder;
+    private final TIntArrayList dynamicBodyExecOrder;
 
     private Map<Team, Map<RobotType, Integer>> robotTypeCount = new EnumMap<>(
             Team.class);
@@ -63,8 +59,7 @@ public strictfp class ObjectInfo {
         robotIndex = new RTree();
         bulletIndex = new RTree();
 
-        robotSpawnOrder = new TIntArrayList();
-        bulletSpawnOrder = new TIntArrayList();
+        dynamicBodyExecOrder = new TIntArrayList();
 
         treeIndex.init(null);
         robotIndex.init(null);
@@ -100,29 +95,6 @@ public strictfp class ObjectInfo {
     }
 
     /**
-     * Apply an operation for every bullet, in the order the bullets were spawned.
-     * Return false to stop iterating.
-     * If you call destroyBullet() on a bullet that hasn't been seen yet,
-     * that bullet will be silently skipped.
-     *
-     * @param op a lambda (bullet) -> boolean
-     */
-    public void eachBulletBySpawnOrder(TObjectProcedure<InternalBullet> op) {
-        // We can't modify the arraylist we are looping over
-        int [] spawnOrderArray = bulletSpawnOrder.toArray();
-
-        for(int id : spawnOrderArray) {
-            // Shouldn't be necessary with Bullets but safety safety safety
-            if(existsBullet(id)) {
-                boolean returnedTrue = op.execute(gameBulletsByID.get(id));
-                if(!returnedTrue) {
-                    break;
-                }
-            }
-        }
-    }
-
-    /**
      * Apply an operation for every tree.
      * Return false to stop iterating.
      * If you call destroyTree() on a tree that hasn't been seen yet,
@@ -148,25 +120,36 @@ public strictfp class ObjectInfo {
     }
 
     /**
-     * Apply an operation for every robot, in the order the Robots were spawned.
+     * Apply an operation for every Bullet and Robot, in the order the
+     * bodies should be updated. Robots update in spawn order, and
+     * Bullets update immediately before the robot that fired them.
      * Return false to stop iterating.
-     * If you call destroyRobot() on a robot that hasn't been seen yet,
-     * that robot will be silently skipped.
      *
-     * @param op a lambda (bullet) -> void
+     * If a body is removed during iteration, the body is cleanly skipped.
+     *
+     * @param op a lambda (body) -> void
      */
-    public void eachRobotBySpawnOrder(TObjectProcedure<InternalRobot> op) {
-        // Robots may be removed during iteration, and we can't modify
-        // the ArrayList we are looping over.
-        int[] spawnOrderArray = robotSpawnOrder.toArray();
+    public void eachDynamicBodyByExecOrder(TObjectProcedure<InternalBody> op) {
+        // We can't modify the ArrayList we are looping over
+        int[] spawnOrderArray = dynamicBodyExecOrder.toArray();
 
-        for(int id : spawnOrderArray) {
-            // Robot may have been killed by a previous one, so check if still exists.
-            if(existsRobot(id)) {
+        for (int id : spawnOrderArray) {
+            // Check if body still exists.
+            // This can produce bugs if a bullet and a robot can have the same ID.
+            if (existsRobot(id)) {
                 boolean returnedTrue = op.execute(gameRobotsByID.get(id));
-                if(!returnedTrue) {
+                if (!returnedTrue) {
                     break;
                 }
+            } else if (existsBullet(id)) {
+                boolean returnedTrue = op.execute(gameBulletsByID.get(id));
+                if (!returnedTrue) {
+                    break;
+                }
+            } else {
+                // The body does not exist, so it was deleted in an earlier
+                // iteration and should be skipped.
+                continue;
             }
         }
     }
@@ -267,18 +250,23 @@ public strictfp class ObjectInfo {
 
         int id = robot.getID();
         gameRobotsByID.put(id, robot);
-        //System.out.println("Spawning robot "+id);
-        robotSpawnOrder.add(id); // Remember order in which IDs were spawned
+
+        dynamicBodyExecOrder.add(id);
 
         MapLocation loc = robot.getLocation();
         robotIndex.add(fromPoint(loc),robot.getID());
     }
 
-    public void spawnBullet(InternalBullet bullet){
+    public void spawnBullet(InternalBullet bullet, InternalRobot parent){
         int id = bullet.getID();
         gameBulletsByID.put(id, bullet);
 
-        bulletSpawnOrder.add(id); // Remember order in which IDs were spawned
+        // We insert the bullet immediately before its parent (i.e. the robot
+        // which fired it). This means that the bullet will first update immediately
+        // before its parent next updates, and after any bullets previously fired
+        // by this robot have updated again.
+        int parentIndex = dynamicBodyExecOrder.indexOf(parent.getID());
+        dynamicBodyExecOrder.insert(parentIndex, id);
 
         MapLocation loc = bullet.getLocation();
         bulletIndex.add(fromPoint(loc),bullet.getID());
@@ -320,7 +308,7 @@ public strictfp class ObjectInfo {
 
         MapLocation loc = robot.getLocation();
         gameRobotsByID.remove(id);
-        robotSpawnOrder.remove(id);
+        dynamicBodyExecOrder.remove(id);
         robotIndex.delete(fromPoint(loc),id);
     }
 
@@ -329,7 +317,7 @@ public strictfp class ObjectInfo {
 
         MapLocation loc = b.getLocation();
         gameBulletsByID.remove(id);
-        bulletSpawnOrder.remove(id);
+        dynamicBodyExecOrder.remove(id);
         bulletIndex.delete(fromPoint(loc),id);
     }
     
