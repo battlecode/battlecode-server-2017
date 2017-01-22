@@ -148,6 +148,19 @@ public class PlayerControlProvider implements RobotControlProvider {
     }
 
     @Override
+    public void increaseBytecodeLimit(InternalRobot robot, int numBytecodes) {
+        assert this.sandboxes.containsKey(robot.getID());
+
+        final SandboxedRobotPlayer player = this.sandboxes.get(robot.getID());
+
+        System.out.println("Increasing bytecode limit of "+robot.getID()+" by "+numBytecodes + "in PlayerControlProvider");
+
+        if (player != null) {
+            player.increaseBytecodeLimit(numBytecodes);
+        }
+    }
+
+    @Override
     public boolean getTerminated(InternalRobot robot) {
         assert this.sandboxes.containsKey(robot.getID());
 

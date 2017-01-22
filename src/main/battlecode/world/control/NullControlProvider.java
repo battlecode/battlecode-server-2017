@@ -36,6 +36,9 @@ public class NullControlProvider implements RobotControlProvider {
     }
 
     @Override
+    public void increaseBytecodeLimit(InternalRobot robot, int numBytecodes) {}
+
+    @Override
     public boolean getTerminated(InternalRobot robot) {
         return false;
     }

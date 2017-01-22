@@ -79,6 +79,11 @@ public class SandboxedRobotPlayer {
     private final Method getBytecodeNumMethod;
 
     /**
+     * The cached 'increaseBytecodeLimit' method of the monitor.
+     */
+    private final Method increaseBytecodeLimitMethod;
+
+    /**
      * The object used to trade of control between threads.
      */
     private final Object notifier;
@@ -132,6 +137,7 @@ public class SandboxedRobotPlayer {
             killMethod = monitor.getMethod("killRobot");
             setBytecodeLimitMethod = monitor.getMethod("setBytecodeLimit", int.class);
             getBytecodeNumMethod = monitor.getMethod("getBytecodeNum");
+            increaseBytecodeLimitMethod = monitor.getMethod("increaseBytecodeLimit",int.class);
             pauseMethod = monitor.getMethod("pause");
             initMethod = monitor.getMethod("init", Pauser.class, Killer.class, int.class);
 
@@ -267,6 +273,19 @@ public class SandboxedRobotPlayer {
     public void setBytecodeLimit(int limit) {
         try {
             setBytecodeLimitMethod.invoke(null, limit);
+        } catch (ReflectiveOperationException e) {
+            ErrorReporter.report(e, true);
+        }
+    }
+
+    /**
+     * Increase the bytecode limit of the sandboxed player.
+     *
+     * @param numBytecodes the amount to increase the limit by
+     */
+    public void increaseBytecodeLimit(int numBytecodes) {
+        try {
+            increaseBytecodeLimitMethod.invoke(null, numBytecodes);
         } catch (ReflectiveOperationException e) {
             ErrorReporter.report(e, true);
         }

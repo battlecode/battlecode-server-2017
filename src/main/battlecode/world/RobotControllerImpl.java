@@ -1161,7 +1161,7 @@ public final strictfp class RobotControllerImpl implements RobotController {
         assertHaveBulletCosts(bullets);
         int gainedBytecodes = (int)Math.floor(bullets * GameConstants.BYTECODES_PER_BULLET_COST);
         this.robot.increaseBytecodeLimit(gainedBytecodes);
-        RobotMonitor.increaseBytecodeLimit(gainedBytecodes);
+        gameWorld.increaseBytecodeLimit(this.robot,gainedBytecodes);
     }
 
     @Override

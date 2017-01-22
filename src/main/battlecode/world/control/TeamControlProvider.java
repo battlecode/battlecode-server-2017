@@ -111,6 +111,14 @@ public final class TeamControlProvider implements RobotControlProvider {
     }
 
     @Override
+    public void increaseBytecodeLimit(InternalRobot robot, int numBytecodes) {
+        Team team = robot.getTeam();
+        assert teamProviderMap.containsKey(team);
+
+        teamProviderMap.get(team).increaseBytecodeLimit(robot, numBytecodes);
+    }
+
+    @Override
     public boolean getTerminated(InternalRobot robot) {
         Team team = robot.getTeam();
         assert teamProviderMap.containsKey(team);

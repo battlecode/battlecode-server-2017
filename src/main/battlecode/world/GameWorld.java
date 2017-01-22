@@ -145,6 +145,10 @@ public strictfp class GameWorld {
         });
     }
 
+    public void increaseBytecodeLimit(InternalRobot robot, int numBytecodes) {
+        this.controlProvider.increaseBytecodeLimit(robot, numBytecodes);
+    }
+
     private void updateBullets(){
         objectInfo.eachBulletBySpawnOrder((bullet) -> {
             bullet.updateBullet();

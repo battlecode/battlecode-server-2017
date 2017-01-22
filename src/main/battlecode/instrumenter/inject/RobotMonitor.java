@@ -135,6 +135,7 @@ public final class RobotMonitor {
      * @param numBytecodes
      */
     public static void increaseBytecodeLimit(int numBytecodes) {
+        System.out.println("Running increaseBytecodeLimit method with arg "+numBytecodes+" in RobotMonitor.java");
         bytecodesLeft += numBytecodes;
         bytecodeLimit += numBytecodes;
     }

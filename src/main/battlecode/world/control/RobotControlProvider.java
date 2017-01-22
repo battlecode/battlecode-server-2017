@@ -77,6 +77,14 @@ public interface RobotControlProvider {
     int getBytecodesUsed(InternalRobot robot);
 
     /**
+     * Increase the bytecode limit of a robot while it is running.
+     *
+     * @param robot the robot to increase the bytecode limit of
+     * @param numBytecodes the amount to increase the limit by
+     */
+    void increaseBytecodeLimit(InternalRobot robot, int numBytecodes);
+
+    /**
      * Determine whether the computation thread for the given
      * robot has terminated
      *
