@@ -131,11 +131,12 @@ public final class RobotMonitor {
     }
 
     /**
-     * todo: add
-     * @param numBytecodes
+     * Increases the bytecode limit of the sandboxed player containing this static class.
+     * The limit will need to be reset on subsequent turns.
+     *
+     * @param numBytecodes the number of bytecodes to increase the limit by
      */
     public static void increaseBytecodeLimit(int numBytecodes) {
-        System.out.println("Running increaseBytecodeLimit method with arg "+numBytecodes+" in RobotMonitor.java");
         bytecodesLeft += numBytecodes;
         bytecodeLimit += numBytecodes;
     }

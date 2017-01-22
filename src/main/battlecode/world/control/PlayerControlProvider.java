@@ -153,8 +153,6 @@ public class PlayerControlProvider implements RobotControlProvider {
 
         final SandboxedRobotPlayer player = this.sandboxes.get(robot.getID());
 
-        System.out.println("Increasing bytecode limit of "+robot.getID()+" by "+numBytecodes + "in PlayerControlProvider");
-
         if (player != null) {
             player.increaseBytecodeLimit(numBytecodes);
         }
