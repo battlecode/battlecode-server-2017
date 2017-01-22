@@ -162,6 +162,7 @@ public class NetServer extends WebSocketServer {
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        System.err.println("Error from: "+conn.getRemoteSocketAddress()+": "+ex);
+        String addr = conn != null ? conn.getRemoteSocketAddress()+"" : "<unknown>";
+        System.err.println("Error from: "+addr+": "+ex);
     }
 }
