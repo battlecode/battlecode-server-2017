@@ -1122,4 +1122,40 @@ public class RobotControllerTest {
             }
         });
     }
+
+    @Test
+    public void testImmediateCollisionDetection() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int soldierA = game.spawn(2.99f,5,RobotType.SOLDIER,Team.A);
+        final int soldierB = game.spawn(5,5,RobotType.SOLDIER,Team.B);
+
+        game.waitRounds(20); // Let units mature
+
+        game.round((id, rc) -> {
+            if (id == soldierA) {
+                rc.fireSingleShot(Direction.EAST);
+                RobotInfo[] nearbyRobots = rc.senseNearbyRobots();
+                assertEquals(nearbyRobots.length,1);
+                // Damage is done immediately
+                assertEquals(nearbyRobots[0].getHealth(),RobotType.SOLDIER.maxHealth-RobotType.SOLDIER.attackPower,EPSILON);
+            }
+        });
+
+        game.getBot(soldierB).damageRobot(RobotType.SOLDIER.maxHealth-RobotType.SOLDIER.attackPower-1);
+
+        game.round((id, rc) -> {
+            if (id == soldierA) {
+                rc.fireSingleShot(Direction.EAST);
+                RobotInfo[] nearbyRobots = rc.senseNearbyRobots();
+                assertEquals(nearbyRobots.length,0);
+                // Damage is done immediately and robot is dead
+                assertTrue(rc.canMove(Direction.EAST));
+            }
+        });
+    }
 }
