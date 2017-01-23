@@ -801,9 +801,9 @@ public strictfp interface RobotController {
     // ***********************************
 
     /**
-     * Tests whether the robot can chop a tree at the given location. Checks robot
-     * stride radius, the robot's type, if a tree exists, and if the robot hasn't
-     * attacked this turn.
+     * Tests whether the robot can chop a tree at the given location.
+     * Checks if the location is within {@link GameConstants#INTERACTION_DIST_FROM_EDGE},
+     * the robot's type, if a tree exists, and if the robot hasn't attacked this turn.
      *
      * @param loc The location of the tree to chop
      * @return true if this robot can chop the tree; false otherwise.
@@ -813,9 +813,9 @@ public strictfp interface RobotController {
     boolean canChop(MapLocation loc);
 
     /**
-     * Tests whether the robot can chop a tree with the given ID. Checks robot
-     * stride radius, the robot's type, if a tree exists, and if the robot hasn't
-     * attacked this turn.
+     * Tests whether the robot can chop a tree with the given ID. Checks if the tree is within
+     * {@link GameConstants#INTERACTION_DIST_FROM_EDGE}, the robot's type,
+     * if a tree exists, and if the robot hasn't attacked this turn.
      *
      * @param id The ID of the tree to chop
      * @return true if this robot can chop the tree; false otherwise.
@@ -829,8 +829,8 @@ public strictfp interface RobotController {
      *
      * @param loc the location of the tree to chop
      * @throws GameActionException if the given location does not contain
-     * a tree, the specified tree is not within one stride of this robot,
-     * this robot is not of type LUMBERJACK, or this robot has already attacked
+     * a tree, the specified tree is not within {@link GameConstants#INTERACTION_DIST_FROM_EDGE}
+     * of this robot, this robot is not of type LUMBERJACK, or this robot has already attacked
      * this turn.
      *
      * @battlecode.doc.costlymethod
@@ -850,8 +850,9 @@ public strictfp interface RobotController {
     void chop(int id) throws GameActionException;
 
     /**
-     * Tests whether this robot can shake a tree at the given location. Checks robot
-     * stride radius, if a tree exists, and if the robot hasn't shaken this turn.
+     * Tests whether this robot can shake a tree at the given location. Checks
+     * if the tree is within {@link GameConstants#INTERACTION_DIST_FROM_EDGE},
+     * if a tree exists, and if the robot hasn't shaken this turn.
      *
      * @param loc The location of the tree to shake
      * @return true if this robot can shake the tree; false otherwise.
@@ -861,8 +862,9 @@ public strictfp interface RobotController {
     boolean canShake(MapLocation loc);
 
     /**
-     * Tests whether this robot can shake a tree with the given ID. Checks robot
-     * stride radius, if a tree exists, and if the robot hasn't shaken this turn.
+     * Tests whether this robot can shake a tree with the given ID. Checks if the
+     * tree is within {@link GameConstants#INTERACTION_DIST_FROM_EDGE},
+     * if a tree exists, and if the robot hasn't shaken this turn.
      *
      * @param id The ID of the tree to shake
      * @return true if this robot can shake the tree; false otherwise.
@@ -878,8 +880,8 @@ public strictfp interface RobotController {
      *
      * @param loc the location of the tree to shake
      * @throws GameActionException if the given location does not contain
-     * a tree, if the tree (not location) is not within one stride of this
-     * robot, or if this robot has already shaken a tree this turn.
+     * a tree, if the tree (not location) is not within {@link GameConstants#INTERACTION_DIST_FROM_EDGE}
+     * of this robot, or if this robot has already shaken a tree this turn.
      *
      * @battlecode.doc.costlymethod
      */
@@ -912,9 +914,9 @@ public strictfp interface RobotController {
     boolean canWater(MapLocation loc);
 
     /**
-     * Tests whether this robot can water a tree with the given ID. Checks robot
-     * stride radius, the robot's type, if a tree exists, and if the robot hasn't
-     * watered this turn.
+     * Tests whether this robot can water a tree with the given ID. Checks that the tree is within
+     * {@link GameConstants#INTERACTION_DIST_FROM_EDGE}, the robot's type, if a tree exists, and
+     * if the robot hasn't watered this turn.
      *
      * @param id The ID of a tree to check.
      * @return true if this robot can water a tree; false otherwise.
@@ -931,7 +933,7 @@ public strictfp interface RobotController {
      *
      * @param loc the location of the tree you wish to water
      * @throws GameActionException if the given location does not contain
-     * a tree, the tree is not within one stride of this robot,
+     * a tree, the tree is not within {@link GameConstants#INTERACTION_DIST_FROM_EDGE} of this robot,
      * this robot is not of type GARDENER, or this robot has already
      * watered a tree.
      *
@@ -947,7 +949,7 @@ public strictfp interface RobotController {
      *
      * @param id the ID of the tree you wish to water.
      * @throws GameActionException if there isn't a tree with the given id,
-     * the tree is not within one stride of this robot,
+     * the tree is not within {@link GameConstants#INTERACTION_DIST_FROM_EDGE} of this robot,
      * this robot is not of type GARDENER, or this robot has already
      * watered a tree.
      *
@@ -983,7 +985,7 @@ public strictfp interface RobotController {
      *
      * @param loc the location you wish to test
      * @return true if there is a tree located at loc and if said tree is
-     * within one stride of this robot.
+     * within {@link GameConstants#INTERACTION_DIST_FROM_EDGE} of this robot.
      *
      * @battlecode.doc.costlymethod
      */
@@ -996,7 +998,7 @@ public strictfp interface RobotController {
      *
      * @param id the ID of the tree you wish to test
      * @return true if there is a tree with id and if said tree is
-     * within one stride of this robot.
+     * within {@link GameConstants#INTERACTION_DIST_FROM_EDGE} of this robot.
      *
      * @battlecode.doc.costlymethod
      */
