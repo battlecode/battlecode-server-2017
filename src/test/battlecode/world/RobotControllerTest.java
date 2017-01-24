@@ -1158,4 +1158,37 @@ public class RobotControllerTest {
             }
         });
     }
+
+    @Test
+    public void testGetXAtLocation() throws GameActionException {
+        LiveMap map = new TestMapBuilder("test", new MapLocation(0,0), 10, 10, 1337, 100)
+                .build();
+
+        // This creates the actual game.
+        TestGame game = new TestGame(map);
+
+        final int soldierA = game.spawn(2.9f,6,RobotType.SOLDIER,Team.A);
+        final int tankB = game.spawn(6,6,RobotType.TANK,Team.B);
+        final int tree1 = game.spawnTree(2.9f,2, 2, Team.NEUTRAL,0,null);
+        final int tree2 = game.spawnTree(6,2, 1, Team.NEUTRAL,0,null);
+
+        game.round((id, rc) -> {
+            if (id == soldierA) {
+                RobotInfo bot = rc.senseRobotAtLocation(new MapLocation(2.9f+0.9f,6));
+                assertNotNull(bot);
+                assertEquals(bot.getType(),RobotType.SOLDIER);
+                bot = rc.senseRobotAtLocation(new MapLocation(6f-1.9f,6));
+                assertNotNull(bot);
+                assertEquals(bot.getType(),RobotType.TANK);
+
+                TreeInfo tree = rc.senseTreeAtLocation(new MapLocation(2.9f+1.9f,2));
+                assertNotNull(tree);
+                assertEquals(tree.getID(),tree1);
+                tree = rc.senseTreeAtLocation(new MapLocation(6f-0.9f,2));
+                assertNotNull(tree);
+                assertEquals(tree.getID(),tree2);
+
+            }
+        });
+    }
 }
