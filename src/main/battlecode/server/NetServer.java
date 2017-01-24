@@ -5,6 +5,7 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
+import java.nio.channels.ClosedByInterruptException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -162,6 +163,8 @@ public class NetServer extends WebSocketServer {
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        System.err.println("Error from: "+conn.getRemoteSocketAddress()+": "+ex);
+        if (!(ex instanceof ClosedByInterruptException)) {
+            System.err.println("Error from: "+conn.getRemoteSocketAddress()+": "+ex);
+        }
     }
 }
