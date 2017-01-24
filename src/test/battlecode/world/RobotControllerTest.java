@@ -548,7 +548,7 @@ public class RobotControllerTest {
         TestGame game = new TestGame(map);
 
         // Create some units
-        final int soldierA = game.spawn(3, 5.01f, RobotType.SOLDIER, Team.A);
+        final int soldierA = game.spawn(3, 5.01f +(RobotType.SOLDIER.bodyRadius-RobotType.SOLDIER.strideRadius), RobotType.SOLDIER, Team.A);
         final int soldierB = game.spawn(9, 5, RobotType.SOLDIER, Team.B);
         final int soldierB2 = game.spawn(10f,6.8f,RobotType.SOLDIER, Team.B);
         game.waitRounds(20);    // Wait for bots to mature to full health
@@ -564,7 +564,7 @@ public class RobotControllerTest {
             // Move before firing so it doesn't step into it's own bullet
             game.round((id, rc) -> {
                 if (id != soldierA) return;
-                rc.move(rc.getLocation().directionTo(soldierBLocation),testInterval);
+                rc.move(Direction.EAST,testInterval);
                 rc.fireSingleShot(rc.getLocation().directionTo(topOfSoldierB));
             });
             game.waitRounds(5); // Bullet propagation
@@ -580,7 +580,7 @@ public class RobotControllerTest {
         // Now check cases where it shouldn't hit soldierB
         game.round((id, rc) -> {
             if (id != soldierA) return;
-            rc.move(Direction.getNorth(),RobotType.SOLDIER.bodyRadius);
+            rc.move(Direction.getNorth(),RobotType.SOLDIER.strideRadius);
             rc.fireSingleShot(Direction.getEast()); // Shoot a bullet parallel, slightly above soldierB
         });
         game.waitRounds(5); // Bullet propagation
