@@ -360,9 +360,25 @@ public strictfp class GameWorld {
     public int spawnBullet(int ID, Team team, float speed, float damage, MapLocation location, Direction direction, InternalRobot parent){
         InternalBullet bullet = new InternalBullet(
                 this, ID, team, speed, damage, location, direction);
-        objectInfo.spawnBullet(bullet, parent);
 
-        matchMaker.addSpawnedBullet(bullet);
+        matchMaker.addSpawnedBullet(bullet); // Even if the bullet will die this turn, make sure information about it is saved in the match file
+
+        // Check for collisions in the spot the bullet is being spawned
+        InternalRobot bot = this.objectInfo.getRobotAtLocation(location);
+        InternalTree tree = this.objectInfo.getTreeAtLocation(location);
+
+        if(bot != null) {
+            // If a there is a bot at this location, damage it.
+            bot.damageRobot(damage);
+            matchMaker.addDied(ID,true);
+        } else if (tree != null) {
+            // If a there is a tree at this location, damage it.
+            tree.damageTree(damage,team,false);
+            matchMaker.addDied(ID,true);
+        } else {
+            // Else, nothing else exists where the bullet was spawned. Go ahead and add it to spatial index.
+            objectInfo.spawnBullet(bullet, parent);
+        }
         return ID;
     }
 
