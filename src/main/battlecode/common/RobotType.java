@@ -32,7 +32,7 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    SOLDIER         (GARDENER,  10, 50,  100,   1,   2f,   2,   7,  10,   1f, 10000),
+    SOLDIER         (GARDENER,  10, 50,  100,   1,   2f,   2,   7,  10,   0.95f, 10000),
     //                              HP    BC   BR     BS    AP   SR   BSR  STR   BCL
     /**
      * A strong fighting unit.
