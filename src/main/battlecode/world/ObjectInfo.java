@@ -394,14 +394,17 @@ public strictfp class ObjectInfo {
         // even though it only contains one element, arraylist is required to be accessed from inside TIntProcedure
         ArrayList<InternalTree> returnTrees = new ArrayList<InternalTree>();
 
-        treeIndex.nearest(
+        treeIndex.nearestN(
                 new Point(loc.x,loc.y),
                 i -> {
                     InternalTree potentialTree = getTreeByID(i);
-                    if (potentialTree.getLocation().isWithinDistance(loc,potentialTree.getRadius()))
+                    if (potentialTree.getLocation().isWithinDistance(loc,potentialTree.getRadius())) {
                         returnTrees.add(potentialTree);
-                    return false;   // Don't need any more results
+                        return false;
+                    }
+                    return true;   // keep looking for results
                 },
+                Integer.MAX_VALUE,
                 GameConstants.NEUTRAL_TREE_MAX_RADIUS  // Furthest distance
         );
 
@@ -416,16 +419,19 @@ public strictfp class ObjectInfo {
         // even though it only contains one element, arraylist is required to be accessed from inside TIntProcedure
         ArrayList<InternalRobot> returnRobots = new ArrayList<InternalRobot>();
 
-        robotIndex.nearest(
+        robotIndex.nearestN(
                 new Point(loc.x,loc.y),
                 new TIntProcedure() {
                     public boolean execute(int i) {
                         InternalRobot potentialRobot = getRobotByID(i);
-                        if (potentialRobot.getLocation().isWithinDistance(loc,potentialRobot.getType().bodyRadius))
+                        if (potentialRobot.getLocation().isWithinDistance(loc,potentialRobot.getType().bodyRadius)) {
                             returnRobots.add(potentialRobot);
-                        return false;   // Don't need any more results
+                            return false;
+                        }
+                        return true;   // keep looking for results
                     }
                 },
+                Integer.MAX_VALUE,
                 GameConstants.MAX_ROBOT_RADIUS  // Furthest distance
         );
 
