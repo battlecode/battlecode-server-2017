@@ -549,6 +549,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 	for (int i = 0; i < n.dims; i++) {
 	    newInsns.add(new InsnNode(DUP2_X1));
 	    newInsns.add(new InsnNode(IALOAD));
+        newInsns.add(new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "sanitizeArrayIndex", "(I)I"));
 	    newInsns.add(new InsnNode(IMUL));
 	    newInsns.add(new InsnNode(DUP_X2));
 	    newInsns.add(new InsnNode(POP));

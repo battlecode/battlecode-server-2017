@@ -149,6 +149,24 @@ public final class RobotMonitor {
     }
 
     /**
+     * When initializing an array, we need to pretend that all indices are at
+     * least 1, for the purposes of calculating bytecode cost. Because this
+     * calculation needs to be done in the instrumenter (and implemented in
+     * bytecode), the use of even simple helper methods like this dramatically
+     * simplifies the instrumenter code.
+     *
+     * THIS METHOD IS CALLED BY THE INSTRUMENTER.
+     *
+     * @param index the index to sanitize
+     *
+     * @return the sanitized array index.
+     */
+    @SuppressWarnings("unused")
+    public static int sanitizeArrayIndex(int index) {
+        return Math.max(1, index);
+    }
+
+    /**
      * Called when entering a debug_ method.
      *
      * THIS METHOD IS CALLED BY THE INSTRUMENTER.
