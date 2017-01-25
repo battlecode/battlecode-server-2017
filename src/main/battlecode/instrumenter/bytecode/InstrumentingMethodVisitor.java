@@ -587,6 +587,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 	if (n.getOpcode() == ANEWARRAY) {
 	    InsnList newInsns = new InsnList();
 	    newInsns.add(new InsnNode(DUP));
+        newInsns.add(new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "sanitizeArrayIndex", "(I)I"));
 	    newInsns.add(new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "incrementBytecodesWithoutInterrupt", "(I)V"));
 	    instructions.insertBefore(n, newInsns);
 	} else {
@@ -604,6 +605,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 	if (n.getOpcode() == NEWARRAY) {
 	    InsnList newInsns = new InsnList();
 	    newInsns.add(new InsnNode(DUP));
+        newInsns.add(new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "sanitizeArrayIndex", "(I)I"));
 	    newInsns.add(new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "incrementBytecodesWithoutInterrupt", "(I)V"));
 	    instructions.insertBefore(n, newInsns);
 	} else {
