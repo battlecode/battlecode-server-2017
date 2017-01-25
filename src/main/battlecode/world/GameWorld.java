@@ -399,7 +399,21 @@ public strictfp class GameWorld {
             RobotType toSpawn = tree.getContainedRobot();
             float containedBullets = tree.getContainedBullets();
 
+            // Spawn a robot if there was one in the tree
             if (toSpawn != null && destroyedBy != Team.NEUTRAL && fromChop) {
+
+
+                //First, kill any scouts that would overlap with the new robot
+                InternalRobot[] overlappingBots = objectInfo.getAllRobotsWithinRadius(tree.getLocation(), toSpawn.bodyRadius);
+                for(InternalRobot bot : overlappingBots) {
+                    if(bot.getType() == RobotType.SCOUT) {
+                        this.destroyRobot(bot.getID());
+                    } else {
+                        throw new RuntimeException("The robot within the tree was overlapping with a non-scout robot");
+                    }
+                }
+
+                // Now spawn the new robot
                 this.spawnRobot(toSpawn, tree.getLocation(), destroyedBy);
             }
             if (containedBullets > 0 && fromChop) {
