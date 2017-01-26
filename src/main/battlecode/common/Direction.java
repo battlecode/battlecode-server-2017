@@ -283,9 +283,9 @@ public final strictfp class Direction {
 
     // Stop NaN or infinity directions from messing things up
     private void assertValid(float num) {
-        if(num == Float.NaN) {
+        if(Float.isNaN(num)) {
             throw new RuntimeException("Direction can not take a NaN float as an argument");
-        } else if (num == Float.NEGATIVE_INFINITY || num == Float.POSITIVE_INFINITY) {
+        } else if (Float.isInfinite(num)) {
             throw new RuntimeException("Direction can not take +/- infinity as an argument");
         }
     }
