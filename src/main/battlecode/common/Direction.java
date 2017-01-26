@@ -39,6 +39,7 @@ public final strictfp class Direction {
      *                to represent based off of the unit circle
      */
     public Direction(float radians) {
+        assertValid(radians);
         this.radians = reduce(radians);
     }
 
@@ -77,6 +78,8 @@ public final strictfp class Direction {
      * @param dy the y component of the vector
      */
     public Direction(float dx, float dy) {
+        assertValid(dx);
+        assertValid(dy);
         if (dx == 0 && dy == 0) {
             dy = 1;
         }
@@ -276,5 +279,14 @@ public final strictfp class Direction {
             return rads - (float)(Math.PI*2*circles);
         }
         return rads;
+    }
+
+    // Stop NaN or infinity directions from messing things up
+    private void assertValid(float num) {
+        if(Float.isNaN(num)) {
+            throw new RuntimeException("Direction can not take a NaN float as an argument");
+        } else if (Float.isInfinite(num)) {
+            throw new RuntimeException("Direction can not take +/- infinity as an argument");
+        }
     }
 }
