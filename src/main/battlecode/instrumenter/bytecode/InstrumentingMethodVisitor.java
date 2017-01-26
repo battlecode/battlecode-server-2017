@@ -316,6 +316,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
                 // Make sure this is kept up to date with visitMethodInsnNode.
                 // @author James Gilles, in penance.
                 if ((h.getName().equals("hashCode") && h.getDesc().equals("()I") && n.getOpcode() != INVOKESTATIC)
+                        || (h.getName().equals("toString") && h.getDesc().equals("()Ljava/lang/String;") && n.getOpcode() != INVOKESTATIC)
                         || (h.getOwner().equals("java/util/Random") && h.getName().equals("<init>") && h.getDesc().equals("()V"))
                         || (h.getOwner().equals("java/lang/String") && ((h.getName().equals("<init>") && h.getDesc().equals("([B)V"))
                             || (h.getName().equals("<init>") && h.getDesc().equals("([BII)V"))
@@ -360,9 +361,19 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
             endOfBasicBlock(n);
             // replace hashCode with deterministic version
             // send the object, its hash code, and the hash code method owner to
-            // ObjectHashCode for analysis
-            n.owner = "battlecode/instrumenter/inject/ObjectHashCode";
+            // ObjectMethods for analysis
+            n.owner = "battlecode/instrumenter/inject/ObjectMethods";
             n.desc = "(Ljava/lang/Object;)I";
+            n.itf = false;
+            n.setOpcode(INVOKESTATIC);
+            return;
+        }
+
+        if (n.name.equals("toString") && n.desc.equals("()Ljava/lang/String;") && n.getOpcode() != INVOKESTATIC) {
+            bytecodeCtr++;
+            endOfBasicBlock(n);
+            n.owner = "battlecode/instrumenter/inject/ObjectMethods";
+            n.desc = "(Ljava/lang/Object;)Ljava/lang/String;";
             n.itf = false;
             n.setOpcode(INVOKESTATIC);
             return;

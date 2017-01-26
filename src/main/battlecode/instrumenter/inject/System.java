@@ -130,7 +130,7 @@ public final class System {
     }
 
     public static int identityHashCode(Object x) {
-        return ObjectHashCode.identityHashCode(x);
+        return ObjectMethods.identityHashCode(x);
     }
 
     public static String getProperty(String key) {
