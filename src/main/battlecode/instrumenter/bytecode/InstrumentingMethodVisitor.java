@@ -50,7 +50,7 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
 
     private LabelNode startLabel;
 
-    private int bytecodeCtr = 0;
+    private long bytecodeCtr = 0;
 
     private MethodVisitor methodWriter;
 
@@ -544,8 +544,8 @@ public class InstrumentingMethodVisitor extends MethodNode implements Opcodes {
         }
 
         newInsns.add(new InsnNode(DUP));
-        newInsns.add(new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "calculateMultiArrayCost", "([I)I"));
-        newInsns.add(new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "incrementBytecodesWithoutInterrupt", "(I)V"));
+        newInsns.add(new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "calculateMultiArrayCost", "([I)L"));
+        newInsns.add(new MethodInsnNode(INVOKESTATIC, "battlecode/instrumenter/inject/RobotMonitor", "incrementBytecodesWithoutInterrupt", "(L)V"));
 
         newInsns.add(new LdcInsnNode(n.dims - 1));
         for (int i = 0; i < n.dims; i++) {

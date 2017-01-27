@@ -103,7 +103,7 @@ public final class TeamControlProvider implements RobotControlProvider {
     }
 
     @Override
-    public int getBytecodesUsed(InternalRobot robot) {
+    public long getBytecodesUsed(InternalRobot robot) {
         Team team = robot.getTeam();
         assert teamProviderMap.containsKey(team);
 

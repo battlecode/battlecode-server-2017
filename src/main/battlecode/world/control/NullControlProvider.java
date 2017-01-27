@@ -31,7 +31,7 @@ public class NullControlProvider implements RobotControlProvider {
     public void roundEnded() {}
 
     @Override
-    public int getBytecodesUsed(InternalRobot robot) {
+    public long getBytecodesUsed(InternalRobot robot) {
         return 0;
     }
 

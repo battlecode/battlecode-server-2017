@@ -17,12 +17,12 @@ import java.io.PrintStream;
  * @author adamd
  */
 public final class RobotMonitor {
-    private static int bytecodeLimit;
+    private static long bytecodeLimit;
 
     private static int randomSeed;
 
-    private static int bytecodesLeft;
-    private static int bytecodesToRemove;
+    private static long bytecodesLeft;
+    private static long bytecodesToRemove;
     private static boolean shouldDie;
     private static int debugLevel;
 
@@ -58,7 +58,7 @@ public final class RobotMonitor {
      * @param limit the new limit
      */
     @SuppressWarnings("unused")
-    public static void setBytecodeLimit(int limit) {
+    public static void setBytecodeLimit(long limit) {
         bytecodeLimit = limit;
     }
 
@@ -88,7 +88,7 @@ public final class RobotMonitor {
      *         Note that this can be above bytecodeLimit in some cases.
      */
     @SuppressWarnings("unused")
-    public static int getBytecodeNum() {
+    public static long getBytecodeNum() {
         return bytecodeLimit - getBytecodesLeft();
     }
 
@@ -96,7 +96,7 @@ public final class RobotMonitor {
      * @return the bytecodes this robot has left to use.
      */
     @SuppressWarnings("unused")
-    public static int getBytecodesLeft() {
+    public static long getBytecodesLeft() {
         return bytecodesLeft;
     }
 
@@ -120,14 +120,14 @@ public final class RobotMonitor {
 
         if (debugLevel == 0) {
             bytecodesLeft -= numBytecodes;
-	    bytecodesLeft -= bytecodesToRemove;
+            bytecodesLeft -= bytecodesToRemove;
 
             while (bytecodesLeft <= 0) {
                 pause();
             }
         }
 	
-	bytecodesToRemove = 0;
+        bytecodesToRemove = 0;
     }
 
     /**
@@ -136,12 +136,33 @@ public final class RobotMonitor {
      * This method is needed for cases where the nature of bytecode incrementation is dependent on
      * the state of the player (e.g. array initialization).
      *
+     * Note that this method has separate versions taking int and long arguments,
+     * for sake of convenience in the instrumenter.
+     *
      * THIS METHOD IS CALLED BY THE INSTRUMENTER.
      *
      * @param numBytecodes the number of bytecodes the robot just executed
      */
     @SuppressWarnings("unused")
     public static void incrementBytecodesWithoutInterrupt(int numBytecodes) {
+        incrementBytecodesWithoutInterrupt((long) numBytecodes);
+    }
+
+    /**
+     * "Increments" the currently active robot's bytecode count by the given amount.
+     * Specifically, this incrementation actually happens when incrementBytecodes is next called.
+     * This method is needed for cases where the nature of bytecode incrementation is dependent on
+     * the state of the player (e.g. array initialization).
+     *
+     * Note that this method has separate versions taking int and long arguments,
+     * for sake of convenience in the instrumenter.
+     *
+     * THIS METHOD IS CALLED BY THE INSTRUMENTER.
+     *
+     * @param numBytecodes the number of bytecodes the robot just executed
+     */
+    @SuppressWarnings("unused")
+    public static void incrementBytecodesWithoutInterrupt(long numBytecodes) {
         // Several potential exploits mean this argument may be passed a negative value.
         // It's easier to deal with this here than in the instrumenter.
         if (numBytecodes > 0)
@@ -178,8 +199,8 @@ public final class RobotMonitor {
      * @return the bytecode cost of instantiated the described array.
      */
     @SuppressWarnings("unused")
-    public static int calculateMultiArrayCost(int[] dims) {
-        int cost = 1;
+    public static long calculateMultiArrayCost(int[] dims) {
+        long cost = 1;
         for (int i = dims.length-1; i >= 0; i--) {
             if (dims[i] == 0)
                 break;

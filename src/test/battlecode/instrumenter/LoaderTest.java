@@ -88,7 +88,7 @@ public class LoaderTest {
                 SandboxedRobotPlayer.Killer.class,
                 int.class)
                 .invoke(null, pauser, killer, 0);
-        monitor1.getMethod("setBytecodeLimit", int.class)
+        monitor1.getMethod("setBytecodeLimit", long.class)
                 .invoke(null, Integer.MAX_VALUE);
 
         result.loadClass("battlecode.instrumenter.inject.System")

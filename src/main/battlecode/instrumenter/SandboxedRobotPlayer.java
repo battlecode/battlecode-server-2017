@@ -130,7 +130,7 @@ public class SandboxedRobotPlayer {
                     .loadClass("battlecode.instrumenter.inject.RobotMonitor");
 
             killMethod = monitor.getMethod("killRobot");
-            setBytecodeLimitMethod = monitor.getMethod("setBytecodeLimit", int.class);
+            setBytecodeLimitMethod = monitor.getMethod("setBytecodeLimit", long.class);
             getBytecodeNumMethod = monitor.getMethod("getBytecodeNum");
             pauseMethod = monitor.getMethod("pause");
             initMethod = monitor.getMethod("init", Pauser.class, Killer.class, int.class);
@@ -347,9 +347,9 @@ public class SandboxedRobotPlayer {
     /**
      * @return the bytecodes used by the player during the most recent step() call.
      */
-    public int getBytecodesUsed() {
+    public long getBytecodesUsed() {
         try {
-            return (Integer) getBytecodeNumMethod.invoke(null);
+            return (Long) getBytecodeNumMethod.invoke(null);
         } catch (ReflectiveOperationException e) {
             ErrorReporter.report(e, true);
             return 0;

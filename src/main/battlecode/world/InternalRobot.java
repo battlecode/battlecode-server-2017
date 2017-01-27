@@ -17,9 +17,9 @@ public strictfp class InternalRobot implements InternalBody {
     private float health;
 
     private long controlBits;
-    private int currentBytecodeLimit;
-    private int bytecodesUsed;
-    private int prevBytecodesUsed;
+    private long currentBytecodeLimit;
+    private long bytecodesUsed;
+    private long prevBytecodesUsed;
 
     private int roundsAlive;
     private int repairCount;
@@ -286,11 +286,11 @@ public strictfp class InternalRobot implements InternalBody {
         return true;
     }
 
-    public void setBytecodesUsed(int numBytecodes) {
+    public void setBytecodesUsed(long numBytecodes) {
         bytecodesUsed = numBytecodes;
     }
 
-    public int getBytecodeLimit() {
+    public long getBytecodeLimit() {
         return canExecuteCode() ? this.currentBytecodeLimit : 0;
     }
 

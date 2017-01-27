@@ -33,7 +33,7 @@ public final class Clock {
      * @battlecode.doc.costlymethod
      */
     public static int getBytecodesLeft() {
-        return RobotMonitor.getBytecodesLeft();
+        return (int) RobotMonitor.getBytecodesLeft();
     }
 
     /**
@@ -45,7 +45,7 @@ public final class Clock {
      * @battlecode.doc.costlymethod
      */
     public static int getBytecodeNum() {
-        return RobotMonitor.getBytecodeNum();
+        return (int) RobotMonitor.getBytecodeNum();
     }
 
     /**

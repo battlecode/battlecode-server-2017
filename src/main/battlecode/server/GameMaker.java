@@ -623,9 +623,9 @@ public strictfp class GameMaker {
             indicatorLineRGBsBlue.add(blue);
         }
 
-        public void addBytecodes(int id, int bytecodes) {
+        public void addBytecodes(int id, long bytecodes) {
             bytecodeIDs.add(id);
-            bytecodesUsed.add(bytecodes);
+            bytecodesUsed.add((int) bytecodes);
         }
 
         public void addSpawnedRobot(InternalRobot robot) {

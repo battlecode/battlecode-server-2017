@@ -74,7 +74,7 @@ public interface RobotControlProvider {
      * @param robot the robot to check
      * @return the bytecodes used by the robot
      */
-    int getBytecodesUsed(InternalRobot robot);
+    long getBytecodesUsed(InternalRobot robot);
 
     /**
      * Determine whether the computation thread for the given

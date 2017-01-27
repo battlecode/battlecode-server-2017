@@ -135,7 +135,7 @@ public class PlayerControlProvider implements RobotControlProvider {
     }
 
     @Override
-    public int getBytecodesUsed(InternalRobot robot) {
+    public long getBytecodesUsed(InternalRobot robot) {
         assert this.sandboxes.containsKey(robot.getID());
 
         final SandboxedRobotPlayer player = this.sandboxes.get(robot.getID());
