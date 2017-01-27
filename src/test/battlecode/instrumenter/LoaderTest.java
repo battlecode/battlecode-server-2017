@@ -34,12 +34,14 @@ public class LoaderTest {
             "instrumentertest/CallsIllegalMethods$CreatesFilePrintStream.class",
             "instrumentertest/CallsMathRandom.class",
             "instrumentertest/DoesntOverrideHashCode.class",
+            "instrumentertest/DoesntOverrideToString.class",
             "instrumentertest/IllegalMethodReference.class",
             "instrumentertest/LegalMethodReference.class",
             "instrumentertest/Nothing.class",
             "instrumentertest/Outer.class",
             "instrumentertest/Outer$Inner.class",
             "instrumentertest/OverridesHashCode.class",
+            "instrumentertest/OverridesToString.class",
             "instrumentertest/Reflection.class",
             "instrumentertest/StringFormat.class",
             "instrumentertest/UsesEnumMap.class",
@@ -213,6 +215,49 @@ public class LoaderTest {
                 getHashCodeNotOverrides2.invoke(notOverrides2a));
         assertEquals(getHashCodeNotOverrides1.invoke(notOverrides1b),
                 getHashCodeNotOverrides2.invoke(notOverrides2b));
+    }
+
+    // Analagous to testHashCodeInstrumentation().
+    // If a player class overrides toString, toString should work normally.
+    // If a player class *doesn't* override toString, we should replace calls to it
+    // with a deterministic string function.
+    @Test
+    public void testToStringInstrumentation() throws Exception {
+        final Class<?> overridesClass = l1.loadClass("instrumentertest.OverridesToString");
+        final Method getToStringOverrides = overridesClass.getMethod("getToString");
+
+        final Object overrides = overridesClass.newInstance();
+
+        assertEquals("foo", getToStringOverrides.invoke(overrides));
+        assertEquals("foo", getToStringOverrides.invoke(overrides));
+
+
+        final Class<?> notOverridesClass1 = l1.loadClass("instrumentertest.DoesntOverrideToString");
+        final Method getToStringNotOverrides1 = notOverridesClass1.getMethod("getToString");
+        final Object notOverrides1a = notOverridesClass1.newInstance();
+        final Object notOverrides1b = notOverridesClass1.newInstance();
+
+        assertEquals(getToStringNotOverrides1.invoke(notOverrides1a),
+                getToStringNotOverrides1.invoke(notOverrides1a));
+        assertEquals(getToStringNotOverrides1.invoke(notOverrides1b),
+                getToStringNotOverrides1.invoke(notOverrides1b));
+
+        final Class<?> notOverridesClass2 = l2.loadClass("instrumentertest.DoesntOverrideToString");
+        final Method getToStringNotOverrides2 = notOverridesClass2.getMethod("getToString");
+        final Object notOverrides2a = notOverridesClass2.newInstance();
+        final Object notOverrides2b = notOverridesClass2.newInstance();
+
+        assertEquals(getToStringNotOverrides2.invoke(notOverrides2a),
+                getToStringNotOverrides2.invoke(notOverrides2a));
+        assertEquals(getToStringNotOverrides2.invoke(notOverrides2b),
+                getToStringNotOverrides2.invoke(notOverrides2b));
+
+        // toString should be deterministic across loaders (assuming it is called
+        // in the same order.)
+        assertEquals(getToStringNotOverrides1.invoke(notOverrides1a),
+                getToStringNotOverrides2.invoke(notOverrides2a));
+        assertEquals(getToStringNotOverrides1.invoke(notOverrides1b),
+                getToStringNotOverrides2.invoke(notOverrides2b));
     }
 
     @Test
