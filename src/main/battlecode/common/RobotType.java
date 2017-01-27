@@ -11,42 +11,42 @@ public enum RobotType {
      *
      * @battlecode.doc.robottype
      */
-    ARCHON          (null,    0,    400,   -1,   2,  -1,  -1,   10,  15, 0.5f,  20000),
+    ARCHON          (null,    0,    400,   -1,   2,  -1,  -1,   10,  15, 0.5f,  30000),
     //                              HP      BC   BR   BS   AP   SR  BSR  STR   BCL
     /**
      * The main producer unit to make other units and trees; can't build Archons or other Gardeners.
      *
      * @battlecode.doc.robottype
      */
-    GARDENER        (ARCHON,  10,   40,  100,   1,  -1,  -1,   7,  10,   0.5f, 10000),
+    GARDENER        (ARCHON,  10,   40,  100,   1,  -1,  -1,   7,  10,   0.5f, 15000),
     //                              HP    BC   BR   BS   AP   SR  BSR  STR   BCL
     /**
      * A melee based unit that specializes at cutting down trees.
      *
      * @battlecode.doc.robottype
      */
-    LUMBERJACK      (GARDENER,  10, 50,  100,   1,  -1,   2,   7,  10,  0.75f, 10000),
+    LUMBERJACK      (GARDENER,  10, 50,  100,   1,  -1,   2,   7,  10,  0.75f, 15000),
     //                              HP    BC   BR   BS   AP    SR  BSR  STR   BCL
     /**
      * The basic fighting unit.
      *
      * @battlecode.doc.robottype
      */
-    SOLDIER         (GARDENER,  10, 50,  100,   1,   2f,   2,   7,  10,   0.95f, 10000),
+    SOLDIER         (GARDENER,  10, 50,  100,   1,   2f,   2,   7,  10,   0.95f, 15000),
     //                              HP    BC   BR     BS    AP   SR   BSR  STR   BCL
     /**
      * A strong fighting unit.
      *
      * @battlecode.doc.robottype
      */
-    TANK            (GARDENER, 10,  200,  300,   2,   4,   5,   7,  10,  0.5f, 10000),
+    TANK            (GARDENER, 10,  200,  300,   2,   4,   5,   7,  10,  0.5f, 15000),
     //                              HP    BC     BR   BS    AP   SR  BSR    STR   BCL
     /**
      * A unit that specializes in movement and reconnaissance.
      *
      * @battlecode.doc.robottype
      */
-    SCOUT           (GARDENER,  10, 10,   80,   1, 1.5f,   0.5f,   14,  20,  1.25f, 10000),
+    SCOUT           (GARDENER,  10, 10,   80,   1, 1.5f,   0.5f,   14,  20,  1.25f, 15000),
     //                              HP    BC   BR    BS   AP   SR  BSR         STR   BCL
     ;
     
