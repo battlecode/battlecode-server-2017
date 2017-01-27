@@ -149,6 +149,48 @@ public final class RobotMonitor {
     }
 
     /**
+     * When initializing an array, we need to pretend that all indices are at
+     * least 1, for the purposes of calculating bytecode cost. Because this
+     * calculation needs to be done in the instrumenter (and implemented in
+     * bytecode), the use of even simple helper methods like this dramatically
+     * simplifies the instrumenter code.
+     *
+     * THIS METHOD IS CALLED BY THE INSTRUMENTER.
+     *
+     * @param index the index to sanitize
+     *
+     * @return the sanitized array index.
+     */
+    @SuppressWarnings("unused")
+    public static int sanitizeArrayIndex(int index) {
+        return Math.max(1, index);
+    }
+
+    /**
+     * Calculates the bytecode cost of initializing a multidimensional array with the given
+     * dimensions. Note that the dimensions are passed in reverse order (so calling
+     * new int[1][2][3] passes this method the parameter {3, 2, 1}.
+     *
+     * THIS METHOD IS CALLED BY THE INSTRUMENTER.
+     *
+     * @param dims the dimensions of the multidimensional array, in reverse order
+     *
+     * @return the bytecode cost of instantiated the described array.
+     */
+    @SuppressWarnings("unused")
+    public static int calculateMultiArrayCost(int[] dims) {
+        int cost = 1;
+        for (int i = dims.length-1; i >= 0; i--) {
+            if (dims[i] == 0)
+                break;
+            cost *= dims[i];
+        }
+
+        System.out.println(cost);
+        return cost;
+    }
+
+    /**
      * Called when entering a debug_ method.
      *
      * THIS METHOD IS CALLED BY THE INSTRUMENTER.

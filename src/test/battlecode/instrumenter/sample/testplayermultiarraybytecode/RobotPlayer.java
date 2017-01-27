@@ -14,7 +14,7 @@ public class RobotPlayer {
 	int z = 4;
 	while (x <= 16) {
 	    Clock.yield();
-	    byte[][][] b = new byte[x][y][z];
+	    byte[][][][] b = new byte[x][y][z][0];
 	    Clock.yield();
 	    x *= 2;
 	    y *= 3;
