@@ -80,7 +80,7 @@ public final class TeamClassLoaderFactory {
      * for every individual player.
      */
     protected final static Set<String> alwaysRedefine = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            "battlecode.instrumenter.inject.ObjectHashCode",
+            "battlecode.instrumenter.inject.ObjectMethods",
             "battlecode.instrumenter.inject.InstrumentableFunctions",
             "battlecode.instrumenter.inject.System",
             "battlecode.instrumenter.inject.RobotMonitor",
