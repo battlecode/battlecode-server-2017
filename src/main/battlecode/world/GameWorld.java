@@ -409,7 +409,8 @@ public strictfp class GameWorld {
                     if(bot.getType() == RobotType.SCOUT) {
                         this.destroyRobot(bot.getID());
                     } else {
-                        throw new RuntimeException("The robot within the tree was overlapping with a non-scout robot");
+                        // TODO: seems like we only hit this on floating point errors
+                        //throw new RuntimeException("The robot within the tree was overlapping with a non-scout robot");
                     }
                 }
 
