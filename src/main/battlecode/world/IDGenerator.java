@@ -62,7 +62,6 @@ public class IDGenerator {
         if (this.cursor == ID_BLOCK_SIZE) {
             allocateNextBlock();
         }
-        System.out.println("IDGenerator: Giving out ID "+id+", cursor="+this.cursor);
         return id;
     }
 
@@ -92,7 +91,6 @@ public class IDGenerator {
         }
 
         this.nextIDBlock += ID_BLOCK_SIZE;
-        System.out.println("IDGenerator: Allocating to block "+this.nextIDBlock);
     }
 
     /**
