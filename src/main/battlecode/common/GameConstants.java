@@ -46,6 +46,9 @@ public interface GameConstants {
     /** Maximum archons that can appear on a map (per team). */
     int NUMBER_OF_ARCHONS_MAX = 3;
 
+    /** Maximum ID a Robot will have; all bullets with have IDs larger than this */
+    int MAX_ROBOT_ID = 32000;
+
     // *********************************
     // ****** TREES ********************
     // *********************************

@@ -49,9 +49,7 @@ public class IDGenerator {
         this.random = new Random(seed);
         this.reservedIDs = new int[ID_BLOCK_SIZE];
 
-        this.nextIDBlock = MIN_ID;
-
-        allocateNextBlock();
+        setStart(MIN_ID);
     }
 
     /**
@@ -64,7 +62,7 @@ public class IDGenerator {
         if (this.cursor == ID_BLOCK_SIZE) {
             allocateNextBlock();
         }
-
+        System.out.println("IDGenerator: Giving out ID "+id+", cursor="+this.cursor);
         return id;
     }
 
@@ -94,5 +92,16 @@ public class IDGenerator {
         }
 
         this.nextIDBlock += ID_BLOCK_SIZE;
+        System.out.println("IDGenerator: Allocating to block "+this.nextIDBlock);
+    }
+
+    /**
+     * Resets the IDGenerator to start at the given ID.
+     *
+     * @param startingID The ID to start allocating from
+     */
+    public void setStart(int startingID) {
+        this.nextIDBlock = startingID;
+        allocateNextBlock();
     }
 }

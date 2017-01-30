@@ -25,6 +25,7 @@ public strictfp class GameWorld {
     protected boolean running = true;
 
     protected final IDGenerator idGenerator;
+    protected final IDGenerator bulletIdGenerator;
     protected final GameStats gameStats;
 
     private final LiveMap gameMap;
@@ -45,6 +46,8 @@ public strictfp class GameWorld {
 
         this.currentRound = 0;
         this.idGenerator = new IDGenerator(gm.getSeed());
+        this.bulletIdGenerator = new IDGenerator(gm.getSeed());
+        this.bulletIdGenerator.setStart(GameConstants.MAX_ROBOT_ID+1);
         this.gameStats = new GameStats();
 
         this.gameMap = gm;
@@ -383,7 +386,7 @@ public strictfp class GameWorld {
     }
 
     public int spawnBullet(Team team, float speed, float damage, MapLocation location, Direction direction, InternalRobot parent){
-        int ID = idGenerator.nextID();
+        int ID = bulletIdGenerator.nextID();
         return spawnBullet(ID, team, speed, damage, location, direction, parent);
     }
 
