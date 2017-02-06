@@ -186,7 +186,6 @@ public final class RobotMonitor {
             cost *= dims[i];
         }
 
-        System.out.println(cost);
         return cost;
     }
 
